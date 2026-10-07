@@ -1,0 +1,415 @@
+=== RUN   TestNativeAuthorityHeadAndGenerationPersistence
+=== RUN   TestNativeAuthorityHeadAndGenerationPersistence/R1
+    nats_authority_test.go:95: native authority late wire: subject=wf.blob.authority.root.089001a35679a33ef3db0ca350db9b9a2f0136e0e327577b04b3b98127470961 held=333 forwarded=333 stale CAS rejected
+    nats_authority_test.go:187: native authority: root head=3 generation=2 retired old CAS rejected; purge/delete denied; same-store restart retained fences
+=== RUN   TestNativeAuthorityHeadAndGenerationPersistence/R3
+    nats_authority_test.go:95: native authority late wire: subject=wf.blob.authority.root.089001a35679a33ef3db0ca350db9b9a2f0136e0e327577b04b3b98127470961 held=333 forwarded=333 stale CAS rejected
+    nats_authority_test.go:187: native authority: root head=3 generation=2 retired old CAS rejected; purge/delete denied; same-store restart retained fences
+--- PASS: TestNativeAuthorityHeadAndGenerationPersistence (2.62s)
+    --- PASS: TestNativeAuthorityHeadAndGenerationPersistence/R1 (0.14s)
+    --- PASS: TestNativeAuthorityHeadAndGenerationPersistence/R3 (2.48s)
+=== RUN   TestNativeAuthorityRejectsUnsafeStream
+=== RUN   TestNativeAuthorityRejectsUnsafeStream/age
+=== RUN   TestNativeAuthorityRejectsUnsafeStream/message_limit
+=== RUN   TestNativeAuthorityRejectsUnsafeStream/byte_limit
+=== RUN   TestNativeAuthorityRejectsUnsafeStream/direct
+=== RUN   TestNativeAuthorityRejectsUnsafeStream/allow_purge
+=== RUN   TestNativeAuthorityRejectsUnsafeStream/allow_delete
+=== RUN   TestNativeAuthorityRejectsUnsafeStream/memory
+=== RUN   TestNativeAuthorityRejectsUnsafeStream/history
+=== RUN   TestNativeAuthorityRejectsUnsafeStream/ttl
+--- PASS: TestNativeAuthorityRejectsUnsafeStream (0.09s)
+    --- PASS: TestNativeAuthorityRejectsUnsafeStream/age (0.01s)
+    --- PASS: TestNativeAuthorityRejectsUnsafeStream/message_limit (0.01s)
+    --- PASS: TestNativeAuthorityRejectsUnsafeStream/byte_limit (0.01s)
+    --- PASS: TestNativeAuthorityRejectsUnsafeStream/direct (0.01s)
+    --- PASS: TestNativeAuthorityRejectsUnsafeStream/allow_purge (0.01s)
+    --- PASS: TestNativeAuthorityRejectsUnsafeStream/allow_delete (0.00s)
+    --- PASS: TestNativeAuthorityRejectsUnsafeStream/memory (0.00s)
+    --- PASS: TestNativeAuthorityRejectsUnsafeStream/history (0.00s)
+    --- PASS: TestNativeAuthorityRejectsUnsafeStream/ttl (0.00s)
+=== RUN   TestNativeObjectPublicationLifecycle
+=== RUN   TestNativeObjectPublicationLifecycle/R1
+    nats_objects_test.go:177: native object lifecycle: R1 payload=390000 standard reads verified; shared protection and two retirements; chunks=0 tombstones=2
+=== RUN   TestNativeObjectPublicationLifecycle/R3
+    nats_objects_test.go:177: native object lifecycle: R3 payload=390000 standard reads verified; shared protection and two retirements; chunks=0 tombstones=2
+--- PASS: TestNativeObjectPublicationLifecycle (2.26s)
+    --- PASS: TestNativeObjectPublicationLifecycle/R1 (0.23s)
+    --- PASS: TestNativeObjectPublicationLifecycle/R3 (2.03s)
+=== RUN   TestNativePartialUploadPublicationFence
+=== RUN   TestNativePartialUploadPublicationFence/R1/resume
+    nats_objects_test.go:301: native partial upload: R1 mode=resume chunks=3 metadata held; reclaimed then old metadata rejected/canceled; generation2 readable; final chunks=0
+=== RUN   TestNativePartialUploadPublicationFence/R1/crash
+    nats_objects_test.go:301: native partial upload: R1 mode=crash chunks=3 metadata held; reclaimed then old metadata rejected/canceled; generation2 readable; final chunks=0
+=== RUN   TestNativePartialUploadPublicationFence/R3/resume
+    nats_objects_test.go:301: native partial upload: R3 mode=resume chunks=3 metadata held; reclaimed then old metadata rejected/canceled; generation2 readable; final chunks=0
+=== RUN   TestNativePartialUploadPublicationFence/R3/crash
+    nats_objects_test.go:301: native partial upload: R3 mode=crash chunks=3 metadata held; reclaimed then old metadata rejected/canceled; generation2 readable; final chunks=0
+--- PASS: TestNativePartialUploadPublicationFence (4.12s)
+    --- PASS: TestNativePartialUploadPublicationFence/R1/resume (0.22s)
+    --- PASS: TestNativePartialUploadPublicationFence/R1/crash (0.18s)
+    --- PASS: TestNativePartialUploadPublicationFence/R3/resume (2.54s)
+    --- PASS: TestNativePartialUploadPublicationFence/R3/crash (1.18s)
+=== RUN   TestNativeUnknownChunksBlockCollection
+--- PASS: TestNativeUnknownChunksBlockCollection (0.09s)
+=== RUN   TestNativeLateChunkAfterGenerationClosed
+=== RUN   TestNativeLateChunkAfterGenerationClosed/R1
+    nats_objects_test.go:460: native late chunks: R1 first chunk held before arrival; generation1 closed, generation2 committed; old uploader revoked, orphan reclaimed, fresh reference readable
+=== RUN   TestNativeLateChunkAfterGenerationClosed/R3
+    nats_objects_test.go:460: native late chunks: R3 first chunk held before arrival; generation1 closed, generation2 committed; old uploader revoked, orphan reclaimed, fresh reference readable
+--- PASS: TestNativeLateChunkAfterGenerationClosed (1.07s)
+    --- PASS: TestNativeLateChunkAfterGenerationClosed/R1 (0.25s)
+    --- PASS: TestNativeLateChunkAfterGenerationClosed/R3 (0.82s)
+=== RUN   TestNativeCommittedMetadataReplyLost
+=== RUN   TestNativeCommittedMetadataReplyLost/R1
+    nats_objects_test.go:536: native metadata reply loss: R1 committed metadata and standard bytes independently read; response buffered, caller canceled; no ready adoption/root publication; orphan reclaimed
+=== RUN   TestNativeCommittedMetadataReplyLost/R3
+    nats_objects_test.go:536: native metadata reply loss: R3 committed metadata and standard bytes independently read; response buffered, caller canceled; no ready adoption/root publication; orphan reclaimed
+--- PASS: TestNativeCommittedMetadataReplyLost (2.85s)
+    --- PASS: TestNativeCommittedMetadataReplyLost/R1 (0.13s)
+    --- PASS: TestNativeCommittedMetadataReplyLost/R3 (2.72s)
+=== RUN   TestNativeObjectSameStoreColdRestart
+=== RUN   TestNativeObjectSameStoreColdRestart/R1
+    nats_objects_test.go:631: native object cold restart: R1 all peers shut down/joined/replaced on same stores; live bytes and attempt tombstones retained, stale metadata rejected; chunks=0
+=== RUN   TestNativeObjectSameStoreColdRestart/R3
+    nats_objects_test.go:631: native object cold restart: R3 all peers shut down/joined/replaced on same stores; live bytes and attempt tombstones retained, stale metadata rejected; chunks=0
+--- PASS: TestNativeObjectSameStoreColdRestart (8.11s)
+    --- PASS: TestNativeObjectSameStoreColdRestart/R1 (0.20s)
+    --- PASS: TestNativeObjectSameStoreColdRestart/R3 (7.91s)
+=== RUN   TestNativeObjectUnsafeConfiguration
+=== RUN   TestNativeObjectUnsafeConfiguration/age
+=== RUN   TestNativeObjectUnsafeConfiguration/messages
+=== RUN   TestNativeObjectUnsafeConfiguration/bytes
+=== RUN   TestNativeObjectUnsafeConfiguration/chunks_per_subject
+=== RUN   TestNativeObjectUnsafeConfiguration/direct
+=== RUN   TestNativeObjectUnsafeConfiguration/memory
+=== RUN   TestNativeObjectUnsafeConfiguration/ttl
+=== RUN   TestNativeObjectUnsafeConfiguration/no_rollup
+=== RUN   TestNativeObjectUnsafeConfiguration/purge_denied
+=== RUN   TestNativeObjectUnsafeConfiguration/delete_allowed
+=== RUN   TestNativeObjectUnsafeConfiguration/wrong_format
+=== RUN   TestNativeObjectUnsafeConfiguration/async_persist
+=== RUN   TestNativeObjectUnsafeConfiguration/atomic
+=== RUN   TestNativeObjectUnsafeConfiguration/schedules
+--- PASS: TestNativeObjectUnsafeConfiguration (0.10s)
+    --- PASS: TestNativeObjectUnsafeConfiguration/age (0.00s)
+    --- PASS: TestNativeObjectUnsafeConfiguration/messages (0.00s)
+    --- PASS: TestNativeObjectUnsafeConfiguration/bytes (0.01s)
+    --- PASS: TestNativeObjectUnsafeConfiguration/chunks_per_subject (0.00s)
+    --- PASS: TestNativeObjectUnsafeConfiguration/direct (0.00s)
+    --- PASS: TestNativeObjectUnsafeConfiguration/memory (0.00s)
+    --- PASS: TestNativeObjectUnsafeConfiguration/ttl (0.00s)
+    --- PASS: TestNativeObjectUnsafeConfiguration/no_rollup (0.00s)
+    --- PASS: TestNativeObjectUnsafeConfiguration/purge_denied (0.00s)
+    --- PASS: TestNativeObjectUnsafeConfiguration/delete_allowed (0.00s)
+    --- PASS: TestNativeObjectUnsafeConfiguration/wrong_format (0.00s)
+    --- PASS: TestNativeObjectUnsafeConfiguration/async_persist (0.01s)
+    --- PASS: TestNativeObjectUnsafeConfiguration/atomic (0.00s)
+    --- PASS: TestNativeObjectUnsafeConfiguration/schedules (0.00s)
+=== RUN   TestNativeAuthorityOpeningBoundedReadRetries
+=== RUN   TestNativeAuthorityOpeningBoundedReadRetries/0
+=== RUN   TestNativeAuthorityOpeningBoundedReadRetries/1
+=== RUN   TestNativeAuthorityOpeningBoundedReadRetries/2
+=== RUN   TestNativeAuthorityOpeningBoundedReadRetries/3
+--- PASS: TestNativeAuthorityOpeningBoundedReadRetries (0.00s)
+    --- PASS: TestNativeAuthorityOpeningBoundedReadRetries/0 (0.00s)
+    --- PASS: TestNativeAuthorityOpeningBoundedReadRetries/1 (0.00s)
+    --- PASS: TestNativeAuthorityOpeningBoundedReadRetries/2 (0.00s)
+    --- PASS: TestNativeAuthorityOpeningBoundedReadRetries/3 (0.00s)
+=== RUN   TestNativeAuthorityOpeningHonorsParentAndMissingStream
+--- PASS: TestNativeAuthorityOpeningHonorsParentAndMissingStream (0.00s)
+=== RUN   TestPausedPublicationIsFenced
+--- PASS: TestPausedPublicationIsFenced (0.00s)
+=== RUN   TestExpiredReplacementPreservesExistingRoot
+--- PASS: TestExpiredReplacementPreservesExistingRoot (0.00s)
+=== RUN   TestSharedAndMultipleReferences
+--- PASS: TestSharedAndMultipleReferences (0.00s)
+=== RUN   TestAmbiguousUploadUsesFreshPhysicalAttempt
+--- PASS: TestAmbiguousUploadUsesFreshPhysicalAttempt (0.00s)
+=== RUN   TestLostRepliesFailClosedAndRecover
+=== RUN   TestLostRepliesFailClosedAndRecover/commit
+=== RUN   TestLostRepliesFailClosedAndRecover/fence
+=== RUN   TestLostRepliesFailClosedAndRecover/blob_close
+=== RUN   TestLostRepliesFailClosedAndRecover/delete
+=== RUN   TestLostRepliesFailClosedAndRecover/pin
+=== RUN   TestLostRepliesFailClosedAndRecover/ready
+--- PASS: TestLostRepliesFailClosedAndRecover (0.00s)
+    --- PASS: TestLostRepliesFailClosedAndRecover/commit (0.00s)
+    --- PASS: TestLostRepliesFailClosedAndRecover/fence (0.00s)
+    --- PASS: TestLostRepliesFailClosedAndRecover/blob_close (0.00s)
+    --- PASS: TestLostRepliesFailClosedAndRecover/delete (0.00s)
+    --- PASS: TestLostRepliesFailClosedAndRecover/pin (0.00s)
+    --- PASS: TestLostRepliesFailClosedAndRecover/ready (0.00s)
+=== RUN   TestCommitWinningFenceRaceRemainsProtected
+--- PASS: TestCommitWinningFenceRaceRemainsProtected (0.00s)
+=== RUN   TestAcquireWinningCloseRaceRemainsProtected
+--- PASS: TestAcquireWinningCloseRaceRemainsProtected (0.00s)
+=== RUN   TestLateDeleteCannotTouchNewGeneration
+--- PASS: TestLateDeleteCannotTouchNewGeneration (0.00s)
+=== RUN   TestDestinationHeadResetIsUnsafeNegativeControl
+--- PASS: TestDestinationHeadResetIsUnsafeNegativeControl (0.00s)
+=== RUN   TestSeededPublicationLifecycle
+=== RUN   TestSeededPublicationLifecycle/0
+=== RUN   TestSeededPublicationLifecycle/1
+=== RUN   TestSeededPublicationLifecycle/2
+=== RUN   TestSeededPublicationLifecycle/3
+=== RUN   TestSeededPublicationLifecycle/4
+=== RUN   TestSeededPublicationLifecycle/5
+=== RUN   TestSeededPublicationLifecycle/6
+=== RUN   TestSeededPublicationLifecycle/7
+=== RUN   TestSeededPublicationLifecycle/8
+=== RUN   TestSeededPublicationLifecycle/9
+=== RUN   TestSeededPublicationLifecycle/10
+=== RUN   TestSeededPublicationLifecycle/11
+=== RUN   TestSeededPublicationLifecycle/12
+=== RUN   TestSeededPublicationLifecycle/13
+=== RUN   TestSeededPublicationLifecycle/14
+=== RUN   TestSeededPublicationLifecycle/15
+=== RUN   TestSeededPublicationLifecycle/16
+=== RUN   TestSeededPublicationLifecycle/17
+=== RUN   TestSeededPublicationLifecycle/18
+=== RUN   TestSeededPublicationLifecycle/19
+=== RUN   TestSeededPublicationLifecycle/20
+=== RUN   TestSeededPublicationLifecycle/21
+=== RUN   TestSeededPublicationLifecycle/22
+=== RUN   TestSeededPublicationLifecycle/23
+=== RUN   TestSeededPublicationLifecycle/24
+=== RUN   TestSeededPublicationLifecycle/25
+=== RUN   TestSeededPublicationLifecycle/26
+=== RUN   TestSeededPublicationLifecycle/27
+=== RUN   TestSeededPublicationLifecycle/28
+=== RUN   TestSeededPublicationLifecycle/29
+=== RUN   TestSeededPublicationLifecycle/30
+=== RUN   TestSeededPublicationLifecycle/31
+=== RUN   TestSeededPublicationLifecycle/32
+=== RUN   TestSeededPublicationLifecycle/33
+=== RUN   TestSeededPublicationLifecycle/34
+=== RUN   TestSeededPublicationLifecycle/35
+=== RUN   TestSeededPublicationLifecycle/36
+=== RUN   TestSeededPublicationLifecycle/37
+=== RUN   TestSeededPublicationLifecycle/38
+=== RUN   TestSeededPublicationLifecycle/39
+=== RUN   TestSeededPublicationLifecycle/40
+=== RUN   TestSeededPublicationLifecycle/41
+=== RUN   TestSeededPublicationLifecycle/42
+=== RUN   TestSeededPublicationLifecycle/43
+=== RUN   TestSeededPublicationLifecycle/44
+=== RUN   TestSeededPublicationLifecycle/45
+=== RUN   TestSeededPublicationLifecycle/46
+=== RUN   TestSeededPublicationLifecycle/47
+=== RUN   TestSeededPublicationLifecycle/48
+=== RUN   TestSeededPublicationLifecycle/49
+=== RUN   TestSeededPublicationLifecycle/50
+=== RUN   TestSeededPublicationLifecycle/51
+=== RUN   TestSeededPublicationLifecycle/52
+=== RUN   TestSeededPublicationLifecycle/53
+=== RUN   TestSeededPublicationLifecycle/54
+=== RUN   TestSeededPublicationLifecycle/55
+=== RUN   TestSeededPublicationLifecycle/56
+=== RUN   TestSeededPublicationLifecycle/57
+=== RUN   TestSeededPublicationLifecycle/58
+=== RUN   TestSeededPublicationLifecycle/59
+=== RUN   TestSeededPublicationLifecycle/60
+=== RUN   TestSeededPublicationLifecycle/61
+=== RUN   TestSeededPublicationLifecycle/62
+=== RUN   TestSeededPublicationLifecycle/63
+=== RUN   TestSeededPublicationLifecycle/64
+=== RUN   TestSeededPublicationLifecycle/65
+=== RUN   TestSeededPublicationLifecycle/66
+=== RUN   TestSeededPublicationLifecycle/67
+=== RUN   TestSeededPublicationLifecycle/68
+=== RUN   TestSeededPublicationLifecycle/69
+=== RUN   TestSeededPublicationLifecycle/70
+=== RUN   TestSeededPublicationLifecycle/71
+=== RUN   TestSeededPublicationLifecycle/72
+=== RUN   TestSeededPublicationLifecycle/73
+=== RUN   TestSeededPublicationLifecycle/74
+=== RUN   TestSeededPublicationLifecycle/75
+=== RUN   TestSeededPublicationLifecycle/76
+=== RUN   TestSeededPublicationLifecycle/77
+=== RUN   TestSeededPublicationLifecycle/78
+=== RUN   TestSeededPublicationLifecycle/79
+=== RUN   TestSeededPublicationLifecycle/80
+=== RUN   TestSeededPublicationLifecycle/81
+=== RUN   TestSeededPublicationLifecycle/82
+=== RUN   TestSeededPublicationLifecycle/83
+=== RUN   TestSeededPublicationLifecycle/84
+=== RUN   TestSeededPublicationLifecycle/85
+=== RUN   TestSeededPublicationLifecycle/86
+=== RUN   TestSeededPublicationLifecycle/87
+=== RUN   TestSeededPublicationLifecycle/88
+=== RUN   TestSeededPublicationLifecycle/89
+=== RUN   TestSeededPublicationLifecycle/90
+=== RUN   TestSeededPublicationLifecycle/91
+=== RUN   TestSeededPublicationLifecycle/92
+=== RUN   TestSeededPublicationLifecycle/93
+=== RUN   TestSeededPublicationLifecycle/94
+=== RUN   TestSeededPublicationLifecycle/95
+=== RUN   TestSeededPublicationLifecycle/96
+=== RUN   TestSeededPublicationLifecycle/97
+=== RUN   TestSeededPublicationLifecycle/98
+=== RUN   TestSeededPublicationLifecycle/99
+=== RUN   TestSeededPublicationLifecycle/100
+=== RUN   TestSeededPublicationLifecycle/101
+=== RUN   TestSeededPublicationLifecycle/102
+=== RUN   TestSeededPublicationLifecycle/103
+=== RUN   TestSeededPublicationLifecycle/104
+=== RUN   TestSeededPublicationLifecycle/105
+=== RUN   TestSeededPublicationLifecycle/106
+=== RUN   TestSeededPublicationLifecycle/107
+=== RUN   TestSeededPublicationLifecycle/108
+=== RUN   TestSeededPublicationLifecycle/109
+=== RUN   TestSeededPublicationLifecycle/110
+=== RUN   TestSeededPublicationLifecycle/111
+=== RUN   TestSeededPublicationLifecycle/112
+=== RUN   TestSeededPublicationLifecycle/113
+=== RUN   TestSeededPublicationLifecycle/114
+=== RUN   TestSeededPublicationLifecycle/115
+=== RUN   TestSeededPublicationLifecycle/116
+=== RUN   TestSeededPublicationLifecycle/117
+=== RUN   TestSeededPublicationLifecycle/118
+=== RUN   TestSeededPublicationLifecycle/119
+=== RUN   TestSeededPublicationLifecycle/120
+=== RUN   TestSeededPublicationLifecycle/121
+=== RUN   TestSeededPublicationLifecycle/122
+=== RUN   TestSeededPublicationLifecycle/123
+=== RUN   TestSeededPublicationLifecycle/124
+=== RUN   TestSeededPublicationLifecycle/125
+=== RUN   TestSeededPublicationLifecycle/126
+=== RUN   TestSeededPublicationLifecycle/127
+--- PASS: TestSeededPublicationLifecycle (10.46s)
+    --- PASS: TestSeededPublicationLifecycle/0 (0.08s)
+    --- PASS: TestSeededPublicationLifecycle/1 (0.09s)
+    --- PASS: TestSeededPublicationLifecycle/2 (0.08s)
+    --- PASS: TestSeededPublicationLifecycle/3 (0.09s)
+    --- PASS: TestSeededPublicationLifecycle/4 (0.09s)
+    --- PASS: TestSeededPublicationLifecycle/5 (0.08s)
+    --- PASS: TestSeededPublicationLifecycle/6 (0.08s)
+    --- PASS: TestSeededPublicationLifecycle/7 (0.08s)
+    --- PASS: TestSeededPublicationLifecycle/8 (0.09s)
+    --- PASS: TestSeededPublicationLifecycle/9 (0.08s)
+    --- PASS: TestSeededPublicationLifecycle/10 (0.08s)
+    --- PASS: TestSeededPublicationLifecycle/11 (0.07s)
+    --- PASS: TestSeededPublicationLifecycle/12 (0.08s)
+    --- PASS: TestSeededPublicationLifecycle/13 (0.12s)
+    --- PASS: TestSeededPublicationLifecycle/14 (0.09s)
+    --- PASS: TestSeededPublicationLifecycle/15 (0.08s)
+    --- PASS: TestSeededPublicationLifecycle/16 (0.07s)
+    --- PASS: TestSeededPublicationLifecycle/17 (0.07s)
+    --- PASS: TestSeededPublicationLifecycle/18 (0.08s)
+    --- PASS: TestSeededPublicationLifecycle/19 (0.09s)
+    --- PASS: TestSeededPublicationLifecycle/20 (0.08s)
+    --- PASS: TestSeededPublicationLifecycle/21 (0.08s)
+    --- PASS: TestSeededPublicationLifecycle/22 (0.07s)
+    --- PASS: TestSeededPublicationLifecycle/23 (0.08s)
+    --- PASS: TestSeededPublicationLifecycle/24 (0.07s)
+    --- PASS: TestSeededPublicationLifecycle/25 (0.07s)
+    --- PASS: TestSeededPublicationLifecycle/26 (0.07s)
+    --- PASS: TestSeededPublicationLifecycle/27 (0.09s)
+    --- PASS: TestSeededPublicationLifecycle/28 (0.08s)
+    --- PASS: TestSeededPublicationLifecycle/29 (0.10s)
+    --- PASS: TestSeededPublicationLifecycle/30 (0.08s)
+    --- PASS: TestSeededPublicationLifecycle/31 (0.07s)
+    --- PASS: TestSeededPublicationLifecycle/32 (0.08s)
+    --- PASS: TestSeededPublicationLifecycle/33 (0.08s)
+    --- PASS: TestSeededPublicationLifecycle/34 (0.10s)
+    --- PASS: TestSeededPublicationLifecycle/35 (0.09s)
+    --- PASS: TestSeededPublicationLifecycle/36 (0.09s)
+    --- PASS: TestSeededPublicationLifecycle/37 (0.10s)
+    --- PASS: TestSeededPublicationLifecycle/38 (0.06s)
+    --- PASS: TestSeededPublicationLifecycle/39 (0.07s)
+    --- PASS: TestSeededPublicationLifecycle/40 (0.07s)
+    --- PASS: TestSeededPublicationLifecycle/41 (0.07s)
+    --- PASS: TestSeededPublicationLifecycle/42 (0.07s)
+    --- PASS: TestSeededPublicationLifecycle/43 (0.07s)
+    --- PASS: TestSeededPublicationLifecycle/44 (0.07s)
+    --- PASS: TestSeededPublicationLifecycle/45 (0.07s)
+    --- PASS: TestSeededPublicationLifecycle/46 (0.07s)
+    --- PASS: TestSeededPublicationLifecycle/47 (0.07s)
+    --- PASS: TestSeededPublicationLifecycle/48 (0.07s)
+    --- PASS: TestSeededPublicationLifecycle/49 (0.09s)
+    --- PASS: TestSeededPublicationLifecycle/50 (0.07s)
+    --- PASS: TestSeededPublicationLifecycle/51 (0.08s)
+    --- PASS: TestSeededPublicationLifecycle/52 (0.07s)
+    --- PASS: TestSeededPublicationLifecycle/53 (0.08s)
+    --- PASS: TestSeededPublicationLifecycle/54 (0.07s)
+    --- PASS: TestSeededPublicationLifecycle/55 (0.08s)
+    --- PASS: TestSeededPublicationLifecycle/56 (0.08s)
+    --- PASS: TestSeededPublicationLifecycle/57 (0.07s)
+    --- PASS: TestSeededPublicationLifecycle/58 (0.07s)
+    --- PASS: TestSeededPublicationLifecycle/59 (0.07s)
+    --- PASS: TestSeededPublicationLifecycle/60 (0.08s)
+    --- PASS: TestSeededPublicationLifecycle/61 (0.08s)
+    --- PASS: TestSeededPublicationLifecycle/62 (0.08s)
+    --- PASS: TestSeededPublicationLifecycle/63 (0.07s)
+    --- PASS: TestSeededPublicationLifecycle/64 (0.09s)
+    --- PASS: TestSeededPublicationLifecycle/65 (0.10s)
+    --- PASS: TestSeededPublicationLifecycle/66 (0.10s)
+    --- PASS: TestSeededPublicationLifecycle/67 (0.08s)
+    --- PASS: TestSeededPublicationLifecycle/68 (0.08s)
+    --- PASS: TestSeededPublicationLifecycle/69 (0.08s)
+    --- PASS: TestSeededPublicationLifecycle/70 (0.09s)
+    --- PASS: TestSeededPublicationLifecycle/71 (0.07s)
+    --- PASS: TestSeededPublicationLifecycle/72 (0.09s)
+    --- PASS: TestSeededPublicationLifecycle/73 (0.07s)
+    --- PASS: TestSeededPublicationLifecycle/74 (0.07s)
+    --- PASS: TestSeededPublicationLifecycle/75 (0.08s)
+    --- PASS: TestSeededPublicationLifecycle/76 (0.09s)
+    --- PASS: TestSeededPublicationLifecycle/77 (0.11s)
+    --- PASS: TestSeededPublicationLifecycle/78 (0.11s)
+    --- PASS: TestSeededPublicationLifecycle/79 (0.11s)
+    --- PASS: TestSeededPublicationLifecycle/80 (0.07s)
+    --- PASS: TestSeededPublicationLifecycle/81 (0.10s)
+    --- PASS: TestSeededPublicationLifecycle/82 (0.10s)
+    --- PASS: TestSeededPublicationLifecycle/83 (0.11s)
+    --- PASS: TestSeededPublicationLifecycle/84 (0.07s)
+    --- PASS: TestSeededPublicationLifecycle/85 (0.08s)
+    --- PASS: TestSeededPublicationLifecycle/86 (0.08s)
+    --- PASS: TestSeededPublicationLifecycle/87 (0.09s)
+    --- PASS: TestSeededPublicationLifecycle/88 (0.11s)
+    --- PASS: TestSeededPublicationLifecycle/89 (0.06s)
+    --- PASS: TestSeededPublicationLifecycle/90 (0.09s)
+    --- PASS: TestSeededPublicationLifecycle/91 (0.10s)
+    --- PASS: TestSeededPublicationLifecycle/92 (0.07s)
+    --- PASS: TestSeededPublicationLifecycle/93 (0.07s)
+    --- PASS: TestSeededPublicationLifecycle/94 (0.08s)
+    --- PASS: TestSeededPublicationLifecycle/95 (0.10s)
+    --- PASS: TestSeededPublicationLifecycle/96 (0.07s)
+    --- PASS: TestSeededPublicationLifecycle/97 (0.07s)
+    --- PASS: TestSeededPublicationLifecycle/98 (0.08s)
+    --- PASS: TestSeededPublicationLifecycle/99 (0.08s)
+    --- PASS: TestSeededPublicationLifecycle/100 (0.10s)
+    --- PASS: TestSeededPublicationLifecycle/101 (0.08s)
+    --- PASS: TestSeededPublicationLifecycle/102 (0.09s)
+    --- PASS: TestSeededPublicationLifecycle/103 (0.07s)
+    --- PASS: TestSeededPublicationLifecycle/104 (0.09s)
+    --- PASS: TestSeededPublicationLifecycle/105 (0.08s)
+    --- PASS: TestSeededPublicationLifecycle/106 (0.07s)
+    --- PASS: TestSeededPublicationLifecycle/107 (0.09s)
+    --- PASS: TestSeededPublicationLifecycle/108 (0.08s)
+    --- PASS: TestSeededPublicationLifecycle/109 (0.08s)
+    --- PASS: TestSeededPublicationLifecycle/110 (0.09s)
+    --- PASS: TestSeededPublicationLifecycle/111 (0.07s)
+    --- PASS: TestSeededPublicationLifecycle/112 (0.07s)
+    --- PASS: TestSeededPublicationLifecycle/113 (0.08s)
+    --- PASS: TestSeededPublicationLifecycle/114 (0.08s)
+    --- PASS: TestSeededPublicationLifecycle/115 (0.07s)
+    --- PASS: TestSeededPublicationLifecycle/116 (0.08s)
+    --- PASS: TestSeededPublicationLifecycle/117 (0.08s)
+    --- PASS: TestSeededPublicationLifecycle/118 (0.07s)
+    --- PASS: TestSeededPublicationLifecycle/119 (0.06s)
+    --- PASS: TestSeededPublicationLifecycle/120 (0.07s)
+    --- PASS: TestSeededPublicationLifecycle/121 (0.12s)
+    --- PASS: TestSeededPublicationLifecycle/122 (0.11s)
+    --- PASS: TestSeededPublicationLifecycle/123 (0.08s)
+    --- PASS: TestSeededPublicationLifecycle/124 (0.07s)
+    --- PASS: TestSeededPublicationLifecycle/125 (0.08s)
+    --- PASS: TestSeededPublicationLifecycle/126 (0.09s)
+    --- PASS: TestSeededPublicationLifecycle/127 (0.08s)
+=== RUN   TestGCWhileUploadPaused
+--- PASS: TestGCWhileUploadPaused (0.00s)
+=== RUN   TestPartialMultiBlobPreparationReclaimed
+--- PASS: TestPartialMultiBlobPreparationReclaimed (0.00s)
+=== RUN   TestConcurrentPublishersAndCollector
+--- PASS: TestConcurrentPublishersAndCollector (0.00s)
+PASS
