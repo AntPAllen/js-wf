@@ -18,3 +18,5 @@ Records:
 Restore into a fresh directory using `scripts/restore-full-fixture-proof.py` and the committed canonical metadata and S3 receipt. Restored paths are grouped by their original `/tmp` directory basename. File bytes, modes, and nanosecond mtimes are preserved; empty directories and ownership metadata are outside the archive format. Restoration does not start a broker.
 
 The active partition campaign, its inputs, registered worktrees, block-device fixtures, and smaller directories remain local.
+
+Completed: **365 original directories**, **1.03 GiB** of original allocated storage reclaimed. The temporary hardlink tree and 200 MiB archive were also removed after verification. `/tmp` was approximately **7.9 GiB**, with **82 GiB** free on the filesystem; the live campaign and its inputs accounted for approximately **6.8 GiB** and continue growing. Exact observations and permission limits are in `remaining-usage.json`.
