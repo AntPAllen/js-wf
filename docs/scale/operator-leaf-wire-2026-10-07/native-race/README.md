@@ -11,3 +11,5 @@ Complete archive: **81,143,200 bytes**, SHA256 `862524b893288c3fdbab0aa15a08a852
 The first native run passed its commands and online routing, but zero successful relays did not prove offline absence because failed upstream dials were omitted. Original results and original review remain preserved under that weaker scope. A real TCP refused-upstream control demonstrates one accepted connection/one failed dial/zero successful traffic. Added diagnostic counters support this fresh unchanged-target run; no original store was reopened or result repaired.
 
 This qualifies the full original healthy packaged operator command suite through a leaf. Packaged projection/tombstone daemons, PostgreSQL leaf paths, injected leaf/hub faults, broader release matrices, million physical drain and online GC remain independently open. Original journal 24h continues in its isolated source.
+
+The completed local fixture and staging archive are retired after fresh full remote/member/current-inventory/closure checks. Complete S3 receipts remain here; [retirement and restoration](../reclaimed/README.md).
