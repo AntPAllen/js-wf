@@ -78,8 +78,8 @@ func TestMatrixRetainedAuditHonorsCancellationDuringWait(t *testing.T) {
 }
 
 func TestMatrixRetainedAuditRejectsConflictingReaders(t *testing.T) {
-	names := []string{"WF_TIER3_BATCHED_RETAINED_AUDIT", "WF_TIER3_STREAMING_STATE_RETAINED_AUDIT", "WF_TIER3_CONCURRENT_STATE_RETAINED_AUDIT", "WF_TIER3_CHUNKED_STATE_RETAINED_AUDIT"}
-	for _, pair := range [][2]int{{0, 1}, {0, 2}, {1, 2}, {0, 3}, {1, 3}, {2, 3}} {
+	names := []string{"WF_TIER3_BATCHED_RETAINED_AUDIT", "WF_TIER3_STREAMING_STATE_RETAINED_AUDIT", "WF_TIER3_CONCURRENT_STATE_RETAINED_AUDIT", "WF_TIER3_CHUNKED_STATE_RETAINED_AUDIT", "WF_TIER3_PARALLEL_STATE_RETAINED_AUDIT"}
+	for _, pair := range [][2]int{{0, 1}, {0, 2}, {1, 2}, {0, 3}, {1, 3}, {2, 3}, {0, 4}, {1, 4}, {2, 4}, {3, 4}} {
 		t.Run(fmt.Sprintf("%d-%d", pair[0], pair[1]), func(t *testing.T) {
 			for _, name := range names {
 				t.Setenv(name, "0")

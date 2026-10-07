@@ -6,6 +6,6 @@ Actual direct peer0 EOF/disconnect is observed after SIGKILL; source is confirme
 
 The erroneous profile required the entire attempt return/cleanup before restart, conflating timeout decision with cleanup that can depend on healing. Correction records an explicit `watch_idle_timeout` decision before Stop and requires **that decision** before restart; all prior cleanup must still finish before the fresh attempt. Known already-removed consumer cleanup is admitted as typed; unknown cleanup errors remain rejected. Original20s overall budget/counts/profile stay unchanged. A seeded observer control checks the decision/Stop/return order and preserves the typed partial-set failure even when cleanup reports a removed consumer. This is a diagnostic target correction, not blanket acceptance of the earlier failed run or a historical NATS cause claim.
 
-Complete archive and full inventory are retained for S3 upload; this failed native is not rerun on the same stores. Native qualification of the corrected decision gate remains pending.
+Complete archive, metadata and full inventory have verified full S3 readbacks ([receipt](s3-readback.json)); this failed native is not rerun on the same stores. Native qualification of the corrected decision gate remains pending.
 
 Focused seeded idle/closed retry, observer decision/cleanup and initial-set controls pass normal/race count20 before the corrected native launch. The newly added milestone is diagnostic only; snapshot retry/deadline behavior is unchanged.

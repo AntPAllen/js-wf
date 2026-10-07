@@ -8,6 +8,8 @@ import subprocess
 import tarfile
 import tempfile
 
+import parallel_soak_profile
+
 
 def sha(path):
     value=hashlib.sha256()
@@ -39,6 +41,9 @@ def review(root, repo):
         state=read('execution.json')
         if state['status']!='row_verified' or state['test_exit_code']!=0 or state['clears_full_tier3_release'] is not False:
             raise ValueError('row is failed/incomplete or claims incorrect release scope')
+        environment=read('test-environment.json')
+        events=[json.loads(line) for line in tar.extractfile('events.jsonl').read().decode().splitlines() if line.strip()]
+        parallel_profile=parallel_soak_profile.validate(state,environment,events)
         before=read('source-before.json');after=read('source-after.json')
         revision=state['source']
         if before!=after or before['revision']!=revision:
@@ -98,7 +103,7 @@ def review(root, repo):
                 if output.read_bytes()!=(temporary/'fixture'/name).read_bytes():
                     raise ValueError('raw event/fencing report does not reproduce')
             explanations=json.loads((temporary/'fixture/event-explanations.json').read_text())
-        return dict(accepted_row=True,source=revision,row=state['row'],seed=state['seed'],
+        return dict(accepted_row=True,parallel_profile=parallel_profile,source=revision,row=state['row'],seed=state['seed'],
                     duration=state['duration'],archive_members_verified=len(members),source_files_verified=len(expected),
                     binary_sha256=binary['sha256'],race=binary['race'],invocations=report['invocations'],
                     journal_entries=report['journal_entries'],confirmed_faults=report['confirmed_faults'],

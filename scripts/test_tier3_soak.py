@@ -5,6 +5,19 @@ spec=importlib.util.spec_from_file_location('soak',Path(__file__).with_name('run
 soak=importlib.util.module_from_spec(spec);spec.loader.exec_module(soak)
 
 class SoakProducerTests(unittest.TestCase):
+ def test_parallel_state_recovery_profile_is_explicit_and_keeps_all_original_gates(self):
+  with patch.dict(os.environ,{'WF_TIER3_PARALLEL_STATE_RETAINED_AUDIT':'1'}):
+   plain,args,flags=soak.execution('journal','10m',1,Path('/tmp/f'),'sigkill',False,memory_limit='4GiB')
+   candidate,new_args,new_flags=soak.execution('journal','10m',1,Path('/tmp/f'),'sigkill',False,memory_limit='4GiB',parallel_state_retained_audit=True)
+  self.assertNotIn('WF_TIER3_PARALLEL_STATE_RETAINED_AUDIT',plain)
+  self.assertEqual(candidate['WF_TIER3_PARALLEL_STATE_RETAINED_AUDIT'],'1')
+  self.assertEqual((candidate['GOMAXPROCS'],candidate['GOGC'],candidate['GOMEMLIMIT']),('4','500','4GiB'))
+  self.assertEqual((args,flags),(new_args,new_flags))
+  self.assertEqual(candidate['WF_TIER3_MATRIX_DURATION'],'10m')
+  self.assertEqual(candidate['WF_TIER3_SYNC_INTERVAL'],plain['WF_TIER3_SYNC_INTERVAL'])
+  with self.assertRaises(ValueError):soak.execution('journal','10m',1,Path('/tmp/f'),'sigkill',False,parallel_state_retained_audit=True)
+  for mode in ('batched_retained_audit','streaming_state_retained_audit','concurrent_state_retained_audit','chunked_state_retained_audit'):
+   with self.assertRaises(ValueError):soak.execution('journal','10m',1,Path('/tmp/f'),'sigkill',False,memory_limit='4GiB',parallel_state_retained_audit=True,**{mode:True})
  def test_bulk_final_latency_qualification_cannot_inherit_or_drop_original_gates(self):
   with patch.dict(os.environ,{'WF_MATRIX_BULK_FINAL_LATENCY':'1','WF_MATRIX_BULK_POINT_COMPARE':'1'}):
    plain,args,flags=soak.execution('journal','10m',1,Path('/tmp/f'),'sigkill',False,memory_limit='4GiB')

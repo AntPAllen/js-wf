@@ -981,10 +981,15 @@ func matrixRetainedCheck(ctx context.Context, js jetstream.JetStream, cutoff *ui
 	batched := os.Getenv("WF_TIER3_BATCHED_RETAINED_AUDIT") == "1"
 	concurrent := os.Getenv("WF_TIER3_CONCURRENT_STATE_RETAINED_AUDIT") == "1"
 	chunked := os.Getenv("WF_TIER3_CHUNKED_STATE_RETAINED_AUDIT") == "1"
-	if (streaming && batched) || (concurrent && (streaming || batched)) || (chunked && (streaming || batched || concurrent)) {
+	parallel := os.Getenv("WF_TIER3_PARALLEL_STATE_RETAINED_AUDIT") == "1"
+	if (streaming && batched) || (concurrent && (streaming || batched)) || (chunked && (streaming || batched || concurrent)) || (parallel && (streaming || batched || concurrent || chunked)) {
 		return integrity.Report{}, errors.New("conflicting retained audit modes")
 	}
 	if cutoff != nil {
+		if parallel {
+			fmt.Printf("MATRIX_AUDIT_MODE mode=parallel_state cutoff=%d\n", *cutoff)
+			return integrity.CheckThroughInvocationSequenceWithParallelDecodedChunkedStateReads(ctx, js, *cutoff)
+		}
 		if chunked {
 			return integrity.CheckThroughInvocationSequenceWithChunkedConcurrentStateReads(ctx, js, *cutoff)
 		}
@@ -998,6 +1003,10 @@ func matrixRetainedCheck(ctx context.Context, js jetstream.JetStream, cutoff *ui
 			return integrity.CheckThroughInvocationSequenceWithBatchedReads(ctx, js, *cutoff)
 		}
 		return integrity.CheckThroughInvocationSequence(ctx, js, *cutoff)
+	}
+	if parallel {
+		fmt.Println("MATRIX_AUDIT_MODE mode=parallel_state cutoff=full")
+		return integrity.CheckWithParallelDecodedChunkedStateReads(ctx, js)
 	}
 	if chunked {
 		return integrity.CheckWithChunkedConcurrentStateReads(ctx, js)
