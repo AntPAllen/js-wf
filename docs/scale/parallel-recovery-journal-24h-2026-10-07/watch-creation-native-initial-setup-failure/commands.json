@@ -1,0 +1,27 @@
+{
+  "build": [
+    "go",
+    "test",
+    "-race",
+    "-buildvcs=true",
+    "-c",
+    "-o",
+    "/tmp/js-wf-state-watch-creation-native-20261007/integrity-race.test",
+    "./integrity"
+  ],
+  "run": [
+    "/tmp/js-wf-state-watch-creation-native-20261007/integrity-race.test",
+    "-test.v",
+    "-test.run=^TestStateCreationNativeRecovery$",
+    "-test.count=1",
+    "-test.timeout=2m"
+  ],
+  "cwd": "/home/exedev/js-wf",
+  "environment": {
+    "GOMAXPROCS": "2",
+    "GOMEMLIMIT": "1GiB",
+    "GOWORK": "off",
+    "GOFLAGS": "",
+    "WF_STATE_CREATION_ROOT": "/tmp/js-wf-state-watch-creation-native-20261007/fixture"
+  }
+}

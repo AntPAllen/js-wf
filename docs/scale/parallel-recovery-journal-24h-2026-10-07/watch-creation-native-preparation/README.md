@@ -15,3 +15,5 @@ PYTHONDONTWRITEBYTECODE=1 python3 scripts/run-state-creation-native.py --root /t
 ```
 
 This is a controlled R3 request-cancellation component. It does not reproduce the original R5 server/watch stall, establish its server-side cause, validate the complete cutoff116480 cohort, or clear24h/default/fullmatrix requirements. The [failed original](../terminal-failure/) remains unchanged. Next is the complete copied cohort with fault interactions under its original20s budget.
+
+The first actual native execution fails in bucket setup before reaching the fault; [failed original](../watch-creation-native-initial-setup-failure/). A fresh-source correction adds explicit metadata-leader readiness within the unchanged30s setup deadline. Native recovery acceptance remains pending.

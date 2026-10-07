@@ -90,6 +90,25 @@ func TestStateCreationNativeRecovery(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	// TCP readiness does not establish the metadata quorum needed to create
+	// an R3 bucket. Admit that quorum within the original setup budget before
+	// making the first creation request; the recovery budget is unchanged.
+	ready := time.NewTicker(20 * time.Millisecond)
+	defer ready.Stop()
+	for {
+		leader := false
+		for _, peer := range cluster.Servers {
+			leader = leader || peer.JetStreamIsLeader()
+		}
+		if leader {
+			break
+		}
+		select {
+		case <-setup.Done():
+			t.Fatal("metadata leader readiness:", setup.Err())
+		case <-ready.C:
+		}
+	}
 	state, err := js.CreateKeyValue(setup, jetstream.KeyValueConfig{Bucket: "WF_STATE", Replicas: 3, Storage: jetstream.FileStorage, History: 1})
 	if err != nil {
 		t.Fatal(err)
