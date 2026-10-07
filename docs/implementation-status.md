@@ -1,5 +1,9 @@
 # Implementation status against the supplied plan
 
+## Leaf-connected domain retirement/reuse accepted — 2026-10-07
+
+Atffcc107 actual race SDK3807458 passes28.74s. Three runtime clients stay on a real WFEDGE leaf with zero local streams, while original strict generation1→3 retirement/manifest-loss/reuse/shared-blob collection operates on the R3 WFRETIRE hub. All three hubs stop before replacements start; leaf disconnect/reconnect, distinct hub IDs, source replica recovery and121 proper domain API subjects verify; whole cut8.3467s under original30s. Complete2520-file archive/source/SDK/originals review accepts with18 actual-proof negatives. The first producer's overstrict object leader-path verifier rejection remains recorded; corrected verifier859b6b3 accepts the captured passing native scenario without rerun. [Proof and provenance limits](scale/leaf-domain-retirement-2026-10-07/native-race/). This qualifies the focused graceful restart leaf component, not SIGKILL/lease-expiry/daemon leaf combinations, broad leaf matrices, onlineGC/million/full24h.
+
 ## Fresh explicit recovery journal24h live — 2026-10-07
 
 At clean `bc9f92bdfd1f01ad78d4acd24e6576d46c82a078`, actual SDK3743450 is running original journal/seed1/24h/count1/nonrace/24h20m with new five-node stores and isolated source. Explicit parallel recovery/full bulk-point final audit retain4CPU/GOGC500/4GiB and all original workload/fault/deadline/history/queue/latency gates. Actual SDK hash/buildVCS/argv/environment and all five stock2.15 server observations verify. Four journal faults healed and26 batches completed at the recorded observation; no terminal24h qualification. Durable producer, observer and prepared terminal-reviewer are actually live; no failed original restarted. [Live admission and exact handles](scale/parallel-recovery-journal-24h-2026-10-07/launch/).

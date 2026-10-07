@@ -183,7 +183,7 @@ def main():
     if args.case == 'leaf-retirement-hub-restart':
         env['WF_CONTINUATION_DOMAIN_ROOT'] = str(root/'stores'/'leaf-scenario')
     binary = root/'integration-race.test'
-    build = ['go', 'test', '-race', '-c', '-o', str(binary), './integration']
+    build = ['go', 'test', '-buildvcs=true', '-race', '-c', '-o', str(binary), './integration']
     command = [str(binary), '-test.v', '-test.run=^('+'|'.join(CASES[args.case])+')$', '-test.count=1', '-test.timeout=3m']
     save('commands.json', {'build': build, 'run': command})
     with (root/'build.log').open('w') as log:

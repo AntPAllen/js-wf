@@ -66,6 +66,9 @@ jobs:
           cd "$RUNNER_TEMP/domain-legacy-build"
           GOWORK=off GO111MODULE=on GOBIN="$RUNNER_TEMP/domain-legacy-bin" go install github.com/nats-io/nats-server/v2@v2.11.17
           printf 'WF_NATS_SERVER_BIN=%s\n' "$RUNNER_TEMP/domain-legacy-bin/nats-server" >> "$GITHUB_ENV"
+      - name: Check captured leaf proof omission and bypass controls
+        if: matrix.case == 'leaf-retirement-hub-restart'
+        run: python3 -m unittest discover -s scripts -p test_leaf_domain_proof.py
       - name: Require complete native race coverage and retain closed originals
         run: python3 scripts/run-domain-runtime-controls.py --case '${{ matrix.case }}' --root '${{ runner.temp }}/domain-controls-${{ matrix.case }}'
       - if: always()

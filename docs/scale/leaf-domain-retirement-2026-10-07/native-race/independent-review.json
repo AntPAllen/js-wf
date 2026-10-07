@@ -1,0 +1,73 @@
+{
+  "build_vcs_stamp_present": false,
+  "source_binding": "Verified complete selected source before/after, captured files and Git blobs plus recorded compiler command and actual live SDK digest; this historical binary has no buildVCS stamp.",
+  "source": "ffcc107fde980fca5415547e40b0cfd0dab2af48",
+  "source_inputs_verified": 2090,
+  "actual_sdk": {
+    "pid": 3807458,
+    "stat": "3807458 (integration-rac) S 3802824 3802824 3802824 0 -1 4194304 12397 0 0 0 8 1 0 0 39 19 5 0 18060159 2002362368 18356 18446744073709551615 4194304 35138224 140730315743744 0 0 0 0 0 2143420159 0 0 0 17 2 0 0 0 0 0 55074816 55793376 829378560 140730315746322 140730315746497 140730315746497 140730315747255 0\n",
+    "start_ticks": "18060159",
+    "args": [
+      "/tmp/js-wf-leaf-domain-retirement-20261007/integration-race.test",
+      "-test.v",
+      "-test.run=^(TestContinuationRetirementReuseThroughLeafWithHubRestart)$",
+      "-test.count=1",
+      "-test.timeout=3m"
+    ],
+    "exe": "/tmp/js-wf-leaf-domain-retirement-20261007/integration-race.test",
+    "working_directory": "/home/exedev/js-wf",
+    "environment": {
+      "GOMAXPROCS": "2",
+      "GOMEMLIMIT": "1GiB",
+      "WF_RESULT_ABSENCE_ROOT": "/tmp/js-wf-leaf-domain-retirement-20261007/stores",
+      "WF_SNAPSHOT_LEADER_ROOT": "/tmp/js-wf-leaf-domain-retirement-20261007/stores",
+      "WF_CONTINUATION_RETIREMENT_PROCESS_ROOT": "/tmp/js-wf-leaf-domain-retirement-20261007/stores",
+      "WF_CONTINUATION_DOMAIN_ROOT": "/tmp/js-wf-leaf-domain-retirement-20261007/stores/leaf-scenario"
+    },
+    "exe_sha256": "33d10a44112f6bd2303cd4e9cff73bf2cd561f24d2a83317a9362933b55718c6",
+    "admission": {
+      "observations": 1,
+      "rejected_observations": 0,
+      "first_missing_environment_keys": [],
+      "stable_identity_observed_twice": true,
+      "scope": "Actual live process identity before/after executable digest; incomplete reads repeated without killing or relaunching."
+    }
+  },
+  "embedded_brokers": "All four NATS library servers run in the admitted race SDK; no separate broker executable or SIGKILL claim. Module version is build-info provenance, not a complete prebuild external-source census.",
+  "archive_every_member_verified": {
+    "bytes": 38198235,
+    "sha256": "240e167f4a806816ac1b4614bed9d9d367286879207a9700b7f102489a00f013"
+  },
+  "files": 2520,
+  "accepted": true,
+  "original_stores_not_reopened": true,
+  "full_matrix_24h_qualified": false,
+  "log_review": {
+    "case": "leaf-retirement-hub-restart",
+    "tests": [
+      "TestContinuationRetirementReuseThroughLeafWithHubRestart"
+    ],
+    "scope": "Focused native row only; full matrix/24h not qualified."
+  },
+  "leaf_review": {
+    "remote_domain": "WFRETIRE",
+    "local_domain": "WFEDGE",
+    "hub_originals": 3,
+    "hub_replacements": 3,
+    "leaf_disconnect_and_reconnect": true,
+    "whole_cut_seconds": 8.346727,
+    "api_subjects": 121,
+    "scope": "Single leaf-connected strict retirement/reuse and graceful all-hub restart; no SIGKILL, lease-expiry, daemon-child wire or broad leaf matrix claim."
+  },
+  "original_producer_verification_failure_preserved": {
+    "native_exit_code": 0,
+    "producer_exit_code": 1,
+    "phase": "leaf proof verifier",
+    "error": "AssertionError: STREAM.MSG.GET.OBJ_WF_BLOB missing",
+    "native_verdict_unchanged": "PASS",
+    "scope": "Original scenario used normal Object Store DIRECT.GET and consumer paths; forced weak-object absence was not requested."
+  },
+  "current_verifier_sha256": "84d4c41221121142ca8028030f1264c6ffcd7854e33c2e3cb8c28dd1abfbcd81",
+  "current_verifier_revision": "859b6b33f3e3f3468aa83010b53f4dc567eded2a",
+  "rejected_actual_proof_mutations": 18
+}
