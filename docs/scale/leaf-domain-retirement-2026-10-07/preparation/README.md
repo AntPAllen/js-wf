@@ -1,0 +1,5 @@
+# Leaf-connected domain retirement prepared
+
+New opt-in `leaf-retirement-hub-restart` runs the original strict retirement/reuse scenario through three clients connected only to one actual leaf. The leaf has local `WFEDGE` JetStream; the R3 hub has `WFRETIRE`. Empty local streams, actual remote AccountInfo, all three hub admission/replacement identities, observed leaf disconnect/reconnect, unchanged client server IDs and API subject trace distinguish remote operation from direct-hub or local-domain handling. The original60s scenario and30s whole cut remain. Fault is graceful all-hub library shutdown/restart, not SIGKILL or lease expiry.
+
+Compilation and12 existing log-verifier controls pass. Source is committed before the retained race native row; native/independent admission is pending. Domain CI includes this new row. The native runner now uses the already qualified stable actual-process admission helper. No production runtime or default server path changes; the existing24h SDK has isolated frozen source and remains live.

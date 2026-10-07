@@ -21,6 +21,7 @@ type Cluster struct {
 	routeMesh  *RouteMesh
 	serverTags map[int][]string
 	domain     string
+	leafPorts  []int
 }
 
 func freePort() (int, error) {
@@ -46,6 +47,23 @@ func StartWithDomain(root string, count int, domain string) (*Cluster, error) {
 	return start(root, count, false, nil, domain)
 }
 
+// StartWithLeafDomain adds stable leaf listeners to a domain fixture. Clients
+// connected to a separate leaf can exercise remote domain routing and recovery.
+func StartWithLeafDomain(root string, count int, domain string) (*Cluster, error) {
+	if domain == "" {
+		return nil, fmt.Errorf("JetStream domain must be nonempty")
+	}
+	return startWithLeaves(root, count, false, nil, domain, true)
+}
+
+func (c *Cluster) LeafURLs() []*url.URL {
+	urls := make([]*url.URL, len(c.leafPorts))
+	for i, port := range c.leafPorts {
+		urls[i], _ = url.Parse(fmt.Sprintf("nats://127.0.0.1:%d", port))
+	}
+	return urls
+}
+
 // StartWithServerTags permits documented JetStream placement constraints in
 // native tests. Tags are copied before starting the servers.
 func StartWithServerTags(root string, count int, tags map[int][]string) (*Cluster, error) {
@@ -59,6 +77,10 @@ func StartPartitionable(root string, count int) (*Cluster, error) {
 }
 
 func start(root string, count int, partitionable bool, tags map[int][]string, domain string) (*Cluster, error) {
+	return startWithLeaves(root, count, partitionable, tags, domain, false)
+}
+
+func startWithLeaves(root string, count int, partitionable bool, tags map[int][]string, domain string, leaves bool) (*Cluster, error) {
 	if count < 1 || count > 3 {
 		return nil, fmt.Errorf("count must be 1..3")
 	}
@@ -101,6 +123,13 @@ func start(root string, count int, partitionable bool, tags map[int][]string, do
 			if err != nil {
 				return nil, err
 			}
+		}
+		if leaves {
+			port, err := uniquePort()
+			if err != nil {
+				return nil, err
+			}
+			c.leafPorts = append(c.leafPorts, port)
 		}
 	}
 	c.ports, c.routes = ports, routes
@@ -160,6 +189,9 @@ func (c *Cluster) ApplyFault(event FaultEvent) error {
 func (c *Cluster) options(i int) *server.Options {
 	opts := &server.Options{Host: "127.0.0.1", Port: c.ports[i], JetStream: true, StoreDir: filepath.Join(c.root, fmt.Sprintf("node-%d", i)), NoLog: true, NoSigs: true, ServerName: fmt.Sprintf("wf-test-%d", i)}
 	opts.JetStreamDomain = c.domain
+	if len(c.leafPorts) != 0 {
+		opts.LeafNode = server.LeafNodeOpts{Host: "127.0.0.1", Port: c.leafPorts[i]}
+	}
 	opts.Tags.Add(c.serverTags[i]...)
 	if len(c.ports) > 1 {
 		opts.Accounts = []*server.Account{server.NewAccount("$SYS"), server.NewAccount("$G")}

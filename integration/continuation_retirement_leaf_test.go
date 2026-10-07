@@ -1,0 +1,257 @@
+package integration_test
+
+import (
+	"context"
+	"encoding/json"
+	"fmt"
+	"os"
+	"path/filepath"
+	"sync"
+	"testing"
+	"time"
+
+	"github.com/nats-io/nats-server/v2/server"
+	"github.com/nats-io/nats.go"
+	"github.com/nats-io/nats.go/jetstream"
+	"js-wf/provision"
+	"js-wf/testcluster"
+)
+
+// Run the original strict retirement/reuse scenario through a real leaf whose
+// local JetStream domain differs from the three-node storage hub's domain.
+func TestContinuationRetirementReuseThroughLeafWithHubRestart(t *testing.T) {
+	root := os.Getenv("WF_CONTINUATION_DOMAIN_ROOT")
+	if root == "" {
+		t.Skip("set WF_CONTINUATION_DOMAIN_ROOT to a fresh absolute directory")
+	}
+	if !filepath.IsAbs(root) {
+		t.Fatal("artifact directory must be absolute")
+	}
+	if err := os.Mkdir(root, 0700); err != nil {
+		t.Fatal(err)
+	}
+	const hubDomain, leafDomain = "WFRETIRE", "WFEDGE"
+	hub, err := testcluster.StartWithLeafDomain(filepath.Join(root, "hub"), 3, hubDomain)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer hub.Close()
+	leaf, err := server.NewServer(&server.Options{Host: "127.0.0.1", Port: -1, ServerName: "wf-edge", NoLog: true, NoSigs: true,
+		JetStream: true, JetStreamDomain: leafDomain, StoreDir: filepath.Join(root, "leaf"),
+		LeafNode: server.LeafNodeOpts{ReconnectInterval: 25 * time.Millisecond, Remotes: []*server.RemoteLeafOpts{{URLs: hub.LeafURLs(), NoRandomize: true}}}})
+	if err != nil {
+		t.Fatal(err)
+	}
+	go leaf.Start()
+	defer func() { leaf.Shutdown(); leaf.WaitForShutdown() }()
+	if !leaf.ReadyForConnections(5 * time.Second) {
+		t.Fatal("leaf not ready")
+	}
+	ready, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+	all := make([]jetstream.JetStream, 3)
+	var connections []*nats.Conn
+	for i := range all {
+		nc, err := nats.Connect(leaf.ClientURL(), nats.IgnoreDiscoveredServers(), nats.MaxReconnects(-1), nats.ReconnectWait(25*time.Millisecond))
+		if err != nil {
+			t.Fatal(err)
+		}
+		defer nc.Close()
+		connections = append(connections, nc)
+		all[i], err = jetstream.NewWithDomain(nc, hubDomain)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if nc.ConnectedServerId() != leaf.ID() {
+			t.Fatal("runtime client bypassed leaf")
+		}
+	}
+	local, err := jetstream.New(connections[0])
+	if err != nil {
+		t.Fatal(err)
+	}
+	localInfo, err := local.AccountInfo(ready)
+	if err != nil || localInfo.Domain != leafDomain {
+		t.Fatalf("local domain=%+v err=%v", localInfo, err)
+	}
+	for {
+		attempt, done := context.WithTimeout(ready, time.Second)
+		err = provision.Ensure(attempt, all[0], 3)
+		done()
+		if err == nil {
+			break
+		}
+		if ready.Err() != nil || !matrixTransientTransport(err) {
+			t.Fatal(err)
+		}
+		time.Sleep(25 * time.Millisecond)
+	}
+	if err := waitMatrixWorkflowReplicas(ready, all[0]); err != nil {
+		t.Fatal(err)
+	}
+	var mu sync.Mutex
+	subjects := map[string]int{}
+	trace, err := connections[0].Subscribe("$JS.>", func(m *nats.Msg) { mu.Lock(); subjects[m.Subject]++; mu.Unlock() })
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer trace.Unsubscribe()
+	if err := connections[0].FlushWithContext(ready); err != nil {
+		t.Fatal(err)
+	}
+	type peer struct {
+		Name   string `json:"name"`
+		ID     string `json:"id"`
+		Domain string `json:"domain"`
+	}
+	type evidence struct {
+		LocalStreamsBefore int            `json:"local_streams_before"`
+		LocalStreamsAfter  int            `json:"local_streams_after"`
+		LeafBefore         *server.Leafz  `json:"leaf_before"`
+		LeafAfter          *server.Leafz  `json:"leaf_after"`
+		LeafID             string         `json:"leaf_id"`
+		LeafURL            string         `json:"leaf_url"`
+		LocalDomain        string         `json:"local_domain"`
+		RemoteDomain       string         `json:"remote_domain"`
+		Before             []peer         `json:"before"`
+		After              []peer         `json:"after"`
+		Stopped            []string       `json:"stopped"`
+		Disconnected       bool           `json:"leaf_disconnected"`
+		Reconnected        bool           `json:"leaf_reconnected"`
+		CutStart           time.Time      `json:"cut_start"`
+		CutEnd             time.Time      `json:"cut_end"`
+		RuntimeServerIDs   []string       `json:"runtime_server_ids"`
+		Subjects           map[string]int `json:"subjects"`
+		Passed             bool           `json:"scenario_passed"`
+	}
+	if localInfo.Streams != 0 {
+		t.Fatal("leaf unexpectedly owns streams")
+	}
+	leafBefore, err := leaf.Leafz(nil)
+	if err != nil || leafBefore.NumLeafs != 1 {
+		t.Fatalf("initial leaf topology=%+v err=%v", leafBefore, err)
+	}
+	proof := evidence{LocalStreamsBefore: localInfo.Streams, LeafBefore: leafBefore, LeafID: leaf.ID(), LeafURL: leaf.ClientURL(), LocalDomain: localInfo.Domain, RemoteDomain: hubDomain}
+	save := func() {
+		mu.Lock()
+		proof.Subjects = make(map[string]int, len(subjects))
+		for k, v := range subjects {
+			proof.Subjects[k] = v
+		}
+		mu.Unlock()
+		data, e := json.MarshalIndent(proof, "", "  ")
+		if e != nil {
+			t.Error(e)
+			return
+		}
+		if e = os.WriteFile(filepath.Join(root, "leaf-domain-proof.json"), data, 0600); e != nil {
+			t.Error(e)
+		}
+	}
+	defer save()
+	for i, s := range hub.Servers {
+		js, e := jetstream.NewWithDomain(hub.Clients[i], hubDomain)
+		if e != nil {
+			t.Fatal(e)
+		}
+		info, e := js.AccountInfo(ready)
+		if e != nil || info.Domain != hubDomain {
+			t.Fatalf("hub%d domain=%+v err=%v", i, info, e)
+		}
+		proof.Before = append(proof.Before, peer{s.Name(), s.ID(), info.Domain})
+	}
+	onDrop := func(ctx context.Context) error {
+		proof.CutStart = time.Now().UTC()
+		observe, stop := context.WithDeadline(ctx, proof.CutStart.Add(30*time.Second))
+		defer stop()
+		for i := range hub.Servers {
+			hub.KillNode(i)
+			if hub.Servers[i].Running() {
+				return fmt.Errorf("hub%d not stopped", i)
+			}
+			proof.Stopped = append(proof.Stopped, hub.Servers[i].ID())
+		}
+		for leaf.NumLeafNodes() != 0 {
+			if observe.Err() != nil {
+				return observe.Err()
+			}
+			time.Sleep(10 * time.Millisecond)
+		}
+		proof.Disconnected = true
+		for i := range hub.Servers {
+			if e := hub.RestartNode(i); e != nil {
+				return e
+			}
+		}
+		for {
+			attempt, done := context.WithTimeout(observe, 250*time.Millisecond)
+			info, e := all[0].AccountInfo(attempt)
+			done()
+			if e == nil {
+				if info.Domain != hubDomain {
+					return fmt.Errorf("wrong remote domain %q", info.Domain)
+				}
+				break
+			}
+			if observe.Err() != nil || !matrixTransientTransport(e) {
+				return fmt.Errorf("remote domain recovery: %w", e)
+			}
+			time.Sleep(25 * time.Millisecond)
+		}
+		if leaf.NumLeafNodes() != 1 {
+			return fmt.Errorf("leaf reconnect count=%d", leaf.NumLeafNodes())
+		}
+		proof.Reconnected = true
+		proof.LeafAfter, err = leaf.Leafz(nil)
+		if err != nil {
+			return err
+		}
+		if e := waitMatrixWorkflowReplicas(observe, all[0]); e != nil {
+			return e
+		}
+		for i, s := range hub.Servers {
+			js, e := jetstream.NewWithDomain(hub.Clients[i], hubDomain)
+			if e != nil {
+				return e
+			}
+			info, e := js.AccountInfo(observe)
+			if e != nil {
+				return e
+			}
+			if info.Domain != hubDomain {
+				return fmt.Errorf("replacement hub wrong domain")
+			}
+			if s.ID() == proof.Before[i].ID {
+				return fmt.Errorf("hub%d identity unchanged", i)
+			}
+			proof.After = append(proof.After, peer{s.Name(), s.ID(), info.Domain})
+		}
+		for _, nc := range connections {
+			if nc.ConnectedServerId() != leaf.ID() {
+				return fmt.Errorf("runtime client bypassed leaf after cut")
+			}
+			proof.RuntimeServerIDs = append(proof.RuntimeServerIDs, nc.ConnectedServerId())
+		}
+		proof.CutEnd = time.Now().UTC()
+		t.Logf("leaf domain hub cut: disconnected=true reconnected=true hub_peers=3 leaf_id=%s elapsed=%s", leaf.ID(), proof.CutEnd.Sub(proof.CutStart))
+		return nil
+	}
+	runContinuationRetirementOnCluster(t, all, true, onDrop)
+	if err := trace.Unsubscribe(); err != nil {
+		t.Fatal(err)
+	}
+	final, stopFinal := context.WithTimeout(context.Background(), 5*time.Second)
+	defer stopFinal()
+	if err := connections[0].FlushWithContext(final); err != nil {
+		t.Fatal(err)
+	}
+	localAfter, err := local.AccountInfo(final)
+	if err != nil || localAfter.Domain != leafDomain || localAfter.Streams != 0 {
+		t.Fatalf("local leaf after=%+v err=%v", localAfter, err)
+	}
+	proof.LocalStreamsAfter = localAfter.Streams
+	proof.Passed = !t.Failed()
+	if proof.Passed {
+		t.Logf("leaf domain strict scenario passed local=%s remote=%s runtime_clients=3", leafDomain, hubDomain)
+	}
+}
