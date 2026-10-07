@@ -1,0 +1,9 @@
+# All-hub and leaf SIGKILL accepted
+
+Native race source `384634e1980c55b9019f97dc4849de2eaea7f465`, actual SDK4147770, passed39.50s. All three stock WFRETIRE hubs4147906/4147907/4147908 and stock WFEDGE leaf4148085 were SIGKILLed and reaped before any replacement started. All three runtime clients disconnected. The production12s lease expired during a13.00007877s outage. Same executable/argv/config/port/store replacements4150728/4150738/4150748 and4150764 recovered in20.347346076s under the original30s gate.
+
+The original strict retirement/reuse scenario passed: generation1→3, two collected objects, shared/survivor retention, calls4/effects3/terminals2, one lost fresh manifest write. The exact generation3 frame received one injected weak Object Store absence, one actual WFRETIRE leader metadata confirmation, and successful payload reads: drops1/reads3/leader1/direct0. Completed epoch72 fences old owner54 across11 logical records. All ten checked stream replica sets healed; WFEDGE owns zero workflow streams.
+
+Independent complete source/actual race SDK/all eight stock broker incarnations/documented metadata admission/2543-file archive review accepts. 50 actual-proof mutations are rejected, including hub exit/signal/PID omissions, identity substitution and shorter-profile promotion. Hub PID order and exact weak-frame object/generation/read count are bound to single captured native confirmations. Race instrumentation covers SDK and fixture code; the separate stock brokers are ordinary binaries. Module provenance is not a complete external-source census.
+
+This closes one combined real-leaf/all-hub/leaf-process-kill/production-expiry/controlled-weak-frame component. It does not prove natural follower lag, naturally lost acknowledgements, packaged daemon-child wire paths, online active-writer GC, original million physical drain or broad/full24h release matrices.

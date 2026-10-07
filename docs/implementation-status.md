@@ -1,5 +1,11 @@
 # Implementation status against the supplied plan
 
+## All-hub and leaf process SIGKILL with expiry and weak frame accepted — 2026-10-07
+
+Native race source `384634e`, actual SDK4147770, passed39.50s. Three actual stock hub processes and the stock leaf were SIGKILLed/reaped before replacements, all three runtime clients disconnected, and production TTL12s was exceeded by13.0001s. All original/replacement executable/argv/config/ports/stores and eight process identities verify. Whole cut20.3473s stays below the original30s target. Ten checked replica sets heal, leaf workflow-stream count remains zero, and strict generation1→3/retirement/reuse/manifest-loss/object/effect/terminal assertions pass. Selected generation3 frame: controlled absence1/reads3/real remote-domain leader confirmation1/direct0. Completed epoch72 fences54 across11 records.
+
+Independent complete source/SDK/eight-stock-process/metadata-admission/2543-file archive review accepts with50 actual-proof mutations rejected. Persistent log/proof controls reject omitted or duplicated confirmations, missing SIGKILL exits, PID substitution/order changes and graceful-profile promotion. [Full evidence and limits](scale/leaf-all-hub-sigkill-2026-10-07/native-race/). This closes one combined leaf/all-hub abrupt-loss component; natural follower lag, packaged daemon-child leaf paths, online active-writer GC, original million physical drain and full release/24h matrices remain open.
+
 ## Leaf SIGKILL, lease expiry and controlled weak frame accepted — 2026-10-07
 
 Native race source `a31994f` passed in40.85s. The selected generation3 frame received one injected weak Object Store absence, then one actual leader metadata confirmation through WFRETIRE and successful payload recovery: drops1/reads3/leader1/direct0. Actual stock leaf4052741 was SIGKILLed/reaped, all three runtime clients disconnected, and replacement4055515 reused the original executable/config/port/store. Production TTL12s was exceeded by13.0009s; all three embedded hubs gracefully restarted and the ten checked replica sets recovered. Whole cut21.3346s stays under the original30s target; terminal epoch72 fences old owner54. Original strict retirement/reuse/manifest loss/generation/object/effect/terminal assertions passed unchanged.

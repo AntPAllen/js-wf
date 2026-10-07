@@ -1,0 +1,11 @@
+=== RUN   TestContinuationRetirementReuseThroughLeafAndAllHubSIGKILLWithLeaseExpiryAndWeakFrame
+    continuation_retirement_leaf_test.go:490: leaf lease outage: held=13.00007877s ttl=12s prior_epoch=54
+    continuation_retirement_leaf_test.go:568: leaf SIGKILL confirmed: old_pid=4148085 new_pid=4150764 old_id=NB5ABSUMMVONNYTEOFLVPA7EBJZVQDFKLC3WWVB34COXFDZWYBTODXMM new_id=NCTPD5PSHO7XVE7QUG7NFCIMIP32U6XEJAKEV6SOASIHWQCIJAR6ZOD6 client_disconnects=3
+    continuation_retirement_leaf_test.go:571: hub SIGKILL confirmed: old_pids=[4147906 4147907 4147908] new_pids=[4150728 4150738 4150748] killed=3 reaped=3
+    continuation_retirement_leaf_test.go:573: leaf domain hub cut: disconnected=true reconnected=true hub_peers=3 leaf_id=NCTPD5PSHO7XVE7QUG7NFCIMIP32U6XEJAKEV6SOASIHWQCIJAR6ZOD6 elapsed=20.347346076s
+    continuation_retirement_test.go:401: continuation retirement/reuse: old_generation=1 fresh_generation=3 reclaimed=2 calls=4 effects=3 terminals=2 shared_blob_retained=true fresh_initial_calls=2 manifest_drops=1 manifest_commits=0
+    continuation_retirement_leaf_test.go:646: leaf weak frame confirmed: object=step-result-4ab5924e57105077358ff16685b28f284672014c665ad468f29c25cc7f384999 generation=3 drops=1 reads=3 leader=1 direct=0
+    continuation_retirement_leaf_test.go:661: leaf lease successor: prior_epoch=54 terminal_epoch=72 records=11
+    continuation_retirement_leaf_test.go:678: leaf domain strict scenario passed local=WFEDGE remote=WFRETIRE runtime_clients=3
+--- PASS: TestContinuationRetirementReuseThroughLeafAndAllHubSIGKILLWithLeaseExpiryAndWeakFrame (39.50s)
+PASS

@@ -1,0 +1,542 @@
+{
+  "build_vcs_stamp_present": true,
+  "source_binding": "Verified complete selected source before/after, captured files and Git blobs plus recorded compiler command and actual live SDK digest; actual race binary buildVCS matches the executed source.",
+  "source": "384634e1980c55b9019f97dc4849de2eaea7f465",
+  "source_inputs_verified": 2102,
+  "actual_sdk": {
+    "pid": 4147770,
+    "stat": "4147770 (integration-rac) S 4143004 4143004 4143004 0 -1 4194304 4765 0 0 0 0 0 0 0 39 19 5 0 18390751 1973035008 9442 18446744073709551615 4194304 35180016 140725767319488 0 0 0 0 0 2143420159 0 0 0 17 3 0 0 0 0 0 55144448 55863296 270626816 140725767326751 140725767326949 140725767326949 140725767327677 0\n",
+    "start_ticks": "18390751",
+    "args": [
+      "/tmp/js-wf-leaf-all-sigkill-20261007/integration-race.test",
+      "-test.v",
+      "-test.run=^(TestContinuationRetirementReuseThroughLeafAndAllHubSIGKILLWithLeaseExpiryAndWeakFrame)$",
+      "-test.count=1",
+      "-test.timeout=3m"
+    ],
+    "exe": "/tmp/js-wf-leaf-all-sigkill-20261007/integration-race.test",
+    "working_directory": "/home/exedev/js-wf",
+    "environment": {
+      "GOMAXPROCS": "2",
+      "GOMEMLIMIT": "1GiB",
+      "WF_RESULT_ABSENCE_ROOT": "/tmp/js-wf-leaf-all-sigkill-20261007/stores",
+      "WF_SNAPSHOT_LEADER_ROOT": "/tmp/js-wf-leaf-all-sigkill-20261007/stores",
+      "WF_CONTINUATION_RETIREMENT_PROCESS_ROOT": "/tmp/js-wf-leaf-all-sigkill-20261007/stores",
+      "WF_CONTINUATION_DOMAIN_ROOT": "/tmp/js-wf-leaf-all-sigkill-20261007/stores/leaf-scenario"
+    },
+    "exe_sha256": "d0a79c3a2914596c4e11173b44d48a5366e708497e5f90fdc6eb7c87601c70c0",
+    "admission": {
+      "observations": 1,
+      "rejected_observations": 0,
+      "first_missing_environment_keys": [],
+      "stable_identity_observed_twice": true,
+      "scope": "Actual live process identity before/after executable digest; incomplete reads repeated without killing or relaunching."
+    }
+  },
+  "broker_scope": "Three stock hub processes and one stock leaf process, eight total incarnations, verified against their original/replacement executables and argv. Race instrumentation covers the SDK and fixture code, not the separate stock brokers. Module version is provenance, not a complete external-source census.",
+  "archive_every_member_verified": {
+    "bytes": 66684438,
+    "sha256": "2fbb215d83906fa55596c051c9719da762748ad7ee81c17c9874632c1df1538e"
+  },
+  "files": 2543,
+  "accepted": true,
+  "original_stores_not_reopened": true,
+  "full_matrix_24h_qualified": false,
+  "log_review": {
+    "case": "leaf-retirement-all-sigkill-expiry-weak",
+    "tests": [
+      "TestContinuationRetirementReuseThroughLeafAndAllHubSIGKILLWithLeaseExpiryAndWeakFrame"
+    ],
+    "scope": "Focused native row only; full matrix/24h not qualified."
+  },
+  "leaf_review": {
+    "remote_domain": "WFRETIRE",
+    "local_domain": "WFEDGE",
+    "hub_originals": 3,
+    "hub_replacements": 3,
+    "fault_profile": "leaf-and-all-hub-sigkill-lease-expiry-weak-frame",
+    "weak_frame": true,
+    "lease_expiry": true,
+    "leaf_process_sigkill": true,
+    "leaf_disconnect_and_reconnect": true,
+    "whole_cut_seconds": 20.347346,
+    "api_subjects": 125,
+    "hub_process_sigkill": true,
+    "scope": "Single leaf-connected strict retirement/reuse with actual all-hub and leaf SIGKILL, production lease expiry and controlled weak frame; no daemon-child wire or broad matrix claim."
+  },
+  "actual_stock_hub_and_leaf_incarnations": [
+    {
+      "pid": 4147906,
+      "birth": "18390866",
+      "exe": "/tmp/js-wf-leaf-all-sigkill-20261007/stores/leaf-scenario/hub-processes/nats-server",
+      "exe_sha256": "24759ea94c030a9c5f1cd7fc61c74e14615a3c35650b5bb28b29891b5899ba9d",
+      "stat": "4147906 (nats-server) S 4147770 4143004 4143004 0 -1 4194304 917 0 0 0 0 0 0 0 39 19 8 0 18390866 1836945408 4080 18446744073709551615 4194304 12824208 140731081286448 0 0 0 1002057728 0 2143420159 0 0 0 17 0 0 0 0 0 0 21082112 21497536 578228224 140731081292601 140731081293004 140731081293004 140731081293732 0\n",
+      "args": [
+        "/tmp/js-wf-leaf-all-sigkill-20261007/stores/leaf-scenario/hub-processes/nats-server",
+        "-a",
+        "127.0.0.1",
+        "-p",
+        "40851",
+        "-m",
+        "46333",
+        "-n",
+        "wf-process-0",
+        "-js",
+        "-sd",
+        "/tmp/js-wf-leaf-all-sigkill-20261007/stores/leaf-scenario/hub-processes/node-0",
+        "-c",
+        "/tmp/js-wf-leaf-all-sigkill-20261007/stores/leaf-scenario/hub-processes/node-0-domain.conf",
+        "--cluster",
+        "nats://127.0.0.1:37445",
+        "--cluster_name",
+        "wf-process",
+        "--routes",
+        "nats://127.0.0.1:34219"
+      ],
+      "build_info": "/proc/4147906/exe: go1.27.1\n\tpath\tgithub.com/nats-io/nats-server/v2\n\tmod\tgithub.com/nats-io/nats-server/v2\tv2.15.0\th1:M99yf0y05rTr46/qc/Is6ZAowI58Ryp2SjufLCUeVJc=\n\tdep\tgithub.com/antithesishq/antithesis-sdk-go\tv0.8.0-default-no-op\th1:1BOWQJweNyvZMlpAHXGLiZQn9S+QXGcz3xh94lC0w6E=\n\tdep\tgithub.com/klauspost/compress\tv1.20.0\th1:a3C1ke2ohxFymNlb2HWAHjDeKCI90scRskErZkR0ezA=\n\tdep\tgithub.com/minio/highwayhash\tv1.0.4\th1:asJizugGgchQod2ja9NJlGOWq4s7KsAWr5XUc9Clgl4=\n\tdep\tgithub.com/nats-io/jwt/v2\tv2.8.2\th1:XXRgB60MSTnqsRwejQurVDs/hcv2dkt+86GjI+I/bMc=\n\tdep\tgithub.com/nats-io/nkeys\tv0.4.16\th1:rd5oAuLOb8mnAycB0xleuEBNS1pVVnN0fv/FF34Eypg=\n\tdep\tgithub.com/nats-io/nuid\tv1.0.1\th1:5iA8DT8V7q8WK2EScv2padNa/rTESc1KdnPw4TC2paw=\n\tdep\tgolang.org/x/crypto\tv0.57.0\th1:3ZVCjf8Ggz7zneR/EHRVx68Ctf+2pmIMP2UFhh9cC6M=\n\tdep\tgolang.org/x/sys\tv0.48.0\th1:bbX/i/6MgT9BVLM9RT1thmxL04yeTAhbEz4SyadbXoo=\n\tdep\tgolang.org/x/time\tv0.16.0\th1:vMb6ptszcQMkcwiRTAuNNU50gom6++Q/6gY2hDM6VDE=\n\tbuild\t-buildmode=exe\n\tbuild\t-compiler=gc\n\tbuild\tCGO_ENABLED=1\n\tbuild\tCGO_CFLAGS=\n\tbuild\tCGO_CPPFLAGS=\n\tbuild\tCGO_CXXFLAGS=\n\tbuild\tCGO_LDFLAGS=\n\tbuild\tGOARCH=amd64\n\tbuild\tGOOS=linux\n\tbuild\tGOAMD64=v1\n"
+    },
+    {
+      "pid": 4147907,
+      "birth": "18390866",
+      "exe": "/tmp/js-wf-leaf-all-sigkill-20261007/stores/leaf-scenario/hub-processes/nats-server",
+      "exe_sha256": "24759ea94c030a9c5f1cd7fc61c74e14615a3c35650b5bb28b29891b5899ba9d",
+      "stat": "4147907 (nats-server) S 4147770 4143004 4143004 0 -1 4194304 1179 0 0 0 0 0 0 0 39 19 8 0 18390866 1837207552 4605 18446744073709551615 4194304 12824208 140730263347104 0 0 0 1002057728 0 2143420159 0 0 0 17 1 0 0 0 0 0 21082112 21497536 1095581696 140730263350073 140730263350476 140730263350476 140730263351204 0\n",
+      "args": [
+        "/tmp/js-wf-leaf-all-sigkill-20261007/stores/leaf-scenario/hub-processes/nats-server",
+        "-a",
+        "127.0.0.1",
+        "-p",
+        "45699",
+        "-m",
+        "46739",
+        "-n",
+        "wf-process-1",
+        "-js",
+        "-sd",
+        "/tmp/js-wf-leaf-all-sigkill-20261007/stores/leaf-scenario/hub-processes/node-1",
+        "-c",
+        "/tmp/js-wf-leaf-all-sigkill-20261007/stores/leaf-scenario/hub-processes/node-1-domain.conf",
+        "--cluster",
+        "nats://127.0.0.1:34219",
+        "--cluster_name",
+        "wf-process",
+        "--routes",
+        "nats://127.0.0.1:37445"
+      ],
+      "build_info": "/proc/4147907/exe: go1.27.1\n\tpath\tgithub.com/nats-io/nats-server/v2\n\tmod\tgithub.com/nats-io/nats-server/v2\tv2.15.0\th1:M99yf0y05rTr46/qc/Is6ZAowI58Ryp2SjufLCUeVJc=\n\tdep\tgithub.com/antithesishq/antithesis-sdk-go\tv0.8.0-default-no-op\th1:1BOWQJweNyvZMlpAHXGLiZQn9S+QXGcz3xh94lC0w6E=\n\tdep\tgithub.com/klauspost/compress\tv1.20.0\th1:a3C1ke2ohxFymNlb2HWAHjDeKCI90scRskErZkR0ezA=\n\tdep\tgithub.com/minio/highwayhash\tv1.0.4\th1:asJizugGgchQod2ja9NJlGOWq4s7KsAWr5XUc9Clgl4=\n\tdep\tgithub.com/nats-io/jwt/v2\tv2.8.2\th1:XXRgB60MSTnqsRwejQurVDs/hcv2dkt+86GjI+I/bMc=\n\tdep\tgithub.com/nats-io/nkeys\tv0.4.16\th1:rd5oAuLOb8mnAycB0xleuEBNS1pVVnN0fv/FF34Eypg=\n\tdep\tgithub.com/nats-io/nuid\tv1.0.1\th1:5iA8DT8V7q8WK2EScv2padNa/rTESc1KdnPw4TC2paw=\n\tdep\tgolang.org/x/crypto\tv0.57.0\th1:3ZVCjf8Ggz7zneR/EHRVx68Ctf+2pmIMP2UFhh9cC6M=\n\tdep\tgolang.org/x/sys\tv0.48.0\th1:bbX/i/6MgT9BVLM9RT1thmxL04yeTAhbEz4SyadbXoo=\n\tdep\tgolang.org/x/time\tv0.16.0\th1:vMb6ptszcQMkcwiRTAuNNU50gom6++Q/6gY2hDM6VDE=\n\tbuild\t-buildmode=exe\n\tbuild\t-compiler=gc\n\tbuild\tCGO_ENABLED=1\n\tbuild\tCGO_CFLAGS=\n\tbuild\tCGO_CPPFLAGS=\n\tbuild\tCGO_CXXFLAGS=\n\tbuild\tCGO_LDFLAGS=\n\tbuild\tGOARCH=amd64\n\tbuild\tGOOS=linux\n\tbuild\tGOAMD64=v1\n"
+    },
+    {
+      "pid": 4147908,
+      "birth": "18390866",
+      "exe": "/tmp/js-wf-leaf-all-sigkill-20261007/stores/leaf-scenario/hub-processes/nats-server",
+      "exe_sha256": "24759ea94c030a9c5f1cd7fc61c74e14615a3c35650b5bb28b29891b5899ba9d",
+      "stat": "4147908 (nats-server) S 4147770 4143004 4143004 0 -1 4194304 1250 0 0 0 0 1 0 0 39 19 8 0 18390866 1837207552 4812 18446744073709551615 4194304 12824208 140724677029760 0 0 0 1002057728 0 2143420159 0 0 0 17 3 0 0 0 0 0 21082112 21497536 373383168 140724677036857 140724677037260 140724677037260 140724677037988 0\n",
+      "args": [
+        "/tmp/js-wf-leaf-all-sigkill-20261007/stores/leaf-scenario/hub-processes/nats-server",
+        "-a",
+        "127.0.0.1",
+        "-p",
+        "44377",
+        "-m",
+        "46095",
+        "-n",
+        "wf-process-2",
+        "-js",
+        "-sd",
+        "/tmp/js-wf-leaf-all-sigkill-20261007/stores/leaf-scenario/hub-processes/node-2",
+        "-c",
+        "/tmp/js-wf-leaf-all-sigkill-20261007/stores/leaf-scenario/hub-processes/node-2-domain.conf",
+        "--cluster",
+        "nats://127.0.0.1:34425",
+        "--cluster_name",
+        "wf-process",
+        "--routes",
+        "nats://127.0.0.1:37445"
+      ],
+      "build_info": "/proc/4147908/exe: go1.27.1\n\tpath\tgithub.com/nats-io/nats-server/v2\n\tmod\tgithub.com/nats-io/nats-server/v2\tv2.15.0\th1:M99yf0y05rTr46/qc/Is6ZAowI58Ryp2SjufLCUeVJc=\n\tdep\tgithub.com/antithesishq/antithesis-sdk-go\tv0.8.0-default-no-op\th1:1BOWQJweNyvZMlpAHXGLiZQn9S+QXGcz3xh94lC0w6E=\n\tdep\tgithub.com/klauspost/compress\tv1.20.0\th1:a3C1ke2ohxFymNlb2HWAHjDeKCI90scRskErZkR0ezA=\n\tdep\tgithub.com/minio/highwayhash\tv1.0.4\th1:asJizugGgchQod2ja9NJlGOWq4s7KsAWr5XUc9Clgl4=\n\tdep\tgithub.com/nats-io/jwt/v2\tv2.8.2\th1:XXRgB60MSTnqsRwejQurVDs/hcv2dkt+86GjI+I/bMc=\n\tdep\tgithub.com/nats-io/nkeys\tv0.4.16\th1:rd5oAuLOb8mnAycB0xleuEBNS1pVVnN0fv/FF34Eypg=\n\tdep\tgithub.com/nats-io/nuid\tv1.0.1\th1:5iA8DT8V7q8WK2EScv2padNa/rTESc1KdnPw4TC2paw=\n\tdep\tgolang.org/x/crypto\tv0.57.0\th1:3ZVCjf8Ggz7zneR/EHRVx68Ctf+2pmIMP2UFhh9cC6M=\n\tdep\tgolang.org/x/sys\tv0.48.0\th1:bbX/i/6MgT9BVLM9RT1thmxL04yeTAhbEz4SyadbXoo=\n\tdep\tgolang.org/x/time\tv0.16.0\th1:vMb6ptszcQMkcwiRTAuNNU50gom6++Q/6gY2hDM6VDE=\n\tbuild\t-buildmode=exe\n\tbuild\t-compiler=gc\n\tbuild\tCGO_ENABLED=1\n\tbuild\tCGO_CFLAGS=\n\tbuild\tCGO_CPPFLAGS=\n\tbuild\tCGO_CXXFLAGS=\n\tbuild\tCGO_LDFLAGS=\n\tbuild\tGOARCH=amd64\n\tbuild\tGOOS=linux\n\tbuild\tGOAMD64=v1\n"
+    },
+    {
+      "pid": 4148085,
+      "birth": "18391013",
+      "exe": "/tmp/js-wf-leaf-all-sigkill-20261007/stores/leaf-scenario/leaf-process/nats-server",
+      "exe_sha256": "24759ea94c030a9c5f1cd7fc61c74e14615a3c35650b5bb28b29891b5899ba9d",
+      "stat": "4148085 (nats-server) S 4147770 4143004 4143004 0 -1 4194304 1275 0 0 0 1 0 0 0 39 19 8 0 18391013 1904726016 4395 18446744073709551615 4194304 12824208 140725321323472 0 0 0 1002057728 0 2143420159 0 0 0 17 2 0 0 0 0 0 21082112 21497536 647483392 140725321325464 140725321325773 140725321325773 140725321326501 0\n",
+      "args": [
+        "/tmp/js-wf-leaf-all-sigkill-20261007/stores/leaf-scenario/leaf-process/nats-server",
+        "-a",
+        "127.0.0.1",
+        "-p",
+        "32815",
+        "-m",
+        "33463",
+        "-n",
+        "wf-process-0",
+        "-js",
+        "-sd",
+        "/tmp/js-wf-leaf-all-sigkill-20261007/stores/leaf-scenario/leaf-process/node-0",
+        "-c",
+        "/tmp/js-wf-leaf-all-sigkill-20261007/stores/leaf-scenario/leaf-process/node-0-domain.conf"
+      ],
+      "build_info": "/proc/4148085/exe: go1.27.1\n\tpath\tgithub.com/nats-io/nats-server/v2\n\tmod\tgithub.com/nats-io/nats-server/v2\tv2.15.0\th1:M99yf0y05rTr46/qc/Is6ZAowI58Ryp2SjufLCUeVJc=\n\tdep\tgithub.com/antithesishq/antithesis-sdk-go\tv0.8.0-default-no-op\th1:1BOWQJweNyvZMlpAHXGLiZQn9S+QXGcz3xh94lC0w6E=\n\tdep\tgithub.com/klauspost/compress\tv1.20.0\th1:a3C1ke2ohxFymNlb2HWAHjDeKCI90scRskErZkR0ezA=\n\tdep\tgithub.com/minio/highwayhash\tv1.0.4\th1:asJizugGgchQod2ja9NJlGOWq4s7KsAWr5XUc9Clgl4=\n\tdep\tgithub.com/nats-io/jwt/v2\tv2.8.2\th1:XXRgB60MSTnqsRwejQurVDs/hcv2dkt+86GjI+I/bMc=\n\tdep\tgithub.com/nats-io/nkeys\tv0.4.16\th1:rd5oAuLOb8mnAycB0xleuEBNS1pVVnN0fv/FF34Eypg=\n\tdep\tgithub.com/nats-io/nuid\tv1.0.1\th1:5iA8DT8V7q8WK2EScv2padNa/rTESc1KdnPw4TC2paw=\n\tdep\tgolang.org/x/crypto\tv0.57.0\th1:3ZVCjf8Ggz7zneR/EHRVx68Ctf+2pmIMP2UFhh9cC6M=\n\tdep\tgolang.org/x/sys\tv0.48.0\th1:bbX/i/6MgT9BVLM9RT1thmxL04yeTAhbEz4SyadbXoo=\n\tdep\tgolang.org/x/time\tv0.16.0\th1:vMb6ptszcQMkcwiRTAuNNU50gom6++Q/6gY2hDM6VDE=\n\tbuild\t-buildmode=exe\n\tbuild\t-compiler=gc\n\tbuild\tCGO_ENABLED=1\n\tbuild\tCGO_CFLAGS=\n\tbuild\tCGO_CPPFLAGS=\n\tbuild\tCGO_CXXFLAGS=\n\tbuild\tCGO_LDFLAGS=\n\tbuild\tGOARCH=amd64\n\tbuild\tGOOS=linux\n\tbuild\tGOAMD64=v1\n"
+    },
+    {
+      "pid": 4150728,
+      "birth": "18393904",
+      "exe": "/tmp/js-wf-leaf-all-sigkill-20261007/stores/leaf-scenario/hub-processes/nats-server",
+      "exe_sha256": "24759ea94c030a9c5f1cd7fc61c74e14615a3c35650b5bb28b29891b5899ba9d",
+      "stat": "4150728 (nats-server) S 4147770 4143004 4143004 0 -1 4194304 2428 0 0 0 1 0 0 0 39 19 8 0 18393904 1838067712 5907 18446744073709551615 4194304 12824208 140728733710528 0 0 0 1002057728 0 2143420159 0 0 0 17 0 0 0 0 0 0 21082112 21497536 673492992 140728733719353 140728733719756 140728733719756 140728733720484 0\n",
+      "args": [
+        "/tmp/js-wf-leaf-all-sigkill-20261007/stores/leaf-scenario/hub-processes/nats-server",
+        "-a",
+        "127.0.0.1",
+        "-p",
+        "40851",
+        "-m",
+        "46333",
+        "-n",
+        "wf-process-0",
+        "-js",
+        "-sd",
+        "/tmp/js-wf-leaf-all-sigkill-20261007/stores/leaf-scenario/hub-processes/node-0",
+        "-c",
+        "/tmp/js-wf-leaf-all-sigkill-20261007/stores/leaf-scenario/hub-processes/node-0-domain.conf",
+        "--cluster",
+        "nats://127.0.0.1:37445",
+        "--cluster_name",
+        "wf-process",
+        "--routes",
+        "nats://127.0.0.1:34219"
+      ],
+      "build_info": "/proc/4150728/exe: go1.27.1\n\tpath\tgithub.com/nats-io/nats-server/v2\n\tmod\tgithub.com/nats-io/nats-server/v2\tv2.15.0\th1:M99yf0y05rTr46/qc/Is6ZAowI58Ryp2SjufLCUeVJc=\n\tdep\tgithub.com/antithesishq/antithesis-sdk-go\tv0.8.0-default-no-op\th1:1BOWQJweNyvZMlpAHXGLiZQn9S+QXGcz3xh94lC0w6E=\n\tdep\tgithub.com/klauspost/compress\tv1.20.0\th1:a3C1ke2ohxFymNlb2HWAHjDeKCI90scRskErZkR0ezA=\n\tdep\tgithub.com/minio/highwayhash\tv1.0.4\th1:asJizugGgchQod2ja9NJlGOWq4s7KsAWr5XUc9Clgl4=\n\tdep\tgithub.com/nats-io/jwt/v2\tv2.8.2\th1:XXRgB60MSTnqsRwejQurVDs/hcv2dkt+86GjI+I/bMc=\n\tdep\tgithub.com/nats-io/nkeys\tv0.4.16\th1:rd5oAuLOb8mnAycB0xleuEBNS1pVVnN0fv/FF34Eypg=\n\tdep\tgithub.com/nats-io/nuid\tv1.0.1\th1:5iA8DT8V7q8WK2EScv2padNa/rTESc1KdnPw4TC2paw=\n\tdep\tgolang.org/x/crypto\tv0.57.0\th1:3ZVCjf8Ggz7zneR/EHRVx68Ctf+2pmIMP2UFhh9cC6M=\n\tdep\tgolang.org/x/sys\tv0.48.0\th1:bbX/i/6MgT9BVLM9RT1thmxL04yeTAhbEz4SyadbXoo=\n\tdep\tgolang.org/x/time\tv0.16.0\th1:vMb6ptszcQMkcwiRTAuNNU50gom6++Q/6gY2hDM6VDE=\n\tbuild\t-buildmode=exe\n\tbuild\t-compiler=gc\n\tbuild\tCGO_ENABLED=1\n\tbuild\tCGO_CFLAGS=\n\tbuild\tCGO_CPPFLAGS=\n\tbuild\tCGO_CXXFLAGS=\n\tbuild\tCGO_LDFLAGS=\n\tbuild\tGOARCH=amd64\n\tbuild\tGOOS=linux\n\tbuild\tGOAMD64=v1\n"
+    },
+    {
+      "pid": 4150738,
+      "birth": "18393909",
+      "exe": "/tmp/js-wf-leaf-all-sigkill-20261007/stores/leaf-scenario/hub-processes/nats-server",
+      "exe_sha256": "24759ea94c030a9c5f1cd7fc61c74e14615a3c35650b5bb28b29891b5899ba9d",
+      "stat": "4150738 (nats-server) S 4147770 4143004 4143004 0 -1 4194304 2525 0 0 0 1 0 0 0 39 19 8 0 18393909 1905250304 5937 18446744073709551615 4194304 12824208 140728574421952 0 0 0 1002057728 0 2143420159 0 0 0 17 0 0 0 0 0 0 21082112 21497536 212951040 140728574425913 140728574426316 140728574426316 140728574427044 0\n",
+      "args": [
+        "/tmp/js-wf-leaf-all-sigkill-20261007/stores/leaf-scenario/hub-processes/nats-server",
+        "-a",
+        "127.0.0.1",
+        "-p",
+        "45699",
+        "-m",
+        "46739",
+        "-n",
+        "wf-process-1",
+        "-js",
+        "-sd",
+        "/tmp/js-wf-leaf-all-sigkill-20261007/stores/leaf-scenario/hub-processes/node-1",
+        "-c",
+        "/tmp/js-wf-leaf-all-sigkill-20261007/stores/leaf-scenario/hub-processes/node-1-domain.conf",
+        "--cluster",
+        "nats://127.0.0.1:34219",
+        "--cluster_name",
+        "wf-process",
+        "--routes",
+        "nats://127.0.0.1:37445"
+      ],
+      "build_info": "/proc/4150738/exe: go1.27.1\n\tpath\tgithub.com/nats-io/nats-server/v2\n\tmod\tgithub.com/nats-io/nats-server/v2\tv2.15.0\th1:M99yf0y05rTr46/qc/Is6ZAowI58Ryp2SjufLCUeVJc=\n\tdep\tgithub.com/antithesishq/antithesis-sdk-go\tv0.8.0-default-no-op\th1:1BOWQJweNyvZMlpAHXGLiZQn9S+QXGcz3xh94lC0w6E=\n\tdep\tgithub.com/klauspost/compress\tv1.20.0\th1:a3C1ke2ohxFymNlb2HWAHjDeKCI90scRskErZkR0ezA=\n\tdep\tgithub.com/minio/highwayhash\tv1.0.4\th1:asJizugGgchQod2ja9NJlGOWq4s7KsAWr5XUc9Clgl4=\n\tdep\tgithub.com/nats-io/jwt/v2\tv2.8.2\th1:XXRgB60MSTnqsRwejQurVDs/hcv2dkt+86GjI+I/bMc=\n\tdep\tgithub.com/nats-io/nkeys\tv0.4.16\th1:rd5oAuLOb8mnAycB0xleuEBNS1pVVnN0fv/FF34Eypg=\n\tdep\tgithub.com/nats-io/nuid\tv1.0.1\th1:5iA8DT8V7q8WK2EScv2padNa/rTESc1KdnPw4TC2paw=\n\tdep\tgolang.org/x/crypto\tv0.57.0\th1:3ZVCjf8Ggz7zneR/EHRVx68Ctf+2pmIMP2UFhh9cC6M=\n\tdep\tgolang.org/x/sys\tv0.48.0\th1:bbX/i/6MgT9BVLM9RT1thmxL04yeTAhbEz4SyadbXoo=\n\tdep\tgolang.org/x/time\tv0.16.0\th1:vMb6ptszcQMkcwiRTAuNNU50gom6++Q/6gY2hDM6VDE=\n\tbuild\t-buildmode=exe\n\tbuild\t-compiler=gc\n\tbuild\tCGO_ENABLED=1\n\tbuild\tCGO_CFLAGS=\n\tbuild\tCGO_CPPFLAGS=\n\tbuild\tCGO_CXXFLAGS=\n\tbuild\tCGO_LDFLAGS=\n\tbuild\tGOARCH=amd64\n\tbuild\tGOOS=linux\n\tbuild\tGOAMD64=v1\n"
+    },
+    {
+      "pid": 4150748,
+      "birth": "18393914",
+      "exe": "/tmp/js-wf-leaf-all-sigkill-20261007/stores/leaf-scenario/hub-processes/nats-server",
+      "exe_sha256": "24759ea94c030a9c5f1cd7fc61c74e14615a3c35650b5bb28b29891b5899ba9d",
+      "stat": "4150748 (nats-server) S 4147770 4143004 4143004 0 -1 4194304 2554 0 0 0 1 1 0 0 39 19 8 0 18393914 1838067712 5967 18446744073709551615 4194304 12824208 140722096326400 0 0 0 1002057728 0 2143420159 0 0 0 17 0 0 0 0 0 0 21082112 21497536 893050880 140722096327481 140722096327884 140722096327884 140722096328612 0\n",
+      "args": [
+        "/tmp/js-wf-leaf-all-sigkill-20261007/stores/leaf-scenario/hub-processes/nats-server",
+        "-a",
+        "127.0.0.1",
+        "-p",
+        "44377",
+        "-m",
+        "46095",
+        "-n",
+        "wf-process-2",
+        "-js",
+        "-sd",
+        "/tmp/js-wf-leaf-all-sigkill-20261007/stores/leaf-scenario/hub-processes/node-2",
+        "-c",
+        "/tmp/js-wf-leaf-all-sigkill-20261007/stores/leaf-scenario/hub-processes/node-2-domain.conf",
+        "--cluster",
+        "nats://127.0.0.1:34425",
+        "--cluster_name",
+        "wf-process",
+        "--routes",
+        "nats://127.0.0.1:37445"
+      ],
+      "build_info": "/proc/4150748/exe: go1.27.1\n\tpath\tgithub.com/nats-io/nats-server/v2\n\tmod\tgithub.com/nats-io/nats-server/v2\tv2.15.0\th1:M99yf0y05rTr46/qc/Is6ZAowI58Ryp2SjufLCUeVJc=\n\tdep\tgithub.com/antithesishq/antithesis-sdk-go\tv0.8.0-default-no-op\th1:1BOWQJweNyvZMlpAHXGLiZQn9S+QXGcz3xh94lC0w6E=\n\tdep\tgithub.com/klauspost/compress\tv1.20.0\th1:a3C1ke2ohxFymNlb2HWAHjDeKCI90scRskErZkR0ezA=\n\tdep\tgithub.com/minio/highwayhash\tv1.0.4\th1:asJizugGgchQod2ja9NJlGOWq4s7KsAWr5XUc9Clgl4=\n\tdep\tgithub.com/nats-io/jwt/v2\tv2.8.2\th1:XXRgB60MSTnqsRwejQurVDs/hcv2dkt+86GjI+I/bMc=\n\tdep\tgithub.com/nats-io/nkeys\tv0.4.16\th1:rd5oAuLOb8mnAycB0xleuEBNS1pVVnN0fv/FF34Eypg=\n\tdep\tgithub.com/nats-io/nuid\tv1.0.1\th1:5iA8DT8V7q8WK2EScv2padNa/rTESc1KdnPw4TC2paw=\n\tdep\tgolang.org/x/crypto\tv0.57.0\th1:3ZVCjf8Ggz7zneR/EHRVx68Ctf+2pmIMP2UFhh9cC6M=\n\tdep\tgolang.org/x/sys\tv0.48.0\th1:bbX/i/6MgT9BVLM9RT1thmxL04yeTAhbEz4SyadbXoo=\n\tdep\tgolang.org/x/time\tv0.16.0\th1:vMb6ptszcQMkcwiRTAuNNU50gom6++Q/6gY2hDM6VDE=\n\tbuild\t-buildmode=exe\n\tbuild\t-compiler=gc\n\tbuild\tCGO_ENABLED=1\n\tbuild\tCGO_CFLAGS=\n\tbuild\tCGO_CPPFLAGS=\n\tbuild\tCGO_CXXFLAGS=\n\tbuild\tCGO_LDFLAGS=\n\tbuild\tGOARCH=amd64\n\tbuild\tGOOS=linux\n\tbuild\tGOAMD64=v1\n"
+    },
+    {
+      "pid": 4150764,
+      "birth": "18393919",
+      "exe": "/tmp/js-wf-leaf-all-sigkill-20261007/stores/leaf-scenario/leaf-process/nats-server",
+      "exe_sha256": "24759ea94c030a9c5f1cd7fc61c74e14615a3c35650b5bb28b29891b5899ba9d",
+      "stat": "4150764 (nats-server) S 4147770 4143004 4143004 0 -1 4194304 1312 0 0 0 0 0 0 0 39 19 7 0 18393919 1762041856 4484 18446744073709551615 4194304 12824208 140721067101184 0 0 0 1002057728 0 2143420159 0 0 0 17 1 0 0 0 0 0 21082112 21497536 842199040 140721067105176 140721067105485 140721067105485 140721067106213 0\n",
+      "args": [
+        "/tmp/js-wf-leaf-all-sigkill-20261007/stores/leaf-scenario/leaf-process/nats-server",
+        "-a",
+        "127.0.0.1",
+        "-p",
+        "32815",
+        "-m",
+        "33463",
+        "-n",
+        "wf-process-0",
+        "-js",
+        "-sd",
+        "/tmp/js-wf-leaf-all-sigkill-20261007/stores/leaf-scenario/leaf-process/node-0",
+        "-c",
+        "/tmp/js-wf-leaf-all-sigkill-20261007/stores/leaf-scenario/leaf-process/node-0-domain.conf"
+      ],
+      "build_info": "/proc/4150764/exe: go1.27.1\n\tpath\tgithub.com/nats-io/nats-server/v2\n\tmod\tgithub.com/nats-io/nats-server/v2\tv2.15.0\th1:M99yf0y05rTr46/qc/Is6ZAowI58Ryp2SjufLCUeVJc=\n\tdep\tgithub.com/antithesishq/antithesis-sdk-go\tv0.8.0-default-no-op\th1:1BOWQJweNyvZMlpAHXGLiZQn9S+QXGcz3xh94lC0w6E=\n\tdep\tgithub.com/klauspost/compress\tv1.20.0\th1:a3C1ke2ohxFymNlb2HWAHjDeKCI90scRskErZkR0ezA=\n\tdep\tgithub.com/minio/highwayhash\tv1.0.4\th1:asJizugGgchQod2ja9NJlGOWq4s7KsAWr5XUc9Clgl4=\n\tdep\tgithub.com/nats-io/jwt/v2\tv2.8.2\th1:XXRgB60MSTnqsRwejQurVDs/hcv2dkt+86GjI+I/bMc=\n\tdep\tgithub.com/nats-io/nkeys\tv0.4.16\th1:rd5oAuLOb8mnAycB0xleuEBNS1pVVnN0fv/FF34Eypg=\n\tdep\tgithub.com/nats-io/nuid\tv1.0.1\th1:5iA8DT8V7q8WK2EScv2padNa/rTESc1KdnPw4TC2paw=\n\tdep\tgolang.org/x/crypto\tv0.57.0\th1:3ZVCjf8Ggz7zneR/EHRVx68Ctf+2pmIMP2UFhh9cC6M=\n\tdep\tgolang.org/x/sys\tv0.48.0\th1:bbX/i/6MgT9BVLM9RT1thmxL04yeTAhbEz4SyadbXoo=\n\tdep\tgolang.org/x/time\tv0.16.0\th1:vMb6ptszcQMkcwiRTAuNNU50gom6++Q/6gY2hDM6VDE=\n\tbuild\t-buildmode=exe\n\tbuild\t-compiler=gc\n\tbuild\tCGO_ENABLED=1\n\tbuild\tCGO_CFLAGS=\n\tbuild\tCGO_CPPFLAGS=\n\tbuild\tCGO_CXXFLAGS=\n\tbuild\tCGO_LDFLAGS=\n\tbuild\tGOARCH=amd64\n\tbuild\tGOOS=linux\n\tbuild\tGOAMD64=v1\n"
+    }
+  ],
+  "same_original_replacement_executable_argv_config_ports_and_store": true,
+  "hub_metadata_admission": {
+    "all_hubs_current": true,
+    "leader": "wf-process-1",
+    "observed_at": "2026-10-07T10:49:48.633989216Z",
+    "peers": [
+      "wf-process-0",
+      "wf-process-1",
+      "wf-process-2"
+    ],
+    "process_metadata": [
+      {
+        "memory": 0,
+        "storage": 0,
+        "reserved_memory": 0,
+        "reserved_storage": 0,
+        "accounts": 1,
+        "ha_assets": 1,
+        "api": {
+          "level": 5,
+          "total": 0,
+          "errors": 0
+        },
+        "server_id": "NANTF6JUS6ZBJUGNYN42PHIKNF3BLFXBO3ALAZ6RCFD2E5BJJ73HJDBE",
+        "now": "2026-10-07T10:49:48.630394552Z",
+        "config": {
+          "max_memory": 805306368,
+          "max_storage": 61911475200,
+          "store_dir": "/tmp/js-wf-leaf-all-sigkill-20261007/stores/leaf-scenario/hub-processes/node-0/jetstream",
+          "sync_interval": 120000000000,
+          "domain": "WFRETIRE",
+          "strict": true
+        },
+        "limits": {
+          "default_max_consumers": 1000
+        },
+        "streams": 0,
+        "consumers": 0,
+        "messages": 0,
+        "bytes": 0,
+        "meta_cluster": {
+          "name": "wf-process",
+          "leader": "wf-process-1",
+          "peer": "St9I6EVH",
+          "replicas": [
+            {
+              "name": "wf-process-1",
+              "current": true,
+              "active": 1105714039,
+              "peer": "St9I6EVH"
+            },
+            {
+              "name": "wf-process-2",
+              "current": false,
+              "active": 0,
+              "peer": "0WED9nmv"
+            }
+          ],
+          "cluster_size": 3,
+          "quorum_needed": 2,
+          "pending": 0,
+          "pending_requests": 0,
+          "pending_infos": 0,
+          "snapshot": {
+            "pending_entries": 1,
+            "pending_size": 86,
+            "last_time": "0001-01-01T00:00:00Z"
+          }
+        },
+        "account_details": [
+          {
+            "name": "$G",
+            "id": "$G",
+            "memory": 0,
+            "storage": 0,
+            "reserved_memory": 18446744073709551615,
+            "reserved_storage": 18446744073709551615,
+            "accounts": 0,
+            "ha_assets": 0,
+            "api": {
+              "level": 0,
+              "total": 0,
+              "errors": 0
+            }
+          }
+        ],
+        "total": 1
+      },
+      {
+        "memory": 0,
+        "storage": 0,
+        "reserved_memory": 0,
+        "reserved_storage": 0,
+        "accounts": 1,
+        "ha_assets": 1,
+        "api": {
+          "level": 5,
+          "total": 0,
+          "errors": 0
+        },
+        "server_id": "NBSPRTEVGVTYET3Z3YGRSXT6GU4EK43BMZZRRT57UDAV4EOUDJ6OETWH",
+        "now": "2026-10-07T10:49:48.632524033Z",
+        "config": {
+          "max_memory": 805306368,
+          "max_storage": 61911536640,
+          "store_dir": "/tmp/js-wf-leaf-all-sigkill-20261007/stores/leaf-scenario/hub-processes/node-1/jetstream",
+          "sync_interval": 120000000000,
+          "domain": "WFRETIRE",
+          "strict": true
+        },
+        "limits": {
+          "default_max_consumers": 1000
+        },
+        "streams": 0,
+        "consumers": 0,
+        "messages": 0,
+        "bytes": 0,
+        "meta_cluster": {
+          "name": "wf-process",
+          "leader": "wf-process-1",
+          "peer": "St9I6EVH",
+          "replicas": [
+            {
+              "name": "wf-process-0",
+              "current": true,
+              "active": 1103163158,
+              "peer": "0m6vARoZ"
+            },
+            {
+              "name": "wf-process-2",
+              "current": true,
+              "active": 1104087050,
+              "peer": "0WED9nmv"
+            }
+          ],
+          "cluster_size": 3,
+          "quorum_needed": 2,
+          "pending": 0,
+          "pending_requests": 0,
+          "pending_infos": 0,
+          "snapshot": {
+            "pending_entries": 0,
+            "pending_size": 0,
+            "last_time": "0001-01-01T00:00:00Z"
+          }
+        },
+        "account_details": [
+          {
+            "name": "$G",
+            "id": "$G",
+            "memory": 0,
+            "storage": 0,
+            "reserved_memory": 18446744073709551615,
+            "reserved_storage": 18446744073709551615,
+            "accounts": 0,
+            "ha_assets": 0,
+            "api": {
+              "level": 0,
+              "total": 0,
+              "errors": 0
+            }
+          }
+        ],
+        "total": 1
+      },
+      {
+        "memory": 0,
+        "storage": 0,
+        "reserved_memory": 0,
+        "reserved_storage": 0,
+        "accounts": 1,
+        "ha_assets": 1,
+        "api": {
+          "level": 5,
+          "total": 0,
+          "errors": 0
+        },
+        "server_id": "NDOBI3KICU7PGTERLVZUGROWOJMYTIIBBEJU7ZOESFRC2KU3L2BYTK6T",
+        "now": "2026-10-07T10:49:48.633484841Z",
+        "config": {
+          "max_memory": 805306368,
+          "max_storage": 61911484416,
+          "store_dir": "/tmp/js-wf-leaf-all-sigkill-20261007/stores/leaf-scenario/hub-processes/node-2/jetstream",
+          "sync_interval": 120000000000,
+          "domain": "WFRETIRE",
+          "strict": true
+        },
+        "limits": {
+          "default_max_consumers": 1000
+        },
+        "streams": 0,
+        "consumers": 0,
+        "messages": 0,
+        "bytes": 0,
+        "meta_cluster": {
+          "name": "wf-process",
+          "leader": "wf-process-1",
+          "peer": "St9I6EVH",
+          "replicas": [
+            {
+              "name": "wf-process-0",
+              "current": false,
+              "active": 0,
+              "peer": "0m6vARoZ"
+            },
+            {
+              "name": "wf-process-1",
+              "current": true,
+              "active": 1109299770,
+              "peer": "St9I6EVH"
+            }
+          ],
+          "cluster_size": 3,
+          "quorum_needed": 2,
+          "pending": 0,
+          "pending_requests": 0,
+          "pending_infos": 0,
+          "snapshot": {
+            "pending_entries": 0,
+            "pending_size": 0,
+            "last_time": "0001-01-01T00:00:00Z"
+          }
+        },
+        "account_details": [
+          {
+            "name": "$G",
+            "id": "$G",
+            "memory": 0,
+            "storage": 0,
+            "reserved_memory": 18446744073709551615,
+            "reserved_storage": 18446744073709551615,
+            "accounts": 0,
+            "ha_assets": 0,
+            "api": {
+              "level": 0,
+              "total": 0,
+              "errors": 0
+            }
+          }
+        ],
+        "total": 1
+      }
+    ]
+  },
+  "rejected_actual_proof_mutations": 50
+}

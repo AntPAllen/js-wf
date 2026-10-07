@@ -81,4 +81,27 @@ class LeafDomainProofControls(unittest.TestCase):
         shorter=json.loads((root.parents[1]/'leaf-domain-expiry-2026-10-07/native-race/leaf-domain-proof.json').read_text())
         with self.assertRaises(AssertionError):validate(shorter,profile,log)
 
+    def test_all_hub_process_exits_and_pid_order_are_required(self):
+        root=Path(__file__).resolve().parents[1]/'docs/scale/leaf-all-hub-sigkill-2026-10-07/native-race'
+        baseline=json.loads((root/'leaf-domain-proof.json').read_text());log=(root/'native.log').read_text()
+        profile='leaf-and-all-hub-sigkill-lease-expiry-weak-frame'
+        validate(baseline,profile,log)
+        variants=[lambda p:p.update(hub_pids_before=p['hub_pids_before'][:2]),
+                  lambda p:p.update(hub_pids_after=p['hub_pids_before']),
+                  lambda p:p.update(hub_pids_before=[p['leaf_pid_before'],*p['hub_pids_before'][1:]]),
+                  lambda p:p.update(hub_pids_after=[0,*p['hub_pids_after'][1:]]),
+                  lambda p:p.update(hub_signals=['terminated']*3),
+                  lambda p:p.update(hub_exit_observed=[True,False,True]),
+                  lambda p:p.update(hub_pids_before=list(reversed(p['hub_pids_before']))),
+                  lambda p:p.update(fault_profile='leaf-sigkill-lease-expiry-weak-frame-hub-restart')]
+        for i,change in enumerate(variants):
+            bad=copy.deepcopy(baseline);change(bad)
+            with self.subTest(mutation=i),self.assertRaises((AssertionError,ValueError,KeyError)):
+                validate(bad,profile,log)
+        confirmation=next(line for line in log.splitlines() if 'hub SIGKILL confirmed:' in line)
+        for bad_log in (None,log.replace(confirmation,''),log+'\n'+confirmation):
+            with self.assertRaises(AssertionError):validate(baseline,profile,bad_log)
+        shorter=json.loads((root.parents[1]/'leaf-domain-weak-frame-2026-10-07/native-race/leaf-domain-proof.json').read_text())
+        with self.assertRaises(AssertionError):validate(shorter,profile,log)
+
 if __name__=='__main__':unittest.main()

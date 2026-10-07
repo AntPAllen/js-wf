@@ -10,6 +10,16 @@ spec.loader.exec_module(controls)
 
 
 class DomainCoverageControls(unittest.TestCase):
+    def test_actual_all_hub_row_rejects_missing_native_fault_confirmations(self):
+        log=(REPO/'docs/scale/leaf-all-hub-sigkill-2026-10-07/native-race/native.log').read_text()
+        controls.verify_log('leaf-retirement-all-sigkill-expiry-weak',log)
+        for token in ('hub SIGKILL confirmed:','leaf SIGKILL confirmed:','leaf lease outage:',
+                      'leaf lease successor:','leaf weak frame confirmed:'):
+            line=next(line for line in log.splitlines() if token in line)
+            for malformed in (log.replace(line,''),log+'\n'+line):
+                with self.subTest(token=token),self.assertRaises(ValueError):
+                    controls.verify_log('leaf-retirement-all-sigkill-expiry-weak',malformed)
+
     def test_graceful_hub_weak_row_cannot_qualify_all_hub_sigkill(self):
         log=(REPO/'docs/scale/leaf-domain-weak-frame-2026-10-07/native-race/native.log').read_text()
         promoted=log.replace(controls.LEAF_WEAK,controls.ALL_HUB_KILL)
