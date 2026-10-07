@@ -1,7 +1,8 @@
 """Validate the recorded remote-domain leaf retirement scenario, not full release."""
 from datetime import datetime
+import re
 
-def validate(proof, expected_profile="hub-restart"):
+def validate(proof, expected_profile="hub-restart", native_log=None):
     assert expected_profile in ('hub-restart','leaf-sigkill-hub-restart','leaf-sigkill-lease-expiry-hub-restart','leaf-sigkill-lease-expiry-weak-frame-hub-restart')
     assert proof.get('fault_profile','hub-restart') == expected_profile
     process_leaf=expected_profile!='hub-restart'
@@ -46,6 +47,10 @@ def validate(proof, expected_profile="hub-restart"):
         assert proof['weak_object'].startswith('step-result-') and len(proof['weak_object'])==76
         assert proof['weak_generation']==proof['fresh_generation'] and proof['fresh_generation']>1 and proof['weak_drops']==proof['weak_leaders']==1 and proof['weak_reads']>=2 and proof['weak_direct']==0
         assert proof['weak_route']=='$JS.WFRETIRE.API.STREAM.MSG.GET.OBJ_WF_BLOB'
+        assert isinstance(native_log,str)
+        confirmations=re.findall(r'leaf weak frame confirmed: object=(step-result-[a-f0-9]{64}) generation=(\d+) drops=1 reads=(\d+) leader=1 direct=0',native_log)
+        assert len(confirmations)==1
+        assert confirmations[0]==(proof['weak_object'],str(proof['weak_generation']),str(proof['weak_reads']))
     api={name:count for name,count in proof['subjects'].items() if '.API.' in name}
     assert api and all(name.startswith('$JS.WFRETIRE.API.') and type(count) is int and count>0 for name,count in api.items())
     assert any('.DIRECT.GET.OBJ_WF_BLOB.' in name for name in api)

@@ -241,7 +241,7 @@ def main():
         require(code == 0, 'native test failed')
         qualification = verify_log(args.case, (root/'native.log').read_text())
         if args.case in LEAF_CASES:
-            qualification['leaf_proof'] = leaf_domain_proof.validate(json.loads((root/'stores'/'leaf-scenario'/'leaf-domain-proof.json').read_text()),LEAF_CASES[args.case])
+            qualification['leaf_proof'] = leaf_domain_proof.validate(json.loads((root/'stores'/'leaf-scenario'/'leaf-domain-proof.json').read_text()),LEAF_CASES[args.case],(root/'native.log').read_text())
             if args.case in ('leaf-retirement-sigkill-hub-restart','leaf-retirement-sigkill-lease-expiry','leaf-retirement-sigkill-lease-expiry-weak'):
                 require(len(servers)==2,'both original and replacement leaf process identities missing')
         elif args.case != 'read-controls':
