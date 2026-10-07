@@ -2,7 +2,7 @@
 from datetime import datetime
 
 def validate(proof, expected_profile="hub-restart"):
-    assert expected_profile in ('hub-restart','leaf-sigkill-hub-restart','leaf-sigkill-lease-expiry-hub-restart')
+    assert expected_profile in ('hub-restart','leaf-sigkill-hub-restart','leaf-sigkill-lease-expiry-hub-restart','leaf-sigkill-lease-expiry-weak-frame-hub-restart')
     assert proof.get('fault_profile','hub-restart') == expected_profile
     process_leaf=expected_profile!='hub-restart'
     assert proof['scenario_passed'] is True
@@ -32,7 +32,7 @@ def validate(proof, expected_profile="hub-restart"):
     start=datetime.fromisoformat(proof['cut_start'].replace('Z','+00:00'))
     end=datetime.fromisoformat(proof['cut_end'].replace('Z','+00:00'))
     assert 0<(end-start).total_seconds()<30
-    expiry=expected_profile=='leaf-sigkill-lease-expiry-hub-restart'
+    expiry='lease-expiry' in expected_profile
     if expiry:
         assert proof['lease_ttl_seconds']==12 and proof['lease_revision']>0
         assert type(proof['prior_epoch']) is int and proof['prior_epoch']>0
@@ -41,11 +41,16 @@ def validate(proof, expected_profile="hub-restart"):
         outage_start=datetime.fromisoformat(proof['outage_start'].replace('Z','+00:00'))
         outage_end=datetime.fromisoformat(proof['outage_end'].replace('Z','+00:00'))
         assert start<=outage_start<outage_end<=end and (outage_end-outage_start).total_seconds()>12
+    weak='weak-frame' in expected_profile
+    if weak:
+        assert proof['weak_object'].startswith('step-result-') and len(proof['weak_object'])==76
+        assert proof['weak_generation']==proof['fresh_generation'] and proof['fresh_generation']>1 and proof['weak_drops']==proof['weak_leaders']==1 and proof['weak_reads']>=2 and proof['weak_direct']==0
+        assert proof['weak_route']=='$JS.WFRETIRE.API.STREAM.MSG.GET.OBJ_WF_BLOB'
     api={name:count for name,count in proof['subjects'].items() if '.API.' in name}
     assert api and all(name.startswith('$JS.WFRETIRE.API.') and type(count) is int and count>0 for name,count in api.items())
     assert any('.DIRECT.GET.OBJ_WF_BLOB.' in name for name in api)
     assert any('.CONSUMER.CREATE.OBJ_WF_BLOB.' in name for name in api)
     assert any('STREAM.MSG.GET.KV_WF_STATE' in name for name in api)
     return dict(remote_domain='WFRETIRE',local_domain='WFEDGE',hub_originals=3,hub_replacements=3,
-                fault_profile=expected_profile,lease_expiry=expiry,leaf_process_sigkill=process_leaf,leaf_disconnect_and_reconnect=True,whole_cut_seconds=(end-start).total_seconds(),
+                fault_profile=expected_profile,weak_frame=weak,lease_expiry=expiry,leaf_process_sigkill=process_leaf,leaf_disconnect_and_reconnect=True,whole_cut_seconds=(end-start).total_seconds(),
                 api_subjects=len(api),scope='Single leaf-connected strict retirement/reuse and graceful all-hub restart, plus actual leaf SIGKILL only when explicitly selected; lease expiry only when explicitly selected; no all-hub SIGKILL, daemon-child wire or broad leaf matrix claim.')

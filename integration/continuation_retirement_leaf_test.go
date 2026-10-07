@@ -2,11 +2,13 @@ package integration_test
 
 import (
 	"context"
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"os"
 	"path/filepath"
 	"sort"
+	"strings"
 	"sync"
 	"syscall"
 	"testing"
@@ -36,7 +38,15 @@ func TestContinuationRetirementReuseThroughLeafSIGKILLAndLeaseExpiryWithHubResta
 	runContinuationRetirementLeaf(t, true, true)
 }
 
-func runContinuationRetirementLeaf(t *testing.T, processLeaf, expireLease bool) {
+func TestContinuationRetirementReuseThroughLeafSIGKILLLeaseExpiryAndWeakFrameWithHubRestart(t *testing.T) {
+	runContinuationRetirementLeaf(t, true, true, true)
+}
+
+func runContinuationRetirementLeaf(t *testing.T, processLeaf, expireLease bool, forcedWeak ...bool) {
+	weakFrame := len(forcedWeak) == 1 && forcedWeak[0]
+	if len(forcedWeak) > 1 || (weakFrame && (!processLeaf || !expireLease)) {
+		t.Fatal("invalid combined weak-frame profile")
+	}
 	root := os.Getenv("WF_CONTINUATION_DOMAIN_ROOT")
 	if root == "" {
 		t.Skip("set WF_CONTINUATION_DOMAIN_ROOT to a fresh absolute directory")
@@ -191,6 +201,15 @@ func runContinuationRetirementLeaf(t *testing.T, processLeaf, expireLease bool) 
 		Domain string `json:"domain"`
 	}
 	type evidence struct {
+		FreshGeneration uint64 `json:"fresh_generation,omitempty"`
+		WeakObject      string `json:"weak_object,omitempty"`
+		WeakGeneration  uint64 `json:"weak_generation,omitempty"`
+		WeakDrops       int64  `json:"weak_drops,omitempty"`
+		WeakReads       int64  `json:"weak_reads,omitempty"`
+		WeakLeaders     int64  `json:"weak_leaders,omitempty"`
+		WeakDirect      int64  `json:"weak_direct"`
+		WeakRoute       string `json:"weak_route,omitempty"`
+
 		LeaseTTLSeconds float64   `json:"lease_ttl_seconds,omitempty"`
 		PriorEpoch      uint64    `json:"prior_epoch,omitempty"`
 		TerminalEpoch   uint64    `json:"terminal_epoch,omitempty"`
@@ -242,6 +261,9 @@ func runContinuationRetirementLeaf(t *testing.T, processLeaf, expireLease bool) 
 	}
 	if expireLease {
 		proof.FaultProfile = "leaf-sigkill-lease-expiry-hub-restart"
+	}
+	if weakFrame {
+		proof.FaultProfile = "leaf-sigkill-lease-expiry-weak-frame-hub-restart"
 	}
 	save := func() {
 		mu.Lock()
@@ -427,7 +449,78 @@ func runContinuationRetirementLeaf(t *testing.T, processLeaf, expireLease bool) 
 		t.Logf("leaf domain hub cut: disconnected=true reconnected=true hub_peers=3 leaf_id=%s elapsed=%s", leafID(), proof.CutEnd.Sub(proof.CutStart))
 		return nil
 	}
-	runContinuationRetirementOnCluster(t, all, true, onDrop)
+	var weak *retirementWeakFrameJS
+	var configure []func(*retirementManifestPort)
+	if weakFrame {
+		weak = &retirementWeakFrameJS{}
+		traced, e := jetstream.NewWithDomain(all[1].Conn(), hubDomain, jetstream.WithClientTrace(&jetstream.ClientTrace{RequestSent: func(subject string, data []byte) {
+			object, ok := weak.object.Load().(string)
+			if !ok {
+				return
+			}
+			var request struct {
+				LastBySubject string `json:"last_by_subj"`
+			}
+			if json.Unmarshal(data, &request) != nil || request.LastBySubject != "$O.WF_BLOB.M."+base64.URLEncoding.EncodeToString([]byte(object)) {
+				return
+			}
+			if subject == "$JS.WFRETIRE.API.STREAM.MSG.GET.OBJ_WF_BLOB" {
+				weak.leaders.Add(1)
+			}
+			if strings.HasPrefix(subject, "$JS.WFRETIRE.API.DIRECT.GET.OBJ_WF_BLOB") {
+				weak.direct.Add(1)
+			}
+		}}))
+		if e != nil {
+			t.Fatal(e)
+		}
+		weak.JetStream = traced
+		configure = append(configure, func(port *retirementManifestPort) {
+			port.SnapshotWritePort = journal.NewSnapshotPort(weak)
+			port.afterDrop = func(object string) { weak.object.Store(object); weak.armed.Store(true) }
+		})
+	}
+	runContinuationRetirementOnCluster(t, all, true, onDrop, configure...)
+	if weakFrame && !t.Failed() {
+		read, done := context.WithTimeout(context.Background(), 5*time.Second)
+		defer done()
+		state, e := all[0].KeyValue(read, "WF_STATE")
+		if e != nil {
+			t.Fatal(e)
+		}
+		entry, e := state.Get(read, "snap."+identity.Key("checkpoint-retire", "reused"))
+		if e != nil {
+			t.Fatal(e)
+		}
+		var snapshot journal.Snapshot
+		if e = json.Unmarshal(entry.Value(), &snapshot); e != nil {
+			t.Fatal(e)
+		}
+		object, _ := weak.object.Load().(string)
+		if snapshot.Runtime == nil || snapshot.Runtime.Object != object || weak.drops.Load() != 1 || weak.reads.Load() < 2 || weak.armed.Load() || weak.leaders.Load() != 1 || weak.direct.Load() != 0 {
+			t.Fatalf("leaf weak frame did not confirm exact object through leader: snapshot=%+v object=%s drops=%d reads=%d leaders=%d direct=%d", snapshot.Runtime, object, weak.drops.Load(), weak.reads.Load(), weak.leaders.Load(), weak.direct.Load())
+		}
+		invocation, e := all[0].Stream(read, "WF_INV")
+		if e != nil {
+			t.Fatal(e)
+		}
+		current, e := invocation.GetLastMsgForSubject(read, identity.InvocationSubject("checkpoint-retire", "reused"))
+		if e != nil {
+			t.Fatal(e)
+		}
+		if current.Sequence != snapshot.Runtime.InvSeq {
+			t.Fatal("weak frame belongs to wrong invocation generation")
+		}
+		proof.FreshGeneration = current.Sequence
+		proof.WeakObject = object
+		proof.WeakGeneration = snapshot.Runtime.InvSeq
+		proof.WeakDrops = weak.drops.Load()
+		proof.WeakReads = weak.reads.Load()
+		proof.WeakLeaders = weak.leaders.Load()
+		proof.WeakDirect = weak.direct.Load()
+		proof.WeakRoute = "$JS.WFRETIRE.API.STREAM.MSG.GET.OBJ_WF_BLOB"
+		t.Logf("leaf weak frame confirmed: object=%s generation=%d drops=1 reads=%d leader=1 direct=0", object, proof.WeakGeneration, proof.WeakReads)
+	}
 	if expireLease && !t.Failed() {
 		read, done := context.WithTimeout(context.Background(), 5*time.Second)
 		defer done()

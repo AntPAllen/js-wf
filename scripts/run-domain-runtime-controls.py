@@ -31,8 +31,9 @@ COMMITTED_WEAK_EXPIRY = 'TestContinuationRetirementReuseInJetStreamDomainWithCom
 LEAF = 'TestContinuationRetirementReuseThroughLeafWithHubRestart'
 LEAF_KILL = 'TestContinuationRetirementReuseThroughLeafSIGKILLWithHubRestart'
 LEAF_EXPIRY = 'TestContinuationRetirementReuseThroughLeafSIGKILLAndLeaseExpiryWithHubRestart'
-LEAF_CASES = {'leaf-retirement-sigkill-lease-expiry': 'leaf-sigkill-lease-expiry-hub-restart','leaf-retirement-hub-restart': 'hub-restart', 'leaf-retirement-sigkill-hub-restart': 'leaf-sigkill-hub-restart'}
-CASES = {'leaf-retirement-sigkill-lease-expiry': [LEAF_EXPIRY],'leaf-retirement-sigkill-hub-restart': [LEAF_KILL], 'leaf-retirement-hub-restart': [LEAF], 'read-controls': [RESULT, RESULT+'InJetStreamDomain', SNAPSHOT, SNAPSHOT+'InJetStreamDomain'],
+LEAF_WEAK = 'TestContinuationRetirementReuseThroughLeafSIGKILLLeaseExpiryAndWeakFrameWithHubRestart'
+LEAF_CASES = {'leaf-retirement-sigkill-lease-expiry-weak': 'leaf-sigkill-lease-expiry-weak-frame-hub-restart','leaf-retirement-sigkill-lease-expiry': 'leaf-sigkill-lease-expiry-hub-restart','leaf-retirement-hub-restart': 'hub-restart', 'leaf-retirement-sigkill-hub-restart': 'leaf-sigkill-hub-restart'}
+CASES = {'leaf-retirement-sigkill-lease-expiry-weak': [LEAF_WEAK],'leaf-retirement-sigkill-lease-expiry': [LEAF_EXPIRY],'leaf-retirement-sigkill-hub-restart': [LEAF_KILL], 'leaf-retirement-hub-restart': [LEAF], 'read-controls': [RESULT, RESULT+'InJetStreamDomain', SNAPSHOT, SNAPSHOT+'InJetStreamDomain'],
          'retirement-server-kill': [KILL, EXPIRY], 'retirement-weak-frame': [WEAK_FRAME],
          'retirement-weak-frame-expiry': [WEAK_EXPIRY], 'legacy-retirement-weak-frame-expiry': [LEGACY_WEAK_EXPIRY],
          'retirement-committed-weak-frame-expiry': [COMMITTED_WEAK_EXPIRY]}
@@ -75,10 +76,12 @@ def verify_log(case, log):
                 'actual leaf disconnect/reconnect missing')
         require(log.count('leaf domain strict scenario passed local=WFEDGE remote=WFRETIRE runtime_clients=3') == 1,
                 'strict leaf scenario missing')
-        if case in ('leaf-retirement-sigkill-hub-restart','leaf-retirement-sigkill-lease-expiry'):
+        if case in ('leaf-retirement-sigkill-hub-restart','leaf-retirement-sigkill-lease-expiry','leaf-retirement-sigkill-lease-expiry-weak'):
             require(len(re.findall(r'leaf SIGKILL confirmed: old_pid=\d+ new_pid=\d+ old_id=\w+ new_id=\w+ client_disconnects=3',log))==1,'actual leaf SIGKILL missing')
-        if case == 'leaf-retirement-sigkill-lease-expiry':
+        if case in ('leaf-retirement-sigkill-lease-expiry','leaf-retirement-sigkill-lease-expiry-weak'):
             require(log.count('leaf lease outage:')==1 and log.count('leaf lease successor:')==1,'lease outage/successor missing')
+        if case == 'leaf-retirement-sigkill-lease-expiry-weak':
+            require(log.count('leaf weak frame confirmed:')==1,'exact weak frame leader confirmation missing')
         require(log.count('effects=3 terminals=2 shared_blob_retained=true') == 1 and log.count('manifest_drops=1') == 1,
                 'original strict retirement/reuse assertions missing')
     else:
@@ -239,7 +242,7 @@ def main():
         qualification = verify_log(args.case, (root/'native.log').read_text())
         if args.case in LEAF_CASES:
             qualification['leaf_proof'] = leaf_domain_proof.validate(json.loads((root/'stores'/'leaf-scenario'/'leaf-domain-proof.json').read_text()),LEAF_CASES[args.case])
-            if args.case in ('leaf-retirement-sigkill-hub-restart','leaf-retirement-sigkill-lease-expiry'):
+            if args.case in ('leaf-retirement-sigkill-hub-restart','leaf-retirement-sigkill-lease-expiry','leaf-retirement-sigkill-lease-expiry-weak'):
                 require(len(servers)==2,'both original and replacement leaf process identities missing')
         elif args.case != 'read-controls':
             require(len(servers) == 6*len(CASES[args.case]), 'all original/replacement native server incarnations must be observed')
