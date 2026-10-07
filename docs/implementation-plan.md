@@ -5659,6 +5659,6 @@ This supplies a concrete reproduction for the reported online-GC gap; it does no
 
 ## Focused blob-boundary normal100k accepted — 2026-10-07
 
-Source `3a7022c`, actual normal SDK265617: all100,000 production-decision schedules and exact replays, three shared pins,33,334 paused uploads/33,253 refreshes/33,413 quiescent controls pass817.04s body. Independent full source/SDK/2,138-file archive review accepts and rejects13 actual-log mutations. Original failed launches and overstrict terminal-state reviewer rejection remain preserved. Corrected review binds the original producer's successful invocation journal and unchanged artifacts; no model rerun. [Evidence](scale/online-blob-boundary-2026-10-07/normal100k/).
+Source `3a7022c`, actual normal SDK 265617: all 100,000 production-decision schedules and exact replays, three shared pins, 33,334 paused uploads / 33,253 refreshes / 33,413 quiescent controls pass in 817.04 s body. Independent full source/SDK/2,138-file archive review accepts and rejects 13 actual-log mutations. Original failed launches and overstrict terminal-state reviewer rejection remain preserved. Corrected review binds the original producer's successful invocation journal and unchanged artifacts; no model rerun. [Evidence](scale/online-blob-boundary-2026-10-07/normal100k/).
 
-This closes the new workload's focused normal100k gate. It does not promote historical full122-workload source scopes to a full current123-workload result, implement online GC or qualify native matrices/actual24h.
+This closes the new workload's focused normal100k gate. It does not promote historical full 122-workload source scopes to a full current 123-workload result, implement online GC or qualify native matrices/actual24h.
