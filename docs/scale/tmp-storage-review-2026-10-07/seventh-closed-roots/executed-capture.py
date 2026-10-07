@@ -16,7 +16,14 @@ def closure(root):
   except PermissionError:limits.append(str(p))
   except (FileNotFoundError,ProcessLookupError):pass
  ids=subprocess.check_output(['docker','ps','-q'],text=True).split()
- running=json.loads(subprocess.check_output(['docker','inspect',*ids],text=True)) if ids else []
+ docker_retries=[]
+ for attempt in range(5):
+  result=subprocess.run(['docker','inspect',*ids],capture_output=True,text=True) if ids else None
+  if result is None or result.returncode==0:
+   running=json.loads(result.stdout) if result else [];break
+  docker_retries.append(dict(attempt=attempt,ids=ids,error=result.stderr))
+  ids=subprocess.check_output(['docker','ps','-q'],text=True).split()
+ else:raise RuntimeError('Docker inspection did not stabilize after five fresh-list retries')
  for c in running:
   for m in c['Mounts']:
    source=Path(m['Source']).resolve();assert not source.is_relative_to(root) and not root.is_relative_to(source)
@@ -30,14 +37,14 @@ def closure(root):
    assert not row['source'].startswith(str(root))
    walk(row.get('children',[]))
  walk(mounts['filesystems'])
- return dict(unobservable_processes=limits,visible_descriptors=closed.verify_no_open_originals(root),loopdevices=loops,mounts=mounts,running_docker_ids=ids)
+ return dict(unobservable_processes=limits,visible_descriptors=closed.verify_no_open_originals(root),loopdevices=loops,mounts=mounts,running_docker_ids=ids,docker_inspection_retries=docker_retries)
 
 
 names=json.loads(Path('/tmp/storage-seventh-names.json').read_text())
 base=Path('/tmp/storage-seventh-proofs')
 for name in names:
  root=Path('/tmp')/name; out=base/name; raw=Path('/tmp')/(name+'-storage-seventh-complete-20261007.tar.gz')
- if (out/'archive-verification.json').exists():continue
+ if (out/'capture.json').exists():continue
  if any(p.is_symlink() for p in root.rglob('*')):
   print('SKIPPED_SYMLINK',name,flush=True)
   if out.exists() and not any(out.iterdir()):out.rmdir()
@@ -46,7 +53,11 @@ for name in names:
  except AssertionError as error:
   print("SKIPPED_ACTIVE",name,str(error),flush=True);continue
  print('CLOSED',name,flush=True)
- proof=fixture_archive.capture(root,raw,out,compresslevel=1)
+ if (out/'archive-verification.json').exists():
+  proof=json.loads((out/'archive-verification.json').read_text());manifest=json.loads((out/'fixture-inventory.json').read_text())
+  with raw.open('rb') as stream: assert fixture_archive.verify_hashed_stream(stream,dict(bytes=proof['archive_bytes'],sha256=proof['archive_sha256']))[0]==manifest
+  assert fixture_archive.inventory(root)==manifest['files']
+ else:proof=fixture_archive.capture(root,raw,out,compresslevel=1)
  final=closure(root)
  report=dict(root=str(root),archive=str(raw),closure_before=initial,closure_after=final,complete_archive=proof,scope='Storage preservation of the complete current closed root. Historical verdict and source scope unchanged; binaries previously offloaded remain recoverable from their separate index. No native test or broker opened.')
  (out/'capture.json').write_text(json.dumps(report,indent=2)+'\n')
