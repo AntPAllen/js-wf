@@ -1,4 +1,4 @@
-package retention
+package retention_test
 
 import (
 	"bytes"
@@ -16,11 +16,12 @@ import (
 	"js-wf/client"
 	"js-wf/identity"
 	"js-wf/provision"
+	"js-wf/retention"
 	"js-wf/testcluster"
 )
 
 type boundaryNativeSweep struct {
-	BlobSweepPort
+	retention.BlobSweepPort
 	beforeDelete func() error
 }
 
@@ -89,13 +90,17 @@ func TestBlobSweepConcurrentRefreshContract(t *testing.T) {
 				fresh, e = objects.GetInfo(ctx, object)
 				return e
 			}
-			port := &boundaryNativeSweep{BlobSweepPort: &jetStreamBlobSweepPort{js: js, objects: objects, streams: map[string]jetstream.Stream{}}}
+			nativePort, err := retention.NewBlobSweepPort(ctx, js)
+			if err != nil {
+				t.Fatal(err)
+			}
+			port := &boundaryNativeSweep{BlobSweepPort: nativePort}
 			if active {
 				port.beforeDelete = publish
 			} else if err = publish(); err != nil {
 				t.Fatal(err)
 			}
-			result, err := SweepBlobsQuiescentWithPort(ctx, port, 0, time.Now().UTC())
+			result, err := retention.SweepBlobsQuiescentWithPort(ctx, port, 0, time.Now().UTC())
 			if err != nil {
 				t.Fatal(err)
 			}

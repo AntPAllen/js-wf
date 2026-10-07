@@ -231,11 +231,23 @@ func SweepBlobsQuiescent(ctx context.Context, js jetstream.JetStream, minAge tim
 	if minAge < 0 || now.IsZero() {
 		return BlobSweepResult{}, fmt.Errorf("invalid blob sweep age or clock")
 	}
-	objects, err := js.ObjectStore(ctx, "WF_BLOB")
+	port, err := NewBlobSweepPort(ctx, js)
 	if err != nil {
 		return BlobSweepResult{}, err
 	}
-	return SweepBlobsQuiescentWithPort(ctx, &jetStreamBlobSweepPort{js: js, objects: objects, streams: map[string]jetstream.Stream{}}, minAge, now)
+	return SweepBlobsQuiescentWithPort(ctx, port, minAge, now)
+}
+
+// NewBlobSweepPort constructs the native retained-metadata and object adapter.
+// A destructive pass over this port still requires quiescent writers, exactly
+// as SweepBlobsQuiescentWithPort documents. It permits wrapping actual transport
+// boundaries without replacing the production census or deletion decisions.
+func NewBlobSweepPort(ctx context.Context, js jetstream.JetStream) (BlobSweepPort, error) {
+	objects, err := js.ObjectStore(ctx, "WF_BLOB")
+	if err != nil {
+		return nil, err
+	}
+	return &jetStreamBlobSweepPort{js: js, objects: objects, streams: map[string]jetstream.Stream{}}, nil
 }
 
 // SweepBlobsQuiescentWithPort runs the production mark-and-sweep logic over a
