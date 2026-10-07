@@ -1,0 +1,37 @@
+{
+  "build": [
+    "go",
+    "test",
+    "-p=1",
+    "-buildvcs=true",
+    "-c",
+    "-o",
+    "/tmp/js-wf-partition-seed6-contiguous-20261006/integration.test",
+    "./integration"
+  ],
+  "prepared_input_root": null,
+  "test_command": [
+    "/tmp/js-wf-partition-seed6-contiguous-20261006/integration.test",
+    "-test.run=^TestMixedMatrixServerPartitionEveryThirtySeconds$",
+    "-test.count=1",
+    "-test.v",
+    "-test.timeout=18m"
+  ],
+  "row": "partition",
+  "test": "TestMixedMatrixServerPartitionEveryThirtySeconds",
+  "duration": "10m",
+  "race": false,
+  "server_profile": "experimental-component-candidate",
+  "sustained_ten_minutes": true,
+  "environment": {
+    "GOMAXPROCS": "2",
+    "GOMEMLIMIT": "2GiB",
+    "WF_MATRIX_CHAOS": "1",
+    "WF_MATRIX_OPERATION_TIMINGS": "1",
+    "WF_MATRIX_DURATION": "10m",
+    "WF_MATRIX_PROCESS_ROOT": "/tmp/js-wf-partition-seed6-contiguous-20261006/originals",
+    "MATRIX_ARTIFACT_PREFIX": "/tmp/js-wf-partition-seed6-contiguous-20261006/matrix-partition-6",
+    "FAULT_SEED": "6",
+    "WF_MATRIX_PARTITION_SERVER_BIN": "/tmp/js-wf-partition-seed6-contiguous-20261006/partition-server.bin"
+  }
+}
