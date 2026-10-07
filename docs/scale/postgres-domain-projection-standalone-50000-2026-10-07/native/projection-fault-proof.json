@@ -1,0 +1,160 @@
+{
+  "KV_WF_STATE_all_three_replicas_current": "2026-10-07T06:03:52.97938134Z",
+  "WF_INV_all_three_replicas_current": "2026-10-07T06:03:52.976617922Z",
+  "WF_JRN_all_three_replicas_current": "2026-10-07T06:03:52.97909175Z",
+  "WF_PURGE_all_three_replicas_current": "2026-10-07T06:03:52.980640493Z",
+  "all_results_checked_while_projection_stopped": true,
+  "all_workflow_workers_joined_before_fault": "2026-10-07T06:03:47.937736406Z",
+  "catchup_admitted_rows": 11,
+  "count": 50000,
+  "domain_api_requests": 1153192,
+  "elapsed_ns": 276038537471,
+  "fault_started": "2026-10-07T06:03:48.123938101Z",
+  "faulted_projection_error": "exit status 1",
+  "faulted_projection_stopped": "2026-10-07T06:03:52.972100908Z",
+  "final_lag": 0,
+  "healed_domain_peers": [
+    {
+      "domain": "WFVIEW",
+      "node": "0",
+      "server_id": "NDIQJT4E2MXN5GZE4H7FJVSWVIP6TAQFYJFECD6ZHJJRZJCQBNSRNOAJ"
+    },
+    {
+      "domain": "WFVIEW",
+      "node": "1",
+      "server_id": "NB25IXRXH2YPECOUGZV74EAGCN3TLCSPS7AB2ZC7MJ7B6P6A5FZK6ZW5"
+    },
+    {
+      "domain": "WFVIEW",
+      "node": "2",
+      "server_id": "NBW2CYB544UR5AIVV3QFBAWQVOME5UPYCU75J6HX7N66F4HOHXMQRS5F"
+    }
+  ],
+  "journal_all_three_replicas_current": "2026-10-07T06:03:52.97909175Z",
+  "journal_leader_new_server_id": "NDIQJT4E2MXN5GZE4H7FJVSWVIP6TAQFYJFECD6ZHJJRZJCQBNSRNOAJ",
+  "journal_leader_node": 0,
+  "journal_leader_old_server_id": "NCYCQDZPDZ4QUMQAS7V6BZOVIYEF3KG5R6TDFCYZJMVDYF6GHIYQL4CC",
+  "journal_leader_restarted": "2026-10-07T06:03:48.440261327Z",
+  "journal_leader_stopped": "2026-10-07T06:03:48.292944541Z",
+  "native_test_failed": false,
+  "pinned_clients_refreshed_after_restart": "2026-10-07T06:03:48.440305274Z",
+  "postgres_fault": true,
+  "projection_domain": "WFVIEW",
+  "projection_process_observed_before_kill": "2026-10-07T06:02:24.375719855Z",
+  "projection_process_reaped_sigkill": true,
+  "projection_process_stopped": "2026-10-07T06:02:24.381554761Z",
+  "projector_profile": "standalone",
+  "row_and_indexed_column_sha256": "c78ac58db67c7819ac7dc4bc38a8484e06fca391f9157321f18146c853391433",
+  "run_queue_drained_before_fault": "2026-10-07T06:03:47.937338822Z",
+  "standalone_binary": {
+    "build_command": [
+      "go",
+      "build",
+      "-p=1",
+      "-buildvcs=true",
+      "-o",
+      "/tmp/js-wf-postgres-domain-standalone-50000-20261007/originals/TestStandalonePostgresProjectionCrashAndSessionLossFiftyThousandInvocationsInJetStreamDomain/wf-project",
+      "./cmd/wf"
+    ],
+    "build_info": "go\tgo1.27.1\npath\tjs-wf/cmd/wf\nmod\tjs-wf\tv0.0.0-20261007060133-dc88aabfbccc\t\ndep\tgithub.com/jackc/pgpassfile\tv1.0.0\th1:/6Hmqy13Ss2zCq62VdNG8tM1wchn8zjSGOBJ6icpsIM=\ndep\tgithub.com/jackc/pgservicefile\tv0.0.0-20240606120523-5a60cdf6a761\th1:iCEnooe7UlwOQYpKFhBabPMi4aNAfoODPEFNiAnClxo=\ndep\tgithub.com/jackc/pgx/v5\tv5.11.0\th1:IzBBtyK9AHqf98cctWFifYSci2hgQR/cd56wB4p+ogg=\ndep\tgithub.com/jackc/puddle/v2\tv2.2.2\th1:PR8nw+E/1w0GLuRFSmiioY6UooMp6KJv0/61nB7icHo=\ndep\tgithub.com/klauspost/compress\tv1.20.0\th1:a3C1ke2ohxFymNlb2HWAHjDeKCI90scRskErZkR0ezA=\ndep\tgithub.com/nats-io/nats.go\tv1.54.0\th1:vsXoOxjHp/GmPUN+EcI7uOf/uB+iAP+kEsAFNQN0yzA=\ndep\tgithub.com/nats-io/nkeys\tv0.4.16\th1:rd5oAuLOb8mnAycB0xleuEBNS1pVVnN0fv/FF34Eypg=\ndep\tgithub.com/nats-io/nuid\tv1.0.1\th1:5iA8DT8V7q8WK2EScv2padNa/rTESc1KdnPw4TC2paw=\ndep\tgolang.org/x/crypto\tv0.57.0\th1:3ZVCjf8Ggz7zneR/EHRVx68Ctf+2pmIMP2UFhh9cC6M=\ndep\tgolang.org/x/sync\tv0.23.0\th1:KameEIfc1IkluZyXWLn39Wd4tURc6GbCiISGiZm2bQk=\ndep\tgolang.org/x/sys\tv0.48.0\th1:bbX/i/6MgT9BVLM9RT1thmxL04yeTAhbEz4SyadbXoo=\ndep\tgolang.org/x/text\tv0.42.0\th1:JbOZXgfeCPU9gacVtYliJqOhD+zhrEqK4LfdpmlUZqI=\ndep\tgoogle.golang.org/protobuf\tv1.36.6\th1:z1NpPI8ku2WgiWnf+t9wTPsn6eP1L7ksHUlkfLvd9xY=\nbuild\t-buildmode=exe\nbuild\t-compiler=gc\nbuild\tCGO_ENABLED=1\nbuild\tCGO_CFLAGS=\nbuild\tCGO_CPPFLAGS=\nbuild\tCGO_CXXFLAGS=\nbuild\tCGO_LDFLAGS=\nbuild\tGOARCH=amd64\nbuild\tGOOS=linux\nbuild\tGOAMD64=v1\nbuild\tvcs=git\nbuild\tvcs.revision=dc88aabfbcccedcc8b65912888b8183fa8b3a5af\nbuild\tvcs.time=2026-10-07T06:01:33Z\nbuild\tvcs.modified=false\n",
+    "package": "js-wf/cmd/wf",
+    "path": "/tmp/js-wf-postgres-domain-standalone-50000-20261007/originals/TestStandalonePostgresProjectionCrashAndSessionLossFiftyThousandInvocationsInJetStreamDomain/wf-project",
+    "sha256": "34c058aa070b7cc788223bb4d30563a95829011264e820c0da35c5a71fb4dceb",
+    "source": "dc88aabfbcccedcc8b65912888b8183fa8b3a5af",
+    "working_directory": "/home/exedev/js-wf"
+  },
+  "standalone_projectors": [
+    {
+      "admitted_at": "2026-10-07T06:02:24.375719855Z",
+      "application_name": "wf-project-initial",
+      "argv": [
+        "/tmp/js-wf-postgres-domain-standalone-50000-20261007/originals/TestStandalonePostgresProjectionCrashAndSessionLossFiftyThousandInvocationsInJetStreamDomain/wf-project",
+        "-url",
+        "nats://127.0.0.1:33949",
+        "-domain",
+        "WFVIEW",
+        "project"
+      ],
+      "build_info": "/proc/3526244/exe: go1.27.1\n\tpath\tjs-wf/cmd/wf\n\tmod\tjs-wf\tv0.0.0-20261007060133-dc88aabfbccc\t\n\tdep\tgithub.com/jackc/pgpassfile\tv1.0.0\th1:/6Hmqy13Ss2zCq62VdNG8tM1wchn8zjSGOBJ6icpsIM=\n\tdep\tgithub.com/jackc/pgservicefile\tv0.0.0-20240606120523-5a60cdf6a761\th1:iCEnooe7UlwOQYpKFhBabPMi4aNAfoODPEFNiAnClxo=\n\tdep\tgithub.com/jackc/pgx/v5\tv5.11.0\th1:IzBBtyK9AHqf98cctWFifYSci2hgQR/cd56wB4p+ogg=\n\tdep\tgithub.com/jackc/puddle/v2\tv2.2.2\th1:PR8nw+E/1w0GLuRFSmiioY6UooMp6KJv0/61nB7icHo=\n\tdep\tgithub.com/klauspost/compress\tv1.20.0\th1:a3C1ke2ohxFymNlb2HWAHjDeKCI90scRskErZkR0ezA=\n\tdep\tgithub.com/nats-io/nats.go\tv1.54.0\th1:vsXoOxjHp/GmPUN+EcI7uOf/uB+iAP+kEsAFNQN0yzA=\n\tdep\tgithub.com/nats-io/nkeys\tv0.4.16\th1:rd5oAuLOb8mnAycB0xleuEBNS1pVVnN0fv/FF34Eypg=\n\tdep\tgithub.com/nats-io/nuid\tv1.0.1\th1:5iA8DT8V7q8WK2EScv2padNa/rTESc1KdnPw4TC2paw=\n\tdep\tgolang.org/x/crypto\tv0.57.0\th1:3ZVCjf8Ggz7zneR/EHRVx68Ctf+2pmIMP2UFhh9cC6M=\n\tdep\tgolang.org/x/sync\tv0.23.0\th1:KameEIfc1IkluZyXWLn39Wd4tURc6GbCiISGiZm2bQk=\n\tdep\tgolang.org/x/sys\tv0.48.0\th1:bbX/i/6MgT9BVLM9RT1thmxL04yeTAhbEz4SyadbXoo=\n\tdep\tgolang.org/x/text\tv0.42.0\th1:JbOZXgfeCPU9gacVtYliJqOhD+zhrEqK4LfdpmlUZqI=\n\tdep\tgoogle.golang.org/protobuf\tv1.36.6\th1:z1NpPI8ku2WgiWnf+t9wTPsn6eP1L7ksHUlkfLvd9xY=\n\tbuild\t-buildmode=exe\n\tbuild\t-compiler=gc\n\tbuild\tCGO_ENABLED=1\n\tbuild\tCGO_CFLAGS=\n\tbuild\tCGO_CPPFLAGS=\n\tbuild\tCGO_CXXFLAGS=\n\tbuild\tCGO_LDFLAGS=\n\tbuild\tGOARCH=amd64\n\tbuild\tGOOS=linux\n\tbuild\tGOAMD64=v1\n\tbuild\tvcs=git\n\tbuild\tvcs.revision=dc88aabfbcccedcc8b65912888b8183fa8b3a5af\n\tbuild\tvcs.time=2026-10-07T06:01:33Z\n\tbuild\tvcs.modified=false\n",
+      "environment": {
+        "GOFLAGS": "",
+        "GOMAXPROCS": "2",
+        "GOMEMLIMIT": "2GiB",
+        "GOWORK": "off"
+      },
+      "exit_code": -1,
+      "exit_signal": "killed",
+      "phase": "initial",
+      "pid": 3526244,
+      "postgres_dsn_sha256": "7bd7d956a9e6d099732aae8f633991abc2f0b1304f07e1670dfa03f08b33a1d7",
+      "reaped_at": "2026-10-07T06:02:24.381548882Z",
+      "sha256": "34c058aa070b7cc788223bb4d30563a95829011264e820c0da35c5a71fb4dceb",
+      "stat": "3526244 (wf-project) S 3525764 3521911 3521911 0 -1 4194304 979 0 0 0 0 0 0 0 20 0 7 0 16666556 1832706048 4552 18446744073709551615 7892992 15884905 140729488361440 0 0 0 1002060288 0 2143420159 0 0 0 17 1 0 0 0 0 0 24947704 25570945 736190464 140729488365529 140729488365747 140729488365747 140729488367441 0\n",
+      "wait_error": "signal: killed",
+      "working_directory": "/home/exedev/js-wf",
+      "writer_backend_pid": 112
+    },
+    {
+      "admitted_at": "2026-10-07T06:03:48.086457165Z",
+      "application_name": "wf-project-catchup",
+      "argv": [
+        "/tmp/js-wf-postgres-domain-standalone-50000-20261007/originals/TestStandalonePostgresProjectionCrashAndSessionLossFiftyThousandInvocationsInJetStreamDomain/wf-project",
+        "-url",
+        "nats://127.0.0.1:33949",
+        "-domain",
+        "WFVIEW",
+        "project"
+      ],
+      "build_info": "/proc/3528110/exe: go1.27.1\n\tpath\tjs-wf/cmd/wf\n\tmod\tjs-wf\tv0.0.0-20261007060133-dc88aabfbccc\t\n\tdep\tgithub.com/jackc/pgpassfile\tv1.0.0\th1:/6Hmqy13Ss2zCq62VdNG8tM1wchn8zjSGOBJ6icpsIM=\n\tdep\tgithub.com/jackc/pgservicefile\tv0.0.0-20240606120523-5a60cdf6a761\th1:iCEnooe7UlwOQYpKFhBabPMi4aNAfoODPEFNiAnClxo=\n\tdep\tgithub.com/jackc/pgx/v5\tv5.11.0\th1:IzBBtyK9AHqf98cctWFifYSci2hgQR/cd56wB4p+ogg=\n\tdep\tgithub.com/jackc/puddle/v2\tv2.2.2\th1:PR8nw+E/1w0GLuRFSmiioY6UooMp6KJv0/61nB7icHo=\n\tdep\tgithub.com/klauspost/compress\tv1.20.0\th1:a3C1ke2ohxFymNlb2HWAHjDeKCI90scRskErZkR0ezA=\n\tdep\tgithub.com/nats-io/nats.go\tv1.54.0\th1:vsXoOxjHp/GmPUN+EcI7uOf/uB+iAP+kEsAFNQN0yzA=\n\tdep\tgithub.com/nats-io/nkeys\tv0.4.16\th1:rd5oAuLOb8mnAycB0xleuEBNS1pVVnN0fv/FF34Eypg=\n\tdep\tgithub.com/nats-io/nuid\tv1.0.1\th1:5iA8DT8V7q8WK2EScv2padNa/rTESc1KdnPw4TC2paw=\n\tdep\tgolang.org/x/crypto\tv0.57.0\th1:3ZVCjf8Ggz7zneR/EHRVx68Ctf+2pmIMP2UFhh9cC6M=\n\tdep\tgolang.org/x/sync\tv0.23.0\th1:KameEIfc1IkluZyXWLn39Wd4tURc6GbCiISGiZm2bQk=\n\tdep\tgolang.org/x/sys\tv0.48.0\th1:bbX/i/6MgT9BVLM9RT1thmxL04yeTAhbEz4SyadbXoo=\n\tdep\tgolang.org/x/text\tv0.42.0\th1:JbOZXgfeCPU9gacVtYliJqOhD+zhrEqK4LfdpmlUZqI=\n\tdep\tgoogle.golang.org/protobuf\tv1.36.6\th1:z1NpPI8ku2WgiWnf+t9wTPsn6eP1L7ksHUlkfLvd9xY=\n\tbuild\t-buildmode=exe\n\tbuild\t-compiler=gc\n\tbuild\tCGO_ENABLED=1\n\tbuild\tCGO_CFLAGS=\n\tbuild\tCGO_CPPFLAGS=\n\tbuild\tCGO_CXXFLAGS=\n\tbuild\tCGO_LDFLAGS=\n\tbuild\tGOARCH=amd64\n\tbuild\tGOOS=linux\n\tbuild\tGOAMD64=v1\n\tbuild\tvcs=git\n\tbuild\tvcs.revision=dc88aabfbcccedcc8b65912888b8183fa8b3a5af\n\tbuild\tvcs.time=2026-10-07T06:01:33Z\n\tbuild\tvcs.modified=false\n",
+      "environment": {
+        "GOFLAGS": "",
+        "GOMAXPROCS": "2",
+        "GOMEMLIMIT": "2GiB",
+        "GOWORK": "off"
+      },
+      "exit_code": 1,
+      "phase": "catchup",
+      "pid": 3528110,
+      "postgres_dsn_sha256": "4f110bdd98318e36f4cb75da26c77ae4a02d7b6ff7df42eeb170e44a34c0ad8d",
+      "reaped_at": "2026-10-07T06:03:52.98205362Z",
+      "sha256": "34c058aa070b7cc788223bb4d30563a95829011264e820c0da35c5a71fb4dceb",
+      "stat": "3528110 (wf-project) S 3525764 3521911 3521911 0 -1 4194304 2079 0 0 0 1 1 0 0 20 0 7 0 16674950 1833836544 5829 18446744073709551615 7892992 15884905 140732539039520 0 0 0 0 0 2143420159 0 0 0 17 0 0 0 0 0 0 24947704 25570945 582111232 140732539045849 140732539046067 140732539046067 140732539047761 0\n",
+      "wait_error": "exit status 1",
+      "working_directory": "/home/exedev/js-wf",
+      "writer_backend_pid": 118
+    },
+    {
+      "admitted_at": "2026-10-07T06:03:53.160081246Z",
+      "application_name": "wf-project-replacement",
+      "argv": [
+        "/tmp/js-wf-postgres-domain-standalone-50000-20261007/originals/TestStandalonePostgresProjectionCrashAndSessionLossFiftyThousandInvocationsInJetStreamDomain/wf-project",
+        "-url",
+        "nats://127.0.0.1:33949",
+        "-domain",
+        "WFVIEW",
+        "project"
+      ],
+      "build_info": "/proc/3529183/exe: go1.27.1\n\tpath\tjs-wf/cmd/wf\n\tmod\tjs-wf\tv0.0.0-20261007060133-dc88aabfbccc\t\n\tdep\tgithub.com/jackc/pgpassfile\tv1.0.0\th1:/6Hmqy13Ss2zCq62VdNG8tM1wchn8zjSGOBJ6icpsIM=\n\tdep\tgithub.com/jackc/pgservicefile\tv0.0.0-20240606120523-5a60cdf6a761\th1:iCEnooe7UlwOQYpKFhBabPMi4aNAfoODPEFNiAnClxo=\n\tdep\tgithub.com/jackc/pgx/v5\tv5.11.0\th1:IzBBtyK9AHqf98cctWFifYSci2hgQR/cd56wB4p+ogg=\n\tdep\tgithub.com/jackc/puddle/v2\tv2.2.2\th1:PR8nw+E/1w0GLuRFSmiioY6UooMp6KJv0/61nB7icHo=\n\tdep\tgithub.com/klauspost/compress\tv1.20.0\th1:a3C1ke2ohxFymNlb2HWAHjDeKCI90scRskErZkR0ezA=\n\tdep\tgithub.com/nats-io/nats.go\tv1.54.0\th1:vsXoOxjHp/GmPUN+EcI7uOf/uB+iAP+kEsAFNQN0yzA=\n\tdep\tgithub.com/nats-io/nkeys\tv0.4.16\th1:rd5oAuLOb8mnAycB0xleuEBNS1pVVnN0fv/FF34Eypg=\n\tdep\tgithub.com/nats-io/nuid\tv1.0.1\th1:5iA8DT8V7q8WK2EScv2padNa/rTESc1KdnPw4TC2paw=\n\tdep\tgolang.org/x/crypto\tv0.57.0\th1:3ZVCjf8Ggz7zneR/EHRVx68Ctf+2pmIMP2UFhh9cC6M=\n\tdep\tgolang.org/x/sync\tv0.23.0\th1:KameEIfc1IkluZyXWLn39Wd4tURc6GbCiISGiZm2bQk=\n\tdep\tgolang.org/x/sys\tv0.48.0\th1:bbX/i/6MgT9BVLM9RT1thmxL04yeTAhbEz4SyadbXoo=\n\tdep\tgolang.org/x/text\tv0.42.0\th1:JbOZXgfeCPU9gacVtYliJqOhD+zhrEqK4LfdpmlUZqI=\n\tdep\tgoogle.golang.org/protobuf\tv1.36.6\th1:z1NpPI8ku2WgiWnf+t9wTPsn6eP1L7ksHUlkfLvd9xY=\n\tbuild\t-buildmode=exe\n\tbuild\t-compiler=gc\n\tbuild\tCGO_ENABLED=1\n\tbuild\tCGO_CFLAGS=\n\tbuild\tCGO_CPPFLAGS=\n\tbuild\tCGO_CXXFLAGS=\n\tbuild\tCGO_LDFLAGS=\n\tbuild\tGOARCH=amd64\n\tbuild\tGOOS=linux\n\tbuild\tGOAMD64=v1\n\tbuild\tvcs=git\n\tbuild\tvcs.revision=dc88aabfbcccedcc8b65912888b8183fa8b3a5af\n\tbuild\tvcs.time=2026-10-07T06:01:33Z\n\tbuild\tvcs.modified=false\n",
+      "environment": {
+        "GOFLAGS": "",
+        "GOMAXPROCS": "2",
+        "GOMEMLIMIT": "2GiB",
+        "GOWORK": "off"
+      },
+      "exit_code": 0,
+      "phase": "replacement",
+      "pid": 3529183,
+      "postgres_dsn_sha256": "dc1f0d4a9e735a8eb619fd829ee28116bd1103f706e91677ffcd4f79fe670044",
+      "reaped_at": "2026-10-07T06:05:24.633940638Z",
+      "sha256": "34c058aa070b7cc788223bb4d30563a95829011264e820c0da35c5a71fb4dceb",
+      "stat": "3529183 (wf-project) S 3525764 3521911 3521911 0 -1 4194304 2594 0 0 0 4 0 0 0 20 0 8 0 16675454 1909927936 6261 18446744073709551615 7892992 15884905 140731284665584 0 0 0 1002060288 0 2143420159 0 0 0 17 2 0 0 0 0 0 24947704 25570945 758046720 140731284666325 140731284666543 140731284666543 140731284668241 0\n",
+      "working_directory": "/home/exedev/js-wf",
+      "writer_backend_pid": 1174
+    }
+  ],
+  "standalone_replacement_clean_sigterm": true,
+  "stopped_projection_lag": 100000,
+  "terminated_writer_backend_pid": 118,
+  "writer_backend_termination_confirmed": true,
+  "wrong_domain_api_prefix_requests": 0
+}

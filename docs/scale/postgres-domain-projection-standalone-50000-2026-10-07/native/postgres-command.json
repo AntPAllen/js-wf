@@ -1,0 +1,19 @@
+[
+  "docker",
+  "run",
+  "-d",
+  "--name",
+  "js-wf-postgres-domain-standalone-50000-20261007-postgres",
+  "--memory=1g",
+  "-p",
+  "127.0.0.1::5432",
+  "-e",
+  "POSTGRES_USER=workflow",
+  "-e",
+  "POSTGRES_DB=workflow",
+  "-e",
+  "POSTGRES_HOST_AUTH_METHOD=trust",
+  "-v",
+  "js-wf-postgres-domain-standalone-50000-20261007-postgres-data:/var/lib/postgresql/data",
+  "sha256:721873c34ceb9f8d8fc265984940dc982404c105f19ad51be9fdc5970a6080ea"
+]

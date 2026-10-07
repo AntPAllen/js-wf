@@ -1,0 +1,26 @@
+{
+  "unit": "js-wf-postgres-domain-standalone-20261007.service",
+  "command": [
+    "systemd-run",
+    "--user",
+    "--unit=js-wf-postgres-domain-standalone-20261007",
+    "--property=Type=exec",
+    "--property=RemainAfterExit=yes",
+    "--property=Restart=no",
+    "--property=RuntimeMaxSec=30min",
+    "--property=WorkingDirectory=/home/exedev/js-wf",
+    "--property=StandardOutput=append:/tmp/postgres-domain-standalone-producer-20261007.log",
+    "--property=StandardError=inherit",
+    "--setenv=PATH=/home/exedev/.codex/packages/app-server-daemon/releases/0.160.1-x86_64-unknown-linux-musl/codex-path:/home/exedev/.local/bin:/home/exedev/.codex/tmp/arg0/codex-arg0bGVOeW:/home/exedev/.codex/packages/app-server-daemon/releases/0.160.1-x86_64-unknown-linux-musl/codex-path:/home/exedev/.codex/tmp/arg0/codex-arg0ALRmXg:/home/exedev/.codex/packages/app-server-daemon/releases/0.160.0-x86_64-unknown-linux-musl/codex-path:/home/exedev/.codex/tmp/arg0/codex-arg0LJgNL8:/usr/local/lib/codex/releases/rust-v0.160.0-x86_64-unknown-linux-musl-4fcc47ab57f52ff7/codex-path:/home/exedev/.local/bin:/home/exedev/.local/bin:/exe.dev/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/snap/bin",
+    "--setenv=PYTHONDONTWRITEBYTECODE=1",
+    "/usr/bin/python3",
+    "/home/exedev/js-wf/scripts/run-postgres-domain-projection.py",
+    "--root",
+    "/tmp/js-wf-postgres-domain-standalone-50000-20261007",
+    "--projector-profile",
+    "standalone"
+  ],
+  "initial_state": "Restart=no\nRuntimeMaxUSec=30min\nMainPID=3521911\nResult=success\nExecMainStatus=0\nActiveState=active\nSubState=running\n",
+  "source": "dc88aabfbcccedcc8b65912888b8183fa8b3a5af",
+  "scope": "Original50000/count1/20m fixture/22m SDK/nonrace2CPU/2GiB. Durable execution only, no qualification from launch; no restart."
+}
