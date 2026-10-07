@@ -1,0 +1,9 @@
+# Original full24h journal run — native failure preserved
+
+The original source757454ab / seed1 / actual SDK3461745 is terminal exit1. Native body **61,168.65s** (16h59m28.65s), not an observation timeout. At batch8,520 / cutoff238,560 invocations, the original retained checkpoint exceeded its unchanged20s per-attempt/60s total gate. Attempts1/2 report238,560 invocations but zero completed journals; attempt3 reaches179,520 journals /1,438,910 entries before deadline. The run was cancelled following that audit failure. No24h component qualifies and no replacement run has been launched.
+
+The original producer source before/after is equal; the sparse detached worktree preserved the production workload/leases/recovery/audit deadlines through main changes. Actual producer/observer units are terminal and independently visible-closed. The pinned acceptance checker correctly rejects the native failure. All original current files, retained stores, observer samples and executable records were captured without reopening the servers. [Independent preservation verification](independent-preservation-verification.json), [native failure window](failure-window.log), and the three original traces/deadline stacks are retained here.
+
+Complete archive:2,090,346,262 bytes /15,402 members, SHA256 `327d503ad3e33cbaa1ff651a99fa191389a666bcc1d4a1aae06ae523c31adf75`. Fresh independent verification reads every archive member and compressed byte and confirms exact current-file inventory equality. Original files remain local. Full S3 retention/readback is a separate next step.
+
+The SDK deadline stacks locate the pending audit in its chunked journal scan; this does not establish a server-side cause or data corruption. Causal attribution, fresh verified copied-store diagnosis, runtime/fault capacity and original24h qualification remain open. No gate is weakened and this failure is not promoted by the accepted full400k synthetic or ten-minute components.

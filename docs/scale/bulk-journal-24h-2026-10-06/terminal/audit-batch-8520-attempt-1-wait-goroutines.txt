@@ -1,0 +1,1983 @@
+goroutine 110153962 [running]:
+js-wf/integration_test.saveMatrixParentStack({0x1662261f206b, 0x33}, {0x166230a28b10, 0x2a}, {0x158c453, 0x7c}, {0x2?, 0x900000042838a?, 0x2608f40?})
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/integration/matrix_failure_stack_test.go:28 +0xc9
+js-wf/integration_test.startMatrixAuditWaitObservation.func2({0x166289195f58?, 0x166289195ef4?, 0x2608f40?})
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/integration/matrix_audit_wait_test.go:32 +0x20f
+js-wf/integration_test.matrixAuditWaitObservation.func2()
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/integration/matrix_audit_wait_test.go:60 +0x22c
+created by js-wf/integration_test.matrixAuditWaitObservation in goroutine 42
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/integration/matrix_audit_wait_test.go:43 +0x12b
+
+goroutine 1 [chan receive, 1018 minutes]:
+testing.(*T).Run(0x16622628d688, {0x1568525?, 0x166226399aa0?}, 0x255aa68)
+	/usr/local/go/src/testing/testing.go:2266 +0x4f2
+testing.runTests.func1(0x16622628d688)
+	/usr/local/go/src/testing/testing.go:2742 +0x37
+testing.tRunner(0x16622628d688, 0x166226399bc8)
+	/usr/local/go/src/testing/testing.go:2193 +0xea
+testing.runTests({0x14fe324, 0x5}, {0x150f255, 0x11}, 0x1662261ba5b8, {0x2602610, 0x1ac, 0x1ac}, {0xc2a9afd15437c332, 0x4fabf6ff9a9c, ...})
+	/usr/local/go/src/testing/testing.go:2740 +0x510
+testing.(*M).Run(0x1662263b0aa0)
+	/usr/local/go/src/testing/testing.go:2600 +0x6af
+main.main()
+	_testmain.go:900 +0x9b
+
+goroutine 8 [sync.WaitGroup.Wait]:
+sync.runtime_SemacquireWaitGroup(0x16628b5d7900?, 0x60?)
+	/usr/local/go/src/runtime/sema.go:114 +0x2e
+sync.(*WaitGroup).Wait(0x1662b183a7c0)
+	/usr/local/go/src/sync/waitgroup.go:206 +0x85
+js-wf/integration_test.runFiveContainerMixedLeader(0x16622628d8c8, {0x1500bf1, 0x7})
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/integration/tier3_mixed_journal_test.go:1209 +0x6812
+js-wf/integration_test.TestFiveContainerMixedJournalLeaderEveryThirtySeconds(0x16622628d8c8?)
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/integration/tier3_mixed_journal_test.go:48 +0x1f
+testing.tRunner(0x16622628d8c8, 0x255aa68)
+	/usr/local/go/src/testing/testing.go:2193 +0xea
+created by testing.(*T).Run in goroutine 1
+	/usr/local/go/src/testing/testing.go:2258 +0x4d4
+
+goroutine 89 [select]:
+js-wf/worker.RunPartitionWithPort({0x254e190, 0x16622651c1e0}, 0x5, {0x2548048, 0x166226604008}, 0x1662263c97f0, 0x4)
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/worker/worker.go:453 +0xa16
+js-wf/worker.(*Worker).RunPartition(...)
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/worker/worker.go:342
+js-wf/integration_test.runFiveContainerMixedLeader.func18()
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/integration/tier3_mixed_journal_test.go:557 +0x99
+js-wf/integration_test.runFiveContainerMixedLeader.func6.1()
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/integration/tier3_mixed_journal_test.go:404 +0x10f
+created by js-wf/integration_test.runFiveContainerMixedLeader.func6 in goroutine 8
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/integration/tier3_mixed_journal_test.go:399 +0x179
+
+goroutine 110156454 [select]:
+github.com/nats-io/nats.go/jetstream.(*pullConsumer).fetch.func1(0x1662958277d0)
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/jetstream/pull.go:954 +0x1b9
+created by github.com/nats-io/nats.go/jetstream.(*pullConsumer).fetch in goroutine 176
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/jetstream/pull.go:950 +0x471
+
+goroutine 86 [select]:
+js-wf/worker.RunPartitionWithPort({0x254e190, 0x16622651c1e0}, 0x2, {0x2548048, 0x16622660d008}, 0x1662263c97a0, 0x4)
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/worker/worker.go:453 +0xa16
+js-wf/worker.(*Worker).RunPartition(...)
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/worker/worker.go:342
+js-wf/integration_test.runFiveContainerMixedLeader.func18()
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/integration/tier3_mixed_journal_test.go:557 +0x99
+js-wf/integration_test.runFiveContainerMixedLeader.func6.1()
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/integration/tier3_mixed_journal_test.go:404 +0x10f
+created by js-wf/integration_test.runFiveContainerMixedLeader.func6 in goroutine 8
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/integration/tier3_mixed_journal_test.go:399 +0x179
+
+goroutine 87 [select]:
+js-wf/worker.RunPartitionWithPort({0x254e190, 0x16622651c1e0}, 0x3, {0x2548048, 0x166226680008}, 0x1662263c96b0, 0x4)
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/worker/worker.go:453 +0xa16
+js-wf/worker.(*Worker).RunPartition(...)
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/worker/worker.go:342
+js-wf/integration_test.runFiveContainerMixedLeader.func18()
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/integration/tier3_mixed_journal_test.go:557 +0x99
+js-wf/integration_test.runFiveContainerMixedLeader.func6.1()
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/integration/tier3_mixed_journal_test.go:404 +0x10f
+created by js-wf/integration_test.runFiveContainerMixedLeader.func6 in goroutine 8
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/integration/tier3_mixed_journal_test.go:399 +0x179
+
+goroutine 41 [select]:
+js-wf/integration_test.runFiveContainerMixedLeader.func26()
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/integration/tier3_mixed_journal_test.go:844 +0x496
+created by js-wf/integration_test.runFiveContainerMixedLeader in goroutine 8
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/integration/tier3_mixed_journal_test.go:830 +0x5e0f
+
+goroutine 102 [sync.Cond.Wait]:
+sync.runtime_notifyListWait(0x1662263bdad0, 0x1da057a)
+	/usr/local/go/src/runtime/sema.go:617 +0x1b3
+sync.(*Cond).Wait(0x1662cf312850?)
+	/usr/local/go/src/sync/cond.go:71 +0x73
+github.com/nats-io/nats%2ego.(*Conn).waitForMsgs(0x166226374e08, 0x1662262fc780)
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/nats.go:3765 +0x105
+created by github.com/nats-io/nats%2ego.(*Conn).subscribeLocked in goroutine 8
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/nats.go:5165 +0x430
+
+goroutine 85 [select]:
+js-wf/worker.RunPartitionWithPort({0x254e190, 0x16622651c1e0}, 0x1, {0x2548048, 0x166226608808}, 0x1662263c9750, 0x4)
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/worker/worker.go:453 +0xa16
+js-wf/worker.(*Worker).RunPartition(...)
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/worker/worker.go:342
+js-wf/integration_test.runFiveContainerMixedLeader.func18()
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/integration/tier3_mixed_journal_test.go:557 +0x99
+js-wf/integration_test.runFiveContainerMixedLeader.func6.1()
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/integration/tier3_mixed_journal_test.go:404 +0x10f
+created by js-wf/integration_test.runFiveContainerMixedLeader.func6 in goroutine 8
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/integration/tier3_mixed_journal_test.go:399 +0x179
+
+goroutine 88 [select]:
+js-wf/worker.RunPartitionWithPort({0x254e190, 0x16622651c1e0}, 0x4, {0x2548048, 0x1662262ba808}, 0x1662263c9840, 0x4)
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/worker/worker.go:453 +0xa16
+js-wf/worker.(*Worker).RunPartition(...)
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/worker/worker.go:342
+js-wf/integration_test.runFiveContainerMixedLeader.func18()
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/integration/tier3_mixed_journal_test.go:557 +0x99
+js-wf/integration_test.runFiveContainerMixedLeader.func6.1()
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/integration/tier3_mixed_journal_test.go:404 +0x10f
+created by js-wf/integration_test.runFiveContainerMixedLeader.func6 in goroutine 8
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/integration/tier3_mixed_journal_test.go:399 +0x179
+
+goroutine 117 [sync.Cond.Wait, 296 minutes]:
+sync.runtime_notifyListWait(0x16622632e910, 0x35)
+	/usr/local/go/src/runtime/sema.go:617 +0x1b3
+sync.(*Cond).Wait(0x0?)
+	/usr/local/go/src/sync/cond.go:71 +0x73
+github.com/nats-io/nats%2ego.(*asyncCallbacksHandler).asyncCBDispatcher(0x16622633c560)
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/nats.go:3643 +0x5a
+created by github.com/nats-io/nats%2ego.Options.Connect in goroutine 8
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/nats.go:2019 +0x3d6
+
+goroutine 42 [runnable]:
+internal/runtime/maps.(*table).uncheckedPutSlot(0x1662976fd360?, 0x2336398?, 0xb77c12574e689651?, 0x1662caab7800?, 0x1662caab7810?)
+	/usr/local/go/src/internal/runtime/maps/table.go:383 +0x1ae
+internal/runtime/maps.(*table).split(0x1662ccfd6600, 0x2336398, 0x166228b7d680)
+	/usr/local/go/src/internal/runtime/maps/table.go:1278 +0x185
+internal/runtime/maps.(*table).rehash(0x539047?, 0x40e81a?, 0x27?)
+	/usr/local/go/src/internal/runtime/maps/table.go:1230 +0x30
+js-wf/integrity.checkUsingConcurrentOptions.func8(0x166297b3d630)
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/integrity/check.go:281 +0x1f0
+js-wf/integrity.scanConsumeDirectWindowsWithFactory.func2(0x166297b3d630)
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/integrity/consume_scan.go:117 +0x28
+js-wf/integrity.scanRetainedThroughWithWindow.func7({0x25544b8, 0x1662973774a0})
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/integrity/batch_scan.go:230 +0x665
+js-wf/integrity.walkCallbackWindow({0x254e190, 0x16629788f6d0}, 0x1000, {0x254bef0, 0x1662263a3408}, 0x166226379680)
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/integrity/consume_scan.go:178 +0x11e
+js-wf/integrity.scanConsumeDirectWindowsWithFactory.func3.1(0x10?)
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/integrity/consume_scan.go:148 +0x2d
+js-wf/integrity.scanRetainedThroughWithWindow({0x254e200, 0x16629ebe19d0}, {0x2556b88, 0x166228b770e0}, 0x0, 0x1662a6cde6f0, 0x1000, 0x16622ab71318, 0x166228b7d6e0, 0x255c600)
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/integrity/batch_scan.go:233 +0x934
+js-wf/integrity.scanConsumeDirectWindowsWithFactory({0x254e200, 0x16629ebe19d0}, {0x2556b88, 0x166228b770e0}, 0x0, 0x1662288cf180, 0x255c618)
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/integrity/consume_scan.go:116 +0x347
+js-wf/integrity.scanConsumeChunkedWindowsThrough(...)
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/integrity/consume_scan.go:73
+js-wf/integrity.scanSingleReplicaChunkedThrough({0x254e200, 0x16629ebe19d0}, {0x2555fb8?, 0x16629ebb5da0?}, 0x0, 0x1662288cf180)
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/integrity/consume_scan.go:103 +0x77
+js-wf/integrity.checkUsingConcurrentOptions({0x254e200, 0x16629ebe19d0}, {0x25577d8, 0x16629eadecd8}, 0x166268fd2710, 0x255bbd8, 0x1, 0x1, 0x1)
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/integrity/check.go:267 +0x5db
+js-wf/integrity.CheckThroughInvocationSequenceWithChunkedConcurrentStateReads(...)
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/integrity/check.go:200
+js-wf/integration_test.matrixRetainedCheck({0x254e200, 0x16629ebe19d0}, {0x25577d8, 0x16629eadecd8}, 0x16622ab71cb8)
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/integration/mixed_matrix_leader_test.go:976 +0x29f
+js-wf/integration_test.runFiveContainerMixedLeader.func28.1({0x254e200, 0x16629ebe19d0})
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/integration/tier3_mixed_journal_test.go:1074 +0x2ee
+js-wf/integration_test.matrixRetainedAuditWithClock({0x254e190?, 0x1662264de500?}, 0x16622ab71f38, 0x255bc20, 0x255bb30)
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/integration/mixed_matrix_leader_test.go:1028 +0x154
+js-wf/integration_test.matrixRetainedAuditUsing({0x254e190?, 0x1662264de500?}, 0x2608f40?)
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/integration/mixed_matrix_leader_test.go:1005 +0x2b
+js-wf/integration_test.runFiveContainerMixedLeader.func28()
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/integration/tier3_mixed_journal_test.go:1063 +0x46b
+created by js-wf/integration_test.runFiveContainerMixedLeader in goroutine 8
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/integration/tier3_mixed_journal_test.go:1050 +0x6065
+
+goroutine 84 [select]:
+js-wf/worker.RunPartitionWithPort({0x254e190, 0x16622651c1e0}, 0x0, {0x2548048, 0x166226604008}, 0x1662263c9700, 0x4)
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/worker/worker.go:453 +0xa16
+js-wf/worker.(*Worker).RunPartition(...)
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/worker/worker.go:342
+js-wf/integration_test.runFiveContainerMixedLeader.func18()
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/integration/tier3_mixed_journal_test.go:557 +0x99
+js-wf/integration_test.runFiveContainerMixedLeader.func6.1()
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/integration/tier3_mixed_journal_test.go:404 +0x10f
+created by js-wf/integration_test.runFiveContainerMixedLeader.func6 in goroutine 8
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/integration/tier3_mixed_journal_test.go:399 +0x179
+
+goroutine 107 [sync.Cond.Wait, 1018 minutes]:
+sync.runtime_notifyListWait(0x16622658add0, 0x0)
+	/usr/local/go/src/runtime/sema.go:617 +0x1b3
+sync.(*Cond).Wait(0x1662263db110?)
+	/usr/local/go/src/sync/cond.go:71 +0x73
+github.com/nats-io/nats%2ego.(*Conn).waitForMsgs(0x166226374e08, 0x1662262fc960)
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/nats.go:3765 +0x105
+created by github.com/nats-io/nats%2ego.(*Conn).subscribeLocked in goroutine 8
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/nats.go:5165 +0x430
+
+goroutine 83 [sync.Cond.Wait, 1018 minutes]:
+sync.runtime_notifyListWait(0x166226431390, 0x0)
+	/usr/local/go/src/runtime/sema.go:617 +0x1b3
+sync.(*Cond).Wait(0x166226323110?)
+	/usr/local/go/src/sync/cond.go:71 +0x73
+github.com/nats-io/nats%2ego.(*Conn).waitForMsgs(0x166226374e08, 0x16622647e000)
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/nats.go:3765 +0x105
+created by github.com/nats-io/nats%2ego.(*Conn).subscribeLocked in goroutine 8
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/nats.go:5165 +0x430
+
+goroutine 123 [sync.Cond.Wait, 1018 minutes]:
+sync.runtime_notifyListWait(0x166226576e90, 0x0)
+	/usr/local/go/src/runtime/sema.go:617 +0x1b3
+sync.(*Cond).Wait(0x166226323340?)
+	/usr/local/go/src/sync/cond.go:71 +0x73
+github.com/nats-io/nats%2ego.(*Conn).waitForMsgs(0x166226374e08, 0x1662265501e0)
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/nats.go:3765 +0x105
+created by github.com/nats-io/nats%2ego.(*Conn).subscribeLocked in goroutine 8
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/nats.go:5165 +0x430
+
+goroutine 124 [sync.Cond.Wait, 1018 minutes]:
+sync.runtime_notifyListWait(0x166226577190, 0x0)
+	/usr/local/go/src/runtime/sema.go:617 +0x1b3
+sync.(*Cond).Wait(0x0?)
+	/usr/local/go/src/sync/cond.go:71 +0x73
+github.com/nats-io/nats%2ego.(*Conn).waitForMsgs(0x166226374e08, 0x1662265502d0)
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/nats.go:3765 +0x105
+created by github.com/nats-io/nats%2ego.(*Conn).subscribeLocked in goroutine 8
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/nats.go:5165 +0x430
+
+goroutine 125 [sync.Cond.Wait, 1018 minutes]:
+sync.runtime_notifyListWait(0x166226577790, 0x0)
+	/usr/local/go/src/runtime/sema.go:617 +0x1b3
+sync.(*Cond).Wait(0x0?)
+	/usr/local/go/src/sync/cond.go:71 +0x73
+github.com/nats-io/nats%2ego.(*Conn).waitForMsgs(0x166226374e08, 0x1662265503c0)
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/nats.go:3765 +0x105
+created by github.com/nats-io/nats%2ego.(*Conn).subscribeLocked in goroutine 8
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/nats.go:5165 +0x430
+
+goroutine 90 [select]:
+js-wf/worker.RunPartitionWithPort({0x254e190, 0x16622651c1e0}, 0x6, {0x2548048, 0x166226608808}, 0x16622632d2a0, 0x4)
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/worker/worker.go:453 +0xa16
+js-wf/worker.(*Worker).RunPartition(...)
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/worker/worker.go:342
+js-wf/integration_test.runFiveContainerMixedLeader.func18()
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/integration/tier3_mixed_journal_test.go:557 +0x99
+js-wf/integration_test.runFiveContainerMixedLeader.func6.1()
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/integration/tier3_mixed_journal_test.go:404 +0x10f
+created by js-wf/integration_test.runFiveContainerMixedLeader.func6 in goroutine 8
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/integration/tier3_mixed_journal_test.go:399 +0x179
+
+goroutine 91 [select]:
+js-wf/worker.RunPartitionWithPort({0x254e190, 0x16622651c1e0}, 0x7, {0x2548048, 0x16622660d008}, 0x16622632d340, 0x4)
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/worker/worker.go:453 +0xa16
+js-wf/worker.(*Worker).RunPartition(...)
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/worker/worker.go:342
+js-wf/integration_test.runFiveContainerMixedLeader.func18()
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/integration/tier3_mixed_journal_test.go:557 +0x99
+js-wf/integration_test.runFiveContainerMixedLeader.func6.1()
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/integration/tier3_mixed_journal_test.go:404 +0x10f
+created by js-wf/integration_test.runFiveContainerMixedLeader.func6 in goroutine 8
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/integration/tier3_mixed_journal_test.go:399 +0x179
+
+goroutine 92 [select]:
+js-wf/worker.RunPartitionWithPort({0x254e190, 0x16622651c1e0}, 0x8, {0x2548048, 0x166226680008}, 0x16622632d390, 0x4)
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/worker/worker.go:453 +0xa16
+js-wf/worker.(*Worker).RunPartition(...)
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/worker/worker.go:342
+js-wf/integration_test.runFiveContainerMixedLeader.func18()
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/integration/tier3_mixed_journal_test.go:557 +0x99
+js-wf/integration_test.runFiveContainerMixedLeader.func6.1()
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/integration/tier3_mixed_journal_test.go:404 +0x10f
+created by js-wf/integration_test.runFiveContainerMixedLeader.func6 in goroutine 8
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/integration/tier3_mixed_journal_test.go:399 +0x179
+
+goroutine 93 [select]:
+js-wf/worker.RunPartitionWithPort({0x254e190, 0x16622651c1e0}, 0x9, {0x2548048, 0x1662262ba808}, 0x16622632d3e0, 0x4)
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/worker/worker.go:453 +0xa16
+js-wf/worker.(*Worker).RunPartition(...)
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/worker/worker.go:342
+js-wf/integration_test.runFiveContainerMixedLeader.func18()
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/integration/tier3_mixed_journal_test.go:557 +0x99
+js-wf/integration_test.runFiveContainerMixedLeader.func6.1()
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/integration/tier3_mixed_journal_test.go:404 +0x10f
+created by js-wf/integration_test.runFiveContainerMixedLeader.func6 in goroutine 8
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/integration/tier3_mixed_journal_test.go:399 +0x179
+
+goroutine 94 [select]:
+js-wf/worker.RunPartitionWithPort({0x254e190, 0x16622651c1e0}, 0xa, {0x2548048, 0x166226604008}, 0x16622632d430, 0x4)
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/worker/worker.go:453 +0xa16
+js-wf/worker.(*Worker).RunPartition(...)
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/worker/worker.go:342
+js-wf/integration_test.runFiveContainerMixedLeader.func18()
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/integration/tier3_mixed_journal_test.go:557 +0x99
+js-wf/integration_test.runFiveContainerMixedLeader.func6.1()
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/integration/tier3_mixed_journal_test.go:404 +0x10f
+created by js-wf/integration_test.runFiveContainerMixedLeader.func6 in goroutine 8
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/integration/tier3_mixed_journal_test.go:399 +0x179
+
+goroutine 95 [select]:
+js-wf/worker.RunPartitionWithPort({0x254e190, 0x16622651c1e0}, 0xb, {0x2548048, 0x166226608808}, 0x16622632d480, 0x4)
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/worker/worker.go:453 +0xa16
+js-wf/worker.(*Worker).RunPartition(...)
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/worker/worker.go:342
+js-wf/integration_test.runFiveContainerMixedLeader.func18()
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/integration/tier3_mixed_journal_test.go:557 +0x99
+js-wf/integration_test.runFiveContainerMixedLeader.func6.1()
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/integration/tier3_mixed_journal_test.go:404 +0x10f
+created by js-wf/integration_test.runFiveContainerMixedLeader.func6 in goroutine 8
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/integration/tier3_mixed_journal_test.go:399 +0x179
+
+goroutine 96 [select]:
+js-wf/worker.RunPartitionWithPort({0x254e190, 0x16622651c1e0}, 0xc, {0x2548048, 0x16622660d008}, 0x16622632d4d0, 0x4)
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/worker/worker.go:453 +0xa16
+js-wf/worker.(*Worker).RunPartition(...)
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/worker/worker.go:342
+js-wf/integration_test.runFiveContainerMixedLeader.func18()
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/integration/tier3_mixed_journal_test.go:557 +0x99
+js-wf/integration_test.runFiveContainerMixedLeader.func6.1()
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/integration/tier3_mixed_journal_test.go:404 +0x10f
+created by js-wf/integration_test.runFiveContainerMixedLeader.func6 in goroutine 8
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/integration/tier3_mixed_journal_test.go:399 +0x179
+
+goroutine 97 [select]:
+js-wf/worker.RunPartitionWithPort({0x254e190, 0x16622651c1e0}, 0xd, {0x2548048, 0x166226680008}, 0x16622632d520, 0x4)
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/worker/worker.go:453 +0xa16
+js-wf/worker.(*Worker).RunPartition(...)
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/worker/worker.go:342
+js-wf/integration_test.runFiveContainerMixedLeader.func18()
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/integration/tier3_mixed_journal_test.go:557 +0x99
+js-wf/integration_test.runFiveContainerMixedLeader.func6.1()
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/integration/tier3_mixed_journal_test.go:404 +0x10f
+created by js-wf/integration_test.runFiveContainerMixedLeader.func6 in goroutine 8
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/integration/tier3_mixed_journal_test.go:399 +0x179
+
+goroutine 130 [select]:
+js-wf/worker.RunPartitionWithPort({0x254e190, 0x16622651c1e0}, 0xe, {0x2548048, 0x1662262ba808}, 0x16622632d570, 0x4)
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/worker/worker.go:453 +0xa16
+js-wf/worker.(*Worker).RunPartition(...)
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/worker/worker.go:342
+js-wf/integration_test.runFiveContainerMixedLeader.func18()
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/integration/tier3_mixed_journal_test.go:557 +0x99
+js-wf/integration_test.runFiveContainerMixedLeader.func6.1()
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/integration/tier3_mixed_journal_test.go:404 +0x10f
+created by js-wf/integration_test.runFiveContainerMixedLeader.func6 in goroutine 8
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/integration/tier3_mixed_journal_test.go:399 +0x179
+
+goroutine 131 [select]:
+js-wf/worker.RunPartitionWithPort({0x254e190, 0x16622651c1e0}, 0xf, {0x2548048, 0x166226604008}, 0x16622632d5c0, 0x4)
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/worker/worker.go:453 +0xa16
+js-wf/worker.(*Worker).RunPartition(...)
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/worker/worker.go:342
+js-wf/integration_test.runFiveContainerMixedLeader.func18()
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/integration/tier3_mixed_journal_test.go:557 +0x99
+js-wf/integration_test.runFiveContainerMixedLeader.func6.1()
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/integration/tier3_mixed_journal_test.go:404 +0x10f
+created by js-wf/integration_test.runFiveContainerMixedLeader.func6 in goroutine 8
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/integration/tier3_mixed_journal_test.go:399 +0x179
+
+goroutine 132 [select]:
+js-wf/worker.RunPartitionWithPort({0x254e190, 0x16622651c1e0}, 0x10, {0x2548048, 0x166226608808}, 0x16622632d610, 0x4)
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/worker/worker.go:453 +0xa16
+js-wf/worker.(*Worker).RunPartition(...)
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/worker/worker.go:342
+js-wf/integration_test.runFiveContainerMixedLeader.func18()
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/integration/tier3_mixed_journal_test.go:557 +0x99
+js-wf/integration_test.runFiveContainerMixedLeader.func6.1()
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/integration/tier3_mixed_journal_test.go:404 +0x10f
+created by js-wf/integration_test.runFiveContainerMixedLeader.func6 in goroutine 8
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/integration/tier3_mixed_journal_test.go:399 +0x179
+
+goroutine 133 [select]:
+js-wf/worker.RunPartitionWithPort({0x254e190, 0x16622651c1e0}, 0x11, {0x2548048, 0x16622660d008}, 0x16622632d660, 0x4)
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/worker/worker.go:453 +0xa16
+js-wf/worker.(*Worker).RunPartition(...)
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/worker/worker.go:342
+js-wf/integration_test.runFiveContainerMixedLeader.func18()
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/integration/tier3_mixed_journal_test.go:557 +0x99
+js-wf/integration_test.runFiveContainerMixedLeader.func6.1()
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/integration/tier3_mixed_journal_test.go:404 +0x10f
+created by js-wf/integration_test.runFiveContainerMixedLeader.func6 in goroutine 8
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/integration/tier3_mixed_journal_test.go:399 +0x179
+
+goroutine 134 [select]:
+js-wf/worker.RunPartitionWithPort({0x254e190, 0x16622651c1e0}, 0x12, {0x2548048, 0x166226680008}, 0x16622632d6b0, 0x4)
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/worker/worker.go:453 +0xa16
+js-wf/worker.(*Worker).RunPartition(...)
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/worker/worker.go:342
+js-wf/integration_test.runFiveContainerMixedLeader.func18()
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/integration/tier3_mixed_journal_test.go:557 +0x99
+js-wf/integration_test.runFiveContainerMixedLeader.func6.1()
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/integration/tier3_mixed_journal_test.go:404 +0x10f
+created by js-wf/integration_test.runFiveContainerMixedLeader.func6 in goroutine 8
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/integration/tier3_mixed_journal_test.go:399 +0x179
+
+goroutine 135 [select]:
+js-wf/worker.RunPartitionWithPort({0x254e190, 0x16622651c1e0}, 0x13, {0x2548048, 0x1662262ba808}, 0x16622632d700, 0x4)
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/worker/worker.go:453 +0xa16
+js-wf/worker.(*Worker).RunPartition(...)
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/worker/worker.go:342
+js-wf/integration_test.runFiveContainerMixedLeader.func18()
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/integration/tier3_mixed_journal_test.go:557 +0x99
+js-wf/integration_test.runFiveContainerMixedLeader.func6.1()
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/integration/tier3_mixed_journal_test.go:404 +0x10f
+created by js-wf/integration_test.runFiveContainerMixedLeader.func6 in goroutine 8
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/integration/tier3_mixed_journal_test.go:399 +0x179
+
+goroutine 136 [select]:
+js-wf/worker.RunPartitionWithPort({0x254e190, 0x16622651c1e0}, 0x14, {0x2548048, 0x166226604008}, 0x16622632d750, 0x4)
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/worker/worker.go:453 +0xa16
+js-wf/worker.(*Worker).RunPartition(...)
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/worker/worker.go:342
+js-wf/integration_test.runFiveContainerMixedLeader.func18()
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/integration/tier3_mixed_journal_test.go:557 +0x99
+js-wf/integration_test.runFiveContainerMixedLeader.func6.1()
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/integration/tier3_mixed_journal_test.go:404 +0x10f
+created by js-wf/integration_test.runFiveContainerMixedLeader.func6 in goroutine 8
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/integration/tier3_mixed_journal_test.go:399 +0x179
+
+goroutine 137 [select]:
+js-wf/worker.RunPartitionWithPort({0x254e190, 0x16622651c1e0}, 0x15, {0x2548048, 0x166226608808}, 0x16622632d7a0, 0x4)
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/worker/worker.go:453 +0xa16
+js-wf/worker.(*Worker).RunPartition(...)
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/worker/worker.go:342
+js-wf/integration_test.runFiveContainerMixedLeader.func18()
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/integration/tier3_mixed_journal_test.go:557 +0x99
+js-wf/integration_test.runFiveContainerMixedLeader.func6.1()
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/integration/tier3_mixed_journal_test.go:404 +0x10f
+created by js-wf/integration_test.runFiveContainerMixedLeader.func6 in goroutine 8
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/integration/tier3_mixed_journal_test.go:399 +0x179
+
+goroutine 138 [select]:
+js-wf/worker.RunPartitionWithPort({0x254e190, 0x16622651c1e0}, 0x16, {0x2548048, 0x16622660d008}, 0x16622632d7f0, 0x4)
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/worker/worker.go:453 +0xa16
+js-wf/worker.(*Worker).RunPartition(...)
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/worker/worker.go:342
+js-wf/integration_test.runFiveContainerMixedLeader.func18()
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/integration/tier3_mixed_journal_test.go:557 +0x99
+js-wf/integration_test.runFiveContainerMixedLeader.func6.1()
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/integration/tier3_mixed_journal_test.go:404 +0x10f
+created by js-wf/integration_test.runFiveContainerMixedLeader.func6 in goroutine 8
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/integration/tier3_mixed_journal_test.go:399 +0x179
+
+goroutine 139 [select]:
+js-wf/worker.RunPartitionWithPort({0x254e190, 0x16622651c1e0}, 0x17, {0x2548048, 0x166226680008}, 0x16622632d840, 0x4)
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/worker/worker.go:453 +0xa16
+js-wf/worker.(*Worker).RunPartition(...)
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/worker/worker.go:342
+js-wf/integration_test.runFiveContainerMixedLeader.func18()
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/integration/tier3_mixed_journal_test.go:557 +0x99
+js-wf/integration_test.runFiveContainerMixedLeader.func6.1()
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/integration/tier3_mixed_journal_test.go:404 +0x10f
+created by js-wf/integration_test.runFiveContainerMixedLeader.func6 in goroutine 8
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/integration/tier3_mixed_journal_test.go:399 +0x179
+
+goroutine 140 [select]:
+js-wf/worker.RunPartitionWithPort({0x254e190, 0x16622651c1e0}, 0x18, {0x2548048, 0x1662262ba808}, 0x16622632d2f0, 0x4)
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/worker/worker.go:453 +0xa16
+js-wf/worker.(*Worker).RunPartition(...)
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/worker/worker.go:342
+js-wf/integration_test.runFiveContainerMixedLeader.func18()
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/integration/tier3_mixed_journal_test.go:557 +0x99
+js-wf/integration_test.runFiveContainerMixedLeader.func6.1()
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/integration/tier3_mixed_journal_test.go:404 +0x10f
+created by js-wf/integration_test.runFiveContainerMixedLeader.func6 in goroutine 8
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/integration/tier3_mixed_journal_test.go:399 +0x179
+
+goroutine 141 [select]:
+js-wf/worker.RunPartitionWithPort({0x254e190, 0x16622651c1e0}, 0x19, {0x2548048, 0x166226604008}, 0x16622632d8e0, 0x4)
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/worker/worker.go:453 +0xa16
+js-wf/worker.(*Worker).RunPartition(...)
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/worker/worker.go:342
+js-wf/integration_test.runFiveContainerMixedLeader.func18()
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/integration/tier3_mixed_journal_test.go:557 +0x99
+js-wf/integration_test.runFiveContainerMixedLeader.func6.1()
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/integration/tier3_mixed_journal_test.go:404 +0x10f
+created by js-wf/integration_test.runFiveContainerMixedLeader.func6 in goroutine 8
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/integration/tier3_mixed_journal_test.go:399 +0x179
+
+goroutine 142 [select]:
+js-wf/worker.RunPartitionWithPort({0x254e190, 0x16622651c1e0}, 0x1a, {0x2548048, 0x166226608808}, 0x16622632d930, 0x4)
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/worker/worker.go:453 +0xa16
+js-wf/worker.(*Worker).RunPartition(...)
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/worker/worker.go:342
+js-wf/integration_test.runFiveContainerMixedLeader.func18()
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/integration/tier3_mixed_journal_test.go:557 +0x99
+js-wf/integration_test.runFiveContainerMixedLeader.func6.1()
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/integration/tier3_mixed_journal_test.go:404 +0x10f
+created by js-wf/integration_test.runFiveContainerMixedLeader.func6 in goroutine 8
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/integration/tier3_mixed_journal_test.go:399 +0x179
+
+goroutine 143 [select]:
+js-wf/worker.RunPartitionWithPort({0x254e190, 0x16622651c1e0}, 0x1b, {0x2548048, 0x16622660d008}, 0x16622632d980, 0x4)
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/worker/worker.go:453 +0xa16
+js-wf/worker.(*Worker).RunPartition(...)
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/worker/worker.go:342
+js-wf/integration_test.runFiveContainerMixedLeader.func18()
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/integration/tier3_mixed_journal_test.go:557 +0x99
+js-wf/integration_test.runFiveContainerMixedLeader.func6.1()
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/integration/tier3_mixed_journal_test.go:404 +0x10f
+created by js-wf/integration_test.runFiveContainerMixedLeader.func6 in goroutine 8
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/integration/tier3_mixed_journal_test.go:399 +0x179
+
+goroutine 144 [select]:
+js-wf/worker.RunPartitionWithPort({0x254e190, 0x16622651c1e0}, 0x1c, {0x2548048, 0x166226680008}, 0x16622632d890, 0x4)
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/worker/worker.go:453 +0xa16
+js-wf/worker.(*Worker).RunPartition(...)
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/worker/worker.go:342
+js-wf/integration_test.runFiveContainerMixedLeader.func18()
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/integration/tier3_mixed_journal_test.go:557 +0x99
+js-wf/integration_test.runFiveContainerMixedLeader.func6.1()
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/integration/tier3_mixed_journal_test.go:404 +0x10f
+created by js-wf/integration_test.runFiveContainerMixedLeader.func6 in goroutine 8
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/integration/tier3_mixed_journal_test.go:399 +0x179
+
+goroutine 145 [select]:
+js-wf/worker.RunPartitionWithPort({0x254e190, 0x16622651c1e0}, 0x1d, {0x2548048, 0x1662262ba808}, 0x1662264881a0, 0x4)
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/worker/worker.go:453 +0xa16
+js-wf/worker.(*Worker).RunPartition(...)
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/worker/worker.go:342
+js-wf/integration_test.runFiveContainerMixedLeader.func18()
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/integration/tier3_mixed_journal_test.go:557 +0x99
+js-wf/integration_test.runFiveContainerMixedLeader.func6.1()
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/integration/tier3_mixed_journal_test.go:404 +0x10f
+created by js-wf/integration_test.runFiveContainerMixedLeader.func6 in goroutine 8
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/integration/tier3_mixed_journal_test.go:399 +0x179
+
+goroutine 146 [select]:
+js-wf/worker.RunPartitionWithPort({0x254e190, 0x16622651c1e0}, 0x1e, {0x2548048, 0x166226604008}, 0x1662264881f0, 0x4)
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/worker/worker.go:453 +0xa16
+js-wf/worker.(*Worker).RunPartition(...)
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/worker/worker.go:342
+js-wf/integration_test.runFiveContainerMixedLeader.func18()
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/integration/tier3_mixed_journal_test.go:557 +0x99
+js-wf/integration_test.runFiveContainerMixedLeader.func6.1()
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/integration/tier3_mixed_journal_test.go:404 +0x10f
+created by js-wf/integration_test.runFiveContainerMixedLeader.func6 in goroutine 8
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/integration/tier3_mixed_journal_test.go:399 +0x179
+
+goroutine 147 [select]:
+js-wf/worker.RunPartitionWithPort({0x254e190, 0x16622651c1e0}, 0x1f, {0x2548048, 0x166226608808}, 0x166226488240, 0x4)
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/worker/worker.go:453 +0xa16
+js-wf/worker.(*Worker).RunPartition(...)
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/worker/worker.go:342
+js-wf/integration_test.runFiveContainerMixedLeader.func18()
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/integration/tier3_mixed_journal_test.go:557 +0x99
+js-wf/integration_test.runFiveContainerMixedLeader.func6.1()
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/integration/tier3_mixed_journal_test.go:404 +0x10f
+created by js-wf/integration_test.runFiveContainerMixedLeader.func6 in goroutine 8
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/integration/tier3_mixed_journal_test.go:399 +0x179
+
+goroutine 148 [select]:
+js-wf/worker.RunPartitionWithPort({0x254e190, 0x16622651c1e0}, 0x20, {0x2548048, 0x16622660d008}, 0x166226488290, 0x4)
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/worker/worker.go:453 +0xa16
+js-wf/worker.(*Worker).RunPartition(...)
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/worker/worker.go:342
+js-wf/integration_test.runFiveContainerMixedLeader.func18()
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/integration/tier3_mixed_journal_test.go:557 +0x99
+js-wf/integration_test.runFiveContainerMixedLeader.func6.1()
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/integration/tier3_mixed_journal_test.go:404 +0x10f
+created by js-wf/integration_test.runFiveContainerMixedLeader.func6 in goroutine 8
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/integration/tier3_mixed_journal_test.go:399 +0x179
+
+goroutine 149 [select]:
+js-wf/worker.RunPartitionWithPort({0x254e190, 0x16622651c1e0}, 0x21, {0x2548048, 0x166226680008}, 0x166226488150, 0x4)
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/worker/worker.go:453 +0xa16
+js-wf/worker.(*Worker).RunPartition(...)
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/worker/worker.go:342
+js-wf/integration_test.runFiveContainerMixedLeader.func18()
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/integration/tier3_mixed_journal_test.go:557 +0x99
+js-wf/integration_test.runFiveContainerMixedLeader.func6.1()
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/integration/tier3_mixed_journal_test.go:404 +0x10f
+created by js-wf/integration_test.runFiveContainerMixedLeader.func6 in goroutine 8
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/integration/tier3_mixed_journal_test.go:399 +0x179
+
+goroutine 150 [select]:
+js-wf/worker.RunPartitionWithPort({0x254e190, 0x16622651c1e0}, 0x22, {0x2548048, 0x1662262ba808}, 0x166226488330, 0x4)
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/worker/worker.go:453 +0xa16
+js-wf/worker.(*Worker).RunPartition(...)
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/worker/worker.go:342
+js-wf/integration_test.runFiveContainerMixedLeader.func18()
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/integration/tier3_mixed_journal_test.go:557 +0x99
+js-wf/integration_test.runFiveContainerMixedLeader.func6.1()
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/integration/tier3_mixed_journal_test.go:404 +0x10f
+created by js-wf/integration_test.runFiveContainerMixedLeader.func6 in goroutine 8
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/integration/tier3_mixed_journal_test.go:399 +0x179
+
+goroutine 151 [select]:
+js-wf/worker.RunPartitionWithPort({0x254e190, 0x16622651c1e0}, 0x23, {0x2548048, 0x166226604008}, 0x16622632d9d0, 0x4)
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/worker/worker.go:453 +0xa16
+js-wf/worker.(*Worker).RunPartition(...)
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/worker/worker.go:342
+js-wf/integration_test.runFiveContainerMixedLeader.func18()
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/integration/tier3_mixed_journal_test.go:557 +0x99
+js-wf/integration_test.runFiveContainerMixedLeader.func6.1()
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/integration/tier3_mixed_journal_test.go:404 +0x10f
+created by js-wf/integration_test.runFiveContainerMixedLeader.func6 in goroutine 8
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/integration/tier3_mixed_journal_test.go:399 +0x179
+
+goroutine 152 [select]:
+js-wf/worker.RunPartitionWithPort({0x254e190, 0x16622651c1e0}, 0x24, {0x2548048, 0x166226608808}, 0x166226488380, 0x4)
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/worker/worker.go:453 +0xa16
+js-wf/worker.(*Worker).RunPartition(...)
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/worker/worker.go:342
+js-wf/integration_test.runFiveContainerMixedLeader.func18()
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/integration/tier3_mixed_journal_test.go:557 +0x99
+js-wf/integration_test.runFiveContainerMixedLeader.func6.1()
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/integration/tier3_mixed_journal_test.go:404 +0x10f
+created by js-wf/integration_test.runFiveContainerMixedLeader.func6 in goroutine 8
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/integration/tier3_mixed_journal_test.go:399 +0x179
+
+goroutine 153 [select]:
+js-wf/worker.RunPartitionWithPort({0x254e190, 0x16622651c1e0}, 0x25, {0x2548048, 0x16622660d008}, 0x1662264882e0, 0x4)
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/worker/worker.go:453 +0xa16
+js-wf/worker.(*Worker).RunPartition(...)
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/worker/worker.go:342
+js-wf/integration_test.runFiveContainerMixedLeader.func18()
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/integration/tier3_mixed_journal_test.go:557 +0x99
+js-wf/integration_test.runFiveContainerMixedLeader.func6.1()
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/integration/tier3_mixed_journal_test.go:404 +0x10f
+created by js-wf/integration_test.runFiveContainerMixedLeader.func6 in goroutine 8
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/integration/tier3_mixed_journal_test.go:399 +0x179
+
+goroutine 154 [select]:
+js-wf/worker.RunPartitionWithPort({0x254e190, 0x16622651c1e0}, 0x26, {0x2548048, 0x166226680008}, 0x166226488420, 0x4)
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/worker/worker.go:453 +0xa16
+js-wf/worker.(*Worker).RunPartition(...)
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/worker/worker.go:342
+js-wf/integration_test.runFiveContainerMixedLeader.func18()
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/integration/tier3_mixed_journal_test.go:557 +0x99
+js-wf/integration_test.runFiveContainerMixedLeader.func6.1()
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/integration/tier3_mixed_journal_test.go:404 +0x10f
+created by js-wf/integration_test.runFiveContainerMixedLeader.func6 in goroutine 8
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/integration/tier3_mixed_journal_test.go:399 +0x179
+
+goroutine 155 [select]:
+js-wf/worker.RunPartitionWithPort({0x254e190, 0x16622651c1e0}, 0x27, {0x2548048, 0x1662262ba808}, 0x1662264883d0, 0x4)
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/worker/worker.go:453 +0xa16
+js-wf/worker.(*Worker).RunPartition(...)
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/worker/worker.go:342
+js-wf/integration_test.runFiveContainerMixedLeader.func18()
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/integration/tier3_mixed_journal_test.go:557 +0x99
+js-wf/integration_test.runFiveContainerMixedLeader.func6.1()
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/integration/tier3_mixed_journal_test.go:404 +0x10f
+created by js-wf/integration_test.runFiveContainerMixedLeader.func6 in goroutine 8
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/integration/tier3_mixed_journal_test.go:399 +0x179
+
+goroutine 156 [select]:
+js-wf/worker.RunPartitionWithPort({0x254e190, 0x16622651c1e0}, 0x28, {0x2548048, 0x166226604008}, 0x166226488470, 0x4)
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/worker/worker.go:453 +0xa16
+js-wf/worker.(*Worker).RunPartition(...)
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/worker/worker.go:342
+js-wf/integration_test.runFiveContainerMixedLeader.func18()
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/integration/tier3_mixed_journal_test.go:557 +0x99
+js-wf/integration_test.runFiveContainerMixedLeader.func6.1()
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/integration/tier3_mixed_journal_test.go:404 +0x10f
+created by js-wf/integration_test.runFiveContainerMixedLeader.func6 in goroutine 8
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/integration/tier3_mixed_journal_test.go:399 +0x179
+
+goroutine 157 [select]:
+js-wf/worker.RunPartitionWithPort({0x254e190, 0x16622651c1e0}, 0x29, {0x2548048, 0x166226608808}, 0x1662264884c0, 0x4)
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/worker/worker.go:453 +0xa16
+js-wf/worker.(*Worker).RunPartition(...)
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/worker/worker.go:342
+js-wf/integration_test.runFiveContainerMixedLeader.func18()
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/integration/tier3_mixed_journal_test.go:557 +0x99
+js-wf/integration_test.runFiveContainerMixedLeader.func6.1()
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/integration/tier3_mixed_journal_test.go:404 +0x10f
+created by js-wf/integration_test.runFiveContainerMixedLeader.func6 in goroutine 8
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/integration/tier3_mixed_journal_test.go:399 +0x179
+
+goroutine 158 [select]:
+js-wf/worker.RunPartitionWithPort({0x254e190, 0x16622651c1e0}, 0x2a, {0x2548048, 0x16622660d008}, 0x1662263c98e0, 0x4)
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/worker/worker.go:453 +0xa16
+js-wf/worker.(*Worker).RunPartition(...)
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/worker/worker.go:342
+js-wf/integration_test.runFiveContainerMixedLeader.func18()
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/integration/tier3_mixed_journal_test.go:557 +0x99
+js-wf/integration_test.runFiveContainerMixedLeader.func6.1()
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/integration/tier3_mixed_journal_test.go:404 +0x10f
+created by js-wf/integration_test.runFiveContainerMixedLeader.func6 in goroutine 8
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/integration/tier3_mixed_journal_test.go:399 +0x179
+
+goroutine 159 [select]:
+js-wf/worker.RunPartitionWithPort({0x254e190, 0x16622651c1e0}, 0x2b, {0x2548048, 0x166226680008}, 0x1662263c9930, 0x4)
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/worker/worker.go:453 +0xa16
+js-wf/worker.(*Worker).RunPartition(...)
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/worker/worker.go:342
+js-wf/integration_test.runFiveContainerMixedLeader.func18()
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/integration/tier3_mixed_journal_test.go:557 +0x99
+js-wf/integration_test.runFiveContainerMixedLeader.func6.1()
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/integration/tier3_mixed_journal_test.go:404 +0x10f
+created by js-wf/integration_test.runFiveContainerMixedLeader.func6 in goroutine 8
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/integration/tier3_mixed_journal_test.go:399 +0x179
+
+goroutine 160 [select]:
+js-wf/worker.RunPartitionWithPort({0x254e190, 0x16622651c1e0}, 0x2c, {0x2548048, 0x1662262ba808}, 0x1662263c9980, 0x4)
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/worker/worker.go:453 +0xa16
+js-wf/worker.(*Worker).RunPartition(...)
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/worker/worker.go:342
+js-wf/integration_test.runFiveContainerMixedLeader.func18()
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/integration/tier3_mixed_journal_test.go:557 +0x99
+js-wf/integration_test.runFiveContainerMixedLeader.func6.1()
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/integration/tier3_mixed_journal_test.go:404 +0x10f
+created by js-wf/integration_test.runFiveContainerMixedLeader.func6 in goroutine 8
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/integration/tier3_mixed_journal_test.go:399 +0x179
+
+goroutine 161 [select]:
+js-wf/worker.RunPartitionWithPort({0x254e190, 0x16622651c1e0}, 0x2d, {0x2548048, 0x166226604008}, 0x1662263c99d0, 0x4)
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/worker/worker.go:453 +0xa16
+js-wf/worker.(*Worker).RunPartition(...)
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/worker/worker.go:342
+js-wf/integration_test.runFiveContainerMixedLeader.func18()
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/integration/tier3_mixed_journal_test.go:557 +0x99
+js-wf/integration_test.runFiveContainerMixedLeader.func6.1()
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/integration/tier3_mixed_journal_test.go:404 +0x10f
+created by js-wf/integration_test.runFiveContainerMixedLeader.func6 in goroutine 8
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/integration/tier3_mixed_journal_test.go:399 +0x179
+
+goroutine 162 [select]:
+js-wf/worker.RunPartitionWithPort({0x254e190, 0x16622651c1e0}, 0x2e, {0x2548048, 0x166226608808}, 0x1662263c9a20, 0x4)
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/worker/worker.go:453 +0xa16
+js-wf/worker.(*Worker).RunPartition(...)
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/worker/worker.go:342
+js-wf/integration_test.runFiveContainerMixedLeader.func18()
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/integration/tier3_mixed_journal_test.go:557 +0x99
+js-wf/integration_test.runFiveContainerMixedLeader.func6.1()
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/integration/tier3_mixed_journal_test.go:404 +0x10f
+created by js-wf/integration_test.runFiveContainerMixedLeader.func6 in goroutine 8
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/integration/tier3_mixed_journal_test.go:399 +0x179
+
+goroutine 163 [select]:
+js-wf/worker.RunPartitionWithPort({0x254e190, 0x16622651c1e0}, 0x2f, {0x2548048, 0x16622660d008}, 0x1662263c9a70, 0x4)
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/worker/worker.go:453 +0xa16
+js-wf/worker.(*Worker).RunPartition(...)
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/worker/worker.go:342
+js-wf/integration_test.runFiveContainerMixedLeader.func18()
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/integration/tier3_mixed_journal_test.go:557 +0x99
+js-wf/integration_test.runFiveContainerMixedLeader.func6.1()
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/integration/tier3_mixed_journal_test.go:404 +0x10f
+created by js-wf/integration_test.runFiveContainerMixedLeader.func6 in goroutine 8
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/integration/tier3_mixed_journal_test.go:399 +0x179
+
+goroutine 164 [select]:
+js-wf/worker.RunPartitionWithPort({0x254e190, 0x16622651c1e0}, 0x30, {0x2548048, 0x166226680008}, 0x1662263c9ac0, 0x4)
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/worker/worker.go:453 +0xa16
+js-wf/worker.(*Worker).RunPartition(...)
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/worker/worker.go:342
+js-wf/integration_test.runFiveContainerMixedLeader.func18()
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/integration/tier3_mixed_journal_test.go:557 +0x99
+js-wf/integration_test.runFiveContainerMixedLeader.func6.1()
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/integration/tier3_mixed_journal_test.go:404 +0x10f
+created by js-wf/integration_test.runFiveContainerMixedLeader.func6 in goroutine 8
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/integration/tier3_mixed_journal_test.go:399 +0x179
+
+goroutine 165 [select]:
+js-wf/worker.RunPartitionWithPort({0x254e190, 0x16622651c1e0}, 0x31, {0x2548048, 0x1662262ba808}, 0x1662263c9b10, 0x4)
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/worker/worker.go:453 +0xa16
+js-wf/worker.(*Worker).RunPartition(...)
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/worker/worker.go:342
+js-wf/integration_test.runFiveContainerMixedLeader.func18()
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/integration/tier3_mixed_journal_test.go:557 +0x99
+js-wf/integration_test.runFiveContainerMixedLeader.func6.1()
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/integration/tier3_mixed_journal_test.go:404 +0x10f
+created by js-wf/integration_test.runFiveContainerMixedLeader.func6 in goroutine 8
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/integration/tier3_mixed_journal_test.go:399 +0x179
+
+goroutine 166 [select]:
+js-wf/worker.RunPartitionWithPort({0x254e190, 0x16622651c1e0}, 0x32, {0x2548048, 0x166226604008}, 0x1662263c9b60, 0x4)
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/worker/worker.go:453 +0xa16
+js-wf/worker.(*Worker).RunPartition(...)
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/worker/worker.go:342
+js-wf/integration_test.runFiveContainerMixedLeader.func18()
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/integration/tier3_mixed_journal_test.go:557 +0x99
+js-wf/integration_test.runFiveContainerMixedLeader.func6.1()
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/integration/tier3_mixed_journal_test.go:404 +0x10f
+created by js-wf/integration_test.runFiveContainerMixedLeader.func6 in goroutine 8
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/integration/tier3_mixed_journal_test.go:399 +0x179
+
+goroutine 167 [select]:
+js-wf/worker.RunPartitionWithPort({0x254e190, 0x16622651c1e0}, 0x33, {0x2548048, 0x166226608808}, 0x1662263c9bb0, 0x4)
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/worker/worker.go:453 +0xa16
+js-wf/worker.(*Worker).RunPartition(...)
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/worker/worker.go:342
+js-wf/integration_test.runFiveContainerMixedLeader.func18()
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/integration/tier3_mixed_journal_test.go:557 +0x99
+js-wf/integration_test.runFiveContainerMixedLeader.func6.1()
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/integration/tier3_mixed_journal_test.go:404 +0x10f
+created by js-wf/integration_test.runFiveContainerMixedLeader.func6 in goroutine 8
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/integration/tier3_mixed_journal_test.go:399 +0x179
+
+goroutine 168 [select]:
+js-wf/worker.RunPartitionWithPort({0x254e190, 0x16622651c1e0}, 0x34, {0x2548048, 0x16622660d008}, 0x1662263c9c00, 0x4)
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/worker/worker.go:453 +0xa16
+js-wf/worker.(*Worker).RunPartition(...)
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/worker/worker.go:342
+js-wf/integration_test.runFiveContainerMixedLeader.func18()
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/integration/tier3_mixed_journal_test.go:557 +0x99
+js-wf/integration_test.runFiveContainerMixedLeader.func6.1()
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/integration/tier3_mixed_journal_test.go:404 +0x10f
+created by js-wf/integration_test.runFiveContainerMixedLeader.func6 in goroutine 8
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/integration/tier3_mixed_journal_test.go:399 +0x179
+
+goroutine 169 [select]:
+js-wf/worker.RunPartitionWithPort({0x254e190, 0x16622651c1e0}, 0x35, {0x2548048, 0x166226680008}, 0x1662263c9890, 0x4)
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/worker/worker.go:453 +0xa16
+js-wf/worker.(*Worker).RunPartition(...)
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/worker/worker.go:342
+js-wf/integration_test.runFiveContainerMixedLeader.func18()
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/integration/tier3_mixed_journal_test.go:557 +0x99
+js-wf/integration_test.runFiveContainerMixedLeader.func6.1()
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/integration/tier3_mixed_journal_test.go:404 +0x10f
+created by js-wf/integration_test.runFiveContainerMixedLeader.func6 in goroutine 8
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/integration/tier3_mixed_journal_test.go:399 +0x179
+
+goroutine 170 [select]:
+js-wf/worker.RunPartitionWithPort({0x254e190, 0x16622651c1e0}, 0x36, {0x2548048, 0x1662262ba808}, 0x16622632da70, 0x4)
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/worker/worker.go:453 +0xa16
+js-wf/worker.(*Worker).RunPartition(...)
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/worker/worker.go:342
+js-wf/integration_test.runFiveContainerMixedLeader.func18()
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/integration/tier3_mixed_journal_test.go:557 +0x99
+js-wf/integration_test.runFiveContainerMixedLeader.func6.1()
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/integration/tier3_mixed_journal_test.go:404 +0x10f
+created by js-wf/integration_test.runFiveContainerMixedLeader.func6 in goroutine 8
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/integration/tier3_mixed_journal_test.go:399 +0x179
+
+goroutine 171 [select]:
+js-wf/worker.RunPartitionWithPort({0x254e190, 0x16622651c1e0}, 0x37, {0x2548048, 0x166226604008}, 0x16622632dac0, 0x4)
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/worker/worker.go:453 +0xa16
+js-wf/worker.(*Worker).RunPartition(...)
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/worker/worker.go:342
+js-wf/integration_test.runFiveContainerMixedLeader.func18()
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/integration/tier3_mixed_journal_test.go:557 +0x99
+js-wf/integration_test.runFiveContainerMixedLeader.func6.1()
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/integration/tier3_mixed_journal_test.go:404 +0x10f
+created by js-wf/integration_test.runFiveContainerMixedLeader.func6 in goroutine 8
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/integration/tier3_mixed_journal_test.go:399 +0x179
+
+goroutine 172 [select]:
+js-wf/worker.RunPartitionWithPort({0x254e190, 0x16622651c1e0}, 0x38, {0x2548048, 0x166226608808}, 0x16622632db10, 0x4)
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/worker/worker.go:453 +0xa16
+js-wf/worker.(*Worker).RunPartition(...)
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/worker/worker.go:342
+js-wf/integration_test.runFiveContainerMixedLeader.func18()
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/integration/tier3_mixed_journal_test.go:557 +0x99
+js-wf/integration_test.runFiveContainerMixedLeader.func6.1()
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/integration/tier3_mixed_journal_test.go:404 +0x10f
+created by js-wf/integration_test.runFiveContainerMixedLeader.func6 in goroutine 8
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/integration/tier3_mixed_journal_test.go:399 +0x179
+
+goroutine 173 [select]:
+js-wf/worker.RunPartitionWithPort({0x254e190, 0x16622651c1e0}, 0x39, {0x2548048, 0x16622660d008}, 0x16622632db60, 0x4)
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/worker/worker.go:453 +0xa16
+js-wf/worker.(*Worker).RunPartition(...)
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/worker/worker.go:342
+js-wf/integration_test.runFiveContainerMixedLeader.func18()
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/integration/tier3_mixed_journal_test.go:557 +0x99
+js-wf/integration_test.runFiveContainerMixedLeader.func6.1()
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/integration/tier3_mixed_journal_test.go:404 +0x10f
+created by js-wf/integration_test.runFiveContainerMixedLeader.func6 in goroutine 8
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/integration/tier3_mixed_journal_test.go:399 +0x179
+
+goroutine 174 [select]:
+js-wf/worker.RunPartitionWithPort({0x254e190, 0x16622651c1e0}, 0x3a, {0x2548048, 0x166226680008}, 0x16622632dbb0, 0x4)
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/worker/worker.go:453 +0xa16
+js-wf/worker.(*Worker).RunPartition(...)
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/worker/worker.go:342
+js-wf/integration_test.runFiveContainerMixedLeader.func18()
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/integration/tier3_mixed_journal_test.go:557 +0x99
+js-wf/integration_test.runFiveContainerMixedLeader.func6.1()
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/integration/tier3_mixed_journal_test.go:404 +0x10f
+created by js-wf/integration_test.runFiveContainerMixedLeader.func6 in goroutine 8
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/integration/tier3_mixed_journal_test.go:399 +0x179
+
+goroutine 175 [select]:
+js-wf/worker.RunPartitionWithPort({0x254e190, 0x16622651c1e0}, 0x3b, {0x2548048, 0x1662262ba808}, 0x16622632da20, 0x4)
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/worker/worker.go:453 +0xa16
+js-wf/worker.(*Worker).RunPartition(...)
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/worker/worker.go:342
+js-wf/integration_test.runFiveContainerMixedLeader.func18()
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/integration/tier3_mixed_journal_test.go:557 +0x99
+js-wf/integration_test.runFiveContainerMixedLeader.func6.1()
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/integration/tier3_mixed_journal_test.go:404 +0x10f
+created by js-wf/integration_test.runFiveContainerMixedLeader.func6 in goroutine 8
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/integration/tier3_mixed_journal_test.go:399 +0x179
+
+goroutine 176 [select]:
+js-wf/worker.RunPartitionWithPort({0x254e190, 0x16622651c1e0}, 0x3c, {0x2548048, 0x166226604008}, 0x16622632dc50, 0x4)
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/worker/worker.go:453 +0xa16
+js-wf/worker.(*Worker).RunPartition(...)
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/worker/worker.go:342
+js-wf/integration_test.runFiveContainerMixedLeader.func18()
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/integration/tier3_mixed_journal_test.go:557 +0x99
+js-wf/integration_test.runFiveContainerMixedLeader.func6.1()
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/integration/tier3_mixed_journal_test.go:404 +0x10f
+created by js-wf/integration_test.runFiveContainerMixedLeader.func6 in goroutine 8
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/integration/tier3_mixed_journal_test.go:399 +0x179
+
+goroutine 177 [select]:
+js-wf/worker.RunPartitionWithPort({0x254e190, 0x16622651c1e0}, 0x3d, {0x2548048, 0x166226608808}, 0x16622632dca0, 0x4)
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/worker/worker.go:453 +0xa16
+js-wf/worker.(*Worker).RunPartition(...)
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/worker/worker.go:342
+js-wf/integration_test.runFiveContainerMixedLeader.func18()
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/integration/tier3_mixed_journal_test.go:557 +0x99
+js-wf/integration_test.runFiveContainerMixedLeader.func6.1()
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/integration/tier3_mixed_journal_test.go:404 +0x10f
+created by js-wf/integration_test.runFiveContainerMixedLeader.func6 in goroutine 8
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/integration/tier3_mixed_journal_test.go:399 +0x179
+
+goroutine 178 [select]:
+js-wf/worker.RunPartitionWithPort({0x254e190, 0x16622651c1e0}, 0x3e, {0x2548048, 0x16622660d008}, 0x16622632dc00, 0x4)
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/worker/worker.go:453 +0xa16
+js-wf/worker.(*Worker).RunPartition(...)
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/worker/worker.go:342
+js-wf/integration_test.runFiveContainerMixedLeader.func18()
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/integration/tier3_mixed_journal_test.go:557 +0x99
+js-wf/integration_test.runFiveContainerMixedLeader.func6.1()
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/integration/tier3_mixed_journal_test.go:404 +0x10f
+created by js-wf/integration_test.runFiveContainerMixedLeader.func6 in goroutine 8
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/integration/tier3_mixed_journal_test.go:399 +0x179
+
+goroutine 179 [select]:
+js-wf/worker.RunPartitionWithPort({0x254e190, 0x16622651c1e0}, 0x3f, {0x2548048, 0x166226680008}, 0x16622632dcf0, 0x4)
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/worker/worker.go:453 +0xa16
+js-wf/worker.(*Worker).RunPartition(...)
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/worker/worker.go:342
+js-wf/integration_test.runFiveContainerMixedLeader.func18()
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/integration/tier3_mixed_journal_test.go:557 +0x99
+js-wf/integration_test.runFiveContainerMixedLeader.func6.1()
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/integration/tier3_mixed_journal_test.go:404 +0x10f
+created by js-wf/integration_test.runFiveContainerMixedLeader.func6 in goroutine 8
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/integration/tier3_mixed_journal_test.go:399 +0x179
+
+goroutine 180 [select]:
+js-wf/reconcile.(*jetStreamLoopPort).Wait(0x166226570c90, {0x254e190, 0x16622651c230}, 0x25d6ef0?)
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/reconcile/loop.go:70 +0x6c
+js-wf/reconcile.RunLoopWithPort.func1(...)
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/reconcile/loop.go:133
+js-wf/reconcile.RunLoopWithPort({0x254e190, 0x16622651c230}, {0x254f138, 0x166226570c90}, {0x150f970, 0x11}, {0x14fe478, 0x5}, 0x3b9aca00, 0x20, ...)
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/reconcile/loop.go:252 +0x9e7
+js-wf/reconcile.runLoop({0x254e190, 0x16622651c230}, {0x255a130, 0x16622628e870}, {0x150f970, 0x11}, {0x14fe478, 0x5}, 0x3b9aca00, 0x20, ...)
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/reconcile/loop.go:120 +0x218
+js-wf/reconcile.runRepairLoopObserved({0x254e190, 0x16622651c230}, {0x255a130, 0x16622628e870}, {0x150f970, 0x11}, {0x14fe478, 0x5}, 0x3b9aca00, 0x20, ...)
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/reconcile/observations.go:120 +0x945
+js-wf/reconcile.RunRepairLoopWithScanObserver(...)
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/reconcile/observations.go:61
+js-wf/integration_test.runFiveContainerMixedLeader.func21()
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/integration/tier3_mixed_journal_test.go:608 +0x92
+js-wf/integration_test.runFiveContainerMixedLeader.func6.1()
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/integration/tier3_mixed_journal_test.go:404 +0x10f
+created by js-wf/integration_test.runFiveContainerMixedLeader.func6 in goroutine 8
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/integration/tier3_mixed_journal_test.go:399 +0x179
+
+goroutine 181 [select]:
+github.com/nats-io/nats%2ego.(*Conn).requestWithContext(0x166226374e08, {0x254e200, 0x1662942fa930}, {0x1662c9f43380, 0x1d}, {0x0, 0x0, 0x0}, {0x166265731130, 0xe, ...})
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/context.go:67 +0x225
+github.com/nats-io/nats%2ego.(*Conn).RequestWithContext(...)
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/context.go:37
+github.com/nats-io/nats.go/jetstream.(*jetStream).apiRequest(0x16622628e870, {0x254e200, 0x1662942fa930}, {0x1662acea6168?, 0x15?}, {0x16622ab6d388, 0x1, 0x1?})
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/jetstream/api.go:139 +0x119
+github.com/nats-io/nats.go/jetstream.(*jetStream).apiRequestJSON(0x1?, {0x254e200?, 0x1662942fa930?}, {0x1662acea6168?, 0x43e325?}, {0x22758c8, 0x1662976252c0}, {0x16622ab6d388, 0x1, 0x1})
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/jetstream/api.go:116 +0x4e
+github.com/nats-io/nats.go/jetstream.(*stream).getMsg(0x166226416be0, {0x254e200?, 0x1662942fa930?}, 0x166297b86db0)
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/jetstream/stream.go:596 +0x525
+github.com/nats-io/nats.go/jetstream.(*stream).GetMsg(0x166226416be0, {0x254e200, 0x1662942fa930}, 0x2c327, {0x0, 0x0, 0x14?})
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/jetstream/stream.go:555 +0xac
+js-wf/reconcile.(*jetStreamSignalScanPort).GetSignal(0x1662e11a7477?, {0x254e200, 0x1662942fa930}, 0x2c327)
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/reconcile/signals.go:75 +0x62
+js-wf/reconcile.(*SignalScan).Scan(0x16622ab6dca8, {0x254e200, 0x1662942fa930}, 0x2c319, 0x20, 0x0)
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/reconcile/signals.go:131 +0x2c2
+js-wf/reconcile.RunLoopWithPort({0x254e190, 0x16622651c230}, {0x254f138, 0x166226570d20}, {0x1511751, 0x12}, {0x14ff505, 0x6}, 0x3b9aca00, 0x20, ...)
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/reconcile/loop.go:205 +0x7e4
+js-wf/reconcile.runLoop({0x254e190, 0x16622651c230}, {0x255a130, 0x16622628e870}, {0x1511751, 0x12}, {0x14ff505, 0x6}, 0x3b9aca00, 0x20, ...)
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/reconcile/loop.go:120 +0x218
+js-wf/reconcile.runRepairLoopObserved({0x254e190, 0x16622651c230}, {0x255a130, 0x16622628e870}, {0x1511751, 0x12}, {0x14ff505, 0x6}, 0x3b9aca00, 0x20, ...)
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/reconcile/observations.go:120 +0x945
+js-wf/reconcile.RunRepairLoopWithClock(...)
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/reconcile/observations.go:74
+js-wf/reconcile.RunRepairLoopObserved(...)
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/reconcile/observations.go:68
+js-wf/integration_test.runFiveContainerMixedLeader.func22()
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/integration/tier3_mixed_journal_test.go:615 +0x5b
+js-wf/integration_test.runFiveContainerMixedLeader.func6.1()
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/integration/tier3_mixed_journal_test.go:404 +0x10f
+created by js-wf/integration_test.runFiveContainerMixedLeader.func6 in goroutine 8
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/integration/tier3_mixed_journal_test.go:399 +0x179
+
+goroutine 182 [select]:
+js-wf/reconcile.(*jetStreamLoopPort).Wait(0x166226403980, {0x254e190, 0x16622651c230}, 0x25d6ef0?)
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/reconcile/loop.go:70 +0x6c
+js-wf/reconcile.RunLoopWithPort.func1(...)
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/reconcile/loop.go:133
+js-wf/reconcile.RunLoopWithPort({0x254e190, 0x16622651c230}, {0x254f138, 0x166226403980}, {0x15175b5, 0x15}, {0x1503918, 0x9}, 0x3b9aca00, 0x8, ...)
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/reconcile/loop.go:252 +0x9e7
+js-wf/reconcile.runLoop({0x254e190, 0x16622651c230}, {0x255a130, 0x16622628e870}, {0x15175b5, 0x15}, {0x1503918, 0x9}, 0x3b9aca00, 0x8, ...)
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/reconcile/loop.go:120 +0x218
+js-wf/reconcile.RunSuspendedLoopWithClockAndObservers({0x254e190, 0x16622651c230}, {0x255a130, 0x16622628e870}, {0x15175b5, 0x15}, 0x3b9aca00, 0x8, 0x16622669b620, 0x166226326c00, ...)
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/reconcile/suspended.go:533 +0x3f7
+js-wf/integration_test.runFiveContainerMixedLeader.func23()
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/integration/tier3_mixed_journal_test.go:636 +0x72
+js-wf/integration_test.runFiveContainerMixedLeader.func6.1()
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/integration/tier3_mixed_journal_test.go:404 +0x10f
+created by js-wf/integration_test.runFiveContainerMixedLeader.func6 in goroutine 8
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/integration/tier3_mixed_journal_test.go:399 +0x179
+
+goroutine 110156369 [select]:
+github.com/nats-io/nats.go/jetstream.(*pullConsumer).fetch.func1(0x166293f189c0)
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/jetstream/pull.go:954 +0x1b9
+created by github.com/nats-io/nats.go/jetstream.(*pullConsumer).fetch in goroutine 154
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/jetstream/pull.go:950 +0x471
+
+goroutine 110156464 [select]:
+github.com/nats-io/nats%2ego.(*Conn).requestWithContext(0x166226374e08, {0x254e200, 0x1662976ed6c0}, {0x1662e4f38000, 0x1d}, {0x0, 0x0, 0x0}, {0x166296fa2b40, 0x4d, ...})
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/context.go:67 +0x225
+github.com/nats-io/nats%2ego.(*Conn).RequestWithContext(...)
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/context.go:37
+github.com/nats-io/nats.go/jetstream.(*jetStream).apiRequest(0x16622628e870, {0x254e200, 0x1662976ed6c0}, {0x1662c8c91e30?, 0x15?}, {0x1662909598a8, 0x1, 0x1?})
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/jetstream/api.go:139 +0x119
+github.com/nats-io/nats.go/jetstream.(*jetStream).apiRequestJSON(0x1?, {0x254e200?, 0x1662976ed6c0?}, {0x1662c8c91e30?, 0x4905cb?}, {0x22758c8, 0x1662976fd2c0}, {0x1662909598a8, 0x1, 0x1})
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/jetstream/api.go:116 +0x4e
+github.com/nats-io/nats.go/jetstream.(*stream).getMsg(0x166226a008e0, {0x254e200?, 0x1662976ed6c0?}, 0x1662976f2f00)
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/jetstream/stream.go:596 +0x525
+github.com/nats-io/nats.go/jetstream.(*stream).GetLastMsgForSubject(0x166226a008e0, {0x254e200, 0x1662976ed6c0}, {0x1662c3537e80, 0x3a})
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/jetstream/stream.go:561 +0x7e
+js-wf/journal.(*Store).MaybeSnapshot(0x166226602000, {0x254e200, 0x1662976ed6c0}, {0x1662d4ac9280, 0x10}, {0x1662d4ac9291, 0x22}, 0x100, 0x10)
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/journal/snapshot.go:172 +0x26a
+js-wf/worker.(*Worker).handle(0x166226604008, {0x254e190, 0x1662261e99f0}, {0x25544b8, 0x166296365cc0})
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/worker/worker.go:727 +0xf99
+js-wf/worker.RunPartitionWithPort.func4({0x25544b8?, 0x166296365cc0?})
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/worker/worker.go:477 +0x93
+created by js-wf/worker.RunPartitionWithPort in goroutine 166
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/worker/worker.go:474 +0xb89
+
+goroutine 110156453 [select]:
+github.com/nats-io/nats.go/jetstream.(*pullConsumer).fetch.func1(0x166295827470)
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/jetstream/pull.go:954 +0x1b9
+created by github.com/nats-io/nats.go/jetstream.(*pullConsumer).fetch in goroutine 153
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/jetstream/pull.go:950 +0x471
+
+goroutine 110156385 [select]:
+github.com/nats-io/nats.go/jetstream.(*pullConsumer).fetch.func1(0x166294bd73e0)
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/jetstream/pull.go:954 +0x1b9
+created by github.com/nats-io/nats.go/jetstream.(*pullConsumer).fetch in goroutine 88
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/jetstream/pull.go:950 +0x471
+
+goroutine 110156431 [select]:
+github.com/nats-io/nats.go/jetstream.(*pullConsumer).fetch.func1(0x166295b25350)
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/jetstream/pull.go:954 +0x1b9
+created by github.com/nats-io/nats.go/jetstream.(*pullConsumer).fetch in goroutine 97
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/jetstream/pull.go:950 +0x471
+
+goroutine 109412468 [IO wait]:
+internal/poll.runtime_pollWait(0x7fa5dbe1f400, 0x72)
+	/usr/local/go/src/runtime/netpoll.go:351 +0x85
+internal/poll.(*pollDesc).wait(0x16623ba91880?, 0x166253645000?, 0x0)
+	/usr/local/go/src/internal/poll/fd_poll_runtime.go:84 +0x27
+internal/poll.(*pollDesc).waitRead(...)
+	/usr/local/go/src/internal/poll/fd_poll_runtime.go:89
+internal/poll.(*FD).Read(0x16623ba91880, {0x166253645000, 0x1000, 0x1000})
+	/usr/local/go/src/internal/poll/fd_unix.go:170 +0x2a8
+net.(*netFD).Read(0x16623ba91880, {0x166253645000?, 0x40959c?, 0x23322c8?})
+	/usr/local/go/src/net/fd_posix.go:68 +0x25
+net.(*conn).Read(0x166258975398, {0x166253645000?, 0x166226ac4d50?, 0x2330e10?})
+	/usr/local/go/src/net/net.go:196 +0x45
+net/http.(*persistConn).Read(0x16625961c280, {0x166253645000?, 0x2542e40?, 0x25da4f0?})
+	/usr/local/go/src/net/http/transport.go:2300 +0x47
+bufio.(*Reader).fill(0x166259604cc0)
+	/usr/local/go/src/bufio/bufio.go:113 +0x103
+bufio.(*Reader).Peek(0x166259604cc0, 0x1)
+	/usr/local/go/src/bufio/bufio.go:152 +0x52
+net/http.(*persistConn).readLoop(0x16625961c280)
+	/usr/local/go/src/net/http/transport.go:2483 +0x172
+created by net/http.(*Transport).dialConn in goroutine 109412467
+	/usr/local/go/src/net/http/transport.go:2123 +0x1da5
+
+goroutine 110156251 [select]:
+github.com/nats-io/nats.go/jetstream.(*pullConsumer).fetch.func1(0x16628f974ba0)
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/jetstream/pull.go:954 +0x1b9
+created by github.com/nats-io/nats.go/jetstream.(*pullConsumer).fetch in goroutine 162
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/jetstream/pull.go:950 +0x471
+
+goroutine 110156511 [select]:
+js-wf/worker.(*Worker).handle.func6()
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/worker/worker.go:674 +0x211
+created by js-wf/worker.(*Worker).handle in goroutine 110156522
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/worker/worker.go:665 +0xc0b
+
+goroutine 110156311 [select]:
+github.com/nats-io/nats.go/jetstream.(*pullConsumer).fetch.func1(0x1662910df290)
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/jetstream/pull.go:954 +0x1b9
+created by github.com/nats-io/nats.go/jetstream.(*pullConsumer).fetch in goroutine 144
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/jetstream/pull.go:950 +0x471
+
+goroutine 110156457 [select]:
+github.com/nats-io/nats.go/jetstream.(*pullConsumer).fetch.func1(0x1662958d2990)
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/jetstream/pull.go:954 +0x1b9
+created by github.com/nats-io/nats.go/jetstream.(*pullConsumer).fetch in goroutine 131
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/jetstream/pull.go:950 +0x471
+
+goroutine 110156458 [select]:
+github.com/nats-io/nats.go/jetstream.(*pullConsumer).fetch.func1(0x1662958d2a50)
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/jetstream/pull.go:954 +0x1b9
+created by github.com/nats-io/nats.go/jetstream.(*pullConsumer).fetch in goroutine 169
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/jetstream/pull.go:950 +0x471
+
+goroutine 110156436 [select]:
+github.com/nats-io/nats.go/jetstream.(*pullConsumer).fetch.func1(0x166294e28870)
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/jetstream/pull.go:954 +0x1b9
+created by github.com/nats-io/nats.go/jetstream.(*pullConsumer).fetch in goroutine 170
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/jetstream/pull.go:950 +0x471
+
+goroutine 110156527 [select]:
+github.com/nats-io/nats.go/jetstream.(*pullConsumer).fetch.func1(0x1662976c1ec0)
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/jetstream/pull.go:954 +0x1b9
+created by github.com/nats-io/nats.go/jetstream.(*pullConsumer).fetch in goroutine 157
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/jetstream/pull.go:950 +0x471
+
+goroutine 110156252 [select]:
+github.com/nats-io/nats.go/jetstream.(*pullConsumer).fetch.func1(0x16628fa80480)
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/jetstream/pull.go:954 +0x1b9
+created by github.com/nats-io/nats.go/jetstream.(*pullConsumer).fetch in goroutine 94
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/jetstream/pull.go:950 +0x471
+
+goroutine 110156243 [select]:
+github.com/nats-io/nats.go/jetstream.(*pullConsumer).fetch.func1(0x166288b667e0)
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/jetstream/pull.go:954 +0x1b9
+created by github.com/nats-io/nats.go/jetstream.(*pullConsumer).fetch in goroutine 135
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/jetstream/pull.go:950 +0x471
+
+goroutine 110156283 [select]:
+github.com/nats-io/nats.go/jetstream.(*pullConsumer).fetch.func1(0x166290925290)
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/jetstream/pull.go:954 +0x1b9
+created by github.com/nats-io/nats.go/jetstream.(*pullConsumer).fetch in goroutine 87
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/jetstream/pull.go:950 +0x471
+
+goroutine 77096018 [chan send, 170 minutes]:
+github.com/nats-io/nats.go/jetstream.(*pullSubscription).checkPending(0x1662974b2be0)
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/jetstream/pull.go:481 +0x1a5
+github.com/nats-io/nats.go/jetstream.(*pullConsumer).Consume.func1(0x16622774f340)
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/jetstream/pull.go:263 +0x312
+github.com/nats-io/nats%2ego.(*Conn).waitForMsgs(0x166226374e08, 0x16629adf40f0)
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/nats.go:3807 +0x49e
+created by github.com/nats-io/nats%2ego.(*Conn).subscribeLocked in goroutine 42
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/nats.go:5165 +0x430
+
+goroutine 110156521 [select]:
+github.com/nats-io/nats.go/jetstream.(*pullConsumer).fetch.func1(0x166295edef00)
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/jetstream/pull.go:954 +0x1b9
+created by github.com/nats-io/nats.go/jetstream.(*pullConsumer).fetch in goroutine 145
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/jetstream/pull.go:950 +0x471
+
+goroutine 110156225 [select]:
+github.com/nats-io/nats.go/jetstream.(*pullConsumer).fetch.func1(0x166288b66720)
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/jetstream/pull.go:954 +0x1b9
+created by github.com/nats-io/nats.go/jetstream.(*pullConsumer).fetch in goroutine 133
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/jetstream/pull.go:950 +0x471
+
+goroutine 110156513 [select]:
+github.com/nats-io/nats%2ego.(*Conn).requestWithContext(0x166226374e08, {0x254e200, 0x166296fa4a10}, {0x166296fa2320, 0x4d}, {0x0, 0x0, 0x0}, {0x0, 0x0, ...})
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/context.go:67 +0x225
+github.com/nats-io/nats%2ego.(*Conn).RequestWithContext(...)
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/context.go:37
+github.com/nats-io/nats.go/jetstream.(*jetStream).apiRequest(0x16622628e870, {0x254e200, 0x166296fa4a10}, {0x166296fa22d0?, 0x2?}, {0x1662912d55c8, 0x1, 0x625a46?})
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/jetstream/api.go:139 +0x119
+github.com/nats-io/nats.go/jetstream.(*stream).getMsg(0x16622633d120, {0x254e200?, 0x166296fa4a10?}, 0x166296c5ecc0)
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/jetstream/stream.go:580 +0x235
+github.com/nats-io/nats.go/jetstream.(*stream).GetLastMsgForSubject(0x16622633d120, {0x254e200, 0x166296fa4a10}, {0x1662d6383cb0, 0x2e})
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/jetstream/stream.go:561 +0x7e
+github.com/nats-io/nats.go/jetstream.(*kvs).get(0x166226574e70, {0x254e200, 0x166296fa4a10}, {0x1662d6383bc0, 0x21}, 0x0)
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/jetstream/kv.go:938 +0x23a
+github.com/nats-io/nats.go/jetstream.(*kvs).Create(0x166226574e70, {0x254e200, 0x166296fa4a10}, {0x1662d6383bc0, 0x21}, {0x1662d6383bf0, 0x24, 0x30}, {0x0, 0x0, ...})
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/jetstream/kv.go:1077 +0x172
+js-wf/lease.jetStreamKVPort.Create({{0x2555898?, 0x166226574e70?}}, {0x254e200?, 0x166296fa4a10?}, {0x1662d6383bc0?, 0x16629386e800?}, {0x1662d6383bf0?, 0x16626739f2c0?, 0x1662893b78f8?})
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/lease/lease.go:53 +0x76
+js-wf/lease.(*Store).acquire(0x16622633d140, {0x254e200, 0x166296fa4a10}, {0x1662d6383b90, 0xc}, {0x1662d6383b9d, 0x14}, {0x16622657a020, 0xd}, 0x1662893b7eb0)
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/lease/lease.go:173 +0x30b
+js-wf/lease.(*Store).AcquireWithHeldObserver(...)
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/lease/lease.go:135
+js-wf/worker.(*Worker).handle(0x166226604008, {0x254e190, 0x1662261e9860}, {0x25544b8, 0x16629745da60})
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/worker/worker.go:572 +0x67f
+js-wf/worker.RunPartitionWithPort.func4({0x25544b8?, 0x16629745da60?})
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/worker/worker.go:477 +0x93
+created by js-wf/worker.RunPartitionWithPort in goroutine 161
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/worker/worker.go:474 +0xb89
+
+goroutine 110156261 [select]:
+github.com/nats-io/nats.go/jetstream.(*pullConsumer).fetch.func1(0x16628f43f4a0)
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/jetstream/pull.go:954 +0x1b9
+created by github.com/nats-io/nats.go/jetstream.(*pullConsumer).fetch in goroutine 171
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/jetstream/pull.go:950 +0x471
+
+goroutine 60891506 [chan send, 268 minutes]:
+github.com/nats-io/nats.go/jetstream.(*pullSubscription).checkPending(0x1662bf745c20)
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/jetstream/pull.go:481 +0x1a5
+github.com/nats-io/nats.go/jetstream.(*pullConsumer).Consume.func1(0x166235d24150)
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/jetstream/pull.go:263 +0x312
+github.com/nats-io/nats%2ego.(*Conn).waitForMsgs(0x166226374e08, 0x1662cff822d0)
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/nats.go:3807 +0x49e
+created by github.com/nats-io/nats%2ego.(*Conn).subscribeLocked in goroutine 42
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/nats.go:5165 +0x430
+
+goroutine 110156465 [select]:
+github.com/nats-io/nats.go/jetstream.(*pullConsumer).fetch.func1(0x1662966fd620)
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/jetstream/pull.go:954 +0x1b9
+created by github.com/nats-io/nats.go/jetstream.(*pullConsumer).fetch in goroutine 166
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/jetstream/pull.go:950 +0x471
+
+goroutine 110156266 [select]:
+github.com/nats-io/nats.go/jetstream.(*pullConsumer).fetch.func1(0x1662908ce9f0)
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/jetstream/pull.go:954 +0x1b9
+created by github.com/nats-io/nats.go/jetstream.(*pullConsumer).fetch in goroutine 143
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/jetstream/pull.go:950 +0x471
+
+goroutine 110154948 [select]:
+net/http.(*persistConn).writeLoop(0x16629e74f400)
+	/usr/local/go/src/net/http/transport.go:2810 +0xe6
+created by net/http.(*Transport).dialConn in goroutine 110154946
+	/usr/local/go/src/net/http/transport.go:2124 +0x1e05
+
+goroutine 110156515 [select]:
+github.com/nats-io/nats%2ego.(*Conn).requestWithContext(0x166226374e08, {0x254e200, 0x166297375b20}, {0x1662b92bf160, 0x1d}, {0x0, 0x0, 0x0}, {0x166296cbefa0, 0x4d, ...})
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/context.go:67 +0x225
+github.com/nats-io/nats%2ego.(*Conn).RequestWithContext(...)
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/context.go:37
+github.com/nats-io/nats.go/jetstream.(*jetStream).apiRequest(0x16622628e870, {0x254e200, 0x166297375b20}, {0x1662cc4854e8?, 0x15?}, {0x16629095d8a8, 0x1, 0x1?})
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/jetstream/api.go:139 +0x119
+github.com/nats-io/nats.go/jetstream.(*jetStream).apiRequestJSON(0x1?, {0x254e200?, 0x166297375b20?}, {0x1662cc4854e8?, 0x4905cb?}, {0x22758c8, 0x16629737b940}, {0x16629095d8a8, 0x1, 0x1})
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/jetstream/api.go:116 +0x4e
+github.com/nats-io/nats.go/jetstream.(*stream).getMsg(0x1662264171e0, {0x254e200?, 0x166297375b20?}, 0x166297373530)
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/jetstream/stream.go:596 +0x525
+github.com/nats-io/nats.go/jetstream.(*stream).GetLastMsgForSubject(0x1662264171e0, {0x254e200, 0x166297375b20}, {0x1662d85c7800, 0x3a})
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/jetstream/stream.go:561 +0x7e
+js-wf/journal.(*Store).MaybeSnapshot(0x1662266021c0, {0x254e200, 0x166297375b20}, {0x16624dfca040, 0x10}, {0x16624dfca051, 0x22}, 0x100, 0x10)
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/journal/snapshot.go:172 +0x26a
+js-wf/worker.(*Worker).handle(0x16622660d008, {0x254e190, 0x16622651c5a0}, {0x25544b8, 0x1662967c2780})
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/worker/worker.go:727 +0xf99
+js-wf/worker.RunPartitionWithPort.func4({0x25544b8?, 0x1662967c2780?})
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/worker/worker.go:477 +0x93
+created by js-wf/worker.RunPartitionWithPort in goroutine 96
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/worker/worker.go:474 +0xb89
+
+goroutine 110156408 [select]:
+github.com/nats-io/nats.go/jetstream.(*pullConsumer).fetch.func1(0x166294511590)
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/jetstream/pull.go:954 +0x1b9
+created by github.com/nats-io/nats.go/jetstream.(*pullConsumer).fetch in goroutine 136
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/jetstream/pull.go:950 +0x471
+
+goroutine 110156494 [select]:
+js-wf/worker.(*Worker).handle.func6()
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/worker/worker.go:674 +0x211
+created by js-wf/worker.(*Worker).handle in goroutine 110156515
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/worker/worker.go:665 +0xc0b
+
+goroutine 110156366 [select]:
+github.com/nats-io/nats.go/jetstream.(*pullConsumer).fetch.func1(0x166293419650)
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/jetstream/pull.go:954 +0x1b9
+created by github.com/nats-io/nats.go/jetstream.(*pullConsumer).fetch in goroutine 130
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/jetstream/pull.go:950 +0x471
+
+goroutine 110156397 [select]:
+github.com/nats-io/nats.go/jetstream.(*pullConsumer).fetch.func1(0x166295c2c840)
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/jetstream/pull.go:954 +0x1b9
+created by github.com/nats-io/nats.go/jetstream.(*pullConsumer).fetch in goroutine 84
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/jetstream/pull.go:950 +0x471
+
+goroutine 110156222 [select]:
+github.com/nats-io/nats.go/jetstream.(*pullConsumer).fetch.func1(0x166288b46b10)
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/jetstream/pull.go:954 +0x1b9
+created by github.com/nats-io/nats.go/jetstream.(*pullConsumer).fetch in goroutine 178
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/jetstream/pull.go:950 +0x471
+
+goroutine 110156412 [select]:
+github.com/nats-io/nats.go/jetstream.(*pullConsumer).fetch.func1(0x166294ce10b0)
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/jetstream/pull.go:954 +0x1b9
+created by github.com/nats-io/nats.go/jetstream.(*pullConsumer).fetch in goroutine 165
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/jetstream/pull.go:950 +0x471
+
+goroutine 110156234 [select]:
+github.com/nats-io/nats.go/jetstream.(*pullConsumer).fetch.func1(0x16628abf3b90)
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/jetstream/pull.go:954 +0x1b9
+created by github.com/nats-io/nats.go/jetstream.(*pullConsumer).fetch in goroutine 95
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/jetstream/pull.go:950 +0x471
+
+goroutine 110156279 [select]:
+js-wf/client.(*Client).Await(0x1662265767c0, {0x254e200, 0x16628faac380}, {0x1506401, 0xb}, {0x1662834320d8, 0x14})
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/client/client.go:702 +0xb35
+js-wf/integration_test.runFiveContainerMixedLeader.func32()
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/integration/tier3_mixed_journal_test.go:1197 +0x9bf
+created by js-wf/integration_test.runFiveContainerMixedLeader in goroutine 8
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/integration/tier3_mixed_journal_test.go:1148 +0x64ff
+
+goroutine 89565863 [chan send, 103 minutes]:
+github.com/nats-io/nats.go/jetstream.(*pullSubscription).checkPending(0x16625f080280)
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/jetstream/pull.go:481 +0x1a5
+github.com/nats-io/nats.go/jetstream.(*pullConsumer).Consume.func1(0x1662ac77a460)
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/jetstream/pull.go:263 +0x312
+github.com/nats-io/nats%2ego.(*Conn).waitForMsgs(0x166226374e08, 0x16629adf45a0)
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/nats.go:3807 +0x49e
+created by github.com/nats-io/nats%2ego.(*Conn).subscribeLocked in goroutine 42
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/nats.go:5165 +0x430
+
+goroutine 93277795 [chan send, 83 minutes]:
+github.com/nats-io/nats.go/jetstream.(*pullSubscription).checkPending(0x16625df73ae0)
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/jetstream/pull.go:481 +0x1a5
+github.com/nats-io/nats.go/jetstream.(*pullConsumer).Consume.func1(0x16623875e9a0)
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/jetstream/pull.go:263 +0x312
+github.com/nats-io/nats%2ego.(*Conn).waitForMsgs(0x166226374e08, 0x16625aebf680)
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/nats.go:3807 +0x49e
+created by github.com/nats-io/nats%2ego.(*Conn).subscribeLocked in goroutine 42
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/nats.go:5165 +0x430
+
+goroutine 110156409 [select]:
+github.com/nats-io/nats.go/jetstream.(*pullConsumer).fetch.func1(0x166294724810)
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/jetstream/pull.go:954 +0x1b9
+created by github.com/nats-io/nats.go/jetstream.(*pullConsumer).fetch in goroutine 92
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/jetstream/pull.go:950 +0x471
+
+goroutine 110156526 [select]:
+github.com/nats-io/nats.go/jetstream.(*pullConsumer).fetch.func1(0x1662976c0150)
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/jetstream/pull.go:954 +0x1b9
+created by github.com/nats-io/nats.go/jetstream.(*pullConsumer).fetch in goroutine 139
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/jetstream/pull.go:950 +0x471
+
+goroutine 110156428 [select]:
+github.com/nats-io/nats.go/jetstream.(*pullConsumer).fetch.func1(0x16629580f2c0)
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/jetstream/pull.go:954 +0x1b9
+created by github.com/nats-io/nats.go/jetstream.(*pullConsumer).fetch in goroutine 177
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/jetstream/pull.go:950 +0x471
+
+goroutine 110156382 [select]:
+github.com/nats-io/nats.go/jetstream.(*pullConsumer).fetch.func1(0x1662946e0e40)
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/jetstream/pull.go:954 +0x1b9
+created by github.com/nats-io/nats.go/jetstream.(*pullConsumer).fetch in goroutine 91
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/jetstream/pull.go:950 +0x471
+
+goroutine 110156475 [select]:
+github.com/nats-io/nats.go/jetstream.(*pullConsumer).fetch.func1(0x166295ce1380)
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/jetstream/pull.go:954 +0x1b9
+created by github.com/nats-io/nats.go/jetstream.(*pullConsumer).fetch in goroutine 138
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/jetstream/pull.go:950 +0x471
+
+goroutine 110156268 [select]:
+github.com/nats-io/nats.go/jetstream.(*pullConsumer).fetch.func1(0x1662908ceb70)
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/jetstream/pull.go:954 +0x1b9
+created by github.com/nats-io/nats.go/jetstream.(*pullConsumer).fetch in goroutine 155
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/jetstream/pull.go:950 +0x471
+
+goroutine 110156522 [select]:
+github.com/nats-io/nats%2ego.(*Conn).requestWithContext(0x166226374e08, {0x254e200, 0x16629733fe30}, {0x1662b92bf120, 0x1a}, {0x0, 0x0, 0x0}, {0x0, 0x0, ...})
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/context.go:67 +0x225
+github.com/nats-io/nats%2ego.(*Conn).RequestWithContext(...)
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/context.go:37
+github.com/nats-io/nats.go/jetstream.(*jetStream).apiRequest(0x16622628e870, {0x254e200, 0x16629733fe30}, {0x1662cc485440?, 0x12?}, {0x0, 0x0, 0x7fa5b8f29e80?})
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/jetstream/api.go:139 +0x119
+github.com/nats-io/nats.go/jetstream.(*jetStream).apiRequestJSON(0x1?, {0x254e200?, 0x16629733fe30?}, {0x1662cc485440?, 0x166226252808?}, {0x2277938, 0x166297338c00}, {0x0, 0x0, 0x0})
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/jetstream/api.go:116 +0x4e
+github.com/nats-io/nats.go/jetstream.(*jetStream).Stream(0x16622628e870, {0x254e200, 0x16629733fe30}, {0x14ff45d, 0x6})
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/jetstream/jetstream.go:821 +0x174
+js-wf/worker.(*jetStreamSignalDrainPort).signalStream(0x166297369640, {0x254e200?, 0x16629733fe30?})
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/worker/signal_port.go:31 +0x4a
+js-wf/worker.(*jetStreamSignalDrainPort).LastSignalSequence(0x254e190?, {0x254e200, 0x16629733fe30})
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/worker/signal_port.go:40 +0x1d
+js-wf/worker.drainSignalsFromPort({0x254e190, 0x166295ef7040}, {0x254ba70, 0x166297369640}, {0x166236912f30, 0xb}, {0x166236912f3c, 0x22}, 0x3a429, 0x0, ...)
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/worker/worker.go:1520 +0x458
+js-wf/worker.(*Worker).drainSignalsFrom(0x4?, {0x254e190, 0x166295ef7040}, {0x166236912f30, 0xb}, {0x166236912f3c, 0x22}, 0x3a429, 0x0, {0x166280edbb88, ...}, ...)
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/worker/worker.go:1493 +0x1e5
+js-wf/worker.(*Worker).execute(0x1662262ba808, {0x254e190, 0x166295ef7040}, {0x166236912f30, 0xb}, {0x166236912f3c, 0x22}, 0x166296742cc0, {0x2894bc8f, 0xee257d74b, ...}, ...)
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/worker/worker.go:998 +0x182c
+js-wf/worker.(*Worker).handle(0x1662262ba808, {0x254e190, 0x16622651c4b0}, {0x25544b8, 0x1662968fd860})
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/worker/worker.go:719 +0xdec
+js-wf/worker.RunPartitionWithPort.func4({0x25544b8?, 0x1662968fd860?})
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/worker/worker.go:477 +0x93
+created by js-wf/worker.RunPartitionWithPort in goroutine 93
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/worker/worker.go:474 +0xb89
+
+goroutine 110154817 [select]:
+github.com/nats-io/nats.go/jetstream.(*pullSubscription).pullMessages(0x16624a5b0500, {0x1662bfb2b100, 0x40})
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/jetstream/pull.go:1060 +0x93
+created by github.com/nats-io/nats.go/jetstream.(*pullConsumer).Consume in goroutine 42
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/jetstream/pull.go:423 +0xa85
+
+goroutine 75647617 [chan send, 179 minutes]:
+github.com/nats-io/nats.go/jetstream.(*pullSubscription).checkPending(0x166273e29180)
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/jetstream/pull.go:481 +0x1a5
+github.com/nats-io/nats.go/jetstream.(*pullConsumer).Consume.func1(0x1662ce8529a0)
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/jetstream/pull.go:263 +0x312
+github.com/nats-io/nats%2ego.(*Conn).waitForMsgs(0x166226374e08, 0x166273888960)
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/nats.go:3807 +0x49e
+created by github.com/nats-io/nats%2ego.(*Conn).subscribeLocked in goroutine 42
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/nats.go:5165 +0x430
+
+goroutine 110150638 [IO wait]:
+internal/poll.runtime_pollWait(0x7fa5d81a1400, 0x72)
+	/usr/local/go/src/runtime/netpoll.go:351 +0x85
+internal/poll.(*pollDesc).wait(0x16628bbd9680?, 0x166299436000?, 0x0)
+	/usr/local/go/src/internal/poll/fd_poll_runtime.go:84 +0x27
+internal/poll.(*pollDesc).waitRead(...)
+	/usr/local/go/src/internal/poll/fd_poll_runtime.go:89
+internal/poll.(*FD).Read(0x16628bbd9680, {0x166299436000, 0x1000, 0x1000})
+	/usr/local/go/src/internal/poll/fd_unix.go:170 +0x2a8
+net.(*netFD).Read(0x16628bbd9680, {0x166299436000?, 0x40959c?, 0x23322c8?})
+	/usr/local/go/src/net/fd_posix.go:68 +0x25
+net.(*conn).Read(0x166299232420, {0x166299436000?, 0x166226ac4d50?, 0x2330e10?})
+	/usr/local/go/src/net/net.go:196 +0x45
+net/http.(*persistConn).Read(0x166298d0ea00, {0x166299436000?, 0x2542e40?, 0x25da4f0?})
+	/usr/local/go/src/net/http/transport.go:2300 +0x47
+bufio.(*Reader).fill(0x166299253da0)
+	/usr/local/go/src/bufio/bufio.go:113 +0x103
+bufio.(*Reader).Peek(0x166299253da0, 0x1)
+	/usr/local/go/src/bufio/bufio.go:152 +0x52
+net/http.(*persistConn).readLoop(0x166298d0ea00)
+	/usr/local/go/src/net/http/transport.go:2483 +0x172
+created by net/http.(*Transport).dialConn in goroutine 110150661
+	/usr/local/go/src/net/http/transport.go:2123 +0x1da5
+
+goroutine 110156470 [select]:
+github.com/nats-io/nats.go/jetstream.(*pullConsumer).fetch.func1(0x166295b69560)
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/jetstream/pull.go:954 +0x1b9
+created by github.com/nats-io/nats.go/jetstream.(*pullConsumer).fetch in goroutine 142
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/jetstream/pull.go:950 +0x471
+
+goroutine 110156547 [select]:
+github.com/nats-io/nats%2ego.(*Conn).requestWithContext(0x166226374e08, {0x254e200, 0x1662973740e0}, {0x1662d85c7100, 0x3b}, {0x1662d85c7140, 0x3a, 0x40}, {0x1662c0050ed0, 0x24, ...})
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/context.go:67 +0x225
+github.com/nats-io/nats%2ego.(*Conn).RequestMsgWithContext(0x166226374e08, {0x254e200, 0x1662973740e0}, 0x1662cd663490)
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/context.go:31 +0x9e
+github.com/nats-io/nats.go/jetstream.(*jetStream).PublishMsg(0x16622628e870, {0x254e200?, 0x1662973740e0?}, 0x1662cd663490, {0x1662cd663518, 0x1, 0x3b?})
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/jetstream/publish.go:248 +0xeef
+github.com/nats-io/nats.go/jetstream.(*kvs).updateRevision(0x166226574e70, {0x254e200, 0x1662973740e0}, {0x1662c0050ea0, 0x2e}, {0x1662c0050ed0, 0x24, 0x30}, 0x56e499, 0x0)
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/jetstream/kv.go:1146 +0x6a5
+github.com/nats-io/nats.go/jetstream.(*kvs).Create(0x166226574e70, {0x254e200, 0x1662973740e0}, {0x1662c0050ea0, 0x2e}, {0x1662c0050ed0, 0x24, 0x30}, {0x0, 0x0, ...})
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/jetstream/kv.go:1078 +0x28c
+js-wf/lease.jetStreamKVPort.Create({{0x2555898?, 0x166226574e70?}}, {0x254e200?, 0x1662973740e0?}, {0x1662c0050ea0?, 0x1662671e3000?}, {0x1662c0050ed0?, 0x16626c42db80?, 0x166282d538f8?})
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/lease/lease.go:53 +0x76
+js-wf/lease.(*Store).acquire(0x16622633d140, {0x254e200, 0x1662973740e0}, {0x1662c0050e40, 0xb}, {0x1662c0050e4c, 0x22}, {0x16622657a020, 0xd}, 0x166282d53eb0)
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/lease/lease.go:173 +0x30b
+js-wf/lease.(*Store).AcquireWithHeldObserver(...)
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/lease/lease.go:135
+js-wf/worker.(*Worker).handle(0x166226604008, {0x254e190, 0x16622651caa0}, {0x25544b8, 0x166297625200})
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/worker/worker.go:572 +0x67f
+js-wf/worker.RunPartitionWithPort.func4({0x25544b8?, 0x166297625200?})
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/worker/worker.go:477 +0x93
+created by js-wf/worker.RunPartitionWithPort in goroutine 151
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/worker/worker.go:474 +0xb89
+
+goroutine 109654907 [IO wait]:
+internal/poll.runtime_pollWait(0x7fa5dbe1fc00, 0x72)
+	/usr/local/go/src/runtime/netpoll.go:351 +0x85
+internal/poll.(*pollDesc).wait(0x1662b1e26880?, 0x16622e2ae000?, 0x0)
+	/usr/local/go/src/internal/poll/fd_poll_runtime.go:84 +0x27
+internal/poll.(*pollDesc).waitRead(...)
+	/usr/local/go/src/internal/poll/fd_poll_runtime.go:89
+internal/poll.(*FD).Read(0x1662b1e26880, {0x16622e2ae000, 0x1000, 0x1000})
+	/usr/local/go/src/internal/poll/fd_unix.go:170 +0x2a8
+net.(*netFD).Read(0x1662b1e26880, {0x16622e2ae000?, 0x40959c?, 0x23322c8?})
+	/usr/local/go/src/net/fd_posix.go:68 +0x25
+net.(*conn).Read(0x166226f6bca0, {0x16622e2ae000?, 0x166226ac4d50?, 0x2330e10?})
+	/usr/local/go/src/net/net.go:196 +0x45
+net/http.(*persistConn).Read(0x166266f5edc0, {0x16622e2ae000?, 0x2542e40?, 0x25da4f0?})
+	/usr/local/go/src/net/http/transport.go:2300 +0x47
+bufio.(*Reader).fill(0x16626714e960)
+	/usr/local/go/src/bufio/bufio.go:113 +0x103
+bufio.(*Reader).Peek(0x16626714e960, 0x1)
+	/usr/local/go/src/bufio/bufio.go:152 +0x52
+net/http.(*persistConn).readLoop(0x166266f5edc0)
+	/usr/local/go/src/net/http/transport.go:2483 +0x172
+created by net/http.(*Transport).dialConn in goroutine 109654906
+	/usr/local/go/src/net/http/transport.go:2123 +0x1da5
+
+goroutine 110150639 [select]:
+net/http.(*persistConn).writeLoop(0x166298d0ea00)
+	/usr/local/go/src/net/http/transport.go:2810 +0xe6
+created by net/http.(*Transport).dialConn in goroutine 110150661
+	/usr/local/go/src/net/http/transport.go:2124 +0x1e05
+
+goroutine 110156442 [select]:
+github.com/nats-io/nats.go/jetstream.(*pullConsumer).fetch.func1(0x16629566f470)
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/jetstream/pull.go:954 +0x1b9
+created by github.com/nats-io/nats.go/jetstream.(*pullConsumer).fetch in goroutine 172
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/jetstream/pull.go:950 +0x471
+
+goroutine 110156429 [select]:
+github.com/nats-io/nats.go/jetstream.(*pullConsumer).fetch.func1(0x16629580f320)
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/jetstream/pull.go:954 +0x1b9
+created by github.com/nats-io/nats.go/jetstream.(*pullConsumer).fetch in goroutine 90
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/jetstream/pull.go:950 +0x471
+
+goroutine 110156329 [select]:
+github.com/nats-io/nats.go/jetstream.(*pullConsumer).fetch.func1(0x166292c4c5a0)
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/jetstream/pull.go:954 +0x1b9
+created by github.com/nats-io/nats.go/jetstream.(*pullConsumer).fetch in goroutine 156
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/jetstream/pull.go:950 +0x471
+
+goroutine 110156499 [select]:
+github.com/nats-io/nats%2ego.(*Conn).requestWithContext(0x166226374e08, {0x254e200, 0x166297affdc0}, {0x1662c9f43340, 0x1d}, {0x0, 0x0, 0x0}, {0x1662970b9bd0, 0x48, ...})
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/context.go:67 +0x225
+github.com/nats-io/nats%2ego.(*Conn).RequestWithContext(...)
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/context.go:37
+github.com/nats-io/nats.go/jetstream.(*jetStream).apiRequest(0x16622628e870, {0x254e200, 0x166297affdc0}, {0x1662acea6030?, 0x15?}, {0x1662a3dc0ad0, 0x1, 0x1?})
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/jetstream/api.go:139 +0x119
+github.com/nats-io/nats.go/jetstream.(*jetStream).apiRequestJSON(0x1?, {0x254e200?, 0x166297affdc0?}, {0x1662acea6030?, 0x2478090?}, {0x22758c8, 0x166297625280}, {0x1662a3dc0ad0, 0x1, 0x1})
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/jetstream/api.go:116 +0x4e
+github.com/nats-io/nats.go/jetstream.(*stream).getMsg(0x1662268df040, {0x254e200?, 0x166297affdc0?}, 0x166297b86d20)
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/jetstream/stream.go:596 +0x525
+github.com/nats-io/nats.go/jetstream.(*stream).GetLastMsgForSubject(0x1662268df040, {0x254e200, 0x166297affdc0}, {0x1662ca2fa300, 0x35})
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/jetstream/stream.go:561 +0x7e
+js-wf/journal.jetStreamAppendPort.Last({{0x255a130?, 0x16622628e870?}, {0x2556ab0?, 0x1662268df040?}}, {0x254e200?, 0x166297affdc0?}, {0x1662ca2fa300?, 0x2e?})
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/journal/journal.go:200 +0x46
+js-wf/journal.(*Store).Append(0x166226594000, {0x254e190, 0x166295c78dc0}, {0x16623a9d9350, 0xb}, {0x16623a9d935c, 0x22}, {0x56e460, 0xc, {0x15039de, ...}, ...}, ...)
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/journal/journal.go:268 +0x231
+js-wf/worker.(*Worker).execute.func2({0x15039de, 0x9}, {0x1662d08a0240, 0x22, 0x30})
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/worker/worker.go:932 +0x3e5
+js-wf/worker.(*Worker).execute.func3({0x15039de, 0x9}, {0x1662d08a0240, 0x22, 0x30})
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/worker/worker.go:961 +0x448
+js-wf/worker.(*Worker).execute(0x1662262ba808, {0x254e190, 0x166295c78dc0}, {0x16623a9d9350, 0xb}, {0x16623a9d935c, 0x22}, 0x166295122f00, {0x249dc34b, 0xee257d74b, ...}, ...)
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/worker/worker.go:1247 +0x422f
+js-wf/worker.(*Worker).handle(0x1662262ba808, {0x254e190, 0x1662264de0a0}, {0x25544b8, 0x166295ec3980})
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/worker/worker.go:719 +0xdec
+js-wf/worker.RunPartitionWithPort.func4({0x25544b8?, 0x166295ec3980?})
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/worker/worker.go:477 +0x93
+created by js-wf/worker.RunPartitionWithPort in goroutine 145
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/worker/worker.go:474 +0xb89
+
+goroutine 94883109 [chan send, 75 minutes]:
+github.com/nats-io/nats.go/jetstream.(*pullSubscription).checkPending(0x16627ae932c0)
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/jetstream/pull.go:481 +0x1a5
+github.com/nats-io/nats.go/jetstream.(*pullConsumer).Consume.func1(0x166254b48d90)
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/jetstream/pull.go:263 +0x312
+github.com/nats-io/nats%2ego.(*Conn).waitForMsgs(0x166226374e08, 0x16626c82ce10)
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/nats.go:3807 +0x49e
+created by github.com/nats-io/nats%2ego.(*Conn).subscribeLocked in goroutine 42
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/nats.go:5165 +0x430
+
+goroutine 110156312 [select]:
+github.com/nats-io/nats.go/jetstream.(*pullConsumer).fetch.func1(0x1662910df2c0)
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/jetstream/pull.go:954 +0x1b9
+created by github.com/nats-io/nats.go/jetstream.(*pullConsumer).fetch in goroutine 137
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/jetstream/pull.go:950 +0x471
+
+goroutine 104315747 [chan send, 28 minutes]:
+github.com/nats-io/nats.go/jetstream.(*pullSubscription).checkPending(0x1662273b8460)
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/jetstream/pull.go:481 +0x1a5
+github.com/nats-io/nats.go/jetstream.(*pullConsumer).Consume.func1(0x1662a1f5f3b0)
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/jetstream/pull.go:263 +0x312
+github.com/nats-io/nats%2ego.(*Conn).waitForMsgs(0x166226374e08, 0x1662ee4ce2d0)
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/nats.go:3807 +0x49e
+created by github.com/nats-io/nats%2ego.(*Conn).subscribeLocked in goroutine 42
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/nats.go:5165 +0x430
+
+goroutine 110156474 [select]:
+github.com/nats-io/nats.go/jetstream.(*pullConsumer).fetch.func1(0x166295b69c80)
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/jetstream/pull.go:954 +0x1b9
+created by github.com/nats-io/nats.go/jetstream.(*pullConsumer).fetch in goroutine 160
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/jetstream/pull.go:950 +0x471
+
+goroutine 110156534 [select]:
+js-wf/worker.(*Worker).handle.func6()
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/worker/worker.go:674 +0x211
+created by js-wf/worker.(*Worker).handle in goroutine 110156496
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/worker/worker.go:665 +0xc0b
+
+goroutine 110156299 [select]:
+github.com/nats-io/nats.go/jetstream.(*pullConsumer).fetch.func1(0x16629268aff0)
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/jetstream/pull.go:954 +0x1b9
+created by github.com/nats-io/nats.go/jetstream.(*pullConsumer).fetch in goroutine 167
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/jetstream/pull.go:950 +0x471
+
+goroutine 110156224 [select]:
+github.com/nats-io/nats.go/jetstream.(*pullConsumer).fetch.func1(0x166288b46c00)
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/jetstream/pull.go:954 +0x1b9
+created by github.com/nats-io/nats.go/jetstream.(*pullConsumer).fetch in goroutine 159
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/jetstream/pull.go:950 +0x471
+
+goroutine 110156467 [select]:
+github.com/nats-io/nats.go/jetstream.(*pullConsumer).fetch.func1(0x1662958d2ea0)
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/jetstream/pull.go:954 +0x1b9
+created by github.com/nats-io/nats.go/jetstream.(*pullConsumer).fetch in goroutine 141
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/jetstream/pull.go:950 +0x471
+
+goroutine 110156307 [select]:
+github.com/nats-io/nats.go/jetstream.(*pullConsumer).fetch.func1(0x166290952480)
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/jetstream/pull.go:954 +0x1b9
+created by github.com/nats-io/nats.go/jetstream.(*pullConsumer).fetch in goroutine 134
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/jetstream/pull.go:950 +0x471
+
+goroutine 109904084 [chan receive]:
+github.com/nats-io/nats%2ego.(*Conn).flusher(0x166226374e08)
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/nats.go:4191 +0xfa
+created by github.com/nats-io/nats%2ego.(*Conn).processConnectInit in goroutine 109904052
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/nats.go:2942 +0x311
+
+goroutine 110156548 [select]:
+github.com/nats-io/nats.go/jetstream.(*pullConsumer).fetch.func1(0x166297b86e10)
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/jetstream/pull.go:954 +0x1b9
+created by github.com/nats-io/nats.go/jetstream.(*pullConsumer).fetch in goroutine 151
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/jetstream/pull.go:950 +0x471
+
+goroutine 110156440 [select]:
+github.com/nats-io/nats.go/jetstream.(*pullConsumer).fetch.func1(0x166295482d50)
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/jetstream/pull.go:954 +0x1b9
+created by github.com/nats-io/nats.go/jetstream.(*pullConsumer).fetch in goroutine 163
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/jetstream/pull.go:950 +0x471
+
+goroutine 110156233 [select]:
+github.com/nats-io/nats.go/jetstream.(*pullConsumer).fetch.func1(0x16628abf3a10)
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/jetstream/pull.go:954 +0x1b9
+created by github.com/nats-io/nats.go/jetstream.(*pullConsumer).fetch in goroutine 173
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/jetstream/pull.go:950 +0x471
+
+goroutine 110156488 [select]:
+js-wf/worker.(*Worker).handle.func6()
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/worker/worker.go:674 +0x211
+created by js-wf/worker.(*Worker).handle in goroutine 110156499
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/worker/worker.go:665 +0xc0b
+
+goroutine 110156562 [select]:
+github.com/nats-io/nats.go/jetstream.(*pullConsumer).fetch.func1(0x16629750b470)
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/jetstream/pull.go:954 +0x1b9
+created by github.com/nats-io/nats.go/jetstream.(*pullConsumer).fetch in goroutine 161
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/jetstream/pull.go:950 +0x471
+
+goroutine 110156256 [select]:
+github.com/nats-io/nats%2ego.(*Conn).requestWithContext(0x166226374e08, {0x254e200, 0x166297445500}, {0x1662967677c0, 0x4d}, {0x0, 0x0, 0x0}, {0x0, 0x0, ...})
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/context.go:67 +0x225
+github.com/nats-io/nats%2ego.(*Conn).RequestWithContext(...)
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/context.go:37
+github.com/nats-io/nats.go/jetstream.(*jetStream).apiRequest(0x16622628e870, {0x254e200, 0x166297445500}, {0x166296767770?, 0x2?}, {0x166226293420, 0x1, 0x1662262933c0?})
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/jetstream/api.go:139 +0x119
+github.com/nats-io/nats.go/jetstream.(*stream).getMsg(0x1662953b2fa0, {0x254e200?, 0x166297445500?}, 0x1662974418f0)
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/jetstream/stream.go:580 +0x235
+github.com/nats-io/nats.go/jetstream.(*stream).GetLastMsgForSubject(0x1662953b2fa0, {0x254e200, 0x166297445500}, {0x1662692be000, 0x2e})
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/jetstream/stream.go:561 +0x7e
+github.com/nats-io/nats.go/jetstream.(*kvs).get(0x1662953ce0e0, {0x254e200, 0x166297445500}, {0x16629753ff50, 0x21}, 0x0)
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/jetstream/kv.go:938 +0x23a
+github.com/nats-io/nats.go/jetstream.(*kvs).Get(0x166226293620?, {0x254e200?, 0x166297445500?}, {0x16629753ff50?, 0x2608f40?})
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/jetstream/kv.go:1008 +0x29
+js-wf/client.(*Client).Await.func6({0x254e200, 0x166297445500})
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/client/client.go:647 +0x6d
+js-wf/client.retryAwaitRead[...]({0x254e200?, 0x16628faac380}, 0x1662262938e0)
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/client/client.go:715 +0x6b
+js-wf/client.(*Client).Await(0x1662265767c0, {0x254e200, 0x16628faac380}, {0x1507937, 0xc}, {0x166291443e48, 0x14})
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/client/client.go:646 +0x81e
+js-wf/integration_test.runFiveContainerMixedLeader.func32()
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/integration/tier3_mixed_journal_test.go:1197 +0x9bf
+created by js-wf/integration_test.runFiveContainerMixedLeader in goroutine 8
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/integration/tier3_mixed_journal_test.go:1148 +0x64ff
+
+goroutine 110156461 [select]:
+js-wf/worker.(*Worker).handle.func6()
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/worker/worker.go:674 +0x211
+created by js-wf/worker.(*Worker).handle in goroutine 110156430
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/worker/worker.go:665 +0xc0b
+
+goroutine 110154815 [sync.Cond.Wait]:
+sync.runtime_notifyListWait(0x1662266fa6d0, 0x22a9)
+	/usr/local/go/src/runtime/sema.go:617 +0x1b3
+sync.(*Cond).Wait(0x4286ef?)
+	/usr/local/go/src/sync/cond.go:71 +0x73
+js-wf/integrity.(*chunkedCallbackDelivery).enqueue(0x1662263a3408, {0x25544b8, 0x16629737b8e0})
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/integrity/chunked_callback.go:61 +0x95
+github.com/nats-io/nats.go/jetstream.(*pullConsumer).Consume.func1(0x166297aa7a40)
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/jetstream/pull.go:287 +0x156
+github.com/nats-io/nats%2ego.(*Conn).waitForMsgs(0x166226374e08, 0x1662b7cd7a40)
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/nats.go:3807 +0x49e
+created by github.com/nats-io/nats%2ego.(*Conn).subscribeLocked in goroutine 42
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/nats.go:5165 +0x430
+
+goroutine 110156275 [select]:
+js-wf/client.(*Client).Await(0x1662265767c0, {0x254e200, 0x16628faac380}, {0x1507937, 0xc}, {0x166291443f68, 0x14})
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/client/client.go:702 +0xb35
+js-wf/integration_test.runFiveContainerMixedLeader.func32()
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/integration/tier3_mixed_journal_test.go:1197 +0x9bf
+created by js-wf/integration_test.runFiveContainerMixedLeader in goroutine 8
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/integration/tier3_mixed_journal_test.go:1148 +0x64ff
+
+goroutine 110156189 [select]:
+github.com/nats-io/nats.go/jetstream.(*pullConsumer).fetch.func1(0x166287bee030)
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/jetstream/pull.go:954 +0x1b9
+created by github.com/nats-io/nats.go/jetstream.(*pullConsumer).fetch in goroutine 89
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/jetstream/pull.go:950 +0x471
+
+goroutine 109412469 [select]:
+net/http.(*persistConn).writeLoop(0x16625961c280)
+	/usr/local/go/src/net/http/transport.go:2810 +0xe6
+created by net/http.(*Transport).dialConn in goroutine 109412467
+	/usr/local/go/src/net/http/transport.go:2124 +0x1e05
+
+goroutine 110146851 [select]:
+net/http.(*persistConn).writeLoop(0x166253033cc0)
+	/usr/local/go/src/net/http/transport.go:2810 +0xe6
+created by net/http.(*Transport).dialConn in goroutine 110146834
+	/usr/local/go/src/net/http/transport.go:2124 +0x1e05
+
+goroutine 110156512 [select]:
+github.com/nats-io/nats.go/jetstream.(*pullConsumer).fetch.func1(0x16629750aed0)
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/jetstream/pull.go:954 +0x1b9
+created by github.com/nats-io/nats.go/jetstream.(*pullConsumer).fetch in goroutine 86
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/jetstream/pull.go:950 +0x471
+
+goroutine 110156480 [select]:
+github.com/nats-io/nats.go/jetstream.(*pullConsumer).fetch.func1(0x1662964dd2c0)
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/jetstream/pull.go:954 +0x1b9
+created by github.com/nats-io/nats.go/jetstream.(*pullConsumer).fetch in goroutine 146
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/jetstream/pull.go:950 +0x471
+
+goroutine 110146850 [IO wait]:
+internal/poll.runtime_pollWait(0x7fa5dbe1f200, 0x72)
+	/usr/local/go/src/runtime/netpoll.go:351 +0x85
+internal/poll.(*pollDesc).wait(0x16623b0c7c80?, 0x16624b927000?, 0x0)
+	/usr/local/go/src/internal/poll/fd_poll_runtime.go:84 +0x27
+internal/poll.(*pollDesc).waitRead(...)
+	/usr/local/go/src/internal/poll/fd_poll_runtime.go:89
+internal/poll.(*FD).Read(0x16623b0c7c80, {0x16624b927000, 0x1000, 0x1000})
+	/usr/local/go/src/internal/poll/fd_unix.go:170 +0x2a8
+net.(*netFD).Read(0x16623b0c7c80, {0x16624b927000?, 0x40959c?, 0x23322c8?})
+	/usr/local/go/src/net/fd_posix.go:68 +0x25
+net.(*conn).Read(0x16622a103da8, {0x16624b927000?, 0x166226ac4d50?, 0x2330e10?})
+	/usr/local/go/src/net/net.go:196 +0x45
+net/http.(*persistConn).Read(0x166253033cc0, {0x16624b927000?, 0x2542e40?, 0x25da4f0?})
+	/usr/local/go/src/net/http/transport.go:2300 +0x47
+bufio.(*Reader).fill(0x1662938f2720)
+	/usr/local/go/src/bufio/bufio.go:113 +0x103
+bufio.(*Reader).Peek(0x1662938f2720, 0x1)
+	/usr/local/go/src/bufio/bufio.go:152 +0x52
+net/http.(*persistConn).readLoop(0x166253033cc0)
+	/usr/local/go/src/net/http/transport.go:2483 +0x172
+created by net/http.(*Transport).dialConn in goroutine 110146834
+	/usr/local/go/src/net/http/transport.go:2123 +0x1da5
+
+goroutine 109904083 [runnable]:
+bufio.NewReaderSize(...)
+	/usr/local/go/src/bufio/bufio.go:57
+github.com/nats-io/nats%2ego.DecodeHeadersMsg({0x166297af6780, 0x3a, 0xb1})
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/nats.go:4505 +0xd8
+github.com/nats-io/nats%2ego.(*Conn).processMsg(0x166226374e08, {0x166226543ae9, 0xb1, 0x6517})
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/nats.go:3891 +0x25d
+github.com/nats-io/nats%2ego.(*Conn).parse(0x166226374e08, {0x166226542000, 0x6e7e, 0x8000})
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/parser.go:193 +0x7e7
+github.com/nats-io/nats%2ego.(*Conn).readLoop(0x166226374e08)
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/nats.go:3727 +0x10c
+created by github.com/nats-io/nats%2ego.(*Conn).processConnectInit in goroutine 109904052
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/nats.go:2941 +0x2c5
+
+goroutine 110156452 [select]:
+github.com/nats-io/nats.go/jetstream.(*pullConsumer).fetch.func1(0x1662954c3800)
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/jetstream/pull.go:954 +0x1b9
+created by github.com/nats-io/nats.go/jetstream.(*pullConsumer).fetch in goroutine 150
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/jetstream/pull.go:950 +0x471
+
+goroutine 110156510 [select]:
+github.com/nats-io/nats.go/jetstream.(*pullConsumer).fetch.func1(0x166296ace2a0)
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/jetstream/pull.go:954 +0x1b9
+created by github.com/nats-io/nats.go/jetstream.(*pullConsumer).fetch in goroutine 85
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/jetstream/pull.go:950 +0x471
+
+goroutine 60522195 [chan send, 270 minutes]:
+github.com/nats-io/nats.go/jetstream.(*pullSubscription).checkPending(0x1662d36286e0)
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/jetstream/pull.go:481 +0x1a5
+github.com/nats-io/nats.go/jetstream.(*pullConsumer).Consume.func1(0x166236a92bd0)
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/jetstream/pull.go:263 +0x312
+github.com/nats-io/nats%2ego.(*Conn).waitForMsgs(0x166226374e08, 0x1662d07a5860)
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/nats.go:3807 +0x49e
+created by github.com/nats-io/nats%2ego.(*Conn).subscribeLocked in goroutine 42
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/nats.go:5165 +0x430
+
+goroutine 110156390 [select]:
+github.com/nats-io/nats.go/jetstream.(*pullConsumer).fetch.func1(0x166294a5ec30)
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/jetstream/pull.go:954 +0x1b9
+created by github.com/nats-io/nats.go/jetstream.(*pullConsumer).fetch in goroutine 175
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/jetstream/pull.go:950 +0x471
+
+goroutine 110156496 [select]:
+github.com/nats-io/nats%2ego.(*Conn).requestWithContext(0x166226374e08, {0x254e200, 0x1662976ed570}, {0x1662bcdf3f60, 0x1a}, {0x0, 0x0, 0x0}, {0x0, 0x0, ...})
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/context.go:67 +0x225
+github.com/nats-io/nats%2ego.(*Conn).RequestWithContext(...)
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/context.go:37
+github.com/nats-io/nats.go/jetstream.(*jetStream).apiRequest(0x16622628e870, {0x254e200, 0x1662976ed570}, {0x1662c8c91e18?, 0x12?}, {0x0, 0x0, 0x7fa5ba9fba60?})
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/jetstream/api.go:139 +0x119
+github.com/nats-io/nats.go/jetstream.(*jetStream).apiRequestJSON(0x1?, {0x254e200?, 0x1662976ed570?}, {0x1662c8c91e18?, 0x166226301808?}, {0x2277938, 0x166296f9f500}, {0x0, 0x0, 0x0})
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/jetstream/api.go:116 +0x4e
+github.com/nats-io/nats.go/jetstream.(*jetStream).Stream(0x16622628e870, {0x254e200, 0x1662976ed570}, {0x14ff45d, 0x6})
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/jetstream/jetstream.go:821 +0x174
+js-wf/worker.(*jetStreamSignalDrainPort).signalStream(0x1662976fd240, {0x254e200?, 0x1662976ed570?})
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/worker/signal_port.go:31 +0x4a
+js-wf/worker.(*jetStreamSignalDrainPort).LastSignalSequence(0x254e190?, {0x254e200, 0x1662976ed570})
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/worker/signal_port.go:40 +0x1d
+js-wf/worker.drainSignalsFromPort({0x254e190, 0x166296810aa0}, {0x254ba70, 0x1662976fd240}, {0x1662979cf590, 0xb}, {0x1662979cf59c, 0x22}, 0x3a42b, 0x0, ...)
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/worker/worker.go:1520 +0x458
+js-wf/worker.(*Worker).drainSignalsFrom(0x4?, {0x254e190, 0x166296810aa0}, {0x1662979cf590, 0xb}, {0x1662979cf59c, 0x22}, 0x3a42b, 0x0, {0x166297362008, ...}, ...)
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/worker/worker.go:1493 +0x1e5
+js-wf/worker.(*Worker).execute(0x16622660d008, {0x254e190, 0x166296810aa0}, {0x1662979cf590, 0xb}, {0x1662979cf59c, 0x22}, 0x16629642b620, {0x275653eb, 0xee257d74b, ...}, ...)
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/worker/worker.go:998 +0x182c
+js-wf/worker.(*Worker).handle(0x16622660d008, {0x254e190, 0x1662264de190}, {0x25544b8, 0x166296ba4460})
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/worker/worker.go:719 +0xdec
+js-wf/worker.RunPartitionWithPort.func4({0x25544b8?, 0x166296ba4460?})
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/worker/worker.go:477 +0x93
+created by js-wf/worker.RunPartitionWithPort in goroutine 148
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/worker/worker.go:474 +0xb89
+
+goroutine 110156407 [select]:
+github.com/nats-io/nats.go/jetstream.(*pullConsumer).fetch.func1(0x1662942c5d40)
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/jetstream/pull.go:954 +0x1b9
+created by github.com/nats-io/nats.go/jetstream.(*pullConsumer).fetch in goroutine 140
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/jetstream/pull.go:950 +0x471
+
+goroutine 110156277 [select]:
+js-wf/client.(*Client).Await(0x1662265767c0, {0x254e200, 0x16628faac380}, {0x150795b, 0xc}, {0x166283432018, 0x14})
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/client/client.go:702 +0xb35
+js-wf/integration_test.runFiveContainerMixedLeader.func32()
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/integration/tier3_mixed_journal_test.go:1197 +0x9bf
+created by js-wf/integration_test.runFiveContainerMixedLeader in goroutine 8
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/integration/tier3_mixed_journal_test.go:1148 +0x64ff
+
+goroutine 110156188 [select]:
+github.com/nats-io/nats.go/jetstream.(*pullConsumer).fetch.func1(0x166287bafe90)
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/jetstream/pull.go:954 +0x1b9
+created by github.com/nats-io/nats.go/jetstream.(*pullConsumer).fetch in goroutine 152
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/jetstream/pull.go:950 +0x471
+
+goroutine 110156524 [select]:
+github.com/nats-io/nats.go/jetstream.(*pullConsumer).fetch.func1(0x166297318e70)
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/jetstream/pull.go:954 +0x1b9
+created by github.com/nats-io/nats.go/jetstream.(*pullConsumer).fetch in goroutine 93
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/jetstream/pull.go:950 +0x471
+
+goroutine 110156236 [select]:
+github.com/nats-io/nats.go/jetstream.(*pullConsumer).fetch.func1(0x16628f0ab470)
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/jetstream/pull.go:954 +0x1b9
+created by github.com/nats-io/nats.go/jetstream.(*pullConsumer).fetch in goroutine 149
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/jetstream/pull.go:950 +0x471
+
+goroutine 110156298 [select]:
+github.com/nats-io/nats.go/jetstream.(*pullConsumer).fetch.func1(0x166291a205a0)
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/jetstream/pull.go:954 +0x1b9
+created by github.com/nats-io/nats.go/jetstream.(*pullConsumer).fetch in goroutine 179
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/jetstream/pull.go:950 +0x471
+
+goroutine 110156430 [select]:
+github.com/nats-io/nats%2ego.(*Conn).requestWithContext(0x166226374e08, {0x254e200, 0x16629761d9d0}, {0x166296fa2a50, 0x4d}, {0x0, 0x0, 0x0}, {0x0, 0x0, ...})
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/context.go:67 +0x225
+github.com/nats-io/nats%2ego.(*Conn).RequestWithContext(...)
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/context.go:37
+github.com/nats-io/nats.go/jetstream.(*jetStream).apiRequest(0x16622628e870, {0x254e200, 0x16629761d9d0}, {0x166296fa2a00?, 0x2?}, {0x1662909507d8, 0x1, 0x625a46?})
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/jetstream/api.go:139 +0x119
+github.com/nats-io/nats.go/jetstream.(*stream).getMsg(0x1662976c7020, {0x254e200?, 0x16629761d9d0?}, 0x1662976f2150)
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/jetstream/stream.go:580 +0x235
+github.com/nats-io/nats.go/jetstream.(*stream).GetLastMsgForSubject(0x1662976c7020, {0x254e200, 0x16629761d9d0}, {0x1662d08a08a0, 0x2e})
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/jetstream/stream.go:561 +0x7e
+github.com/nats-io/nats.go/jetstream.(*kvs).get(0x1662976ec4d0, {0x254e200, 0x16629761d9d0}, {0x16625cbc21b0, 0x21}, 0x0)
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/jetstream/kv.go:938 +0x23a
+github.com/nats-io/nats.go/jetstream.(*kvs).Get(0x16622628e870?, {0x254e200?, 0x16629761d9d0?}, {0x16625cbc21b0?, 0x8?})
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/jetstream/kv.go:1008 +0x29
+js-wf/client.jetStreamSignalPort.StateValue({{0x255a130?, 0x16622628e870?}}, {0x254e200, 0x16629761d9d0}, {0x16625cbc21b0, 0x21})
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/client/signal_port.go:46 +0x70
+js-wf/client.(*Client).signal(0x1662265775c0, {0x254e200, 0x16629761d9d0}, {0x1662f83f3570, 0xc}, {0x1662dffe6abe, 0x14}, {0x1662f83f3552, 0x7}, {0x1662d6382d20, ...}, ...)
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/client/client.go:459 +0x4fb
+js-wf/client.(*Client).SignalToGeneration(0x40?, {0x254e200?, 0x16629761d9d0?}, {0x1662f83f3570?, 0x16629733f200?}, {0x1662dffe6abe?, 0x1662909510b0?}, {0x1662f83f3552?, 0x254e190?}, {0x1662d6382d20, ...}, ...)
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/client/client.go:398 +0x116
+js-wf/worker.NotifyParentWithClient({0x254e190, 0x16629513a870}, 0x1662265775c0, {0x1662460e6030, 0xb}, {0x1662460e603c, 0x22}, 0x3a424, {0x1662d6382d20, 0x22, ...}, ...)
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/worker/worker.go:1296 +0x66d
+js-wf/worker.(*Worker).persistAndNotify(0x16622660d008, {0x254e190, 0x16629513a870}, {0x1662460e6030, 0xb}, {0x1662460e603c, 0x22}, 0x3a424, {0x1662d6382d20, 0x22, ...}, ...)
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/worker/worker.go:1267 +0x108
+js-wf/worker.(*Worker).execute(0x16622660d008, {0x254e190, 0x16629513a870}, {0x1662460e6030, 0xb}, {0x1662460e603c, 0x22}, 0x166294603680, {0x205ab304, 0xee257d74b, ...}, ...)
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/worker/worker.go:1250 +0x42d4
+js-wf/worker.(*Worker).handle(0x16622660d008, {0x254e190, 0x16622651c8c0}, {0x25544b8, 0x16629584eea0})
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/worker/worker.go:719 +0xdec
+js-wf/worker.RunPartitionWithPort.func4({0x25544b8?, 0x16629584eea0?})
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/worker/worker.go:477 +0x93
+created by js-wf/worker.RunPartitionWithPort in goroutine 138
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/worker/worker.go:474 +0xb89
+
+goroutine 110154947 [IO wait]:
+internal/poll.runtime_pollWait(0x7fa5dbe1fe00, 0x72)
+	/usr/local/go/src/runtime/netpoll.go:351 +0x85
+internal/poll.(*pollDesc).wait(0x166290e4d400?, 0x166259701000?, 0x0)
+	/usr/local/go/src/internal/poll/fd_poll_runtime.go:84 +0x27
+internal/poll.(*pollDesc).waitRead(...)
+	/usr/local/go/src/internal/poll/fd_poll_runtime.go:89
+internal/poll.(*FD).Read(0x166290e4d400, {0x166259701000, 0x1000, 0x1000})
+	/usr/local/go/src/internal/poll/fd_unix.go:170 +0x2a8
+net.(*netFD).Read(0x166290e4d400, {0x166259701000?, 0x40959c?, 0x23322c8?})
+	/usr/local/go/src/net/fd_posix.go:68 +0x25
+net.(*conn).Read(0x16629e4c7180, {0x166259701000?, 0x166226ac4d50?, 0x2330e10?})
+	/usr/local/go/src/net/net.go:196 +0x45
+net/http.(*persistConn).Read(0x16629e74f400, {0x166259701000?, 0x2542e40?, 0x25da4f0?})
+	/usr/local/go/src/net/http/transport.go:2300 +0x47
+bufio.(*Reader).fill(0x166226409ce0)
+	/usr/local/go/src/bufio/bufio.go:113 +0x103
+bufio.(*Reader).Peek(0x166226409ce0, 0x1)
+	/usr/local/go/src/bufio/bufio.go:152 +0x52
+net/http.(*persistConn).readLoop(0x16629e74f400)
+	/usr/local/go/src/net/http/transport.go:2483 +0x172
+created by net/http.(*Transport).dialConn in goroutine 110154946
+	/usr/local/go/src/net/http/transport.go:2123 +0x1da5
+
+goroutine 110156257 [select]:
+js-wf/client.(*Client).Await(0x1662265767c0, {0x254e200, 0x16628faac380}, {0x1506401, 0xb}, {0x166291443e78, 0x14})
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/client/client.go:702 +0xb35
+js-wf/integration_test.runFiveContainerMixedLeader.func32()
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/integration/tier3_mixed_journal_test.go:1197 +0x9bf
+created by js-wf/integration_test.runFiveContainerMixedLeader in goroutine 8
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/integration/tier3_mixed_journal_test.go:1148 +0x64ff
+
+goroutine 110156479 [select]:
+github.com/nats-io/nats.go/jetstream.(*pullConsumer).fetch.func1(0x166295ede390)
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/jetstream/pull.go:954 +0x1b9
+created by github.com/nats-io/nats.go/jetstream.(*pullConsumer).fetch in goroutine 96
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/jetstream/pull.go:950 +0x471
+
+goroutine 109654908 [select]:
+net/http.(*persistConn).writeLoop(0x166266f5edc0)
+	/usr/local/go/src/net/http/transport.go:2810 +0xe6
+created by net/http.(*Transport).dialConn in goroutine 109654906
+	/usr/local/go/src/net/http/transport.go:2124 +0x1e05
+
+goroutine 110154816 [select]:
+github.com/nats-io/nats.go/jetstream.(*pullConsumer).Consume.func3()
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/jetstream/pull.go:347 +0xd0
+created by github.com/nats-io/nats.go/jetstream.(*pullConsumer).Consume in goroutine 42
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/jetstream/pull.go:341 +0xa15
+
+goroutine 110156525 [select]:
+github.com/nats-io/nats.go/jetstream.(*pullConsumer).fetch.func1(0x1662973199b0)
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/jetstream/pull.go:954 +0x1b9
+created by github.com/nats-io/nats.go/jetstream.(*pullConsumer).fetch in goroutine 148
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/jetstream/pull.go:950 +0x471
+
+goroutine 110156389 [select]:
+github.com/nats-io/nats.go/jetstream.(*pullConsumer).fetch.func1(0x166294a5ec00)
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/jetstream/pull.go:954 +0x1b9
+created by github.com/nats-io/nats.go/jetstream.(*pullConsumer).fetch in goroutine 164
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/jetstream/pull.go:950 +0x471
+
+goroutine 110156255 [select]:
+js-wf/client.(*Client).Await(0x1662265767c0, {0x254e200, 0x16628faac380}, {0x1506401, 0xb}, {0x166291443e18, 0x14})
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/client/client.go:702 +0xb35
+js-wf/integration_test.runFiveContainerMixedLeader.func32()
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/integration/tier3_mixed_journal_test.go:1197 +0x9bf
+created by js-wf/integration_test.runFiveContainerMixedLeader in goroutine 8
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/integration/tier3_mixed_journal_test.go:1148 +0x64ff
+
+goroutine 110156199 [select]:
+github.com/nats-io/nats.go/jetstream.(*pullConsumer).fetch.func1(0x166287aabd10)
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/jetstream/pull.go:954 +0x1b9
+created by github.com/nats-io/nats.go/jetstream.(*pullConsumer).fetch in goroutine 174
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/jetstream/pull.go:950 +0x471
+
+goroutine 110156242 [select]:
+github.com/nats-io/nats.go/jetstream.(*pullConsumer).fetch.func1(0x166288b66780)
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/jetstream/pull.go:954 +0x1b9
+created by github.com/nats-io/nats.go/jetstream.(*pullConsumer).fetch in goroutine 158
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/jetstream/pull.go:950 +0x471
+
+goroutine 110156438 [select]:
+github.com/nats-io/nats.go/jetstream.(*pullConsumer).fetch.func1(0x166295269650)
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/jetstream/pull.go:954 +0x1b9
+created by github.com/nats-io/nats.go/jetstream.(*pullConsumer).fetch in goroutine 168
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/jetstream/pull.go:950 +0x471
+
+goroutine 59786429 [chan send, 275 minutes]:
+github.com/nats-io/nats.go/jetstream.(*pullSubscription).checkPending(0x16624ef014a0)
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/jetstream/pull.go:481 +0x1a5
+github.com/nats-io/nats.go/jetstream.(*pullConsumer).Consume.func1(0x1662780ec770)
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/jetstream/pull.go:263 +0x312
+github.com/nats-io/nats%2ego.(*Conn).waitForMsgs(0x166226374e08, 0x1662464030e0)
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/nats.go:3807 +0x49e
+created by github.com/nats-io/nats%2ego.(*Conn).subscribeLocked in goroutine 42
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/nats.go:5165 +0x430
+
+goroutine 110156514 [select]:
+js-wf/worker.(*Worker).handle.func6()
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/worker/worker.go:674 +0x211
+created by js-wf/worker.(*Worker).handle in goroutine 110156464
+	/tmp/js-wf-bulk-journal-24h-joined-20261006/source/worker/worker.go:665 +0xc0b
+
+goroutine 110156280 [select]:
+github.com/nats-io/nats.go/jetstream.(*pullConsumer).fetch.func1(0x166290925080)
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/jetstream/pull.go:954 +0x1b9
+created by github.com/nats-io/nats.go/jetstream.(*pullConsumer).fetch in goroutine 147
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/jetstream/pull.go:950 +0x471
+
+goroutine 110156386 [select]:
+github.com/nats-io/nats.go/jetstream.(*pullConsumer).fetch.func1(0x1662934197a0)
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/jetstream/pull.go:954 +0x1b9
+created by github.com/nats-io/nats.go/jetstream.(*pullConsumer).fetch in goroutine 132
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/jetstream/pull.go:950 +0x471

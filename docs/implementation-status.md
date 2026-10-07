@@ -18,7 +18,7 @@ against the complete supplied plan is still incomplete; no percentage is claimed
 | Full400k bulk latency capacity | Fresh valid synthetic R5 full400k/4.8M at86a9a33: nativePASS346.87s; full integrity before17.935866136s/after16.185203628s; bulk and exact full-sample comparison19.345814968s, all800,000 samples match independent timestamp oracle plus256 frozen point witnesses. SDK test-body highwater3,804,444KiB (3.63GiB), excluding servers and before cleanup/exit; not exact final lifetime peak. Explicit original10m bulk journal atca7a1fa and consumer atb861f95 independently qualify with full point equivalence. Default/broader live faults/fullmatrix/24h adoption remains open. |
 | Operational domains | Explicit operator commands at ea29cf8, worker static/KV/auto and startup restart at3be727b, and full50000 PostgreSQL projection crash/session-loss/library-restart/rebuild at a397c04 qualify in recorded scopes. Full50000 packaged PostgreSQL projection crash/session-loss/library-restart/rebuild now qualifies atdc88aab. Leaf routing, child wire tracing, other daemon-specific and broader combined cuts remain. |
 | Original million-timer gate | Delivery alone is insufficient: the original physical index/drain assertion is not qualified. |
-| Original 24-hour soak | Three actual journal-leader attempts failed retained audits at batch110/100/400 after950/799/3223s. Complete originals independently preserved; instrumented scan throughput localized. Batched attempt also failed at batch400 /11200 after3223s; originals independently preserved. Explicit-route normal attempt also failed at batch1050 /29400 after7751.58s; complete originals reviewed, concurrent million-loading overlap recorded. Byte-bounded explicit-route attempt failed checkpoint1750 /49000 after13096.14s; all originals independently preserved. Corrected continuous-byte attempt also failed checkpoint1040 /29120 after7986.85s; originals independently preserved, state snapshot phase is the next diagnostic target. No24h row qualified; full-matrix soak remains. |
+| Original 24-hour soak | Three actual journal-leader attempts failed retained audits at batch110/100/400 after950/799/3223s. Complete originals independently preserved; instrumented scan throughput localized. Batched attempt also failed at batch400 /11200 after3223s; originals independently preserved. Explicit-route normal attempt also failed at batch1050 /29400 after7751.58s; complete originals reviewed, concurrent million-loading overlap recorded. Byte-bounded explicit-route attempt failed checkpoint1750 /49000 after13096.14s; all originals independently preserved. Corrected continuous-byte attempt also failed checkpoint1040 /29120 after7986.85s; originals independently preserved, state snapshot phase is the next diagnostic target. Latest original757454a explicit bulk/chunked24h journal run also fails after61168.65s (about17h), batch8520/cutoff238560 retained audit exceeding original20s attempts/60s total; third attempt179520journals/1438910entries. Complete originals independently verified and preserved; cause remains unconfirmed. [Terminal failure](scale/bulk-journal-24h-2026-10-06/terminal/). No24h row qualified; full-matrix soak remains. |
 
 Requested adjustments are in place: Tier1 simulation is implemented; R5 route
 recovery p99 measures from confirmed healing; the historical 31.1 s / TTL 30 s worker
@@ -32,11 +32,15 @@ Immediate work: decide the dependency delivery path from the qualified full170
 composed comparison, qualify broader live/fault capacity,
 finish million-timer physical-drain and combined/operational coverage, and qualify
 the actual 24-hour gate. Earlier latest24h campaigns are
-terminal failures. Fresh explicit bulk/chunked24h journal seed1 now runs at757454a;
-no24h row is accepted. Their complete current files, including
+terminal failures. Original explicit bulk/chunked24h journal seed1 at757454a is now terminal failed
+after about17h at batch8520; no replacement launched and no24h row is accepted. Their complete current files, including
 partial no-space evidence, are preserved to S3. The current normal simulation
 qualifier has completed successfully at its recorded source; the ten-minute consumer-leader component is now
 accepted in its executed-source scope as recorded below.
+
+## Original bulk/chunked 24h journal terminal failure — 2026-10-07
+
+Original757454a actual SDK3461745 fails after61168.65s native body (about17h), batch8520/cutoff238560. Retained audit attempts20.2221s/20.0006s/19.7794s exceed original60s checkpoint: firsttwo zero completed journals; third179520journals/1438910entries. Actual producer/observer units terminal; no observer-timeout inference or restart. Pinned review correctly rejects; fresh independent preservation verifies source equality, complete15402-member/2,090,346,262-byte archive and current originals, no stores reopened. SDK deadline stacks locate pending chunked journal scanning, not confirmed server-side cause or corruption. [Complete terminal evidence](scale/bulk-journal-24h-2026-10-06/terminal/). Actual24h and fullmatrix gates remain open; original deadlines unchanged. Hosted partition200 remains queued.
 
 ## Packaged PostgreSQL domain projection recovery accepted — 2026-10-07
 
