@@ -26,13 +26,15 @@ def main():
     parser.add_argument('--root', type=Path, required=True)
     parser.add_argument('--parent-root', type=Path, required=True)
     parser.add_argument('--guard-variant', choices=['strict', 'contiguous'], default='strict')
-    parser.add_argument('--test-profile', choices=['original', 'locked-peer-setup'], default='original')
+    parser.add_argument('--test-profile', choices=['original', 'locked-peer-setup', 'synchronized-setup'], default='original')
     args = parser.parse_args()
-    if args.test_profile == 'locked-peer-setup' and args.guard_variant != 'contiguous':
-        parser.error('locked-peer-setup requires the qualified contiguous profile')
+    if args.test_profile != 'original' and args.guard_variant != 'contiguous':
+        parser.error('corrected setup requires the qualified contiguous profile')
     parent_canonical = PARENT if args.guard_variant == 'strict' else Path('docs/scale/lease-partition-component-2026-10-06/raft-contiguous-controls')
     if args.test_profile == 'locked-peer-setup':
         parent_canonical = Path('docs/scale/lease-partition-component-2026-10-06/peer-locking-controls')
+    elif args.test_profile == 'synchronized-setup':
+        parent_canonical = Path('docs/scale/lease-partition-component-2026-10-06/synchronized-setup-controls')
     component_canonical = COMPONENT if args.guard_variant == 'strict' else Path('docs/scale/lease-partition-component-2026-10-06/contiguous-component')
     candidate_profile = 'candidate' if args.guard_variant == 'strict' else 'contiguous'
     profiles = ['upstream', candidate_profile]
@@ -60,6 +62,8 @@ def main():
                  candidate_profile+'-overlay.json', 'upstream-overlay.json', 'generated-testmain-limits.json']
     if args.test_profile == 'locked-peer-setup':
         record_names.append('locking-change.json')
+    elif args.test_profile == 'synchronized-setup':
+        record_names.extend(['locking-change.json', 'snapshot-reservation-change.json', 'result.json'])
     for name in record_names:
         data = subprocess.check_output(['git', 'cat-file', 'blob', revision+':'+str(parent_canonical/name)], cwd=REPO)
         assert data == (REPO/parent_canonical/name).read_bytes()
@@ -95,6 +99,28 @@ def main():
         assert change['original_sha256'] == shared.sha(copied/'server/raft_test.go')
         assert sum(row['groups'] for row in change['changes']) == 8 and sum(row['calls'] for row in change['changes']) == 17
         shutil.copyfile(test_overlay, root/'locked-raft_test.go')
+    elif args.test_profile == 'synchronized-setup':
+        review = read('independent-review.json')
+        assert review['original_test_cases'] == 3 and review['original_subcases'] == 12 and review['snapshot_reserves_all']
+        assert read('result.json')['expected_outcomes_matched']
+        for key in ['upstream-synchronized-controls', 'contiguous-synchronized-controls']:
+            assert read('result.json')['results'][key] == 0
+        change = read('locking-change.json'); reservation = read('snapshot-reservation-change.json')
+        assert change['original_sha256'] == shared.sha(copied/'server/raft_test.go')
+        assert change['modified_sha256'] == reservation['original_sha256'] == shared.sha(parent/'locked-raft_test.go')
+        assert sum(row['groups'] for row in change['changes']) == 8 and sum(row['calls'] for row in change['changes']) == 17
+        assert reservation['reserve_all'] and not reservation['late_return']
+        test_overlay = parent/'synchronized-raft_test.go'
+        assert reservation['modified_sha256'] == shared.sha(test_overlay) == manifest['files']['synchronized-raft_test.go']['sha256']
+        modules = []
+        for module_name, filename in [('locking', 'raft-peer-test-locking.py'), ('reservation', 'raft-snapshot-test-reservation.py')]:
+            spec = importlib.util.spec_from_file_location(module_name, REPO/'scripts'/filename)
+            module = importlib.util.module_from_spec(spec); spec.loader.exec_module(module); modules.append(module)
+        locked, _ = modules[0].transform((copied/'server/raft_test.go').read_text())
+        assert locked == (parent/'locked-raft_test.go').read_text()
+        assert modules[1].transform(locked, True, False) == test_overlay.read_text()
+        shutil.copyfile(test_overlay, root/'synchronized-raft_test.go')
+
     save('parent-reference.json', {'canonical': str(parent_canonical), 'guard_variant':args.guard_variant, 'test_profile':args.test_profile, 'test_overlay_sha256':shared.sha(test_overlay) if test_overlay else None, 'candidate_profile':candidate_profile, 'component_canonical':str(component_canonical), 'records': records, 'source': read('independent-review.json')['source'],
          'archive_url': receipt['archive']['url'], 'archive_sha256': metadata['archive_sha256'],
          'component_source':component_build['source'], 'component_build_sha256':hashlib.sha256(component_build_data).hexdigest(),
@@ -163,7 +189,7 @@ def main():
     save('closure.json', shared.closure(root))
     save('result.json', {'orchestrator_source':revision, 'compiled_server_source':read('independent-review.json')['source'], 'results':results,
          'guard_variant':args.guard_variant, 'test_profile':args.test_profile, 'test_overlay_sha256':shared.sha(test_overlay) if test_overlay else None, 'candidate_profile':candidate_profile,
-         'scope':'Every170 pinned TestNRG top-level case, source-bound race binaries, count1/20m each, fresh fixture-source and temp dirs, 2CPU/2GiB. Test profile explicitly records original source or qualified peer-addition setup locking; assertions/cases/deadlines unchanged. Broader Raft controls only; no full NATS test suite, production adoption, workflow matrix or Tier1 qualification.'})
+         'scope':'Every170 pinned TestNRG top-level case, source-bound race binaries, count1/20m each, fresh fixture-source and temp dirs, 2CPU/2GiB. Test profile explicitly records original source, peer-addition setup locking or composed peer-locking/complete I/O reservation without diagnostic injection; original assertions/cases/sleeps/deadlines unchanged. Broader Raft controls only; no full NATS test suite, production adoption, workflow matrix or Tier1 qualification.'})
     shutil.copyfile(__file__, root/'executed-producer.py')
     proof = fixture_archive.capture(root, root.with_suffix('.tar.gz'), root.with_name(root.name+'-proof'), compresslevel=1)
     print(json.dumps({'proof':proof,'all_pass':all(r['qualified'] for r in results.values())}), flush=True)

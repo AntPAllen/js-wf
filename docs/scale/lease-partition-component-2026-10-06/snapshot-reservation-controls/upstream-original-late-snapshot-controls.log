@@ -1,0 +1,11 @@
+=== RUN   TestNRGCheckpointInstallSnapshotAbortDuringWrite
+=== RUN   TestNRGCheckpointInstallSnapshotAbortDuringWrite/RemoveOrphan
+    raft_test.go:6968: DIAGNOSTIC_LATE_DIOS borrowed=1 waited=true drained=4095 capacity=4096
+    raft_test.go:6971: writer returned before dios refill: <nil>
+=== RUN   TestNRGCheckpointInstallSnapshotAbortDuringWrite/KeepAdoptedSnapshot
+    raft_test.go:6968: DIAGNOSTIC_LATE_DIOS borrowed=1 waited=true drained=4095 capacity=4096
+    raft_test.go:6971: writer returned before dios refill: <nil>
+--- FAIL: TestNRGCheckpointInstallSnapshotAbortDuringWrite (0.85s)
+    --- FAIL: TestNRGCheckpointInstallSnapshotAbortDuringWrite/RemoveOrphan (0.42s)
+    --- FAIL: TestNRGCheckpointInstallSnapshotAbortDuringWrite/KeepAdoptedSnapshot (0.43s)
+FAIL

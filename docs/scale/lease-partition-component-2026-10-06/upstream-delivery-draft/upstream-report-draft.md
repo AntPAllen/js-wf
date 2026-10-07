@@ -37,3 +37,7 @@ Canonical records in `docs/scale/lease-partition-component-2026-10-06/`: `raft-c
 ## Complete peer-locked comparison
 
 At b33e795, both actual race binaries run all170 original tests with only the qualified eight lock pairs. Upstream170passes; contiguous169passes/one TestNRGCheckpointInstallSnapshotAbortDuringWrite/RemoveOrphan failure: writer returned before dios refill: <nil>. No race or skip. The original drain consumes only currently available server I/O permits; a late in-flight release is a source-level hypothesis requiring deterministic controls. Native historical cause remains untraced; this full-suite gate remains failed. See ../peer-locked-safety170/.
+
+## Deterministic snapshot-fixture late-permit control
+
+At cb48979, both stock/refined original drain variants fail both original snapshot subcases under the same controlled late permit return (4095/4096 held). Both variants reserving all4096 permits pass with and without the injection. Six actual race/count1/3m/2CPU/2GiB binaries, all original assertions/sleeps/deadlines retained, no races/skips; complete independent source/native/archive review. snapshot-test-reservation.patch is a test-only correction and applies to exact official v2.15.0. Historical full170 cause remains untraced; no production change/default adoption. Combined peer-locking/reservation/full170 remains pending. Full proof: ../snapshot-reservation-controls/.

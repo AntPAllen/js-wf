@@ -1,0 +1,20 @@
+--- a/server/raft_test.go
++++ b/server/raft_test.go
+@@ -6911,14 +6911,9 @@
+ 
+ 			// Drain dios so writeFileWithSync parks inside writeAtomically.
+ 			drained := 0
+-		drain:
+-			for {
+-				select {
+-				case <-n.dios.ch:
+-					drained++
+-				default:
+-					break drain
+-				}
++			for drained < n.dios.cap() {
++				n.dios.acquire()
++				drained++
+ 			}
+ 			refill := func() {
+ 				for i := 0; i < drained; i++ {
