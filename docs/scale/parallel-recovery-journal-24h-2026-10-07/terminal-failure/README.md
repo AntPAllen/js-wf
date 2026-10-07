@@ -1,0 +1,11 @@
+# Original parallel-decoder 24-hour journal run failed
+
+Original native source `bc9f92bdfd1f01ad78d4acd24e6576d46c82a078`, actual SDK3743450 and original service invocation `cb8aebddd6d44f2b947fbb9604ada1da` fail after **29,741.22 seconds (8h15m41s)**. The failed unit retains producer3743034/exit1. The observer and independent reviewer finish successfully; their success preserves the native failure and is not 24-hour acceptance.
+
+Checkpoint4160/cutoff116480 exhausts the original three audit attempts under their unchanged parent budgets. Attempt1 obtains the full initial state set and times out during journal validation with Inv116480/Journals95945/Entries741133/Terminal95944. Attempt2 obtains a state set but returns zero journal counts by its deadline. Attempt3 spends15.196624417s inside WF_STATE.WatchAll creation and returns a context deadline error with no entries/barrier. Its preceding INV deletion and one JRN creation also time out. These observations locate stalled operations; they do not establish a general NATS or historical failure cause.
+
+The existing candidate progress watchdog begins only after WatchAll returns. It therefore cannot bound a stalled watch-creation request. A follow-up will bound creation separately without shortening a successful full initial-set read or extending the original20s parent deadline. Earlier journal delays remain separate risks; this is not a demonstrated full-row fix.
+
+Independent terminal review binds2085 source inputs,10442 original files, original SDK SHA,995 periodic server observations and original store archive. It records `qualifies_24h=false`, source unchanged and observed processes closed. [Original review](independent-review.json), [unit](original-terminal-unit.txt), [complete fault output](events.jsonl), [checkpoint traces and wait stacks](checkpoint4160/), [compact operation summary](failure-summary.json). No original store was opened or broker restarted.
+
+The complete original fixture, observer/reviewer files, frozen source, executables, stores and original nested archive are preserved in a fully verified10,454-member archive:1,088,449,356 bytes, SHA256 `418f0281c0afa0ba2279ff3decbb34007d4a31a35a01b5dfd4d938481d317d0a`. Full S3 upload/readback receipts accompany successful offload. The failed original root remains local for diagnosis; reopen only fresh verified copies.

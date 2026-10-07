@@ -36,9 +36,52 @@ func (t realAuditStateProgressTimer) Reset() {
 }
 
 func initialAuditStateWithProgressTimeout(ctx context.Context, state jetstream.KeyValue, include func(string) bool) (jetstream.KeyValue, error) {
-	return initialAuditStateUsingProgress(ctx, state, include, func() auditStateProgressTimer {
+	clock := func() auditStateProgressTimer {
 		return realAuditStateProgressTimer{timer: time.NewTimer(auditStateProgressInterval)}
-	})
+	}
+	return initialAuditStateUsingTimers(ctx, state, include, clock, clock)
+}
+
+// Watch creation has no entry progress to reset a clock. Cancel its request
+// after the same idle interval without shortening the successful initial-set
+// read. Join the watchdog before returning; WatchAll itself remains synchronous
+// and must honor its request context. No abandoned creation goroutine is used.
+func createAuditStateWatch(ctx context.Context, state jetstream.KeyValue, createTimer func() auditStateProgressTimer) (jetstream.KeyWatcher, context.CancelFunc, error) {
+	if createTimer == nil {
+		watch, err := state.WatchAll(ctx)
+		return watch, func() {}, err
+	}
+	call, cancel := context.WithCancel(ctx)
+	clock := createTimer()
+	defer clock.Stop()
+	created, joined := make(chan struct{}), make(chan struct{})
+	timedOut := false
+	go func() {
+		defer close(joined)
+		select {
+		case <-created:
+		case <-call.Done():
+		case <-clock.C():
+			select {
+			case <-created:
+				return
+			default:
+			}
+			if ctx.Err() == nil {
+				timedOut = true
+				cancel()
+			}
+		}
+	}()
+	watch, err := state.WatchAll(call)
+	close(created)
+	<-joined
+	if ctx.Err() != nil {
+		err = ctx.Err()
+	} else if timedOut {
+		err = fmt.Errorf("state watch creation made no progress: %w", nats.ErrTimeout)
+	}
+	return watch, cancel, err
 }
 
 // The documented nil watch entry marks completion of the initial latest-value
@@ -49,6 +92,10 @@ func initialAuditState(ctx context.Context, state jetstream.KeyValue, include fu
 }
 
 func initialAuditStateUsingProgress(ctx context.Context, state jetstream.KeyValue, include func(string) bool, createTimer func() auditStateProgressTimer) (result jetstream.KeyValue, err error) {
+	return initialAuditStateUsingTimers(ctx, state, include, createTimer, nil)
+}
+
+func initialAuditStateUsingTimers(ctx context.Context, state jetstream.KeyValue, include func(string) bool, createTimer, createCreationTimer func() auditStateProgressTimer) (result jetstream.KeyValue, err error) {
 	// Preserve the underlying error for retry classification while identifying a
 	// failure before the initial-set barrier. Iterator completion alone cannot
 	// show whether this later snapshot phase received any state records.
@@ -79,29 +126,35 @@ func initialAuditStateUsingProgress(ctx context.Context, state jetstream.KeyValu
 		}
 		emit("attempt_return", err)
 	}()
-	watch, err := state.WatchAll(ctx)
+	watch, cancelWatch, err := createAuditStateWatch(ctx, state, createCreationTimer)
+	defer cancelWatch()
+	if watch != nil {
+		defer func() {
+			emit("watch_stop_start", nil)
+			stopError := watch.Stop()
+			defer emit("watch_stopped", stopError)
+			// Release buffered sends from the SDK's synchronous watch callback.
+			// After unsubscribe, only already queued updates can remain.
+			for {
+				select {
+				case _, ok := <-watch.Updates():
+					if !ok {
+						return
+					}
+				default:
+					return
+				}
+			}
+		}()
+	}
 	if err != nil {
 		emit("watch_creation_error", err)
 		return nil, err
 	}
+	if watch == nil {
+		return nil, errors.New("retained state watch creation returned no watcher")
+	}
 	emit("watch_created", nil)
-	defer func() {
-		emit("watch_stop_start", nil)
-		stopError := watch.Stop()
-		defer emit("watch_stopped", stopError)
-		// Release buffered sends from the SDK's synchronous watch callback.
-		// After unsubscribe, only already queued updates can remain.
-		for {
-			select {
-			case _, ok := <-watch.Updates():
-				if !ok {
-					return
-				}
-			default:
-				return
-			}
-		}
-	}()
 	phase = "initial set"
 	var progressTimer auditStateProgressTimer
 	var progress <-chan time.Time

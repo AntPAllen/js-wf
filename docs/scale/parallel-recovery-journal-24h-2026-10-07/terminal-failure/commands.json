@@ -1,0 +1,69 @@
+[
+  {
+    "command": [
+      "git",
+      "worktree",
+      "add",
+      "--detach",
+      "--no-checkout",
+      "/tmp/js-wf-parallel-recovery-journal-24h-20261007/source",
+      "bc9f92bdfd1f01ad78d4acd24e6576d46c82a078"
+    ],
+    "working_directory": "/home/exedev/js-wf"
+  },
+  {
+    "command": [
+      "git",
+      "sparse-checkout",
+      "set",
+      "--no-cone",
+      "--stdin"
+    ],
+    "working_directory": "/tmp/js-wf-parallel-recovery-journal-24h-20261007/source"
+  },
+  {
+    "command": [
+      "git",
+      "read-tree",
+      "-mu",
+      "HEAD"
+    ],
+    "working_directory": "/tmp/js-wf-parallel-recovery-journal-24h-20261007/source"
+  },
+  {
+    "command": [
+      "docker",
+      "info"
+    ],
+    "working_directory": "/tmp/js-wf-parallel-recovery-journal-24h-20261007/source"
+  },
+  {
+    "command": [
+      "go",
+      "test",
+      "-p=1",
+      "-buildvcs=true",
+      "-c",
+      "-o",
+      "/tmp/js-wf-parallel-recovery-journal-24h-20261007/integration.test",
+      "./integration"
+    ],
+    "working_directory": "/tmp/js-wf-parallel-recovery-journal-24h-20261007/source"
+  },
+  {
+    "command": [
+      "go",
+      "tool",
+      "test2json",
+      "-t",
+      "-p",
+      "js-wf/integration",
+      "/tmp/js-wf-parallel-recovery-journal-24h-20261007/integration.test",
+      "-test.run=^TestFiveContainerMixedJournalLeaderEveryThirtySeconds$",
+      "-test.v=test2json",
+      "-test.count=1",
+      "-test.timeout=24h20m"
+    ],
+    "working_directory": "/tmp/js-wf-parallel-recovery-journal-24h-20261007/source/integration"
+  }
+]

@@ -1,0 +1,25 @@
+{
+  "scope": "Local preparation controls only. No captured native SDK/process identity or original full-cohort/24h qualification.",
+  "environment": {
+    "GOMAXPROCS": "2",
+    "GOMEMLIMIT": "1GiB"
+  },
+  "changed_source_sha256": {
+    "integrity/state_scan.go": "90dfc5178b82ea3971eac300d925fd9d9602015b91404f7cbe92d9ed4aa7bb56",
+    "integrity/state_creation_progress_test.go": "6d6c4a241d13b5dd4757d0107ab9c7946144e31ce44712d687e44eacec401d16"
+  },
+  "checks": [
+    {
+      "command": "go test ./integrity -run 'Test(SeededState.*Progress|SeededStateClosedWatch|StateProgress|StateCreationProgress)' -count=20 -timeout=3m",
+      "exit": 0,
+      "stdout": "ok  \tjs-wf/integrity\t0.052s\n",
+      "scope": "Before adding the terminal three-creation-attempt control; creation retry/lifetime and independent error controls included."
+    },
+    {
+      "command": "go test -race ./integrity -run 'Test(SeededState.*Progress|SeededStateClosedWatch|StateProgress|StateCreationProgress)' -count=20 -timeout=3m",
+      "exit": 0,
+      "stdout": "ok  \tjs-wf/integrity\t1.282s\n",
+      "scope": "Final changed source, including terminal three-attempt control; 32 seeded creation schedules per repetition and inherited progress controls."
+    }
+  ]
+}
