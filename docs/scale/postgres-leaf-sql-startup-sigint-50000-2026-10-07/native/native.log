@@ -1,0 +1,19 @@
+=== RUN   TestStandalonePostgresProjectionCrashAndSessionLossFiftyThousandInvocationsThroughLeafWithSQLStartupSIGINT
+    visibility_scale_test.go:151: real domain admitted node=0 domain=WFVIEW server_id=NCTOPPN4LG6I3ACH6J7RTAAA6TOCLIPBVADFPHCTGE4CEWEOZDPTITMQ
+    visibility_scale_test.go:151: real domain admitted node=1 domain=WFVIEW server_id=NBP2JQAIZQEHPBF2TZZMJALEF6TESY7WQLFYEPMIIS3LWI3YSX246IKI
+    visibility_scale_test.go:151: real domain admitted node=2 domain=WFVIEW server_id=NATMOLFV562P6EUW67SB5CYM5IRUJRFZZDVL3N5Y57T3ROCT45ZWHF6X
+    visibility_scale_test.go:151: SQL projector leaf wire: phase=sql-startup pid=1890201 records=7 client_bytes=377 server_bytes=3352
+    visibility_scale_test.go:151: SQL startup cancelled: pid=1890201 backend=100 blocker=98 wait=Lock/relation exit=0 residual_sessions=0 residual_locks=0 rows=0 durables_absent=true signal=SIGINT
+    visibility_scale_test.go:151: SQL projector leaf wire: phase=initial pid=1890232 records=23 client_bytes=1738 server_bytes=11586
+    visibility_scale_test.go:151: started 50000 invocations in 2m26.343356465s while projection stopped
+    visibility_scale_test.go:151: completed and checked 50000 results in 2m55.592094462s
+    visibility_scale_test.go:151: projection healed domain node=0 domain=WFVIEW server_id=NCTOPPN4LG6I3ACH6J7RTAAA6TOCLIPBVADFPHCTGE4CEWEOZDPTITMQ
+    visibility_scale_test.go:151: projection healed domain node=1 domain=WFVIEW server_id=NBP2JQAIZQEHPBF2TZZMJALEF6TESY7WQLFYEPMIIS3LWI3YSX246IKI
+    visibility_scale_test.go:151: projection healed domain node=2 domain=WFVIEW server_id=NDPIWWZQK72FNJ5RN4BQSQOWEHRPREUY74DGLFDGSVP3PVZEHSMWZ54A
+    visibility_scale_test.go:151: SQL projector leaf wire: phase=catchup pid=1905020 records=2389 client_bytes=512141 server_bytes=2766412
+    visibility_scale_test.go:151: SQL projector leaf wire: phase=replacement pid=1905619 records=142505 client_bytes=47189309 server_bytes=250491960
+    visibility_scale_test.go:151: projection lag drained in 6m31.708086534s
+    visibility_project_leaf_test.go:203: SQL projector leaf: test=TestStandalonePostgresProjectionCrashAndSessionLossFiftyThousandInvocationsThroughLeafWithSQLStartupSIGINT local=WFEDGE remote=WFVIEW leaf_pid=1889514 local_streams=0
+    visibility_scale_test.go:230: projection real domain=WFVIEW domain_api_requests=1154786 wrong_prefix_requests=0
+--- PASS: TestStandalonePostgresProjectionCrashAndSessionLossFiftyThousandInvocationsThroughLeafWithSQLStartupSIGINT (588.76s)
+PASS
