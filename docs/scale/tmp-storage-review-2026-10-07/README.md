@@ -15,3 +15,5 @@ This pass recovered another **20.92 GiB** from two complete closed diagnostic co
 An implementation experiment later reclaimed its first complete copied diagnostic and staging archive after fresh verified S3/member/inventory/closure checks: **9.39 GiB**. This retires newly created experiment data and is separate from the earlier20.92 GiB cleanup. [Records](../parallel-journal-decode-2026-10-07/first-copy-reclaimed/README.md).
 
 The completed reused-slot experiment was also retired after fresh verified S3/member/inventory/closure checks: **9.39 GiB**. Both decoder experiments now live in S3 with Git receipts. Observed free space: **65.06 GiB**. [Records](../parallel-journal-decode-2026-10-07/reused-copy-reclaimed/README.md).
+
+Latest cleanup retired both completed cold cursor-owner diagnostic copies and staging archives: **18.71 GiB** reclaimed after fresh full S3/member/inventory/closure verification. Observed free space: **64.95 GiB**. [Removal records](eleventh-closed-cursor-copies/README.md). Original failed stores and reusable fixtures remain local.
