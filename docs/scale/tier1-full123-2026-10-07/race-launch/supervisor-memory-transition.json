@@ -1,0 +1,36 @@
+{
+  "changed_utc": "2026-10-07T16:09:17.013759+00:00",
+  "before": {
+    "Restart": "no",
+    "RuntimeMaxUSec": "1h 15min",
+    "MainPID": "1744790",
+    "ExecMainPID": "1744790",
+    "MemoryCurrent": "1855070208",
+    "MemoryPeak": "1869008896",
+    "MemoryMax": "2147483648",
+    "ActiveState": "active",
+    "SubState": "running",
+    "InvocationID": "96d88310c36d4d80a7a66b42c907a701"
+  },
+  "command": [
+    "systemctl",
+    "--user",
+    "set-property",
+    "--runtime",
+    "js-wf-tier1-full123-race-20261007.service",
+    "MemoryMax=3G"
+  ],
+  "after": {
+    "Restart": "no",
+    "RuntimeMaxUSec": "1h 15min",
+    "MainPID": "1744790",
+    "ExecMainPID": "1744790",
+    "MemoryCurrent": "1853911040",
+    "MemoryPeak": "1869008896",
+    "MemoryMax": "3221225472",
+    "ActiveState": "active",
+    "SubState": "running",
+    "InvocationID": "96d88310c36d4d80a7a66b42c907a701"
+  },
+  "reason": "Measured race-detector/supervisor RSS approached newly added2GiB service cap while VM had8.8GiB available. Original full-suite512MiB Go heap/twoGoCPU/60m/seeds/count unchanged. Same process and original service invocation; no restart or source change."
+}

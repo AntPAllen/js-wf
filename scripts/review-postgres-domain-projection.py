@@ -200,7 +200,7 @@ def main():
         report['leaf_wire']=leaf_wire;report['terminal_unit']=unit;report['scope']=leaf_wire['scope']
     if startup is not None:
         report['sql_startup_cancellation']=startup
-        report['scope']+=' Actual SQL schema-lock startup SIGTERM/exit0, zero residual SQL sessions/locks/rows and no premature projection durables.'
+        report['scope']+=' Actual SQL schema-lock startup '+startup['signal']+'/exit0, zero residual SQL sessions/locks/rows and no premature projection durables.'
     if leaf_fault is not None:
         report['leaf_transport_fault']=leaf_fault
         report['scope']+=' Actual stock leaf SIGKILL/fatal projector/healthy SQL/same-store restart and full replacement rebuild; interrupted fault tails explicitly accounted.'
