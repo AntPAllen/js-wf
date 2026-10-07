@@ -67,11 +67,15 @@ func decodeJournalEntries(ctx context.Context, scan func(context.Context, func(*
 						if b.err = call.Err(); b.err != nil {
 							break
 						}
-						var e journal.Entry
-						if b.err = decode(call, m.Data, &e); b.err != nil {
+						// Decode into the reusable batch slot. Passing a fresh local
+						// Entry through the decoder function allocated once per record.
+						i := len(b.entries)
+						b.entries = b.entries[:i+1]
+						if b.err = decode(call, m.Data, &b.entries[i]); b.err != nil {
+							clear(b.entries[i:])
+							b.entries = b.entries[:i]
 							break
 						}
-						b.entries = append(b.entries, e)
 					}
 					close(b.done)
 				}

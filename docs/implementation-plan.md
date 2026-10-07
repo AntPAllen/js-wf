@@ -5570,3 +5570,8 @@ The CPU profile now has an explicit implementation candidate: bounded parallel J
 ## First bounded decoder native result reviewed — 2026-10-07
 
 At clean d86b0e4, three native point-oracle invariant suites and all five journal corruption subcases pass. The full fresh-restored238560/2630779 cohort then passes15.972402994s under unchanged20s with all actual five stock NATS identities/source/copy/original/archive checks independently reviewed. This supplies no speedup evidence against14.316s serial; one run is not a statistical regression measurement. Default decoding remains serial, original24h failed. Compiler escape analysis identifies an extra per-entry destination allocation; reuse batch slots before further native measurement/adoption. Complete20624-member archive/S3 pending. [Evidence](scale/parallel-journal-decode-2026-10-07/).
+
+
+## Reused decode slots prepared — 2026-10-07
+
+The bounded candidate now decodes into existing batch entry slots rather than allocating a fresh worker destination per record. Normal/race count20 controls pass, and compiler escape analysis no longer reports that worker-local Entry escape. Existing decoder allocations remain; no measured heap/throughput improvement is claimed. Native acceptance at d86b0e4 predates this follow-up source; its full native capacity/performance remain to measure with the original20s/full238560/2630779 workload. Default decoding/24h verdict unchanged. [Evidence](scale/parallel-journal-decode-2026-10-07/reused-slots/).

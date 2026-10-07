@@ -1,0 +1,17 @@
+{
+  "toolchain": "go version go1.27.1 linux/amd64",
+  "command": [
+    "go",
+    "build",
+    "-gcflags=-m=2",
+    "./integrity"
+  ],
+  "initial_candidate_source": "d86b0e4c50d658025708f306fbf9a15a545eb964",
+  "initial_decoder_sha256": "0746f0337d0ff88e07ae8f580cd8f043316a418ccc596b52a41b07062553736a",
+  "reused_slot_decoder_sha256": "f21547ecec3fb9d27704c87179ad56bc2caa4a8a7fbfde4e61190b0c3d36324b",
+  "compiler_output_sha256": "f4eda5615ffe12e3cf74f6217218cb9722bd9f8e2d3940851890f66e51b4c591",
+  "no_worker_local_entry_escape_diagnostic": true,
+  "normal_count": 20,
+  "race_count": 20,
+  "scope": "Compiler escape diagnostics plus focused semantic/race controls; not full runtime allocation or throughput measurement. Batch storage still allocates, and the real journal decoder retains its own allocations."
+}
