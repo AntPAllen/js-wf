@@ -31,3 +31,5 @@ The newly completed leaf/lease-expiry fixture and staging archive were also reti
 Latest user-requested pass reclaimed **4.83 GiB** from completed S3-backed diagnostics. `/tmp`: **14.4 GiB**; filesystem free: **77.1 GiB**. Live24h and reusable fixtures remain local. [Exact records and restoration](thirteenth-completed-diagnostics/README.md).
 
 The new completed all-hub/leaf SIGKILL proof fixture and staging archive were also retired after fresh full S3/member/current-inventory/closure checks: **222.7 MiB** reclaimed. [Ledger and restoration](../leaf-all-hub-sigkill-2026-10-07/reclaimed/README.md).
+
+The completed packaged-worker leaf wire fixture and archive are also retired after fresh complete S3/member/current-inventory/closure checks: **359.6 MiB** reclaimed. Collector failure/native pass/independent acceptance remain distinguished. [Ledger and restore](../worker-leaf-wire-2026-10-07/reclaimed/README.md).
