@@ -1,0 +1,11 @@
+Traceback (most recent call last):
+  File "/tmp/js-wf-candidate-partition200-20261007/source/scripts/run-tier2-retained-row.py", line 46, in <module>
+    names=subprocess.check_output(['git','ls-files','*.go','go.mod','go.sum'],cwd=repo,text=True).splitlines();before={n:sha(repo/n) for n in names}
+                                                                                                                         ^^^^^^^^^^^
+  File "/tmp/js-wf-candidate-partition200-20261007/source/scripts/run-tier2-retained-row.py", line 36, in sha
+    with p.open('rb') as f:return hashlib.file_digest(f,'sha256').hexdigest()
+         ^^^^^^^^^^^^
+  File "/usr/lib/python3.12/pathlib.py", line 1015, in open
+    return io.open(self, mode, buffering, encoding, errors, newline)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '/tmp/js-wf-candidate-partition200-20261007/source/docs/scale/cas-throughput-placement-ci-2026-09-30/follower/main.go'
