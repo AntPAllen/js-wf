@@ -50,17 +50,31 @@ func OpenNativeAuthority(ctx context.Context, js jetstream.JetStream, name, pref
 	if name == "" || prefix == "" || strings.ContainsAny(prefix, "*> /\\\t\r\n") || strings.HasPrefix(prefix, ".") || strings.HasSuffix(prefix, ".") || strings.Contains(prefix, "..") {
 		return nil, errors.New("invalid authority namespace")
 	}
-	lookup, stop := context.WithTimeout(ctx, 2*time.Second)
-	defer stop()
-	stream, err := js.Stream(lookup, name)
-	if err != nil {
-		return nil, err
+	var last error
+	for attempt := 0; attempt < 3; attempt++ {
+		lookup, stop := context.WithTimeout(ctx, 2*time.Second)
+		stream, err := js.Stream(lookup, name)
+		var p *NativeAuthority
+		if err == nil {
+			p = &NativeAuthority{js: js, stream: stream, name: name, prefix: prefix}
+			err = p.validate(lookup)
+		}
+		stop()
+		if err == nil {
+			return p, nil
+		}
+		if ctx.Err() != nil {
+			return nil, ctx.Err()
+		}
+		last = err
+		// Read-only admission can lose a reply during cold routing. Every attempt
+		// has a fresh bounded context; missing/unsafe authorities are never retried
+		// or recreated, and no publication is repeated by this constructor.
+		if !errors.Is(err, context.DeadlineExceeded) && !errors.Is(err, nats.ErrTimeout) {
+			return nil, err
+		}
 	}
-	p := &NativeAuthority{js: js, stream: stream, name: name, prefix: prefix}
-	if err = p.validate(lookup); err != nil {
-		return nil, err
-	}
-	return p, nil
+	return nil, last
 }
 func (p *NativeAuthority) validate(ctx context.Context) error {
 	info, err := p.stream.Info(ctx)
