@@ -22,3 +22,9 @@ Complete original evidence: 1240 members/8,690,915 bytes/SHA256 `648d1a6a4b6b3bb
 Run `scripts/check-nats-scheduler-cleanup.py --module-version v2.15.1-RC.2 --root /tmp/fresh-cleanup-rc2`, then `scripts/review-nats-scheduler-cleanup.py /tmp/fresh-cleanup-rc2 --expected-version v2.15.1-RC.2 --require-retained-store`. Fresh roots only.
 
 Use `s3-readback.json` to download the full archive, then `scripts/restore-full-fixture-proof.py` with this directory's archive metadata/inventory into a fresh destination. No process starts automatically and no verdict changes. Production remains pinned to2.15.0.
+
+## Local storage retirement
+
+The complete RC2 fixture and the fresh stable/RC1 compatibility copies are now offloaded and removed locally. Each removal verified the full remote compressed hash, every archive member, current remaining local bytes and process/descriptor/mount closure. The original failed native verdict is preserved. [Removal ledger](reclaimed/removal.json) records 102,502,400 allocated bytes reclaimed from fixtures and 25,718,784 bytes from archive staging.
+
+Initial removal encountered read-only copied module directories after partial deletion. The [initial ledger](reclaimed/initial-removal.json) preserves the complete verification before that attempt. The resume verified every remaining file as an unchanged subset, read back each complete S3 archive again, and changed owner permissions only on closed selected directories to finish deletion. Original archive modes remain preserved. The completed scheduler unit was stopped; the original 24-hour producer, observer and reviewer remain active in [final state](reclaimed/final-state.json).
