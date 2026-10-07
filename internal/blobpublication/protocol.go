@@ -59,14 +59,18 @@ type Object struct {
 // must not reuse that name for a later retry or report success before its own
 // delayed cleanup can no longer delete that successful upload. List operations
 // cover this protocol's objects only. Missing objects are a successful Delete.
-type Port interface {
+// Authority is the durable reference and generation portion of Port.
+type Authority interface {
 	ReadBlob(context.Context, string) (Record, error)
 	CASBlob(context.Context, string, uint64, Fence) (Record, error)
 	ReadRoot(context.Context, string) (Root, error)
 	CASRoot(context.Context, string, uint64, Root) (Root, error)
+	BlobKeys(context.Context) ([]string, error)
+}
+type Port interface {
+	Authority
 	Put(context.Context, string, []byte) error
 	Delete(context.Context, string) error
-	BlobKeys(context.Context) ([]string, error)
 	Objects(context.Context) ([]Object, error)
 }
 

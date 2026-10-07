@@ -23,6 +23,7 @@ type ClientProxyPendingAPI struct {
 
 type clientAPIBarrier struct {
 	prefix   string
+	exact    bool
 	release  chan struct{}
 	cancel   chan struct{}
 	released bool
@@ -49,6 +50,22 @@ func (p *ClientProxy) HoldFirstConsumerCreate(apiPrefix, stream string) error {
 		return fmt.Errorf("consumer barrier requires a JetStream API prefix and stream token")
 	}
 	return p.holdFirstAPIPrefix(apiPrefix + "CONSUMER.CREATE." + stream + ".")
+}
+
+// HoldFirstPublication holds one complete publication to exactly subject.
+// Metadata and sibling subjects preceding the held packet keep flowing.
+// Configure before connecting.
+func (p *ClientProxy) HoldFirstPublication(subject string) error {
+	if subject == "" || strings.ContainsAny(subject, "*> \t\r\n") || strings.HasPrefix(subject, ".") || strings.HasSuffix(subject, ".") || strings.Contains(subject, "..") {
+		return fmt.Errorf("publication barrier requires an exact subject")
+	}
+	p.mu.Lock()
+	defer p.mu.Unlock()
+	if p.closed || p.acceptedConnections != 0 || p.apiBarrier != nil {
+		return fmt.Errorf("publication barrier requires an unused proxy")
+	}
+	p.apiBarrier = &clientAPIBarrier{prefix: subject, exact: true, release: make(chan struct{}), cancel: make(chan struct{})}
+	return nil
 }
 
 func (p *ClientProxy) holdFirstAPIPrefix(prefix string) error {
@@ -136,7 +153,7 @@ func (p *ClientProxy) copyWithAPIBarrier(client, upstream net.Conn, connection u
 			return err
 		}
 		p.mu.Lock()
-		held := barrier.pending == nil && strings.HasPrefix(subject, barrier.prefix)
+		held := barrier.pending == nil && strings.HasPrefix(subject, barrier.prefix) && (!barrier.exact || subject == barrier.prefix)
 		if held {
 			barrier.pending = &ClientProxyPendingAPI{Connection: connection, Subject: subject, Packet: append([]byte(nil), packet...), Disposition: "held"}
 		}

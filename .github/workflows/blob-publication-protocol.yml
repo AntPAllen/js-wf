@@ -4,6 +4,7 @@ on:
   push:
     paths:
       - 'internal/blobpublication/**'
+      - 'testcluster/client_proxy*'
       - 'sim/blob_publication*'
       - 'sim/journal_transport_test.go'
       - 'sim/testdata/regressions/blob-publication-*'
@@ -13,6 +14,7 @@ on:
   pull_request:
     paths:
       - 'internal/blobpublication/**'
+      - 'testcluster/client_proxy*'
       - 'sim/blob_publication*'
       - 'sim/journal_transport_test.go'
       - 'sim/testdata/regressions/blob-publication-*'
@@ -34,7 +36,14 @@ jobs:
         env:
           GOMAXPROCS: '2'
           GOMEMLIMIT: 512MiB
-        run: go test -race ./internal/blobpublication -count=1 -timeout=3m -json > blob-publication-events.jsonl
+        run: |
+          mkdir -p "$RUNNER_TEMP/blob-native-authority"
+          WF_BLOB_AUTHORITY_ROOT="$RUNNER_TEMP/blob-native-authority" go test -race ./internal/blobpublication -count=1 -timeout=3m -json > blob-publication-events.jsonl
+      - name: Exact publication and existing API selector controls
+        env:
+          GOMAXPROCS: '2'
+          GOMEMLIMIT: 512MiB
+        run: go test -race ./testcluster -run 'TestClientProxy(ExactPublicationSelector|FirstAPIBarrier|ConsumerCreationSelector)' -count=1 -timeout=2m
       - name: Common Tier 1 workload and pinned trace dispatch
         env:
           GOMAXPROCS: '2'
@@ -48,3 +57,4 @@ jobs:
           path: |
             blob-publication-events.jsonl
             blob-publication-tier1-events.jsonl
+            ${{ runner.temp }}/blob-native-authority

@@ -1,0 +1,19 @@
+{
+  "exit_code": 1,
+  "command": [
+    "go",
+    "test",
+    "-race",
+    "./internal/blobpublication",
+    "-run",
+    "^TestNativeAuthority",
+    "-count=1",
+    "-v",
+    "-timeout=2m"
+  ],
+  "r1": "PASS: retired head3 and generation2 persist across same-store restart; old CAS rejected and purge/delete denied",
+  "r3": "FAIL: first CreateStream context deadline exceeded within original20s before authority operations",
+  "unsafe_configurations": "PASS: nine native config negatives and unsafe post-open mutation",
+  "package_elapsed_seconds": 20.288,
+  "scope": "Preliminary development run; no retained SDK/media qualification. Metadata-leader admission was absent. Exact server-side cause of creation timeout remains unconfirmed; next fixture admits readiness under the same20s budget."
+}

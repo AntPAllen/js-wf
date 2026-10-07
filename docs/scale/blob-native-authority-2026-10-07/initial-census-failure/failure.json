@@ -1,0 +1,27 @@
+{
+  "command": [
+    "go",
+    "test",
+    "-race",
+    "./internal/blobpublication",
+    "-run",
+    "^TestNativeAuthority",
+    "-count=1",
+    "-v",
+    "-timeout=2m"
+  ],
+  "environment": {
+    "GOMAXPROCS": "2",
+    "GOMEMLIMIT": "512MiB"
+  },
+  "exit_code": 1,
+  "head_generation_test": "FAIL at authority census: incomplete authority census",
+  "unsafe_configuration_test": "PASS including nine native configuration controls",
+  "package_elapsed_seconds": 0.166,
+  "cause": "Filtered subject map contained one blob key while NumSubjects counted the complete mixed root/blob authority stream. Client census assumption confirmed; no server-side cause inferred.",
+  "source_files": {
+    "nats_authority.go.txt": "81ff0d626fdb1f6fd736d5e2a2f6da1581a896ba6a449070e5cbcad2c4a163cb",
+    "nats_authority_test.go.txt": "6e5df158a260589a0e2c1a2e66e1de1f0385d990a497f00fb99ebc342ec9bed5"
+  },
+  "scope": "Preliminary development test result from observed tool output. No retained original SDK or native store qualification; normal Go temporary fixture cleanup occurred."
+}
