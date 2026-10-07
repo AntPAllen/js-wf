@@ -1,0 +1,19 @@
+{
+  "build": [
+    "go",
+    "test",
+    "-buildvcs=true",
+    "-race",
+    "-c",
+    "-o",
+    "/tmp/js-wf-online-blob-native-20261007/retention-race.test",
+    "./retention"
+  ],
+  "run": [
+    "/tmp/js-wf-online-blob-native-20261007/retention-race.test",
+    "-test.v",
+    "-test.run=^TestBlobSweepConcurrentRefreshContract$",
+    "-test.count=1",
+    "-test.timeout=3m"
+  ]
+}
