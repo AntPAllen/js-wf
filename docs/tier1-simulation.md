@@ -1,5 +1,9 @@
 # Tier 1 deterministic simulation: journal, lease, start, signals, timers, dispatch, and worker slices
 
+## Complete123-workload normal100000 graph live — 2026-10-07
+
+Actual normal SDK2045340 runs the original full123-workload/395-pin graph at isolated4a04e00 with100000 seeds per workload/count1/300m/twoGoCPU/512MiB. Independent admission verifies2215 selected Git inputs, exact live binary/argv/birth/profile/cwd, compiled/source inventories and original retained service. [Launch and terminal requirements](scale/tier1-full123-2026-10-07/normal100k-launch/). Full123 race1000 is independently accepted and S3-preserved; full normal12300000-body acceptance awaits terminal evidence. Both SQL SIGINT original failure and accepted full50000 fixtures/owned stoppedSQL volumes are now verified S3-backed and retired,1.55GiB reclaimed. Original24h remains live. Full native matrices, safe onlineGC, original million physical drain and fullrelease remain open.
+
 ## Complete123-workload Tier1 race graph accepted — 2026-10-07
 
 The exact isolated362219f campaign passes every123000 workload body, all395 pins,180 top-level cases/two documented trace-only skips and2271.395s package. Independent review regenerates all exact1..1000 ranges and verifies2200 selected Git inputs, unchanged source/binary/profile/launch identity, original retained successful service and every complete archive member. External supervisor cap2GiB→3GiB was explicitly recorded; original512MiB Go heap/twoGoCPU/60m/count1/source/process/invocation remain. No restart. [Complete evidence and limits](scale/tier1-full123-2026-10-07/race-terminal/). Full123 normal100k remains next; original24h remains live. Safe onlineGC, NATS internal causality, full native matrices, original million physical drain and fullrelease remain open.

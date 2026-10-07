@@ -11,3 +11,5 @@ The [initial native failure](../initial-failure/) remains failed: residual sessi
 Full archive199,211,767bytes/SHA256 `8af2816e0771140ff0924cc3d52ca2fef2b030611b34dbb2855ed645160ea654`, complete source/stores/SQL media/wire/binaries/raw logs and original file modes/mtimes. No original store was reopened in review. Manual CI carries the sixth explicit profile; it has not been dispatched.
 
 This closes the recorded-source SQL relation-lock startup SIGINT plus full50000 recovery component. Other connection/authentication boundaries, natural reply loss/follower lag, hub-process SIGKILL, full runtime matrices, safe onlineGC, original million physical drain and actual24h/fullrelease remain open. Original isolated24h and complete123-workload race campaign remain active.
+
+The complete original root/local archive and exact owned stoppedSQL container/volume are now retired after fresh full remote/member/current-inventory/closure/complete-volume-media verification. [Exact ledger](../reclaimed/README.md) preserves this original verdict; restore full S3 evidence into a fresh destination before reuse.

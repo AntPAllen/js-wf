@@ -13,3 +13,7 @@ At16:09UTC, measured race-service memory approached the2GiB external supervision
 ## Complete race terminal accepted
 
 The exact live campaign now completes and is [independently accepted](race-terminal/):123000 seed bodies,395 pins,180 top-level passes/two trace-only skips,2271.395s, unchanged original source/binary/native profile. Original supervisor-memory transition is retained. Full123 normal100k remains next; no real-matrix/onlineGC/million/24h qualification follows.
+
+## Full normal100000 campaign live
+
+[Independent normal launch](normal100k-launch/) binds actual SDK2045340 and exact isolated4a04e00 source/all2215 selected inputs. All123 workloads and395 pins are selected under original100000/count1/300m/twoGoCPU/512MiB; no terminal verdict yet. Complete accepted race archive has verified S3 body/metadata/inventory readbacks.
