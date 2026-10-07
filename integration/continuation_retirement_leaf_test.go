@@ -15,6 +15,9 @@ import (
 	"github.com/nats-io/nats-server/v2/server"
 	"github.com/nats-io/nats.go"
 	"github.com/nats-io/nats.go/jetstream"
+	"js-wf/identity"
+	"js-wf/journal"
+	"js-wf/lease"
 	"js-wf/provision"
 	"js-wf/testcluster"
 )
@@ -22,14 +25,18 @@ import (
 // Run the original strict retirement/reuse scenario through a real leaf whose
 // local JetStream domain differs from the three-node storage hub's domain.
 func TestContinuationRetirementReuseThroughLeafWithHubRestart(t *testing.T) {
-	runContinuationRetirementLeaf(t, false)
+	runContinuationRetirementLeaf(t, false, false)
 }
 
 func TestContinuationRetirementReuseThroughLeafSIGKILLWithHubRestart(t *testing.T) {
-	runContinuationRetirementLeaf(t, true)
+	runContinuationRetirementLeaf(t, true, false)
 }
 
-func runContinuationRetirementLeaf(t *testing.T, processLeaf bool) {
+func TestContinuationRetirementReuseThroughLeafSIGKILLAndLeaseExpiryWithHubRestart(t *testing.T) {
+	runContinuationRetirementLeaf(t, true, true)
+}
+
+func runContinuationRetirementLeaf(t *testing.T, processLeaf, expireLease bool) {
 	root := os.Getenv("WF_CONTINUATION_DOMAIN_ROOT")
 	if root == "" {
 		t.Skip("set WF_CONTINUATION_DOMAIN_ROOT to a fresh absolute directory")
@@ -184,6 +191,14 @@ func runContinuationRetirementLeaf(t *testing.T, processLeaf bool) {
 		Domain string `json:"domain"`
 	}
 	type evidence struct {
+		LeaseTTLSeconds float64   `json:"lease_ttl_seconds,omitempty"`
+		PriorEpoch      uint64    `json:"prior_epoch,omitempty"`
+		TerminalEpoch   uint64    `json:"terminal_epoch,omitempty"`
+		LeaseRevision   uint64    `json:"lease_revision,omitempty"`
+		OutageStart     time.Time `json:"outage_start,omitempty"`
+		OutageEnd       time.Time `json:"outage_end,omitempty"`
+		JournalRecords  int       `json:"journal_records,omitempty"`
+
 		FaultProfile      string `json:"fault_profile"`
 		LeafOriginalID    string `json:"leaf_original_id,omitempty"`
 		LeafPIDBefore     int    `json:"leaf_pid_before,omitempty"`
@@ -225,6 +240,9 @@ func runContinuationRetirementLeaf(t *testing.T, processLeaf bool) {
 		proof.LeafOriginalID = proof.LeafID
 		proof.LeafPIDBefore = leafProcess.Commands[0].Process.Pid
 	}
+	if expireLease {
+		proof.FaultProfile = "leaf-sigkill-lease-expiry-hub-restart"
+	}
 	save := func() {
 		mu.Lock()
 		proof.Subjects = make(map[string]int, len(subjects))
@@ -260,6 +278,33 @@ func runContinuationRetirementLeaf(t *testing.T, processLeaf bool) {
 		// deadline rather than the operation whose failure we are injecting.
 		observe, stop := context.WithDeadline(context.Background(), proof.CutStart.Add(30*time.Second))
 		defer stop()
+		if expireLease {
+			kv, e := all[0].KeyValue(observe, "WF_LEASE")
+			if e != nil {
+				return e
+			}
+			status, e := kv.Status(observe)
+			if e != nil {
+				return e
+			}
+			if status.TTL() != provision.LeaseTTL {
+				return fmt.Errorf("lease TTL mismatch: %s", status.TTL())
+			}
+			proof.LeaseTTLSeconds = status.TTL().Seconds()
+			entry, e := kv.Get(observe, identity.Key("checkpoint-retire", "reused"))
+			if e != nil {
+				return e
+			}
+			var held lease.Value
+			if e = json.Unmarshal(entry.Value(), &held); e != nil {
+				return e
+			}
+			if held.Epoch == 0 || held.Worker != "checkpoint-retirement" {
+				return fmt.Errorf("fresh owner unconfirmed: %+v", held)
+			}
+			proof.PriorEpoch = held.Epoch
+			proof.LeaseRevision = entry.Revision()
+		}
 		for i := range hub.Servers {
 			hub.KillNode(i)
 			if hub.Servers[i].Running() {
@@ -296,6 +341,21 @@ func runContinuationRetirementLeaf(t *testing.T, processLeaf bool) {
 			}
 		}
 		proof.Disconnected = true
+		if expireLease {
+			proof.OutageStart = time.Now().UTC()
+			timer := time.NewTimer(provision.LeaseTTL + time.Second)
+			select {
+			case <-observe.Done():
+				timer.Stop()
+				return observe.Err()
+			case <-timer.C:
+			}
+			proof.OutageEnd = time.Now().UTC()
+			if proof.OutageEnd.Sub(proof.OutageStart) <= provision.LeaseTTL {
+				return fmt.Errorf("outage did not exceed TTL")
+			}
+			t.Logf("leaf lease outage: held=%s ttl=%s prior_epoch=%d", proof.OutageEnd.Sub(proof.OutageStart), provision.LeaseTTL, proof.PriorEpoch)
+		}
 		for i := range hub.Servers {
 			if e := hub.RestartNode(i); e != nil {
 				return e
@@ -368,6 +428,21 @@ func runContinuationRetirementLeaf(t *testing.T, processLeaf bool) {
 		return nil
 	}
 	runContinuationRetirementOnCluster(t, all, true, onDrop)
+	if expireLease && !t.Failed() {
+		read, done := context.WithTimeout(context.Background(), 5*time.Second)
+		defer done()
+		records, _, e := journal.New(all[0]).Read(read, "checkpoint-retire", "reused")
+		if e != nil || len(records) == 0 {
+			t.Fatalf("post-outage journal: records=%d err=%v", len(records), e)
+		}
+		terminal := records[len(records)-1]
+		if terminal.Kind != journal.Completed || terminal.Epoch <= proof.PriorEpoch {
+			t.Fatalf("terminal failed to fence old owner: %+v prior=%d", terminal, proof.PriorEpoch)
+		}
+		proof.TerminalEpoch = terminal.Epoch
+		proof.JournalRecords = len(records)
+		t.Logf("leaf lease successor: prior_epoch=%d terminal_epoch=%d records=%d", proof.PriorEpoch, proof.TerminalEpoch, len(records))
+	}
 	if err := trace.Unsubscribe(); err != nil {
 		t.Fatal(err)
 	}
