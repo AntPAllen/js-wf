@@ -7,3 +7,5 @@ Further cleanup: Reclaimed **10.40 GiB** from 284 historical closed directories 
 See [cleanup and restoration details](eighth-closed-roots/README.md), [measured totals](eighth-closed-roots/summary.json), and [archive-copy removal](eighth-verified-staging-removal/removal.json). Live runs and retained scale/causal fixtures remain local.
 
 Earlier cleanup records are in [the October 6 review](../tmp-storage-review-2026-10-06/README.md). No test verdict is changed by storage cleanup.
+
+Latest pass removed another **469.3 MiB** of redundant archive staging copies after fresh complete S3 verification. See [details](ninth-verified-staging-removal/README.md). Observed filesystem free space afterward: approximately **71 GiB**. Original fixture directories remain local.
