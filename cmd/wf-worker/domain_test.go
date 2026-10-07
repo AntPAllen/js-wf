@@ -21,6 +21,10 @@ func TestWorkerRunnerCompletesWorkflowAndServesMetricsInJetStreamDomain(t *testi
 }
 
 func workerDomainCluster(t *testing.T, domain string) (*testcluster.Cluster, error) {
+	return workerDomainClusterWithLeaf(t, domain, false)
+}
+
+func workerDomainClusterWithLeaf(t *testing.T, domain string, leaf bool) (*testcluster.Cluster, error) {
 	t.Helper()
 	root := os.Getenv("WF_WORKER_TEST_ROOT")
 	if root == "" {
@@ -34,6 +38,9 @@ func workerDomainCluster(t *testing.T, domain string) (*testcluster.Cluster, err
 	}
 	if domain == "" {
 		return testcluster.Start(root, 1)
+	}
+	if leaf {
+		return testcluster.StartWithLeafDomain(root, 3, domain)
 	}
 	return testcluster.StartWithDomain(root, 3, domain)
 }

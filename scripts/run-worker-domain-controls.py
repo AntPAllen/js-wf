@@ -12,6 +12,7 @@ import subprocess
 import time
 
 import fixture_archive
+import worker_leaf_wire
 
 REPO = Path(__file__).resolve().parents[1]
 TESTS = ['TestWorkerRunnerCompletesWorkflowAndServesMetrics', 'TestWorkerRunnerCompletesWorkflowAndServesMetricsInJetStreamDomain', 'TestWorkerRunnerStartsAfterServerRestart', 'TestWorkerRunnerStartsAfterServerRestartInJetStreamDomain']
@@ -64,10 +65,21 @@ def verify_standalone_log(log):
     return dict(tests=STANDALONE_TESTS,actual_standalone_processes=8,real_domain_peer_admissions=12,scope='Actual built worker default/domain static/KV/auto workflow metrics retention and startup after real embedded all-server library restart; eight real SIGTERM joins. No outgoing child wire trace, native SIGKILL, leaf, fullmatrix or release qualification.')
 
 
+def verify_leaf_log(log):
+    assert log.rstrip().endswith('PASS') and not any(x in log for x in ('DATA RACE','--- FAIL:','--- SKIP:'))
+    assert re.findall(r'^--- PASS: (\w+) \([0-9.]+s\)$',log,re.M)==[worker_leaf_wire.TEST]
+    assert sorted(re.findall(r'^\s+--- PASS: '+worker_leaf_wire.TEST+r'/(static|kv|auto) \(',log,re.M))==['auto','kv','static']
+    processes=re.findall(r'worker standalone process domain="WFWORKER" pid=(\d+) signal=SIGTERM exit=0 exe_sha256=([0-9a-f]{64})',log)
+    assert len(processes)==len({pid for pid,_ in processes})==3 and len({sha for _,sha in processes})==1
+    wires=re.findall(r'worker leaf wire: test='+worker_leaf_wire.TEST+r'/(static|kv|auto) local=WFEDGE remote=WFWORKER leaf_pid=(\d+) connections=1 truncated=false child_bytes=(\d+)',log)
+    assert sorted(mode for mode,_,_ in wires)==['auto','kv','static'] and len({pid for _,pid,_ in wires})==3 and all(int(size)>0 for _,_,size in wires)
+    return dict(tests=[worker_leaf_wire.TEST],scope='Packaged full static/KV/auto smoke through a real separate-domain leaf; complete wire proof verified separately. No faults or full release claim.')
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--root', type=Path, required=True)
-    parser.add_argument('--case',choices=['commands','standalone-commands'],default='commands')
+    parser.add_argument('--case',choices=['commands','standalone-commands','standalone-leaf'],default='commands')
     args = parser.parse_args()
     root = args.root.absolute()
     assert not root.exists() and not root.is_relative_to(REPO)
@@ -86,7 +98,7 @@ def main():
     env = dict(os.environ, GOMAXPROCS='2', GOMEMLIMIT='1GiB', GOWORK='off', GOFLAGS='', WF_WORKER_TEST_ROOT=str(root/'stores'), WF_WORKER_STANDALONE='1')
     binary = root/'worker-race.test'
     build = ['go', 'test', '-race', '-buildvcs=true', '-c', '-o', str(binary), './cmd/wf-worker']
-    tests=STANDALONE_TESTS if args.case=='standalone-commands' else TESTS
+    tests=([worker_leaf_wire.TEST] if args.case=='standalone-leaf' else STANDALONE_TESTS if args.case=='standalone-commands' else TESTS)
     command = [str(binary), '-test.v', '-test.run=^('+'|'.join(tests)+')$', '-test.count=1', '-test.timeout=4m']
     run_directory = REPO/'cmd/wf-worker'
     save('commands.json', dict(build=build, build_working_directory=str(REPO), run=command, run_working_directory=str(run_directory)))
@@ -98,13 +110,8 @@ def main():
     started = time.monotonic()
     with (root/'native.log').open('w') as log:
         child = subprocess.Popen(command, cwd=run_directory, env=env, stdout=log, stderr=subprocess.STDOUT)
-        proc = Path('/proc', str(child.pid))
-        actual_env = dict(v.split(b'=', 1) for v in (proc/'environ').read_bytes().split(b'\0') if b'=' in v)
-        actual = dict(pid=child.pid, stat=(proc/'stat').read_text(), exe=str((proc/'exe').resolve()), working_directory=str((proc/'cwd').resolve()),
-                      exe_sha256=shared.sha(proc/'exe'),
-                      args=[os.fsdecode(v) for v in (proc/'cmdline').read_bytes().split(b'\0') if v],
-                      environment={k:os.fsdecode(actual_env[k.encode()]) for k in ('GOMAXPROCS','GOMEMLIMIT','GOWORK','GOFLAGS','WF_WORKER_TEST_ROOT','WF_WORKER_STANDALONE')})
-        assert actual['args']==command and actual['exe_sha256']==shared.sha(binary) and actual['exe']==str(binary) and actual['working_directory']==str(run_directory)
+        keys=('GOMAXPROCS','GOMEMLIMIT','GOWORK','GOFLAGS','WF_WORKER_TEST_ROOT','WF_WORKER_STANDALONE')
+        actual=shared.live_process_admission.admit(child,command,{key:env[key] for key in keys},run_directory,binary,shared.sha(binary))
         save('actual-sdk.json', actual)
         print('ACTUAL_WORKER_SDK', child.pid, flush=True)
         code = child.wait()
@@ -124,12 +131,27 @@ def main():
         if args.case=='commands':
             result = verify_log((root/'native.log').read_text())
         else:
-            result = verify_standalone_log((root/'native.log').read_text())
+            result = (verify_leaf_log if args.case=='standalone-leaf' else verify_standalone_log)((root/'native.log').read_text())
             records=[json.loads(p.read_text()) for p in (root/'stores').rglob('standalone.process.json')]
-            assert len(records)==8 and len({r['pid'] for r in records})==8
+            expected_processes=3 if args.case=='standalone-leaf' else 8
+            assert len(records)==len({r['pid'] for r in records})==expected_processes
             assert all(r['signal']=='SIGTERM' and r['exit_code']==0 and r['argv'][0]==r['exe'] and Path(r['exe']).is_relative_to(root/'stores') and shared.sha(r['exe'])==r['exe_sha256'] and 'vcs.revision='+revision in r['build_info'] and 'vcs.modified=false' in r['build_info'] and '-race=true' in r['build_info'] and not Path('/proc',str(r['pid'])).exists() for r in records)
             save('standalone-processes.json',records)
-    except AssertionError as exc:
+            if args.case=='standalone-leaf':
+                proofs=list((root/'stores').glob('wf-worker-leaf-*/leaf-proof.json'));assert len(proofs)==3
+                reports=[]
+                for proof_path in proofs:
+                    report=worker_leaf_wire.validate(proof_path.parent)
+                    proof=json.loads(proof_path.read_text());native=json.loads((proof_path.parent/'leaf.process.json').read_text())
+                    assert native['pid']==proof['leaf_pid'] and native['reaped'] is True and native['exit_code']==0 and not Path('/proc',str(native['pid'])).exists()
+                    assert shared.sha(native['exe'])==native['exe_sha256'] and re.search(r'\bgithub.com/nats-io/nats-server/v2\s+v2\.15\.0\b',native['build_info'])
+                    child=next(record for record in records if record['test']==proof['test'])
+                    assert child['argv'][child['argv'].index('-url')+1]==proof['proxy_url'] and child['argv'][child['argv'].index('-domain')+1]=='WFWORKER'
+                    reports.append(report)
+                assert {report['test'] for report in reports}=={worker_leaf_wire.TEST+'/'+mode for mode in ('static','kv','auto')}
+                save('leaf-wire-review.json',reports)
+
+    except (AssertionError,ValueError,KeyError) as exc:
         error = str(exc) or 'native coverage rejected'
     save('row-review.json', dict(qualification=result, rejection=error))
     proof = fixture_archive.capture(root, root.with_suffix('.tar.gz'), root.with_name(root.name+'-proof'), compresslevel=1)

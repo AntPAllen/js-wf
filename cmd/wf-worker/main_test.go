@@ -279,11 +279,15 @@ func runWorkerSmokeWithDomain(t *testing.T, pluginPath, mode, domain string, enc
 }
 
 func runWorkerSmokeWithInvoker(t *testing.T, pluginPath, mode, domain string, invoke func(context.Context, []string) error, encodings ...string) {
+	runWorkerSmokeWithTransport(t, pluginPath, mode, domain, invoke, false, encodings...)
+}
+
+func runWorkerSmokeWithTransport(t *testing.T, pluginPath, mode, domain string, invoke func(context.Context, []string) error, leaf bool, encodings ...string) {
 	if invoke == nil {
 		invoke = func(ctx context.Context, args []string) error { return runDomainWorker(t, ctx, domain, args) }
 	}
 	t.Helper()
-	cluster, err := workerDomainCluster(t, domain)
+	cluster, err := workerDomainClusterWithLeaf(t, domain, leaf)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -296,6 +300,12 @@ func runWorkerSmokeWithInvoker(t *testing.T, pluginPath, mode, domain string, in
 	defer cancel()
 	if domain != "" {
 		admitWorkerDomain(t, ctx, cluster, domain)
+	}
+	serverURL := cluster.Servers[0].ClientURL()
+	if leaf {
+		var closeLeaf func()
+		serverURL, closeLeaf = workerLeafEndpoint(t, ctx, cluster, domain)
+		defer closeLeaf()
 	}
 	if mode == "kv" {
 		if err := provision.Ensure(ctx, js, len(cluster.Servers)); err != nil {
@@ -318,7 +328,7 @@ func runWorkerSmokeWithInvoker(t *testing.T, pluginPath, mode, domain string, in
 		t.Fatal(err)
 	}
 	args := []string{
-		"-url", cluster.Servers[0].ClientURL(), "-id", "runner-smoke",
+		"-url", serverURL, "-id", "runner-smoke",
 		"-handler-plugin", pluginPath, "-mode", mode,
 		"-metrics-addr", metricsAddr, "-reconcile-interval", "100ms",
 		"-retention-type", "retention", "-retention-grace", "1h",

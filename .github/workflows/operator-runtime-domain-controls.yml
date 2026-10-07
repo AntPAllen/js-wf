@@ -8,6 +8,8 @@ on:
       - 'cmd/wf-worker/**'
       - 'scripts/run-operator-domain-controls.py'
       - 'scripts/run-worker-domain-controls.py'
+      - 'scripts/worker_leaf_wire.py'
+      - 'scripts/test_worker_leaf_wire.py'
       - 'scripts/run-domain-runtime-controls.py'
       - 'scripts/fixture_archive.py'
       - 'scripts/verify-tier2-closed-originals.py'
@@ -63,6 +65,7 @@ jobs:
           - {program: operator, case: standalone-commands, args: "--case standalone-commands"}
           - {program: worker, case: commands, args: ""}
           - {program: worker, case: standalone-commands, args: "--case standalone-commands"}
+          - {program: worker, case: standalone-leaf, args: "--case standalone-leaf"}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-go@v5
