@@ -10,6 +10,7 @@ import re
 import shutil
 import subprocess
 import sys
+import time
 
 sys.dont_write_bytecode = True
 
@@ -112,6 +113,13 @@ def main():
             proc = Path('/proc', str(child.pid))
             actual = {'pid':child.pid, 'stat':(proc/'stat').read_text(), 'argv':[os.fsdecode(v) for v in (proc/'cmdline').read_bytes().split(b'\0') if v],
                       'actual_executable_sha256':shared.sha(proc/'exe'), 'cwd':os.readlink(proc/'cwd')}
+            deadline = time.monotonic()+5
+            while actual['argv'] != command or actual['actual_executable_sha256'] != read(profile+'-binary.json')['executable_sha256']:
+                if child.poll() is not None or time.monotonic() > deadline:
+                    raise RuntimeError('native process identity did not stabilize')
+                time.sleep(.01)
+                actual = {'pid':child.pid, 'stat':(proc/'stat').read_text(), 'argv':[os.fsdecode(v) for v in (proc/'cmdline').read_bytes().split(b'\0') if v],
+                          'actual_executable_sha256':shared.sha(proc/'exe'), 'cwd':os.readlink(proc/'cwd')}
             actual_environment = {os.fsdecode(row.split(b'=', 1)[0]):os.fsdecode(row.split(b'=', 1)[1]) for row in (proc/'environ').read_bytes().split(b'\0') if b'=' in row}
             expected_environment = {k:env[k] for k in ['GOMAXPROCS','GOMEMLIMIT','TMPDIR','GOWORK','GOFLAGS']}
             actual['environment'] = {k:actual_environment[k] for k in expected_environment}
