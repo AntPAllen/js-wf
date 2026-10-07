@@ -9,3 +9,5 @@ See [cleanup and restoration details](eighth-closed-roots/README.md), [measured 
 Earlier cleanup records are in [the October 6 review](../tmp-storage-review-2026-10-06/README.md). No test verdict is changed by storage cleanup.
 
 Latest pass removed another **469.3 MiB** of redundant archive staging copies after fresh complete S3 verification. See [details](ninth-verified-staging-removal/README.md). Observed filesystem free space afterward: approximately **71 GiB**. Original fixture directories remain local.
+
+This pass recovered another **20.92 GiB** from two complete closed diagnostic copies and five redundant archive files after fresh full S3/member verification. Observed filesystem free space: **67.24 GiB**. See [verified removal and restoration records](tenth-copied-roots-and-staging/README.md). Original failed-run stores and donor fixtures remain local.

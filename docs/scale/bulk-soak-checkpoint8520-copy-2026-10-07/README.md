@@ -13,3 +13,7 @@ Trace timestamps place most copied runtime in journal delivery/decoding/reductio
 ## Full-phase CPU diagnosis
 
 A separate fresh full-cohort profiled run atf9be625 passes13.447759199s with complete independent review. [Profile and limits](cpu-profile/README.md). Journal decoding consumes22.42% of sampled SDK CPU; bounded parallel decoding is the next implementation candidate, with ordering/invariants/cancellation and original deadlines preserved. No original24h promotion.
+
+## Local storage
+
+The two complete closed diagnostic copies and their local archive staging files were removed after fresh full S3 readback and inventory/closure verification. Original failed-run stores remain local. See [removal and restoration records](../tmp-storage-review-2026-10-07/tenth-copied-roots-and-staging/README.md). Download and fully verify a fresh restoration before further native work.
