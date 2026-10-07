@@ -19,6 +19,7 @@ import (
 	"strings"
 	"sync"
 	"sync/atomic"
+	"syscall"
 	"testing"
 	"time"
 
@@ -140,6 +141,16 @@ func TestStandalonePostgresProjectionCrashAndSessionLossFiftyThousandInvocations
 	runProjectionRecoveryStartup(t, true, true, true, true, "WFVIEW")
 }
 
+func TestStandalonePostgresProjectionCrashAndSessionLossFiftyThousandInvocationsThroughLeafWithSQLStartupSIGINT(t *testing.T) {
+	if os.Getenv("WF_PROJECTION_POSTGRES_FAULT_ROOT") == "" || os.Getenv("WF_TEST_POSTGRES_DSN") == "" {
+		t.Skip("opt-in full packaged SQL leaf SIGINT startup proof")
+	}
+	if os.Getenv("WF_PROJECTION_COUNT") != "" {
+		t.Fatal("full SQL startup SIGINT requires default50000")
+	}
+	runProjectionRecoverySignalFault(t, true, true, true, true, false, syscall.SIGINT, "WFVIEW")
+}
+
 func TestStandalonePostgresProjectionCrashAndSessionLossFiftyThousandInvocationsThroughLeafWithSIGKILL(t *testing.T) {
 	if os.Getenv("WF_PROJECTION_POSTGRES_FAULT_ROOT") == "" || os.Getenv("WF_TEST_POSTGRES_DSN") == "" {
 		t.Skip("opt-in full SQL leaf SIGKILL proof")
@@ -167,6 +178,10 @@ func runProjectionRecoveryStartup(t *testing.T, postgresFault, standalone, leaf,
 }
 
 func runProjectionRecoveryLeafFault(t *testing.T, postgresFault, standalone, leaf, sqlStartup, leafSIGKILL bool, domains ...string) {
+	runProjectionRecoverySignalFault(t, postgresFault, standalone, leaf, sqlStartup, leafSIGKILL, syscall.SIGTERM, domains...)
+}
+
+func runProjectionRecoverySignalFault(t *testing.T, postgresFault, standalone, leaf, sqlStartup, leafSIGKILL bool, startupSignal syscall.Signal, domains ...string) {
 	t.Helper()
 	count := 50000
 	if value := os.Getenv("WF_PROJECTION_COUNT"); value != "" {
@@ -286,7 +301,7 @@ func runProjectionRecoveryLeafFault(t *testing.T, postgresFault, standalone, lea
 			if !leaf || !postgresFault || domain != "WFVIEW" {
 				t.Fatal("SQL startup requires full packaged SQL leaf profile")
 			}
-			proof["sql_startup_cancellation"] = cancelStandaloneSQLStartup(t, ctx, db, all[0], standaloneBinary, root, projectorURL, domain)
+			proof["sql_startup_cancellation"] = cancelStandaloneSQLStartup(t, ctx, db, all[0], standaloneBinary, root, projectorURL, domain, startupSignal)
 		}
 		initial := startStandaloneProjection(t, ctx, db, standaloneBinary, root, "initial", projectorURL, domain, leaf)
 		var rows int

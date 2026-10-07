@@ -13,7 +13,7 @@ def main():
     parser=argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--root',type=Path,required=True)
     parser.add_argument('--output',type=Path,required=True)
-    parser.add_argument('--projector-profile',choices=('standalone','standalone-leaf','standalone-leaf-startup','standalone-leaf-sigkill'),default='standalone')
+    parser.add_argument('--projector-profile',choices=('standalone','standalone-leaf','standalone-leaf-startup','standalone-leaf-sigkill','standalone-leaf-startup-sigint'),default='standalone')
     a=parser.parse_args();root=a.root.absolute()
     repo=Path(__file__).resolve().parents[1]
     if not (repo/'scripts/review-postgres-domain-projection.py').is_file():

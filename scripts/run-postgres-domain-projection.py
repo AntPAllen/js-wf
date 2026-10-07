@@ -21,9 +21,9 @@ TEST = 'TestPostgresProjectionCrashAndSessionLossFiftyThousandInvocationsInJetSt
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--root', type=Path, required=True)
-    parser.add_argument('--projector-profile', choices=('sdk','standalone','standalone-leaf','standalone-leaf-startup','standalone-leaf-sigkill'), default='sdk')
+    parser.add_argument('--projector-profile', choices=('sdk','standalone','standalone-leaf','standalone-leaf-startup','standalone-leaf-sigkill','standalone-leaf-startup-sigint'), default='sdk')
     args = parser.parse_args()
-    test = 'TestStandalonePostgresProjectionCrashAndSessionLossFiftyThousandInvocationsThroughLeafWithSIGKILL' if args.projector_profile=='standalone-leaf-sigkill' else 'TestStandalonePostgresProjectionCrashAndSessionLossFiftyThousandInvocationsThroughLeafWithSQLStartupCancellation' if args.projector_profile=='standalone-leaf-startup' else TEST if args.projector_profile=='sdk' else 'TestStandalonePostgresProjectionCrashAndSessionLossFiftyThousandInvocationsThroughLeaf' if args.projector_profile=='standalone-leaf' else 'TestStandalonePostgresProjectionCrashAndSessionLossFiftyThousandInvocationsInJetStreamDomain'
+    test = 'TestStandalonePostgresProjectionCrashAndSessionLossFiftyThousandInvocationsThroughLeafWithSQLStartupSIGINT' if args.projector_profile=='standalone-leaf-startup-sigint' else 'TestStandalonePostgresProjectionCrashAndSessionLossFiftyThousandInvocationsThroughLeafWithSIGKILL' if args.projector_profile=='standalone-leaf-sigkill' else 'TestStandalonePostgresProjectionCrashAndSessionLossFiftyThousandInvocationsThroughLeafWithSQLStartupCancellation' if args.projector_profile=='standalone-leaf-startup' else TEST if args.projector_profile=='sdk' else 'TestStandalonePostgresProjectionCrashAndSessionLossFiftyThousandInvocationsThroughLeaf' if args.projector_profile=='standalone-leaf' else 'TestStandalonePostgresProjectionCrashAndSessionLossFiftyThousandInvocationsInJetStreamDomain'
     root = args.root.absolute()
     assert not root.exists() and not root.is_relative_to(REPO)
     assert shutil.disk_usage(root.parent).free >= 5*(1 << 30), '5GiB disk admission required'

@@ -1,0 +1,27 @@
+{
+  "integration_compile": {
+    "command": [
+      "go",
+      "test",
+      "-p=1",
+      "./integration",
+      "-run",
+      "^$",
+      "-count=1"
+    ],
+    "environment": {
+      "GOMAXPROCS": "2",
+      "GOMEMLIMIT": "512MiB"
+    },
+    "exit_code": 0,
+    "output": "ok js-wf/integration 0.007s [no tests to run]",
+    "scope": "Compile only, no native test acceptance"
+  },
+  "python_ast_parsed": [
+    "run-postgres-domain-projection.py",
+    "review-postgres-domain-projection.py",
+    "sql_startup_cancellation.py",
+    "check-postgres-sql-startup-proof-controls.py",
+    "check-postgres-standalone-proof-controls.py"
+  ]
+}

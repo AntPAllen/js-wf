@@ -15,6 +15,7 @@ import fixture_archive
 REPO = Path(__file__).resolve().parents[1]
 TEST = 'TestPostgresProjectionCrashAndSessionLossFiftyThousandInvocationsInJetStreamDomain'
 SIGKILL_TEST = 'TestStandalonePostgresProjectionCrashAndSessionLossFiftyThousandInvocationsThroughLeafWithSIGKILL'
+STARTUP_SIGINT_TEST = 'TestStandalonePostgresProjectionCrashAndSessionLossFiftyThousandInvocationsThroughLeafWithSQLStartupSIGINT'
 STARTUP_TEST = 'TestStandalonePostgresProjectionCrashAndSessionLossFiftyThousandInvocationsThroughLeafWithSQLStartupCancellation'
 LEAF_TEST = 'TestStandalonePostgresProjectionCrashAndSessionLossFiftyThousandInvocationsThroughLeaf'
 STANDALONE_TEST = 'TestStandalonePostgresProjectionCrashAndSessionLossFiftyThousandInvocationsInJetStreamDomain'
@@ -26,8 +27,8 @@ def require(value, message):
 
 
 def verify_fault(proof, log, killed_log, sdk_hash, profile="sdk"):
-    require(profile in ("sdk","standalone","standalone-leaf","standalone-leaf-startup","standalone-leaf-sigkill"), "known projection profile required")
-    test = SIGKILL_TEST if profile=='standalone-leaf-sigkill' else STARTUP_TEST if profile=='standalone-leaf-startup' else TEST if profile=="sdk" else LEAF_TEST if profile=="standalone-leaf" else STANDALONE_TEST
+    require(profile in ("sdk","standalone","standalone-leaf","standalone-leaf-startup","standalone-leaf-sigkill","standalone-leaf-startup-sigint"), "known projection profile required")
+    test = STARTUP_SIGINT_TEST if profile=='standalone-leaf-startup-sigint' else SIGKILL_TEST if profile=='standalone-leaf-sigkill' else STARTUP_TEST if profile=='standalone-leaf-startup' else TEST if profile=="sdk" else LEAF_TEST if profile=="standalone-leaf" else STANDALONE_TEST
     require(log.rstrip().endswith('PASS') and '--- FAIL:' not in log and '--- SKIP:' not in log,
             'native terminal pass required')
     require(re.findall(r'^--- PASS: (\w+) \([0-9.]+s\)$', log, re.M)==[test], 'exact named full case required')
@@ -123,9 +124,9 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--root',type=Path,required=True)
     parser.add_argument('--output',type=Path,required=True)
-    parser.add_argument('--projector-profile',choices=('sdk','standalone','standalone-leaf','standalone-leaf-startup','standalone-leaf-sigkill'),default='sdk')
+    parser.add_argument('--projector-profile',choices=('sdk','standalone','standalone-leaf','standalone-leaf-startup','standalone-leaf-sigkill','standalone-leaf-startup-sigint'),default='sdk')
     args = parser.parse_args(); root=args.root.absolute()
-    test = SIGKILL_TEST if args.projector_profile=='standalone-leaf-sigkill' else STARTUP_TEST if args.projector_profile=='standalone-leaf-startup' else TEST if args.projector_profile=='sdk' else LEAF_TEST if args.projector_profile=='standalone-leaf' else STANDALONE_TEST
+    test = STARTUP_SIGINT_TEST if args.projector_profile=='standalone-leaf-startup-sigint' else SIGKILL_TEST if args.projector_profile=='standalone-leaf-sigkill' else STARTUP_TEST if args.projector_profile=='standalone-leaf-startup' else TEST if args.projector_profile=='sdk' else LEAF_TEST if args.projector_profile=='standalone-leaf' else STANDALONE_TEST
     load = lambda name: json.loads((root/name).read_text())
     execution=load('execution.json'); rev=execution['source']
     profile_record=load('projector-profile.json') if (root/'projector-profile.json').exists() else dict(profile='sdk',test=TEST)
@@ -162,7 +163,7 @@ def main():
     else:
         verify_standalone(proof,rev,case)
     leaf_wire=None
-    if args.projector_profile in ('standalone-leaf','standalone-leaf-startup','standalone-leaf-sigkill'):
+    if args.projector_profile in ('standalone-leaf','standalone-leaf-startup','standalone-leaf-sigkill','standalone-leaf-startup-sigint'):
         import sql_leaf_stream_wire
         require(sdk['admission']['stable_identity_observed_twice'] and sdk['count_override_absence_observed_at_same_process_birth'],'actual stable SDK/count-override absence required')
         unit=subprocess.check_output(['systemctl','show',root.name+'.service','-p','LoadState','-p','ExecMainPID','-p','ExecMainStatus','-p','SubState','-p','MainPID','-p','Result','-p','InvocationID','-p','Restart'],text=True)
@@ -173,9 +174,9 @@ def main():
         expected_wire_logs={(p['phase'],str(p['pid']),str(leaf_wire['phases'][p['phase']]['frame_records']),str(leaf_wire['phases'][p['phase']]['streams']['client_to_server']['bytes']),str(leaf_wire['phases'][p['phase']]['streams']['server_to_client']['bytes'])) for p in proof['standalone_projectors']}
         require(len(logged)==3 and set(logged)==expected_wire_logs,'all actual child wire logs/proof counters required')
     startup=None
-    if args.projector_profile in ('standalone-leaf-startup','standalone-leaf-sigkill'):
+    if args.projector_profile in ('standalone-leaf-startup','standalone-leaf-sigkill','standalone-leaf-startup-sigint'):
         import sql_startup_cancellation
-        startup=sql_startup_cancellation.validate(case,proof,rev,(root/'native.log').read_text(),verify_child)
+        startup=sql_startup_cancellation.validate(case,proof,rev,(root/'native.log').read_text(),verify_child,expected_signal='SIGINT' if args.projector_profile=='standalone-leaf-startup-sigint' else 'SIGTERM')
     leaf_fault=None
     if args.projector_profile=='standalone-leaf-sigkill':
         import sql_leaf_transport_fault

@@ -14,8 +14,15 @@ import (
 // The blocking transaction remains held until the actual child is reaped.
 // PostgreSQL's lock graph admits the startup boundary, without a sleep or a
 // mocked SQL driver. The subsequent original full workload proves reuse.
-func cancelStandaloneSQLStartup(t *testing.T, ctx context.Context, db *sql.DB, js jetstream.JetStream, binary, root, endpoint, domain string) map[string]any {
+func cancelStandaloneSQLStartup(t *testing.T, ctx context.Context, db *sql.DB, js jetstream.JetStream, binary, root, endpoint, domain string, signal syscall.Signal) map[string]any {
 	t.Helper()
+	if signal != syscall.SIGTERM && signal != syscall.SIGINT {
+		t.Fatal("unsupported SQL startup signal", signal)
+	}
+	signalName, signalField, logSuffix := "SIGTERM", "sigterm_sent_at", ""
+	if signal == syscall.SIGINT {
+		signalName, signalField, logSuffix = "SIGINT", "sigint_sent_at", " signal=SIGINT"
+	}
 	if err := (&visibility.PostgresStore{DB: db}).Init(ctx); err != nil {
 		t.Fatal(err)
 	}
@@ -41,17 +48,17 @@ func cancelStandaloneSQLStartup(t *testing.T, ctx context.Context, db *sql.DB, j
 	}
 	admittedAt := time.Now().UTC()
 	sentAt := time.Now().UTC()
-	if err = child.command.Process.Signal(syscall.SIGTERM); err != nil {
+	if err = child.command.Process.Signal(signal); err != nil {
 		t.Fatal(err)
 	}
 	select {
 	case <-child.joined:
 	case <-time.After(10 * time.Second):
-		t.Fatal("SQL startup SIGTERM did not join while lock remained held")
+		t.Fatalf("SQL startup %s did not join while lock remained held", signalName)
 	}
 	record := child.recordExit(t)
 	if child.err != nil || child.command.ProcessState.ExitCode() != 0 {
-		t.Fatalf("SQL startup SIGTERM: %v", child.err)
+		t.Fatalf("SQL startup %s: %v", signalName, child.err)
 	}
 	// pgx cancellation and database Close must have removed every child session,
 	// including the blocked statement, before the blocking lock is released.
@@ -80,7 +87,10 @@ func cancelStandaloneSQLStartup(t *testing.T, ctx context.Context, db *sql.DB, j
 		t.Fatal(err)
 	}
 	releasedAt := time.Now().UTC()
-	proof := map[string]any{"child": record, "blocker_backend_pid": blocker, "blocked_backend_pid": backend, "query": query, "wait_event_type": waitType, "wait_event": waitEvent, "blocking_pid_confirmed": blocked, "lock_held_at": lockedAt, "blocked_statement_admitted_at": admittedAt, "sigterm_sent_at": sentAt, "residual_checked_at": checkedAt, "blocker_released_at": releasedAt, "residual_sessions": sessions, "residual_locks": locks, "rows": rows, "projection_durables_absent": true}
-	t.Logf("SQL startup cancelled: pid=%d backend=%d blocker=%d wait=%s/%s exit=0 residual_sessions=0 residual_locks=0 rows=0 durables_absent=true", child.command.Process.Pid, backend, blocker, waitType, waitEvent)
+	proof := map[string]any{"child": record, "blocker_backend_pid": blocker, "blocked_backend_pid": backend, "query": query, "wait_event_type": waitType, "wait_event": waitEvent, "blocking_pid_confirmed": blocked, "lock_held_at": lockedAt, "blocked_statement_admitted_at": admittedAt, signalField: sentAt, "residual_checked_at": checkedAt, "blocker_released_at": releasedAt, "residual_sessions": sessions, "residual_locks": locks, "rows": rows, "projection_durables_absent": true}
+	if signal == syscall.SIGINT {
+		proof["signal"] = signalName
+	}
+	t.Logf("SQL startup cancelled: pid=%d backend=%d blocker=%d wait=%s/%s exit=0 residual_sessions=0 residual_locks=0 rows=0 durables_absent=true%s", child.command.Process.Pid, backend, blocker, waitType, waitEvent, logSuffix)
 	return proof
 }
