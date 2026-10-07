@@ -8,4 +8,4 @@ Before removal, each archive and inventory is committed and pushed, uploaded to 
 
 For restoration, use the chosen directory's `s3-readback.json` archive URL and run `scripts/restore-full-fixture-proof.py` with its `archive-verification.json`, `fixture-inventory.json`, and a fresh destination. Empty directories are omitted by this archive format. Restoration starts no process.
 
-Retirement totals and final live-run checks will be recorded after cleanup.
+Completed: **1.17 GiB** of pre-existing allocated storage reclaimed from all 28 selected directories, plus **0.49 GiB** of newly created archive staging removed. `/tmp` now uses approximately **4.94 GiB**, with **86.08 GiB** free on the filesystem. All three original 24-hour test, observer and reviewer units remain active. See the [exact removal ledger](removal.json) and [final storage snapshot](final-storage.json).
