@@ -9,6 +9,8 @@ on:
       - .github/workflows/copied-checkpoint-proof.yml
       - docs/scale/checkpoint8520-cursor-owner-recovery-2026-10-07/native-peer-outage/*.json
       - docs/scale/parallel-recovery-journal-24h-2026-10-07/checkpoint4160-copied-recovery-accepted/*.json
+      - docs/scale/parallel-recovery-journal-24h-2026-10-07/checkpoint4160-creation-exact-profile-accepted/*.json
+      - docs/scale/parallel-recovery-journal-24h-2026-10-07/checkpoint4160-creation-exact-profile-accepted/creation-wire.jsonl
   pull_request:
     paths:
       - scripts/copied_checkpoint_creation_proof.py
@@ -17,6 +19,8 @@ on:
       - .github/workflows/copied-checkpoint-proof.yml
       - docs/scale/checkpoint8520-cursor-owner-recovery-2026-10-07/native-peer-outage/*.json
       - docs/scale/parallel-recovery-journal-24h-2026-10-07/checkpoint4160-copied-recovery-accepted/*.json
+      - docs/scale/parallel-recovery-journal-24h-2026-10-07/checkpoint4160-creation-exact-profile-accepted/*.json
+      - docs/scale/parallel-recovery-journal-24h-2026-10-07/checkpoint4160-creation-exact-profile-accepted/creation-wire.jsonl
   workflow_dispatch:
 
 permissions:
@@ -31,27 +35,38 @@ jobs:
       matrix:
         include:
           - checkpoint: 8520
+            mode: peer
             proof: docs/scale/checkpoint8520-cursor-owner-recovery-2026-10-07/native-peer-outage
           - checkpoint: 4160
+            mode: peer
             proof: docs/scale/parallel-recovery-journal-24h-2026-10-07/checkpoint4160-copied-recovery-accepted
+          - checkpoint: 4160
+            mode: creation
+            proof: docs/scale/parallel-recovery-journal-24h-2026-10-07/checkpoint4160-creation-exact-profile-accepted
     steps:
       - uses: actions/checkout@v4
       - name: Review mutations of actual retained native evidence
         env:
           CHECKPOINT: ${{ matrix.checkpoint }}
           PROOF: ${{ matrix.proof }}
+          PROOF_MODE: ${{ matrix.mode }}
           PYTHONDONTWRITEBYTECODE: '1'
         run: |
-          proof_root="$RUNNER_TEMP/copied-checkpoint-$CHECKPOINT"
+          proof_root="$RUNNER_TEMP/copied-checkpoint-$CHECKPOINT-$PROOF_MODE"
           mkdir -p "$proof_root/originals"
           cp "$PROOF/copied-checkpoint-audit.json" "$proof_root/originals/"
           cp "$PROOF/actual-servers.json" "$PROOF/copied-store-admission.json" "$proof_root/"
+          creation_args=()
+          if [ "$PROOF_MODE" = "creation" ]; then
+            cp "$PROOF/creation-wire.jsonl" "$proof_root/originals/"
+            creation_args+=(--state-watch-creation-stall)
+          fi
           python3 scripts/check-copied-checkpoint-fault-controls.py \
             --root "$proof_root" --checkpoint "$CHECKPOINT" \
-            --output "$RUNNER_TEMP/proof-controls-$CHECKPOINT.json"
+            --output "$RUNNER_TEMP/proof-controls-$CHECKPOINT-$PROOF_MODE.json" "${creation_args[@]}"
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: copied-checkpoint-proof-controls-${{ matrix.checkpoint }}
-          path: ${{ runner.temp }}/proof-controls-${{ matrix.checkpoint }}.json
+          name: copied-checkpoint-proof-controls-${{ matrix.checkpoint }}-${{ matrix.mode }}
+          path: ${{ runner.temp }}/proof-controls-${{ matrix.checkpoint }}-${{ matrix.mode }}.json
           if-no-files-found: error
