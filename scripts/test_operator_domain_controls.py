@@ -53,6 +53,21 @@ class OperatorDaemonCoverageTests(unittest.TestCase):
 
 
 class OperatorStandaloneCoverageTests(unittest.TestCase):
+    def test_actual_leaf_log_requires_all_children_wire_and_leaf_coverage(self):
+        log=(REPO/'docs/scale/operator-leaf-wire-2026-10-07/native-race/native.log').read_text()
+        controls.verify_leaf_log(log)
+        bad=[log.replace('local=WFEDGE','local=WFOPS'),
+             log.replace('truncated=false','truncated=true',1),
+             log.replace('processes=23','processes=22'),
+             log.replace('--- PASS: '+controls.LEAF_TESTS[0],'--- SKIP: '+controls.LEAF_TESTS[0]),
+             log+'DATA RACE']
+        for marker in ('operator child wire:','operator standalone process domain="WFOPS"','operator domain admitted node=2'):
+            line=next(line for line in log.splitlines() if marker in line)
+            bad.extend((log.replace(line,''),log.replace(line,line+'\n'+line)))
+        for altered in bad:
+            self.assertNotEqual(log,altered)
+            with self.assertRaises(AssertionError):controls.verify_leaf_log(altered)
+
     def test_actual_standalone_pair_rejects_missing_processes_bad_exits_and_wrong_source_markers(self):
         log=(REPO/'docs/scale/operator-standalone-cli-2026-10-06/native-race/native.log').read_text()
         result=controls.verify_standalone_log(log)

@@ -1,5 +1,13 @@
 # Implementation status against the supplied plan
 
+## Healthy packaged operator leaf routing accepted — 2026-10-07
+
+At `9d6feff`, actual race SDK 568999 passes in 34.12 s body / 35.203 s SDK. All original 23 standalone command assertions/five nonzero exits / original 60 s case / 3 m SDK remain. Actual race CLI children and matching plugin run through one stock WFEDGE leaf 570120 and three embedded WFOPS hubs. Twenty positive online children use WFOPS; the intentional missing-domain child uses MISSING and rejects. Each online child has exactly one accepted/relayed connection and zero upstream dial failures; two offline replays have zero accepts/failed dials/traffic. Complete joined bytes 48,925 client / 3,874,289 server and 313 argv-correct API publications verify actual leaf INFO identity/zero local streams/three distinct hub IDs.
+
+Independent 2,138-source/SDK/23-child/plugin/stock-leaf/2,739-file archive review accepts with 11 actual-log negatives. Permanent full-capture controls reject 18 byte/prefix/identity/acceptance mutations; six operator log groups pass. CI adds the operator standalone-leaf row and real refused-upstream counter control; hosted acceptance remains separate. [Evidence and limits](scale/operator-leaf-wire-2026-10-07/native-race/).
+
+The first source-bound native also passed its commands and online routing, but the former successful-relay metric could miss a failed offline connection attempt. Its original result/review remains preserved with that limitation. Added accepted-client/failed-dial diagnostics and a real TCP negative control close the hole in this fresh run. No original store was reopened or target weakened. Packaged daemon/SQL/fault leaf paths, online GC, million physical drain and full release/24h gates remain open; original isolated journal 24h continues.
+
 ## Active-writer blob GC counterexamples confirmed — 2026-10-07
 
 The new seeded `online_blob_boundary` workload runs production Start and collector decisions. All 1,000 schedules and exact replays pass, including 325 paused uploads, 348 refresh-after-census interleavings and 327 quiescent controls; three traces are pinned. The one-hour grace fails to protect either active-writer schedule. This is expected unsafe use of the quiescent API, not an online collector implementation.

@@ -5664,3 +5664,11 @@ Source `3a7022c`, actual normal SDK 265617: all 100,000 production-decision sche
 This closes the new workload's focused normal100k gate. It does not promote historical full 122-workload source scopes to a full current 123-workload result, implement online GC or qualify native matrices/actual24h.
 
 The matching focused race1k gate now passes at `92a782c`, actual SDK 384242: all 1,000 generated schedules and exact replays plus three pins, 325 paused uploads / 348 refreshes / 327 quiescent controls, 25.10 s body. Independent full source/SDK/2,143-file archive review accepts 13 actual-log negatives and verifies the retained original producer exit/invocation; original reviewer adaptation failures are preserved without a model rerun. [Race proof](scale/online-blob-boundary-2026-10-07/race1000/). This closes only the new workload's focused normal/race gates; full graph/native matrices and online GC remain separate.
+
+## Healthy packaged operator leaf path accepted — 2026-10-07
+
+Source `9d6feff`, actual race SDK568999: original23-command suite/five nonzero exits/60s case/3m SDK pass34.12s body. Actual packaged CLI/plugin, stock WFEDGE leaf and three embedded WFOPS hubs verify. All21 online children have one accept/successful relay and zero failed upstream dials; the two offline replay children have zero accepts/dials/traffic. Complete48,925 client/3,874,289 server bytes/313 API publications follow each actual argv domain, including deliberate MISSING rejection. Actual leaf INFO identities, zero local streams and distinct hub identities verify.
+
+Independent full2,138-source/SDK/23-child/plugin/stock-leaf/2,739-file archive review accepts11 actual-log negatives. Permanent actual-capture controls reject18 mutations, and native CI adds this operator leaf row plus the refused-upstream negative control. The first weaker successful-relay-only offline measurement is preserved and not promoted to zero-attempt evidence. Original stores/targets remain unchanged. [Evidence](scale/operator-leaf-wire-2026-10-07/native-race/).
+
+Healthy packaged operator leaf routing closes; daemon/SQL/injected fault leaf combinations, full release/million/onlineGC and original24h remain independently open.
