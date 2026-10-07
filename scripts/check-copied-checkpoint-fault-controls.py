@@ -86,6 +86,13 @@ def main():
         reject('fresh-watch-incomplete', lambda r, s: attempt_frames(r)[-1].__setitem__('initial_complete', False))
         reject('fresh-watch-too-small', lambda r, s: attempt_frames(r)[-1].__setitem__('received', 238559))
         reject('watch-deadline-reset', lambda r, s: attempt_frames(r)[-1].__setitem__('deadline', '2100-01-01T00:00:00Z'))
+        reject('unknown-closed-watch-stop', lambda r, s: r['state_watches'][0].__setitem__('StopError', 'failed'))
+        def change_complete_frames(r, field, value):
+            for f in r['state_connection_loss']['frames']:
+                if f['initial_complete']:
+                    f[field] = value
+        reject('missing-excluded-physical-state', lambda r, s: change_complete_frames(r, 'received', 238560))
+        reject('incomplete-included-state', lambda r, s: change_complete_frames(r, 'included', 238559))
         reject('missing-native-barrier', lambda r, s: r['state_connection_loss'].__setitem__('frames', [f for f in r['state_connection_loss']['frames'] if f['event'] != 'initial_complete']))
     report = dict(admitted=admitted, rejected_controls=controls, rejected_count=len(controls),
                   scope='Mutations of actual retained fault result and server observations; no broker or original store opened.')

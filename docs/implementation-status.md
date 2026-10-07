@@ -1,5 +1,9 @@
 # Implementation status against the supplied plan
 
+## Full checkpoint8520 closed-watch recovery accepted — 2026-10-07
+
+Clean31d6941 actual SDK3653628 passes31.23s native body. All238560 invocations/journals/terminals/2630779 scoped entries, all2632932 raw journal records exactly once, node3 actual R1 ownerSIGKILL/observed exit/same-store restart, exact resume129, zero INV/JRN cursors and four R5 sets current finish15.084948781s under original20s/4CPU/GOGC500/4GiB. Controlled real first-watch connection closure produces zero-entry incomplete snapshot; old Stop/context cleanup precedes fresh watch, which reads all238757 physical states/includes238560 cohort and reaches its native barrier under unchanged absolute deadline. Independent complete20120-member/source/actual six-server/SDK/restore review accepts;58 actual-positive proof mutations rejected after proof-only hardening. [Evidence and limits](scale/checkpoint8520-cursor-owner-recovery-2026-10-07/native-closed-watch/). This proves controlled closed-watch recovery, not the silent-watch watchdog, native partial-map retry, historical cause, natural lost replies, default adoption or actual24h. Thirty-two new seeded closed-watch scripts initially expose non-retryable closed-channel handling; the explicit recovery candidate fix passes normal/race count20 along with existing idle/cleanup/deadline controls. Native silent-watch outage qualification remains next.
+
 ## Summary — 2026-10-06
 
 The core runtime is implemented and broadly exercised. Full release qualification

@@ -82,6 +82,7 @@ def validate(result, servers, identity):
         assert stamp(connection['close_finished']) <= stamp(kill['kill_started'])
         assert 0 <= connection['buffered_before_exposure'] < 238560
         assert connection['attempts'] == len(watches) and 2 <= len(watches) <= 3
+        assert watches[0]['StopError'] in ('nats: connection closed', 'nats: invalid subscription')
         frames = connection['frames']
         assert frames and len({f['deadline'] for f in frames}) == 1
         returns = [f for f in frames if f['event'] == 'attempt_return']
@@ -90,10 +91,12 @@ def validate(result, servers, identity):
         assert not first_frame['initial_complete'] and first_frame['error']
         assert 'closed before initial completion' in first_frame['error'] or 'made no progress' in first_frame['error']
         assert first_frame['received'] < 238560
-        assert final['initial_complete'] and not final.get('error') and final['received'] >= 238560
+        assert final['initial_complete'] and not final.get('error')
+        assert final['received'] == result['readiness']['KV_WF_STATE']['state']['messages']
+        assert final['included'] == result['cutoff']
         assert all(not f['initial_complete'] and f.get('error') for f in returns[:-1])
         barriers = [f for f in frames if f['event'] == 'initial_complete']
-        assert len(barriers) == 1 and barriers[0]['received'] == final['received']
+        assert len(barriers) == 1 and barriers[0]['received'] == final['received'] and barriers[0]['included'] == final['included']
         assert stamp(barriers[0]['time']) >= stamp(result['restart_completed'])
         for i, frame in enumerate(returns):
             assert frame['received'] >= frame['included'] >= 0
