@@ -1,0 +1,17 @@
+VERIFY_REMOTE js-wf-partition-seed6-contiguous-20261006
+REMOVED js-wf-partition-seed6-contiguous-20261006 527945728
+VERIFY_REMOTE js-wf-raft-snapshot-reservation-controls-20261007
+Traceback (most recent call last):
+  File "/tmp/reclaim_current_closed.py", line 95, in <module>
+    shutil.rmtree(root)
+  File "/usr/lib/python3.12/shutil.py", line 785, in rmtree
+    _rmtree_safe_fd(fd, path, onexc)
+  File "/usr/lib/python3.12/shutil.py", line 686, in _rmtree_safe_fd
+    _rmtree_safe_fd(dirfd, fullname, onexc)
+  File "/usr/lib/python3.12/shutil.py", line 686, in _rmtree_safe_fd
+    _rmtree_safe_fd(dirfd, fullname, onexc)
+  File "/usr/lib/python3.12/shutil.py", line 717, in _rmtree_safe_fd
+    onexc(os.unlink, fullname, err)
+  File "/usr/lib/python3.12/shutil.py", line 715, in _rmtree_safe_fd
+    os.unlink(entry.name, dir_fd=topfd)
+PermissionError: [Errno 13] Permission denied: 'README.md'
