@@ -38,6 +38,10 @@ partial no-space evidence, are preserved to S3. The current normal simulation
 qualifier has completed successfully at its recorded source; the ten-minute consumer-leader component is now
 accepted in its executed-source scope as recorded below.
 
+## Full checkpoint8520 profiling prepared — 2026-10-07
+
+The same full238560 original copied cohort gains explicit `--cpu-profile` diagnosis: SDK CPU samples around the complete unchanged20s checker, plus before/after heap/GC snapshots. No original count/deadline/profile alteration; profiler setup/drain and snapshots are outside measured checker elapsed and may perturb execution. Default uninstrumented diagnostic remains unchanged. No peak/lifetime/server CPU or historical cause claim. Compilation passes; clean profiled native evidence remains pending.
+
 ## Full checkpoint8520 quiescent copied audit accepted — 2026-10-07
 
 Clean5c6cc85 checks all238560 invocations/journals/terminals and2630779 entries in14.316318492s within original20s. Full original archive restored fresh:15401files/7,663,385,263bytes; every byte/mode/mtime verified before opening five copied stores. Actual five stock2.15.0 executables match original hashes, original Raft identities/fresh container identities and all four R5 source replicas verify. Independent source/dependency/SDK/server/mount/closure review verifies every20617-member complete diagnostic archive and unchanged original complete census. [Evidence](scale/bulk-soak-checkpoint8520-copy-2026-10-07/). This proves quiescent full-cohort audit capacity; original24h remains failed, live writes/faults and historical cause remain separate. Journal delivery/decoding dominates the copied timing; further bounded tracing/profiling is next. No deadline/count reduction or old smoke/model rerun.

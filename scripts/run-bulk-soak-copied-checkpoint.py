@@ -23,6 +23,7 @@ TEST='TestRetainedAuditBulkSoakCheckpoint8520VerifiedCopy'
 def main():
     parser=argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--root',type=Path,required=True)
+    parser.add_argument('--cpu-profile',action='store_true',help='Opt-in full SDK checker CPU/memory diagnosis; original audit budget unchanged.')
     a=parser.parse_args();root=a.root.absolute()
     assert not root.exists() and not root.is_relative_to(REPO) and not root.is_relative_to(DONOR)
     assert shutil.disk_usage(root.parent).free>=20*(1<<30),'20GiB restore/collection reserve required'
@@ -75,6 +76,7 @@ def main():
     save('external-source-before.json',inputs);save('external-captured-paths.json',captured)
     env={k:v for k,v in os.environ.items() if not k.startswith('WF_')}
     env.update(GOMAXPROCS='4',GOGC='500',GOMEMLIMIT='4GiB',GOWORK='off',GOFLAGS='',WF_AUDIT_BULK_SOAK_STORES=str(restored/'fixture/cluster'),WF_AUDIT_BULK_SOAK_ROOT=str(root/'originals'),WF_AUDIT_BULK_SOAK_IDENTITY=identity,WF_TIER3_EXPLICIT_ROUTE_SEEDS='1',WF_TIER3_SYNC_INTERVAL='2m')
+    if a.cpu_profile:env['WF_AUDIT_BULK_SOAK_CPU_PROFILE']='1'
     profile={k:v for k,v in env.items() if k.startswith('WF_') or k in ('GOMAXPROCS','GOGC','GOMEMLIMIT','GOWORK','GOFLAGS')}
     binary=root/'integration.test';build=['go','test','-p=1','-buildvcs=true','-c','-o',str(binary),'./integration']
     command=[str(binary),'-test.run=^'+TEST+'$','-test.count=1','-test.v','-test.timeout=6m']
@@ -95,7 +97,7 @@ def main():
             ids=subprocess.check_output(['docker','ps','-q','--filter',f'name=js-wf-route-{child.pid}-'],text=True).split()
             for cid in ids:
                 try:
-                    observed=json.loads(subprocess.check_output(['docker','inspect',cid],text=True))[0];pid=observed['State']['Pid']
+                    observed=json.loads(subprocess.check_output(['docker','inspect',cid],text=True,stderr=subprocess.DEVNULL))[0];pid=observed['State']['Pid']
                     if not pid or (cid,pid) in seen:continue
                     p=Path('/proc',str(pid));digest=shared.sha(p/'exe');target=root/'actual-containers'/digest
                     if not target.exists():shutil.copyfile(p/'exe',target)

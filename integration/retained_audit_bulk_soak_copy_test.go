@@ -8,6 +8,8 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"runtime"
+	"runtime/pprof"
 	"strings"
 	"testing"
 	"time"
@@ -111,12 +113,47 @@ func TestRetainedAuditBulkSoakCheckpoint8520VerifiedCopy(t *testing.T) {
 		}
 		time.Sleep(50 * time.Millisecond)
 	}
+	var cpuProfile *os.File
+	var memoryBefore, memoryAfter runtime.MemStats
+	profiling := os.Getenv("WF_AUDIT_BULK_SOAK_CPU_PROFILE") == "1"
+	if profiling {
+		var err error
+		cpuProfile, err = os.Create(filepath.Join(root, "audit-cpu.pprof"))
+		if err != nil {
+			t.Fatal(err)
+		}
+		if err := pprof.StartCPUProfile(cpuProfile); err != nil {
+			cpuProfile.Close()
+			t.Fatal(err)
+		}
+		runtime.ReadMemStats(&memoryBefore)
+	}
 	trace := &retainedAuditTrace{}
 	call, cancel := context.WithTimeout(context.Background(), 20*time.Second)
 	began := time.Now()
 	report, failure := integrity.CheckThroughInvocationSequenceWithChunkedConcurrentStateReads(call, tracedAuditJS{JetStream: js, trace: trace}, cutoff)
 	elapsed := time.Since(began)
 	cancel()
+	if profiling {
+		pprof.StopCPUProfile()
+		if err := cpuProfile.Close(); err != nil {
+			t.Fatal(err)
+		}
+		runtime.ReadMemStats(&memoryAfter)
+		observations := struct {
+			Before runtime.MemStats `json:"before"`
+			After  runtime.MemStats `json:"after"`
+			Scope  string           `json:"scope"`
+		}{memoryBefore, memoryAfter, "Snapshots around the unchanged full checker; not lifetime/peak heap or server memory. CPU profiler setup/drain and these snapshots are outside the original checker elapsed/deadline; instrumentation may perturb execution."}
+		data, err := json.MarshalIndent(observations, "", "  ")
+		if err != nil {
+			t.Fatal(err)
+		}
+		if err := os.WriteFile(filepath.Join(root, "audit-memory.json"), append(data, '\n'), 0600); err != nil {
+			t.Fatal(err)
+		}
+	}
+
 	result := struct {
 		Cutoff       uint64                           `json:"cutoff"`
 		ElapsedNS    int64                            `json:"elapsed_ns"`
