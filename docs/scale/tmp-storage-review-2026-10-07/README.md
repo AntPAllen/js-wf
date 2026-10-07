@@ -19,3 +19,5 @@ The completed reused-slot experiment was also retired after fresh verified S3/me
 Latest cleanup retired both completed cold cursor-owner diagnostic copies and staging archives: **18.71 GiB** reclaimed after fresh full S3/member/inventory/closure verification. Observed free space: **64.95 GiB**. [Removal records](eleventh-closed-cursor-copies/README.md). Original failed stores and reusable fixtures remain local.
 
 The new completed closed-watch recovery experiment was also retired after verified S3/member/current-inventory/closure checks: **9.35 GiB** reclaimed. This removes newly created experiment data, separate from the preceding18.71 GiB cleanup. Free space: **64.88 GiB**. [Ledger](../checkpoint8520-cursor-owner-recovery-2026-10-07/closed-watch-reclaimed/README.md).
+
+All three completed new watch-peer diagnostics and staging archives are now retired after fresh complete S3/member/inventory/closure checks: **27.99 GiB** reclaimed, with **64.68 GiB** free. This removes newly created experiment data, separate from earlier passes. [Full ledger](../checkpoint8520-cursor-owner-recovery-2026-10-07/peer-attempts-reclaimed/README.md).
