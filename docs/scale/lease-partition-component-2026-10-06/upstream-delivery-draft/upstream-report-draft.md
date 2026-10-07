@@ -33,3 +33,7 @@ In the consumer repository, `scripts/run-raft-catchup-contiguous-controls.py --r
 The standalone proposed patch applies to the pinned v2.15.0 Raft source and the official RC.2 commit `d564fd6982a44cc47c4228b12f7a9b6c9f722a8c`. RC.2 was inspected and patch-checked only, never compiled or run. Native evidence uses the retained consumer module file, selected compiler/dependencies and source-bound binaries; a standalone upstream-checkout test command has not been independently qualified.
 
 Canonical records in `docs/scale/lease-partition-component-2026-10-06/`: `raft-callback-regression/`, `matrix-seed6-offline-wal-review/`, `raft-safety170/`, `raft-contiguous-controls/`, `contiguous-component/`, and `contiguous-native-seed6/`, and `contiguous-safety170/`. Each qualified scope has a complete content-addressed S3 archive, inventory and full-body readback receipt. Failed scopes remain preserved. The default dependency remains official v2.15.0.
+
+## Complete peer-locked comparison
+
+At b33e795, both actual race binaries run all170 original tests with only the qualified eight lock pairs. Upstream170passes; contiguous169passes/one TestNRGCheckpointInstallSnapshotAbortDuringWrite/RemoveOrphan failure: writer returned before dios refill: <nil>. No race or skip. The original drain consumes only currently available server I/O permits; a late in-flight release is a source-level hypothesis requiring deterministic controls. Native historical cause remains untraced; this full-suite gate remains failed. See ../peer-locked-safety170/.

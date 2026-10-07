@@ -1,0 +1,9 @@
+# Complete 170-case comparison with peer setup locking
+
+Orchestrator `b33e795` runs both actual race binaries from `bbf33a0` through every original 170 top-level TestNRG case, count1/20m each, 2CPU/2GiB. The explicit test overlay adds eight lock/unlock pairs around 17 addPeer calls in two upstream tests; every original assertion, case and deadline remains unchanged. Upstream passes 170; the contiguous candidate passes 169 and fails TestNRGCheckpointInstallSnapshotAbortDuringWrite/RemoveOrphan, with “writer returned before dios refill: <nil>”. Neither profile reports a race or skip. This derived full-suite gate remains failed.
+
+The snapshot test drains only currently available permits from the server I/O semaphore and assumes no permit can return while its checkpoint writer is blocked. An already active I/O operation can release a permit after that drain. This is a source-level candidate explanation, not a traced cause for this historical failure. A deterministic late-permit control is the next step; no full-suite retry is authorized by an unexplained failure alone.
+
+Independent review binds 2011 selected Git/current/retained/before/after inputs, 2664 selected compiled dependencies, all 598 unchanged module files, the actual component guard body, exact reversible setup overlay, actual live SDK argv/birth/bytes/environment and all 5,309 archive members. Full archive: 89,320,457 bytes, SHA256 `73cd0dbccffb0468b5ec3ed2c97975c0565cfdc8ffb238e75f24d7b8fb4e149a`. The independent reviewer initially expected a body file absent from the canonical peer-locking parent; the corrected review binds the actual compiled overlay body and retained dependencies to the committed component source. Native results are unchanged.
+
+The default NATS dependency stays official v2.15.0. Earlier original-source failures remain preserved. No production adoption, workflow matrix, Tier1 or actual24h qualification is claimed.
