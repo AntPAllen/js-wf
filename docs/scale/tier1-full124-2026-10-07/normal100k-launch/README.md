@@ -1,0 +1,9 @@
+# Full124 normal100k live qualification
+
+The complete current **124 seeded workloads / 410 pinned regressions** are running in a fresh isolated sparse checkout at **4412481823f65243950a03e92f9bfe3794712df8**. Actual original SDK **2697740** is independently verified across birth/arguments/environment/executable hashing, with **2351** selected inputs matching retained checkout and committed Git blobs. Native SDK profile is **100,000 seeds / count1 / nonrace / two Go CPUs / 512MiB / original300m**, under the original5h15m supervisor bound, CPUWeight5/Nice19/2GiB cap/no restart. The unit is `js-wf-tier1-full124-normal100k-20261007.service`, invocation `dbd776bba70f4cbcb588387200367910`.
+
+The existing partition200 campaign remains active under supervisor2354515/original invocation739815ede74f4562aca63e5a0fc52ee9; this launch does not change or repeat it. Qualification uses the current complete graph, including the common blob publication workload, rather than combining old full123 evidence with a focused124th result.
+
+This is **live admission only**. Complete terminal raw events, source-after equality, original terminal unit/SDK/profile checks, independent full-suite/count/seed/trace review, positive-proof mutation controls and archive/S3 preservation are still required. Current full124 race1k qualification remains pending and should preserve the same frozen source and original60m profile. Original native matrices, failed24h, million physical drain, dependency adoption, workflow/history blob migration and onlineGC remain independent open requirements. No full-suite acceptance is inferred from this running process.
+
+The frozen checkout and executable remain local while live; do not delete, offload or restart them due to an observation timeout. See `launch.json`, the compiled and seeded inventories, regression list, source-before record and executed launch/verifier scripts.
