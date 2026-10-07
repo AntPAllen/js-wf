@@ -58,6 +58,7 @@ def validate(result, servers, identity):
     assert set(deletions) == {c['info']['name'] for c in created}
     assert not deletions[resumed['info']['name']]['error']
     assert not deletions[invocations[0]['info']['name']]['error']
+    assert deletions[target['name']]['error'] in ('', 'nats: consumer not found')
     names = [s['args'][s['args'].index('-n') + 1] for s in servers]
     assert len(servers) == 6 and set(names) == {identity + '-n' + str(n) for n in range(5)}
     owner = [s for s, name in zip(servers, names) if name == identity + '-n' + str(node)]

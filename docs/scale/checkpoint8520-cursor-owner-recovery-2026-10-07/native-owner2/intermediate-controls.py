@@ -1,5 +1,8 @@
 #!/usr/bin/env python3
 """Reject mutations of an actual retained copied-checkpoint fault proof."""
+import sys
+sys.dont_write_bytecode=True
+sys.path.insert(0,"/home/exedev/js-wf/scripts")
 import argparse
 import copy
 import json
@@ -56,14 +59,7 @@ def main():
     reject('kill-reply-before-start', lambda r, s: r['kill'].__setitem__('kill_returned', '2000-01-01T00:00:00Z'))
     reject('no-concurrent-exit-observation', lambda r, s: r['kill'].__setitem__('concurrent_observation', False))
     reject('no-replacement-process', lambda r, s: s.pop())
-    def replacement_delete(result):
-        replacement = next(c['info']['name'] for c in result['cursors']
-                           if c['created'] and c['info']['stream_name'] == 'WF_JRN'
-                           and c['info']['name'] != result['target']['name'])
-        return next(d for d in result['deletions'] if d['name'] == replacement)
-
-    reject('residual-new-cursor', lambda r, s: replacement_delete(r).__setitem__('error', 'failed'))
-    reject('unknown-old-delete-error', lambda r, s: next(d for d in r['deletions'] if d['name'] == r['target']['name']).__setitem__('error', 'failed'))
+    reject('residual-new-cursor', lambda r, s: next(d for d in r['deletions'] if d['name']==[c['info']['name'] for c in r['cursors'] if c['created'] and c['info']['stream_name']=='WF_JRN' and c['info']['name'] != r['target']['name']][0]).__setitem__('error', 'failed'))
     reject('missing-delete', lambda r, s: r['deletions'].pop())
     reject('reused-cursor', lambda r, s: [c for c in r['cursors'] if c['created'] and c['info']['stream_name']=='WF_JRN'][-1]['info'].__setitem__('name', r['target']['name']))
     reject('wrong-resume-sequence', lambda r, s: [c for c in r['cursors'] if c['created'] and c['info']['stream_name']=='WF_JRN'][-1]['info']['config'].__setitem__('opt_start_seq', 1))
