@@ -1,0 +1,13 @@
+{
+  "compilation": {
+    "command": "go test ./integrity -run '^TestRetainedAuditBulkSoakCheckpoint(8520|4160)CursorOwnerRestartVerifiedCopy$' -count=1",
+    "result": "ok 0.007s; both opt-in fixture executions skip without configured stores"
+  },
+  "creation_progress_race": {
+    "command": "go test -race ./integrity -run '^(TestSeededStateCreationProgressRetryAndLifetime|TestStateCreationProgressStopsAfterThreeAttempts|TestStateCreationProgressPreservesParentAndIndependentError)$' -count=5",
+    "result": "ok 1.037s"
+  },
+  "legacy_actual_proof_controls": 68,
+  "latest_actual_peer_proof_controls": 75,
+  "latest_creation_native_accepted": false
+}

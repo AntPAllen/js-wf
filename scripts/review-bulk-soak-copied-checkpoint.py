@@ -9,11 +9,13 @@ parser.add_argument('--parallel-decode',action='store_true')
 parser.add_argument('--cursor-owner-restart',action='store_true')
 parser.add_argument('--state-watch-connection-loss',action='store_true')
 parser.add_argument('--state-watch-peer-outage',action='store_true')
+parser.add_argument('--state-watch-creation-stall',action='store_true',help='Real R5 WatchAll creation held before publication; latest4160 only, no other watch fault.')
 a=parser.parse_args()
 assert a.checkpoint!=4160 or a.cursor_owner_restart
 cutoff=238560 if a.checkpoint==8520 else 116480
 assert not a.state_watch_peer_outage or (a.cursor_owner_restart and not a.state_watch_connection_loss)
 assert not a.state_watch_connection_loss or a.cursor_owner_restart
+assert not a.state_watch_creation_stall or (a.checkpoint==4160 and a.cursor_owner_restart and not a.state_watch_peer_outage and not a.state_watch_connection_loss)
 assert not a.cursor_owner_restart or a.parallel_decode
 repo=Path(__file__).resolve().parents[1];root=a.root.absolute();proof=Path(str(root)+'-proof')
 assert not root.is_relative_to(repo) and root.is_dir()
@@ -92,6 +94,8 @@ assert result.get('parallel_decode',False)==a.parallel_decode
 assert sdk['environment'].get('WF_AUDIT_BULK_SOAK_PARALLEL_DECODE')==('1' if a.parallel_decode else None)
 assert sdk['environment'].get('WF_AUDIT_BULK_SOAK_CURSOR_OWNER_RESTART')==('1' if a.cursor_owner_restart else None)
 assert result.get('cursor_owner_restart',False)==a.cursor_owner_restart
+assert bool(result.get('state_creation_stall'))==a.state_watch_creation_stall
+assert sdk['environment'].get('WF_AUDIT_BULK_SOAK_STATE_CREATION_STALL')==('1' if a.state_watch_creation_stall else None)
 assert bool(result.get('state_connection_loss'))==(a.state_watch_connection_loss or a.state_watch_peer_outage)
 assert bool((result.get('state_connection_loss') or {}).get('peer_outage'))==a.state_watch_peer_outage
 assert sdk['environment'].get('WF_AUDIT_BULK_SOAK_STATE_PEER_OUTAGE')==('1' if a.state_watch_peer_outage else None)
@@ -112,12 +116,15 @@ if a.cursor_owner_restart and execution['exit_code'] != 0:
 if qualified and a.cursor_owner_restart:
  import copied_checkpoint_fault_proof
  fault_review=copied_checkpoint_fault_proof.validate(result,servers,identity,checkpoint=a.checkpoint)
+ if a.state_watch_creation_stall:
+  import copied_checkpoint_creation_proof
+  fault_review['creation']=copied_checkpoint_creation_proof.validate(results[0].parent,result,servers,identity)
 elif qualified:
  for n in ['WF_STATE.WatchAll','WF_STATE.WatchStop']:
   row=result['trace']['counts'][n];assert row['started']==row['completed']==1 and row['errors']==0
 assert (execution['exit_code']==0)==qualified
 spec=importlib.util.spec_from_file_location('shared',repo/'scripts/run-domain-runtime-controls.py');shared=importlib.util.module_from_spec(spec);spec.loader.exec_module(shared)
 closure=shared.closure(root);assert fixture_archive.inventory(root)==inventory['files']
-report=dict(state_watch_peer_outage=a.state_watch_peer_outage,state_watch_connection_loss=a.state_watch_connection_loss,parallel_decode=a.parallel_decode,cursor_owner_restart=a.cursor_owner_restart,fault_review=fault_review,source=revision,selected_git_inputs=len(selected),selected_external_inputs=len(external),restore=restore,exact_original_store_files=len(expected_stores),original_server_hash=admission['original_server_sha256'],actual_servers=len(servers),original_complete_files_unchanged=len(original_inventory['files']),execution=execution,result=result,qualified_quiescent_copied_capacity=qualified,qualifies_24h=False,closure=closure,archive=meta,checkpoint=a.checkpoint,scope=f'Entire original checkpoint{a.checkpoint} cohort on fresh verified complete restore: actual identical stock NATS2.15 server binaries/five R5 sources/profile4CPU/GOGC500/4GiB/original20s attempt. Explicit cursor-owner fault only when selected; no concurrent application workload, historical cause attribution, original24h acceptance or release adoption.')
+report=dict(state_watch_creation_stall=a.state_watch_creation_stall,state_watch_peer_outage=a.state_watch_peer_outage,state_watch_connection_loss=a.state_watch_connection_loss,parallel_decode=a.parallel_decode,cursor_owner_restart=a.cursor_owner_restart,fault_review=fault_review,source=revision,selected_git_inputs=len(selected),selected_external_inputs=len(external),restore=restore,exact_original_store_files=len(expected_stores),original_server_hash=admission['original_server_sha256'],actual_servers=len(servers),original_complete_files_unchanged=len(original_inventory['files']),execution=execution,result=result,qualified_quiescent_copied_capacity=qualified,qualifies_24h=False,closure=closure,archive=meta,checkpoint=a.checkpoint,scope=f'Entire original checkpoint{a.checkpoint} cohort on fresh verified complete restore: actual identical stock NATS2.15 server binaries/five R5 sources/profile4CPU/GOGC500/4GiB/original20s attempt. Explicit cursor-owner fault only when selected; no concurrent application workload, historical cause attribution, original24h acceptance or release adoption.')
 (proof/'independent-review.json').write_text(json.dumps(report,indent=2)+'\n');shutil.copyfile(__file__,proof/'executed-independent-review.py')
 print(json.dumps(dict(qualified_quiescent_copied_capacity=qualified,cursor_owner_restart=a.cursor_owner_restart,result=result['report'],elapsed_ns=result['elapsed_ns'],actual_servers=len(servers),full_archive_members=meta['members'],qualifies_24h=False)))

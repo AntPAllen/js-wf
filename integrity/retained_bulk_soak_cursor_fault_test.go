@@ -176,6 +176,13 @@ func retainedBulkSoakCursorOwnerRestart(t *testing.T, checkpoint, cutoff, expect
 			readiness[name] = after
 		}
 	}
+	var creationFault *copiedCreationState
+	if os.Getenv("WF_AUDIT_BULK_SOAK_STATE_CREATION_STALL") == "1" {
+		if checkpoint != 4160 || os.Getenv("WF_AUDIT_BULK_SOAK_STATE_CONNECTION_LOSS") == "1" || os.Getenv("WF_AUDIT_BULK_SOAK_STATE_PEER_OUTAGE") == "1" {
+			t.Fatal("creation stall requires latest full cohort and no other watch fault")
+		}
+		creationFault = prepareCopiedCreation(t, startup, js, cluster, root)
+	}
 	inheritedCleanupFinished := time.Now()
 	// No healthy journal scan precedes this fault. Admission reads only stream
 	// metadata; the original full captured cohort and budgets remain unchanged.
@@ -210,6 +217,7 @@ func retainedBulkSoakCursorOwnerRestart(t *testing.T, checkpoint, cutoff, expect
 		Cursors                  []cursorObservation               `json:"cursors"`
 		CursorErrors             []string                          `json:"cursor_errors"`
 		Deletions                []processDeleteObservation        `json:"deletions"`
+		StateCreationStall       map[string]any                    `json:"state_creation_stall,omitempty"`
 		StateConnectionLoss      *copiedWatchConnectionProof       `json:"state_connection_loss,omitempty"`
 		StateWatches             []capacityWatchTiming             `json:"state_watches"`
 		Cleanup                  map[string]int                    `json:"cleanup"`
@@ -219,6 +227,10 @@ func retainedBulkSoakCursorOwnerRestart(t *testing.T, checkpoint, cutoff, expect
 	began := time.Now()
 	trace := &capacityStateTrace{origin: &began}
 	var watchFault *copiedWatchConnectionLoss
+	var creationFrames []StateSnapshotObservation
+	if creationFault != nil {
+		call = WithStateSnapshotObserver(call, func(frame StateSnapshotObservation) { creationFrames = append(creationFrames, frame) })
+	}
 	if os.Getenv("WF_AUDIT_BULK_SOAK_STATE_CONNECTION_LOSS") == "1" || os.Getenv("WF_AUDIT_BULK_SOAK_STATE_PEER_OUTAGE") == "1" {
 		watchFault = newCopiedWatchConnectionLoss()
 		watchFault.peerOutage = os.Getenv("WF_AUDIT_BULK_SOAK_STATE_PEER_OUTAGE") == "1"
@@ -262,6 +274,15 @@ func retainedBulkSoakCursorOwnerRestart(t *testing.T, checkpoint, cutoff, expect
 				return fmt.Errorf("duplicate/omitted physical journal record: sequence=%d visit=%d", msg.Sequence, result.JournalVisits)
 			}
 			if result.JournalVisits == 128 {
+				if creationFault != nil {
+					// Confirm watchdog cancellation and transport join before killing
+					// the cursor owner, which may be the proxy upstream itself.
+					select {
+					case <-creationFault.joined:
+					case <-ctx.Done():
+						return ctx.Err()
+					}
+				}
 				target, err := observed.consumer.Info(ctx)
 				if err != nil {
 					return err
@@ -336,6 +357,9 @@ func retainedBulkSoakCursorOwnerRestart(t *testing.T, checkpoint, cutoff, expect
 	}
 	cutoffValue := uint64(cutoff)
 	var stateJS jetstream.JetStream = js
+	if creationFault != nil {
+		stateJS = copiedCreationJS{JetStream: js, state: creationFault}
+	}
 	if watchFault != nil {
 		stateJS = copiedWatchFaultJS{JetStream: js, fault: watchFault, cluster: cluster}
 	}
@@ -402,10 +426,18 @@ func retainedBulkSoakCursorOwnerRestart(t *testing.T, checkpoint, cutoff, expect
 		proof := watchFault.snapshot()
 		result.StateConnectionLoss = &proof
 	}
+	if creationFault != nil {
+		creationFault.proof["attempts"] = creationFault.calls
+		creationFault.proof["frames"] = creationFrames
+		result.StateCreationStall = creationFault.proof
+	}
 	result.Error = fmt.Sprint(failure)
 	want := Report{Invocations: cutoff, Journals: cutoff, Entries: report.Entries, Terminal: cutoff}
 	entryCountMatches := report.Entries > 0 && (expectedEntries == 0 || report.Entries == expectedEntries)
 	qualification := failure == nil && report == want && entryCountMatches && result.JournalVisits == journalState.Msgs && result.ElapsedNS < int64(20*time.Second) && !result.RestartCompleted.IsZero()
+	if creationFault != nil {
+		qualification = qualification && creationFault.calls >= 2 && creationFault.calls <= 3 && result.RecoveredReadiness["KV_WF_STATE"] != nil && result.RecoveredReadiness["KV_WF_STATE"].State.Consumers == 0
+	}
 	var journalCursors []cursorObservation
 	for _, cursor := range result.Cursors {
 		if cursor.Created && cursor.Info.Stream == "WF_JRN" {

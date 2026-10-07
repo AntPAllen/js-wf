@@ -3,6 +3,7 @@
 import argparse
 import copy
 import json
+import tempfile
 from pathlib import Path
 
 import copied_checkpoint_fault_proof
@@ -13,25 +14,56 @@ def main():
     parser.add_argument('--root', type=Path, required=True)
     parser.add_argument('--checkpoint', type=int, choices=(8520,4160), default=8520)
     parser.add_argument('--output', type=Path, required=True)
+    parser.add_argument('--state-watch-creation-stall', action='store_true')
     args = parser.parse_args()
     paths = list((args.root/'originals').rglob('copied-checkpoint-audit.json'))
     assert len(paths) == 1
     baseline = json.loads(paths[0].read_text())
     servers = json.loads((args.root/'actual-servers.json').read_text())
     identity = json.loads((args.root/'copied-store-admission.json').read_text())['identity']
-    admitted = copied_checkpoint_fault_proof.validate(baseline, servers, identity, checkpoint=args.checkpoint)
+    assert bool(baseline.get('state_creation_stall'))==args.state_watch_creation_stall
+    fixture=paths[0].parent
+    def validate(result,observed,wire_root=fixture):
+        admitted=copied_checkpoint_fault_proof.validate(result,observed,identity,checkpoint=args.checkpoint)
+        if args.state_watch_creation_stall:
+            import copied_checkpoint_creation_proof
+            admitted['creation']=copied_checkpoint_creation_proof.validate(wire_root,result,observed,identity)
+        return admitted
+    admitted = validate(baseline,servers)
     controls = []
 
     def reject(name, change):
         result, observed = copy.deepcopy(baseline), copy.deepcopy(servers)
         change(result, observed)
         try:
-            copied_checkpoint_fault_proof.validate(result, observed, identity, checkpoint=args.checkpoint)
+            validate(result, observed)
         except (AssertionError, KeyError, ValueError, TypeError):
             controls.append(name)
         else:
             raise AssertionError('invalid proof admitted: ' + name)
 
+    if args.state_watch_creation_stall:
+        for key,bad in [('attempts',1),('parent_budget_ns',30_000_000_000),('first_creation_elapsed_ns',1_000_000_000),
+                        ('first_native_error','context deadline exceeded'),('server_id','wrong'),('server_name','wrong'),
+                        ('upstream_url','nats://127.0.0.1:1'),('transport_joined','2030-01-01T00:00:00Z'),('frames',[])]:
+            reject('creation-'+key,lambda r,s,k=key,v=bad:r['state_creation_stall'].__setitem__(k,v))
+        reject('creation-missing',lambda r,s:r.pop('state_creation_stall'))
+        for key,bad in [('forwarded_bytes',1),('subject','$JS.API.CONSUMER.CREATE.OTHER.x'),('disposition','released')]:
+            reject('creation-pending-'+key,lambda r,s,k=key,v=bad:r['state_creation_stall']['pending_before_close'].__setitem__(k,v))
+        reject('creation-proxy-unjoined',lambda r,s:r['state_creation_stall']['proxy_stats'].__setitem__('active_connections',1))
+        reject('creation-trace-truncated',lambda r,s:r['state_creation_stall']['proxy_trace'].__setitem__('truncated',True))
+        reject('creation-false-partial-barrier',lambda r,s:r['state_creation_stall']['frames'][2].__setitem__('initial_complete',True))
+        reject('creation-partial-values',lambda r,s:r['state_creation_stall']['frames'][-1].__setitem__('included',1))
+        reject('creation-parent-changed',lambda r,s:r['state_creation_stall']['frames'][0].__setitem__('deadline','2030-01-01T00:00:00Z'))
+        reject('creation-residual-state-consumer',lambda r,s:r['readiness_after']['KV_WF_STATE']['state'].__setitem__('consumer_count',1))
+        wire=(fixture/'creation-wire.jsonl').read_bytes()
+        for name,changed in [('wire-truncated',wire[:-8]),('wire-missing',b''),('wire-invalid-extra-record',wire+b'{}\n')]:
+            with tempfile.TemporaryDirectory(prefix='copied-creation-proof-control-') as temp:
+                scratch=Path(temp);(scratch/'creation-wire.jsonl').write_bytes(changed)
+                try:validate(copy.deepcopy(baseline),copy.deepcopy(servers),scratch)
+                except (AssertionError,KeyError,ValueError,TypeError):controls.append('creation-'+name)
+                else:raise AssertionError('invalid wire accepted: '+name)
+        assert (fixture/'creation-wire.jsonl').read_bytes()==wire
     if args.checkpoint==4160:
         reject('missing-inherited-cursors',lambda r,s:r.__setitem__('inherited_cursors',[]))
         reject('unknown-inherited-consumer',lambda r,s:r['inherited_cursors'][0].__setitem__('name','application'))
