@@ -59,4 +59,26 @@ class LeafDomainProofControls(unittest.TestCase):
         shorter=json.loads((Path(__file__).resolve().parents[1]/'docs/scale/leaf-domain-sigkill-2026-10-07/native-race/leaf-domain-proof.json').read_text())
         with self.assertRaises(AssertionError):validate(shorter,'leaf-sigkill-lease-expiry-hub-restart')
 
+    def test_actual_weak_frame_is_bound_to_native_confirmation(self):
+        root=Path(__file__).resolve().parents[1]/'docs/scale/leaf-domain-weak-frame-2026-10-07/native-race'
+        baseline=json.loads((root/'leaf-domain-proof.json').read_text())
+        log=(root/'native.log').read_text()
+        profile='leaf-sigkill-lease-expiry-weak-frame-hub-restart'
+        validate(baseline,profile,log)
+        variants=[lambda p:p.update(weak_drops=0),lambda p:p.update(weak_reads=1),
+                  lambda p:p.update(weak_leaders=0),lambda p:p.update(weak_direct=1),
+                  lambda p:p.update(weak_generation=1),lambda p:p.update(fresh_generation=p['fresh_generation']+1),
+                  lambda p:p.update(weak_object='wrong'),lambda p:p.update(weak_object='step-result-'+'0'*64),
+                  lambda p:p.update(weak_route='$JS.API.STREAM.MSG.GET.OBJ_WF_BLOB')]
+        for i,change in enumerate(variants):
+            bad=copy.deepcopy(baseline);change(bad)
+            with self.subTest(mutation=i),self.assertRaises((AssertionError,ValueError,KeyError)):
+                validate(bad,profile,log)
+        confirmation=next(line for line in log.splitlines() if 'leaf weak frame confirmed:' in line)
+        for bad_log in (None,log.replace(confirmation,''),log+'\n'+confirmation,
+                        log.replace(baseline['weak_object'],'step-result-'+'0'*64)):
+            with self.subTest(log=bad_log),self.assertRaises(AssertionError):validate(baseline,profile,bad_log)
+        shorter=json.loads((root.parents[1]/'leaf-domain-expiry-2026-10-07/native-race/leaf-domain-proof.json').read_text())
+        with self.assertRaises(AssertionError):validate(shorter,profile,log)
+
 if __name__=='__main__':unittest.main()

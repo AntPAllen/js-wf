@@ -1,5 +1,11 @@
 # Implementation status against the supplied plan
 
+## Leaf SIGKILL, lease expiry and controlled weak frame accepted — 2026-10-07
+
+Native race source `a31994f` passed in40.85s. The selected generation3 frame received one injected weak Object Store absence, then one actual leader metadata confirmation through WFRETIRE and successful payload recovery: drops1/reads3/leader1/direct0. Actual stock leaf4052741 was SIGKILLed/reaped, all three runtime clients disconnected, and replacement4055515 reused the original executable/config/port/store. Production TTL12s was exceeded by13.0009s; all three embedded hubs gracefully restarted and the ten checked replica sets recovered. Whole cut21.3346s stays under the original30s target; terminal epoch72 fences old owner54. Original strict retirement/reuse/manifest loss/generation/object/effect/terminal assertions passed unchanged.
+
+Independent complete source/SDK/both stock leaf processes/2532-file archive review accepts with42 actual-proof mutations rejected. Persistent verifier controls bind the selected object/generation/read count to the captured native log and reject shorter-profile promotion. [Evidence, S3 restoration and scope](scale/leaf-domain-weak-frame-2026-10-07/native-race/). Controlled absence does not establish natural follower lag. All-hub SIGKILL, daemon-child leaf paths, online active-writer GC, original million physical drain and broad release/24h matrices remain open.
+
 ## Leaf SIGKILL with production lease expiry accepted — 2026-10-07
 
 At2f4afec actual race SDK3997690 passes41.49s: actual12s TTL/old owner54/revision, leaf3997777 SIGKILL/reaped/three client disconnects,13.0008s outage, distinct same-store/argv/port leaf4000593, all graceful hub replacements/ten checked stream sets and proper remote domain traffic verify. Whole cut22.2084s under original30s; terminal epoch72 across11 records fences old owner54. Full strict retirement/manifest-loss/generation/reuse/object/effect/count assertions pass. Independent source/SDK/two stock leaf processes/2530-file archive review accepts;33 actual-proof mutations and shorter-profile promotion rejection pass. [Evidence and scope](scale/leaf-domain-expiry-2026-10-07/native-race/). All-hub SIGKILL/daemon/weak-frame leaf combinations and broad release/million/onlineGC/24h gates remain open.
