@@ -1,5 +1,9 @@
 # Implementation status against the supplied plan
 
+## Leaf SIGKILL with production lease expiry accepted — 2026-10-07
+
+At2f4afec actual race SDK3997690 passes41.49s: actual12s TTL/old owner54/revision, leaf3997777 SIGKILL/reaped/three client disconnects,13.0008s outage, distinct same-store/argv/port leaf4000593, all graceful hub replacements/ten checked stream sets and proper remote domain traffic verify. Whole cut22.2084s under original30s; terminal epoch72 across11 records fences old owner54. Full strict retirement/manifest-loss/generation/reuse/object/effect/count assertions pass. Independent source/SDK/two stock leaf processes/2530-file archive review accepts;33 actual-proof mutations and shorter-profile promotion rejection pass. [Evidence and scope](scale/leaf-domain-expiry-2026-10-07/native-race/). All-hub SIGKILL/daemon/weak-frame leaf combinations and broad release/million/onlineGC/24h gates remain open.
+
 ## Abrupt leaf loss plus hub restart accepted — 2026-10-07
 
 At4a49240 actual race SDK3931497 passes30.00s. Real stock leaf PID3931688 SIGKILL/reaped, all three client RECONNECTING states and distinct replacement3933084/exact executable/argv/store verify. All hubs gracefully restart, all ten checked stream replica sets heal, runtime clients stay on the replacement WFEDGE leaf, local streams remain zero and122 WFRETIRE API subjects are captured; whole cut9.0828s under original30s. Full strict generation/reuse/manifest loss/object/effect/terminal assertions pass. Independent source/SDK/two actual leaf processes/2528-file complete archive review accepts;25 proof negatives plus hub-only promotion rejection pass. [Evidence and limits](scale/leaf-domain-sigkill-2026-10-07/native-race/). Earlier startup and inherited-observer-cancellation attempts remain failed/preserved. All-hub SIGKILL/lease-expiry/daemon leaf combinations and full leaf/release/million/onlineGC/24h gates remain open.

@@ -45,4 +45,18 @@ class LeafDomainProofControls(unittest.TestCase):
         hub_only=json.loads((Path(__file__).resolve().parents[1]/'docs/scale/leaf-domain-retirement-2026-10-07/native-race/leaf-domain-proof.json').read_text())
         with self.assertRaises(AssertionError):validate(hub_only,'leaf-sigkill-hub-restart')
 
+    def test_actual_expiry_requires_production_ttl_outage_and_successor(self):
+        baseline=json.loads((Path(__file__).resolve().parents[1]/'docs/scale/leaf-domain-expiry-2026-10-07/native-race/leaf-domain-proof.json').read_text())
+        validate(baseline,'leaf-sigkill-lease-expiry-hub-restart')
+        variants=[lambda p:p.update(lease_ttl_seconds=30),lambda p:p.update(prior_epoch=0),
+                  lambda p:p.update(terminal_epoch=p['prior_epoch']),lambda p:p.update(lease_revision=0),
+                  lambda p:p.update(outage_end=p['outage_start']),lambda p:p.update(outage_start=p['cut_end']),
+                  lambda p:p.update(fault_profile='leaf-sigkill-hub-restart'),lambda p:p.update(journal_records=0)]
+        for i,change in enumerate(variants):
+            bad=copy.deepcopy(baseline);change(bad)
+            with self.subTest(mutation=i),self.assertRaises((AssertionError,ValueError,KeyError)):
+                validate(bad,'leaf-sigkill-lease-expiry-hub-restart')
+        shorter=json.loads((Path(__file__).resolve().parents[1]/'docs/scale/leaf-domain-sigkill-2026-10-07/native-race/leaf-domain-proof.json').read_text())
+        with self.assertRaises(AssertionError):validate(shorter,'leaf-sigkill-lease-expiry-hub-restart')
+
 if __name__=='__main__':unittest.main()

@@ -5618,3 +5618,10 @@ The explicit parallel/fresh-watch recovery profile now also has an accepted orig
 Explicit `leaf-retirement-sigkill-hub-restart` at4a49240 passes original strict retirement/reuse under race in30.00s. Actual separate stock leaf SIGKILL/reap, all three client disconnects, distinct replacement identity/same executable/argv/store, all hub graceful replacements, all ten checked stream replica sets, remote domain traffic and zero local streams verify; original whole-cut30s target finishes9.0828s. Independent complete-source/SDK/leaf-process/archive review and25 proof mutations accept. [Full proof and retained failed attempts](scale/leaf-domain-sigkill-2026-10-07/native-race/).
 
 CI retains hub-only and abrupt-leaf profiles. The original worker-operation context may cancel during endpoint loss; the external fault observer now remains bounded by the original cut-start-plus30s instead. All-hub SIGKILL, leaf/lease-expiry combinations, packaged daemon/child wire paths, broad leaf matrices and full release requirements remain open.
+
+
+## Leaf loss exceeding production lease TTL accepted — 2026-10-07
+
+Explicit `leaf-retirement-sigkill-lease-expiry` at2f4afec passes41.49s under race, original60s strict retirement/reuse scenario and30s whole-cut recovery. Actual held lease TTL12s/epoch54/revision, SIGKILLed leaf/reaped exit/three client disconnects and13.0008s physical outage are captured. Same-store/port leaf replacement plus all graceful hub replacements recover in22.2084s; Completed epoch72 fences old owner. Full generation1→3/object collection/shared retention/three effects/two terminals/manifest-loss/domain gates stay unchanged. Independent complete archive/source/SDK/leaf-process review and33 proof controls accept. [Native proof and CI scope](scale/leaf-domain-expiry-2026-10-07/native-race/).
+
+All-hub SIGKILL, daemon/child leaf paths, weak-frame combinations, broad matrices and full release gates remain open. Existing24h journal SDK continues at its isolated source; this focused row does not qualify it.
