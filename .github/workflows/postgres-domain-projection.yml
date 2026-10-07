@@ -10,7 +10,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        projector: [sdk, standalone, standalone-leaf]
+        projector: [sdk, standalone, standalone-leaf, standalone-leaf-startup]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-go@v5
@@ -19,20 +19,20 @@ jobs:
       - name: Obtain PostgreSQL image and record exact executed identity in runner
         run: docker pull postgres:16-alpine
       - name: Check disk-backed trace and actual captured streaming controls
-        if: matrix.projector == 'standalone-leaf'
+        if: matrix.projector == 'standalone-leaf' || matrix.projector == 'standalone-leaf-startup'
         run: |
           go test -race ./testcluster -run '^TestClientProxyFileTraceJoinedBytesAndFailures$' -count=1
           python3 -m unittest discover -s scripts -p test_sql_leaf_stream_wire.py
       - name: Run full50000 projection fault and rebuild in domain (${{ matrix.projector }})
-        if: matrix.projector != 'standalone-leaf'
+        if: matrix.projector != 'standalone-leaf' && matrix.projector != 'standalone-leaf-startup'
         run: python3 scripts/run-postgres-domain-projection.py --projector-profile '${{ matrix.projector }}' --root '${{ runner.temp }}/postgres-domain-projection-${{ matrix.projector }}-full50000'
       - name: Run full50000 packaged SQL leaf case with retained producer identity
-        if: matrix.projector == 'standalone-leaf'
+        if: matrix.projector == 'standalone-leaf' || matrix.projector == 'standalone-leaf-startup'
         run: |
-          sudo systemd-run --unit=postgres-domain-projection-standalone-leaf-full50000 --property="User=$USER" --property="WorkingDirectory=$GITHUB_WORKSPACE" --property=MemoryMax=4G --property=Restart=no --property=RemainAfterExit=yes --setenv="PATH=$PATH" --setenv=PYTHONDONTWRITEBYTECODE=1 /usr/bin/python3 "$GITHUB_WORKSPACE/scripts/run-postgres-domain-projection.py" --projector-profile standalone-leaf --root '${{ runner.temp }}/postgres-domain-projection-standalone-leaf-full50000'
+          sudo systemd-run --unit=postgres-domain-projection-${{ matrix.projector }}-full50000 --property="User=$USER" --property="WorkingDirectory=$GITHUB_WORKSPACE" --property=MemoryMax=4G --property=Restart=no --property=RemainAfterExit=yes --setenv="PATH=$PATH" --setenv=PYTHONDONTWRITEBYTECODE=1 /usr/bin/python3 "$GITHUB_WORKSPACE/scripts/run-postgres-domain-projection.py" --projector-profile '${{ matrix.projector }}' --root '${{ runner.temp }}/postgres-domain-projection-${{ matrix.projector }}-full50000'
           python3 - <<'PY'
           import subprocess,time,sys
-          unit='postgres-domain-projection-standalone-leaf-full50000.service'
+          unit='postgres-domain-projection-${{ matrix.projector }}-full50000.service'
           while True:
               output=subprocess.check_output(['systemctl','show',unit,'-p','LoadState','-p','SubState','-p','MainPID','-p','ExecMainStatus','-p','Result'],text=True)
               fields=dict(line.split('=',1) for line in output.splitlines())
@@ -47,8 +47,11 @@ jobs:
         if: matrix.projector == 'standalone'
         run: python3 scripts/check-postgres-standalone-proof-controls.py --root '${{ runner.temp }}/postgres-domain-projection-standalone-full50000' --output '${{ runner.temp }}/postgres-domain-projection-standalone-full50000-proof/coverage-controls.json'
       - name: Reject weakened full packaged SQL leaf fault evidence
-        if: matrix.projector == 'standalone-leaf'
-        run: python3 scripts/check-postgres-standalone-proof-controls.py --projector-profile standalone-leaf --root '${{ runner.temp }}/postgres-domain-projection-standalone-leaf-full50000' --output '${{ runner.temp }}/postgres-domain-projection-standalone-leaf-full50000-proof/coverage-controls.json'
+        if: matrix.projector == 'standalone-leaf' || matrix.projector == 'standalone-leaf-startup'
+        run: python3 scripts/check-postgres-standalone-proof-controls.py --projector-profile '${{ matrix.projector }}' --root '${{ runner.temp }}/postgres-domain-projection-${{ matrix.projector }}-full50000' --output '${{ runner.temp }}/postgres-domain-projection-${{ matrix.projector }}-full50000-proof/coverage-controls.json'
+      - name: Reject weakened actual SQL startup boundary
+        if: matrix.projector == 'standalone-leaf-startup'
+        run: python3 scripts/check-postgres-sql-startup-proof-controls.py --root '${{ runner.temp }}/postgres-domain-projection-standalone-leaf-startup-full50000' --output '${{ runner.temp }}/postgres-domain-projection-standalone-leaf-startup-full50000-proof/startup-controls.json'
       - if: always()
         uses: actions/upload-artifact@v7
         with:
