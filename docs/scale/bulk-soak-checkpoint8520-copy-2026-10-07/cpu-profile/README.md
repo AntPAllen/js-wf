@@ -1,0 +1,11 @@
+# Full checkpoint8520 CPU diagnosis
+
+Cleanf9be625 actual full238560 copied-cohort audit passes **13.447759199s**, all238560 invocations/journals/terminals and2630779 entries, under the unchanged20s checker deadline. Original4CPU/GOGC500/4GiB/explicit routes/2m sync remain. Every original member is again fully verified/restored fresh before five copied stores are opened. All actual stock2.15.0 server hashes match the original, four R5 source replica sets heal, and every original file remains unchanged.
+
+CPU profiler covers the full checker; setup/drain and before/after runtime snapshots are outside measured checker elapsed. Instrumentation can perturb execution. This is a separate profiled diagnostic, not a statistical performance improvement over the uninstrumented14.316s proof.
+
+[Independent review](independent-review.json) binds exact sources, actual SDK/server births/argv/hashes/mounts, copied admission, untouched originals and all20621 complete archive members. Raw CPU profile remains in the complete archive/local case; its hash/size and build-bound decoded [CPU table](cpu-top.txt) are retained here. Complete archive2165002902bytes, SHA256 `801507d3318f621b7d830f0fd20a4e3ce0d8a58f27f664cef8cfa382383f2cc7`. S3 retention is pending.
+
+SDK sampled CPU totals16.10s across13.45s wall time: NATS client parser cumulative5.02s/31.18%; journal entry decoding cumulative3.61s/22.42%; retained scan visitor cumulative6.96s/43.23%. Cumulative categories overlap and must not be added. Server CPU is excluded. Runtime TotalAlloc grows by4,886,431,864 bytes; fourteen GC cycles occur. After-check heap allocation is1,307,388,152 bytes. Before/after snapshots are not a peak/lifetime heap claim or an explanation of the historical live failure.
+
+Next: evaluate bounded parallel decoding while preserving source order, complete captured bounds, all semantic/invariant errors, deterministic cancellation/join and the original20s attempt. The original24h remains failed; no historical server-side cause, concurrent workload/fault reproduction, new production default or release qualification follows from this profile.

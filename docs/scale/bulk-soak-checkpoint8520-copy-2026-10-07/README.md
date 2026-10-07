@@ -9,3 +9,7 @@ Before reopening anything, the full original archive is verified and restored to
 This qualifies only the **quiescent copied full-cohort capacity** diagnostic. The original24h failure remains failed. This does not reproduce concurrent writes/faults, identify a historical server-side cause, or qualify production adoption/fullmatrix/24h. The original failure's firsttwo zero completed journals indicate the journal-read phase had not completed; the third partial journal report comes from later invariant reduction. A copied pass does not show that live fault recovery is correct.
 
 Trace timestamps place most copied runtime in journal delivery/decoding/reduction: WF_INV consumer deleted at06:23:30.862, journal consumer created06:23:30.866/deleted06:23:43.125; the concurrent state watch stops06:23:32.682. Next diagnosis targets the journal pipeline and live fault interaction while preserving the original deadlines and full cohort.
+
+## Full-phase CPU diagnosis
+
+A separate fresh full-cohort profiled run atf9be625 passes13.447759199s with complete independent review. [Profile and limits](cpu-profile/README.md). Journal decoding consumes22.42% of sampled SDK CPU; bounded parallel decoding is the next implementation candidate, with ordering/invariants/cancellation and original deadlines preserved. No original24h promotion.

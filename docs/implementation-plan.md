@@ -5555,3 +5555,8 @@ The original757454a full24h journal producer/actualSDK3461745 reaches a native e
 ## Full checkpoint8520 copied capacity accepted — 2026-10-07
 
 Clean5c6cc85 verifies the entire failed238560-invocation cohort on a full fresh byte/mode/mtime-verified original restore:238560 journals/terminals,2630779 entries in14.316318492s under unchanged20s. Same five actual stockNATS2.15.0 binary hashes/original Raft identities/four current R5 sources and4CPU/GOGC500/4GiB/2m sync/explicit routes are retained. Independent review verifies all original bytes unchanged and complete20617-member diagnostic archive. This isolates quiescent capacity from original live failures; no historical cause attribution or24h acceptance. Journal pipeline/live fault interaction remains to diagnose. [Evidence](scale/bulk-soak-checkpoint8520-copy-2026-10-07/).
+
+
+## Full checkpoint8520 CPU diagnosis reviewed — 2026-10-07
+
+Separate fresh complete copied cohort atf9be625 passes13.447759199s under original20s/4CPU/GOGC500/4GiB; all238560 journals/terminals and2630779 entries verify. Independent source/actual SDK/server/copy/original/complete20621-member review passes. Journal entry decode takes22.42% of sampled SDK CPU; NATS client parsing31.18%; categories overlap and exclude server CPU. Full checker allocates4,886,431,864 bytes; before/after GC/heap snapshots are not peak claims. Instrumentation can perturb timing. Evaluate bounded ordered parallel decoding without reducing captured bounds/invariants or changing deadlines. Original live24h failure/cause and broader gates remain open. [Evidence](scale/bulk-soak-checkpoint8520-copy-2026-10-07/cpu-profile/).

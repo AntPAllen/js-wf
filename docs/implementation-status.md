@@ -38,6 +38,10 @@ partial no-space evidence, are preserved to S3. The current normal simulation
 qualifier has completed successfully at its recorded source; the ten-minute consumer-leader component is now
 accepted in its executed-source scope as recorded below.
 
+## Full checkpoint8520 CPU diagnosis reviewed — 2026-10-07
+
+Cleanf9be625 separate full original copied audit passes13.447759199s/all238560 invocations/journals/terminals/2630779entries at unchanged20s and4CPU/GOGC500/4GiB. Fresh complete restore and all same actual five stock-server binaries/four R5 sources/original unchanged bytes verify. Full20621-member archive and SDK-bound CPU profile independently reviewed. Sampled SDK CPU16.10s: journal decode3.61s/22.42%, NATS client parsing5.02s/31.18%; cumulative categories overlap, server CPU excluded. TotalAlloc delta4,886,431,864bytes/14GC cycles; after-check HeapAlloc1,307,388,152bytes is not peak/lifetime. Instrumentation may perturb execution. [Profile](scale/bulk-soak-checkpoint8520-copy-2026-10-07/cpu-profile/). Next candidate: bounded ordered parallel decoding, with complete-cohort errors/invariants/cancellation and original deadlines retained. Original24h remains failed; no historical cause or release adoption.
+
 ## Full checkpoint8520 profiling prepared — 2026-10-07
 
 The same full238560 original copied cohort gains explicit `--cpu-profile` diagnosis: SDK CPU samples around the complete unchanged20s checker, plus before/after heap/GC snapshots. No original count/deadline/profile alteration; profiler setup/drain and snapshots are outside measured checker elapsed and may perturb execution. Default uninstrumented diagnostic remains unchanged. No peak/lifetime/server CPU or historical cause claim. Compilation passes; clean profiled native evidence remains pending.
