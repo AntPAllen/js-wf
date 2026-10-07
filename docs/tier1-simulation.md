@@ -1,5 +1,12 @@
 # Tier 1 deterministic simulation: journal, lease, start, signals, timers, dispatch, and worker slices
 
+## Active-writer blob boundary workload — 2026-10-07
+
+`TestSeededOnlineBlobBoundaryReplay` shares the actual production Start and blob-sweep decision paths over one seeded in-memory store. It proves two expected failures of violating writer quiescence: a two-hour paused upload can publish an acknowledged dangling reference after a one-hour-age sweep, and a refreshed shared object can be deleted after a stale census. The quiescent control preserves its input. Every generated schedule is replayed exactly. Three new pins also run through the shared FAULT_TRACE dispatcher.
+
+Initial normal/race 1,000 schedules cover all three modes; the actual R1 stock NATS race contract confirms refresh-after-census against real transport. This adds one workload and three regressions; full previous graph campaigns remain scoped to their original inventories. Focused 100,000-seed coverage remains pending, and online GC remains unimplemented. [Preparation](scale/online-blob-boundary-2026-10-07/preparation/), [native proof](scale/online-blob-boundary-2026-10-07/native-race/).
+
+
 ## Current full-suite qualification — 2026-10-03
 
 The complete 121-workload graph now passes 100,000 seeds per workload,

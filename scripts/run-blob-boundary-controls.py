@@ -15,16 +15,44 @@ import live_process_admission
 
 REPO=Path(__file__).resolve().parents[1]
 TEST='TestBlobSweepConcurrentRefreshContract'
+MODES=('quiescent','refresh_after_census')
+
+def boundary_rows(log):
+    lines=[line for line in log.splitlines() if 'native blob boundary:' in line]
+    pattern=r'.*native blob boundary: mode=(quiescent|refresh_after_census) old_nuid=(\w+) fresh_nuid=(\w+) acked_ref=true deleted=(\d+) dangling=(true|false) server_id=(\w+)'
+    matches=[re.fullmatch(pattern,line) for line in lines]
+    assert len(matches)==2 and all(matches),'missing, duplicate or malformed native boundary rows'
+    return [match.groups() for match in matches]
 
 def verify_log(log):
     assert log.rstrip().endswith('PASS') and not any(token in log for token in ('DATA RACE','--- FAIL:','--- SKIP:'))
     assert re.findall(r'^--- PASS: (\w+) \([0-9.]+s\)$',log,re.M)==[TEST]
     assert sorted(re.findall(r'^\s+--- PASS: '+TEST+r'/(quiescent|refresh_after_census) \(',log,re.M))==['quiescent','refresh_after_census']
-    rows=re.findall(r'native blob boundary: mode=(quiescent|refresh_after_census) old_nuid=(\w+) fresh_nuid=(\w+) acked_ref=true deleted=(\d+) dangling=(true|false) server_id=(\w+)',log)
+    rows=boundary_rows(log)
     assert len(rows)==2 and {mode for mode,*_ in rows}=={'quiescent','refresh_after_census'}
     assert all(old!=new and (deleted,dangling)==(('0','false') if mode=='quiescent' else ('1','true')) for mode,old,new,deleted,dangling,_ in rows)
     assert len({row[-1] for row in rows})==2
     return dict(counterexample_confirmed=True,quiescent_control_retained=True,scope='R1 native contract for violating quiescent collector precondition, not safe online GC or broad release qualification.')
+
+def verify_proofs(log,proofs):
+    qualification=verify_log(log)
+    assert set(proofs)==set(MODES),'require both original boundary proofs'
+    rows={row[0]:row for row in boundary_rows(log)}
+    objects=set()
+    for mode in MODES:
+        proof=proofs[mode]
+        active=mode=='refresh_after_census'
+        assert proof['mode']==mode
+        assert type(proof['invocation_sequence']) is int and proof['invocation_sequence']>0
+        assert proof['object']==proof['acknowledged_reference']
+        assert re.fullmatch(r'input-[0-9a-f]{64}',proof['object'])
+        objects.add(proof['object'])
+        assert proof['sweep']==dict(objects=1,referenced=0 if active else 1,eligible=1 if active else 0,deleted=1 if active else 0)
+        assert all(type(value) is int for value in proof['sweep'].values())
+        assert proof['dangling'] is active
+        assert rows[mode]==(mode,proof['old_nuid'],proof['fresh_nuid'],str(proof['sweep']['deleted']),str(active).lower(),proof['server_id']),'JSON proof differs from actual native log'
+    assert len(objects)==1,'both controls must use the same shared input key'
+    return qualification
 
 def main():
     parser=argparse.ArgumentParser();parser.add_argument('--root',type=Path,required=True);args=parser.parse_args()
@@ -49,11 +77,9 @@ def main():
     after=shared.source_inventory(rev);assert before==after;save('source-after.json',after);save('closure.json',shared.closure(root))
     result=None;error=None
     try:
-        assert code==0,'native contract failed';result=verify_log((root/'native.log').read_text())
-        for mode in ('quiescent','refresh_after_census'):
-            proof=json.loads((root/'stores/scenario'/mode/'boundary-proof.json').read_text())
-            assert proof['mode']==mode and proof['old_nuid']!=proof['fresh_nuid'] and proof['object']==proof['acknowledged_reference'] and proof['invocation_sequence']>0
-            assert proof['dangling']==(mode=='refresh_after_census') and proof['sweep']['deleted']==(1 if mode=='refresh_after_census' else 0)
+        assert code==0,'native contract failed'
+        proofs={mode:json.loads((root/'stores/scenario'/mode/'boundary-proof.json').read_text()) for mode in MODES}
+        result=verify_proofs((root/'native.log').read_text(),proofs)
     except (AssertionError,ValueError,KeyError,TypeError) as exc:error=str(exc) or type(exc).__name__
     save('row-review.json',dict(qualification=result,rejection=error))
     proof=fixture_archive.capture(root,root.with_suffix('.tar.gz'),root.with_name(root.name+'-proof'),compresslevel=1)

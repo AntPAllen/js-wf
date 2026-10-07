@@ -1,0 +1,52 @@
+name: blob-boundary-controls
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - '.github/workflows/blob-boundary-controls.yml'
+      - 'retention/**'
+      - 'client/**'
+      - 'provision/**'
+      - 'testcluster/**'
+      - 'scripts/run-blob-boundary-controls.py'
+      - 'scripts/test_blob_boundary_controls.py'
+      - 'scripts/run-domain-runtime-controls.py'
+      - 'scripts/fixture_archive.py'
+      - 'scripts/live_process_admission.py'
+      - 'go.mod'
+      - 'go.sum'
+  pull_request:
+    paths:
+      - '.github/workflows/blob-boundary-controls.yml'
+      - 'retention/**'
+      - 'client/**'
+      - 'provision/**'
+      - 'testcluster/**'
+      - 'scripts/**'
+      - 'go.mod'
+      - 'go.sum'
+permissions:
+  contents: read
+jobs:
+  native-boundary:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - name: Reject altered captured boundary outcomes and proofs
+        run: python3 -m unittest discover -s scripts -p test_blob_boundary_controls.py
+      - name: Require both real JetStream race boundary controls
+        run: python3 scripts/run-blob-boundary-controls.py --root '${{ runner.temp }}/blob-boundary'
+      - if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: blob-boundary
+          path: |
+            ${{ runner.temp }}/blob-boundary.tar.gz
+            ${{ runner.temp }}/blob-boundary-proof/
+            ${{ runner.temp }}/blob-boundary/*.json
+            ${{ runner.temp }}/blob-boundary/*.log
+          if-no-files-found: error

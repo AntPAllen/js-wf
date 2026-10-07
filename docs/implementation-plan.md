@@ -5648,3 +5648,11 @@ At native `c2f313c`, actual SDK21577 passes the full unchanged static/KV/auto he
 The first collector fails on bytearray parsing after all native tests pass; its failure is retained. Verifier-only `3fa341b` accepts the unchanged captures, adding bytes/bytearray/memoryview boundary controls without native rerun. Fresh complete8196-file capture and independent2107-source/SDK/three-built-child/three-stock-leaf/plugin review reject21 actual-proof mutations. Captured actual wire and log controls persist in CI. [Native scope and original collector failure](scale/worker-leaf-wire-2026-10-07/native-race/).
 
 This closes healthy packaged worker leaf routing and observed outgoing child prefixes at the recorded source. Packaged operator/project/tombstone daemons, active fault interaction, naturally lost replies, online active-writer GC, original million physical drain and broad/full24h matrices remain separate requirements.
+
+## Active-writer blob collection boundary established — 2026-10-07
+
+Production Start and quiescent collector decisions now share a seeded transport workload with paused-upload, refresh-after-census and quiescent schedules. Initial 1,000 normal/race schedules and exact replays pass; three shared regression traces are pinned. A virtual one-hour minimum age does not prevent acknowledged dangling references in the two active-writer schedules.
+
+The actual R1 stock NATS 2.15.0 native race contract at `2430702` confirms refresh-after-census deletion of a fresh uploaded NUID after production Start acknowledgment. The quiescent control retains the payload. Native minimum age is zero. Independent full source/SDK/proof/archive review accepts; permanent captured-log/proof mutation controls and a dedicated native CI row now preserve this boundary. [Evidence](scale/online-blob-boundary-2026-10-07/native-race/).
+
+This supplies a concrete reproduction for the reported online-GC gap; it does not implement safe online collection. An online protocol must protect and fence pending-reference publication through arbitrary writer pauses, crashes, lost acknowledgments and shared-object reuse across inputs, signals, results and snapshot/checkpoint references. Until that protocol is implemented and proven, the existing collector requires stopped writers. Previous full Tier 1 graphs and all real release matrices retain their original scope.

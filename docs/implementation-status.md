@@ -1,5 +1,15 @@
 # Implementation status against the supplied plan
 
+## Active-writer blob GC counterexamples confirmed — 2026-10-07
+
+The new seeded `online_blob_boundary` workload runs production Start and collector decisions. All 1,000 schedules and exact replays pass, including 325 paused uploads, 348 refresh-after-census interleavings and 327 quiescent controls; three traces are pinned. The one-hour grace fails to protect either active-writer schedule. This is expected unsafe use of the quiescent API, not an online collector implementation.
+
+At `2430702`, actual race SDK 142864 passes both real stock NATS 2.15.0 R1 controls in 0.48 s. A new object NUID and acknowledged production Start reference are followed by deletion through the collector's cached census; the reference is dangling. The quiescent control retains its input. Native minimum age is zero; virtual one-hour grace evidence belongs to Tier 1 only. Independent source/SDK/proof/2,213-file archive review accepts, rejecting eight altered actual logs. [Native evidence and S3 receipt](scale/online-blob-boundary-2026-10-07/native-race/).
+
+Permanent verification now requires exact counts, matching log/JSON identities and distinct server/object generations. Three guard groups reject 14 actual-log and 28 proof mutations. Dedicated CI executes both original native race cases; hosted results remain separate. The seeded graph gains one workload and three pins; prior full-suite results retain their recorded sources and sizes. Focused 100,000-seed coverage is not yet accepted.
+
+Online GC remains unimplemented. Age grace, a metadata re-read or conditional delete alone cannot protect a writer paused after upload and before publication. Pending-reference publication must be fenced across arbitrary stalls, crashes, lost replies and shared-object reuse for inputs, signals, results and checkpoints. Existing collection still requires writer quiescence. Full release/million/24h gates remain open; the isolated journal 24-hour SDK is still running.
+
 ## Packaged worker leaf routing and complete child wire accepted — 2026-10-07
 
 Native race `c2f313c`, actual SDK21577, passed45.99s body/47.086s SDK. Three actual packaged `wf-worker` children complete all original static/KV/auto workflow42, metrics/capacity, expired tombstone, retention, purge/reuse and result43 checks, then SIGTERM/exit0. Each uses an exclusive TCP relay into a separate stock WFEDGE leaf and R3 embedded WFWORKER hubs. Joined complete transcripts match871022 client bytes/2439163 server bytes, one connection per child, zero overflow/truncation/pending bytes, actual leaf INFO identities and6070 proper WFWORKER API publications. Nine distinct hub identities and zero local leaf workflow streams verify. Original35s cases/10s shutdown/4m SDK remain unchanged.
