@@ -38,12 +38,16 @@ type ClientProxy struct {
 	trafficUsed          int
 	traffic              ClientProxyTraffic
 	apiBarrier           *clientAPIBarrier
+	fileTrace            *clientProxyFileTrace
 }
 
 type ClientProxyTraffic struct {
-	Connections []ClientProxyConnection `json:"connections"`
-	Frames      []ClientProxyFrame      `json:"frames"`
-	Truncated   bool                    `json:"truncated"`
+	Connections    []ClientProxyConnection `json:"connections"`
+	Frames         []ClientProxyFrame      `json:"frames"`
+	Truncated      bool                    `json:"truncated"`
+	FrameFile      string                  `json:"frame_file,omitempty"`
+	FrameFileError string                  `json:"frame_file_error,omitempty"`
+	FrameRecords   uint64                  `json:"frame_records,omitempty"`
 }
 
 type ClientProxyConnection struct {
@@ -68,7 +72,7 @@ type ClientProxyFrame struct {
 func (p *ClientProxy) EnableTrafficTrace(limit int) error {
 	p.mu.Lock()
 	defer p.mu.Unlock()
-	if p.nextConnection != 0 || p.trafficLimit != 0 || limit < 1024 || limit > 16<<20 {
+	if p.closed || p.acceptedConnections != 0 || p.trafficLimit != 0 || limit < 1024 || limit > 16<<20 {
 		return fmt.Errorf("traffic trace requires an unused proxy and a 1 KiB..16 MiB budget")
 	}
 	p.trafficLimit = limit
@@ -89,6 +93,10 @@ func (p *ClientProxy) TrafficTrace() ClientProxyTraffic {
 
 func (p *ClientProxy) recordTrafficLocked(connection uint64, direction string, data []byte) {
 	if p.trafficLimit == 0 || p.traffic.Truncated || len(data) == 0 {
+		return
+	}
+	if p.fileTrace != nil {
+		p.recordFileTrafficLocked(connection, direction, data)
 		return
 	}
 	cost := len(data) + 128
@@ -237,6 +245,7 @@ func (p *ClientProxy) Close() {
 	p.mu.Unlock()
 	<-p.acceptDone
 	p.sessions.Wait()
+	p.closeFileTrace()
 }
 
 func (p *ClientProxy) accept() {

@@ -119,11 +119,25 @@ func TestStandalonePostgresProjectionCrashAndSessionLossFiftyThousandInvocations
 	runProjectionRecovery(t, true, true, "WFVIEW")
 }
 
+func TestStandalonePostgresProjectionCrashAndSessionLossFiftyThousandInvocationsThroughLeaf(t *testing.T) {
+	if os.Getenv("WF_PROJECTION_POSTGRES_FAULT_ROOT") == "" || os.Getenv("WF_TEST_POSTGRES_DSN") == "" {
+		t.Skip("opt-in retained full packaged SQL leaf proof")
+	}
+	if os.Getenv("WF_PROJECTION_COUNT") != "" {
+		t.Fatal("full SQL leaf proof requires default50000 count")
+	}
+	runProjectionRecoveryWithTransport(t, true, true, true, "WFVIEW")
+}
+
 func runProjectionRecoversFiftyThousandInvocations(t *testing.T, postgresFault bool, domains ...string) {
 	runProjectionRecovery(t, postgresFault, false, domains...)
 }
 
 func runProjectionRecovery(t *testing.T, postgresFault, standalone bool, domains ...string) {
+	runProjectionRecoveryWithTransport(t, postgresFault, standalone, false, domains...)
+}
+
+func runProjectionRecoveryWithTransport(t *testing.T, postgresFault, standalone, leaf bool, domains ...string) {
 	t.Helper()
 	count := 50000
 	if value := os.Getenv("WF_PROJECTION_COUNT"); value != "" {
@@ -183,6 +197,8 @@ func runProjectionRecovery(t *testing.T, postgresFault, standalone bool, domains
 		var err error
 		if domain == "" {
 			cluster, err = testcluster.Start(filepath.Join(root, "cluster"), 3)
+		} else if leaf {
+			cluster, err = testcluster.StartWithLeafDomain(filepath.Join(root, "cluster"), 3, domain)
 		} else {
 			cluster, err = testcluster.StartWithDomain(filepath.Join(root, "cluster"), 3, domain)
 		}
@@ -216,12 +232,23 @@ func runProjectionRecovery(t *testing.T, postgresFault, standalone bool, domains
 		options = append(options, visibility.WithPostgres(&visibility.PostgresStore{DB: db}))
 	}
 	const typ = "view-scale"
+	projectorURL := cluster.Servers[0].ClientURL()
+	if leaf {
+		if !postgresFault || !standalone || domain == "" {
+			t.Fatal("SQL leaf requires full packaged domain fault profile")
+		}
+		endpoint, finishLeaf := projectionLeafEndpoint(t, ctx, cluster, domain, root)
+		defer finishLeaf()
+		projectorURL = endpoint
+		proof["projector_transport"] = "leaf"
+		proof["projector_leaf_url"] = endpoint
+	}
 	var standaloneBinary string
 	var standaloneRecords []map[string]any
 	if standalone {
 		proof["projector_profile"] = "standalone"
 		standaloneBinary = buildStandaloneProjection(t, ctx, root, proof)
-		initial := startStandaloneProjection(t, ctx, db, standaloneBinary, root, "initial", cluster.Servers[0].ClientURL(), domain)
+		initial := startStandaloneProjection(t, ctx, db, standaloneBinary, root, "initial", projectorURL, domain, leaf)
 		var rows int
 		if err := db.QueryRowContext(ctx, `SELECT count(*) FROM wf_visibility`).Scan(&rows); err != nil || rows != 0 {
 			t.Fatalf("initial rows=%d err=%v", rows, err)
@@ -445,7 +472,7 @@ func runProjectionRecovery(t *testing.T, postgresFault, standalone bool, domains
 	projectionDone := make(chan error, 1)
 	var standaloneWriter *standaloneProjection
 	if standalone {
-		standaloneWriter = startStandaloneProjection(t, projectionCtx, db, standaloneBinary, root, "catchup", cluster.Servers[0].ClientURL(), domain)
+		standaloneWriter = startStandaloneProjection(t, projectionCtx, db, standaloneBinary, root, "catchup", projectorURL, domain, leaf)
 		projectionDone = standaloneWriter.done
 	} else {
 		go func() { projectionDone <- restarted.Run(projectionCtx) }()
@@ -473,7 +500,7 @@ func runProjectionRecovery(t *testing.T, postgresFault, standalone bool, domains
 		defer stopProjection()
 		projectionDone = make(chan error, 1)
 		if standalone {
-			standaloneWriter = startStandaloneProjection(t, projectionCtx, db, standaloneBinary, root, "replacement", cluster.Servers[0].ClientURL(), domain)
+			standaloneWriter = startStandaloneProjection(t, projectionCtx, db, standaloneBinary, root, "replacement", projectorURL, domain, leaf)
 			projectionDone = standaloneWriter.done
 		} else {
 			go func() { projectionDone <- restarted.Run(projectionCtx) }()

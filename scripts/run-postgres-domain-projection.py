@@ -12,6 +12,7 @@ import subprocess
 import time
 
 import fixture_archive
+import live_process_admission
 
 REPO = Path(__file__).resolve().parents[1]
 TEST = 'TestPostgresProjectionCrashAndSessionLossFiftyThousandInvocationsInJetStreamDomain'
@@ -20,9 +21,9 @@ TEST = 'TestPostgresProjectionCrashAndSessionLossFiftyThousandInvocationsInJetSt
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--root', type=Path, required=True)
-    parser.add_argument('--projector-profile', choices=('sdk','standalone'), default='sdk')
+    parser.add_argument('--projector-profile', choices=('sdk','standalone','standalone-leaf'), default='sdk')
     args = parser.parse_args()
-    test = TEST if args.projector_profile=='sdk' else 'TestStandalonePostgresProjectionCrashAndSessionLossFiftyThousandInvocationsInJetStreamDomain'
+    test = TEST if args.projector_profile=='sdk' else 'TestStandalonePostgresProjectionCrashAndSessionLossFiftyThousandInvocationsThroughLeaf' if args.projector_profile=='standalone-leaf' else 'TestStandalonePostgresProjectionCrashAndSessionLossFiftyThousandInvocationsInJetStreamDomain'
     root = args.root.absolute()
     assert not root.exists() and not root.is_relative_to(REPO)
     assert shutil.disk_usage(root.parent).free >= 5*(1 << 30), '5GiB disk admission required'
@@ -34,14 +35,14 @@ def main():
     root.mkdir(); (root/'originals').mkdir()
     save = lambda name, value: (root/name).write_text(json.dumps(value, indent=2)+'\n')
     save('source-before.json', before)
-    save('projector-profile.json', dict(profile=args.projector_profile,test=test,child_package='js-wf/cmd/wf' if args.projector_profile=='standalone' else 'js-wf/integration'))
+    save('projector-profile.json', dict(profile=args.projector_profile,test=test,child_package='js-wf/cmd/wf' if args.projector_profile!='sdk' else 'js-wf/integration'))
     for name in before['files']:
         target = root/'selected-source'/name
         target.parent.mkdir(parents=True, exist_ok=True)
         shutil.copyfile(REPO/name, target)
     # Preserve the selected actual external Go inputs, as in the original full case.
     fmt = '{{.Dir}}|{{join .GoFiles " "}}|{{join .CgoFiles " "}}|{{join .TestGoFiles " "}}|{{join .XTestGoFiles " "}}'
-    packages = ['./integration'] + (['./cmd/wf'] if args.projector_profile=='standalone' else [])
+    packages = ['./integration'] + (['./cmd/wf'] if args.projector_profile!='sdk' else [])
     deps = subprocess.check_output(['go','list','-deps','-test','-f',fmt,*packages], cwd=REPO, text=True)
     (root/'dependencies.txt').write_text(deps)
     goroot = Path(subprocess.check_output(['go','env','GOROOT'],text=True).strip())
@@ -106,15 +107,14 @@ def main():
         started = time.monotonic()
         with (root/'native.log').open('w') as log:
             child = subprocess.Popen(command,cwd=REPO,env=env,stdout=log,stderr=subprocess.STDOUT)
-            proc = Path('/proc',str(child.pid))
-            actual_env = dict(v.split(b'=',1) for v in (proc/'environ').read_bytes().split(b'\0') if b'=' in v)
-            actual = dict(pid=child.pid,stat=(proc/'stat').read_text(),exe=str((proc/'exe').resolve()),
-                          exe_sha256=shared.sha(proc/'exe'),working_directory=str((proc/'cwd').resolve()),
-                          args=[os.fsdecode(v) for v in (proc/'cmdline').read_bytes().split(b'\0') if v],
-                          environment={k:os.fsdecode(actual_env[k.encode()]) for k in ('GOMAXPROCS','GOMEMLIMIT','GOWORK','GOFLAGS','WF_PROJECTION_POSTGRES_FAULT_ROOT','WF_TEST_POSTGRES_DSN')},
-                          actual_WF_PROJECTION_COUNT_present=b'WF_PROJECTION_COUNT' in actual_env,
-                          native_R3_servers_embedded_in_actual_sdk=True)
-            assert actual['args']==command and actual['exe_sha256']==shared.sha(binary) and not actual['actual_WF_PROJECTION_COUNT_present']
+            keys=('GOMAXPROCS','GOMEMLIMIT','GOWORK','GOFLAGS','WF_PROJECTION_POSTGRES_FAULT_ROOT','WF_TEST_POSTGRES_DSN')
+            actual=live_process_admission.admit(child,command,{k:env[k] for k in keys},REPO,binary,shared.sha(binary))
+            absent=live_process_admission.snapshot(child.pid,('WF_PROJECTION_COUNT',))
+            assert absent['start_ticks']==actual['start_ticks'] and absent['args']==command and absent['exe']==actual['exe']
+            actual['actual_WF_PROJECTION_COUNT_present']='WF_PROJECTION_COUNT' in absent['environment']
+            actual['count_override_absence_observed_at_same_process_birth']=True
+            actual['native_R3_servers_embedded_in_actual_sdk']=True
+            assert not actual['actual_WF_PROJECTION_COUNT_present']
             save('actual-sdk.json',actual)
             save('execution.json',dict(source=revision,status='running',started_utc=datetime.now(timezone.utc).isoformat()))
             print('ACTUAL_FULL_DOMAIN_PROJECTION_SDK',child.pid,revision,flush=True)
