@@ -1,0 +1,28 @@
+{
+  "build": [
+    "go",
+    "test",
+    "-p=1",
+    "-buildvcs=true",
+    "-c",
+    "-o",
+    "/tmp/js-wf-postgres-leaf-sql-startup-sigint-50000-20261007/integration.test",
+    "./integration"
+  ],
+  "test": [
+    "/tmp/js-wf-postgres-leaf-sql-startup-sigint-50000-20261007/integration.test",
+    "-test.run=^TestStandalonePostgresProjectionCrashAndSessionLossFiftyThousandInvocationsThroughLeafWithSQLStartupSIGINT$",
+    "-test.count=1",
+    "-test.v",
+    "-test.timeout=22m"
+  ],
+  "working_directory": "/home/exedev/js-wf",
+  "environment": {
+    "GOMAXPROCS": "2",
+    "GOMEMLIMIT": "2GiB",
+    "GOWORK": "off",
+    "GOFLAGS": "",
+    "WF_PROJECTION_POSTGRES_FAULT_ROOT": "/tmp/js-wf-postgres-leaf-sql-startup-sigint-50000-20261007/originals",
+    "WF_TEST_POSTGRES_DSN": "postgres://workflow@127.0.0.1:33466/workflow?sslmode=disable"
+  }
+}

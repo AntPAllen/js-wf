@@ -3,9 +3,12 @@ package integration_test
 import (
 	"context"
 	"database/sql"
+	"encoding/json"
 	"errors"
 	"github.com/nats-io/nats.go/jetstream"
 	"js-wf/visibility"
+	"os"
+	"path/filepath"
 	"syscall"
 	"testing"
 	"time"
@@ -48,26 +51,52 @@ func cancelStandaloneSQLStartup(t *testing.T, ctx context.Context, db *sql.DB, j
 	}
 	admittedAt := time.Now().UTC()
 	sentAt := time.Now().UTC()
+	progress := map[string]any{"signal": signalName, "blocker_backend_pid": blocker, "blocked_backend_pid": backend, "query": query, "wait_event_type": waitType, "wait_event": waitEvent, "blocked_statement_admitted_at": admittedAt, "signal_sent_at": sentAt, "child": child.record}
+	defer func() {
+		data, e := json.MarshalIndent(progress, "", "  ")
+		if e == nil {
+			e = os.WriteFile(filepath.Join(root, "sql-startup-boundary-progress.json"), append(data, '\n'), 0600)
+		}
+		if e != nil {
+			t.Error("retain SQL startup progress", e)
+		}
+	}()
+	// Reaping a client does not synchronously join the remote PostgreSQL
+	// backend. Observe its cleanup while retaining the blocker, within the
+	// original ten-second signal budget (including process join).
+	cleanupCtx, cancelCleanup := context.WithDeadline(ctx, sentAt.Add(10*time.Second))
+	defer cancelCleanup()
 	if err = child.command.Process.Signal(signal); err != nil {
 		t.Fatal(err)
 	}
 	select {
 	case <-child.joined:
-	case <-time.After(10 * time.Second):
+	case <-cleanupCtx.Done():
 		t.Fatalf("SQL startup %s did not join while lock remained held", signalName)
 	}
 	record := child.recordExit(t)
+	progress["child"] = record
 	if child.err != nil || child.command.ProcessState.ExitCode() != 0 {
 		t.Fatalf("SQL startup %s: %v", signalName, child.err)
 	}
 	// pgx cancellation and database Close must have removed every child session,
 	// including the blocked statement, before the blocking lock is released.
 	var sessions, locks, rows int
-	if err = db.QueryRowContext(ctx, `SELECT count(*) FROM pg_stat_activity WHERE application_name=$1`, record["application_name"]).Scan(&sessions); err != nil || sessions != 0 {
-		t.Fatalf("SQL startup residual sessions=%d err=%v", sessions, err)
-	}
-	if err = db.QueryRowContext(ctx, `SELECT count(*) FROM pg_locks WHERE pid=$1`, backend).Scan(&locks); err != nil || locks != 0 {
-		t.Fatalf("SQL startup residual locks=%d err=%v", locks, err)
+	var observations []map[string]any
+	progress["cleanup_observations"] = &observations
+	for {
+		if err = db.QueryRowContext(cleanupCtx, `SELECT (SELECT count(*) FROM pg_stat_activity WHERE application_name=$1),(SELECT count(*) FROM pg_locks WHERE pid=$2)`, record["application_name"], backend).Scan(&sessions, &locks); err != nil {
+			t.Fatal("SQL startup cleanup observation", err)
+		}
+		observations = append(observations, map[string]any{"observed_at": time.Now().UTC(), "sessions": sessions, "locks": locks})
+		if sessions == 0 && locks == 0 {
+			break
+		}
+		select {
+		case <-cleanupCtx.Done():
+			t.Fatalf("SQL startup cleanup exceeded original10s: sessions=%d locks=%d", sessions, locks)
+		case <-time.After(10 * time.Millisecond):
+		}
 	}
 	if err = tx.QueryRowContext(ctx, `SELECT count(*) FROM wf_visibility`).Scan(&rows); err != nil || rows != 0 {
 		t.Fatalf("SQL startup mutated rows=%d err=%v", rows, err)
@@ -83,10 +112,16 @@ func cancelStandaloneSQLStartup(t *testing.T, ctx context.Context, db *sql.DB, j
 		}
 	}
 	checkedAt := time.Now().UTC()
+	if !checkedAt.Before(sentAt.Add(10 * time.Second)) {
+		t.Fatal("SQL startup cleanup exceeded original10s")
+	}
 	if err = tx.Rollback(); err != nil {
 		t.Fatal(err)
 	}
 	releasedAt := time.Now().UTC()
+	progress["residual_checked_at"] = checkedAt
+	progress["blocker_released_at"] = releasedAt
+	progress["complete"] = true
 	proof := map[string]any{"child": record, "blocker_backend_pid": blocker, "blocked_backend_pid": backend, "query": query, "wait_event_type": waitType, "wait_event": waitEvent, "blocking_pid_confirmed": blocked, "lock_held_at": lockedAt, "blocked_statement_admitted_at": admittedAt, signalField: sentAt, "residual_checked_at": checkedAt, "blocker_released_at": releasedAt, "residual_sessions": sessions, "residual_locks": locks, "rows": rows, "projection_durables_absent": true}
 	if signal == syscall.SIGINT {
 		proof["signal"] = signalName

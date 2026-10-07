@@ -1,6 +1,7 @@
 """Check the actual SQL lock boundary and startup child, read-only."""
 from datetime import datetime
 from pathlib import Path
+import json
 import re
 import sql_leaf_stream_wire
 
@@ -27,6 +28,20 @@ def validate(case,proof,revision,verify_log,verify_child,expected_signal='SIGTER
     ordered=[boundary['lock_held_at'],child['admitted_at'],boundary['blocked_statement_admitted_at'],boundary[signal_field],child['reaped_at'],boundary['residual_checked_at'],boundary['blocker_released_at'],proof['standalone_projectors'][0]['admitted_at']]
     assert all(stamp(a)<=stamp(b) for a,b in zip(ordered,ordered[1:]))
     assert 0< (stamp(child['reaped_at'])-stamp(boundary[signal_field])).total_seconds()<10
+    progress_path=case/'sql-startup-boundary-progress.json'
+    if expected_signal=='SIGINT' or progress_path.exists():
+        progress=json.loads(progress_path.read_text())
+        assert progress['signal']==expected_signal and progress['complete'] is True
+        assert progress['child']==child and progress['blocked_backend_pid']==backend and progress['blocker_backend_pid']==blocker
+        assert progress['query']==boundary['query'] and progress['signal_sent_at']==boundary[signal_field]
+        assert progress['blocked_statement_admitted_at']==boundary['blocked_statement_admitted_at']
+        assert progress['residual_checked_at']==boundary['residual_checked_at'] and progress['blocker_released_at']==boundary['blocker_released_at']
+        samples=progress['cleanup_observations'];assert samples
+        assert all(type(s[k]) is int and s[k]>=0 for s in samples for k in ('sessions','locks'))
+        assert samples[-1]['sessions']==samples[-1]['locks']==0
+        times=[child['reaped_at']]+[s['observed_at'] for s in samples]+[boundary['residual_checked_at']]
+        assert all(stamp(a)<=stamp(b) for a,b in zip(times,times[1:]))
+        assert 0<(stamp(boundary['residual_checked_at'])-stamp(boundary[signal_field])).total_seconds()<10
     assert (case/'standalone-project-sql-startup.log').read_text()==''
     leaf=__import__('json').loads((case/'leaf-route/leaf-proof.json').read_text())
     root=case/'projector-sql-startup-leaf-wire'
