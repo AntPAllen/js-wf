@@ -179,7 +179,7 @@ func runOperatorStandaloneCommandsWithTransport(t *testing.T, domain string, lea
 			if offline {
 				connections = 0
 			}
-			if trace.Truncated || len(trace.Connections) != connections || stats.Active != 0 || stats.BufferOverflows != 0 || stats.BufferedBytes != 0 {
+			if trace.Truncated || len(trace.Connections) != connections || stats.AcceptedConnections != uint64(connections) || stats.UpstreamDialFailures != 0 || stats.Active != 0 || stats.BufferOverflows != 0 || stats.BufferedBytes != 0 {
 				t.Errorf("operator child wire incomplete: offline=%t truncated=%t connections=%d stats=%+v", offline, trace.Truncated, len(trace.Connections), stats)
 			}
 			for name, value := range map[string]any{"traffic.json": trace, "proxy-final.json": stats, "wire-expectation.json": map[string]any{"offline": offline, "proxy_url": proxy.URL(), "args": args}} {

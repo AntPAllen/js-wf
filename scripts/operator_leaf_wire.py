@@ -32,6 +32,8 @@ def validate(stores):
         assert type(expected['offline']) is bool and expected['offline']==('-replay-bundle' in expected['args'])
         assert trace['truncated'] is False
         assert all(stats[k]==0 and type(stats[k]) is int for k in ('active_connections','buffered_bytes','buffer_overflows'))
+        assert type(stats['accepted_connections']) is int and stats['accepted_connections']==(0 if expected['offline'] else 1)
+        assert type(stats['upstream_dial_failures']) is int and stats['upstream_dial_failures']==0
         if expected['offline']:
             assert trace['connections'] in (None,[]) and trace['frames'] in (None,[])
             assert stats['client_to_server']==stats['server_to_client']==0

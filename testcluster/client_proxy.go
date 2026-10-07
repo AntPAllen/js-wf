@@ -15,26 +15,28 @@ import (
 // connections and refuses reconnects; Heal accepts reconnects again. It is
 // suitable for isolating a worker or SDK client from a running cluster.
 type ClientProxy struct {
-	listener          net.Listener
-	target            string
-	mu                sync.Mutex
-	blocked           bool
-	closed            bool
-	responsesHeld     chan struct{}
-	active            map[net.Conn]net.Conn
-	acceptDone        chan struct{}
-	sessions          sync.WaitGroup
-	clientBytes       uint64
-	serverBytes       uint64
-	replyBufferLimit  int
-	bufferedBytes     uint64
-	peakBufferedBytes uint64
-	bufferOverflows   uint64
-	heldBytes         uint64
-	nextConnection    uint64
-	trafficLimit      int
-	trafficUsed       int
-	traffic           ClientProxyTraffic
+	listener             net.Listener
+	target               string
+	mu                   sync.Mutex
+	blocked              bool
+	closed               bool
+	responsesHeld        chan struct{}
+	active               map[net.Conn]net.Conn
+	acceptDone           chan struct{}
+	sessions             sync.WaitGroup
+	clientBytes          uint64
+	serverBytes          uint64
+	replyBufferLimit     int
+	bufferedBytes        uint64
+	peakBufferedBytes    uint64
+	bufferOverflows      uint64
+	heldBytes            uint64
+	nextConnection       uint64
+	acceptedConnections  uint64
+	upstreamDialFailures uint64
+	trafficLimit         int
+	trafficUsed          int
+	traffic              ClientProxyTraffic
 }
 
 type ClientProxyTraffic struct {
@@ -172,20 +174,22 @@ func (p *ClientProxy) resumeResponsesLocked() {
 // ClientProxyStats are byte counts at the relay boundaries, including bytes
 // awaiting release during an asymmetric server-to-client fault.
 type ClientProxyStats struct {
-	ClientToServer    uint64 `json:"client_to_server"`
-	ServerToClient    uint64 `json:"server_to_client"`
-	HeldBytes         uint64 `json:"held_bytes"`
-	ResponsesHeld     bool   `json:"responses_held"`
-	Active            int    `json:"active_connections"`
-	BufferedBytes     uint64 `json:"buffered_bytes"`
-	PeakBufferedBytes uint64 `json:"peak_buffered_bytes"`
-	BufferOverflows   uint64 `json:"buffer_overflows"`
+	AcceptedConnections  uint64 `json:"accepted_connections"`
+	UpstreamDialFailures uint64 `json:"upstream_dial_failures"`
+	ClientToServer       uint64 `json:"client_to_server"`
+	ServerToClient       uint64 `json:"server_to_client"`
+	HeldBytes            uint64 `json:"held_bytes"`
+	ResponsesHeld        bool   `json:"responses_held"`
+	Active               int    `json:"active_connections"`
+	BufferedBytes        uint64 `json:"buffered_bytes"`
+	PeakBufferedBytes    uint64 `json:"peak_buffered_bytes"`
+	BufferOverflows      uint64 `json:"buffer_overflows"`
 }
 
 func (p *ClientProxy) Stats() ClientProxyStats {
 	p.mu.Lock()
 	defer p.mu.Unlock()
-	return ClientProxyStats{ClientToServer: p.clientBytes, ServerToClient: p.serverBytes, HeldBytes: p.heldBytes, ResponsesHeld: p.responsesHeld != nil, Active: len(p.active), BufferedBytes: p.bufferedBytes, PeakBufferedBytes: p.peakBufferedBytes, BufferOverflows: p.bufferOverflows}
+	return ClientProxyStats{AcceptedConnections: p.acceptedConnections, UpstreamDialFailures: p.upstreamDialFailures, ClientToServer: p.clientBytes, ServerToClient: p.serverBytes, HeldBytes: p.heldBytes, ResponsesHeld: p.responsesHeld != nil, Active: len(p.active), BufferedBytes: p.bufferedBytes, PeakBufferedBytes: p.peakBufferedBytes, BufferOverflows: p.bufferOverflows}
 }
 func (p *ClientProxy) waitResponses(done <-chan struct{}) bool {
 	p.mu.Lock()
@@ -239,6 +243,7 @@ func (p *ClientProxy) accept() {
 			return
 		}
 		p.mu.Lock()
+		p.acceptedConnections++
 		blocked := p.blocked || p.closed
 		p.mu.Unlock()
 		if blocked {
@@ -247,6 +252,9 @@ func (p *ClientProxy) accept() {
 		}
 		upstream, err := net.DialTimeout("tcp", p.target, time.Second)
 		if err != nil {
+			p.mu.Lock()
+			p.upstreamDialFailures++
+			p.mu.Unlock()
 			_ = client.Close()
 			continue
 		}

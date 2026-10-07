@@ -1,0 +1,7 @@
+# First operator leaf run: offline absence measurement incomplete
+
+At `da460f8`, actual race SDK497275 passes the original 23-command suite in37.81s body/38.851s SDK. One actual stock leaf498424 and three embedded WFOPS hubs verify; all online wire captures have real WFEDGE INFO identities and correct argv-domain API prefixes. Native trace totals48,923 client bytes/3,874,260 server bytes/313 API publications.
+
+Original independent review binds2,136 source inputs, actual SDK/23 race CLI children/matching race plugin/stock leaf and the complete2,736-file archive. That review's healthy acceptance is preserved as originally emitted, but its offline zero-connection interpretation is **too weak**: the proxy records connections only after an upstream dial succeeds. An attempted connection to the unreachable offline endpoint could leave zero successful relays and zero traffic. This run does not establish the required zero-attempt offline contract or final healthy leaf acceptance.
+
+The next fresh run adds accepted-client and failed-upstream-dial counters; offline children must have zero accepts, while online children must have exactly one accept and zero dial failures. The new real-TCP negative control produces one accepted connection/one refused dial/zero relayed traffic, demonstrating that the former offline metric could miss an attempt. Original stores and results are preserved without reopening or rewriting them. Native60s case/3m SDK/count1 and all original command assertions remain unchanged.
