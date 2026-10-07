@@ -160,17 +160,32 @@ func runOnlineBlobBoundary(seed int64, replay *Trace) (trace Trace, runErr error
 }
 
 func TestSeededOnlineBlobBoundaryReplay(t *testing.T) {
+	fail := func(seed int64, trace Trace, cause error) {
+		t.Helper()
+		path := os.Getenv("FAULT_TRACE_OUT")
+		if path == "" {
+			dir, err := os.MkdirTemp("", "js-wf-online-blob-boundary-failure-")
+			if err != nil {
+				t.Fatalf("FAULT_SEED=%d: %v; save trace: %v", seed, cause, err)
+			}
+			path = filepath.Join(dir, "trace.json")
+		}
+		if err := trace.Save(path); err != nil {
+			t.Fatalf("FAULT_SEED=%d: %v; save trace: %v", seed, cause, err)
+		}
+		t.Fatalf("FAULT_SEED=%d FAULT_TRACE=%s: %v", seed, path, cause)
+	}
 	observed := map[string]int{}
 	for seed := range seededSchedules(t) {
 		generated, err := runOnlineBlobBoundary(seed, nil)
 		if err != nil {
-			t.Fatalf("FAULT_SEED=%d: %v", seed, err)
+			fail(seed, generated, err)
 		}
 		mode := generated.Decisions[0].Chosen
 		observed[mode]++
 		replayed, err := runOnlineBlobBoundary(seed, &generated)
 		if err != nil || !reflect.DeepEqual(generated, replayed) {
-			t.Fatalf("FAULT_SEED=%d replay differs: %v", seed, err)
+			fail(seed, generated, fmt.Errorf("replay differs: %v", err))
 		}
 		if root := os.Getenv("SIM_ONLINE_BLOB_BOUNDARY_ROOT"); root != "" && observed[mode] == 1 {
 			if err = generated.Save(filepath.Join(root, fmt.Sprintf("seed-%03d.json", seed))); err != nil {
