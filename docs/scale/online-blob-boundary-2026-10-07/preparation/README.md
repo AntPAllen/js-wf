@@ -1,0 +1,9 @@
+# Active-writer blob reclamation boundaries
+
+The production collector explicitly requires stopped writers. Seeded production `Client.Start` and `SweepBlobsQuiescentWithPort` executions reproduce two violations of that precondition: a client paused after upload for two virtual hours can later publish a dangling input reference; a client refreshing a retired shared object after the object census can have that fresh object deleted. A one-hour minimum age does not protect either schedule. The quiescent control preserves its acknowledged input.
+
+1,000 seeded schedules and exact replays cover325 paused uploads/348 refreshes/327 quiescent controls. Race execution passes all expected counterexamples and controls; initial normal preparation also passes. The upload hook was then moved before the client creates its per-publish timeout, retaining the same transport trace. Three traces are pinned in the shared regression corpus and registered for FAULT_TRACE replay. These are expected unsafe-use demonstrations, not proof of safe online GC.
+
+A real R1 JetStream refresh-after-census contract and quiescent control are prepared. They verify distinct actual Object Store NUIDs, an acknowledged production Start reference, deletion/dangling state only when writers violate quiescence, and payload retention otherwise. Native source-bound race execution and archive review remain pending.
+
+An online collector requires a publication protocol protecting pending references through writer stalls, crashes, retries, lost acknowledgments, shared-object reuse and generation fencing. Age grace, re-reading metadata, or a conditional metadata delete alone cannot protect a writer paused between upload and reference publication. Until that protocol is implemented and proven for inputs, signals, step/terminal results and snapshots/checkpoints, retain the existing quiescent API. No production safety contract is relaxed here.

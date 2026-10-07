@@ -1,0 +1,99 @@
+{
+  "version": 3,
+  "seed": 5,
+  "workload": "online_blob_boundary",
+  "step_limit": 100000,
+  "decisions": [
+    {
+      "at_ms": 0,
+      "enabled": [
+        "paused_upload",
+        "quiescent_control",
+        "refresh_after_census"
+      ],
+      "chosen": "paused_upload"
+    }
+  ],
+  "transport": [
+    {
+      "at_ms": 0,
+      "operation": "put_input",
+      "subject": "input-de53e0cc84c23a24084efbb46a080972775d390c209bf113a6a72f838afce094",
+      "data_sha256": "de53e0cc84c23a24084efbb46a080972775d390c209bf113a6a72f838afce094",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "blob_put",
+      "subject": "input-de53e0cc84c23a24084efbb46a080972775d390c209bf113a6a72f838afce094",
+      "data_sha256": "de53e0cc84c23a24084efbb46a080972775d390c209bf113a6a72f838afce094",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 7200000,
+      "operation": "blob_stream_range",
+      "subject": "WF_INV",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 7200000,
+      "operation": "blob_stream_range",
+      "subject": "WF_SIG",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 7200000,
+      "operation": "blob_stream_range",
+      "subject": "WF_JRN",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 7200000,
+      "operation": "kv_keys",
+      "outcome": "no_keys"
+    },
+    {
+      "at_ms": 7200000,
+      "operation": "blob_list",
+      "sequence": 1,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 7200000,
+      "operation": "blob_delete",
+      "subject": "input-de53e0cc84c23a24084efbb46a080972775d390c209bf113a6a72f838afce094",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 7200000,
+      "operation": "publish_invocation",
+      "subject": "wf.inv.gc-boundary.paused",
+      "sequence": 1,
+      "data_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 7200000,
+      "operation": "blob_stream_publish",
+      "subject": "WF_INV",
+      "sequence": 1,
+      "data_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 7200000,
+      "operation": "enqueue_run",
+      "subject": "wf.run.12",
+      "sequence": 1,
+      "data_sha256": "4622e6178215c86351ffe746f802335d4dfedbe7c0464eff1e6c92b3af222efc",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "check_online_blob_boundary",
+      "subject": "input-de53e0cc84c23a24084efbb46a080972775d390c209bf113a6a72f838afce094",
+      "sequence": 1,
+      "outcome": "paused_upload"
+    }
+  ]
+}
