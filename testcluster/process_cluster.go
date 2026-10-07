@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"net/url"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -75,6 +76,22 @@ func StartProcessesWithDomain(root string, count int, domain string) (*ProcessCl
 		return nil, fmt.Errorf("invalid process JetStream domain")
 	}
 	return startProcessesWithDomain(root, count, false, nil, false, domain)
+}
+
+// StartLeafProcess starts a domain leaf connected to the supplied hub listeners.
+// KillNode and RestartNode retain its client port, config and local store.
+func StartLeafProcess(root, domain string, remotes []*url.URL) (*ProcessCluster, error) {
+	if domain == "" || strings.ContainsAny(domain, "\r\n") || len(remotes) == 0 {
+		return nil, fmt.Errorf("invalid leaf domain or remotes")
+	}
+	values := make([]string, len(remotes))
+	for i, remote := range remotes {
+		if remote == nil || remote.Scheme != "nats" || remote.Host == "" || remote.User != nil {
+			return nil, fmt.Errorf("invalid leaf remote")
+		}
+		values[i] = strconv.Quote(remote.String())
+	}
+	return startProcessesWithDiagnostics(root, 1, false, nil, false, domain, false, "leafnodes { reconnect: 25ms, remotes: [{ urls: ["+strings.Join(values, ",")+"] }] }\n")
 }
 
 // StartProfiledProcesses enables NATS' loopback HTTP profiler for diagnostic
@@ -156,7 +173,7 @@ func startProcessesWithDomain(root string, count int, partitionable bool, binari
 	return startProcessesWithDiagnostics(root, count, partitionable, binaries, profiling, domain, false)
 }
 
-func startProcessesWithDiagnostics(root string, count int, partitionable bool, binaries []string, profiling bool, domain string, debug bool) (_ *ProcessCluster, err error) {
+func startProcessesWithDiagnostics(root string, count int, partitionable bool, binaries []string, profiling bool, domain string, debug bool, extraConfig ...string) (_ *ProcessCluster, err error) {
 	if count < 1 || count > 3 {
 		return nil, fmt.Errorf("count must be 1..3")
 	}
@@ -224,7 +241,7 @@ func startProcessesWithDiagnostics(root string, count int, partitionable bool, b
 		}
 		if domain != "" {
 			config := filepath.Join(root, fmt.Sprintf("node-%d-domain.conf", i))
-			if err := os.WriteFile(config, []byte("jetstream { domain: "+strconv.Quote(domain)+" }\n"), 0600); err != nil {
+			if err := os.WriteFile(config, []byte("jetstream { domain: "+strconv.Quote(domain)+" }\n"+strings.Join(extraConfig, "")), 0600); err != nil {
 				return nil, err
 			}
 			args = append(args, "-c", config)
@@ -290,6 +307,8 @@ func (c *ProcessCluster) Diagnostic(ctx context.Context, node int, kind string) 
 	port, path := c.monitors[node], "/connz?subs=detail"
 	switch kind {
 	case "connections":
+	case "leaf":
+		path = "/leafz"
 	case "jetstream":
 		path = "/jsz?accounts=true&streams=true&consumers=true&raft=true"
 	case "clock":

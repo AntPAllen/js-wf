@@ -29,7 +29,9 @@ WEAK_EXPIRY = 'TestContinuationRetirementReuseInJetStreamDomainWithManifestLossW
 LEGACY_WEAK_EXPIRY = 'TestContinuationRetirementReuseInLegacyJetStreamDomainWithManifestLossWeakFrameAbsenceAndLeaseExpiryAcrossAllServerSIGKILL'
 COMMITTED_WEAK_EXPIRY = 'TestContinuationRetirementReuseInJetStreamDomainWithCommittedManifestAckLossWeakFrameAbsenceAndLeaseExpiryAcrossAllServerSIGKILL'
 LEAF = 'TestContinuationRetirementReuseThroughLeafWithHubRestart'
-CASES = {'leaf-retirement-hub-restart': [LEAF], 'read-controls': [RESULT, RESULT+'InJetStreamDomain', SNAPSHOT, SNAPSHOT+'InJetStreamDomain'],
+LEAF_KILL = 'TestContinuationRetirementReuseThroughLeafSIGKILLWithHubRestart'
+LEAF_CASES = {'leaf-retirement-hub-restart': 'hub-restart', 'leaf-retirement-sigkill-hub-restart': 'leaf-sigkill-hub-restart'}
+CASES = {'leaf-retirement-sigkill-hub-restart': [LEAF_KILL], 'leaf-retirement-hub-restart': [LEAF], 'read-controls': [RESULT, RESULT+'InJetStreamDomain', SNAPSHOT, SNAPSHOT+'InJetStreamDomain'],
          'retirement-server-kill': [KILL, EXPIRY], 'retirement-weak-frame': [WEAK_FRAME],
          'retirement-weak-frame-expiry': [WEAK_EXPIRY], 'legacy-retirement-weak-frame-expiry': [LEGACY_WEAK_EXPIRY],
          'retirement-committed-weak-frame-expiry': [COMMITTED_WEAK_EXPIRY]}
@@ -67,11 +69,13 @@ def verify_log(case, log):
                     'worker/client real leader route not observed')
             require(log.count('leader requests=2 direct requests=0 route='+prefix+'.STREAM.MSG.GET.KV_WF_STATE') == 2,
                     'exact snapshot leader route not observed')
-    elif case == 'leaf-retirement-hub-restart':
+    elif case in LEAF_CASES:
         require(log.count('leaf domain hub cut: disconnected=true reconnected=true hub_peers=3') == 1,
                 'actual leaf disconnect/reconnect missing')
         require(log.count('leaf domain strict scenario passed local=WFEDGE remote=WFRETIRE runtime_clients=3') == 1,
                 'strict leaf scenario missing')
+        if case == 'leaf-retirement-sigkill-hub-restart':
+            require(len(re.findall(r'leaf SIGKILL confirmed: old_pid=\d+ new_pid=\d+ old_id=\w+ new_id=\w+ client_disconnects=3',log))==1,'actual leaf SIGKILL missing')
         require(log.count('effects=3 terminals=2 shared_blob_retained=true') == 1 and log.count('manifest_drops=1') == 1,
                 'original strict retirement/reuse assertions missing')
     else:
@@ -180,7 +184,7 @@ def main():
         save('legacy-binary.json', {'donor': str(donor), 'retained': str(target), 'sha256': sha(target), 'build_info': info})
     for key in ('WF_RESULT_ABSENCE_ROOT', 'WF_SNAPSHOT_LEADER_ROOT', 'WF_CONTINUATION_RETIREMENT_PROCESS_ROOT'):
         env[key] = str(root/'stores')
-    if args.case == 'leaf-retirement-hub-restart':
+    if args.case in LEAF_CASES:
         env['WF_CONTINUATION_DOMAIN_ROOT'] = str(root/'stores'/'leaf-scenario')
     binary = root/'integration-race.test'
     build = ['go', 'test', '-buildvcs=true', '-race', '-c', '-o', str(binary), './integration']
@@ -194,7 +198,7 @@ def main():
     started = time.monotonic()
     with (root/'native.log').open('w') as log:
         child = subprocess.Popen(command, cwd=REPO, env=env, stdout=log, stderr=subprocess.STDOUT)
-        keys = ('GOMAXPROCS', 'GOMEMLIMIT', 'WF_RESULT_ABSENCE_ROOT', 'WF_SNAPSHOT_LEADER_ROOT', 'WF_CONTINUATION_RETIREMENT_PROCESS_ROOT') + (('WF_NATS_SERVER_BIN',) if legacy else ()) + (('WF_CONTINUATION_DOMAIN_ROOT',) if args.case == 'leaf-retirement-hub-restart' else ())
+        keys = ('GOMAXPROCS', 'GOMEMLIMIT', 'WF_RESULT_ABSENCE_ROOT', 'WF_SNAPSHOT_LEADER_ROOT', 'WF_CONTINUATION_RETIREMENT_PROCESS_ROOT') + (('WF_NATS_SERVER_BIN',) if legacy else ()) + (('WF_CONTINUATION_DOMAIN_ROOT',) if args.case in LEAF_CASES else ())
         actual = live_process_admission.admit(child, command, {key: env[key] for key in keys}, REPO, binary, sha(binary))
         save('actual-sdk.json', actual)
         print('ACTUAL_SDK', child.pid, flush=True)
@@ -230,8 +234,10 @@ def main():
     try:
         require(code == 0, 'native test failed')
         qualification = verify_log(args.case, (root/'native.log').read_text())
-        if args.case == 'leaf-retirement-hub-restart':
-            qualification['leaf_proof'] = leaf_domain_proof.validate(json.loads((root/'stores'/'leaf-scenario'/'leaf-domain-proof.json').read_text()))
+        if args.case in LEAF_CASES:
+            qualification['leaf_proof'] = leaf_domain_proof.validate(json.loads((root/'stores'/'leaf-scenario'/'leaf-domain-proof.json').read_text()),LEAF_CASES[args.case])
+            if args.case == 'leaf-retirement-sigkill-hub-restart':
+                require(len(servers)==2,'both original and replacement leaf process identities missing')
         elif args.case != 'read-controls':
             require(len(servers) == 6*len(CASES[args.case]), 'all original/replacement native server incarnations must be observed')
             for row in servers.values():

@@ -1,0 +1,5 @@
+# Abrupt leaf loss combined with hub restart prepared
+
+New explicit `leaf-retirement-sigkill-hub-restart` uses a separate stock NATS process for the WFEDGE leaf. At the original fresh manifest-loss boundary, all three WFRETIRE hubs stop, the actual leaf process receives SIGKILL and is reaped, all three runtime clients must become RECONNECTING, then hubs and leaf restart on their original stores/ports. Distinct PID/server ID, native leaf topology, all ten provisioned replica sets, exact remote-domain traffic and complete original strict generation/reuse/object/result assertions remain mandatory. Original60s scenario/30s whole cut/3m race SDK/2CPU/1GiB remain. This is actual leaf SIGKILL plus graceful library hub restart, not all-hub SIGKILL or lease-expiry admission.
+
+Compilation and previous12 verifier groups/18 actual leaf-proof negatives pass. New native SIGKILL admission remains pending. The profile guard requires the explicit recorded mode; the hub-only baseline cannot qualify this combined row. CI retains both profiles. Existing24h SDK remains isolated atbc9f92b; run this finite scenario at low priority.

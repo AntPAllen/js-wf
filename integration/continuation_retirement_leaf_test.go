@@ -7,6 +7,7 @@ import (
 	"os"
 	"path/filepath"
 	"sync"
+	"syscall"
 	"testing"
 	"time"
 
@@ -20,6 +21,14 @@ import (
 // Run the original strict retirement/reuse scenario through a real leaf whose
 // local JetStream domain differs from the three-node storage hub's domain.
 func TestContinuationRetirementReuseThroughLeafWithHubRestart(t *testing.T) {
+	runContinuationRetirementLeaf(t, false)
+}
+
+func TestContinuationRetirementReuseThroughLeafSIGKILLWithHubRestart(t *testing.T) {
+	runContinuationRetirementLeaf(t, true)
+}
+
+func runContinuationRetirementLeaf(t *testing.T, processLeaf bool) {
 	root := os.Getenv("WF_CONTINUATION_DOMAIN_ROOT")
 	if root == "" {
 		t.Skip("set WF_CONTINUATION_DOMAIN_ROOT to a fresh absolute directory")
@@ -36,23 +45,57 @@ func TestContinuationRetirementReuseThroughLeafWithHubRestart(t *testing.T) {
 		t.Fatal(err)
 	}
 	defer hub.Close()
-	leaf, err := server.NewServer(&server.Options{Host: "127.0.0.1", Port: -1, ServerName: "wf-edge", NoLog: true, NoSigs: true,
-		JetStream: true, JetStreamDomain: leafDomain, StoreDir: filepath.Join(root, "leaf"),
-		LeafNode: server.LeafNodeOpts{ReconnectInterval: 25 * time.Millisecond, Remotes: []*server.RemoteLeafOpts{{URLs: hub.LeafURLs(), NoRandomize: true}}}})
-	if err != nil {
-		t.Fatal(err)
+	var leaf *server.Server
+	var leafProcess *testcluster.ProcessCluster
+	if processLeaf {
+		leafProcess, err = testcluster.StartLeafProcess(filepath.Join(root, "leaf-process"), leafDomain, hub.LeafURLs())
+		if err != nil {
+			t.Fatal(err)
+		}
+		defer leafProcess.Close()
+	} else {
+		leaf, err = server.NewServer(&server.Options{Host: "127.0.0.1", Port: -1, ServerName: "wf-edge", NoLog: true, NoSigs: true,
+			JetStream: true, JetStreamDomain: leafDomain, StoreDir: filepath.Join(root, "leaf"),
+			LeafNode: server.LeafNodeOpts{ReconnectInterval: 25 * time.Millisecond, Remotes: []*server.RemoteLeafOpts{{URLs: hub.LeafURLs(), NoRandomize: true}}}})
+		if err != nil {
+			t.Fatal(err)
+		}
+		go leaf.Start()
+		defer func() { leaf.Shutdown(); leaf.WaitForShutdown() }()
+		if !leaf.ReadyForConnections(5 * time.Second) {
+			t.Fatal("leaf not ready")
+		}
 	}
-	go leaf.Start()
-	defer func() { leaf.Shutdown(); leaf.WaitForShutdown() }()
-	if !leaf.ReadyForConnections(5 * time.Second) {
-		t.Fatal("leaf not ready")
+	leafID := func() string {
+		if processLeaf {
+			return leafProcess.Clients[0].ConnectedServerId()
+		}
+		return leaf.ID()
+	}
+	leafURL := func() string {
+		if processLeaf {
+			return leafProcess.ClientURL(0)
+		}
+		return leaf.ClientURL()
+	}
+	leafSnapshot := func(ctx context.Context) (*server.Leafz, error) {
+		if !processLeaf {
+			return leaf.Leafz(nil)
+		}
+		data, e := leafProcess.Diagnostic(ctx, 0, "leaf")
+		if e != nil {
+			return nil, e
+		}
+		var value server.Leafz
+		e = json.Unmarshal(data, &value)
+		return &value, e
 	}
 	ready, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 	all := make([]jetstream.JetStream, 3)
 	var connections []*nats.Conn
 	for i := range all {
-		nc, err := nats.Connect(leaf.ClientURL(), nats.IgnoreDiscoveredServers(), nats.MaxReconnects(-1), nats.ReconnectWait(25*time.Millisecond))
+		nc, err := nats.Connect(leafURL(), nats.IgnoreDiscoveredServers(), nats.MaxReconnects(-1), nats.ReconnectWait(25*time.Millisecond))
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -62,7 +105,7 @@ func TestContinuationRetirementReuseThroughLeafWithHubRestart(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		if nc.ConnectedServerId() != leaf.ID() {
+		if nc.ConnectedServerId() != leafID() {
 			t.Fatal("runtime client bypassed leaf")
 		}
 	}
@@ -105,6 +148,14 @@ func TestContinuationRetirementReuseThroughLeafWithHubRestart(t *testing.T) {
 		Domain string `json:"domain"`
 	}
 	type evidence struct {
+		FaultProfile      string `json:"fault_profile"`
+		LeafOriginalID    string `json:"leaf_original_id,omitempty"`
+		LeafPIDBefore     int    `json:"leaf_pid_before,omitempty"`
+		LeafPIDAfter      int    `json:"leaf_pid_after,omitempty"`
+		LeafSignal        string `json:"leaf_signal,omitempty"`
+		LeafExitObserved  bool   `json:"leaf_exit_observed,omitempty"`
+		ClientDisconnects []bool `json:"client_disconnects,omitempty"`
+
 		LocalStreamsBefore int            `json:"local_streams_before"`
 		LocalStreamsAfter  int            `json:"local_streams_after"`
 		LeafBefore         *server.Leafz  `json:"leaf_before"`
@@ -127,11 +178,17 @@ func TestContinuationRetirementReuseThroughLeafWithHubRestart(t *testing.T) {
 	if localInfo.Streams != 0 {
 		t.Fatal("leaf unexpectedly owns streams")
 	}
-	leafBefore, err := leaf.Leafz(nil)
+	leafBefore, err := leafSnapshot(ready)
 	if err != nil || leafBefore.NumLeafs != 1 {
 		t.Fatalf("initial leaf topology=%+v err=%v", leafBefore, err)
 	}
-	proof := evidence{LocalStreamsBefore: localInfo.Streams, LeafBefore: leafBefore, LeafID: leaf.ID(), LeafURL: leaf.ClientURL(), LocalDomain: localInfo.Domain, RemoteDomain: hubDomain}
+	proof := evidence{LocalStreamsBefore: localInfo.Streams, LeafBefore: leafBefore, LeafID: leafID(), LeafURL: leafURL(), LocalDomain: localInfo.Domain, RemoteDomain: hubDomain}
+	proof.FaultProfile = "hub-restart"
+	if processLeaf {
+		proof.FaultProfile = "leaf-sigkill-hub-restart"
+		proof.LeafOriginalID = proof.LeafID
+		proof.LeafPIDBefore = leafProcess.Commands[0].Process.Pid
+	}
 	save := func() {
 		mu.Lock()
 		proof.Subjects = make(map[string]int, len(subjects))
@@ -171,16 +228,48 @@ func TestContinuationRetirementReuseThroughLeafWithHubRestart(t *testing.T) {
 			}
 			proof.Stopped = append(proof.Stopped, hub.Servers[i].ID())
 		}
-		for leaf.NumLeafNodes() != 0 {
-			if observe.Err() != nil {
-				return observe.Err()
+		if processLeaf {
+			old := leafProcess.Commands[0]
+			if e := leafProcess.KillNode(0); e != nil {
+				return e
 			}
-			time.Sleep(10 * time.Millisecond)
+			status, ok := old.ProcessState.Sys().(syscall.WaitStatus)
+			if !ok || !status.Signaled() || status.Signal() != syscall.SIGKILL {
+				return fmt.Errorf("leaf did not exit with SIGKILL")
+			}
+			proof.LeafExitObserved = true
+			proof.LeafSignal = "killed"
+			for _, nc := range connections {
+				for nc.Status() != nats.RECONNECTING {
+					if observe.Err() != nil {
+						return observe.Err()
+					}
+					time.Sleep(10 * time.Millisecond)
+				}
+				proof.ClientDisconnects = append(proof.ClientDisconnects, true)
+			}
+		} else {
+			for leaf.NumLeafNodes() != 0 {
+				if observe.Err() != nil {
+					return observe.Err()
+				}
+				time.Sleep(10 * time.Millisecond)
+			}
 		}
 		proof.Disconnected = true
 		for i := range hub.Servers {
 			if e := hub.RestartNode(i); e != nil {
 				return e
+			}
+		}
+		if processLeaf {
+			if e := leafProcess.RestartNode(0); e != nil {
+				return e
+			}
+			proof.LeafPIDAfter = leafProcess.Commands[0].Process.Pid
+			proof.LeafID = leafID()
+			if proof.LeafPIDAfter == proof.LeafPIDBefore || proof.LeafID == proof.LeafOriginalID {
+				return fmt.Errorf("leaf replacement identity unchanged")
 			}
 		}
 		for {
@@ -198,14 +287,14 @@ func TestContinuationRetirementReuseThroughLeafWithHubRestart(t *testing.T) {
 			}
 			time.Sleep(25 * time.Millisecond)
 		}
-		if leaf.NumLeafNodes() != 1 {
-			return fmt.Errorf("leaf reconnect count=%d", leaf.NumLeafNodes())
-		}
-		proof.Reconnected = true
-		proof.LeafAfter, err = leaf.Leafz(nil)
+		proof.LeafAfter, err = leafSnapshot(observe)
 		if err != nil {
 			return err
 		}
+		if proof.LeafAfter.NumLeafs != 1 {
+			return fmt.Errorf("leaf reconnect count=%d", proof.LeafAfter.NumLeafs)
+		}
+		proof.Reconnected = true
 		if e := waitMatrixWorkflowReplicas(observe, all[0]); e != nil {
 			return e
 		}
@@ -227,13 +316,16 @@ func TestContinuationRetirementReuseThroughLeafWithHubRestart(t *testing.T) {
 			proof.After = append(proof.After, peer{s.Name(), s.ID(), info.Domain})
 		}
 		for _, nc := range connections {
-			if nc.ConnectedServerId() != leaf.ID() {
+			if nc.ConnectedServerId() != leafID() {
 				return fmt.Errorf("runtime client bypassed leaf after cut")
 			}
 			proof.RuntimeServerIDs = append(proof.RuntimeServerIDs, nc.ConnectedServerId())
 		}
 		proof.CutEnd = time.Now().UTC()
-		t.Logf("leaf domain hub cut: disconnected=true reconnected=true hub_peers=3 leaf_id=%s elapsed=%s", leaf.ID(), proof.CutEnd.Sub(proof.CutStart))
+		if processLeaf {
+			t.Logf("leaf SIGKILL confirmed: old_pid=%d new_pid=%d old_id=%s new_id=%s client_disconnects=3", proof.LeafPIDBefore, proof.LeafPIDAfter, proof.LeafOriginalID, proof.LeafID)
+		}
+		t.Logf("leaf domain hub cut: disconnected=true reconnected=true hub_peers=3 leaf_id=%s elapsed=%s", leafID(), proof.CutEnd.Sub(proof.CutStart))
 		return nil
 	}
 	runContinuationRetirementOnCluster(t, all, true, onDrop)
