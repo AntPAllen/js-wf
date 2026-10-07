@@ -14,6 +14,7 @@ import fixture_archive
 
 REPO = Path(__file__).resolve().parents[1]
 TEST = 'TestPostgresProjectionCrashAndSessionLossFiftyThousandInvocationsInJetStreamDomain'
+SIGKILL_TEST = 'TestStandalonePostgresProjectionCrashAndSessionLossFiftyThousandInvocationsThroughLeafWithSIGKILL'
 STARTUP_TEST = 'TestStandalonePostgresProjectionCrashAndSessionLossFiftyThousandInvocationsThroughLeafWithSQLStartupCancellation'
 LEAF_TEST = 'TestStandalonePostgresProjectionCrashAndSessionLossFiftyThousandInvocationsThroughLeaf'
 STANDALONE_TEST = 'TestStandalonePostgresProjectionCrashAndSessionLossFiftyThousandInvocationsInJetStreamDomain'
@@ -25,8 +26,8 @@ def require(value, message):
 
 
 def verify_fault(proof, log, killed_log, sdk_hash, profile="sdk"):
-    require(profile in ("sdk","standalone","standalone-leaf","standalone-leaf-startup"), "known projection profile required")
-    test = STARTUP_TEST if profile=='standalone-leaf-startup' else TEST if profile=="sdk" else LEAF_TEST if profile=="standalone-leaf" else STANDALONE_TEST
+    require(profile in ("sdk","standalone","standalone-leaf","standalone-leaf-startup","standalone-leaf-sigkill"), "known projection profile required")
+    test = SIGKILL_TEST if profile=='standalone-leaf-sigkill' else STARTUP_TEST if profile=='standalone-leaf-startup' else TEST if profile=="sdk" else LEAF_TEST if profile=="standalone-leaf" else STANDALONE_TEST
     require(log.rstrip().endswith('PASS') and '--- FAIL:' not in log and '--- SKIP:' not in log,
             'native terminal pass required')
     require(re.findall(r'^--- PASS: (\w+) \([0-9.]+s\)$', log, re.M)==[test], 'exact named full case required')
@@ -122,9 +123,9 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--root',type=Path,required=True)
     parser.add_argument('--output',type=Path,required=True)
-    parser.add_argument('--projector-profile',choices=('sdk','standalone','standalone-leaf','standalone-leaf-startup'),default='sdk')
+    parser.add_argument('--projector-profile',choices=('sdk','standalone','standalone-leaf','standalone-leaf-startup','standalone-leaf-sigkill'),default='sdk')
     args = parser.parse_args(); root=args.root.absolute()
-    test = STARTUP_TEST if args.projector_profile=='standalone-leaf-startup' else TEST if args.projector_profile=='sdk' else LEAF_TEST if args.projector_profile=='standalone-leaf' else STANDALONE_TEST
+    test = SIGKILL_TEST if args.projector_profile=='standalone-leaf-sigkill' else STARTUP_TEST if args.projector_profile=='standalone-leaf-startup' else TEST if args.projector_profile=='sdk' else LEAF_TEST if args.projector_profile=='standalone-leaf' else STANDALONE_TEST
     load = lambda name: json.loads((root/name).read_text())
     execution=load('execution.json'); rev=execution['source']
     profile_record=load('projector-profile.json') if (root/'projector-profile.json').exists() else dict(profile='sdk',test=TEST)
@@ -161,20 +162,24 @@ def main():
     else:
         verify_standalone(proof,rev,case)
     leaf_wire=None
-    if args.projector_profile in ('standalone-leaf','standalone-leaf-startup'):
+    if args.projector_profile in ('standalone-leaf','standalone-leaf-startup','standalone-leaf-sigkill'):
         import sql_leaf_stream_wire
         require(sdk['admission']['stable_identity_observed_twice'] and sdk['count_override_absence_observed_at_same_process_birth'],'actual stable SDK/count-override absence required')
         unit=subprocess.check_output(['systemctl','show',root.name+'.service','-p','LoadState','-p','ExecMainPID','-p','ExecMainStatus','-p','SubState','-p','MainPID','-p','Result','-p','InvocationID','-p','Restart'],text=True)
         fields=dict(line.split('=',1) for line in unit.splitlines())
         require(fields['LoadState']=='loaded' and fields['ExecMainStatus']=='0' and fields['SubState']=='exited' and fields['MainPID']=='0' and fields['Result']=='success' and fields['Restart']=='no' and sdk['stat'].split(') ',1)[1].split()[1]==fields['ExecMainPID'],'original retained terminal producer/SDK identity required')
-        leaf_wire=sql_leaf_stream_wire.validate_case(case,proof)
+        leaf_wire=sql_leaf_stream_wire.validate_case(case,proof,leaf_fault=args.projector_profile=='standalone-leaf-sigkill')
         logged=re.findall(r'SQL projector leaf wire: phase=(initial|catchup|replacement) pid=(\d+) records=(\d+) client_bytes=(\d+) server_bytes=(\d+)',(root/'native.log').read_text())
         expected_wire_logs={(p['phase'],str(p['pid']),str(leaf_wire['phases'][p['phase']]['frame_records']),str(leaf_wire['phases'][p['phase']]['streams']['client_to_server']['bytes']),str(leaf_wire['phases'][p['phase']]['streams']['server_to_client']['bytes'])) for p in proof['standalone_projectors']}
         require(len(logged)==3 and set(logged)==expected_wire_logs,'all actual child wire logs/proof counters required')
     startup=None
-    if args.projector_profile=='standalone-leaf-startup':
+    if args.projector_profile in ('standalone-leaf-startup','standalone-leaf-sigkill'):
         import sql_startup_cancellation
         startup=sql_startup_cancellation.validate(case,proof,rev,(root/'native.log').read_text(),verify_child)
+    leaf_fault=None
+    if args.projector_profile=='standalone-leaf-sigkill':
+        import sql_leaf_transport_fault
+        leaf_fault=sql_leaf_transport_fault.validate(case,proof,rev,(root/'native.log').read_text(),verify_child)
     rows=verify_rows(case/'before-rebuild.jsonl',case/'after-rebuild.jsonl',proof['row_and_indexed_column_sha256'])
     trace=json.loads((case/'projection-dependency-trace.json').read_text())
     minimum = 2 if args.projector_profile=='sdk' else 1
@@ -195,6 +200,9 @@ def main():
     if startup is not None:
         report['sql_startup_cancellation']=startup
         report['scope']+=' Actual SQL schema-lock startup SIGTERM/exit0, zero residual SQL sessions/locks/rows and no premature projection durables.'
+    if leaf_fault is not None:
+        report['leaf_transport_fault']=leaf_fault
+        report['scope']+=' Actual stock leaf SIGKILL/fatal projector/healthy SQL/same-store restart and full replacement rebuild; interrupted fault tails explicitly accounted.'
     args.output.parent.mkdir(parents=True,exist_ok=True);args.output.write_text(json.dumps(report,indent=2)+'\n')
     print(json.dumps(dict(source=rev,rows=50000,archive_members=meta['members'])))
 

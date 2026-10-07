@@ -281,7 +281,12 @@ func (p *standaloneProjection) recordExit(t *testing.T) map[string]any {
 		}
 		p.wireSaved = true
 		p.record["wire_root"] = p.wireRoot
-		if trace.Truncated || trace.FrameFileError != "" || trace.FrameRecords == 0 || len(trace.Connections) != 1 || stats.AcceptedConnections != 1 || stats.UpstreamDialFailures != 0 || stats.Active != 0 || stats.BufferedBytes != 0 || stats.BufferOverflows != 0 {
+		faultPhase := p.record["phase"] == "leaf-fault"
+		accepted := stats.AcceptedConnections == 1 && stats.UpstreamDialFailures == 0
+		if faultPhase {
+			accepted = stats.AcceptedConnections == 1+stats.UpstreamDialFailures
+		}
+		if trace.Truncated || trace.FrameFileError != "" || trace.FrameRecords == 0 || len(trace.Connections) != 1 || !accepted || stats.Active != 0 || stats.BufferedBytes != 0 || stats.BufferOverflows != 0 {
 			t.Fatalf("incomplete SQL leaf trace: stats=%+v trace=%+v", stats, trace)
 		}
 		t.Logf("SQL projector leaf wire: phase=%s pid=%d records=%d client_bytes=%d server_bytes=%d", p.record["phase"], p.command.Process.Pid, trace.FrameRecords, stats.ClientToServer, stats.ServerToClient)

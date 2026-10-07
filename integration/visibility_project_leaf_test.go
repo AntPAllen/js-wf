@@ -11,6 +11,7 @@ import (
 	"path/filepath"
 	"sort"
 	"strings"
+	"syscall"
 	"testing"
 	"time"
 
@@ -19,7 +20,12 @@ import (
 	"js-wf/testcluster"
 )
 
-func projectionLeafEndpoint(t *testing.T, ctx context.Context, hub *testcluster.Cluster, domain, fixtureRoot string) (string, func()) {
+type projectionLeafFault struct {
+	kill    func()
+	restart func()
+}
+
+func projectionLeafEndpoint(t *testing.T, ctx context.Context, hub *testcluster.Cluster, domain, fixtureRoot string, faultHooks ...*projectionLeafFault) (string, func()) {
 	t.Helper()
 	for {
 		current := true
@@ -67,27 +73,9 @@ func projectionLeafEndpoint(t *testing.T, ctx context.Context, hub *testcluster.
 		t.Fatalf("leaf before=%+v err=%v", before, err)
 	}
 	pid := leaf.Commands[0].Process.Pid
-	proc := filepath.Join("/proc", fmt.Sprint(pid))
-	stat, err := os.ReadFile(filepath.Join(proc, "stat"))
-	if err != nil {
-		t.Fatal(err)
-	}
-	argv, err := os.ReadFile(filepath.Join(proc, "cmdline"))
-	if err != nil {
-		t.Fatal(err)
-	}
-	hash, err := projectionFileSHA(filepath.Join(proc, "exe"))
-	if err != nil {
-		t.Fatal(err)
-	}
-	if string(argv) != strings.Join(leaf.Commands[0].Args, "\x00")+"\x00" {
-		t.Fatal("actual leaf argv mismatch")
-	}
-	info, err := exec.Command("go", "version", "-m", leaf.Commands[0].Args[0]).Output()
-	if err != nil {
-		t.Fatal(err)
-	}
-	record := map[string]any{"pid": pid, "stat": string(stat), "argv": leaf.Commands[0].Args, "exe": leaf.Commands[0].Args[0], "exe_sha256": hash, "build_info": string(info)}
+	record := projectionLeafProcessRecord(t, leaf.Commands[0])
+	currentRecord := record
+	currentFile := "leaf.process.json"
 	persist := func(name string, value any) {
 		data, e := json.MarshalIndent(value, "", "  ")
 		if e != nil {
@@ -138,6 +126,52 @@ func projectionLeafEndpoint(t *testing.T, ctx context.Context, hub *testcluster.
 		peers = append(peers, map[string]string{"name": s.Name(), "id": s.ID(), "domain": domain})
 	}
 	proof["hubs"] = peers
+	if len(faultHooks) > 0 {
+		hook := faultHooks[0]
+		hook.kill = func() {
+			started := time.Now().UTC()
+			if err := leaf.KillNode(0); err != nil {
+				t.Fatal(err)
+			}
+			status, ok := leaf.Commands[0].ProcessState.Sys().(syscall.WaitStatus)
+			if !ok || !status.Signaled() || status.Signal() != syscall.SIGKILL {
+				t.Fatal("leaf not reaped SIGKILL")
+			}
+			record["reaped"] = true
+			record["exit_code"] = -1
+			record["exit_signal"] = "killed"
+			record["kill_started_at"] = started
+			record["reaped_at"] = time.Now().UTC()
+			persist("leaf.process.json", record)
+			proof["leaf_sigkill"] = true
+			t.Logf("SQL leaf SIGKILL: pid=%d id=%s reaped=true", pid, leafID)
+		}
+		hook.restart = func() {
+			if err := leaf.RestartNode(0); err != nil {
+				t.Fatal(err)
+			}
+			currentRecord = projectionLeafProcessRecord(t, leaf.Commands[0])
+			currentFile = "leaf.replacement.process.json"
+			currentRecord["admitted_at"] = time.Now().UTC()
+			persist(currentFile, currentRecord)
+			for {
+				attempt, stop := context.WithTimeout(ctx, 250*time.Millisecond)
+				account, e := remote.AccountInfo(attempt)
+				stop()
+				if e == nil && account.Domain == domain && nc.ConnectedServerId() != leafID {
+					break
+				}
+				if ctx.Err() != nil {
+					t.Fatal("replacement leaf readiness", ctx.Err())
+				}
+				time.Sleep(25 * time.Millisecond)
+			}
+			proof["leaf_replacement_id"] = nc.ConnectedServerId()
+			proof["leaf_replacement_pid"] = leaf.Commands[0].Process.Pid
+			proof["leaf_replacement_ready_at"] = time.Now().UTC()
+			t.Logf("SQL leaf replacement: old_pid=%d pid=%d old_id=%s id=%s same_ports_store=true", pid, leaf.Commands[0].Process.Pid, leafID, nc.ConnectedServerId())
+		}
+	}
 	return leaf.ClientURL(0), func() {
 		observe, stop := context.WithTimeout(context.Background(), 3*time.Second)
 		defer stop()
@@ -159,15 +193,42 @@ func projectionLeafEndpoint(t *testing.T, ctx context.Context, hub *testcluster.
 			proof["hubs_after"] = afterHubs
 		}
 		leaf.Close()
-		record["reaped"] = leaf.Commands[0].ProcessState != nil
+		currentRecord["reaped"] = leaf.Commands[0].ProcessState != nil
 		if leaf.Commands[0].ProcessState != nil {
-			record["exit_code"] = leaf.Commands[0].ProcessState.ExitCode()
+			currentRecord["exit_code"] = leaf.Commands[0].ProcessState.ExitCode()
 		}
-		persist("leaf.process.json", record)
+		persist(currentFile, currentRecord)
 		proof["scenario_passed"] = !t.Failed()
 		persist("leaf-proof.json", proof)
 		t.Logf("SQL projector leaf: test=%s local=WFEDGE remote=%s leaf_pid=%d local_streams=0", t.Name(), domain, pid)
 	}
+}
+
+func projectionLeafProcessRecord(t *testing.T, command *exec.Cmd) map[string]any {
+	t.Helper()
+	pid := command.Process.Pid
+	proc := filepath.Join("/proc", fmt.Sprint(pid))
+	stat, err := os.ReadFile(filepath.Join(proc, "stat"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	argv, err := os.ReadFile(filepath.Join(proc, "cmdline"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	hash, err := projectionFileSHA(filepath.Join(proc, "exe"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if string(argv) != strings.Join(command.Args, "\x00")+"\x00" {
+		t.Fatal("actual leaf argv mismatch")
+	}
+	info, err := exec.Command("go", "version", "-m", command.Args[0]).Output()
+	if err != nil {
+		t.Fatal(err)
+	}
+	record := map[string]any{"pid": pid, "stat": string(stat), "argv": command.Args, "exe": command.Args[0], "exe_sha256": hash, "build_info": string(info)}
+	return record
 }
 
 func projectionFileSHA(path string) (string, error) {

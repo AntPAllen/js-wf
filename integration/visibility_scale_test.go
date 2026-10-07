@@ -140,6 +140,16 @@ func TestStandalonePostgresProjectionCrashAndSessionLossFiftyThousandInvocations
 	runProjectionRecoveryStartup(t, true, true, true, true, "WFVIEW")
 }
 
+func TestStandalonePostgresProjectionCrashAndSessionLossFiftyThousandInvocationsThroughLeafWithSIGKILL(t *testing.T) {
+	if os.Getenv("WF_PROJECTION_POSTGRES_FAULT_ROOT") == "" || os.Getenv("WF_TEST_POSTGRES_DSN") == "" {
+		t.Skip("opt-in full SQL leaf SIGKILL proof")
+	}
+	if os.Getenv("WF_PROJECTION_COUNT") != "" {
+		t.Fatal("full SQL leaf SIGKILL requires default50000")
+	}
+	runProjectionRecoveryLeafFault(t, true, true, true, true, true, "WFVIEW")
+}
+
 func runProjectionRecoversFiftyThousandInvocations(t *testing.T, postgresFault bool, domains ...string) {
 	runProjectionRecovery(t, postgresFault, false, domains...)
 }
@@ -153,6 +163,10 @@ func runProjectionRecoveryWithTransport(t *testing.T, postgresFault, standalone,
 }
 
 func runProjectionRecoveryStartup(t *testing.T, postgresFault, standalone, leaf, sqlStartup bool, domains ...string) {
+	runProjectionRecoveryLeafFault(t, postgresFault, standalone, leaf, sqlStartup, false, domains...)
+}
+
+func runProjectionRecoveryLeafFault(t *testing.T, postgresFault, standalone, leaf, sqlStartup, leafSIGKILL bool, domains ...string) {
 	t.Helper()
 	count := 50000
 	if value := os.Getenv("WF_PROJECTION_COUNT"); value != "" {
@@ -247,12 +261,17 @@ func runProjectionRecoveryStartup(t *testing.T, postgresFault, standalone, leaf,
 		options = append(options, visibility.WithPostgres(&visibility.PostgresStore{DB: db}))
 	}
 	const typ = "view-scale"
+	var leafFault projectionLeafFault
 	projectorURL := cluster.Servers[0].ClientURL()
 	if leaf {
 		if !postgresFault || !standalone || domain == "" {
 			t.Fatal("SQL leaf requires full packaged domain fault profile")
 		}
-		endpoint, finishLeaf := projectionLeafEndpoint(t, ctx, cluster, domain, root)
+		var hooks []*projectionLeafFault
+		if leafSIGKILL {
+			hooks = append(hooks, &leafFault)
+		}
+		endpoint, finishLeaf := projectionLeafEndpoint(t, ctx, cluster, domain, root, hooks...)
 		defer finishLeaf()
 		projectorURL = endpoint
 		proof["projector_transport"] = "leaf"
@@ -510,6 +529,9 @@ func runProjectionRecoveryStartup(t *testing.T, postgresFault, standalone, leaf,
 			}
 			standaloneRecords = append(standaloneRecords, record)
 			proof["standalone_projectors"] = standaloneRecords
+		}
+		if leafSIGKILL {
+			proof["leaf_transport_fault"] = faultStandaloneSQLLeaf(t, ctx, db, standaloneBinary, root, projectorURL, domain, &leafFault)
 		}
 		stopProjection()
 		projectionJS = tracedAuditJS{JetStream: all[2], trace: dependencyTrace}
