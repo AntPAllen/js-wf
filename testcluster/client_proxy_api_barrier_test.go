@@ -140,3 +140,58 @@ func TestReadClientPacketRejectsMalformedPublications(t *testing.T) {
 		}
 	}
 }
+
+func TestClientProxyConsumerCreationSelector(t *testing.T) {
+	listener, err := net.Listen("tcp", "127.0.0.1:0")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer listener.Close()
+	proxy, err := NewClientProxy("nats://" + listener.Addr().String())
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer proxy.Close()
+	for _, stream := range []string{"", "KV_WF_STATE.other", "*", ">", "bad stream", "bad/stream"} {
+		if err := proxy.HoldFirstConsumerCreate("$JS.API.", stream); err == nil {
+			t.Fatal("accepted non-stream token")
+		}
+	}
+	if err = proxy.HoldFirstConsumerCreate("$JS.API.", "KV_WF_STATE"); err != nil {
+		t.Fatal(err)
+	}
+	client, err := net.Dial("tcp", proxy.listener.Addr().String())
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer client.Close()
+	server, err := listener.Accept()
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer server.Close()
+	client.SetDeadline(time.Now().Add(3 * time.Second))
+	server.SetDeadline(time.Now().Add(3 * time.Second))
+	prefix := "PUB $JS.API.STREAM.INFO.KV_WF_STATE reply 0\r\n\r\n" +
+		"PUB $JS.API.CONSUMER.CREATE.KV_WF_STATE_OTHER.c reply 0\r\n\r\n"
+	packet := "PUB $JS.API.CONSUMER.CREATE.KV_WF_STATE.c reply 2\r\n{}\r\n"
+	if _, err = client.Write([]byte(prefix + packet)); err != nil {
+		t.Fatal(err)
+	}
+	got := make([]byte, len(prefix))
+	if _, err = io.ReadFull(server, got); err != nil || string(got) != prefix {
+		t.Fatalf("metadata/shared-prefix request incorrectly held: %q %v", got, err)
+	}
+	until := time.Now().Add(3 * time.Second)
+	for proxy.PendingAPI() == nil && time.Now().Before(until) {
+		time.Sleep(time.Millisecond)
+	}
+	pending := proxy.PendingAPI()
+	if pending == nil || string(pending.Packet) != packet || pending.ForwardedBytes != 0 || pending.Disposition != "held" {
+		t.Fatalf("consumer creation not held: %+v", pending)
+	}
+	proxy.Close()
+	if pending = proxy.PendingAPI(); pending.Disposition != "cancelled" || pending.ForwardedBytes != 0 || proxy.Stats().Active != 0 {
+		t.Fatal("consumer creation barrier did not join without publication")
+	}
+}

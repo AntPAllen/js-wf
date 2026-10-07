@@ -1,0 +1,55 @@
+name: state-watch-creation
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - '.github/workflows/state-watch-creation.yml'
+      - 'integrity/**'
+      - 'testcluster/client_proxy*'
+      - 'scripts/run-state-creation-native.py'
+      - 'scripts/live_process_admission.py'
+      - 'scripts/fixture_archive.py'
+      - 'go.mod'
+      - 'go.sum'
+  pull_request:
+    paths:
+      - '.github/workflows/state-watch-creation.yml'
+      - 'integrity/**'
+      - 'testcluster/client_proxy*'
+      - 'scripts/run-state-creation-native.py'
+      - 'go.mod'
+      - 'go.sum'
+permissions:
+  contents: read
+jobs:
+  native-request-recovery:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - name: Selector and seeded lifecycle controls
+        env:
+          GOMAXPROCS: '2'
+          GOMEMLIMIT: 1GiB
+        run: |
+          go test -race ./testcluster -run 'Test(ClientProxyFirstAPIBarrier|ClientProxyConsumerCreationSelector|ReadClientPacketRejectsMalformedPublications)' -count=5 -timeout=3m
+          go test -race ./integrity -run 'Test(SeededState.*Progress|SeededStateClosedWatch|StateProgress|StateCreationProgress)' -count=20 -timeout=3m
+      - name: Original native R3 WatchAll cancellation and recovery
+        env:
+          PYTHONDONTWRITEBYTECODE: '1'
+        run: python3 scripts/run-state-creation-native.py --root "$RUNNER_TEMP/state-watch-creation"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: state-watch-creation-complete
+          path: |
+            ${{ runner.temp }}/state-watch-creation/native.log
+            ${{ runner.temp }}/state-watch-creation/execution.json
+            ${{ runner.temp }}/state-watch-creation/actual-sdk.json
+            ${{ runner.temp }}/state-watch-creation/fixture/native-proof.json
+            ${{ runner.temp }}/state-watch-creation.tar.gz
+            ${{ runner.temp }}/state-watch-creation-proof/
+          if-no-files-found: warn

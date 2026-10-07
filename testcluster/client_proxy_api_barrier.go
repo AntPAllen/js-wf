@@ -33,11 +33,29 @@ type clientAPIBarrier struct {
 // path parses client packets; ordinary relay behavior is unchanged. The first
 // complete PUB/HPUB to prefix is held before writing any of its bytes upstream.
 func (p *ClientProxy) HoldFirstAPI(prefix string) error {
+	if !strings.HasPrefix(prefix, "$JS.") || !strings.HasSuffix(prefix, ".API.") || strings.ContainsAny(prefix, " \t\r\n") {
+		return fmt.Errorf("API barrier requires a JetStream API prefix")
+	}
+	return p.holdFirstAPIPrefix(prefix)
+}
+
+// HoldFirstConsumerCreate leaves metadata requests flowing and holds the first
+// modern consumer-create request for exactly this stream before publication.
+// A delimiter after the stream prevents another stream with a shared name
+// prefix from matching. Configure before connecting, as for HoldFirstAPI.
+func (p *ClientProxy) HoldFirstConsumerCreate(apiPrefix, stream string) error {
+	if !strings.HasPrefix(apiPrefix, "$JS.") || !strings.HasSuffix(apiPrefix, ".API.") || strings.ContainsAny(apiPrefix, " \t\r\n") ||
+		stream == "" || strings.ContainsAny(stream, ".*> \t\r\n/\\") {
+		return fmt.Errorf("consumer barrier requires a JetStream API prefix and stream token")
+	}
+	return p.holdFirstAPIPrefix(apiPrefix + "CONSUMER.CREATE." + stream + ".")
+}
+
+func (p *ClientProxy) holdFirstAPIPrefix(prefix string) error {
 	p.mu.Lock()
 	defer p.mu.Unlock()
-	if p.closed || p.acceptedConnections != 0 || p.apiBarrier != nil ||
-		!strings.HasPrefix(prefix, "$JS.") || !strings.HasSuffix(prefix, ".API.") || strings.ContainsAny(prefix, " \t\r\n") {
-		return fmt.Errorf("API barrier requires an unused proxy and a JetStream API prefix")
+	if p.closed || p.acceptedConnections != 0 || p.apiBarrier != nil {
+		return fmt.Errorf("API barrier requires an unused proxy")
 	}
 	p.apiBarrier = &clientAPIBarrier{prefix: prefix, release: make(chan struct{}), cancel: make(chan struct{})}
 	return nil
