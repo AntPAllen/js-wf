@@ -73,6 +73,20 @@ def verify_leaf_log(log):
     assert len(re.findall(r'operator leaf: test='+LEAF_TESTS[0]+r' local=WFEDGE remote=WFOPS leaf_pid=\d+ local_streams=0',log))==1
     return dict(tests=LEAF_TESTS,actual_standalone_processes=23,online_children=21,offline_children=2,scope='Focused healthy packaged operator leaf suite only; no daemon, SQL, injected fault or full release acceptance.')
 
+def verify_daemon_leaf_log(log):
+    test='TestOperatorStandaloneDaemonSignalsThroughLeaf'
+    assert log.rstrip().endswith('PASS') and not any(s in log for s in ('DATA RACE','--- FAIL:','--- SKIP:'))
+    assert re.findall(r'^--- PASS: (\w+) \(',log,re.M)==[test]
+    modes=re.findall(r'^\s+--- PASS: '+test+r'/(project|tombstone-loop)/(startup|running|fatal) \(',log,re.M)
+    expected={('project','startup'),('project','running'),('project','fatal'),('tombstone-loop','startup'),('tombstone-loop','running')}
+    assert len(modes)==5 and set(modes)==expected
+    rows=re.findall(r'packaged leaf daemon: command=(project|tombstone-loop) stage=(startup|running|fatal) pid=(\d+) exit=(\d+) root=(\S+) client_bytes=(\d+) server_bytes=(\d+)',log)
+    assert len(rows)==5 and len({r[2] for r in rows})==5 and {(r[0],r[1]) for r in rows}==expected
+    assert all(int(r[3])==(1 if r[1]=='fatal' else 0) and int(r[5])>0 and int(r[6])>0 for r in rows)
+    assert len(re.findall(r'operator leaf: test='+test+r' local=WFEDGE remote=WFOPS leaf_pid=\d+ local_streams=0',log))==1
+    return [dict(command=c,stage=s,pid=int(pid),exit_code=int(code),root=root,client_bytes=int(cb),server_bytes=int(sb)) for c,s,pid,code,root,cb,sb in rows]
+
+
 def verify_standalone_log(log):
     assert log.rstrip().endswith('PASS') and not any(s in log for s in ('DATA RACE','--- FAIL:','--- SKIP:'))
     assert sorted(re.findall(r'^--- PASS: (\w+) \([0-9.]+s\)$',log,re.M))==sorted(STANDALONE_TESTS)
@@ -154,12 +168,12 @@ def main():
             import operator_daemon_leaf_wire
             assert not plugin_records
             log=(root/'native.log').read_text()
-            assert log.rstrip().endswith('PASS') and not any(s in log for s in ('DATA RACE','--- FAIL:','--- SKIP:'))
-            assert re.findall(r'^--- PASS: (\w+) \(',log,re.M)==tests
+            logged=verify_daemon_leaf_log(log)
             records=[json.loads(p.read_text()) for p in (root/'stores').rglob('daemon.process.json')]
             assert len(records)==5
             assert all(r['argv'][0].startswith(str(root/'stores')) and shared.sha(r['argv'][0])==r['exe_sha256'] and 'vcs.revision='+revision in r['build_info'] and 'vcs.modified=false' in r['build_info'] and '-race=true' in r['build_info'] and not Path('/proc',str(r['pid'])).exists() for r in records)
             result=operator_daemon_leaf_wire.validate(root/'stores')
+            assert {tuple(row[k] for k in ('pid','command','stage','exit_code','client_bytes','server_bytes')) for row in logged}=={tuple(row[k] for k in ('pid','command','stage','exit_code','client_bytes','server_bytes')) for row in result['processes']}
             save('daemon-processes.json',records);save('leaf-wire-review.json',result)
             leaves=[json.loads(p.read_text()) for p in (root/'stores').rglob('leaf.process.json')]
             assert len(leaves)==1 and leaves[0]['reaped'] is True and leaves[0]['exit_code']==0 and not Path('/proc',str(leaves[0]['pid'])).exists()

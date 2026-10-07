@@ -1,5 +1,9 @@
 # Tier 1 deterministic simulation: journal, lease, start, signals, timers, dispatch, and worker slices
 
+## Packaged daemon leaf component — 2026-10-07
+
+Actual packaged project/tombstone startup/running signal cases and fatal missing-source rejection pass through a real leaf atdb67e7d, with complete forwarded traffic and separate zero-forwarded pending startup packets. This is a focused native component; no unchanged full Tier1 graph rerun or fullrelease acceptance is claimed. Original two readiness failures remain unconfirmed. [Native proof](scale/operator-daemon-leaf-2026-10-07/native-race/).
+
 ## Active-writer blob boundary workload — 2026-10-07
 
 `TestSeededOnlineBlobBoundaryReplay` shares the actual production Start and blob-sweep decision paths over one seeded in-memory store. It proves two expected failures of violating writer quiescence: a two-hour paused upload can publish an acknowledged dangling reference after a one-hour-age sweep, and a refreshed shared object can be deleted after a stale census. The quiescent control preserves its input. Every generated schedule is replayed exactly. Three new pins also run through the shared FAULT_TRACE dispatcher.

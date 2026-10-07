@@ -1,5 +1,12 @@
 # Implementation status against the supplied plan
 
+## Packaged operator daemon leaf signal boundary accepted — 2026-10-07
+
+At recorded clean `db67e7d`, actual race SDK842305 passes in15.25s body/16.278s SDK. Five actual packaged race `wf` children run through stock WFEDGE leaf843214/R3 WFOPS hubs: project/tombstone first-API SIGTERM and running SIGINT exit0; missing-source project exits1. Startup packets are retained separately, cancelled before upstream forwarding with zero forwarded bytes. Running readiness uses the original real NumWaiting/tombstone criteria. Original60s/3m/count1 remain. Complete child wire6,036client/28,040server bytes/36WFOPS publications binds actual leaf INFO identity and zero local streams. Independent2,150-source/5-child/SDK/stockleaf/2,543-file review accepts; captured-proof controls reject22 artifact and15 log mutations. Two earlier readiness timeouts remain failed and their cause unconfirmed. [Evidence and limits](scale/operator-daemon-leaf-2026-10-07/native-race/).
+
+This closes this recorded-source packaged daemon leaf signal/fatal-source component. SQL daemon, natural leaf/route/server faults, full fault matrices, onlineGC, million physical drain and fullrelease/24h remain open. Hosted CI acceptance is separate; the isolated live24h is unchanged.
+
+
 ## Healthy packaged operator leaf routing accepted — 2026-10-07
 
 At `9d6feff`, actual race SDK 568999 passes in 34.12 s body / 35.203 s SDK. All original 23 standalone command assertions/five nonzero exits / original 60 s case / 3 m SDK remain. Actual race CLI children and matching plugin run through one stock WFEDGE leaf 570120 and three embedded WFOPS hubs. Twenty positive online children use WFOPS; the intentional missing-domain child uses MISSING and rejects. Each online child has exactly one accepted/relayed connection and zero upstream dial failures; two offline replays have zero accepts/failed dials/traffic. Complete joined bytes 48,925 client / 3,874,289 server and 313 argv-correct API publications verify actual leaf INFO identity/zero local streams/three distinct hub IDs.

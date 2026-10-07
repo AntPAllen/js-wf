@@ -12,6 +12,8 @@ on:
       - 'scripts/test_worker_leaf_wire.py'
       - 'scripts/operator_leaf_wire.py'
       - 'scripts/test_operator_leaf_wire.py'
+      - 'scripts/operator_daemon_leaf_wire.py'
+      - 'scripts/test_operator_daemon_leaf_wire.py'
       - 'scripts/run-domain-runtime-controls.py'
       - 'scripts/fixture_archive.py'
       - 'scripts/verify-tier2-closed-originals.py'
@@ -66,6 +68,7 @@ jobs:
           - {program: operator, case: daemon-signals, args: "--case daemon-signals"}
           - {program: operator, case: standalone-commands, args: "--case standalone-commands"}
           - {program: operator, case: standalone-leaf, args: "--case standalone-leaf"}
+          - {program: operator, case: standalone-daemon-leaf, args: "--case standalone-daemon-leaf"}
           - {program: worker, case: commands, args: ""}
           - {program: worker, case: standalone-commands, args: "--case standalone-commands"}
           - {program: worker, case: standalone-leaf, args: "--case standalone-leaf"}
@@ -82,6 +85,11 @@ jobs:
         run: |
           go test -race ./testcluster -run '^Test(ClientProxyCountsFailedUpstreamDials|ClientProxyFirstAPIBarrier|ReadClientPacketRejectsMalformedPublications)$' -count=1
           python3 -m unittest discover -s scripts -p test_operator_leaf_wire.py
+      - name: Check packaged daemon held publications and complete leaf captures
+        if: matrix.case == 'standalone-daemon-leaf'
+        run: |
+          go test -race ./testcluster -run '^Test(ClientProxyFirstAPIBarrier|ReadClientPacketRejectsMalformedPublications)$' -count=1
+          python3 -m unittest discover -s scripts -p test_operator_daemon_leaf_wire.py
       - name: Require actual default and domain race controls
         run: python3 scripts/run-${{ matrix.program }}-domain-controls.py ${{ matrix.args }} --root '${{ runner.temp }}/command-domain-${{ matrix.program }}-${{ matrix.case }}'
       - if: always()
