@@ -9,6 +9,7 @@ TEST='TestWorkerStandaloneCommandsThroughLeaf'
 
 def protocol(data, incoming=False):
     """Parse framing so payload text cannot masquerade as protocol commands."""
+    data=bytes(data)
     result=[];offset=0
     while offset<len(data):
         end=data.find(b'\r\n',offset)

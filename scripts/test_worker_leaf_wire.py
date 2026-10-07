@@ -9,6 +9,8 @@ class WireFramingControls(unittest.TestCase):
                 +b'PUB application '+str(len(payload)).encode()+b'\r\n'+payload+b'\r\n'
                 +b'HPUB $JS.WFWORKER.API.STREAM.INFO.WF_JRN _INBOX.x 12 14\r\nNATS/1.0\r\n\r\n{}\r\nPING\r\n')
         expected=protocol(stream)
+        self.assertEqual(protocol(bytearray(stream)),expected)
+        self.assertEqual(protocol(memoryview(stream)),expected)
         self.assertEqual([parts[1] for op,parts,_ in expected if op in (b'PUB',b'HPUB')],
                          [b'application',b'$JS.WFWORKER.API.STREAM.INFO.WF_JRN'])
         self.assertEqual(expected[2][2],payload)
