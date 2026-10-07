@@ -1,0 +1,21 @@
+{
+  "original_sha256": "05251ff80370fd10d837adc9ee708c98b00cde202d58ea47de7221bd4d484508",
+  "modified_sha256": "5138d5ebf3f42654d7c1067322fd4de5496a3ca58fe0110d89e8718d2ef638e6",
+  "changes": [
+    {
+      "test": "TestNRGTruncateWALRevertsUncommittedRemovePeer",
+      "groups": 1,
+      "calls": 2
+    },
+    {
+      "test": "TestNRGEvictPeers",
+      "groups": 7,
+      "calls": 15
+    }
+  ],
+  "scope": "Only lock/unlock consecutive peer additions in the two upstream tests with observed race reports; no assertions, test cases, sleeps, deadlines or production source changed.",
+  "patch_application_stock_v2_15_0": {
+    "exit_code": 0,
+    "scope": "Patch application only; native qualification pending."
+  }
+}

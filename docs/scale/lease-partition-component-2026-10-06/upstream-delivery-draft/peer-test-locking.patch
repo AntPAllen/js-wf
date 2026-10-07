@@ -1,0 +1,91 @@
+--- a/server/raft_test.go
++++ b/server/raft_test.go
+@@ -1509,8 +1509,10 @@
+ 
+ 		nats0 := "S1Nunr6R"   // "nats-0"
+ 		oldPeer := "yrzKKRBu" // "nats-1"
++		n.Lock()
+ 		n.addPeer(nats0)
+ 		n.addPeer(oldPeer)
++		n.Unlock()
+ 		require_Len(t, len(n.peers), 3)
+ 
+ 		esm := encodeStreamMsgAllowCompress("foo", "_INBOX.foo", nil, nil, 0, 0, true)
+@@ -1589,7 +1591,9 @@
+ 		n, cleanup := initSingleMemRaftNode(t)
+ 		defer cleanup()
+ 
++		n.Lock()
+ 		n.addPeer(nats0)
++		n.Unlock()
+ 
+ 		// Refuse for unmanaged groups.
+ 		_, err := n.EvictPeers([]string{nats0})
+@@ -1642,10 +1646,12 @@
+ 		n, cleanup := initSingleMemRaftNode(t)
+ 		defer cleanup()
+ 
++		n.Lock()
+ 		n.addPeer(nats0)
+ 		n.addPeer(nats1)
+ 		n.addPeer(nats2)
+ 		n.addPeer(nats3)
++		n.Unlock()
+ 		require_Len(t, len(n.peers), 5)
+ 
+ 		n.Lock()
+@@ -1671,10 +1677,12 @@
+ 		n, cleanup := initSingleMemRaftNode(t)
+ 		defer cleanup()
+ 
++		n.Lock()
+ 		n.addPeer(nats0)
+ 		n.addPeer(nats1)
+ 		n.addPeer(nats2)
+ 		n.addPeer(nats3)
++		n.Unlock()
+ 		require_Len(t, len(n.peers), 5)
+ 
+ 		esm := encodeStreamMsgAllowCompress("foo", "_INBOX.foo", nil, nil, 0, 0, true)
+@@ -1716,8 +1724,10 @@
+ 		n, cleanup := initSingleMemRaftNode(t)
+ 		defer cleanup()
+ 
++		n.Lock()
+ 		n.addPeer(nats0)
+ 		n.addPeer(nats1)
++		n.Unlock()
+ 		require_Len(t, len(n.peers), 3)
+ 
+ 		esm := encodeStreamMsgAllowCompress("foo", "_INBOX.foo", nil, nil, 0, 0, true)
+@@ -1760,8 +1770,10 @@
+ 		n, cleanup := initSingleMemRaftNode(t)
+ 		defer cleanup()
+ 
++		n.Lock()
+ 		n.addPeer(nats0)
+ 		n.addPeer(nats1)
++		n.Unlock()
+ 		require_Len(t, len(n.peers), 3)
+ 
+ 		esm := encodeStreamMsgAllowCompress("foo", "_INBOX.foo", nil, nil, 0, 0, true)
+@@ -1812,7 +1824,9 @@
+ 		n, cleanup := initSingleMemRaftNode(t)
+ 		defer cleanup()
+ 
++		n.Lock()
+ 		n.addPeer(nats0)
++		n.Unlock()
+ 		require_Len(t, len(n.peers), 2)
+ 
+ 		esm := encodeStreamMsgAllowCompress("foo", "_INBOX.foo", nil, nil, 0, 0, true)
+@@ -1873,7 +1887,9 @@
+ 		n, cleanup := initSingleMemRaftNode(t)
+ 		defer cleanup()
+ 
++		n.Lock()
+ 		n.addPeer(nats0)
++		n.Unlock()
+ 		require_Len(t, len(n.peers), 2)
+ 
+ 		esm := encodeStreamMsgAllowCompress("foo", "_INBOX.foo", nil, nil, 0, 0, true)

@@ -1,0 +1,135 @@
+--- a/server/raft.go
++++ b/server/raft.go
+@@ -4593,10 +4593,16 @@
+ 	// to our dedicated catchup inbox.
+ 	isCatchup := sub != nil && !isNew
+ 
+-	// If we are/were catching up ignore old catchup subs, but only if catching up from an older server
+-	// that doesn't send the leader term when catching up or if we would truncate as a result.
+-	// We can reject old catchups from newer subs later, just by checking the append entry is on the correct term.
+-	if !isNew && sub != nil && (ae.lterm == 0 || ae.pindex < n.pindex) && (!catchingUp || sub != n.catchup.sub) {
++	// Obsolete catchup callbacks cannot start or replace catchup state.
++	// After catchup completes, a modern stream can still deliver a trailing
++	// entry. Accept it only from our known current-term leader and only when
++	// its previous term/index exactly match our log: no reset or new catchup
++	// request can then be caused by its obsolete progress reply inbox.
++	obsoleteCatchup := isCatchup && (!catchingUp || sub != n.catchup.sub)
++	contiguousTrailing := !catchingUp && ae.lterm != 0 && ae.lterm == n.term &&
++		ae.leader != noLeader && ae.leader == n.leader &&
++		ae.pterm == n.pterm && ae.pindex == n.pindex
++	if obsoleteCatchup && !contiguousTrailing {
+ 		n.Unlock()
+ 		n.debug("AppendEntry ignoring old entry from previous catchup")
+ 		return
+--- /dev/null
++++ b/server/raft_obsolete_catchup_test.go
+@@ -0,0 +1,109 @@
++// Diagnostic regression in the pinned NATS server package, not a workflow Tier1 test.
++package server
++
++import "testing"
++
++func TestDiagnosticRaftObsoleteCatchupDoesNotCreateOrCancelState(t *testing.T) {
++	for _, modern := range []bool{false, true} {
++		for _, replaced := range []bool{false, true} {
++			name := "legacy/canceled"
++			if modern {
++				name = "modern/canceled"
++			}
++			if replaced {
++				name = name[:len(name)-len("canceled")] + "replaced"
++			}
++			t.Run(name, func(t *testing.T) {
++				n, cleanup := initSingleMemRaftNode(t)
++				defer cleanup()
++				leader := "S1Nunr6R"
++				trigger := encode(t, &appendEntry{leader: leader, term: 1, lterm: 1, pterm: 1, pindex: 1, reply: "$TEST.MAIN"})
++				n.processAppendEntry(trigger, n.aesub)
++				if n.catchup == nil {
++					t.Fatal("catchup admission failed")
++				}
++				obsolete := n.catchup.sub
++				n.cancelCatchup()
++				if replaced {
++					n.Lock()
++					n.createCatchup(&appendEntry{leader: leader, term: 1, lterm: 1, pterm: 1, pindex: 2})
++					n.Unlock()
++				}
++				current := n.catchup
++				lterm := uint64(0)
++				if modern {
++					lterm = 1
++				}
++				// A queued callback from the unsubscribed inbox carries the old
++				// progress reply. It cannot legitimately start another catchup
++				// or cancel the replacement subscription.
++				queued := encode(t, &appendEntry{leader: leader, term: 1, lterm: lterm, pterm: 1, pindex: 1, reply: "$NRG.CP.OBSOLETE"})
++				n.processAppendEntry(queued, obsolete)
++				if n.catchup != current {
++					t.Fatalf("obsolete callback changed catchup state: prior=%p current=%p", current, n.catchup)
++				}
++				if n.pindex != 0 || n.commit != 0 {
++					t.Fatalf("obsolete callback changed log state: index=%d commit=%d", n.pindex, n.commit)
++				}
++			})
++		}
++	}
++}
++
++func TestDiagnosticRaftObsoleteCatchupTrailingEntries(t *testing.T) {
++	for _, name := range []string{"contiguous", "ahead", "behind", "wrong_previous_term", "wrong_leader", "higher_leader_term", "older_leader_term", "legacy"} {
++		t.Run(name, func(t *testing.T) {
++			n, cleanup := initSingleMemRaftNode(t)
++			defer cleanup()
++			leader := "S1Nunr6R"
++			entries := []*Entry{newEntry(EntryNormal, []byte("trailing catchup entry"))}
++			makeEntry := func(index, previous uint64) *appendEntry {
++				return &appendEntry{leader: leader, term: 20, lterm: 20, pterm: previous, pindex: index, entries: entries, reply: "$NRG.CP.COMPLETED"}
++			}
++			n.processAppendEntry(encode(t, makeEntry(1, 20)), n.aesub)
++			n.RLock()
++			if n.catchup == nil {
++				n.RUnlock()
++				t.Fatal("catchup admission failed")
++			}
++			completed := n.catchup.sub
++			n.RUnlock()
++			n.processAppendEntry(encode(t, makeEntry(0, 0)), completed)
++			n.processAppendEntry(encode(t, makeEntry(1, 20)), completed)
++			n.RLock()
++			ready := n.catchup == nil && n.pindex == 2 && n.pterm == 20 && n.term == 20 && n.leader == leader
++			n.RUnlock()
++			if !ready {
++				t.Fatal("completed catchup precondition failed")
++			}
++			queued := makeEntry(2, 20)
++			switch name {
++			case "ahead":
++				queued.pindex = 3
++			case "behind":
++				queued.pindex = 1
++			case "wrong_previous_term":
++				queued.pterm = 19
++			case "wrong_leader":
++				queued.leader = "yrzKKRBu"
++			case "higher_leader_term":
++				queued.lterm = 21
++			case "older_leader_term":
++				queued.lterm = 19
++			case "legacy":
++				queued.lterm = 0
++			}
++			n.processAppendEntry(encode(t, queued), completed)
++			wantIndex := uint64(2)
++			if name == "contiguous" {
++				wantIndex = 3
++			}
++			n.RLock()
++			index, previous, term, currentLeader, catchingUp := n.pindex, n.pterm, n.term, n.leader, n.catchup != nil
++			n.RUnlock()
++			if index != wantIndex || previous != 20 || term != 20 || currentLeader != leader || catchingUp {
++				t.Fatalf("trailing callback changed state incorrectly: index=%d want=%d previous=%d term=%d leader=%q catchingUp=%v", index, wantIndex, previous, term, currentLeader, catchingUp)
++			}
++		})
++	}
++}
