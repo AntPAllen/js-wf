@@ -511,6 +511,8 @@ func replayTrace(loaded Trace) (Trace, error) {
 		replayed, err = runSeededTombstoneSweep(loaded.Seed, &loaded)
 	case "blob_metadata":
 		replayed, err = runSeededBlobMetadata(loaded.Seed, &loaded)
+	case "blob_publication_protocol":
+		replayed, err = runBlobPublication(loaded.Seed, &loaded)
 	case "online_blob_boundary":
 		replayed, err = runOnlineBlobBoundary(loaded.Seed, &loaded)
 	case "blob_sweep":

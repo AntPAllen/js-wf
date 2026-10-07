@@ -4,12 +4,18 @@ on:
   push:
     paths:
       - 'internal/blobpublication/**'
+      - 'sim/blob_publication*'
+      - 'sim/journal_transport_test.go'
+      - 'sim/testdata/regressions/blob-publication-*'
       - '.github/workflows/blob-publication-protocol.yml'
       - 'go.mod'
       - 'go.sum'
   pull_request:
     paths:
       - 'internal/blobpublication/**'
+      - 'sim/blob_publication*'
+      - 'sim/journal_transport_test.go'
+      - 'sim/testdata/regressions/blob-publication-*'
       - '.github/workflows/blob-publication-protocol.yml'
       - 'go.mod'
       - 'go.sum'
@@ -29,8 +35,16 @@ jobs:
           GOMAXPROCS: '2'
           GOMEMLIMIT: 512MiB
         run: go test -race ./internal/blobpublication -count=1 -timeout=3m -json > blob-publication-events.jsonl
+      - name: Common Tier 1 workload and pinned trace dispatch
+        env:
+          GOMAXPROCS: '2'
+          GOMEMLIMIT: 512MiB
+          SIM_COVERAGE_SUMMARY: '1'
+        run: go test -race ./sim -run '^(TestSeededBlobPublicationReplay|TestPinnedRegressionCorpus)$/^blob-publication-' -count=1 -timeout=3m -json > blob-publication-tier1-events.jsonl
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: experimental-blob-publication-events
-          path: blob-publication-events.jsonl
+          path: |
+            blob-publication-events.jsonl
+            blob-publication-tier1-events.jsonl
