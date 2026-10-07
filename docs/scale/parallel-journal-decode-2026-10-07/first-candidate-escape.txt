@@ -1,0 +1,9 @@
+integrity/parallel_decode.go:70:11: e escapes to heap in decodeJournalEntries.func1:
+integrity/parallel_decode.go:70:11:   flow: {heap} ← &e:
+integrity/parallel_decode.go:70:11:     from &e (address-of) at integrity/parallel_decode.go:71:39
+integrity/parallel_decode.go:70:11:     from decode(call, m.Data, &e) (call parameter) at integrity/parallel_decode.go:71:24
+integrity/parallel_decode.go:74:25: append(b.entries, e) escapes to heap in decodeJournalEntries.func1:
+integrity/parallel_decode.go:74:25:   flow: {heap} ← &{storage for append(b.entries, e)}:
+integrity/parallel_decode.go:74:25:     from append(b.entries, e) (spill) at integrity/parallel_decode.go:74:25
+integrity/parallel_decode.go:74:25:     from b.entries = append(b.entries, e) (assign) at integrity/parallel_decode.go:74:17
+integrity/parallel_decode.go:56:6: joined escapes to heap in decodeJournalEntries:

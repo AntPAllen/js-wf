@@ -5565,3 +5565,8 @@ Separate fresh complete copied cohort atf9be625 passes13.447759199s under origin
 ## Bounded ordered decoding candidate prepared — 2026-10-07
 
 The CPU profile now has an explicit implementation candidate: bounded parallel JSON/protobuf journal decoding with ordered single-goroutine reduction, cohort filtering before decode, reusable batch storage and cancellation/worker joins. Existing checker APIs remain serial; original20s/full-cohort requirements remain. Seeded ordering/error/filtering/bound/join controls pass normal/race count20 after correcting an incoming-record bound in the test (initial failure retained). Native point-oracle invariants and the complete238560/2630779 copied candidate still require execution/review; no throughput/default/24h acceptance follows yet. [Candidate and controls](scale/parallel-journal-decode-2026-10-07/).
+
+
+## First bounded decoder native result reviewed — 2026-10-07
+
+At clean d86b0e4, three native point-oracle invariant suites and all five journal corruption subcases pass. The full fresh-restored238560/2630779 cohort then passes15.972402994s under unchanged20s with all actual five stock NATS identities/source/copy/original/archive checks independently reviewed. This supplies no speedup evidence against14.316s serial; one run is not a statistical regression measurement. Default decoding remains serial, original24h failed. Compiler escape analysis identifies an extra per-entry destination allocation; reuse batch slots before further native measurement/adoption. Complete20624-member archive/S3 pending. [Evidence](scale/parallel-journal-decode-2026-10-07/).

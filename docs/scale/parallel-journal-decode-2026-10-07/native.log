@@ -1,0 +1,80 @@
+=== RUN   TestBatchedInvariantAuditNativeCompactionCohortAndFreshCorruption
+    batched_invariant_native_test.go:176: full-oracle R1-direct stream=WF_INV source_replicas=3 cursor=wf-audit-mfG2hVg7Wkkal4P8ojAcN3 cursor_replicas=1 chunked=false
+    batched_invariant_native_test.go:176: full-oracle R1-direct stream=WF_JRN source_replicas=3 cursor=wf-audit-mfG2hVg7Wkkal4P8ojAczl cursor_replicas=1 chunked=false
+    batched_invariant_native_test.go:209: cohort=false report={Invocations:2 Journals:2 Entries:8 Terminal:2} matched_error=<nil>
+    batched_invariant_native_test.go:176: full-oracle R1-direct stream=WF_INV source_replicas=3 cursor=wf-audit-mfG2hVg7Wkkal4P8ojAyU1 cursor_replicas=1 chunked=false
+    batched_invariant_native_test.go:176: full-oracle R1-direct stream=WF_JRN source_replicas=3 cursor=wf-audit-mfG2hVg7Wkkal4P8ojAz3V cursor_replicas=1 chunked=false
+    batched_invariant_native_test.go:218: cohort=true report={Invocations:2 Journals:2 Entries:8 Terminal:2} matched_error=<nil>
+    batched_invariant_native_test.go:176: full-oracle R1-direct stream=WF_INV source_replicas=3 cursor=wf-audit-mfG2hVg7Wkkal4P8ojBDT3 cursor_replicas=1 chunked=false
+    batched_invariant_native_test.go:176: full-oracle R1-direct stream=WF_JRN source_replicas=3 cursor=wf-audit-mfG2hVg7Wkkal4P8ojBE2X cursor_replicas=1 chunked=false
+    batched_invariant_native_test.go:219: cohort=false report={Invocations:3 Journals:0 Entries:0 Terminal:0} matched_error=invalid character 'i' looking for beginning of value
+    batched_invariant_native_test.go:176: full-oracle R1-direct stream=WF_INV source_replicas=3 cursor=wf-audit-mfG2hVg7Wkkal4P8ojBZ3l cursor_replicas=1 chunked=false
+    batched_invariant_native_test.go:176: full-oracle R1-direct stream=WF_JRN source_replicas=3 cursor=wf-audit-mfG2hVg7Wkkal4P8ojBZdF cursor_replicas=1 chunked=false
+    batched_invariant_native_test.go:227: cohort=true report={Invocations:2 Journals:1 Entries:0 Terminal:0} matched_error=wf.jrn.audit.first: terminal state differs
+    batched_invariant_native_test.go:176: full-oracle R1-direct stream=WF_INV source_replicas=3 cursor=wf-audit-mfG2hVg7Wkkal4P8ojBvAj cursor_replicas=1 chunked=false
+    batched_invariant_native_test.go:176: full-oracle R1-direct stream=WF_JRN source_replicas=3 cursor=wf-audit-mfG2hVg7Wkkal4P8ojBvnR cursor_replicas=1 chunked=false
+    batched_invariant_native_test.go:234: cohort=true report={Invocations:2 Journals:2 Entries:4 Terminal:1} matched_error=wf.jrn.audit.second: terminal state missing: nats: key not found
+    batched_invariant_native_test.go:176: full-oracle R1-direct stream=WF_INV source_replicas=3 cursor=wf-audit-mfG2hVg7Wkkal4P8ojGTk5 cursor_replicas=1 chunked=false
+    batched_invariant_native_test.go:176: full-oracle R1-direct stream=WF_JRN source_replicas=3 cursor=wf-audit-mfG2hVg7Wkkal4P8ojGUMn cursor_replicas=1 chunked=false
+    batched_invariant_native_test.go:249: cohort=true report={Invocations:2 Journals:1 Entries:0 Terminal:0} matched_error=wf.jrn.audit.first: journal gap or corrupt entry: snapshot object "snapshot-35ad1f9ad87ef7b2-3-88db2a2d59cd5942": snapshot SHA256 differs
+    batched_invariant_native_test.go:176: full-oracle R1-direct stream=WF_INV source_replicas=3 cursor=wf-audit-mfG2hVg7Wkkal4P8ojHFoj cursor_replicas=1 chunked=false
+    batched_invariant_native_test.go:176: full-oracle R1-direct stream=WF_JRN source_replicas=3 cursor=wf-audit-mfG2hVg7Wkkal4P8ojHGRR cursor_replicas=1 chunked=false
+    batched_invariant_native_test.go:253: cohort=true report={Invocations:2 Journals:2 Entries:8 Terminal:2} matched_error=<nil>
+    batched_invariant_native_test.go:176: full-oracle R1-direct stream=WF_INV source_replicas=3 cursor=wf-audit-mfG2hVg7Wkkal4P8ojHc5N cursor_replicas=1 chunked=false
+    batched_invariant_native_test.go:176: full-oracle R1-direct stream=WF_JRN source_replicas=3 cursor=wf-audit-mfG2hVg7Wkkal4P8ojHcbd cursor_replicas=1 chunked=false
+    batched_invariant_native_test.go:266: cohort=true report={Invocations:2 Journals:2 Entries:8 Terminal:2} matched_error=<nil>
+    batched_invariant_native_test.go:176: full-oracle R1-direct stream=WF_INV source_replicas=3 cursor=wf-audit-mfG2hVg7Wkkal4P8ojHyFZ cursor_replicas=1 chunked=false
+    batched_invariant_native_test.go:176: full-oracle R1-direct stream=WF_JRN source_replicas=3 cursor=wf-audit-mfG2hVg7Wkkal4P8ojHysH cursor_replicas=1 chunked=false
+    batched_invariant_native_test.go:267: cohort=false report={Invocations:3 Journals:2 Entries:4 Terminal:1} matched_error=journal wf.jrn.audit.orphan has no invocation
+--- PASS: TestBatchedInvariantAuditNativeCompactionCohortAndFreshCorruption (78.58s)
+=== RUN   TestBatchedInvariantAuditNativeJournalCorruption
+=== RUN   TestBatchedInvariantAuditNativeJournalCorruption/epoch-owner
+    batched_invariant_native_test.go:176: full-oracle R1-direct stream=WF_INV source_replicas=3 cursor=wf-audit-mfG2hVg7Wkkal4P8ojIIKj cursor_replicas=1 chunked=false
+    batched_invariant_native_test.go:176: full-oracle R1-direct stream=WF_JRN source_replicas=3 cursor=wf-audit-mfG2hVg7Wkkal4P8ojIIuD cursor_replicas=1 chunked=false
+    batched_invariant_native_test.go:301: cohort=false report={Invocations:1 Journals:1 Entries:0 Terminal:0} matched_error=wf.jrn.audit.epoch-owner: epoch 1 used by workers audit-proof and other-owner
+=== RUN   TestBatchedInvariantAuditNativeJournalCorruption/index-gap
+    batched_invariant_native_test.go:176: full-oracle R1-direct stream=WF_INV source_replicas=3 cursor=wf-audit-mfG2hVg7Wkkal4P8ojIYPV cursor_replicas=1 chunked=false
+    batched_invariant_native_test.go:176: full-oracle R1-direct stream=WF_JRN source_replicas=3 cursor=wf-audit-mfG2hVg7Wkkal4P8ojIYyz cursor_replicas=1 chunked=false
+    batched_invariant_native_test.go:301: cohort=false report={Invocations:1 Journals:1 Entries:0 Terminal:0} matched_error=wf.jrn.audit.index-gap: index 9 at position 2
+=== RUN   TestBatchedInvariantAuditNativeJournalCorruption/descending-epoch
+    batched_invariant_native_test.go:176: full-oracle R1-direct stream=WF_INV source_replicas=3 cursor=wf-audit-mfG2hVg7Wkkal4P8ojIoUH cursor_replicas=1 chunked=false
+    batched_invariant_native_test.go:176: full-oracle R1-direct stream=WF_JRN source_replicas=3 cursor=wf-audit-mfG2hVg7Wkkal4P8ojIp6z cursor_replicas=1 chunked=false
+    batched_invariant_native_test.go:301: cohort=false report={Invocations:1 Journals:1 Entries:0 Terminal:0} matched_error=wf.jrn.audit.descending-epoch: epoch or Started violation
+=== RUN   TestBatchedInvariantAuditNativeJournalCorruption/unresolved-terminal
+    batched_invariant_native_test.go:176: full-oracle R1-direct stream=WF_INV source_replicas=3 cursor=wf-audit-mfG2hVg7Wkkal4P8ojJ4Z3 cursor_replicas=1 chunked=false
+    batched_invariant_native_test.go:176: full-oracle R1-direct stream=WF_JRN source_replicas=3 cursor=wf-audit-mfG2hVg7Wkkal4P8ojJ58X cursor_replicas=1 chunked=false
+    batched_invariant_native_test.go:301: cohort=false report={Invocations:1 Journals:1 Entries:0 Terminal:0} matched_error=wf.jrn.audit.unresolved-terminal: successful terminal with unresolved request
+=== RUN   TestBatchedInvariantAuditNativeJournalCorruption/completion-without-request
+    batched_invariant_native_test.go:176: full-oracle R1-direct stream=WF_INV source_replicas=3 cursor=wf-audit-mfG2hVg7Wkkal4P8ojJKdp cursor_replicas=1 chunked=false
+    batched_invariant_native_test.go:176: full-oracle R1-direct stream=WF_JRN source_replicas=3 cursor=wf-audit-mfG2hVg7Wkkal4P8ojJLDJ cursor_replicas=1 chunked=false
+    batched_invariant_native_test.go:301: cohort=false report={Invocations:1 Journals:1 Entries:0 Terminal:0} matched_error=wf.jrn.audit.completion-without-request: completion without request
+=== NAME  TestBatchedInvariantAuditNativeJournalCorruption
+    batched_invariant_native_test.go:176: full-oracle R1-direct stream=WF_INV source_replicas=3 cursor=wf-audit-mfG2hVg7Wkkal4P8ojJShp cursor_replicas=1 chunked=false
+    batched_invariant_native_test.go:330: cohort=false report={Invocations:1 Journals:0 Entries:0 Terminal:0} matched_error=duplicate invocation wf.inv.audit.duplicate
+--- PASS: TestBatchedInvariantAuditNativeJournalCorruption (11.70s)
+    --- PASS: TestBatchedInvariantAuditNativeJournalCorruption/epoch-owner (1.39s)
+    --- PASS: TestBatchedInvariantAuditNativeJournalCorruption/index-gap (1.33s)
+    --- PASS: TestBatchedInvariantAuditNativeJournalCorruption/descending-epoch (1.49s)
+    --- PASS: TestBatchedInvariantAuditNativeJournalCorruption/unresolved-terminal (1.45s)
+    --- PASS: TestBatchedInvariantAuditNativeJournalCorruption/completion-without-request (1.33s)
+=== RUN   TestBatchedInvariantAuditNativeStateValues
+    batched_invariant_native_test.go:176: full-oracle R1-direct stream=WF_INV source_replicas=3 cursor=wf-audit-mfG2hVg7Wkkal4P8ojJlAz cursor_replicas=1 chunked=false
+    batched_invariant_native_test.go:176: full-oracle R1-direct stream=WF_JRN source_replicas=3 cursor=wf-audit-mfG2hVg7Wkkal4P8ojJlnh cursor_replicas=1 chunked=false
+    batched_invariant_native_test.go:673: cohort=true report={Invocations:1 Journals:1 Entries:4 Terminal:1} matched_error=<nil>
+    batched_invariant_native_test.go:176: full-oracle R1-direct stream=WF_INV source_replicas=3 cursor=wf-audit-mfG2hVg7Wkkal4P8ojK0zd cursor_replicas=1 chunked=false
+    batched_invariant_native_test.go:176: full-oracle R1-direct stream=WF_JRN source_replicas=3 cursor=wf-audit-mfG2hVg7Wkkal4P8ojK1cL cursor_replicas=1 chunked=false
+    batched_invariant_native_test.go:678: cohort=true report={Invocations:1 Journals:1 Entries:0 Terminal:0} matched_error=wf.jrn.audit.state-first: terminal state differs
+    batched_invariant_native_test.go:176: full-oracle R1-direct stream=WF_INV source_replicas=3 cursor=wf-audit-mfG2hVg7Wkkal4P8ojKHE5 cursor_replicas=1 chunked=false
+    batched_invariant_native_test.go:176: full-oracle R1-direct stream=WF_JRN source_replicas=3 cursor=wf-audit-mfG2hVg7Wkkal4P8ojKHnZ cursor_replicas=1 chunked=false
+    batched_invariant_native_test.go:686: cohort=true report={Invocations:1 Journals:1 Entries:0 Terminal:0} matched_error=wf.jrn.audit.state-first: terminal state missing: nats: key not found
+    batched_invariant_native_test.go:176: full-oracle R1-direct stream=WF_INV source_replicas=3 cursor=wf-audit-mfG2hVg7Wkkal4P8ojKXSX cursor_replicas=1 chunked=false
+    batched_invariant_native_test.go:176: full-oracle R1-direct stream=WF_JRN source_replicas=3 cursor=wf-audit-mfG2hVg7Wkkal4P8ojKY5F cursor_replicas=1 chunked=false
+    batched_invariant_native_test.go:686: cohort=true report={Invocations:1 Journals:1 Entries:0 Terminal:0} matched_error=wf.jrn.audit.state-first: terminal state missing: nats: key not found
+    batched_invariant_native_test.go:176: full-oracle R1-direct stream=WF_INV source_replicas=3 cursor=wf-audit-mfG2hVg7Wkkal4P8ojKnHB cursor_replicas=1 chunked=false
+    batched_invariant_native_test.go:176: full-oracle R1-direct stream=WF_JRN source_replicas=3 cursor=wf-audit-mfG2hVg7Wkkal4P8ojKnqf cursor_replicas=1 chunked=false
+    batched_invariant_native_test.go:691: cohort=true report={Invocations:1 Journals:1 Entries:4 Terminal:1} matched_error=<nil>
+    batched_invariant_native_test.go:176: full-oracle R1-direct stream=WF_INV source_replicas=3 cursor=wf-audit-mfG2hVg7Wkkal4P8ojL35p cursor_replicas=1 chunked=false
+    batched_invariant_native_test.go:176: full-oracle R1-direct stream=WF_JRN source_replicas=3 cursor=wf-audit-mfG2hVg7Wkkal4P8ojL3iX cursor_replicas=1 chunked=false
+    batched_invariant_native_test.go:692: cohort=false report={Invocations:2 Journals:2 Entries:8 Terminal:2} matched_error=<nil>
+--- PASS: TestBatchedInvariantAuditNativeStateValues (12.16s)
+PASS
