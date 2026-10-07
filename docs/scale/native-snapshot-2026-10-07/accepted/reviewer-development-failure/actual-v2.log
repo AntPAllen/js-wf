@@ -1,0 +1,11 @@
+Traceback (most recent call last):
+  File "/tmp/review_native_snapshot_20261007.py", line 142, in <module>
+    proofs[label]=dict(check(d,identity),identity=identity)
+                       ^^^^^^^^^^^^^^^^^
+  File "/tmp/review_native_snapshot_20261007.py", line 124, in check
+    a=graph(d['root']);assert a['manifest']==d['snapshot'] and live['Head']>d['root']['Head'] and len(a['objects'])==3 and a['manifest']['version']==2 and a['manifest']['runtime']['sha256']==d['frame_sha256'] and d['fast_resume_records']==1
+      ^^^^^^^^^^^^^^^^
+  File "/tmp/review_native_snapshot_20261007.py", line 42, in graph
+    assert runtime and runtime['object']=='step-result-'+runtime['sha256'] and runtime['index']>m['last_index'] and runtime['sequence']>m['last_seq']
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError
