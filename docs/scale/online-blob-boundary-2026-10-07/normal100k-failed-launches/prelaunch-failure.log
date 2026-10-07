@@ -1,0 +1,16 @@
+Oct 07 11:41:02 jetstream-wf systemd[1]: Started js-wf-online-blob-normal100k-20261007.service - /usr/bin/python3 /tmp/run_online_blob_normal100k.py.
+Oct 07 11:41:02 jetstream-wf python3[242999]: fatal: detected dubious ownership in repository at '/home/exedev/js-wf'
+Oct 07 11:41:02 jetstream-wf python3[242999]: To add an exception for this directory, call:
+Oct 07 11:41:02 jetstream-wf python3[242999]:         git config --global --add safe.directory /home/exedev/js-wf
+Oct 07 11:41:02 jetstream-wf python3[242998]: Traceback (most recent call last):
+Oct 07 11:41:02 jetstream-wf python3[242998]:   File "/tmp/run_online_blob_normal100k.py", line 9, in <module>
+Oct 07 11:41:02 jetstream-wf python3[242998]:     assert not root.exists();rev=subprocess.check_output(['git','rev-parse','HEAD'],cwd=repo,text=True).strip();before=shared.source_inventory(rev)
+Oct 07 11:41:02 jetstream-wf python3[242998]:                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Oct 07 11:41:02 jetstream-wf python3[242998]:   File "/usr/lib/python3.12/subprocess.py", line 466, in check_output
+Oct 07 11:41:02 jetstream-wf python3[242998]:     return run(*popenargs, stdout=PIPE, timeout=timeout, check=True,
+Oct 07 11:41:02 jetstream-wf python3[242998]:            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Oct 07 11:41:02 jetstream-wf python3[242998]:   File "/usr/lib/python3.12/subprocess.py", line 571, in run
+Oct 07 11:41:02 jetstream-wf python3[242998]:     raise CalledProcessError(retcode, process.args,
+Oct 07 11:41:02 jetstream-wf python3[242998]: subprocess.CalledProcessError: Command '['git', 'rev-parse', 'HEAD']' returned non-zero exit status 128.
+Oct 07 11:41:02 jetstream-wf systemd[1]: js-wf-online-blob-normal100k-20261007.service: Main process exited, code=exited, status=1/FAILURE
+Oct 07 11:41:02 jetstream-wf systemd[1]: js-wf-online-blob-normal100k-20261007.service: Failed with result 'exit-code'.

@@ -1,0 +1,11 @@
+Oct 07 11:43:18 jetstream-wf systemd[1]: Started js-wf-online-blob-normal100k-admitted-20261007.service - /usr/bin/python3 /tmp/run_online_blob_normal100k.py.
+Oct 07 11:43:25 jetstream-wf python3[255270]: Traceback (most recent call last):
+Oct 07 11:43:25 jetstream-wf python3[255270]:   File "/tmp/run_online_blob_normal100k.py", line 26, in <module>
+Oct 07 11:43:25 jetstream-wf python3[255270]:     actual=live_process_admission.admit(child,command,{key:env[key] for key in keys},repo/'sim',binary,shared.sha(binary));save('actual-sdk.json',actual)
+Oct 07 11:43:25 jetstream-wf python3[255270]:            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Oct 07 11:43:25 jetstream-wf python3[255270]:   File "/home/exedev/js-wf/scripts/live_process_admission.py", line 50, in admit
+Oct 07 11:43:25 jetstream-wf python3[255270]:     raise RuntimeError(f'SDK exited before stable identity admission: exit={child.returncode}, observations={observations}')
+Oct 07 11:43:25 jetstream-wf python3[255270]: RuntimeError: SDK exited before stable identity admission: exit=1, observations=1
+Oct 07 11:43:25 jetstream-wf systemd[1]: js-wf-online-blob-normal100k-admitted-20261007.service: Main process exited, code=exited, status=1/FAILURE
+Oct 07 11:43:25 jetstream-wf systemd[1]: js-wf-online-blob-normal100k-admitted-20261007.service: Failed with result 'exit-code'.
+Oct 07 11:43:25 jetstream-wf systemd[1]: js-wf-online-blob-normal100k-admitted-20261007.service: Consumed 5.103s CPU time.
