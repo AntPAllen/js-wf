@@ -1,0 +1,24 @@
+{
+  "unit": "js-wf-bulk-soak-checkpoint8520-copy-20261007.service",
+  "command": [
+    "systemd-run",
+    "--user",
+    "--unit=js-wf-bulk-soak-checkpoint8520-copy-20261007",
+    "--property=Type=exec",
+    "--property=RemainAfterExit=yes",
+    "--property=Restart=no",
+    "--property=RuntimeMaxSec=20min",
+    "--property=WorkingDirectory=/home/exedev/js-wf",
+    "--property=StandardOutput=append:/tmp/bulk-soak-checkpoint8520-copy-producer-20261007.log",
+    "--property=StandardError=inherit",
+    "--setenv=PATH=/home/exedev/.codex/packages/app-server-daemon/releases/0.160.1-x86_64-unknown-linux-musl/codex-path:/home/exedev/.local/bin:/home/exedev/.codex/tmp/arg0/codex-arg0bGVOeW:/home/exedev/.codex/packages/app-server-daemon/releases/0.160.1-x86_64-unknown-linux-musl/codex-path:/home/exedev/.codex/tmp/arg0/codex-arg0ALRmXg:/home/exedev/.codex/packages/app-server-daemon/releases/0.160.0-x86_64-unknown-linux-musl/codex-path:/home/exedev/.codex/tmp/arg0/codex-arg0LJgNL8:/usr/local/lib/codex/releases/rust-v0.160.0-x86_64-unknown-linux-musl-4fcc47ab57f52ff7/codex-path:/home/exedev/.local/bin:/home/exedev/.local/bin:/exe.dev/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/snap/bin",
+    "--setenv=PYTHONDONTWRITEBYTECODE=1",
+    "/usr/bin/python3",
+    "/home/exedev/js-wf/scripts/run-bulk-soak-copied-checkpoint.py",
+    "--root",
+    "/tmp/js-wf-bulk-soak-checkpoint8520-copy-20261007"
+  ],
+  "initial_state": "Restart=no\nRuntimeMaxUSec=20min\nMainPID=3594390\nResult=success\nExecMainStatus=0\nActiveState=active\nSubState=running\n",
+  "source": "5c6cc85a4e34f05d7fca63e5c3e8eb93eca35060",
+  "scope": "Full238560 copied cohort / original20s attempt /6m SDK /4CPU/GOGC500/4GiB. Durable diagnostic execution only, no qualification from launch; no restart."
+}

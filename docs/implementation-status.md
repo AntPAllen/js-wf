@@ -38,6 +38,10 @@ partial no-space evidence, are preserved to S3. The current normal simulation
 qualifier has completed successfully at its recorded source; the ten-minute consumer-leader component is now
 accepted in its executed-source scope as recorded below.
 
+## Full checkpoint8520 quiescent copied audit accepted — 2026-10-07
+
+Clean5c6cc85 checks all238560 invocations/journals/terminals and2630779 entries in14.316318492s within original20s. Full original archive restored fresh:15401files/7,663,385,263bytes; every byte/mode/mtime verified before opening five copied stores. Actual five stock2.15.0 executables match original hashes, original Raft identities/fresh container identities and all four R5 source replicas verify. Independent source/dependency/SDK/server/mount/closure review verifies every20617-member complete diagnostic archive and unchanged original complete census. [Evidence](scale/bulk-soak-checkpoint8520-copy-2026-10-07/). This proves quiescent full-cohort audit capacity; original24h remains failed, live writes/faults and historical cause remain separate. Journal delivery/decoding dominates the copied timing; further bounded tracing/profiling is next. No deadline/count reduction or old smoke/model rerun.
+
 ## Full checkpoint8520 copied audit prepared — 2026-10-07
 
 New opt-in diagnostic restores every original closed fixture member from the committed complete archive before opening only the fresh five-node stores. It keeps the complete238560-invocation cutoff, original R5 identities, four current R5 sources, same chunked concurrent-state invariant checker and20s attempt budget. Native profile retains4CPU/GOGC500/4GiB/2m sync/explicit routes, with exact source/dependency/actual SDK/server observations and untouched original after-check. Quiescent copied capacity is diagnostic, not original24h acceptance or a concurrent fault reproduction. Compilation passes; native and independent review remain pending. No original restart or deadline relaxation.

@@ -5550,3 +5550,8 @@ Clean dc88aab completes original50000 workload at284.64s with packaged `wf proje
 ## Original24h journal failure preserved — 2026-10-07
 
 The original757454a full24h journal producer/actualSDK3461745 reaches a native exit1 after61168.65s, batch8520/cutoff238560 retained checkpoint exceeding unchanged20s attempts/60s total. Third attempt reaches179520 journals/1438910 entries; this is incomplete evidence and does not qualify24h. Pinned reviewer rejects and fresh independent preservation verifies source equality and every member/current file of the15402-member complete archive without reopening originals. Deadline stacks locate pending chunked journal scan; root cause remains unconfirmed. No replacement or gate relaxation. [Terminal evidence](scale/bulk-journal-24h-2026-10-06/terminal/).
+
+
+## Full checkpoint8520 copied capacity accepted — 2026-10-07
+
+Clean5c6cc85 verifies the entire failed238560-invocation cohort on a full fresh byte/mode/mtime-verified original restore:238560 journals/terminals,2630779 entries in14.316318492s under unchanged20s. Same five actual stockNATS2.15.0 binary hashes/original Raft identities/four current R5 sources and4CPU/GOGC500/4GiB/2m sync/explicit routes are retained. Independent review verifies all original bytes unchanged and complete20617-member diagnostic archive. This isolates quiescent capacity from original live failures; no historical cause attribution or24h acceptance. Journal pipeline/live fault interaction remains to diagnose. [Evidence](scale/bulk-soak-checkpoint8520-copy-2026-10-07/).
