@@ -1,0 +1,18 @@
+Oct 07 11:00:51 jetstream-wf systemd[1]: Started js-wf-worker-leaf-wire-20261007.service - /usr/bin/python3 /home/exedev/js-wf/scripts/run-worker-domain-controls.py --case standalone-leaf --root /tmp/js-wf-worker-leaf-wire-20261007.
+Oct 07 11:01:03 jetstream-wf python3[18458]: ACTUAL_WORKER_SDK 21577
+Oct 07 11:01:56 jetstream-wf python3[18458]: Traceback (most recent call last):
+Oct 07 11:01:56 jetstream-wf python3[18458]:   File "/home/exedev/js-wf/scripts/run-worker-domain-controls.py", line 163, in <module>
+Oct 07 11:01:56 jetstream-wf python3[18458]:     main()
+Oct 07 11:01:56 jetstream-wf python3[18458]:   File "/home/exedev/js-wf/scripts/run-worker-domain-controls.py", line 144, in main
+Oct 07 11:01:56 jetstream-wf python3[18458]:     report=worker_leaf_wire.validate(proof_path.parent)
+Oct 07 11:01:56 jetstream-wf python3[18458]:            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Oct 07 11:01:56 jetstream-wf python3[18458]:   File "/home/exedev/js-wf/scripts/worker_leaf_wire.py", line 62, in validate
+Oct 07 11:01:56 jetstream-wf python3[18458]:     outgoing=protocol(streams['client_to_server']);incoming=protocol(streams['server_to_client'],True)
+Oct 07 11:01:56 jetstream-wf python3[18458]:              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Oct 07 11:01:56 jetstream-wf python3[18458]:   File "/home/exedev/js-wf/scripts/worker_leaf_wire.py", line 19, in protocol
+Oct 07 11:01:56 jetstream-wf python3[18458]:     if op in sizes:
+Oct 07 11:01:56 jetstream-wf python3[18458]:        ^^^^^^^^^^^
+Oct 07 11:01:56 jetstream-wf python3[18458]: TypeError: unhashable type: 'bytearray'
+Oct 07 11:01:56 jetstream-wf systemd[1]: js-wf-worker-leaf-wire-20261007.service: Main process exited, code=exited, status=1/FAILURE
+Oct 07 11:01:56 jetstream-wf systemd[1]: js-wf-worker-leaf-wire-20261007.service: Failed with result 'exit-code'.
+Oct 07 11:01:56 jetstream-wf systemd[1]: js-wf-worker-leaf-wire-20261007.service: Consumed 43.948s CPU time, 1.0G memory peak, 0B memory swap peak.

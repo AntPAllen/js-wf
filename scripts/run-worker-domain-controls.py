@@ -151,7 +151,7 @@ def main():
                 assert {report['test'] for report in reports}=={worker_leaf_wire.TEST+'/'+mode for mode in ('static','kv','auto')}
                 save('leaf-wire-review.json',reports)
 
-    except (AssertionError,ValueError,KeyError) as exc:
+    except (AssertionError,ValueError,KeyError,TypeError) as exc:
         error = str(exc) or 'native coverage rejected'
     save('row-review.json', dict(qualification=result, rejection=error))
     proof = fixture_archive.capture(root, root.with_suffix('.tar.gz'), root.with_name(root.name+'-proof'), compresslevel=1)

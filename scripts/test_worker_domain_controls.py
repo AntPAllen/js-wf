@@ -10,6 +10,19 @@ spec.loader.exec_module(controls)
 
 
 class WorkerDomainCoverageTests(unittest.TestCase):
+    def test_actual_leaf_log_requires_all_modes_and_child_wire_captures(self):
+        log=(REPO/'docs/scale/worker-leaf-wire-2026-10-07/native-race/native.log').read_text()
+        controls.verify_leaf_log(log)
+        for token in ('worker leaf wire: test=TestWorkerStandaloneCommandsThroughLeaf/static',
+                      'worker standalone process domain="WFWORKER"'):
+            line=next(line for line in log.splitlines() if token in line)
+            for malformed in (log.replace(line,''),log+'\n'+line):
+                with self.assertRaises(AssertionError):controls.verify_leaf_log(malformed)
+        for malformed in (log.replace('truncated=false','truncated=true',1),
+                          log.replace('local=WFEDGE','local=WFWORKER',1),
+                          log.replace('--- PASS: TestWorkerStandaloneCommandsThroughLeaf/auto','--- SKIP: TestWorkerStandaloneCommandsThroughLeaf/auto')):
+            with self.assertRaises(AssertionError):controls.verify_leaf_log(malformed)
+
     def test_actual_native_quadruple_rejects_missing_and_wrong_coverage(self):
         log = (REPO/'docs/scale/worker-cli-domain-2026-10-06/native-race/native.log').read_text()
         controls.verify_log(log)
