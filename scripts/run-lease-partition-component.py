@@ -120,7 +120,7 @@ def prepare_official(root, revision, shared, save, env, version):
     original = fixture_archive.inventory(Path(download['Dir']))
     assert fixture_archive.inventory(copied) == original
     save('official-nats-source-before.json', original)
-    command = ['go', 'list', '-mod=readonly', '-deps', '-f',
+    command = ['go', 'list', '-mod=readonly', '-buildvcs=false', '-deps', '-f',
                '{{.Dir}}|{{join .GoFiles " "}}|{{join .CgoFiles " "}}', '.']
     deps = subprocess.check_output(command, cwd=copied, env=env, text=True)
     (root/'official-dependencies.txt').write_text(deps)
