@@ -100,6 +100,8 @@ def main():
                          ('offline_hold_ns', 2_000_000_000), ('restart_started', '2000-01-01T00:00:00Z')):
             reject('peer-outage-' + key, lambda r, s, k=key, value=bad: r['state_connection_loss'].__setitem__(k, value))
         reject('closed-watch-substituted-for-idle', lambda r, s: attempt_frames(r)[0].__setitem__('error', 'closed before initial completion'))
+        reject('missing-timeout-decision', lambda r, s: r['state_connection_loss'].__setitem__('frames', [f for f in r['state_connection_loss']['frames'] if f['event'] != 'watch_idle_timeout']))
+        reject('timeout-decision-after-heal', lambda r, s: next(f for f in r['state_connection_loss']['frames'] if f['event']=='watch_idle_timeout').__setitem__('time', '2100-01-01T00:00:00Z'))
         reject('premature-idle-timeout', lambda r, s: attempt_frames(r)[0].__setitem__('elapsed_ns', 1_000_000_000))
     report = dict(admitted=admitted, rejected_controls=controls, rejected_count=len(controls),
                   scope='Mutations of actual retained fault result and server observations; no broker or original store opened.')

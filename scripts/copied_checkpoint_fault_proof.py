@@ -83,7 +83,8 @@ def validate(result, servers, identity):
             assert connection['exposed_status'] == 'RECONNECTING' and connection['disconnect_error']
             assert stamp(connection['native_created']) <= stamp(kill['kill_started']) <= stamp(connection['disconnected']) <= stamp(connection['exposed'])
             assert stamp(kill['source_stopped']) <= stamp(connection['exposed']) <= stamp(connection['close_started'])
-            assert stamp(connection['close_finished']) < stamp(connection['restart_started']) <= stamp(result['restart_completed'])
+            assert stamp(connection['restart_started']) <= stamp(result['restart_completed'])
+            assert stamp(connection['exposed']) <= stamp(connection['close_started']) <= stamp(connection['close_finished'])
             hold = (stamp(connection['restart_started']) - stamp(kill['source_stopped'])).total_seconds()
             assert hold >= 3 and connection['offline_hold_ns'] >= 3_000_000_000
             assert abs(hold - connection['offline_hold_ns']/1e9) < .00001
@@ -92,7 +93,7 @@ def validate(result, servers, identity):
             assert stamp(connection['close_finished']) <= stamp(kill['kill_started'])
         assert 0 <= connection['buffered_before_exposure'] < 238560
         assert connection['attempts'] == len(watches) and 2 <= len(watches) <= 3
-        assert watches[0]['StopError'] in (('<nil>',) if peer_outage else ('nats: connection closed', 'nats: invalid subscription'))
+        assert watches[0]['StopError'] in (('<nil>', 'nats: consumer not found', 'nats: connection closed', 'nats: invalid subscription') if peer_outage else ('nats: connection closed', 'nats: invalid subscription'))
         frames = connection['frames']
         assert frames and len({f['deadline'] for f in frames}) == 1
         returns = [f for f in frames if f['event'] == 'attempt_return']
@@ -103,7 +104,16 @@ def validate(result, servers, identity):
         assert first_frame['received'] < 238560
         if peer_outage:
             assert 'made no progress' in first_frame['error'] and first_frame['elapsed_ns'] >= 2_000_000_000
-            assert stamp(connection['close_finished']) <= stamp(first_frame['time']) < stamp(connection['restart_started'])
+            decisions = [f for f in frames if f['event'] == 'watch_idle_timeout']
+            assert len(decisions) == 1
+            decision = decisions[0]
+            assert 'made no progress' in decision['error'] and not decision['initial_complete']
+            assert decision['received'] == first_frame['received'] and decision['included'] == first_frame['included']
+            created_frames = [f for f in frames if f['event'] == 'watch_created']
+            assert created_frames and (stamp(decision['time']) - stamp(created_frames[0]['time'])).total_seconds() >= 2
+            assert stamp(connection['exposed']) < stamp(decision['time']) <= stamp(connection['close_started'])
+            assert stamp(decision['time']) < stamp(connection['restart_started'])
+            assert stamp(connection['close_finished']) <= stamp(first_frame['time'])
         assert final['initial_complete'] and not final.get('error')
         assert final['received'] == result['readiness']['KV_WF_STATE']['state']['messages']
         assert final['included'] == result['cutoff']

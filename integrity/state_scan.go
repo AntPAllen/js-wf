@@ -126,7 +126,9 @@ func initialAuditStateUsingProgress(ctx context.Context, state jetstream.KeyValu
 			select {
 			case entry, ok = <-watch.Updates():
 			default:
-				return nil, fmt.Errorf("state watch made no progress: %w", nats.ErrTimeout)
+				failure := fmt.Errorf("state watch made no progress: %w", nats.ErrTimeout)
+				emit("watch_idle_timeout", failure)
+				return nil, failure
 			}
 		case entry, ok = <-watch.Updates():
 		}

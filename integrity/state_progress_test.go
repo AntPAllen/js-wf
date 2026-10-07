@@ -173,3 +173,57 @@ func TestStateProgressBoundedRetryAndCancellation(t *testing.T) {
 		t.Fatal("cancellation lost to buffered completion/idle tick")
 	}
 }
+
+type stateProgressStopKV struct {
+	jetstream.KeyValue
+	watch jetstream.KeyWatcher
+}
+
+func (s stateProgressStopKV) Bucket() string { return "WF_STATE" }
+func (s stateProgressStopKV) WatchAll(context.Context, ...jetstream.WatchOpt) (jetstream.KeyWatcher, error) {
+	return s.watch, nil
+}
+
+type stateProgressStopWatch struct {
+	jetstream.KeyWatcher
+	onStop func() error
+}
+
+func (s stateProgressStopWatch) Stop() error { _ = s.KeyWatcher.Stop(); return s.onStop() }
+
+func TestStateProgressTimeoutDecisionPrecedesCleanup(t *testing.T) {
+	watch := &auditWatch{updates: make(chan jetstream.KeyValueEntry, 1)}
+	watch.updates <- auditWatchEntry{key: "partial", rev: 1}
+	clock := &scriptedStateProgress{ticks: make(chan time.Time, 1)}
+	clock.onReset = func(int) { clock.ticks <- time.Unix(2, 0) }
+	var frames []StateSnapshotObservation
+	decided := false
+	ctx := WithStateSnapshotObserver(t.Context(), func(frame StateSnapshotObservation) {
+		frames = append(frames, frame)
+		if frame.Event == "watch_idle_timeout" {
+			decided = true
+			if frame.InitialComplete || frame.Received != 1 || frame.Error == "" {
+				t.Error("invalid timeout decision")
+			}
+		}
+	})
+	wrapped := stateProgressStopWatch{KeyWatcher: watch, onStop: func() error {
+		if !decided || !clock.stopped {
+			t.Error("cleanup began before timeout decision/idle clock stop")
+		}
+		// Cleanup may depend on healing and report an already removed consumer.
+		// It must not change the earlier typed snapshot failure or certify the set.
+		return jetstream.ErrConsumerNotFound
+	}}
+	value, err := initialAuditStateUsingProgress(ctx, stateProgressStopKV{watch: wrapped}, func(string) bool { return true }, func() auditStateProgressTimer { return clock })
+	if value != nil || !errors.Is(err, nats.ErrTimeout) || !watch.stopped {
+		t.Fatalf("partial snapshot or failure changed: %v", err)
+	}
+	indices := map[string]int{}
+	for i, frame := range frames {
+		indices[frame.Event] = i
+	}
+	if !decided || indices["watch_idle_timeout"] >= indices["watch_stop_start"] || indices["watch_stop_start"] >= indices["watch_stopped"] || indices["watch_stopped"] >= indices["attempt_return"] {
+		t.Fatalf("decision and cleanup conflated: %+v", frames)
+	}
+}

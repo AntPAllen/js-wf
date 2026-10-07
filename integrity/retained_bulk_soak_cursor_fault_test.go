@@ -378,7 +378,7 @@ func TestRetainedAuditBulkSoakCheckpoint8520CursorOwnerRestartVerifiedCopy(t *te
 			qualification = qualification && proof.OfflineHoldNS >= int64(3*time.Second) && proof.ExposedStatus == "RECONNECTING"
 			var idleTimeout bool
 			for _, frame := range proof.Frames {
-				if frame.Event == "attempt_return" && !frame.InitialComplete && strings.Contains(frame.Error, "made no progress") && frame.Time.Before(proof.RestartStarted) {
+				if frame.Event == "watch_idle_timeout" && !frame.InitialComplete && strings.Contains(frame.Error, "made no progress") && frame.Time.Before(proof.RestartStarted) {
 					idleTimeout = true
 				}
 			}
