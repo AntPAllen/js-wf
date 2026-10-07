@@ -14,6 +14,7 @@ import fixture_archive
 
 REPO = Path(__file__).resolve().parents[1]
 TEST = 'TestPostgresProjectionCrashAndSessionLossFiftyThousandInvocationsInJetStreamDomain'
+STARTUP_TEST = 'TestStandalonePostgresProjectionCrashAndSessionLossFiftyThousandInvocationsThroughLeafWithSQLStartupCancellation'
 LEAF_TEST = 'TestStandalonePostgresProjectionCrashAndSessionLossFiftyThousandInvocationsThroughLeaf'
 STANDALONE_TEST = 'TestStandalonePostgresProjectionCrashAndSessionLossFiftyThousandInvocationsInJetStreamDomain'
 
@@ -24,8 +25,8 @@ def require(value, message):
 
 
 def verify_fault(proof, log, killed_log, sdk_hash, profile="sdk"):
-    require(profile in ("sdk","standalone","standalone-leaf"), "known projection profile required")
-    test = TEST if profile=="sdk" else LEAF_TEST if profile=="standalone-leaf" else STANDALONE_TEST
+    require(profile in ("sdk","standalone","standalone-leaf","standalone-leaf-startup"), "known projection profile required")
+    test = STARTUP_TEST if profile=='standalone-leaf-startup' else TEST if profile=="sdk" else LEAF_TEST if profile=="standalone-leaf" else STANDALONE_TEST
     require(log.rstrip().endswith('PASS') and '--- FAIL:' not in log and '--- SKIP:' not in log,
             'native terminal pass required')
     require(re.findall(r'^--- PASS: (\w+) \([0-9.]+s\)$', log, re.M)==[test], 'exact named full case required')
@@ -66,6 +67,16 @@ def verify_fault(proof, log, killed_log, sdk_hash, profile="sdk"):
                 domain_api_requests=proof['domain_api_requests'],partial_catchup_rows=proof['catchup_admitted_rows'],final_lag=0)
 
 
+def verify_child(p, binary, revision):
+    instant=lambda x:datetime.fromisoformat(x.replace('Z','+00:00'))
+    require(p['sha256']==binary['sha256'] and not Path('/proc',str(p['pid'])).exists(), 'actual matching closed command child required')
+    require(int(p['stat'].split(') ',1)[1].split()[19])>0 and int(p['stat'].split(' ',1)[0])==p['pid'], 'actual process birth identity required')
+    require(p['argv'][:2]==[binary['path'],'-url'] and p['argv'][2].startswith('nats://') and p['argv'][3:]==['-domain','WFVIEW','project'], 'actual explicit domain project argv required')
+    require(p['working_directory']==str(REPO) and p['environment']==dict(GOMAXPROCS='2',GOMEMLIMIT='2GiB',GOWORK='off',GOFLAGS=''), 'actual child cwd/profile required')
+    require('vcs.revision='+revision in p['build_info'] and 'vcs.modified=false' in p['build_info'] and '-race=true' not in p['build_info'] and re.search(r'path\s+js-wf/cmd/wf',p['build_info']), 'actual command build identity required')
+    require(p['application_name']=='wf-project-'+p['phase'] and p['writer_backend_pid']>0 and re.fullmatch('[0-9a-f]{64}',p['postgres_dsn_sha256']), 'admitted SQL writer identity/DSN hash required')
+    require(instant(p['admitted_at'])<instant(p['reaped_at']), 'actual child admission before reap required')
+
 def verify_standalone(proof, revision, case):
     binary=proof['standalone_binary']; records=proof['standalone_projectors']
     require(binary['source']==revision and binary['package']=='js-wf/cmd/wf', 'packaged operator source/package required')
@@ -77,13 +88,7 @@ def verify_standalone(proof, revision, case):
     require(len({p['pid'] for p in records})==3, 'distinct child process identities required')
     instant=lambda x:datetime.fromisoformat(x.replace('Z','+00:00'))
     for p in records:
-        require(p['sha256']==binary['sha256'] and not Path('/proc',str(p['pid'])).exists(), 'actual matching closed command child required')
-        require(int(p['stat'].split(') ',1)[1].split()[19])>0 and int(p['stat'].split(' ',1)[0])==p['pid'], 'actual process birth identity required')
-        require(p['argv'][:2]==[binary['path'],'-url'] and p['argv'][2].startswith('nats://') and p['argv'][3:]==['-domain','WFVIEW','project'], 'actual explicit domain project argv required')
-        require(p['working_directory']==str(REPO) and p['environment']==dict(GOMAXPROCS='2',GOMEMLIMIT='2GiB',GOWORK='off',GOFLAGS=''), 'actual child cwd/profile required')
-        require('vcs.revision='+revision in p['build_info'] and 'vcs.modified=false' in p['build_info'] and '-race=true' not in p['build_info'] and re.search(r'path\s+js-wf/cmd/wf',p['build_info']), 'actual command build identity required')
-        require(p['application_name']=='wf-project-'+p['phase'] and p['writer_backend_pid']>0 and re.fullmatch('[0-9a-f]{64}',p['postgres_dsn_sha256']), 'admitted SQL writer identity/DSN hash required')
-        require(instant(p['admitted_at'])<instant(p['reaped_at']), 'actual child admission before reap required')
+        verify_child(p,binary,revision)
     initial, faulted, replacement=records
     require(initial['exit_code']==-1 and initial['exit_signal']=='killed' and initial['wait_error'], 'initial actual SIGKILL status required')
     require(initial['admitted_at']==proof['projection_process_observed_before_kill'] and instant(initial['reaped_at'])<=instant(proof['projection_process_stopped']), 'initial process observed/killed before workload required')
@@ -117,9 +122,9 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--root',type=Path,required=True)
     parser.add_argument('--output',type=Path,required=True)
-    parser.add_argument('--projector-profile',choices=('sdk','standalone','standalone-leaf'),default='sdk')
+    parser.add_argument('--projector-profile',choices=('sdk','standalone','standalone-leaf','standalone-leaf-startup'),default='sdk')
     args = parser.parse_args(); root=args.root.absolute()
-    test = TEST if args.projector_profile=='sdk' else LEAF_TEST if args.projector_profile=='standalone-leaf' else STANDALONE_TEST
+    test = STARTUP_TEST if args.projector_profile=='standalone-leaf-startup' else TEST if args.projector_profile=='sdk' else LEAF_TEST if args.projector_profile=='standalone-leaf' else STANDALONE_TEST
     load = lambda name: json.loads((root/name).read_text())
     execution=load('execution.json'); rev=execution['source']
     profile_record=load('projector-profile.json') if (root/'projector-profile.json').exists() else dict(profile='sdk',test=TEST)
@@ -156,7 +161,7 @@ def main():
     else:
         verify_standalone(proof,rev,case)
     leaf_wire=None
-    if args.projector_profile=='standalone-leaf':
+    if args.projector_profile in ('standalone-leaf','standalone-leaf-startup'):
         import sql_leaf_stream_wire
         require(sdk['admission']['stable_identity_observed_twice'] and sdk['count_override_absence_observed_at_same_process_birth'],'actual stable SDK/count-override absence required')
         unit=subprocess.check_output(['systemctl','show',root.name+'.service','-p','LoadState','-p','ExecMainPID','-p','ExecMainStatus','-p','SubState','-p','MainPID','-p','Result','-p','InvocationID','-p','Restart'],text=True)
@@ -166,6 +171,10 @@ def main():
         logged=re.findall(r'SQL projector leaf wire: phase=(initial|catchup|replacement) pid=(\d+) records=(\d+) client_bytes=(\d+) server_bytes=(\d+)',(root/'native.log').read_text())
         expected_wire_logs={(p['phase'],str(p['pid']),str(leaf_wire['phases'][p['phase']]['frame_records']),str(leaf_wire['phases'][p['phase']]['streams']['client_to_server']['bytes']),str(leaf_wire['phases'][p['phase']]['streams']['server_to_client']['bytes'])) for p in proof['standalone_projectors']}
         require(len(logged)==3 and set(logged)==expected_wire_logs,'all actual child wire logs/proof counters required')
+    startup=None
+    if args.projector_profile=='standalone-leaf-startup':
+        import sql_startup_cancellation
+        startup=sql_startup_cancellation.validate(case,proof,rev,(root/'native.log').read_text(),verify_child)
     rows=verify_rows(case/'before-rebuild.jsonl',case/'after-rebuild.jsonl',proof['row_and_indexed_column_sha256'])
     trace=json.loads((case/'projection-dependency-trace.json').read_text())
     minimum = 2 if args.projector_profile=='sdk' else 1
@@ -183,6 +192,9 @@ def main():
                 scope=('Packaged wf project; parent SDK trace is not a child wire-prefix trace. ' if args.projector_profile=='standalone' else '')+'Full50000 PostgreSQL/domain projection SIGKILL, writer session loss, library journal restart and exact exposed-row/index rebuild. No NATS process SIGKILL, independent copied-store audit, leaf, natural reply loss, fullmatrix, million drain or actual24h qualification.')
     if leaf_wire is not None:
         report['leaf_wire']=leaf_wire;report['terminal_unit']=unit;report['scope']=leaf_wire['scope']
+    if startup is not None:
+        report['sql_startup_cancellation']=startup
+        report['scope']+=' Actual SQL schema-lock startup SIGTERM/exit0, zero residual SQL sessions/locks/rows and no premature projection durables.'
     args.output.parent.mkdir(parents=True,exist_ok=True);args.output.write_text(json.dumps(report,indent=2)+'\n')
     print(json.dumps(dict(source=rev,rows=50000,archive_members=meta['members'])))
 

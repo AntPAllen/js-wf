@@ -21,9 +21,9 @@ TEST = 'TestPostgresProjectionCrashAndSessionLossFiftyThousandInvocationsInJetSt
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--root', type=Path, required=True)
-    parser.add_argument('--projector-profile', choices=('sdk','standalone','standalone-leaf'), default='sdk')
+    parser.add_argument('--projector-profile', choices=('sdk','standalone','standalone-leaf','standalone-leaf-startup'), default='sdk')
     args = parser.parse_args()
-    test = TEST if args.projector_profile=='sdk' else 'TestStandalonePostgresProjectionCrashAndSessionLossFiftyThousandInvocationsThroughLeaf' if args.projector_profile=='standalone-leaf' else 'TestStandalonePostgresProjectionCrashAndSessionLossFiftyThousandInvocationsInJetStreamDomain'
+    test = 'TestStandalonePostgresProjectionCrashAndSessionLossFiftyThousandInvocationsThroughLeafWithSQLStartupCancellation' if args.projector_profile=='standalone-leaf-startup' else TEST if args.projector_profile=='sdk' else 'TestStandalonePostgresProjectionCrashAndSessionLossFiftyThousandInvocationsThroughLeaf' if args.projector_profile=='standalone-leaf' else 'TestStandalonePostgresProjectionCrashAndSessionLossFiftyThousandInvocationsInJetStreamDomain'
     root = args.root.absolute()
     assert not root.exists() and not root.is_relative_to(REPO)
     assert shutil.disk_usage(root.parent).free >= 5*(1 << 30), '5GiB disk admission required'

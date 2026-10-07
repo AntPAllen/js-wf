@@ -129,6 +129,17 @@ func TestStandalonePostgresProjectionCrashAndSessionLossFiftyThousandInvocations
 	runProjectionRecoveryWithTransport(t, true, true, true, "WFVIEW")
 }
 
+// The original full case follows a real SQL startup cancellation boundary.
+func TestStandalonePostgresProjectionCrashAndSessionLossFiftyThousandInvocationsThroughLeafWithSQLStartupCancellation(t *testing.T) {
+	if os.Getenv("WF_PROJECTION_POSTGRES_FAULT_ROOT") == "" || os.Getenv("WF_TEST_POSTGRES_DSN") == "" {
+		t.Skip("opt-in retained full packaged SQL leaf startup cancellation proof")
+	}
+	if os.Getenv("WF_PROJECTION_COUNT") != "" {
+		t.Fatal("full SQL startup proof requires default50000 count")
+	}
+	runProjectionRecoveryStartup(t, true, true, true, true, "WFVIEW")
+}
+
 func runProjectionRecoversFiftyThousandInvocations(t *testing.T, postgresFault bool, domains ...string) {
 	runProjectionRecovery(t, postgresFault, false, domains...)
 }
@@ -138,6 +149,10 @@ func runProjectionRecovery(t *testing.T, postgresFault, standalone bool, domains
 }
 
 func runProjectionRecoveryWithTransport(t *testing.T, postgresFault, standalone, leaf bool, domains ...string) {
+	runProjectionRecoveryStartup(t, postgresFault, standalone, leaf, false, domains...)
+}
+
+func runProjectionRecoveryStartup(t *testing.T, postgresFault, standalone, leaf, sqlStartup bool, domains ...string) {
 	t.Helper()
 	count := 50000
 	if value := os.Getenv("WF_PROJECTION_COUNT"); value != "" {
@@ -248,6 +263,12 @@ func runProjectionRecoveryWithTransport(t *testing.T, postgresFault, standalone,
 	if standalone {
 		proof["projector_profile"] = "standalone"
 		standaloneBinary = buildStandaloneProjection(t, ctx, root, proof)
+		if sqlStartup {
+			if !leaf || !postgresFault || domain != "WFVIEW" {
+				t.Fatal("SQL startup requires full packaged SQL leaf profile")
+			}
+			proof["sql_startup_cancellation"] = cancelStandaloneSQLStartup(t, ctx, db, all[0], standaloneBinary, root, projectorURL, domain)
+		}
 		initial := startStandaloneProjection(t, ctx, db, standaloneBinary, root, "initial", projectorURL, domain, leaf)
 		var rows int
 		if err := db.QueryRowContext(ctx, `SELECT count(*) FROM wf_visibility`).Scan(&rows); err != nil || rows != 0 {

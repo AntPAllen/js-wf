@@ -103,6 +103,12 @@ func buildStandaloneProjection(t *testing.T, ctx context.Context, root string, p
 
 func startStandaloneProjection(t *testing.T, ctx context.Context, db *sql.DB, binary, root, phase, natsURL, domain string, leafTransport ...bool) *standaloneProjection {
 	t.Helper()
+	leaf := len(leafTransport) > 0 && leafTransport[0]
+	return startStandaloneProjectionReady(t, ctx, db, binary, root, phase, natsURL, domain, leaf, 0)
+}
+
+func startStandaloneProjectionReady(t *testing.T, ctx context.Context, db *sql.DB, binary, root, phase, natsURL, domain string, leaf bool, blocker int) *standaloneProjection {
+	t.Helper()
 	app := "wf-project-" + phase
 	parsed, err := url.Parse(os.Getenv("WF_TEST_POSTGRES_DSN"))
 	if err != nil {
@@ -115,7 +121,7 @@ func startStandaloneProjection(t *testing.T, ctx context.Context, db *sql.DB, bi
 	originalURL := natsURL
 	var proxy *testcluster.ClientProxy
 	wireRoot := ""
-	if len(leafTransport) > 0 && leafTransport[0] {
+	if leaf {
 		wireRoot = filepath.Join(root, "projector-"+phase+"-leaf-wire")
 		if err = os.Mkdir(wireRoot, 0700); err != nil {
 			t.Fatal(err)
@@ -159,7 +165,11 @@ func startStandaloneProjection(t *testing.T, ctx context.Context, db *sql.DB, bi
 			t.Fatalf("standalone %s exited before writer admission: %v", phase, process.err)
 		default:
 		}
-		err = db.QueryRowContext(ctx, `SELECT l.pid FROM pg_locks l JOIN pg_stat_activity a ON a.pid=l.pid WHERE l.locktype='advisory' AND l.mode='ExclusiveLock' AND l.granted AND a.application_name=$1 AND l.database=(SELECT oid FROM pg_database WHERE datname=current_database()) LIMIT 1`, app).Scan(&backend)
+		if blocker > 0 {
+			err = db.QueryRowContext(ctx, `SELECT a.pid FROM pg_stat_activity a WHERE a.application_name=$1 AND a.wait_event_type='Lock' AND $2=ANY(pg_blocking_pids(a.pid)) AND a.query LIKE 'CREATE %'`, app, blocker).Scan(&backend)
+		} else {
+			err = db.QueryRowContext(ctx, `SELECT l.pid FROM pg_locks l JOIN pg_stat_activity a ON a.pid=l.pid WHERE l.locktype='advisory' AND l.mode='ExclusiveLock' AND l.granted AND a.application_name=$1 AND l.database=(SELECT oid FROM pg_database WHERE datname=current_database()) LIMIT 1`, app).Scan(&backend)
+		}
 		if err == nil {
 			break
 		}
@@ -229,6 +239,7 @@ func startStandaloneProjection(t *testing.T, ctx context.Context, db *sql.DB, bi
 		t.Fatal(err)
 	}
 	process.record = map[string]any{"environment": actualEnvironment, "working_directory": cwd, "phase": phase, "pid": command.Process.Pid, "stat": string(stat), "argv": actualArgs, "sha256": hex.EncodeToString(actualHash[:]), "build_info": string(info), "postgres_dsn_sha256": hex.EncodeToString(dsnHash[:]), "application_name": app, "writer_backend_pid": backend, "admitted_at": time.Now().UTC(), "nats_target": originalURL, "nats_url": natsURL, "leaf_transport": proxy != nil}
+	process.record["startup_blocker_backend_pid"] = blocker
 	return process
 }
 
