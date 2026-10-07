@@ -1,5 +1,9 @@
 # Implementation status against the supplied plan
 
+## Complete current Tier1 race graph live — 2026-10-07
+
+The isolated full123-workload/395-pin race1000 qualifier is now actually live at362219f. Independent admission binds actual SDK1746503, originalcount1/60m/twoGoCPU/512MiB, race binary/argv/birth/profile, all2200 selected Git inputs, compiled/source inventories and retained no-restart user service. Historical full122 and focused online-blob results keep their original scopes. Original24h producer/observer/reviewer remain active. [Launch evidence and terminal requirements](scale/tier1-full123-2026-10-07/). Full123 race acceptance requires terminal per-workload coverage/unchanged sources/independent review; full123 normal100k remains pending. Full matrices, onlineGC, original million physical drain and actual24h remain open.
+
 ## Official RC2 scheduler-cleanup diagnostic accepted — 2026-10-07
 
 At clean `da8dc7d`, unchanged official v2.15.1-RC.2 reproduces the fresh two-message cleanup defect (memory1→0, clean reopen1; callbacks0; anchor/physical1/last2); exact copied dirty-count control reopens0. Actual named/package failure0.009s and control pass0.019s are retained; compilation wall time is separate. Independent review verifies598 upstream files, both compiled inventories, exact Git-bound runner/fixture, retained stores, unchanged production dependencies and annotated tag resolution to Go download commit d564fd6982a44cc47c4228b12f7a9b6c9f722a8c. Three complete stable/RC1/RC2 corpora accept;15 provenance substitutions reject with original bytes unchanged. Legacy roots were restored from full verified S3 copies; no native rerun/store reopen.
