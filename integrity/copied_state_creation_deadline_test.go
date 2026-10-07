@@ -7,19 +7,39 @@ import (
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/nats-io/nats.go/jetstream"
 )
+
+type creationMetadataFixtureJS struct {
+	jetstream.JetStream
+	calls    int
+	deadline time.Time
+}
+
+type creationMetadataFixtureKV struct{ jetstream.KeyValue }
+
+func (s *creationMetadataFixtureJS) KeyValue(ctx context.Context, bucket string) (jetstream.KeyValue, error) {
+	s.calls++
+	s.deadline, _ = ctx.Deadline()
+	return creationMetadataFixtureKV{}, nil
+}
 
 func TestCopiedCreationMetadataDeadlineDoesNotReplaceWatchParent(t *testing.T) {
 	parent, stop := context.WithTimeout(context.Background(), 20*time.Second)
 	defer stop()
 	deadline, _ := parent.Deadline()
 	state := &copiedCreationState{nativeCreationState: &nativeCreationState{parent: deadline, proof: map[string]any{}}}
-	js := copiedCreationJS{state: state}
+	lookup := &creationMetadataFixtureJS{}
+	js := copiedCreationJS{JetStream: lookup, state: state}
 	metadata, stopMetadata := context.WithTimeout(parent, 2*time.Second)
 	defer stopMetadata()
 	got, err := js.KeyValue(metadata, "WF_STATE")
 	if err != nil || got != state || !state.parent.Equal(deadline) {
 		t.Fatalf("metadata replaced full watch deadline: state=%v err=%v parent=%s", got, err, state.parent)
+	}
+	if lookup.calls != 1 || !lookup.deadline.Before(deadline) {
+		t.Fatal("normal native metadata lookup was skipped or inherited the wrong budget")
 	}
 	if short, ok := state.proof["metadata_deadline"].(time.Time); !ok || !short.Before(deadline) {
 		t.Fatal("short metadata admission deadline was not recorded separately")

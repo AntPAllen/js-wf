@@ -48,6 +48,13 @@ func (s copiedCreationJS) KeyValue(ctx context.Context, bucket string) (jetstrea
 		return nil, fmt.Errorf("creation metadata admission must stay inside the bound full audit parent")
 	}
 	s.state.proof["metadata_deadline"] = deadline.UTC()
+	started := time.Now()
+	healthy, err := s.JetStream.KeyValue(ctx, bucket)
+	s.state.proof["metadata_lookup"] = map[string]any{"started": started.UTC(), "returned": time.Now().UTC(), "deadline": deadline.UTC(), "error": fmt.Sprint(err)}
+	if err != nil {
+		return nil, err
+	}
+	s.state.KeyValue = healthy
 	return s.state, nil
 }
 

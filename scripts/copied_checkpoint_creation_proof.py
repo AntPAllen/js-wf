@@ -12,10 +12,15 @@ clock=importlib.util.module_from_spec(spec);spec.loader.exec_module(clock)
 ns=clock.timestamp_ns
 
 
-def validate(root,result,servers,identity):
+def validate(root,result,servers,identity,*,require_fresh_metadata=True):
     root=Path(root);p=result['state_creation_stall']
     assert p['creation_control_valid'] is True
     assert ns(p['metadata_deadline'])<ns(p['deadline'])
+    if require_fresh_metadata:
+        metadata=p['metadata_lookup']
+        assert metadata['deadline']==p['metadata_deadline'] and metadata['error']=='<nil>'
+        assert ns(p['deadline'])-20_000_000_000<=ns(metadata['started'])<=ns(metadata['returned'])<=ns(p['first_creation_started'])
+        assert ns(metadata['returned'])<ns(metadata['deadline'])
     assert result['cutoff']==116480 and not result.get('state_connection_loss')
     assert type(p['attempts']) is int and 2<=p['attempts']<=3
     assert type(p['parent_budget_ns']) is int and p['parent_budget_ns']==20_000_000_000
@@ -91,4 +96,4 @@ def validate(root,result,servers,identity):
     assert result['readiness_after']['KV_WF_STATE']['state']['consumer_count']==0
     return dict(first_creation_elapsed_ns=elapsed,attempts=p['attempts'],wire_frames=count,client_bytes=len(streams['client_to_server']),server_bytes=len(streams['server_to_client']),
                 actual_upstream_server_id=p['server_id'],full_included=116480,native_received=final['received'],held_publication_bytes=0,transport_joined_before_cursor_kill=True,
-                scope='Controlled R5 full copied cohort creation stall and cold cursor-owner recovery; no natural stall/cause, concurrent24h, physical store decoder or default release qualification.')
+                fresh_metadata_lookup_required=require_fresh_metadata,scope='Controlled R5 full copied cohort creation stall and cold cursor-owner recovery; no natural stall/cause, concurrent24h, physical store decoder or default release qualification.')

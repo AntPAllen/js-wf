@@ -56,6 +56,10 @@ def main():
         reject('creation-partial-values',lambda r,s:r['state_creation_stall']['frames'][-1].__setitem__('included',1))
         reject('creation-parent-changed',lambda r,s:r['state_creation_stall']['frames'][0].__setitem__('deadline','2030-01-01T00:00:00Z'))
         reject('creation-residual-state-consumer',lambda r,s:r['readiness_after']['KV_WF_STATE']['state'].__setitem__('consumer_count',1))
+        reject('creation-metadata-omitted',lambda r,s:r['state_creation_stall'].pop('metadata_lookup'))
+        reject('creation-metadata-failed',lambda r,s:r['state_creation_stall']['metadata_lookup'].__setitem__('error','timeout'))
+        reject('creation-metadata-outside-audit',lambda r,s:r['state_creation_stall']['metadata_lookup'].__setitem__('started','2000-01-01T00:00:00Z'))
+        reject('creation-metadata-after-deadline',lambda r,s:r['state_creation_stall']['metadata_lookup'].__setitem__('returned','2030-01-01T00:00:00Z'))
         wire=(fixture/'creation-wire.jsonl').read_bytes()
         for name,changed in [('wire-truncated',wire[:-8]),('wire-missing',b''),('wire-invalid-extra-record',wire+b'{}\n')]:
             with tempfile.TemporaryDirectory(prefix='copied-creation-proof-control-') as temp:
