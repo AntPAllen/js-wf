@@ -1,0 +1,477 @@
+=== RUN   TestNRGSimple
+--- PASS: TestNRGSimple (0.69s)
+=== RUN   TestNRGSnapshotAndRestart
+--- PASS: TestNRGSnapshotAndRestart (2.24s)
+=== RUN   TestNRGAppendEntryEncode
+--- PASS: TestNRGAppendEntryEncode (0.02s)
+=== RUN   TestNRGAppendEntryDecode
+--- PASS: TestNRGAppendEntryDecode (0.56s)
+=== RUN   TestNRGAppendEntryDecodeTruncatedEntryLength
+--- PASS: TestNRGAppendEntryDecodeTruncatedEntryLength (0.00s)
+=== RUN   TestNRGPeerStateDecodeTruncated
+--- PASS: TestNRGPeerStateDecodeTruncated (0.00s)
+=== RUN   TestNRGRecoverFromFollowingNoLeader
+--- PASS: TestNRGRecoverFromFollowingNoLeader (4.10s)
+=== RUN   TestNRGInlineStepdown
+--- PASS: TestNRGInlineStepdown (0.42s)
+=== RUN   TestNRGMalformedAppendEntryResponse
+--- PASS: TestNRGMalformedAppendEntryResponse (0.37s)
+=== RUN   TestNRGObserverMode
+--- PASS: TestNRGObserverMode (0.62s)
+=== RUN   TestNRGAEFromOldLeader
+--- PASS: TestNRGAEFromOldLeader (6.88s)
+=== RUN   TestNRGSimpleElection
+--- PASS: TestNRGSimpleElection (2.08s)
+=== RUN   TestNRGLeaderTransfer
+--- PASS: TestNRGLeaderTransfer (0.58s)
+=== RUN   TestNRGSwitchStateClearsQueues
+--- PASS: TestNRGSwitchStateClearsQueues (0.26s)
+=== RUN   TestNRGProposalFastPath
+--- PASS: TestNRGProposalFastPath (0.00s)
+=== RUN   TestNRGProposalFastPathLimits
+=== RUN   TestNRGProposalFastPathLimits/limit_entries
+=== RUN   TestNRGProposalFastPathLimits/limit_bytes
+--- PASS: TestNRGProposalFastPathLimits (0.09s)
+    --- PASS: TestNRGProposalFastPathLimits/limit_entries (0.08s)
+    --- PASS: TestNRGProposalFastPathLimits/limit_bytes (0.00s)
+=== RUN   TestNRGStepDownOnSameTermDoesntClearVote
+--- PASS: TestNRGStepDownOnSameTermDoesntClearVote (1.55s)
+=== RUN   TestNRGUnsuccessfulVoteRequestDoesntResetElectionTimer
+--- PASS: TestNRGUnsuccessfulVoteRequestDoesntResetElectionTimer (1.37s)
+=== RUN   TestNRGUnsuccessfulVoteRequestCampaignEarly
+--- PASS: TestNRGUnsuccessfulVoteRequestCampaignEarly (0.27s)
+=== RUN   TestNRGInvalidTAVDoesntPanic
+--- PASS: TestNRGInvalidTAVDoesntPanic (0.58s)
+=== RUN   TestNRGAssumeHighTermAfterCandidateIsolation
+--- PASS: TestNRGAssumeHighTermAfterCandidateIsolation (0.80s)
+=== RUN   TestNRGHeartbeatOnLeaderChange
+--- PASS: TestNRGHeartbeatOnLeaderChange (24.03s)
+=== RUN   TestNRGElectionTimerAfterObserver
+--- PASS: TestNRGElectionTimerAfterObserver (4.73s)
+=== RUN   TestNRGSystemClientCleanupFromAccount
+--- PASS: TestNRGSystemClientCleanupFromAccount (0.91s)
+=== RUN   TestNRGCandidateDoesntRevertTermAfterOldAE
+--- PASS: TestNRGCandidateDoesntRevertTermAfterOldAE (0.59s)
+=== RUN   TestNRGTermDoesntRollBackToPtermOnCatchup
+--- PASS: TestNRGTermDoesntRollBackToPtermOnCatchup (3.20s)
+=== RUN   TestNRGNoResetOnAppendEntryResponse
+--- PASS: TestNRGNoResetOnAppendEntryResponse (0.66s)
+=== RUN   TestNRGCandidateDontStepdownDueToLeaderOfPreviousTerm
+--- PASS: TestNRGCandidateDontStepdownDueToLeaderOfPreviousTerm (1.62s)
+=== RUN   TestNRGRemoveLeaderPeerDeadlockBug
+--- PASS: TestNRGRemoveLeaderPeerDeadlockBug (0.58s)
+=== RUN   TestNRGWALEntryWithoutQuorumMustTruncate
+=== RUN   TestNRGWALEntryWithoutQuorumMustTruncate/equal
+=== RUN   TestNRGWALEntryWithoutQuorumMustTruncate/diverged
+--- PASS: TestNRGWALEntryWithoutQuorumMustTruncate (5.37s)
+    --- PASS: TestNRGWALEntryWithoutQuorumMustTruncate/equal (2.83s)
+    --- PASS: TestNRGWALEntryWithoutQuorumMustTruncate/diverged (2.54s)
+=== RUN   TestNRGTermNoDecreaseAfterWALReset
+--- PASS: TestNRGTermNoDecreaseAfterWALReset (0.46s)
+=== RUN   TestNRGPendingAppendEntryCacheInvalidation
+=== RUN   TestNRGPendingAppendEntryCacheInvalidation/empty
+=== RUN   TestNRGPendingAppendEntryCacheInvalidation/at_limit
+=== RUN   TestNRGPendingAppendEntryCacheInvalidation/full
+--- PASS: TestNRGPendingAppendEntryCacheInvalidation (2.65s)
+    --- PASS: TestNRGPendingAppendEntryCacheInvalidation/empty (0.86s)
+    --- PASS: TestNRGPendingAppendEntryCacheInvalidation/at_limit (0.89s)
+    --- PASS: TestNRGPendingAppendEntryCacheInvalidation/full (0.89s)
+=== RUN   TestNRGTruncateWALClearsPendingAppendEntryCache
+--- PASS: TestNRGTruncateWALClearsPendingAppendEntryCache (0.30s)
+=== RUN   TestNRGTruncateWALRevertsUncommittedAddPeer
+=== RUN   TestNRGTruncateWALRevertsUncommittedAddPeer/Leader
+=== RUN   TestNRGTruncateWALRevertsUncommittedAddPeer/Follower
+=== RUN   TestNRGTruncateWALRevertsUncommittedAddPeer/Restart
+--- PASS: TestNRGTruncateWALRevertsUncommittedAddPeer (1.06s)
+    --- PASS: TestNRGTruncateWALRevertsUncommittedAddPeer/Leader (0.31s)
+    --- PASS: TestNRGTruncateWALRevertsUncommittedAddPeer/Follower (0.36s)
+    --- PASS: TestNRGTruncateWALRevertsUncommittedAddPeer/Restart (0.39s)
+=== RUN   TestNRGTruncateWALRevertsUncommittedRemovePeer
+=== RUN   TestNRGTruncateWALRevertsUncommittedRemovePeer/Leader
+=== RUN   TestNRGTruncateWALRevertsUncommittedRemovePeer/Follower
+=== RUN   TestNRGTruncateWALRevertsUncommittedRemovePeer/Restart
+--- PASS: TestNRGTruncateWALRevertsUncommittedRemovePeer (1.19s)
+    --- PASS: TestNRGTruncateWALRevertsUncommittedRemovePeer/Leader (0.39s)
+    --- PASS: TestNRGTruncateWALRevertsUncommittedRemovePeer/Follower (0.37s)
+    --- PASS: TestNRGTruncateWALRevertsUncommittedRemovePeer/Restart (0.42s)
+=== RUN   TestNRGEvictPeers
+=== RUN   TestNRGEvictPeers/Guards
+=== RUN   TestNRGEvictPeers/RefusesWhenQuorumPossible
+=== RUN   TestNRGEvictPeers/RefusesForUncommittedRemovePeer
+=== RUN   TestNRGEvictPeers/RevertsUncommittedRemovePeer
+=== RUN   TestNRGEvictPeers/RevertsUncommittedSelfRemoval
+=== RUN   TestNRGEvictPeers/RevertsUncommittedAddPeer
+=== RUN   TestNRGEvictPeers/RevertedAddPeerCommitsAsNoopWhenLeader
+--- PASS: TestNRGEvictPeers (2.50s)
+    --- PASS: TestNRGEvictPeers/Guards (0.41s)
+    --- PASS: TestNRGEvictPeers/RefusesWhenQuorumPossible (0.35s)
+    --- PASS: TestNRGEvictPeers/RefusesForUncommittedRemovePeer (0.33s)
+    --- PASS: TestNRGEvictPeers/RevertsUncommittedRemovePeer (0.32s)
+    --- PASS: TestNRGEvictPeers/RevertsUncommittedSelfRemoval (0.36s)
+    --- PASS: TestNRGEvictPeers/RevertsUncommittedAddPeer (0.32s)
+    --- PASS: TestNRGEvictPeers/RevertedAddPeerCommitsAsNoopWhenLeader (0.40s)
+=== RUN   TestNRGResetWALClearsPendingAppendEntryCache
+--- PASS: TestNRGResetWALClearsPendingAppendEntryCache (0.29s)
+=== RUN   TestNRGInstallSnapshotClearsPendingAppendEntryCache
+--- PASS: TestNRGInstallSnapshotClearsPendingAppendEntryCache (0.32s)
+=== RUN   TestNRGCatchupFromSnapshotClearsPendingAppendEntryCache
+--- PASS: TestNRGCatchupFromSnapshotClearsPendingAppendEntryCache (0.38s)
+=== RUN   TestNRGCatchupDoesNotTruncateUncommittedEntriesWithQuorum
+--- PASS: TestNRGCatchupDoesNotTruncateUncommittedEntriesWithQuorum (0.37s)
+=== RUN   TestNRGCatchupCanTruncateMultipleEntriesWithoutQuorum
+--- PASS: TestNRGCatchupCanTruncateMultipleEntriesWithoutQuorum (0.29s)
+=== RUN   TestNRGCatchupDoesNotTruncateCommittedEntriesDuringRedelivery
+--- PASS: TestNRGCatchupDoesNotTruncateCommittedEntriesDuringRedelivery (0.32s)
+=== RUN   TestNRGCatchupFromNewLeaderWithIncorrectPterm
+--- PASS: TestNRGCatchupFromNewLeaderWithIncorrectPterm (0.29s)
+=== RUN   TestNRGDontRemoveSnapshotIfTruncateToApplied
+--- PASS: TestNRGDontRemoveSnapshotIfTruncateToApplied (0.25s)
+=== RUN   TestNRGSnapshotAndTruncateToApplied
+--- PASS: TestNRGSnapshotAndTruncateToApplied (0.34s)
+=== RUN   TestNRGIgnoreDoubleSnapshot
+--- PASS: TestNRGIgnoreDoubleSnapshot (2.01s)
+=== RUN   TestNRGDontSwitchToCandidateWithInflightSnapshot
+--- PASS: TestNRGDontSwitchToCandidateWithInflightSnapshot (0.29s)
+=== RUN   TestNRGDontSwitchToCandidateWithMultipleInflightSnapshots
+--- PASS: TestNRGDontSwitchToCandidateWithMultipleInflightSnapshots (0.26s)
+=== RUN   TestNRGRecoverPindexPtermOnlyIfLogNotEmpty
+--- PASS: TestNRGRecoverPindexPtermOnlyIfLogNotEmpty (0.38s)
+=== RUN   TestNRGCancelCatchupWhenDetectingHigherTermDuringVoteRequest
+--- PASS: TestNRGCancelCatchupWhenDetectingHigherTermDuringVoteRequest (0.28s)
+=== RUN   TestNRGMultipleStopsDontPanic
+--- PASS: TestNRGMultipleStopsDontPanic (0.24s)
+=== RUN   TestNRGTruncateDownToCommitted
+--- PASS: TestNRGTruncateDownToCommitted (0.30s)
+=== RUN   TestNRGTruncateDownToCommittedWhenTruncateFails
+--- PASS: TestNRGTruncateDownToCommittedWhenTruncateFails (0.36s)
+=== RUN   TestNRGForwardProposalResponse
+--- PASS: TestNRGForwardProposalResponse (0.66s)
+=== RUN   TestNRGMemoryWALEmptiesSnapshotsDir
+--- PASS: TestNRGMemoryWALEmptiesSnapshotsDir (2.70s)
+=== RUN   TestNRGHealthCheckWaitForCatchup
+--- PASS: TestNRGHealthCheckWaitForCatchup (0.34s)
+=== RUN   TestNRGHealthCheckWaitForDoubleCatchup
+--- PASS: TestNRGHealthCheckWaitForDoubleCatchup (0.32s)
+=== RUN   TestNRGHealthCheckWaitForPendingCommitsWhenPaused
+--- PASS: TestNRGHealthCheckWaitForPendingCommitsWhenPaused (0.30s)
+=== RUN   TestNRGAppendEntryCanEstablishQuorumAfterLeaderChange
+--- PASS: TestNRGAppendEntryCanEstablishQuorumAfterLeaderChange (0.26s)
+=== RUN   TestNRGQuorumAccounting
+--- PASS: TestNRGQuorumAccounting (0.27s)
+=== RUN   TestNRGRevalidateQuorumAfterLeaderChange
+--- PASS: TestNRGRevalidateQuorumAfterLeaderChange (0.33s)
+=== RUN   TestNRGSignalLeadChangeFalseIfCampaignImmediately
+=== RUN   TestNRGSignalLeadChangeFalseIfCampaignImmediately/Follower
+=== RUN   TestNRGSignalLeadChangeFalseIfCampaignImmediately/Candidate
+=== RUN   TestNRGSignalLeadChangeFalseIfCampaignImmediately/Leader
+--- PASS: TestNRGSignalLeadChangeFalseIfCampaignImmediately (0.79s)
+    --- PASS: TestNRGSignalLeadChangeFalseIfCampaignImmediately/Follower (0.26s)
+    --- PASS: TestNRGSignalLeadChangeFalseIfCampaignImmediately/Candidate (0.27s)
+    --- PASS: TestNRGSignalLeadChangeFalseIfCampaignImmediately/Leader (0.26s)
+=== RUN   TestNRGCatchupDontCountTowardQuorum
+--- PASS: TestNRGCatchupDontCountTowardQuorum (2.31s)
+=== RUN   TestNRGCatchupAcksProgressWhenGivenProgressInbox
+--- PASS: TestNRGCatchupAcksProgressWhenGivenProgressInbox (0.51s)
+=== RUN   TestNRGCatchupSendsProgressInboxAndRefillsWindow
+--- PASS: TestNRGCatchupSendsProgressInboxAndRefillsWindow (0.44s)
+=== RUN   TestNRGCatchupLargeEntriesProgressesAcrossWindows
+--- PASS: TestNRGCatchupLargeEntriesProgressesAcrossWindows (2.11s)
+=== RUN   TestNRGIgnoreTrackResponseWhenNotLeader
+--- PASS: TestNRGIgnoreTrackResponseWhenNotLeader (0.27s)
+=== RUN   TestNRGRejectNewAppendEntryFromPreviousLeader
+--- PASS: TestNRGRejectNewAppendEntryFromPreviousLeader (0.30s)
+=== RUN   TestNRGRejectAppendEntryDuringCatchupFromPreviousLeader
+=== RUN   TestNRGRejectAppendEntryDuringCatchupFromPreviousLeader/new-entry
+=== RUN   TestNRGRejectAppendEntryDuringCatchupFromPreviousLeader/new-entry-backward-compatible
+=== RUN   TestNRGRejectAppendEntryDuringCatchupFromPreviousLeader/catchup
+=== RUN   TestNRGRejectAppendEntryDuringCatchupFromPreviousLeader/catchup-backward-compatible
+--- PASS: TestNRGRejectAppendEntryDuringCatchupFromPreviousLeader (2.74s)
+    --- PASS: TestNRGRejectAppendEntryDuringCatchupFromPreviousLeader/new-entry (0.27s)
+    --- PASS: TestNRGRejectAppendEntryDuringCatchupFromPreviousLeader/new-entry-backward-compatible (0.28s)
+    --- PASS: TestNRGRejectAppendEntryDuringCatchupFromPreviousLeader/catchup (0.28s)
+    --- PASS: TestNRGRejectAppendEntryDuringCatchupFromPreviousLeader/catchup-backward-compatible (1.91s)
+=== RUN   TestNRGDontRejectAppendEntryFromReplay
+=== RUN   TestNRGDontRejectAppendEntryFromReplay/no-restart
+=== RUN   TestNRGDontRejectAppendEntryFromReplay/with-restart
+--- PASS: TestNRGDontRejectAppendEntryFromReplay (3.51s)
+    --- PASS: TestNRGDontRejectAppendEntryFromReplay/no-restart (0.89s)
+    --- PASS: TestNRGDontRejectAppendEntryFromReplay/with-restart (2.62s)
+=== RUN   TestNRGSimpleCatchup
+=== RUN   TestNRGSimpleCatchup/same-leader
+=== RUN   TestNRGSimpleCatchup/change-leader
+--- PASS: TestNRGSimpleCatchup (1.62s)
+    --- PASS: TestNRGSimpleCatchup/same-leader (0.80s)
+    --- PASS: TestNRGSimpleCatchup/change-leader (0.82s)
+=== RUN   TestNRGSnapshotCatchup
+=== RUN   TestNRGSnapshotCatchup/no-restart
+=== RUN   TestNRGSnapshotCatchup/with-restart
+--- PASS: TestNRGSnapshotCatchup (4.06s)
+    --- PASS: TestNRGSnapshotCatchup/no-restart (1.01s)
+    --- PASS: TestNRGSnapshotCatchup/with-restart (3.05s)
+=== RUN   TestNRGSnapshotRecovery
+--- PASS: TestNRGSnapshotRecovery (0.32s)
+=== RUN   TestNRGLoadLastSnapshotCleansLegacyZeroIndexSnapshot
+--- PASS: TestNRGLoadLastSnapshotCleansLegacyZeroIndexSnapshot (0.28s)
+=== RUN   TestNRGSetupLastSnapshotIgnoresTmpFile
+--- PASS: TestNRGSetupLastSnapshotIgnoresTmpFile (0.28s)
+=== RUN   TestNRGKeepRunningOnServerShutdown
+--- PASS: TestNRGKeepRunningOnServerShutdown (1.29s)
+=== RUN   TestNRGVoteResponseEncoding
+--- PASS: TestNRGVoteResponseEncoding (0.00s)
+=== RUN   TestNRGDoesntRequestVoteOnWriteError
+--- PASS: TestNRGDoesntRequestVoteOnWriteError (0.51s)
+=== RUN   TestNRGTrackPeerObserved
+--- PASS: TestNRGTrackPeerObserved (0.00s)
+=== RUN   TestNRGTrackPeerAutoAddOnlyUnmanaged
+--- PASS: TestNRGTrackPeerAutoAddOnlyUnmanaged (0.27s)
+=== RUN   TestNRGInitializeAndScaleUp
+--- PASS: TestNRGInitializeAndScaleUp (0.34s)
+=== RUN   TestNRGReplayOnSnapshotSameTerm
+--- PASS: TestNRGReplayOnSnapshotSameTerm (0.27s)
+=== RUN   TestNRGReplayOnSnapshotDifferentTerm
+--- PASS: TestNRGReplayOnSnapshotDifferentTerm (0.27s)
+=== RUN   TestNRGSizeAndApplied
+--- PASS: TestNRGSizeAndApplied (0.27s)
+=== RUN   TestNRGIgnoreEntryAfterCanceledCatchup
+--- PASS: TestNRGIgnoreEntryAfterCanceledCatchup (2.09s)
+=== RUN   TestNRGDelayedMessagesAfterCatchupDontCountTowardQuorum
+--- PASS: TestNRGDelayedMessagesAfterCatchupDontCountTowardQuorum (1.29s)
+=== RUN   TestNRGStepdownWithHighestTermDuringCatchup
+--- PASS: TestNRGStepdownWithHighestTermDuringCatchup (0.30s)
+=== RUN   TestNRGTruncateOnStartup
+--- PASS: TestNRGTruncateOnStartup (0.36s)
+=== RUN   TestNRGLeaderCatchupHandling
+--- PASS: TestNRGLeaderCatchupHandling (0.30s)
+=== RUN   TestNRGNewEntriesFromOldLeaderResetsWALDuringCatchup
+--- PASS: TestNRGNewEntriesFromOldLeaderResetsWALDuringCatchup (0.35s)
+=== RUN   TestNRGProcessed
+--- PASS: TestNRGProcessed (0.29s)
+=== RUN   TestNRGProcessedSingleNodeTriggersEarlyElection
+--- PASS: TestNRGProcessedSingleNodeTriggersEarlyElection (1.03s)
+=== RUN   TestNRGSendAppendEntryNotLeader
+--- PASS: TestNRGSendAppendEntryNotLeader (4.18s)
+=== RUN   TestNRGDrainAndReplaySnapshot
+--- PASS: TestNRGDrainAndReplaySnapshot (0.32s)
+=== RUN   TestNRGTrackPeerActive
+--- PASS: TestNRGTrackPeerActive (4.29s)
+=== RUN   TestNRGLostQuorum
+--- PASS: TestNRGLostQuorum (0.37s)
+=== RUN   TestNRGParallelCatchupRollback
+--- PASS: TestNRGParallelCatchupRollback (0.29s)
+=== RUN   TestNRGReportLeaderAfterNoopEntry
+--- PASS: TestNRGReportLeaderAfterNoopEntry (0.28s)
+=== RUN   TestNRGSendSnapshotInstallsSnapshot
+--- PASS: TestNRGSendSnapshotInstallsSnapshot (0.32s)
+=== RUN   TestNRGQuorumAfterLeaderStepdown
+--- PASS: TestNRGQuorumAfterLeaderStepdown (0.33s)
+=== RUN   TestNRGNoLogResetOnCorruptedSendToFollower
+--- PASS: TestNRGNoLogResetOnCorruptedSendToFollower (1.07s)
+=== RUN   TestNRGTruncateLogWithMisalignedSnapshotGap
+--- PASS: TestNRGTruncateLogWithMisalignedSnapshotGap (0.27s)
+=== RUN   TestNRGTruncateLogWithMissingSnapshot
+--- PASS: TestNRGTruncateLogWithMissingSnapshot (0.29s)
+=== RUN   TestNRGChainOfBlocksRunInLockstep
+--- PASS: TestNRGChainOfBlocksRunInLockstep (25.46s)
+=== RUN   TestNRGChainOfBlocksStopAndCatchUp
+--- PASS: TestNRGChainOfBlocksStopAndCatchUp (57.97s)
+=== RUN   TestNRGProposeRemovePeer
+--- PASS: TestNRGProposeRemovePeer (0.44s)
+=== RUN   TestNRGProposeRemovePeerNonExistent
+--- PASS: TestNRGProposeRemovePeerNonExistent (0.66s)
+=== RUN   TestNRGForwardedRemovePeerProposalNonExistent
+--- PASS: TestNRGForwardedRemovePeerProposalNonExistent (1.19s)
+=== RUN   TestNRGProposeRemovePeerConcurrent
+--- PASS: TestNRGProposeRemovePeerConcurrent (0.62s)
+=== RUN   TestNRGUncommittedMembershipChangeOnNewLeader
+--- PASS: TestNRGUncommittedMembershipChangeOnNewLeader (0.34s)
+=== RUN   TestNRGUncommittedMembershipChangeGetsTruncated
+--- PASS: TestNRGUncommittedMembershipChangeGetsTruncated (0.34s)
+=== RUN   TestNRGUncommittedMembershipChangeOnNewLeaderForwardedRemovePeerProposal
+--- PASS: TestNRGUncommittedMembershipChangeOnNewLeaderForwardedRemovePeerProposal (5.32s)
+=== RUN   TestNRGIgnoreForwardedProposalIfNotCaughtUpLeader
+--- PASS: TestNRGIgnoreForwardedProposalIfNotCaughtUpLeader (5.38s)
+=== RUN   TestNRGProposeRemovePeerQuorum
+--- PASS: TestNRGProposeRemovePeerQuorum (1.60s)
+=== RUN   TestNRGProposeRemovePeerLeader
+--- PASS: TestNRGProposeRemovePeerLeader (1.60s)
+=== RUN   TestNRGProposeRemovePeerAll
+--- PASS: TestNRGProposeRemovePeerAll (0.55s)
+=== RUN   TestNRGLeaderResurrectsRemovedPeers
+--- PASS: TestNRGLeaderResurrectsRemovedPeers (0.46s)
+=== RUN   TestNRGAddPeers
+--- PASS: TestNRGAddPeers (1.47s)
+=== RUN   TestNRGDisjointMajorities
+--- PASS: TestNRGDisjointMajorities (1.61s)
+=== RUN   TestNRGAppendEntryResurrectsLeader
+--- PASS: TestNRGAppendEntryResurrectsLeader (0.28s)
+=== RUN   TestNRGSingleNodeElection
+--- PASS: TestNRGSingleNodeElection (1.21s)
+=== RUN   TestNRGMustNotResetVoteOnStepDownOrLeaderTransfer
+--- PASS: TestNRGMustNotResetVoteOnStepDownOrLeaderTransfer (1.81s)
+=== RUN   TestNRGAppendEntriesSeqStopsOnRangeBreak
+--- PASS: TestNRGAppendEntriesSeqStopsOnRangeBreak (0.31s)
+=== RUN   TestNRGInstallSnapshotFromCheckpoint
+--- PASS: TestNRGInstallSnapshotFromCheckpoint (0.26s)
+=== RUN   TestNRGForcedInstallSnapshotAbortsInProgressCheckpoint
+--- PASS: TestNRGForcedInstallSnapshotAbortsInProgressCheckpoint (1.78s)
+=== RUN   TestNRGDirectInstallSnapshotWaitsForInFlightWrite
+--- PASS: TestNRGDirectInstallSnapshotWaitsForInFlightWrite (0.53s)
+=== RUN   TestNRGCheckpointInstallSnapshotWaitsForInFlightWrite
+--- PASS: TestNRGCheckpointInstallSnapshotWaitsForInFlightWrite (0.59s)
+=== RUN   TestNRGSnapshotCheckpointNodeClosed
+=== RUN   TestNRGSnapshotCheckpointNodeClosed/Stop
+=== RUN   TestNRGSnapshotCheckpointNodeClosed/Delete
+--- PASS: TestNRGSnapshotCheckpointNodeClosed (0.55s)
+    --- PASS: TestNRGSnapshotCheckpointNodeClosed/Stop (0.30s)
+    --- PASS: TestNRGSnapshotCheckpointNodeClosed/Delete (0.26s)
+=== RUN   TestNRGDrainAndReplaySnapshotNodeClosed
+=== RUN   TestNRGDrainAndReplaySnapshotNodeClosed/Stop
+=== RUN   TestNRGDrainAndReplaySnapshotNodeClosed/Delete
+--- PASS: TestNRGDrainAndReplaySnapshotNodeClosed (0.54s)
+    --- PASS: TestNRGDrainAndReplaySnapshotNodeClosed/Stop (0.27s)
+    --- PASS: TestNRGDrainAndReplaySnapshotNodeClosed/Delete (0.28s)
+=== RUN   TestNRGInstallSnapshotForce
+--- PASS: TestNRGInstallSnapshotForce (0.26s)
+=== RUN   TestNRGInstallSnapshotFromCheckpointAfterTruncateToSnapshot
+--- PASS: TestNRGInstallSnapshotFromCheckpointAfterTruncateToSnapshot (0.28s)
+=== RUN   TestNRGCheckpointInstallSnapshotAbortDuringWrite
+=== RUN   TestNRGCheckpointInstallSnapshotAbortDuringWrite/RemoveOrphan
+=== RUN   TestNRGCheckpointInstallSnapshotAbortDuringWrite/KeepAdoptedSnapshot
+--- PASS: TestNRGCheckpointInstallSnapshotAbortDuringWrite (0.77s)
+    --- PASS: TestNRGCheckpointInstallSnapshotAbortDuringWrite/RemoveOrphan (0.40s)
+    --- PASS: TestNRGCheckpointInstallSnapshotAbortDuringWrite/KeepAdoptedSnapshot (0.37s)
+=== RUN   TestNRGSwitchToCandidateResetsVote
+--- PASS: TestNRGSwitchToCandidateResetsVote (0.26s)
+=== RUN   TestNRGInitSingleMemRaftNodeDefaults
+--- PASS: TestNRGInitSingleMemRaftNodeDefaults (0.35s)
+=== RUN   TestNRGReplayAddPeerKeepsClusterSize
+--- PASS: TestNRGReplayAddPeerKeepsClusterSize (0.27s)
+=== RUN   TestNRGSnapshotExcludesUncommittedMembershipChange
+=== RUN   TestNRGSnapshotExcludesUncommittedMembershipChange/AddPeer
+=== RUN   TestNRGSnapshotExcludesUncommittedMembershipChange/RemovePeer
+--- PASS: TestNRGSnapshotExcludesUncommittedMembershipChange (0.54s)
+    --- PASS: TestNRGSnapshotExcludesUncommittedMembershipChange/AddPeer (0.26s)
+    --- PASS: TestNRGSnapshotExcludesUncommittedMembershipChange/RemovePeer (0.27s)
+=== RUN   TestNRGDontSwitchToCandidateWithInflightSelfMembershipChange
+--- PASS: TestNRGDontSwitchToCandidateWithInflightSelfMembershipChange (0.29s)
+=== RUN   TestNRGDontSwitchToCandidateAsManagedNodeOutsidePeerSet
+--- PASS: TestNRGDontSwitchToCandidateAsManagedNodeOutsidePeerSet (0.29s)
+=== RUN   TestNRGTrackPeerLag
+--- PASS: TestNRGTrackPeerLag (2.56s)
+=== RUN   TestNRGPeersResponse
+--- PASS: TestNRGPeersResponse (0.00s)
+=== RUN   TestNRGOnlyCommitIfCurrentTerm
+--- PASS: TestNRGOnlyCommitIfCurrentTerm (0.31s)
+=== RUN   TestNRGTermFencedProposals
+--- PASS: TestNRGTermFencedProposals (0.36s)
+=== RUN   TestNRGLeaderStepsDownIfOverrun
+=== RUN   TestNRGLeaderStepsDownIfOverrun/Uncommitted
+=== RUN   TestNRGLeaderStepsDownIfOverrun/Unapplied
+--- PASS: TestNRGLeaderStepsDownIfOverrun (0.33s)
+    --- PASS: TestNRGLeaderStepsDownIfOverrun/Uncommitted (0.00s)
+    --- PASS: TestNRGLeaderStepsDownIfOverrun/Unapplied (0.00s)
+=== RUN   TestNRGFollowerPausesQuorumIfOverrun
+=== RUN   TestNRGFollowerPausesQuorumIfOverrun/Replay
+=== RUN   TestNRGFollowerPausesQuorumIfOverrun/New
+--- PASS: TestNRGFollowerPausesQuorumIfOverrun (1.99s)
+    --- PASS: TestNRGFollowerPausesQuorumIfOverrun/Replay (1.28s)
+    --- PASS: TestNRGFollowerPausesQuorumIfOverrun/New (0.71s)
+=== RUN   TestNRGSwitchToCandidateResetsQuorumPaused
+--- PASS: TestNRGSwitchToCandidateResetsQuorumPaused (0.32s)
+=== RUN   TestNRGPausingQuorumCancelsCatchup
+=== RUN   TestNRGPausingQuorumCancelsCatchup/EnteringPause
+=== RUN   TestNRGPausingQuorumCancelsCatchup/AlreadyPaused
+--- PASS: TestNRGPausingQuorumCancelsCatchup (0.63s)
+    --- PASS: TestNRGPausingQuorumCancelsCatchup/EnteringPause (0.33s)
+    --- PASS: TestNRGPausingQuorumCancelsCatchup/AlreadyPaused (0.29s)
+=== RUN   TestNRGApplyCommitDoesNotResetWALAtSnapshotBoundary
+--- PASS: TestNRGApplyCommitDoesNotResetWALAtSnapshotBoundary (0.26s)
+=== RUN   TestNRGProcessAppendEntryTermMismatchDoesNotRegressCommit
+--- PASS: TestNRGProcessAppendEntryTermMismatchDoesNotRegressCommit (0.29s)
+=== RUN   TestNRGReset
+--- PASS: TestNRGReset (0.28s)
+=== RUN   TestNRGBootstrapExpectedClusterSize
+=== RUN   TestNRGBootstrapExpectedClusterSize/ip_literal_gateway_urls
+=== RUN   TestNRGBootstrapExpectedClusterSize/hostname_gateway_urls_are_not_resolved
+=== RUN   TestNRGBootstrapExpectedClusterSize/multiple_remote_clusters
+--- PASS: TestNRGBootstrapExpectedClusterSize (0.01s)
+    --- PASS: TestNRGBootstrapExpectedClusterSize/ip_literal_gateway_urls (0.01s)
+    --- PASS: TestNRGBootstrapExpectedClusterSize/hostname_gateway_urls_are_not_resolved (0.00s)
+    --- PASS: TestNRGBootstrapExpectedClusterSize/multiple_remote_clusters (0.00s)
+=== RUN   TestNRGCatchupRerequestDoesNotOrphanProgressQueue
+--- PASS: TestNRGCatchupRerequestDoesNotOrphanProgressQueue (0.39s)
+=== RUN   TestNRGCatchupRerequestLosesCatchupSignal
+=== RUN   TestNRGCatchupRerequestLosesCatchupSignal/NoStall
+=== RUN   TestNRGCatchupRerequestLosesCatchupSignal/Stall
+--- PASS: TestNRGCatchupRerequestLosesCatchupSignal (0.54s)
+    --- PASS: TestNRGCatchupRerequestLosesCatchupSignal/NoStall (0.28s)
+    --- PASS: TestNRGCatchupRerequestLosesCatchupSignal/Stall (0.27s)
+=== RUN   TestNRGCatchupDoesNotAddPeerOnCompletion
+=== RUN   TestNRGCatchupDoesNotAddPeerOnCompletion/Managed
+=== RUN   TestNRGCatchupDoesNotAddPeerOnCompletion/Removed
+=== RUN   TestNRGCatchupDoesNotAddPeerOnCompletion/Unmanaged
+--- PASS: TestNRGCatchupDoesNotAddPeerOnCompletion (0.84s)
+    --- PASS: TestNRGCatchupDoesNotAddPeerOnCompletion/Managed (0.29s)
+    --- PASS: TestNRGCatchupDoesNotAddPeerOnCompletion/Removed (0.27s)
+    --- PASS: TestNRGCatchupDoesNotAddPeerOnCompletion/Unmanaged (0.28s)
+=== RUN   TestNRGCatchupFollowerNoWaitGroupLeakWhenGoRoutineFails
+--- PASS: TestNRGCatchupFollowerNoWaitGroupLeakWhenGoRoutineFails (0.30s)
+=== RUN   TestNRGProcessAppendEntryResponseTermRace
+--- PASS: TestNRGProcessAppendEntryResponseTermRace (0.57s)
+=== RUN   TestNRGPartitionedPeerRemove
+--- PASS: TestNRGPartitionedPeerRemove (0.68s)
+=== RUN   TestNRGPeerAddAndPartitionLeader
+--- PASS: TestNRGPeerAddAndPartitionLeader (5.71s)
+=== RUN   TestNRGLeaderWithoutQuorumAfterPeerAdd
+--- PASS: TestNRGLeaderWithoutQuorumAfterPeerAdd (11.42s)
+=== RUN   TestNRGRemovedPeerVoteDoesNotElectLeader
+--- PASS: TestNRGRemovedPeerVoteDoesNotElectLeader (1.66s)
+=== RUN   TestNRGRescueQuorum
+--- PASS: TestNRGRescueQuorum (0.30s)
+=== RUN   TestNRGRescueQuorumRecalc
+--- PASS: TestNRGRescueQuorumRecalc (0.35s)
+=== RUN   TestNRGRescueQuorumKeptOnPeerState
+--- PASS: TestNRGRescueQuorumKeptOnPeerState (2.53s)
+=== RUN   TestNRGRescueQuorumExpires
+--- PASS: TestNRGRescueQuorumExpires (0.45s)
+=== RUN   TestNRGRescueQuorumCountsEmptyVotes
+--- PASS: TestNRGRescueQuorumCountsEmptyVotes (0.31s)
+=== RUN   TestNRGRescueQuorumEmptyVotesRequireRescue
+--- PASS: TestNRGRescueQuorumEmptyVotesRequireRescue (2.89s)
+=== RUN   TestNRGEntryBytesEstimate
+=== RUN   TestNRGEntryBytesEstimate/no_entries_in_the_wal
+=== RUN   TestNRGEntryBytesEstimate/no_bytes_in_the_wal
+=== RUN   TestNRGEntryBytesEstimate/pindex_equals_papplied
+=== RUN   TestNRGEntryBytesEstimate/large_entries
+=== RUN   TestNRGEntryBytesEstimate/small_entries
+=== RUN   TestNRGEntryBytesEstimate/offset_by_papplied
+=== RUN   TestNRGEntryBytesEstimate/asking_for_more_than_we_hold
+--- PASS: TestNRGEntryBytesEstimate (0.32s)
+    --- PASS: TestNRGEntryBytesEstimate/no_entries_in_the_wal (0.00s)
+    --- PASS: TestNRGEntryBytesEstimate/no_bytes_in_the_wal (0.00s)
+    --- PASS: TestNRGEntryBytesEstimate/pindex_equals_papplied (0.00s)
+    --- PASS: TestNRGEntryBytesEstimate/large_entries (0.00s)
+    --- PASS: TestNRGEntryBytesEstimate/small_entries (0.00s)
+    --- PASS: TestNRGEntryBytesEstimate/offset_by_papplied (0.00s)
+    --- PASS: TestNRGEntryBytesEstimate/asking_for_more_than_we_hold (0.00s)
+=== RUN   TestNRGOverrunUsesBytesWhenEntryCountIsLow
+--- PASS: TestNRGOverrunUsesBytesWhenEntryCountIsLow (0.29s)
+=== RUN   TestNRGLeaderOverrunOnLargeEntries
+=== RUN   TestNRGLeaderOverrunOnLargeEntries/uncommitted_large_entries
+=== RUN   TestNRGLeaderOverrunOnLargeEntries/uncommitted_small_entries
+=== RUN   TestNRGLeaderOverrunOnLargeEntries/unapplied_large_entries
+=== RUN   TestNRGLeaderOverrunOnLargeEntries/unapplied_small_entries
+--- PASS: TestNRGLeaderOverrunOnLargeEntries (1.17s)
+    --- PASS: TestNRGLeaderOverrunOnLargeEntries/uncommitted_large_entries (0.28s)
+    --- PASS: TestNRGLeaderOverrunOnLargeEntries/uncommitted_small_entries (0.33s)
+    --- PASS: TestNRGLeaderOverrunOnLargeEntries/unapplied_large_entries (0.27s)
+    --- PASS: TestNRGLeaderOverrunOnLargeEntries/unapplied_small_entries (0.28s)
+=== RUN   TestNRGCachePendingEntryBoundedByBytes
+=== RUN   TestNRGCachePendingEntryBoundedByBytes/large_entries_stop_at_the_byte_cap
+=== RUN   TestNRGCachePendingEntryBoundedByBytes/small_entries_are_all_cached
+--- PASS: TestNRGCachePendingEntryBoundedByBytes (0.58s)
+    --- PASS: TestNRGCachePendingEntryBoundedByBytes/large_entries_stop_at_the_byte_cap (0.28s)
+    --- PASS: TestNRGCachePendingEntryBoundedByBytes/small_entries_are_all_cached (0.30s)
+=== RUN   TestNRGCachePendingEntryBytesAccounting
+--- PASS: TestNRGCachePendingEntryBytesAccounting (0.27s)
+PASS

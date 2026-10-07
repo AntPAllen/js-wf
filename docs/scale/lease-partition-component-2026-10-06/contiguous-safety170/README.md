@@ -1,0 +1,9 @@
+# Refined original 170-case Raft comparison
+
+At orchestrator `ab65d38`, both already source-bound race binaries from `dc332f2` run every original `TestNRG` case exactly once, with original 20-minute SDK timeouts and 2-CPU/2-GiB profiles. Upstream passes 170/170 without races or skips. The contiguous candidate passes 169/170 and fails `TestNRGEvictPeers` with a peer-map race. No case is skipped; the candidate full-suite gate is not accepted. The prior trailing-entry regression and membership-change test pass in this experiment; prior failed verdicts remain unchanged.
+
+The sole race writer is upstream test setup calling `addPeer` at raft_test.go:1764 without the lock required by that method. The reader is `checkAccountNRGStatus` through asynchronously recreated subscriptions. Both paths are unchanged by the catchup overlay. This confirms the reported location and locking violation, not absence of every possible candidate defect. A minimal correction to those setup calls must be qualified separately.
+
+The original immediate upstream sample catches pre-exec Python stat/empty argv; its executable hash and later build info already match the Go SDK. Independent later live captures verify the same process birth, actual argv, bytes, environment and cwd for both SDKs. Both initial and supplemental records are retained; point-in-time observations do not claim complete process lifetime coverage. Supplemental observations have their own complete four-member archive.
+
+Independent review verifies 2,004 selected Git/current/retained/before/after source inputs, 2,666 selected compiled parent dependencies, all 598 unchanged original module files, exact component guard binding, original test bodies and every member of the full 5,302-member 89,303,769-byte archive. SHA256: `5bc17b053e9a613a2ab4bc4bf8f2df4419e55896f84eb4e8dca183b75b17fd7d`. Native failure remains a failure; no default dependency, matrix, workflow Tier1 or 24-hour gate is promoted.
