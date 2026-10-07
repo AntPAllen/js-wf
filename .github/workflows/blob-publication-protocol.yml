@@ -1,0 +1,36 @@
+name: blob-publication-protocol
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'internal/blobpublication/**'
+      - '.github/workflows/blob-publication-protocol.yml'
+      - 'go.mod'
+      - 'go.sum'
+  pull_request:
+    paths:
+      - 'internal/blobpublication/**'
+      - '.github/workflows/blob-publication-protocol.yml'
+      - 'go.mod'
+      - 'go.sum'
+permissions:
+  contents: read
+jobs:
+  experimental-protocol:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - name: Seeded exact replay and real concurrency controls
+        env:
+          GOMAXPROCS: '2'
+          GOMEMLIMIT: 512MiB
+        run: go test -race ./internal/blobpublication -count=1 -timeout=3m -json > blob-publication-events.jsonl
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: experimental-blob-publication-events
+          path: blob-publication-events.jsonl

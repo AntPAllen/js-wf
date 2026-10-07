@@ -1,0 +1,613 @@
+package blobpublication
+
+import (
+	"context"
+	"crypto/sha256"
+	"encoding/json"
+	"errors"
+	"fmt"
+	"math/rand"
+	"reflect"
+	"sort"
+	"strconv"
+	"strings"
+	"sync"
+	"sync/atomic"
+	"testing"
+	"time"
+)
+
+var lostReply = errors.New("reply lost after operation")
+var ctx = context.Background()
+var epoch = time.Unix(1000, 0)
+
+type memoryPort struct {
+	blobs       map[string]Record
+	roots       map[string]Root
+	objects     map[string][]byte
+	serial      int
+	putHook     func(string, []byte) error
+	rootHook    func(string, uint64, Root) error
+	rootAfter   func() error
+	blobBefore  func(string, uint64, Fence) error
+	blobAfter   func() error
+	deleteHook  func(string) error
+	deleteAfter func() error
+}
+
+func cloneFence(f Fence) Fence {
+	n := f
+	n.Intents = map[string]Intent{}
+	for k, v := range f.Intents {
+		n.Intents[k] = v
+	}
+	return n
+}
+func cloneRoot(r Root) Root {
+	n := r
+	n.Blobs = map[string]Reference{}
+	for k, v := range r.Blobs {
+		n.Blobs[k] = v
+	}
+	n.Data = append([]byte(nil), r.Data...)
+	return n
+}
+func newModel() (*memoryPort, Protocol) {
+	m := &memoryPort{blobs: map[string]Record{}, roots: map[string]Root{}, objects: map[string][]byte{}}
+	return m, Protocol{Port: m, NewID: func() (string, error) { m.serial++; return fmt.Sprint(m.serial), nil }}
+}
+func (m *memoryPort) ReadBlob(_ context.Context, k string) (Record, error) {
+	r := m.blobs[k]
+	r.Fence = cloneFence(r.Fence)
+	return r, nil
+}
+func (m *memoryPort) CASBlob(_ context.Context, k string, rev uint64, f Fence) (Record, error) {
+	if m.blobBefore != nil {
+		h := m.blobBefore
+		m.blobBefore = nil
+		if err := h(k, rev, f); err != nil {
+			return Record{}, err
+		}
+	}
+	r := m.blobs[k]
+	if r.Revision != rev {
+		return Record{}, ErrConflict
+	}
+	r = Record{Revision: rev + 1, Fence: cloneFence(f)}
+	m.blobs[k] = r
+	if m.blobAfter != nil {
+		h := m.blobAfter
+		m.blobAfter = nil
+		return Record{}, h()
+	}
+	return m.ReadBlob(ctx, k)
+}
+func (m *memoryPort) ReadRoot(_ context.Context, k string) (Root, error) {
+	return cloneRoot(m.roots[k]), nil
+}
+func (m *memoryPort) CASRoot(_ context.Context, k string, head uint64, r Root) (Root, error) {
+	if m.rootHook != nil {
+		h := m.rootHook
+		m.rootHook = nil
+		if err := h(k, head, r); err != nil {
+			return Root{}, err
+		}
+	}
+	if m.roots[k].Head != head {
+		return Root{}, ErrConflict
+	}
+	r = cloneRoot(r)
+	r.Head = head + 1
+	m.roots[k] = r
+	if m.rootAfter != nil {
+		h := m.rootAfter
+		m.rootAfter = nil
+		return Root{}, h()
+	}
+	return cloneRoot(r), nil
+}
+func (m *memoryPort) Put(_ context.Context, n string, b []byte) error {
+	if m.putHook != nil {
+		h := m.putHook
+		m.putHook = nil
+		return h(n, b)
+	}
+	if _, ok := m.objects[n]; ok {
+		return errors.New("physical name reused")
+	}
+	m.objects[n] = append([]byte(nil), b...)
+	return nil
+}
+func (m *memoryPort) Delete(_ context.Context, n string) error {
+	if m.deleteHook != nil {
+		h := m.deleteHook
+		m.deleteHook = nil
+		if err := h(n); err != nil {
+			return err
+		}
+	}
+	delete(m.objects, n)
+	if m.deleteAfter != nil {
+		h := m.deleteAfter
+		m.deleteAfter = nil
+		return h()
+	}
+	return nil
+}
+func (m *memoryPort) BlobKeys(_ context.Context) ([]string, error) {
+	keys := []string{}
+	for k := range m.blobs {
+		keys = append(keys, k)
+	}
+	sort.Strings(keys)
+	return keys, nil
+}
+func (m *memoryPort) Objects(_ context.Context) ([]Object, error) {
+	objects := []Object{}
+	for n := range m.objects {
+		v := strings.Split(n, "/")
+		if len(v) != 3 {
+			return nil, errors.New("invalid name")
+		}
+		gen, err := strconv.ParseUint(v[1], 10, 64)
+		if err != nil {
+			return nil, err
+		}
+		objects = append(objects, Object{v[0], Reference{gen, n}})
+	}
+	sort.Slice(objects, func(i, j int) bool { return objects[i].Reference.Object < objects[j].Reference.Object })
+	return objects, nil
+}
+func (m *memoryPort) check() error {
+	for dest, r := range m.roots {
+		for k, ref := range r.Blobs {
+			data, ok := m.objects[ref.Object]
+			if !ok || key(data) != k {
+				return fmt.Errorf("dangling publication at %s: %+v", dest, ref)
+			}
+			f := m.blobs[k].Fence
+			if f.Phase != "ready" || f.Generation != ref.Generation || f.Object != ref.Object {
+				return errors.New("published generation closed")
+			}
+			if _, ok := f.Intents[r.Token]; !ok {
+				return errors.New("published intent lost")
+			}
+		}
+	}
+	return nil
+}
+func prepare(t *testing.T, p Protocol, dest string, data []byte) Prepared {
+	t.Helper()
+	r, err := p.Prepare(ctx, dest, []byte(dest), [][]byte{data}, epoch.Add(time.Second))
+	if err != nil {
+		t.Fatal(err)
+	}
+	return r
+}
+func commit(t *testing.T, p Protocol, r Prepared) Root {
+	t.Helper()
+	v, err := p.Commit(ctx, r)
+	if err != nil {
+		t.Fatal(err)
+	}
+	return v
+}
+func sweep(t *testing.T, p Protocol) {
+	t.Helper()
+	if _, err := p.Sweep(ctx, epoch.Add(time.Hour)); err != nil {
+		t.Fatal(err)
+	}
+}
+func check(t *testing.T, m *memoryPort) {
+	t.Helper()
+	if err := m.check(); err != nil {
+		t.Fatal(err)
+	}
+}
+
+func TestPausedPublicationIsFenced(t *testing.T) {
+	m, p := newModel()
+	pending := prepare(t, p, "root", []byte("one"))
+	sweep(t, p)
+	if _, err := p.Commit(ctx, pending); !errors.Is(err, ErrConflict) {
+		t.Fatal("expired writer published", err)
+	}
+	if len(m.objects) != 0 {
+		t.Fatal("expired objects leaked")
+	}
+	next := prepare(t, p, "root", []byte("one"))
+	if reflect.DeepEqual(next.publication.Blobs, pending.publication.Blobs) {
+		t.Fatal("physical generation reused")
+	}
+	commit(t, p, next)
+	sweep(t, p)
+	check(t, m)
+}
+func TestExpiredReplacementPreservesExistingRoot(t *testing.T) {
+	m, p := newModel()
+	first := commit(t, p, prepare(t, p, "root", []byte("old")))
+	pending := prepare(t, p, "root", []byte("new"))
+	sweep(t, p)
+	current := m.roots["root"]
+	if current.Token != first.Token || !reflect.DeepEqual(current.Blobs, first.Blobs) || current.Head <= first.Head {
+		t.Fatal("fence destroyed old publication")
+	}
+	if _, err := p.Commit(ctx, pending); !errors.Is(err, ErrConflict) {
+		t.Fatal(err)
+	}
+	check(t, m)
+	if len(m.objects) != 1 {
+		t.Fatal("replacement orphan leaked")
+	}
+}
+func TestSharedAndMultipleReferences(t *testing.T) {
+	m, p := newModel()
+	a, err := p.Prepare(ctx, "a", nil, [][]byte{[]byte("shared"), []byte("private"), []byte("shared")}, epoch.Add(time.Second))
+	if err != nil {
+		t.Fatal(err)
+	}
+	commit(t, p, a)
+	b := commit(t, p, prepare(t, p, "b", []byte("shared")))
+	sweep(t, p)
+	if len(m.objects) != 2 {
+		t.Fatal("deduplication failed")
+	}
+	if err := p.Retire(ctx, "a", m.roots["a"].Head); err != nil {
+		t.Fatal(err)
+	}
+	sweep(t, p)
+	check(t, m)
+	if len(m.objects) != 1 {
+		t.Fatal("shared object deleted or private object leaked")
+	}
+	if err := p.Retire(ctx, "b", b.Head); err != nil {
+		t.Fatal(err)
+	}
+	sweep(t, p)
+	if len(m.objects) != 0 {
+		t.Fatal("retired refs leaked")
+	}
+}
+func TestAmbiguousUploadUsesFreshPhysicalAttempt(t *testing.T) {
+	m, p := newModel()
+	var lateName string
+	var lateBytes []byte
+	m.putHook = func(n string, b []byte) error { lateName = n; lateBytes = append([]byte(nil), b...); return lostReply }
+	if _, err := p.Prepare(ctx, "a", nil, [][]byte{[]byte("same")}, epoch.Add(time.Second)); !errors.Is(err, lostReply) {
+		t.Fatal(err)
+	}
+	// Another writer completes while the old upload's reply/cleanup is unknown.
+	fresh := prepare(t, p, "b", []byte("same"))
+	commit(t, p, fresh)
+	m.objects[lateName] = lateBytes
+	delete(m.objects, lateName) // the old native upload's delayed cleanup
+	sweep(t, p)
+	check(t, m)
+	// An arbitrarily late old Put after reclamation is just an orphan.
+	m.objects[lateName] = lateBytes
+	sweep(t, p)
+	check(t, m)
+	if len(m.objects) != 1 {
+		t.Fatal("late upload not reclaimed")
+	}
+}
+func TestLostRepliesFailClosedAndRecover(t *testing.T) {
+	for _, operation := range []string{"commit", "fence", "blob_close", "delete", "pin", "ready"} {
+		t.Run(operation, func(t *testing.T) {
+			m, p := newModel()
+			if operation == "pin" || operation == "ready" {
+				if operation == "pin" {
+					m.blobAfter = func() error { return lostReply }
+				} else {
+					m.putHook = func(n string, b []byte) error {
+						m.objects[n] = append([]byte(nil), b...)
+						m.blobAfter = func() error { return lostReply }
+						return nil
+					}
+				}
+				if _, err := p.Prepare(ctx, "root", nil, [][]byte{[]byte("one")}, epoch.Add(time.Second)); !errors.Is(err, lostReply) {
+					t.Fatal(err)
+				}
+				sweep(t, p)
+				if len(m.objects) != 0 {
+					t.Fatal("ambiguous preparation leaked")
+				}
+				return
+			}
+			pending := prepare(t, p, "root", []byte("one"))
+			if operation == "commit" {
+				m.rootAfter = func() error { return lostReply }
+				commit(t, p, pending)
+				sweep(t, p)
+				check(t, m)
+				return
+			}
+			switch operation {
+			case "fence":
+				m.rootAfter = func() error { return lostReply }
+			case "blob_close":
+				m.blobAfter = func() error { return lostReply }
+			case "delete":
+				m.deleteAfter = func() error { return lostReply }
+			}
+			if _, err := p.Sweep(ctx, epoch.Add(time.Hour)); !errors.Is(err, lostReply) {
+				t.Fatal(err)
+			}
+			if _, err := p.Commit(ctx, pending); !errors.Is(err, ErrConflict) {
+				t.Fatal("late commit admitted", err)
+			}
+			sweep(t, p)
+			if len(m.objects) != 0 {
+				t.Fatal("lost reply stranded object")
+			}
+		})
+	}
+}
+func TestCommitWinningFenceRaceRemainsProtected(t *testing.T) {
+	m, p := newModel()
+	pending := prepare(t, p, "root", []byte("one"))
+	m.rootHook = func(_ string, _ uint64, _ Root) error { commit(t, p, pending); return nil }
+	sweep(t, p)
+	check(t, m)
+	if len(m.objects) != 1 {
+		t.Fatal("winning publication reclaimed")
+	}
+}
+func TestAcquireWinningCloseRaceRemainsProtected(t *testing.T) {
+	m, p := newModel()
+	prepare(t, p, "old", []byte("same"))
+	var winner Prepared
+	m.blobBefore = func(_ string, _ uint64, f Fence) error {
+		if f.Phase != "closed" {
+			t.Fatal("unexpected fault location")
+		}
+		winner = prepare(t, p, "new", []byte("same"))
+		commit(t, p, winner)
+		return nil
+	}
+	sweep(t, p)
+	check(t, m)
+	if len(m.objects) != 1 {
+		t.Fatal("concurrent acquire deleted")
+	}
+}
+func TestLateDeleteCannotTouchNewGeneration(t *testing.T) {
+	m, p := newModel()
+	prepare(t, p, "old", []byte("same"))
+	m.deleteHook = func(_ string) error { commit(t, p, prepare(t, p, "new", []byte("same"))); return nil }
+	sweep(t, p)
+	check(t, m)
+	if len(m.objects) != 1 {
+		t.Fatal("late delete destroyed new generation")
+	}
+}
+func TestDestinationHeadResetIsUnsafeNegativeControl(t *testing.T) {
+	m, p := newModel()
+	pending := prepare(t, p, "root", []byte("one"))
+	sweep(t, p)
+	delete(m.roots, "root") // faulty adapter that purges its durable fence
+	if _, err := p.Commit(ctx, pending); err != nil {
+		t.Fatal("negative control didn't admit late publication", err)
+	}
+	if err := m.check(); err == nil {
+		t.Fatal("unsafe head reset was not detected")
+	}
+}
+
+// Seeds vary publication, expiration, retirement, concurrent generations and
+// sharing across several destinations. Invariants are checked after every
+// operation; all published roots must survive every sweep.
+func TestSeededPublicationLifecycle(t *testing.T) {
+	for seed := int64(0); seed < 128; seed++ {
+		t.Run(fmt.Sprint(seed), func(t *testing.T) {
+			var firstDigest string
+			for replay := 0; replay < 2; replay++ {
+				digest := sha256.New()
+				m, p := newModel()
+				rng := rand.New(rand.NewSource(seed))
+				pending := []Prepared{}
+				now := epoch
+				for step := 0; step < 200; step++ {
+					destination := fmt.Sprintf("root-%d", rng.Intn(4))
+					switch rng.Intn(5) {
+					case 0, 1:
+						data := [][]byte{[]byte(fmt.Sprintf("blob-%d", rng.Intn(5))), []byte(fmt.Sprintf("blob-%d", rng.Intn(5)))}
+						prepared, err := p.Prepare(ctx, destination, []byte(fmt.Sprint(step)), data, now.Add(time.Second))
+						if err != nil {
+							t.Fatal(err)
+						}
+						pending = append(pending, prepared)
+					case 2:
+						if len(pending) > 0 {
+							i := rng.Intn(len(pending))
+							_, err := p.Commit(ctx, pending[i])
+							if err != nil && !errors.Is(err, ErrConflict) {
+								t.Fatal(err)
+							}
+							pending = append(pending[:i], pending[i+1:]...)
+						}
+					case 3:
+						if err := p.Retire(ctx, destination, m.roots[destination].Head); err != nil {
+							t.Fatal(err)
+						}
+					case 4:
+						now = now.Add(time.Duration(rng.Intn(3)) * time.Second)
+						if _, err := p.Sweep(ctx, now); err != nil {
+							t.Fatal(err)
+						}
+					}
+					check(t, m)
+					encoded, err := json.Marshal(map[string]any{"blobs": m.blobs, "roots": m.roots, "objects": m.objects})
+					if err != nil {
+						t.Fatal(err)
+					}
+					digest.Write(encoded)
+				}
+				for dest, r := range m.roots {
+					if err := p.Retire(ctx, dest, r.Head); err != nil {
+						t.Fatal(err)
+					}
+				}
+				if _, err := p.Sweep(ctx, now.Add(time.Hour)); err != nil {
+					t.Fatal(err)
+				}
+				if len(m.objects) != 0 {
+					t.Fatal("terminal orphan leaked")
+				}
+				actual := fmt.Sprintf("%x", digest.Sum(nil))
+				if replay == 0 {
+					firstDigest = actual
+				} else if actual != firstDigest {
+					t.Fatal("seeded state replay diverged", firstDigest, actual)
+				}
+			}
+		})
+	}
+}
+
+func TestGCWhileUploadPaused(t *testing.T) {
+	m, p := newModel()
+	m.putHook = func(n string, b []byte) error {
+		sweep(t, p)                              // fences the destination and closes this uploading generation
+		m.objects[n] = append([]byte(nil), b...) // original upload resumes after closure
+		return nil
+	}
+	if _, err := p.Prepare(ctx, "root", nil, [][]byte{[]byte("one")}, epoch.Add(time.Second)); !errors.Is(err, ErrRevoked) {
+		t.Fatal("resumed upload admitted", err)
+	}
+	sweep(t, p)
+	if len(m.objects) != 0 {
+		t.Fatal("paused upload orphan leaked")
+	}
+	commit(t, p, prepare(t, p, "root", []byte("one")))
+	sweep(t, p)
+	check(t, m)
+}
+func TestPartialMultiBlobPreparationReclaimed(t *testing.T) {
+	m, p := newModel()
+	m.putHook = func(n string, b []byte) error {
+		m.objects[n] = append([]byte(nil), b...)
+		m.putHook = func(n string, b []byte) error { m.objects[n] = append([]byte(nil), b...); return lostReply }
+		return nil
+	}
+	if _, err := p.Prepare(ctx, "root", nil, [][]byte{[]byte("first"), []byte("second")}, epoch.Add(time.Second)); !errors.Is(err, lostReply) {
+		t.Fatal(err)
+	}
+	sweep(t, p)
+	if len(m.objects) != 0 {
+		t.Fatal("partial preparation leaked")
+	}
+}
+
+// This adapter serializes native model operations while permitting production
+// protocol calls to overlap. Scripted hooks above are not used in this test.
+type lockedPort struct {
+	mu sync.Mutex
+	m  *memoryPort
+}
+
+func (l *lockedPort) ReadBlob(c context.Context, k string) (Record, error) {
+	l.mu.Lock()
+	defer l.mu.Unlock()
+	return l.m.ReadBlob(c, k)
+}
+func (l *lockedPort) CASBlob(c context.Context, k string, v uint64, f Fence) (Record, error) {
+	l.mu.Lock()
+	defer l.mu.Unlock()
+	return l.m.CASBlob(c, k, v, f)
+}
+func (l *lockedPort) ReadRoot(c context.Context, k string) (Root, error) {
+	l.mu.Lock()
+	defer l.mu.Unlock()
+	return l.m.ReadRoot(c, k)
+}
+func (l *lockedPort) CASRoot(c context.Context, k string, v uint64, r Root) (Root, error) {
+	l.mu.Lock()
+	defer l.mu.Unlock()
+	return l.m.CASRoot(c, k, v, r)
+}
+func (l *lockedPort) Put(c context.Context, k string, b []byte) error {
+	l.mu.Lock()
+	defer l.mu.Unlock()
+	return l.m.Put(c, k, b)
+}
+func (l *lockedPort) Delete(c context.Context, k string) error {
+	l.mu.Lock()
+	defer l.mu.Unlock()
+	return l.m.Delete(c, k)
+}
+func (l *lockedPort) BlobKeys(c context.Context) ([]string, error) {
+	l.mu.Lock()
+	defer l.mu.Unlock()
+	return l.m.BlobKeys(c)
+}
+func (l *lockedPort) Objects(c context.Context) ([]Object, error) {
+	l.mu.Lock()
+	defer l.mu.Unlock()
+	return l.m.Objects(c)
+}
+func TestConcurrentPublishersAndCollector(t *testing.T) {
+	m, _ := newModel()
+	l := &lockedPort{m: m}
+	var serial atomic.Uint64
+	p := Protocol{Port: l, NewID: func() (string, error) { return fmt.Sprint(serial.Add(1)), nil }}
+	var writers sync.WaitGroup
+	start := make(chan struct{})
+	stop := make(chan struct{})
+	joined := make(chan struct{})
+	faults := make(chan error, 64)
+	go func() {
+		defer close(joined)
+		<-start
+		for {
+			select {
+			case <-stop:
+				return
+			default:
+			}
+			if _, err := p.Sweep(ctx, epoch.Add(time.Hour)); err != nil && !errors.Is(err, ErrConflict) {
+				faults <- err
+				return
+			}
+			l.mu.Lock()
+			err := m.check()
+			l.mu.Unlock()
+			if err != nil {
+				faults <- err
+				return
+			}
+		}
+	}()
+	for i := 0; i < 32; i++ {
+		writers.Add(1)
+		go func(i int) {
+			defer writers.Done()
+			<-start
+			prepared, err := p.Prepare(ctx, fmt.Sprint(i), nil, [][]byte{[]byte("shared"), []byte(fmt.Sprint(i % 3))}, epoch.Add(time.Second))
+			if err == nil {
+				_, err = p.Commit(ctx, prepared)
+			}
+			if err != nil && !errors.Is(err, ErrConflict) && !errors.Is(err, ErrRevoked) {
+				faults <- err
+			}
+		}(i)
+	}
+	close(start)
+	writers.Wait()
+	close(stop)
+	<-joined
+	close(faults)
+	for err := range faults {
+		t.Error(err)
+	}
+	check(t, m)
+	for dest, r := range m.roots {
+		if err := p.Retire(ctx, dest, r.Head); err != nil {
+			t.Fatal(err)
+		}
+	}
+	sweep(t, p)
+	if len(m.objects) != 0 {
+		t.Fatal("concurrent lifecycle leaked objects")
+	}
+}
