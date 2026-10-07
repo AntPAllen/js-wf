@@ -16,3 +16,5 @@ The normal SDK passed on its first execution. The initial producer's final-line 
 This closes focused common Tier 1 normal100k/race1k and saved-trace integration. It does not qualify the complete current124 graph, implement native transport adapters, enable production online GC, resolve physical chunk reclamation or qualify real-cluster/full release gates. The older full123 normal campaign is independently reviewed at its original source.
 
 Full fixture archive metadata/inventory and S3 readback receipt preserve the actual binaries and inputs. [Independent review](independent-review.json).
+
+Complete S3 archive/metadata/inventory readbacks are verified. Closed local fixtures and archive staging have been retired; use fresh restoration from the committed S3 receipt for future inspection.

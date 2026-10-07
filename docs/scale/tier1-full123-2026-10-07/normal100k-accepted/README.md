@@ -14,3 +14,5 @@ The initial offline reviewer omitted the CLI wrapper's `events_sha256` field whe
 This qualifies the full **frozen123 normal100k source scope**. The source graph has since gained the blob publication protocol workload; its focused gates do not turn this into a full124 result. Current complete graph qualification, native release matrices, production online GC, original24h, million physical drain and default dependency adoption remain separate requirements.
 
 [Independent review](independent-review.json), [original result](tier1-result.json), complete archive inventory and S3 readback receipt retain the evidence. The original live stores are not reopened.
+
+Complete S3 archive/metadata/inventory readbacks are verified. Closed local fixtures and archive staging have been retired; use fresh restoration from the committed S3 receipt for future inspection.
