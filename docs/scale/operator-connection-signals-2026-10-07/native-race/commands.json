@@ -1,0 +1,21 @@
+{
+  "build": [
+    "go",
+    "test",
+    "-race",
+    "-buildvcs=true",
+    "-c",
+    "-o",
+    "/tmp/js-wf-operator-connection-signals-20261007/operator-race.test",
+    "./cmd/wf"
+  ],
+  "build_working_directory": "/home/exedev/js-wf",
+  "run": [
+    "/tmp/js-wf-operator-connection-signals-20261007/operator-race.test",
+    "-test.v",
+    "-test.run=^(TestOperatorStandaloneConnectionSignals)$",
+    "-test.count=1",
+    "-test.timeout=3m"
+  ],
+  "run_working_directory": "/home/exedev/js-wf/cmd/wf"
+}
