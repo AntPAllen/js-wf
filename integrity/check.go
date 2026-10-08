@@ -30,20 +30,22 @@ func scan(ctx context.Context, stream jetstream.Stream, visit func(*jetstream.Ra
 }
 
 func scanThrough(ctx context.Context, stream jetstream.Stream, cutoff *uint64, visit func(*jetstream.RawStreamMsg) error) error {
+	return scanPointThrough(ctx, stream, cutoff, visit)
+}
+
+func scanPointThrough(ctx context.Context, stream RetainedPointReadPort, cutoff *uint64, visit func(*jetstream.RawStreamMsg) error) error {
 	info, err := auditRead(ctx, func(attempt context.Context) (*jetstream.StreamInfo, error) { return stream.Info(attempt) })
 	if err != nil {
 		return err
 	}
-	if cutoff != nil && info.State.LastSeq > *cutoff {
-		info.State.LastSeq = *cutoff
-	}
+	firstBound, lastBound := retainedScanBounds(info.State, cutoff)
 	// Read a bounded window in parallel, then visit it in stream order. This
 	// preserves exact sequence requests and hole detection without introducing
 	// a consumer, while avoiding one network round trip per serial entry.
 	const window = 32
-	for first := info.State.FirstSeq; first <= info.State.LastSeq && first != 0; {
+	for first := firstBound; first <= lastBound && first != 0; {
 		count := uint64(window)
-		if remaining := info.State.LastSeq - first + 1; remaining < count {
+		if remaining := lastBound - first + 1; remaining < count {
 			count = remaining
 		}
 		type result struct {
@@ -78,7 +80,7 @@ func scanThrough(ctx context.Context, stream jetstream.Stream, cutoff *uint64, v
 				return err
 			}
 		}
-		if count > info.State.LastSeq-first {
+		if count > lastBound-first {
 			break
 		}
 		first += count

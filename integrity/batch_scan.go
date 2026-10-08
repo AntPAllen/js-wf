@@ -84,10 +84,7 @@ func scanRetainedThroughWithWindow(ctx context.Context, stream jetstream.Stream,
 	if err != nil {
 		return err
 	}
-	first, last := info.State.FirstSeq, info.State.LastSeq
-	if cutoff != nil && last > *cutoff {
-		last = *cutoff
-	}
+	first, last := retainedScanBounds(info.State, cutoff)
 	if first == 0 || first > last {
 		return nil
 	}

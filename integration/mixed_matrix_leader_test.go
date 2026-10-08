@@ -692,7 +692,7 @@ func runMixedMatrixLeaderWithChallenge(t *testing.T, row, mutationMode string) {
 				if checkpointCtx.Err() != nil {
 					return
 				}
-				if err != nil || report.Invocations != cut.batch*28 || report.Journals != cut.batch*28 || report.Terminal != cut.batch*28 {
+				if err != nil || integrity.ValidateCompletedCohortReport(report, cut.batch*28) != nil {
 					checkpointErrors <- fmt.Errorf("intermediate retained audit batch=%d cutoff=%d report=%+v err=%v", cut.batch, cut.cutoff, report, err)
 					cancel()
 					return
@@ -707,6 +707,8 @@ func runMixedMatrixLeaderWithChallenge(t *testing.T, row, mutationMode string) {
 	latenciesByType := map[string][]time.Duration{}
 	progressByType := map[string][]time.Duration{}
 	batches := 0
+	var acknowledgedMu sync.Mutex
+	var acknowledgedStart uint64
 	for time.Now().Before(end) {
 		select {
 		case err := <-faultDone:
@@ -735,7 +737,14 @@ func runMixedMatrixLeaderWithChallenge(t *testing.T, row, mutationMode string) {
 			go func() {
 				defer batch.Done()
 				if err := matrixRetryClient(batchCtx, func(attempt context.Context) error {
-					_, err := c.Start(attempt, typ, id, []byte(`null`))
+					handle, err := c.Start(attempt, typ, id, []byte(`null`))
+					if err == nil || errors.Is(err, client.ErrAlreadyStarted) {
+						acknowledgedMu.Lock()
+						if handle.InvSeq > acknowledgedStart {
+							acknowledgedStart = handle.InvSeq
+						}
+						acknowledgedMu.Unlock()
+					}
 					if errors.Is(err, client.ErrAlreadyStarted) {
 						return nil
 					}
@@ -792,16 +801,19 @@ func runMixedMatrixLeaderWithChallenge(t *testing.T, row, mutationMode string) {
 		}
 		batches++
 		if batches%10 == 0 {
-			stream, err := matrixReadMetadata(ctx, func(attempt context.Context) (jetstream.Stream, error) { return js.Stream(attempt, "WF_INV") })
-			if err != nil {
-				t.Fatal(err)
-			}
-			info, err := matrixReadMetadata(ctx, func(attempt context.Context) (*jetstream.StreamInfo, error) { return stream.Info(attempt) })
+			acknowledgedMu.Lock()
+			minimum := acknowledgedStart
+			acknowledgedMu.Unlock()
+			cutoff, err := matrixReadMetadata(ctx, func(attempt context.Context) (uint64, error) {
+				return integrity.CaptureInvocationCutoff(attempt, minimum, func(call context.Context) (*jetstream.RawStreamMsg, error) {
+					return natsutil.GetInvocationTailFromLeader(call, js)
+				})
+			})
 			if err != nil {
 				t.Fatal(err)
 			}
 			select {
-			case checkpoints <- checkpoint{batch: batches, cutoff: info.State.LastSeq}:
+			case checkpoints <- checkpoint{batch: batches, cutoff: cutoff}:
 			case <-ctx.Done():
 				t.Fatalf("enqueue checkpoint: %v", ctx.Err())
 			}

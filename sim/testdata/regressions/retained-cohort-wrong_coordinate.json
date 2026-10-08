@@ -1,0 +1,94 @@
+{
+  "version": 3,
+  "seed": 18,
+  "workload": "retained_cohort_boundary",
+  "step_limit": 100000,
+  "decisions": [
+    {
+      "at_ms": 0,
+      "enabled": [
+        "canceled",
+        "invalid_tail_subject",
+        "leader_behind_ack",
+        "metadata_ahead",
+        "metadata_behind",
+        "metadata_empty",
+        "missing_tail",
+        "wrong_coordinate"
+      ],
+      "chosen": "wrong_coordinate"
+    }
+  ],
+  "transport": [
+    {
+      "at_ms": 0,
+      "operation": "invocation_cohort_leader_tail",
+      "subject": "wf.inv.audit.last",
+      "expected": 5,
+      "sequence": 8,
+      "outcome": "wrong_coordinate"
+    },
+    {
+      "at_ms": 0,
+      "operation": "retained_cohort_metadata",
+      "sequence": 4,
+      "outcome": "snapshot"
+    },
+    {
+      "at_ms": 0,
+      "operation": "retained_cohort_accept",
+      "subject": "wf.inv.audit.id-1",
+      "sequence": 1,
+      "outcome": "committed"
+    },
+    {
+      "at_ms": 0,
+      "operation": "retained_cohort_accept",
+      "subject": "wf.inv.audit.id-2",
+      "sequence": 2,
+      "outcome": "committed"
+    },
+    {
+      "at_ms": 0,
+      "operation": "retained_cohort_accept",
+      "subject": "wf.inv.audit.id-3",
+      "sequence": 3,
+      "outcome": "committed"
+    },
+    {
+      "at_ms": 0,
+      "operation": "retained_cohort_accept",
+      "subject": "wf.inv.audit.id-4",
+      "sequence": 4,
+      "outcome": "committed"
+    },
+    {
+      "at_ms": 0,
+      "operation": "retained_cohort_accept",
+      "subject": "wf.inv.audit.id-5",
+      "sequence": 5,
+      "outcome": "committed"
+    },
+    {
+      "at_ms": 0,
+      "operation": "retained_cohort_accept",
+      "subject": "wf.inv.audit.id-6",
+      "sequence": 6,
+      "outcome": "committed"
+    },
+    {
+      "at_ms": 0,
+      "operation": "retained_cohort_accept",
+      "subject": "wf.inv.audit.id-7",
+      "sequence": 7,
+      "outcome": "committed"
+    },
+    {
+      "at_ms": 0,
+      "operation": "check_retained_cohort",
+      "expected": 8,
+      "sequence": 7,
+      "outcome": "wrong_coordinate"
+    }
+  ]
+}

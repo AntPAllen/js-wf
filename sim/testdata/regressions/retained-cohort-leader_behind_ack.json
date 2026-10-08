@@ -1,0 +1,37 @@
+{
+  "version": 3,
+  "seed": 2,
+  "workload": "retained_cohort_boundary",
+  "step_limit": 100000,
+  "decisions": [
+    {
+      "at_ms": 0,
+      "enabled": [
+        "canceled",
+        "invalid_tail_subject",
+        "leader_behind_ack",
+        "metadata_ahead",
+        "metadata_behind",
+        "metadata_empty",
+        "missing_tail",
+        "wrong_coordinate"
+      ],
+      "chosen": "leader_behind_ack"
+    }
+  ],
+  "transport": [
+    {
+      "at_ms": 0,
+      "operation": "invocation_cohort_leader_tail",
+      "subject": "wf.inv.audit.last",
+      "expected": 5,
+      "sequence": 4,
+      "outcome": "leader_behind_ack"
+    },
+    {
+      "at_ms": 0,
+      "operation": "check_retained_cohort",
+      "outcome": "leader_behind_ack_rejected"
+    }
+  ]
+}
