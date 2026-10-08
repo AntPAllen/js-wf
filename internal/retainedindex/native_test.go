@@ -168,6 +168,9 @@ func TestNativeOwnedIndexReopenedSnapshotAndPhysicalDrain(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
+			if uint64(len(info.State.Subjects)) != info.State.NumSubjects {
+				t.Fatal("incomplete physical subject census", len(info.State.Subjects), info.State.NumSubjects)
+			}
 			for subject := range info.State.Subjects {
 				if strings.Contains(subject, ".C.") {
 					t.Fatal("physical chunks remain", subject)
