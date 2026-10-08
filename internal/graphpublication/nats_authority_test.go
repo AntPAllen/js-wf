@@ -496,3 +496,39 @@ func TestNativeGraphAuthorityLostMutationReplies(t *testing.T) {
 		})
 	}
 }
+
+func TestNativeGraphAuthorityRejectsLossyDestinationEncoding(t *testing.T) {
+	_, a, c := nativeGraphFixture(t, 1)
+	invalid := "invalid-" + string([]byte{0xff})
+	before, err := a.stream.Info(c)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err = a.ReadRoot(c, invalid); err == nil {
+		t.Fatal("lossy read identity accepted")
+	}
+	if _, err = a.CASRoot(c, invalid, 0, EmptyRoot()); err == nil {
+		t.Fatal("lossy publication identity accepted")
+	}
+	hash, owner := key([]byte("invalid-destination")), "invalid"
+	f := Fence{Hash: hash, Owner: owner, Generation: 1, Phase: "uploading", Intents: map[string]Intent{owner: {Destination: invalid, Expected: 0, Expires: time.Now().UTC().Add(time.Hour), Locations: []Location{{Kind: "payload", First: 0}}}}}
+	if _, err = a.CASBlob(c, authorityKey(hash, owner), 0, f); err == nil {
+		t.Fatal("lossy grant destination accepted")
+	}
+	_, p := newModel("utf8")
+	if _, err = p.PrepareAppend(c, invalid, 0, nil, nil, time.Now().Add(time.Hour)); err == nil {
+		t.Fatal("lossy protocol destination accepted")
+	}
+	after, err := a.stream.Info(c)
+	if err != nil || after.State.LastSeq != before.State.LastSeq {
+		t.Fatal("rejected identities mutated authority", err)
+	}
+	// UTF-8 names remain legal and are retained exactly; this is not ASCII-only.
+	if _, err = a.CASRoot(c, "root-λ", 0, EmptyRoot()); err != nil {
+		t.Fatal(err)
+	}
+	root, err := a.ReadRoot(c, "root-λ")
+	if err != nil || root.Head != 1 {
+		t.Fatal(root, err)
+	}
+}

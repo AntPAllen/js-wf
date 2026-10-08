@@ -11,6 +11,7 @@ import (
 	"sort"
 	"strings"
 	"time"
+	"unicode/utf8"
 
 	"js-wf/internal/blobpublication"
 
@@ -63,7 +64,7 @@ func AuthorityStreamConfig(name, prefix string, replicas int) jetstream.StreamCo
 	return jetstream.StreamConfig{Name: name, Subjects: []string{prefix + ".>"}, Storage: jetstream.FileStorage, Replicas: replicas, Retention: jetstream.LimitsPolicy, Discard: jetstream.DiscardOld, MaxMsgsPerSubject: 1, DenyDelete: true, DenyPurge: true}
 }
 func OpenNativeAuthority(ctx context.Context, js jetstream.JetStream, name, prefix string) (*NativeAuthority, error) {
-	if name == "" || prefix == "" || strings.ContainsAny(prefix, "*> /\\\t\r\n") || strings.HasPrefix(prefix, ".") || strings.HasSuffix(prefix, ".") || strings.Contains(prefix, "..") {
+	if name == "" || prefix == "" || !utf8.ValidString(name) || !utf8.ValidString(prefix) || strings.ContainsAny(prefix, "*> /\\\t\r\n") || strings.HasPrefix(prefix, ".") || strings.HasSuffix(prefix, ".") || strings.Contains(prefix, "..") {
 		return nil, errors.New("invalid authority namespace")
 	}
 	var last error
@@ -110,7 +111,7 @@ func (p *NativeAuthority) subject(kind, identity string) string {
 	return p.prefix + "." + kind + "." + identity
 }
 func (p *NativeAuthority) readSnapshot(ctx context.Context, kind, identity string) (authorityValue, uint64, error) {
-	if identity == "" || (kind == "root" && len(identity) > 256) || (kind != "root" && kind != "blob") {
+	if identity == "" || (kind == "root" && (len(identity) > 256 || !utf8.ValidString(identity))) || (kind != "root" && kind != "blob") {
 		return authorityValue{}, 0, errors.New("empty authority identity")
 	}
 	if kind == "blob" && !validHash(identity) {
@@ -175,7 +176,7 @@ func validHash(k string) bool {
 // validateAuthority never normalizes stored bytes. Zero logical revisions have
 // no root/fence; their physical absence witnesses remain permanent subjects.
 func validateAuthority(v authorityValue, kind, identity string) error {
-	if (kind != "root" && kind != "blob") || v.Schema != authoritySchema || v.Kind != kind || v.Identity != identity || identity == "" || (kind == "root" && len(identity) > 256) || (kind == "blob" && !validHash(identity)) {
+	if (kind != "root" && kind != "blob") || v.Schema != authoritySchema || v.Kind != kind || v.Identity != identity || identity == "" || (kind == "root" && (len(identity) > 256 || !utf8.ValidString(identity))) || (kind == "blob" && !validHash(identity)) {
 		return errors.New("invalid graph authority envelope")
 	}
 	if v.Revision == 0 {

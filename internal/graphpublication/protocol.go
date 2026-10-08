@@ -16,6 +16,7 @@ import (
 	"strconv"
 	"strings"
 	"time"
+	"unicode/utf8"
 
 	"js-wf/internal/blobpublication"
 	"js-wf/internal/retainedgraph"
@@ -174,7 +175,7 @@ func validateFence(k string, record Record) error {
 		if token != f.Owner {
 			return errors.New("foreign graph intent owner")
 		}
-		if !validID(token) || intent.Destination == "" || len(intent.Destination) > 256 || intent.Expected == math.MaxUint64 || intent.Expires.IsZero() || len(intent.Locations) == 0 || len(intent.Locations) > MaxIntentLocations {
+		if !validID(token) || intent.Destination == "" || !utf8.ValidString(intent.Destination) || len(intent.Destination) > 256 || intent.Expected == math.MaxUint64 || intent.Expires.IsZero() || len(intent.Locations) == 0 || len(intent.Locations) > MaxIntentLocations {
 			return errors.New("invalid graph intent")
 		}
 		seen := map[Location]bool{}

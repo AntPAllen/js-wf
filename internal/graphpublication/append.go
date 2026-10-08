@@ -8,6 +8,7 @@ import (
 	"reflect"
 	"sort"
 	"time"
+	"unicode/utf8"
 
 	"js-wf/internal/blobpublication"
 	"js-wf/internal/retainedgraph"
@@ -82,7 +83,7 @@ func (p Protocol) PrepareAppendWithOwned(ctx context.Context, destination string
 	if err := ctx.Err(); err != nil {
 		return Prepared{}, err
 	}
-	if p.Port == nil || destination == "" || len(destination) > 256 || expected == math.MaxUint64 || expires.IsZero() || len(data) > retainedgraph.MaxDataBytes || len(payloads) > retainedgraph.MaxBlobReferences || len(owned) > retainedgraph.MaxBlobReferences-len(payloads) {
+	if p.Port == nil || destination == "" || !utf8.ValidString(destination) || len(destination) > 256 || expected == math.MaxUint64 || expires.IsZero() || len(data) > retainedgraph.MaxDataBytes || len(payloads) > retainedgraph.MaxBlobReferences || len(owned) > retainedgraph.MaxBlobReferences-len(payloads) {
 		return Prepared{}, errors.New("invalid graph append configuration")
 	}
 	base, err := p.readRoot(ctx, destination)
@@ -186,7 +187,7 @@ func (p Protocol) Commit(ctx context.Context, prepared Prepared) (Root, error) {
 	if err := ctx.Err(); err != nil {
 		return Root{}, err
 	}
-	if p.Port == nil || prepared.destination == "" || !validID(prepared.publication.Token) {
+	if p.Port == nil || prepared.destination == "" || !utf8.ValidString(destination) || !validID(prepared.publication.Token) {
 		return Root{}, errors.New("invalid prepared graph append")
 	}
 	current, err := p.readRoot(ctx, prepared.destination)
