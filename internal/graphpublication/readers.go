@@ -1,8 +1,11 @@
 package graphpublication
 
 import (
+	"bytes"
 	"context"
+	"encoding/json"
 	"errors"
+	"io"
 	"math"
 	"reflect"
 	"time"
@@ -17,6 +20,84 @@ type Reader struct {
 	destination string
 	id          string
 	graph       retainedgraph.Root
+}
+
+const ReaderCheckpointSchema = "js-wf-graph-reader-handle-v1"
+const MaxReaderCheckpointBytes = 2048
+
+// readerCheckpoint carries identity and the exact snapshot fingerprint, never
+// lease expiry or ownership. Resumption obtains both from canonical authority.
+type readerCheckpoint struct {
+	Schema         string
+	Destination    string
+	ID             string
+	SnapshotSHA256 string
+}
+
+func validReaderCheckpoint(v readerCheckpoint) bool {
+	return v.Schema == ReaderCheckpointSchema && v.Destination != "" && utf8.ValidString(v.Destination) && len(v.Destination) <= 256 && validID(v.ID) && validHash(v.SnapshotSHA256)
+}
+
+// Checkpoint encodes a bounded handle for durable client-side storage. These
+// bytes cannot create a pin, extend expiry or adopt an arbitrary snapshot.
+func (r Reader) Checkpoint() ([]byte, error) {
+	graph, err := r.graph.Encode()
+	if err != nil {
+		return nil, err
+	}
+	v := readerCheckpoint{Schema: ReaderCheckpointSchema, Destination: r.destination, ID: r.id, SnapshotSHA256: key(graph)}
+	if !validReaderCheckpoint(v) {
+		return nil, errors.New("invalid reader checkpoint")
+	}
+	data, err := json.Marshal(v)
+	if err != nil || len(data) > MaxReaderCheckpointBytes {
+		return nil, errors.New("reader checkpoint byte limit")
+	}
+	return data, nil
+}
+
+// ResumeReader restores an unexpired exact pin using a quorum-witnessed root.
+// It does not mutate logical authority. A released/expired/missing or changed
+// snapshot fails closed even if all of its old bytes remain physically present.
+// now must use the same collection-consistent clock as ReadRetained.
+func (p Protocol) ResumeReader(ctx context.Context, data []byte, now time.Time) (Reader, Root, error) {
+	if err := ctx.Err(); err != nil {
+		return Reader{}, Root{}, err
+	}
+	if p.Port == nil || now.IsZero() || len(data) == 0 || len(data) > MaxReaderCheckpointBytes {
+		return Reader{}, Root{}, errors.New("invalid reader resumption")
+	}
+	var v readerCheckpoint
+	d := json.NewDecoder(bytes.NewReader(data))
+	d.DisallowUnknownFields()
+	if err := d.Decode(&v); err != nil {
+		return Reader{}, Root{}, err
+	}
+	if d.Decode(new(any)) != io.EOF {
+		return Reader{}, Root{}, errors.New("trailing reader checkpoint")
+	}
+	canonical, err := json.Marshal(v)
+	if err != nil || !bytes.Equal(canonical, data) || !validReaderCheckpoint(v) {
+		return Reader{}, Root{}, errors.New("noncanonical or invalid reader checkpoint")
+	}
+	root, err := p.readRoot(ctx, v.Destination)
+	if err != nil {
+		return Reader{}, Root{}, err
+	}
+	for _, pin := range root.Readers {
+		if pin.ID != v.ID {
+			continue
+		}
+		encoded, err := pin.Graph.Encode()
+		if err != nil {
+			return Reader{}, Root{}, err
+		}
+		if key(encoded) != v.SnapshotSHA256 || !now.Before(pin.Expires) {
+			return Reader{}, Root{}, ErrRevoked
+		}
+		return Reader{destination: v.Destination, id: v.ID, graph: copyGraph(pin.Graph)}, root, nil
+	}
+	return Reader{}, Root{}, ErrRevoked
 }
 
 func copyGraph(g retainedgraph.Root) retainedgraph.Root {
