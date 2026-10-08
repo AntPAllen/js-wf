@@ -34,11 +34,12 @@ type timerWakeup struct {
 }
 
 type signalRecord struct {
-	Sequence uint64 `json:"sig_seq"`
-	Name     string `json:"name"`
-	Payload  []byte `json:"payload,omitempty"`
-	Ref      string `json:"ref,omitempty"`
-	Hash     string `json:"hash,omitempty"`
+	Sequence uint64            `json:"sig_seq"`
+	Name     string            `json:"name"`
+	Payload  []byte            `json:"payload,omitempty"`
+	Ref      string            `json:"ref,omitempty"`
+	Hash     string            `json:"hash,omitempty"`
+	Child    *graphChildResult `json:"graph_child,omitempty"`
 }
 
 type cancelWaiter struct {
@@ -875,6 +876,7 @@ func (w *Worker) execute(ctx context.Context, typ, id string, l *lease.Lease, wa
 			defer stop()
 			_ = graph.close(cleanup)
 		}()
+		graph.invocationPort = invocationPort
 		records, tail = graph.records, graph.view.Tail()
 	}
 	if w.continuations[typ] != nil {
@@ -983,7 +985,11 @@ func (w *Worker) execute(ctx context.Context, typ, id string, l *lease.Lease, wa
 		if err != nil {
 			return err
 		}
-		records = append(records, journal.Record{Entry: journal.Entry{Epoch: l.Epoch(), Index: nextIndex(), Kind: kind, Payload: payload, WorkerID: w.ID}, Sequence: seq})
+		if graph != nil {
+			records = graph.records
+		} else {
+			records = append(records, journal.Record{Entry: journal.Entry{Epoch: l.Epoch(), Index: nextIndex(), Kind: kind, Payload: payload, WorkerID: w.ID}, Sequence: seq})
+		}
 		tail = seq
 		return nil
 	}

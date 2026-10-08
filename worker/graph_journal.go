@@ -19,6 +19,8 @@ import (
 // ownership for deliveries. Every external terminal reader must also use graph
 // results. Legacy start/state/signal publication, import, snapshots, continuation
 // and retention migration remain separate; production online GC is not enabled.
+// A child terminal must remain available until its parent publishes the owned
+// SignalConsumed copy; production child retention coordination is still pending.
 func WithGraphJournal(store *journal.GraphStore) Option {
 	return func(w *Worker) error {
 		if store == nil {
@@ -44,14 +46,15 @@ type graphPayload struct {
 	link  retainedgraph.Link
 }
 type graphDelivery struct {
-	store      *journal.GraphStore
-	typ, id    string
-	invocation uint64
-	view       *journal.GraphView
-	records    []journal.Record
-	refs       map[string]graphPayload
-	pending    map[string][]byte
-	input      []byte
+	store          *journal.GraphStore
+	typ, id        string
+	invocation     uint64
+	view           *journal.GraphView
+	records        []journal.Record
+	refs           map[string]graphPayload
+	pending        map[string][]byte
+	input          []byte
+	invocationPort InvocationPort
 }
 
 func openGraphDelivery(ctx context.Context, s *journal.GraphStore, typ, id string, invocation uint64) (g *graphDelivery, err error) {
@@ -80,6 +83,9 @@ func openGraphDelivery(ctx context.Context, s *journal.GraphStore, typ, id strin
 			}
 		}
 		if e = g.register(record); e != nil {
+			return nil, e
+		}
+		if e = g.validateChildSignal(ctx, record.Entry); e != nil {
 			return nil, e
 		}
 		g.records = append(g.records, record.Record)
@@ -156,6 +162,14 @@ func graphReferences(entry journal.Entry) (map[string]string, error) {
 				return nil, err
 			}
 		}
+		if meta.Child != nil {
+			if err := meta.Child.validate(); err != nil {
+				return nil, err
+			}
+			if err := add(meta.Child.Ref, meta.Child.Hash); err != nil {
+				return nil, err
+			}
+		}
 	}
 	return refs, nil
 }
@@ -226,6 +240,13 @@ func (g *graphDelivery) GetBytes(ctx context.Context, name string) ([]byte, erro
 }
 
 func (g *graphDelivery) append(ctx context.Context, entry journal.Entry, tail uint64) (uint64, error) {
+	cleanup, err := g.prepareChildSignal(ctx, &entry)
+	if err != nil {
+		return 0, err
+	}
+	if cleanup != nil {
+		defer cleanup()
+	}
 	refs, err := graphReferences(entry)
 	if err != nil {
 		return 0, err
@@ -274,6 +295,7 @@ func (g *graphDelivery) append(ctx context.Context, entry journal.Entry, tail ui
 	for _, name := range names {
 		delete(g.pending, name)
 	}
+	g.records = append(g.records, record.Record)
 	g.input = nil
 	return seq, nil
 }
