@@ -1,0 +1,107 @@
+{
+  "access": {
+    "Publish": [
+      "wf.blob.authority.root.*",
+      "wf.blob.authority.blob.*",
+      "$JS.API.STREAM.INFO.BLOB_AUTH",
+      "$JS.API.STREAM.MSG.GET.BLOB_AUTH"
+    ],
+    "Subscribe": [
+      "_INBOX.\u003e"
+    ]
+  },
+  "after_restart": {
+    "Head": 2,
+    "Token": "",
+    "Blobs": null,
+    "Data": null
+  },
+  "before": {
+    "config": {
+      "name": "BLOB_AUTH",
+      "subjects": [
+        "wf.blob.authority.\u003e"
+      ],
+      "retention": "limits",
+      "max_consumers": -1,
+      "max_msgs": -1,
+      "max_bytes": -1,
+      "discard": "old",
+      "max_age": 0,
+      "max_msgs_per_subject": 1,
+      "max_msg_size": -1,
+      "storage": "file",
+      "num_replicas": 1,
+      "duplicate_window": 120000000000,
+      "deny_delete": true,
+      "deny_purge": true,
+      "compression": "none",
+      "allow_direct": false,
+      "mirror_direct": false,
+      "consumer_limits": {},
+      "metadata": {
+        "_nats.level": "5",
+        "_nats.req.level": "0",
+        "_nats.ver": "2.15.0"
+      }
+    },
+    "created": "2026-10-08T00:55:59.924442331Z",
+    "state": {
+      "messages": 2,
+      "bytes": 856,
+      "first_seq": 2,
+      "first_ts": "2026-10-08T00:55:59.940112493Z",
+      "last_seq": 4,
+      "last_ts": "2026-10-08T00:55:59.948683467Z",
+      "consumer_count": 0,
+      "deleted": null,
+      "num_deleted": 1,
+      "num_subjects": 2,
+      "subjects": null
+    },
+    "cluster": {
+      "leader": "wf-test-0"
+    },
+    "ts": "2026-10-08T00:55:59.952280274Z"
+  },
+  "blob": {
+    "Revision": 1,
+    "Fence": {
+      "Generation": 1,
+      "Phase": "uploading",
+      "Object": "",
+      "Intents": {
+        "pending": {
+          "Root": "workflow",
+          "Expected": 1,
+          "Expires": "2026-10-08T01:55:59.940295942Z"
+        }
+      }
+    }
+  },
+  "denied": {
+    "$JS.API.STREAM.CREATE.BLOB_AUTH": "nats: permissions violation: Permissions Violation for Publish to \"$JS.API.STREAM.CREATE.BLOB_AUTH\"",
+    "$JS.API.STREAM.CREATE.OTHER": "nats: permissions violation: Permissions Violation for Publish to \"$JS.API.STREAM.CREATE.OTHER\"",
+    "$JS.API.STREAM.DELETE.BLOB_AUTH": "nats: permissions violation: Permissions Violation for Publish to \"$JS.API.STREAM.DELETE.BLOB_AUTH\"",
+    "$JS.API.STREAM.INFO.OTHER": "nats: permissions violation: Permissions Violation for Publish to \"$JS.API.STREAM.INFO.OTHER\"",
+    "$JS.API.STREAM.MSG.DELETE.BLOB_AUTH": "nats: permissions violation: Permissions Violation for Publish to \"$JS.API.STREAM.MSG.DELETE.BLOB_AUTH\"",
+    "$JS.API.STREAM.MSG.GET.OTHER": "nats: permissions violation: Permissions Violation for Publish to \"$JS.API.STREAM.MSG.GET.OTHER\"",
+    "$JS.API.STREAM.PURGE.BLOB_AUTH": "nats: permissions violation: Permissions Violation for Publish to \"$JS.API.STREAM.PURGE.BLOB_AUTH\"",
+    "$JS.API.STREAM.UPDATE.BLOB_AUTH": "nats: permissions violation: Permissions Violation for Publish to \"$JS.API.STREAM.UPDATE.BLOB_AUTH\"",
+    "wf.blob.authority.unrecognized.value": "nats: permissions violation: Permissions Violation for Publish to \"wf.blob.authority.unrecognized.value\"",
+    "wf.inv.type.id": "nats: permissions violation: Permissions Violation for Publish to \"wf.inv.type.id\""
+  },
+  "keys": [
+    "ca67bd59cc4116ac80db5f64cbf4747f26ba929c85e8cc689a6123368d08719b"
+  ],
+  "provisioner_control_deleted": true,
+  "replicas": 1,
+  "restart_denial": "nats: permissions violation: Permissions Violation for Publish to \"$JS.API.STREAM.DELETE.BLOB_AUTH\"",
+  "retired": {
+    "Head": 2,
+    "Token": "",
+    "Blobs": null,
+    "Data": null
+  },
+  "scope": "Named trusted adapter principal cannot call stream lifecycle APIs; provisioning credentials remain privileged. No server administrator threat, ObjectStore permissions, runtime migration or domain routing qualification."
+}
