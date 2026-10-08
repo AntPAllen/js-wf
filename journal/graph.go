@@ -38,8 +38,8 @@ type GraphConfig struct {
 	// CanonicalStarts selects the versioned input/pending-start lifecycle.
 	// Existing legacy/v3 histories require explicit import before enabling it.
 	CanonicalStarts bool
-	// CanonicalSignals selects owned, indexed Signal reservations. Publication
-	// and worker queue intake must be integrated before runtime adoption.
+	// CanonicalSignals selects owned reservations, ordered source bindings
+	// and canonical worker queue intake. Full deployment migration is separate.
 	CanonicalSignals bool
 }
 
@@ -57,6 +57,8 @@ type graphCursor struct {
 	Start              *GraphStart `json:"start,omitempty"`
 	PreviousInvocation uint64      `json:"previous_invocation,omitempty"`
 	SignalInputs       uint64      `json:"signal_inputs,omitempty"`
+	SignalBindings     uint64      `json:"signal_bindings,omitempty"`
+	SignalSource       uint64      `json:"signal_source,omitempty"`
 }
 
 type graphEntry struct {
@@ -149,7 +151,7 @@ func (s *GraphStore) validateRoot(root graphpublication.Root, typ, id string) (*
 		return nil, ErrGap
 	}
 	var c graphCursor
-	if graphDecode(root.Application, &c) != nil || c.Schema != cursorSchema || !s.cfg.CanonicalStarts && (c.Invocation == 0 || c.Start != nil || c.PreviousInvocation != 0) || !s.cfg.CanonicalSignals && c.SignalInputs != 0 || c.SignalInputs > math.MaxInt64 || c.Count > MaxEntries || c.Base > math.MaxUint64-c.Count {
+	if graphDecode(root.Application, &c) != nil || c.Schema != cursorSchema || !s.cfg.CanonicalStarts && (c.Invocation == 0 || c.Start != nil || c.PreviousInvocation != 0) || !s.cfg.CanonicalSignals && (c.SignalInputs != 0 || c.SignalBindings != 0 || c.SignalSource != 0) || c.SignalInputs > math.MaxInt64 || c.SignalBindings > c.SignalInputs || c.Count > MaxEntries || c.Base > math.MaxUint64-c.Count {
 		return nil, ErrGap
 	}
 	if s.cfg.CanonicalStarts {

@@ -34,13 +34,19 @@ type timerWakeup struct {
 	scheduled  bool
 }
 
+type canonicalSignalRecord struct {
+	Index uint64 `json:"index"`
+	Token string `json:"token"`
+}
+
 type signalRecord struct {
-	Sequence uint64            `json:"sig_seq"`
-	Name     string            `json:"name"`
-	Payload  []byte            `json:"payload,omitempty"`
-	Ref      string            `json:"ref,omitempty"`
-	Hash     string            `json:"hash,omitempty"`
-	Child    *graphChildResult `json:"graph_child,omitempty"`
+	Sequence  uint64                 `json:"sig_seq"`
+	Name      string                 `json:"name"`
+	Payload   []byte                 `json:"payload,omitempty"`
+	Ref       string                 `json:"ref,omitempty"`
+	Hash      string                 `json:"hash,omitempty"`
+	Child     *graphChildResult      `json:"graph_child,omitempty"`
+	Canonical *canonicalSignalRecord `json:"canonical_signal,omitempty"`
 }
 
 type cancelWaiter struct {
@@ -1089,6 +1095,8 @@ func (w *Worker) execute(ctx context.Context, typ, id string, l *lease.Lease, wa
 	var signals []wf.Signal
 	if graph == nil {
 		signals, err = w.drainSignalsFrom(ctx, typ, id, input.Sequence, checkpointInfo.SignalCursor, records, appendEntry, ops)
+	} else if graph.store.CanonicalSignals() {
+		signals, err = w.drainCanonicalSignals(ctx, graph, checkpointInfo.SignalCursor, records, appendEntry, ops)
 	} else {
 		port := w.signalDrainPort
 		if port == nil {
@@ -1261,7 +1269,13 @@ func (w *Worker) execute(ctx context.Context, typ, id string, l *lease.Lease, wa
 	}
 	result, runErr, panicked := outcome.result, outcome.err, outcome.panicked
 	if cancelSeen {
-		current, err := w.drainSignalsFrom(ctx, typ, id, input.Sequence, checkpointInfo.SignalCursor, records, appendEntry, ops)
+		var current []wf.Signal
+		var err error
+		if graph != nil && graph.store.CanonicalSignals() {
+			current, err = w.drainCanonicalSignals(ctx, graph, checkpointInfo.SignalCursor, records, appendEntry, ops)
+		} else {
+			current, err = w.drainSignalsFrom(ctx, typ, id, input.Sequence, checkpointInfo.SignalCursor, records, appendEntry, ops)
+		}
 		if err != nil {
 			return err
 		}

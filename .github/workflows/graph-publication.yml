@@ -8,6 +8,7 @@ on:
       - 'reconcile/**'
       - 'retention/**'
       - 'worker/graph_journal*.go'
+      - 'worker/graph_signal*.go'
       - 'worker/graph_terminal*.go'
       - 'worker/graph_child*.go'
       - 'worker/graph_parent*.go'
@@ -23,6 +24,7 @@ on:
       - 'client/graph_bind*.go'
       - 'client/graph_start*.go'
       - 'client/client.go'
+      - 'client/signal_port.go'
       - 'internal/retainedgraph/**'
       - 'internal/retainedindex/**'
       - 'sim/graph_publication*'
@@ -57,6 +59,7 @@ on:
       - 'reconcile/**'
       - 'retention/**'
       - 'worker/graph_journal*.go'
+      - 'worker/graph_signal*.go'
       - 'worker/graph_terminal*.go'
       - 'worker/graph_child*.go'
       - 'worker/graph_parent*.go'
@@ -72,6 +75,7 @@ on:
       - 'client/graph_bind*.go'
       - 'client/graph_start*.go'
       - 'client/client.go'
+      - 'client/signal_port.go'
       - 'internal/retainedgraph/**'
       - 'internal/retainedindex/**'
       - 'sim/graph_publication*'
@@ -131,7 +135,7 @@ jobs:
         run: |
           graph_flags=()
           if [ "$GRAPH_MODE" = race ]; then graph_flags=(-race); fi
-          go test -p=1 "${graph_flags[@]}" ./journal -run '^(TestGraphJournal|TestNativeGraphJournal|TestGraphCanonicalStart|TestGraphCanonicalSignalInputs|TestNativeGraphCanonicalSignalInputs)' -count=1 -timeout=5m -json > graph-journal-events.jsonl
+          go test -p=1 "${graph_flags[@]}" ./journal -run '^(TestGraphJournal|TestNativeGraphJournal|TestGraphCanonicalStart|TestGraphCanonicalSignalInputs|TestNativeGraphCanonicalSignalInputs|TestGraphCanonicalSignalQueue)' -count=1 -timeout=5m -json > graph-journal-events.jsonl
       - name: Native graph worker input signal result replay and drain
         env:
           GOMAXPROCS: '2'
@@ -141,6 +145,15 @@ jobs:
           graph_flags=()
           if [ "$GRAPH_MODE" = race ]; then graph_flags=(-race); fi
           go test -p=1 "${graph_flags[@]}" ./worker -run '^(TestNativeGraphWorkerReplayInputsSignalsAndResults|TestNativeGraphChildResultTransferAndReplay|TestGraphChildReplayRejectsForgedProvenance|TestGraphSelectedChildRequiresExactRecordedSignal|TestNativeGraphWorkerParentNotifications|TestNativeCanonicalStartRecoveryWorkerReplayAndPurge)$' -count=1 -timeout=5m -json > graph-worker-events.jsonl
+      - name: Canonical Signal queue consumption replay and child transfer
+        env:
+          GOMAXPROCS: '2'
+          GOMEMLIMIT: 512MiB
+          GRAPH_MODE: ${{ matrix.mode }}
+        run: |
+          graph_flags=()
+          if [ "$GRAPH_MODE" = race ]; then graph_flags=(-race); fi
+          go test -p=1 "${graph_flags[@]}" ./worker -run '^TestNativeCanonicalSignalQueue' -count=1 -timeout=5m -json > graph-signal-worker-events.jsonl
       - name: Canonical graph repair decisions and native wakeup recovery
         env:
           GOMAXPROCS: '2'
@@ -185,6 +198,7 @@ jobs:
             graph-publication-events.jsonl
             graph-journal-events.jsonl
             graph-worker-events.jsonl
+            graph-signal-worker-events.jsonl
             graph-client-events.jsonl
             graph-reconcile-events.jsonl
             graph-retention-events.jsonl

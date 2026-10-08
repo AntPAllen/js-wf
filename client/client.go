@@ -411,9 +411,6 @@ func (c *Client) Cancel(ctx context.Context, typ, id string) (uint64, error) {
 }
 
 func (c *Client) signal(ctx context.Context, typ, id, name string, payload []byte, idempotencyKey string, expectedInvSeq uint64, operation string, requireRunning bool) (sequence uint64, err error) {
-	if c.graphJournal != nil && c.graphJournal.CanonicalSignals() {
-		return 0, fmt.Errorf("%w: canonical Signal publication is not integrated", ErrSignalUnknown)
-	}
 	var observedInvSeq uint64
 	publishAttempted := false
 	if c.observer != nil {
@@ -466,6 +463,9 @@ func (c *Client) signal(ctx context.Context, typ, id, name string, payload []byt
 	observedInvSeq = invocation.Sequence
 	if expectedInvSeq != 0 && invocation.Sequence != expectedInvSeq {
 		return 0, ErrStaleGeneration
+	}
+	if c.graphJournal != nil && c.graphJournal.CanonicalSignals() {
+		return c.signalCanonical(ctx, journal.GraphSignalRequest{Type: typ, ID: id, Invocation: invocation.Sequence, Name: name, Key: idempotencyKey}, payload, requireRunning, invocation, &publishAttempted)
 	}
 	if c.graphJournal != nil {
 		if err := c.graphSignalAdmission(ctx, typ, id, invocation.Sequence, requireRunning); err != nil {

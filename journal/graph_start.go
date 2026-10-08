@@ -103,24 +103,29 @@ func validateStartCursor(root graphpublication.Root, c graphCursor, typ, id stri
 		return ErrGap
 	}
 	if signals {
-		if c.Invocation == 0 && c.SignalInputs != 0 {
+		if c.Invocation == 0 && (c.SignalInputs != 0 || c.SignalBindings != 0 || c.SignalSource != 0) {
 			return ErrGap
 		}
-		var inputs uint64
+		inputs, bindings := uint64(0), uint64(0)
 		for _, stream := range root.Streams[1:] {
-			if stream.Name != graphSignalInputForest {
+			switch stream.Name {
+			case graphSignalInputForest:
+				inputs = stream.Graph.Count
+			case graphSignalQueueForest:
+				bindings = stream.Graph.Count
+			default:
 				return ErrGap
 			}
-			inputs = stream.Graph.Count
 		}
-		want = c.SignalInputs
+		wantInputs, wantBindings := c.SignalInputs, c.SignalBindings
 		if c.Retired {
-			want = 0
+			wantInputs, wantBindings = 0, 0
 		}
-		if inputs != want {
+		if inputs != wantInputs || bindings != wantBindings || c.SignalBindings > 0 && c.SignalSource == 0 {
 			return ErrGap
 		}
 	}
+
 	return nil
 }
 

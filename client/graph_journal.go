@@ -56,7 +56,8 @@ func (p jetStreamGraphResultPort) Wait(ctx context.Context, d time.Duration) err
 // NewWithGraphJournal reads all terminal outcomes through the experimental
 // graph journal. Signal admission and duplicate confirmation use graph history;
 // CanonicalStarts stores Start input and pending recovery in the graph; source
-// pointers remain in WF_INV. Signals still use legacy publication. Use graph-aware retention;
+// pointers remain in WF_INV. CanonicalSignals additionally owns and binds
+// incoming Signal queues; otherwise Signals use legacy publication. Use graph-aware retention;
 // remaining canonical publication/import migration is required before online GC.
 func NewWithGraphJournal(js jetstream.JetStream, store *journal.GraphStore) (*Client, error) {
 	if js == nil || store == nil {

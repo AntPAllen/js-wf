@@ -25,6 +25,12 @@ import (
 )
 
 func TestNativeGraphChildResultTransferAndReplay(t *testing.T) {
+	testNativeGraphChildResultTransferAndReplay(t, false)
+}
+func TestNativeCanonicalSignalQueueChildTransferAndReplay(t *testing.T) {
+	testNativeGraphChildResultTransferAndReplay(t, true)
+}
+func testNativeGraphChildResultTransferAndReplay(t *testing.T, canonical bool) {
 	for _, replicas := range []int{1, 3} {
 		for _, scenario := range []struct{ async, externalResult bool }{{false, true}, {true, true}, {false, false}, {true, false}} {
 			async, externalResult := scenario.async, scenario.externalResult
@@ -59,7 +65,7 @@ func TestNativeGraphChildResultTransferAndReplay(t *testing.T) {
 				if err = provision.Ensure(ctx, js, replicas); err != nil {
 					t.Fatal(err)
 				}
-				cfg := journal.NativeGraphConfig{AuthorityStream: "GRAPH_CHILD_AUTH", AuthorityPrefix: "wf.graph.child", ObjectBucket: "GRAPH_CHILD_OBJECTS", ExpectedReplicas: replicas, PinTTL: time.Minute, IntentTTL: time.Minute}
+				cfg := journal.NativeGraphConfig{AuthorityStream: "GRAPH_CHILD_AUTH", AuthorityPrefix: "wf.graph.child", ObjectBucket: "GRAPH_CHILD_OBJECTS", ExpectedReplicas: replicas, CanonicalStarts: canonical, CanonicalSignals: canonical, PinTTL: time.Minute, IntentTTL: time.Minute}
 				now := time.Now().UTC()
 				cfg.Now = func() time.Time { return now }
 				configs, err := journal.NativeGraphStreamConfigs(cfg, replicas)
@@ -257,7 +263,7 @@ func TestNativeGraphChildResultTransferAndReplay(t *testing.T) {
 					t.Fatal(err)
 				}
 				stagingRef := signalMessage.Header.Get("Wf-Signal-Ref")
-				if !externalResult && stagingRef == "" {
+				if !canonical && !externalResult && stagingRef == "" {
 					t.Fatal("inline child outcome did not use external signal staging")
 				}
 				if stagingRef != "" {

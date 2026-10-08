@@ -91,3 +91,30 @@ func (p jetStreamSignalPort) ReadJournal(ctx context.Context, typ, id string) ([
 func (p jetStreamSignalPort) EnqueueRun(ctx context.Context, subject string, data []byte, messageID string) error {
 	return (&jetStreamStartPort{js: p.js}).EnqueueRun(ctx, subject, data, messageID)
 }
+
+// CanonicalSignalPort additionally supplies source-order discovery. Existing
+// legacy-only transports are insufficient to bind canonical Signal queues.
+type CanonicalSignalPort interface {
+	SignalPort
+	journal.GraphSignalSource
+	LastSignalSequence(context.Context) (uint64, error)
+}
+
+func (p jetStreamSignalPort) LastSignalSequence(ctx context.Context) (uint64, error) {
+	stream, err := p.js.Stream(ctx, "WF_SIG")
+	if err != nil {
+		return 0, err
+	}
+	info, err := stream.Info(ctx)
+	if err != nil {
+		return 0, err
+	}
+	return info.State.LastSeq, nil
+}
+func (p jetStreamSignalPort) NextSignal(ctx context.Context, from uint64, subject string) (*jetstream.RawStreamMsg, error) {
+	stream, err := p.js.Stream(ctx, "WF_SIG")
+	if err != nil {
+		return nil, err
+	}
+	return stream.GetMsg(ctx, from, jetstream.WithGetMsgSubject(subject))
+}

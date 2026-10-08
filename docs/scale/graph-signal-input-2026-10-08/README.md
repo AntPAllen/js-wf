@@ -1,5 +1,7 @@
 # Canonical graph-owned Signal inputs
 
+The description below records the frozen reservation-only component at `691434f`. Subsequent [publication, ordered queue binding and worker intake](../graph-signal-queue-2026-10-08/) supersede its client/worker guards; original frozen evidence and verdicts remain unchanged.
+
 This component implements the first durable Signal cut: one root CAS publishes the immutable request descriptor, owned body, and persistent bounded idempotency index together. It does not publish or bind WF_SIG, enqueue a delivery, or integrate worker queue intake.
 
 ## Storage and admission

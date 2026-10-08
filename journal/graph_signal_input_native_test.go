@@ -10,7 +10,6 @@ import (
 	"time"
 
 	"github.com/nats-io/nats.go/jetstream"
-	"js-wf/client"
 	"js-wf/internal/graphpublication"
 	"js-wf/journal"
 	"js-wf/testcluster"
@@ -62,13 +61,6 @@ func TestNativeGraphCanonicalSignalInputs(t *testing.T) {
 			store, err := journal.OpenNativeGraphStore(ctx, js, cfg)
 			if err != nil {
 				t.Fatal(err)
-			}
-			c, e := client.NewWithGraphJournal(js, store)
-			if e != nil {
-				t.Fatal(e)
-			}
-			if sequence, e := c.Signal(ctx, "flow", "native", "signal", []byte("input"), "key"); !errors.Is(e, client.ErrSignalUnknown) || sequence != 0 {
-				t.Fatal("unintegrated publication used legacy path", sequence, e)
 			}
 			start, err := store.ReserveStart(ctx, journal.GraphStartRequest{Type: "flow", ID: "native"}, []byte("start"))
 			if err != nil {

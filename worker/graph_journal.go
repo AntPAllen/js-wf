@@ -19,7 +19,8 @@ import (
 // ownership for deliveries, including graph-aware parent notification clients.
 // Every external terminal reader must also use graph
 // results. CanonicalStarts additionally owns Start inputs and validates source
-// pointers. State/signal publication, import, snapshots, continuation
+// pointers. CanonicalSignals owns incoming Signal queues and consumption.
+// State publication, import, snapshots, continuation
 // migration remain separate; production online GC is not enabled. Use graph-aware
 // retention to keep child terminals until their parent publishes an owned
 // SignalConsumed copy or its canonical generation completes/retires.
@@ -34,9 +35,6 @@ func WithGraphJournal(store *journal.GraphStore) Option {
 }
 
 func (w *Worker) validateGraphOptions() error {
-	if w.graphJournal != nil && w.graphJournal.CanonicalSignals() {
-		return fmt.Errorf("canonical Signal worker queue intake is not integrated")
-	}
 	if w.graphJournal != nil && (w.legacyJournalOption || w.resultBlobPort != nil) {
 		return fmt.Errorf("graph journal conflicts with legacy journal/result options")
 	}
