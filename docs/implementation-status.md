@@ -1,5 +1,11 @@
 # Implementation status against the supplied plan
 
+## Original full124 normal100k independently accepted — 2026-10-08
+
+Frozen4412481 actual SDK2697740 completes12400000 workload bodies,410 source pins,182 top-level passes and two documented trace-only skips in13274.288s under original300m/count1/twoGoCPU/512MiB. Original unitdbd776bba70f4cbcb588387200367910 exits successfully; original SDK/producer/supervisor are closed. Independent terminal review verifies2351 selected Git inputs, before/after equality, exact original committed launch identity, full events/compiled inventories and15 altered-proof rejection controls. [Complete accepted original](scale/tier1-full124-2026-10-07/normal100k-accepted/).
+
+Updated full126 normal SDK2827904 remains live unchanged. Its full terminal qualification and every current-source race/native/migration/onlineGC/full-release gate remain required. Corrected native200 remains stopped at seed2 failure, S3-preserved;3–200 unexecuted. Next work is graph-aware transitive ownership/fencing and bounded diagnosis of the retained failed fanout trace.
+
 ## Full126 normal100k independently admitted; closed proofs offloaded — 2026-10-08
 
 Updated-source074bcfc actual SDK2827904 runs original126 workloads/433 pins with100000 seeds/count1/nonrace/300m/twoGoCPU/512MiB. Independent2498-selected-input/compiled-inventory/live SDK birth/argv/cwd/environment/hash review binds original unitb2521868d0e34dc49e70a618dcd2b424 (Typeexec/5h15m/no-restart/3GiB supervisor guard). [Live admission and terminal requirements](scale/tier1-full126-2026-10-08/normal100k-launch/). Original full124 SDK2697740 remains live unchanged. Complete source-after/full12600000 bodies/terminal events/trace/archival qualification remain pending; this is not current-source race/native/full-release acceptance.

@@ -1,0 +1,5 @@
+# Full124 normal100000 independently accepted
+
+Original frozen4412481 SDK2697740 completes12400000 workload bodies,410 source pins and182 top-level passes with two documented trace-only skips. Package elapsed13274.288s (3h41m14.288s) under original100000 seeds/count1/nonrace/300m/twoGoCPU/512MiB. Independent terminal review binds2351 exact selected Git inputs/before-after equality/original committed launch SDK and unit identities/compiled inventories/full raw events. Fifteen altered actual-proof controls reject. Complete closed fixture, original source worktree and binary are archived. [Independent proof](independent-review.json) and [complete archive manifest](archive-verification.json).
+
+This qualifies only frozen4412481/full124 normal100k. Updated full126 normal SDK2827904 remains live and requires its own12600000-body terminal/source/trace/archival proof. Current126 race, native matrices/failed candidate200/actual24h/million physical drain/default dependency adoption, canonical runtime migration and production onlineGC remain open.
