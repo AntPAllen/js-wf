@@ -1,0 +1,61 @@
+{
+  "source": "4178f5003d3ac1160613e81d4f4a25b3ba0709b8",
+  "proofs": [
+    {
+      "scenario": "authority-read-witness",
+      "replicas": 1
+    },
+    {
+      "scenario": "read-witness-quorum-partition",
+      "replicas": 3
+    },
+    {
+      "scenario": "read-witness-replacement-race",
+      "replicas": 3
+    },
+    {
+      "scenario": "read-witness-replacement-race",
+      "replicas": 1
+    },
+    {
+      "scenario": "authority-read-witness",
+      "replicas": 3
+    }
+  ],
+  "mutations_rejected": [
+    "TestNativeAuthorityReadWitness-R1/wrong_replicas",
+    "TestNativeAuthorityReadWitness-R1/head_changed",
+    "TestNativeAuthorityReadWitness-R1/no_absence_witness",
+    "TestNativeAuthorityReadWitness-R1/lost_reply_accepted",
+    "TestNativeAuthorityReadWitness-R1/cancel_contacted",
+    "TestNativeAuthorityReadWitness-R1/stale_returned",
+    "TestNativeAuthorityReadWitness-R1/legacy_reset",
+    "TestNativeAuthorityReadWitness-R1/foreign-commit",
+    "TestNativeAuthorityReadRequiresQuorum/wrong_replicas",
+    "TestNativeAuthorityReadRequiresQuorum/minority_succeeded",
+    "TestNativeAuthorityReadRequiresQuorum/heal_regressed",
+    "TestNativeAuthorityReadRequiresQuorum/no_minority_error",
+    "TestNativeAuthorityReadRequiresQuorum/foreign-commit",
+    "TestNativeAuthorityWitnessRacesCommittedReplacement-R3/wrong_replicas",
+    "TestNativeAuthorityWitnessRacesCommittedReplacement-R3/held_forwarded",
+    "TestNativeAuthorityWitnessRacesCommittedReplacement-R3/truncated",
+    "TestNativeAuthorityWitnessRacesCommittedReplacement-R3/root_not_latest",
+    "TestNativeAuthorityWitnessRacesCommittedReplacement-R3/not_rejected",
+    "TestNativeAuthorityWitnessRacesCommittedReplacement-R3/foreign-commit",
+    "TestNativeAuthorityWitnessRacesCommittedReplacement-R1/wrong_replicas",
+    "TestNativeAuthorityWitnessRacesCommittedReplacement-R1/held_forwarded",
+    "TestNativeAuthorityWitnessRacesCommittedReplacement-R1/truncated",
+    "TestNativeAuthorityWitnessRacesCommittedReplacement-R1/root_not_latest",
+    "TestNativeAuthorityWitnessRacesCommittedReplacement-R1/not_rejected",
+    "TestNativeAuthorityWitnessRacesCommittedReplacement-R1/foreign-commit",
+    "TestNativeAuthorityReadWitness-R3/wrong_replicas",
+    "TestNativeAuthorityReadWitness-R3/head_changed",
+    "TestNativeAuthorityReadWitness-R3/no_absence_witness",
+    "TestNativeAuthorityReadWitness-R3/lost_reply_accepted",
+    "TestNativeAuthorityReadWitness-R3/cancel_contacted",
+    "TestNativeAuthorityReadWitness-R3/stale_returned",
+    "TestNativeAuthorityReadWitness-R3/legacy_reset",
+    "TestNativeAuthorityReadWitness-R3/foreign-commit"
+  ],
+  "scope": "Five native component cases: controlled stale/speculative GETs, real held conditional-witness CAS and real route minority failure/majority advance/heal. Does not prove OS/power loss, all arbitrary partitions, production adoption, concurrency/scale or full release."
+}

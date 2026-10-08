@@ -1,0 +1,20 @@
+{
+  "build": [
+    "go",
+    "test",
+    "-p=1",
+    "-buildvcs=true",
+    "-race",
+    "-c",
+    "-o",
+    "/tmp/js-wf-native-authority-witness-20261008/journal-race.test",
+    "./journal"
+  ],
+  "run": [
+    "/tmp/js-wf-native-authority-witness-20261008/journal-race.test",
+    "-test.run=Snapshot|Checkpoint",
+    "-test.v",
+    "-test.count=1",
+    "-test.timeout=3m"
+  ]
+}

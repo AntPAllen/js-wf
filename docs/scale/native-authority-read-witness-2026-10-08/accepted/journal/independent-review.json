@@ -1,0 +1,529 @@
+{
+  "source": "4178f5003d3ac1160613e81d4f4a25b3ba0709b8",
+  "source_inputs_verified": 2406,
+  "actual_sdk": {
+    "pid": 2753038,
+    "stat": "2753038 (journal-race.te) S 2750523 2750522 2750522 0 -1 4194304 6255 0 0 0 2 0 0 0 20 0 5 0 23234499 1963933696 11132 18446744073709551615 4194304 23892944 140725410432752 0 0 0 0 0 2143420159 0 0 0 17 1 0 0 0 0 0 36646912 37136384 671277056 140725410439641 140725410439773 140725410439773 140725410443193 0\n",
+    "start_ticks": "23234499",
+    "args": [
+      "/tmp/js-wf-native-authority-witness-20261008/journal-race.test",
+      "-test.run=Snapshot|Checkpoint",
+      "-test.v",
+      "-test.count=1",
+      "-test.timeout=3m"
+    ],
+    "exe": "/tmp/js-wf-native-authority-witness-20261008/journal-race.test",
+    "working_directory": "/home/exedev/js-wf",
+    "environment": {
+      "GOMAXPROCS": "2",
+      "GOMEMLIMIT": "512MiB",
+      "WF_NATIVE_SNAPSHOT_ROOT": "/tmp/js-wf-native-authority-witness-20261008/snapshot-stores",
+      "WF_BLOB_AUTHORITY_ROOT": "/tmp/js-wf-native-authority-witness-20261008/blob-stores"
+    },
+    "exe_sha256": "e2c51ed07df2123cc9adf3852ef87dd2195ca139199e3a56044e5b0944a491aa",
+    "admission": {
+      "observations": 2,
+      "rejected_observations": 1,
+      "first_missing_environment_keys": [
+        "GOMAXPROCS",
+        "GOMEMLIMIT",
+        "WF_BLOB_AUTHORITY_ROOT",
+        "WF_NATIVE_SNAPSHOT_ROOT"
+      ],
+      "stable_identity_observed_twice": true,
+      "scope": "Actual live process identity before/after executable digest; incomplete reads repeated without killing or relaunching."
+    }
+  },
+  "binary": {
+    "sha256": "e2c51ed07df2123cc9adf3852ef87dd2195ca139199e3a56044e5b0944a491aa",
+    "build_info": "/tmp/js-wf-native-authority-witness-20261008/journal-race.test: go1.27.1\n\tpath\tjs-wf/journal.test\n\tmod\tjs-wf\tv0.0.0-20261008001634-4178f5003d3a\t\n\tdep\tgithub.com/antithesishq/antithesis-sdk-go\tv0.8.0-default-no-op\th1:1BOWQJweNyvZMlpAHXGLiZQn9S+QXGcz3xh94lC0w6E=\n\tdep\tgithub.com/klauspost/compress\tv1.20.0\th1:a3C1ke2ohxFymNlb2HWAHjDeKCI90scRskErZkR0ezA=\n\tdep\tgithub.com/minio/highwayhash\tv1.0.4\th1:asJizugGgchQod2ja9NJlGOWq4s7KsAWr5XUc9Clgl4=\n\tdep\tgithub.com/nats-io/jwt/v2\tv2.8.2\th1:XXRgB60MSTnqsRwejQurVDs/hcv2dkt+86GjI+I/bMc=\n\tdep\tgithub.com/nats-io/nats-server/v2\tv2.15.0\th1:M99yf0y05rTr46/qc/Is6ZAowI58Ryp2SjufLCUeVJc=\n\tdep\tgithub.com/nats-io/nats.go\tv1.54.0\th1:vsXoOxjHp/GmPUN+EcI7uOf/uB+iAP+kEsAFNQN0yzA=\n\tdep\tgithub.com/nats-io/nkeys\tv0.4.16\th1:rd5oAuLOb8mnAycB0xleuEBNS1pVVnN0fv/FF34Eypg=\n\tdep\tgithub.com/nats-io/nuid\tv1.0.1\th1:5iA8DT8V7q8WK2EScv2padNa/rTESc1KdnPw4TC2paw=\n\tdep\tgolang.org/x/crypto\tv0.57.0\th1:3ZVCjf8Ggz7zneR/EHRVx68Ctf+2pmIMP2UFhh9cC6M=\n\tdep\tgolang.org/x/sys\tv0.48.0\th1:bbX/i/6MgT9BVLM9RT1thmxL04yeTAhbEz4SyadbXoo=\n\tdep\tgolang.org/x/time\tv0.16.0\th1:vMb6ptszcQMkcwiRTAuNNU50gom6++Q/6gY2hDM6VDE=\n\tdep\tgoogle.golang.org/protobuf\tv1.36.6\th1:z1NpPI8ku2WgiWnf+t9wTPsn6eP1L7ksHUlkfLvd9xY=\n\tbuild\t-buildmode=exe\n\tbuild\t-compiler=gc\n\tbuild\t-race=true\n\tbuild\tCGO_ENABLED=1\n\tbuild\tCGO_CFLAGS=\n\tbuild\tCGO_CPPFLAGS=\n\tbuild\tCGO_CXXFLAGS=\n\tbuild\tCGO_LDFLAGS=\n\tbuild\tGOARCH=amd64\n\tbuild\tGOOS=linux\n\tbuild\tGOAMD64=v1\n\tbuild\tvcs=git\n\tbuild\tvcs.revision=4178f5003d3ac1160613e81d4f4a25b3ba0709b8\n\tbuild\tvcs.time=2026-10-08T00:16:34Z\n\tbuild\tvcs.modified=false\n"
+  },
+  "execution": {
+    "label": "journal",
+    "source": "4178f5003d3ac1160613e81d4f4a25b3ba0709b8",
+    "exit_code": 0,
+    "elapsed_seconds": 22.164595558017027
+  },
+  "proofs": {
+    "TestNativeSnapshotRetainedGraph-R3": {
+      "scenario": "retained-graph",
+      "replicas": 3,
+      "graph_objects": 0,
+      "identity": {
+        "parent_budget_seconds": 30,
+        "peers": [
+          {
+            "embedding_commit": "4178f50",
+            "id": "NDWRVHGLNMZPD7REAOEQ6DOK5YRHTSQPPSP74U5XAEZJQMAVVIDJH42Z",
+            "name": "wf-test-0",
+            "version": "2.15.0"
+          },
+          {
+            "embedding_commit": "4178f50",
+            "id": "NC47EUUJTP3AQ46FPDKWV7Z4V6AV5YX662WZXFGJCC7WL2XWPURAKPBM",
+            "name": "wf-test-1",
+            "version": "2.15.0"
+          },
+          {
+            "embedding_commit": "4178f50",
+            "id": "NDG23DY6THJF2MJZ4G7325PXBWMEYHI2MRCSMZV5RPKAKAUOEGD4PSXW",
+            "name": "wf-test-2",
+            "version": "2.15.0"
+          }
+        ],
+        "replicas": 3,
+        "test": "TestNativeSnapshotRetainedGraph/R3"
+      }
+    },
+    "TestNativeSnapshotMissingDependencyDoesNotPublish": {
+      "scenario": "missing-dependency",
+      "replicas": 1,
+      "graph_objects": 1,
+      "identity": {
+        "parent_budget_seconds": 30,
+        "peers": [
+          {
+            "embedding_commit": "4178f50",
+            "id": "NBYBULF7NAXEGTP6U2UYKDW6DWTWKN43P3RBNLN2ZTBFXZD4CD4MKVEI",
+            "name": "wf-test-0",
+            "version": "2.15.0"
+          }
+        ],
+        "replicas": 1,
+        "test": "TestNativeSnapshotMissingDependencyDoesNotPublish"
+      }
+    },
+    "TestNativeSnapshotImportLegacy-R3": {
+      "scenario": "legacy-import",
+      "replicas": 3,
+      "graph_objects": 2,
+      "identity": {
+        "parent_budget_seconds": 30,
+        "peers": [
+          {
+            "embedding_commit": "4178f50",
+            "id": "NB4DPNRDVA3UP5P6JCEFM7NDHKOZ7NHDEHKC74BXZG5XMI3DXJFQUXE2",
+            "name": "wf-test-0",
+            "version": "2.15.0"
+          },
+          {
+            "embedding_commit": "4178f50",
+            "id": "NC7CDVAHQCLESJPUX5MDV3MP2GU6NADKB3KX7LDMPO5RKN5OTEYGV5EW",
+            "name": "wf-test-1",
+            "version": "2.15.0"
+          },
+          {
+            "embedding_commit": "4178f50",
+            "id": "NBMCFSDYHIOCIAJ5MLKHC7ZWB55ACVVXZX3WN5K3ADRZAVHTJAH4OEFC",
+            "name": "wf-test-2",
+            "version": "2.15.0"
+          }
+        ],
+        "replicas": 3,
+        "test": "TestNativeSnapshotImportLegacy/R3"
+      }
+    },
+    "TestNativeSnapshotPublicationFencedWhilePaused-R3": {
+      "scenario": "paused-publication",
+      "replicas": 3,
+      "graph_objects": 0,
+      "wire": {
+        "server_info": {
+          "server_id": "NAQ3C6QHU3ARQBSVFKA6XWRXYYIP6HQ5NTISCFFZSQPSMOUY2MYZ4732",
+          "server_name": "wf-test-0",
+          "version": "2.15.0",
+          "proto": 1,
+          "git_commit": "4178f50",
+          "go": "go1.27.1",
+          "host": "127.0.0.1",
+          "port": 40831,
+          "headers": true,
+          "auth_required": true,
+          "max_payload": 1048576,
+          "jetstream": true,
+          "client_id": 67,
+          "client_ip": "127.0.0.1",
+          "cluster": "wf-test",
+          "connect_urls": [
+            "127.0.0.1:40831",
+            "127.0.0.1:34621",
+            "127.0.0.1:44327"
+          ],
+          "api_lvl": 5,
+          "xkey": "XBXQWZU6FZFYJ3HQCB74K6ZSP4ARDESCXZ42Q3ZI3L6SYREEMWMVLPCP"
+        },
+        "packet_bytes": 1089,
+        "original_wire_CAS_rejected": 10071
+      },
+      "identity": {
+        "parent_budget_seconds": 30,
+        "peers": [
+          {
+            "embedding_commit": "4178f50",
+            "id": "NAQ3C6QHU3ARQBSVFKA6XWRXYYIP6HQ5NTISCFFZSQPSMOUY2MYZ4732",
+            "name": "wf-test-0",
+            "version": "2.15.0"
+          },
+          {
+            "embedding_commit": "4178f50",
+            "id": "NAI2XJPVXBTXVB5DG245DWM7G6OQVDRR5R37JL7ZPYAIDNDU5XW6XKBO",
+            "name": "wf-test-1",
+            "version": "2.15.0"
+          },
+          {
+            "embedding_commit": "4178f50",
+            "id": "NDO35XQHKUN2W2ILCIPK6ZND6LZ5HEM5FS7744UGW6ZKIMZRM7SGYY57",
+            "name": "wf-test-2",
+            "version": "2.15.0"
+          }
+        ],
+        "replicas": 3,
+        "test": "TestNativeSnapshotPublicationFencedWhilePaused/R3"
+      }
+    },
+    "TestNativeCheckpointSnapshotPromiseGraph-R3": {
+      "scenario": "checkpoint-promise-graph",
+      "replicas": 3,
+      "graph_objects": 0,
+      "identity": {
+        "parent_budget_seconds": 30,
+        "peers": [
+          {
+            "embedding_commit": "4178f50",
+            "id": "NBE4JSGK6A3UT3S2MAYO6YT3FUESG2CEQ2OJXANNEHBHL53CTF5YFG47",
+            "name": "wf-test-0",
+            "version": "2.15.0"
+          },
+          {
+            "embedding_commit": "4178f50",
+            "id": "NCH6EEP6VBXNEJHVAPC22JWQGS67LQUYR5MWLMFFYZEPZLIJOLXBLFC4",
+            "name": "wf-test-1",
+            "version": "2.15.0"
+          },
+          {
+            "embedding_commit": "4178f50",
+            "id": "NDOMIMH7SPRYA4NWY6WJKS5VWUB2T7JN2WAXXEFZ4KPUBSE43NC3XV7G",
+            "name": "wf-test-2",
+            "version": "2.15.0"
+          }
+        ],
+        "replicas": 3,
+        "test": "TestNativeCheckpointSnapshotPromiseGraph/R3"
+      }
+    },
+    "TestNativeSnapshotMissingCanonicalBytesFailClosed": {
+      "scenario": "missing-canonical-object",
+      "replicas": 1,
+      "graph_objects": 0,
+      "identity": {
+        "parent_budget_seconds": 30,
+        "peers": [
+          {
+            "embedding_commit": "4178f50",
+            "id": "NAD5QRV2GHPCRZZRRJBCLUCJ3OS5FKXBJ3BQCYX6JLSGJFDUTIOLJ3WW",
+            "name": "wf-test-0",
+            "version": "2.15.0"
+          }
+        ],
+        "replicas": 1,
+        "test": "TestNativeSnapshotMissingCanonicalBytesFailClosed"
+      }
+    },
+    "TestNativeCheckpointSnapshotPromiseGraph-R1": {
+      "scenario": "checkpoint-promise-graph",
+      "replicas": 1,
+      "graph_objects": 0,
+      "identity": {
+        "parent_budget_seconds": 30,
+        "peers": [
+          {
+            "embedding_commit": "4178f50",
+            "id": "NCF5MF6VGDMMQMCOK5PYFOEJGIO66QWDSVDHM5L26LU46J7FQR3O2K74",
+            "name": "wf-test-0",
+            "version": "2.15.0"
+          }
+        ],
+        "replicas": 1,
+        "test": "TestNativeCheckpointSnapshotPromiseGraph/R1"
+      }
+    },
+    "TestNativeSnapshotPublicationFencedWhilePaused-R1": {
+      "scenario": "paused-publication",
+      "replicas": 1,
+      "graph_objects": 0,
+      "wire": {
+        "server_info": {
+          "server_id": "NCNQW37Z64A3WDJYH62JY3NX242ETUJ6APUYOYL3WSIJPX5MEIV3QSSO",
+          "server_name": "wf-test-0",
+          "version": "2.15.0",
+          "proto": 1,
+          "git_commit": "4178f50",
+          "go": "go1.27.1",
+          "host": "127.0.0.1",
+          "port": 44163,
+          "headers": true,
+          "max_payload": 1048576,
+          "jetstream": true,
+          "client_id": 44,
+          "client_ip": "127.0.0.1",
+          "api_lvl": 5,
+          "xkey": "XB7OA4V4GL7KFGV6EQZTB7VXPYCJOOX5YNP77ZYQEYAVBMDKPAAVBY32"
+        },
+        "packet_bytes": 1089,
+        "original_wire_CAS_rejected": 10071
+      },
+      "identity": {
+        "parent_budget_seconds": 30,
+        "peers": [
+          {
+            "embedding_commit": "4178f50",
+            "id": "NCNQW37Z64A3WDJYH62JY3NX242ETUJ6APUYOYL3WSIJPX5MEIV3QSSO",
+            "name": "wf-test-0",
+            "version": "2.15.0"
+          }
+        ],
+        "replicas": 1,
+        "test": "TestNativeSnapshotPublicationFencedWhilePaused/R1"
+      }
+    },
+    "TestNativeSnapshotImportLegacy-R1": {
+      "scenario": "legacy-import",
+      "replicas": 1,
+      "graph_objects": 2,
+      "identity": {
+        "parent_budget_seconds": 30,
+        "peers": [
+          {
+            "embedding_commit": "4178f50",
+            "id": "ND3JR34Y34TA75IUOTGAPQMNCIKPGVJ6Z2JE27RNHWBVBAGNFJIBAZVC",
+            "name": "wf-test-0",
+            "version": "2.15.0"
+          }
+        ],
+        "replicas": 1,
+        "test": "TestNativeSnapshotImportLegacy/R1"
+      }
+    },
+    "TestNativeSnapshotRetainedGraph-R1": {
+      "scenario": "retained-graph",
+      "replicas": 1,
+      "graph_objects": 0,
+      "identity": {
+        "parent_budget_seconds": 30,
+        "peers": [
+          {
+            "embedding_commit": "4178f50",
+            "id": "NCBC7X2EVABP3JSSZRCTIDWJIE6JHNLIOCCA45MLPHX2QFQW3KCPRSDT",
+            "name": "wf-test-0",
+            "version": "2.15.0"
+          }
+        ],
+        "replicas": 1,
+        "test": "TestNativeSnapshotRetainedGraph/R1"
+      }
+    },
+    "TestNativeSnapshotArchivedCheckpointPromise": {
+      "scenario": "archived-checkpoint-promise",
+      "replicas": 1,
+      "graph_objects": 3,
+      "identity": {
+        "parent_budget_seconds": 30,
+        "peers": [
+          {
+            "embedding_commit": "4178f50",
+            "id": "NDG7WSY5N6IMIRFXXYVNNWCI7WQ3SNBCHDTZVWEB3BFIDHZ5XA33UR2X",
+            "name": "wf-test-0",
+            "version": "2.15.0"
+          }
+        ],
+        "replicas": 1,
+        "test": "TestNativeSnapshotArchivedCheckpointPromise"
+      }
+    },
+    "TestNativeCheckpointImportRejectsWrongLiveAnchor": {
+      "scenario": "checkpoint-import-anchor",
+      "replicas": 1,
+      "graph_objects": 2,
+      "identity": {
+        "parent_budget_seconds": 30,
+        "peers": [
+          {
+            "embedding_commit": "4178f50",
+            "id": "NBX3MY2BAB2KTVHC6IL6WOWZX34AVOQ4CXWRTD4WX2G6PLPIVYLCPPE7",
+            "name": "wf-test-0",
+            "version": "2.15.0"
+          }
+        ],
+        "replicas": 1,
+        "test": "TestNativeCheckpointImportRejectsWrongLiveAnchor"
+      }
+    },
+    "TestNativeSnapshotWholeReadRetriesReplacement": {
+      "scenario": "whole-read-replacement",
+      "replicas": 1,
+      "graph_objects": 1,
+      "identity": {
+        "parent_budget_seconds": 30,
+        "peers": [
+          {
+            "embedding_commit": "4178f50",
+            "id": "NAGY6GEAOKAES7YFX6MDYA65IO7V5S224TDIZXTUVSUYPDCVC7ZJ56MD",
+            "name": "wf-test-0",
+            "version": "2.15.0"
+          }
+        ],
+        "replicas": 1,
+        "test": "TestNativeSnapshotWholeReadRetriesReplacement"
+      }
+    }
+  },
+  "actual_positive_substitutions_rejected": [
+    "TestNativeSnapshotRetainedGraph-R3/unsafe_direct",
+    "TestNativeSnapshotRetainedGraph-R3/authority_purge_allowed",
+    "TestNativeSnapshotRetainedGraph-R3/object_TTL",
+    "TestNativeSnapshotRetainedGraph-R3/consumer_remains",
+    "TestNativeSnapshotRetainedGraph-R3/subject_census_wrong",
+    "TestNativeSnapshotRetainedGraph-R3/result_and_signal_retained_false",
+    "TestNativeSnapshotRetainedGraph-R3/stale_publication_rejected_false",
+    "TestNativeSnapshotRetainedGraph-R3/superseded_archive_reclaimed_false",
+    "TestNativeSnapshotRetainedGraph-R3/retired_graph_reclaimed_false",
+    "TestNativeSnapshotRetainedGraph-R3/foreign-embedding-commit",
+    "TestNativeSnapshotMissingDependencyDoesNotPublish/unsafe_direct",
+    "TestNativeSnapshotMissingDependencyDoesNotPublish/authority_purge_allowed",
+    "TestNativeSnapshotMissingDependencyDoesNotPublish/object_TTL",
+    "TestNativeSnapshotMissingDependencyDoesNotPublish/consumer_remains",
+    "TestNativeSnapshotMissingDependencyDoesNotPublish/subject_census_wrong",
+    "TestNativeSnapshotMissingDependencyDoesNotPublish/candidate_not_uploaded_false",
+    "TestNativeSnapshotMissingDependencyDoesNotPublish/root_hash_graph_removed",
+    "TestNativeSnapshotMissingDependencyDoesNotPublish/foreign-embedding-commit",
+    "TestNativeSnapshotImportLegacy-R3/unsafe_direct",
+    "TestNativeSnapshotImportLegacy-R3/authority_purge_allowed",
+    "TestNativeSnapshotImportLegacy-R3/object_TTL",
+    "TestNativeSnapshotImportLegacy-R3/consumer_remains",
+    "TestNativeSnapshotImportLegacy-R3/subject_census_wrong",
+    "TestNativeSnapshotImportLegacy-R3/legacy_objects_deleted_false",
+    "TestNativeSnapshotImportLegacy-R3/existing_canonical_root_not_replaced_false",
+    "TestNativeSnapshotImportLegacy-R3/root_hash_graph_removed",
+    "TestNativeSnapshotImportLegacy-R3/foreign-embedding-commit",
+    "TestNativeSnapshotPublicationFencedWhilePaused-R3/unsafe_direct",
+    "TestNativeSnapshotPublicationFencedWhilePaused-R3/authority_purge_allowed",
+    "TestNativeSnapshotPublicationFencedWhilePaused-R3/object_TTL",
+    "TestNativeSnapshotPublicationFencedWhilePaused-R3/consumer_remains",
+    "TestNativeSnapshotPublicationFencedWhilePaused-R3/subject_census_wrong",
+    "TestNativeSnapshotPublicationFencedWhilePaused-R3/old_graph_preserved_false",
+    "TestNativeSnapshotPublicationFencedWhilePaused-R3/late_publication_rejected_false",
+    "TestNativeSnapshotPublicationFencedWhilePaused-R3/all_native_objects_reclaimed_false",
+    "TestNativeSnapshotPublicationFencedWhilePaused-R3/truncated_wire",
+    "TestNativeSnapshotPublicationFencedWhilePaused-R3/held_packet_forwarded",
+    "TestNativeSnapshotPublicationFencedWhilePaused-R3/root_fence_reset",
+    "TestNativeSnapshotPublicationFencedWhilePaused-R3/foreign-embedding-commit",
+    "TestNativeSnapshotPublicationFencedWhilePaused-R3/foreign-wire-callee",
+    "TestNativeCheckpointSnapshotPromiseGraph-R3/unsafe_direct",
+    "TestNativeCheckpointSnapshotPromiseGraph-R3/authority_purge_allowed",
+    "TestNativeCheckpointSnapshotPromiseGraph-R3/object_TTL",
+    "TestNativeCheckpointSnapshotPromiseGraph-R3/consumer_remains",
+    "TestNativeCheckpointSnapshotPromiseGraph-R3/subject_census_wrong",
+    "TestNativeCheckpointSnapshotPromiseGraph-R3/frame_and_promise_imported_false",
+    "TestNativeCheckpointSnapshotPromiseGraph-R3/legacy_bytes_removed_false",
+    "TestNativeCheckpointSnapshotPromiseGraph-R3/all_imported_objects_reclaimed_false",
+    "TestNativeCheckpointSnapshotPromiseGraph-R3/foreign-embedding-commit",
+    "TestNativeSnapshotMissingCanonicalBytesFailClosed/unsafe_direct",
+    "TestNativeSnapshotMissingCanonicalBytesFailClosed/authority_purge_allowed",
+    "TestNativeSnapshotMissingCanonicalBytesFailClosed/object_TTL",
+    "TestNativeSnapshotMissingCanonicalBytesFailClosed/consumer_remains",
+    "TestNativeSnapshotMissingCanonicalBytesFailClosed/subject_census_wrong",
+    "TestNativeSnapshotMissingCanonicalBytesFailClosed/legacy_copy_present_false",
+    "TestNativeSnapshotMissingCanonicalBytesFailClosed/missing_current_object_failed_closed_false",
+    "TestNativeSnapshotMissingCanonicalBytesFailClosed/root_hash_graph_removed",
+    "TestNativeSnapshotMissingCanonicalBytesFailClosed/foreign-embedding-commit",
+    "TestNativeCheckpointSnapshotPromiseGraph-R1/unsafe_direct",
+    "TestNativeCheckpointSnapshotPromiseGraph-R1/authority_purge_allowed",
+    "TestNativeCheckpointSnapshotPromiseGraph-R1/object_TTL",
+    "TestNativeCheckpointSnapshotPromiseGraph-R1/consumer_remains",
+    "TestNativeCheckpointSnapshotPromiseGraph-R1/subject_census_wrong",
+    "TestNativeCheckpointSnapshotPromiseGraph-R1/frame_and_promise_imported_false",
+    "TestNativeCheckpointSnapshotPromiseGraph-R1/legacy_bytes_removed_false",
+    "TestNativeCheckpointSnapshotPromiseGraph-R1/all_imported_objects_reclaimed_false",
+    "TestNativeCheckpointSnapshotPromiseGraph-R1/foreign-embedding-commit",
+    "TestNativeSnapshotPublicationFencedWhilePaused-R1/unsafe_direct",
+    "TestNativeSnapshotPublicationFencedWhilePaused-R1/authority_purge_allowed",
+    "TestNativeSnapshotPublicationFencedWhilePaused-R1/object_TTL",
+    "TestNativeSnapshotPublicationFencedWhilePaused-R1/consumer_remains",
+    "TestNativeSnapshotPublicationFencedWhilePaused-R1/subject_census_wrong",
+    "TestNativeSnapshotPublicationFencedWhilePaused-R1/old_graph_preserved_false",
+    "TestNativeSnapshotPublicationFencedWhilePaused-R1/late_publication_rejected_false",
+    "TestNativeSnapshotPublicationFencedWhilePaused-R1/all_native_objects_reclaimed_false",
+    "TestNativeSnapshotPublicationFencedWhilePaused-R1/truncated_wire",
+    "TestNativeSnapshotPublicationFencedWhilePaused-R1/held_packet_forwarded",
+    "TestNativeSnapshotPublicationFencedWhilePaused-R1/root_fence_reset",
+    "TestNativeSnapshotPublicationFencedWhilePaused-R1/foreign-embedding-commit",
+    "TestNativeSnapshotPublicationFencedWhilePaused-R1/foreign-wire-callee",
+    "TestNativeSnapshotImportLegacy-R1/unsafe_direct",
+    "TestNativeSnapshotImportLegacy-R1/authority_purge_allowed",
+    "TestNativeSnapshotImportLegacy-R1/object_TTL",
+    "TestNativeSnapshotImportLegacy-R1/consumer_remains",
+    "TestNativeSnapshotImportLegacy-R1/subject_census_wrong",
+    "TestNativeSnapshotImportLegacy-R1/legacy_objects_deleted_false",
+    "TestNativeSnapshotImportLegacy-R1/existing_canonical_root_not_replaced_false",
+    "TestNativeSnapshotImportLegacy-R1/root_hash_graph_removed",
+    "TestNativeSnapshotImportLegacy-R1/foreign-embedding-commit",
+    "TestNativeSnapshotRetainedGraph-R1/unsafe_direct",
+    "TestNativeSnapshotRetainedGraph-R1/authority_purge_allowed",
+    "TestNativeSnapshotRetainedGraph-R1/object_TTL",
+    "TestNativeSnapshotRetainedGraph-R1/consumer_remains",
+    "TestNativeSnapshotRetainedGraph-R1/subject_census_wrong",
+    "TestNativeSnapshotRetainedGraph-R1/result_and_signal_retained_false",
+    "TestNativeSnapshotRetainedGraph-R1/stale_publication_rejected_false",
+    "TestNativeSnapshotRetainedGraph-R1/superseded_archive_reclaimed_false",
+    "TestNativeSnapshotRetainedGraph-R1/retired_graph_reclaimed_false",
+    "TestNativeSnapshotRetainedGraph-R1/foreign-embedding-commit",
+    "TestNativeSnapshotArchivedCheckpointPromise/unsafe_direct",
+    "TestNativeSnapshotArchivedCheckpointPromise/authority_purge_allowed",
+    "TestNativeSnapshotArchivedCheckpointPromise/object_TTL",
+    "TestNativeSnapshotArchivedCheckpointPromise/consumer_remains",
+    "TestNativeSnapshotArchivedCheckpointPromise/subject_census_wrong",
+    "TestNativeSnapshotArchivedCheckpointPromise/archive_frame_promise_pinned_false",
+    "TestNativeSnapshotArchivedCheckpointPromise/root_hash_graph_removed",
+    "TestNativeSnapshotArchivedCheckpointPromise/foreign-embedding-commit",
+    "TestNativeCheckpointImportRejectsWrongLiveAnchor/unsafe_direct",
+    "TestNativeCheckpointImportRejectsWrongLiveAnchor/authority_purge_allowed",
+    "TestNativeCheckpointImportRejectsWrongLiveAnchor/object_TTL",
+    "TestNativeCheckpointImportRejectsWrongLiveAnchor/consumer_remains",
+    "TestNativeCheckpointImportRejectsWrongLiveAnchor/subject_census_wrong",
+    "TestNativeCheckpointImportRejectsWrongLiveAnchor/wrong_live_anchor_rejected_false",
+    "TestNativeCheckpointImportRejectsWrongLiveAnchor/verified_import_fast_resume_false",
+    "TestNativeCheckpointImportRejectsWrongLiveAnchor/root_hash_graph_removed",
+    "TestNativeCheckpointImportRejectsWrongLiveAnchor/foreign-embedding-commit",
+    "TestNativeSnapshotWholeReadRetriesReplacement/unsafe_direct",
+    "TestNativeSnapshotWholeReadRetriesReplacement/authority_purge_allowed",
+    "TestNativeSnapshotWholeReadRetriesReplacement/object_TTL",
+    "TestNativeSnapshotWholeReadRetriesReplacement/consumer_remains",
+    "TestNativeSnapshotWholeReadRetriesReplacement/subject_census_wrong",
+    "TestNativeSnapshotWholeReadRetriesReplacement/manifest_reloaded_after_old_archive_collection_false",
+    "TestNativeSnapshotWholeReadRetriesReplacement/root_hash_graph_removed",
+    "TestNativeSnapshotWholeReadRetriesReplacement/foreign-embedding-commit"
+  ],
+  "complete_archive_verified": {
+    "bytes": 65663385,
+    "sha256": "2345d307ee6dc62b878b038b2e0ebad9d08d4033b25f7b8dbb3f697a6ef2e361"
+  },
+  "required_tests": [
+    "TestNativeSnapshotRetainedGraph",
+    "TestNativeCheckpointSnapshotPromiseGraph",
+    "TestSnapshotSupersededRetriesWholeRead",
+    "TestNativeSnapshotPublicationFencedWhilePaused",
+    "TestNativeSnapshotWholeReadRetriesReplacement",
+    "TestNativeSnapshotImportLegacy",
+    "TestNativeSnapshotMissingDependencyDoesNotPublish",
+    "TestNativeSnapshotMissingCanonicalBytesFailClosed",
+    "TestNativeSnapshotArchivedCheckpointPromise",
+    "TestNativeCheckpointImportRejectsWrongLiveAnchor",
+    "TestRuntimeCheckpointBindsActualAnchorAndSDKCounter",
+    "TestRuntimeSnapshotPurgeBoundAndLimit",
+    "TestCheckpointReadAbsentOrdinaryAndMalformedMetadata",
+    "TestCheckpointReadInvalidIdentityAndCancellationBeforeTransport",
+    "TestSnapshotObjectDeadlinePreservesObservedCause"
+  ],
+  "reviewed_utc": "2026-10-08T00:19:38.371265+00:00",
+  "scope": "Selected source, actual race SDK/profile, thirteen native snapshot boundary graphs/configurations and two exact held CAS packet/reply/peer transcripts, full archived media and every file. Embedded module version/application revision bound; external Go module files not separately inventoried. Migration uses quiesced legacy readers/writers. Other runtime destinations, privileged lifecycle, arbitrary partition, large graph/message size, final-source full124/matrices/24h/million drain/release and production online GC remain open."
+}

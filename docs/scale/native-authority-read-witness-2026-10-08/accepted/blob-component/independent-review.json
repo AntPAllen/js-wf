@@ -1,0 +1,1130 @@
+{
+  "source": "4178f5003d3ac1160613e81d4f4a25b3ba0709b8",
+  "source_inputs_verified": 2406,
+  "actual_sdk": {
+    "pid": 2753137,
+    "stat": "2753137 (blob-race.test) S 2750523 2750522 2750522 0 -1 4194304 5102 0 0 0 1 1 0 0 20 0 5 0 23236874 1948139520 9036 18446744073709551615 4194304 19891312 140721299119296 0 0 0 0 0 2143420159 0 0 0 17 2 0 0 0 0 0 29876224 30326176 672669696 140721299124721 140721299124832 140721299124832 140721299128252 0\n",
+    "start_ticks": "23236874",
+    "args": [
+      "/tmp/js-wf-native-authority-witness-20261008/blob-race.test",
+      "-test.run=.",
+      "-test.v",
+      "-test.count=1",
+      "-test.timeout=3m"
+    ],
+    "exe": "/tmp/js-wf-native-authority-witness-20261008/blob-race.test",
+    "working_directory": "/home/exedev/js-wf",
+    "environment": {
+      "GOMAXPROCS": "2",
+      "GOMEMLIMIT": "512MiB",
+      "WF_NATIVE_SNAPSHOT_ROOT": "/tmp/js-wf-native-authority-witness-20261008/snapshot-stores",
+      "WF_BLOB_AUTHORITY_ROOT": "/tmp/js-wf-native-authority-witness-20261008/blob-stores"
+    },
+    "exe_sha256": "d591b2c16d87a1ee2a432a588da794bec4b6cbc8646df3a83a1e797386de77e3",
+    "admission": {
+      "observations": 1,
+      "rejected_observations": 0,
+      "first_missing_environment_keys": [],
+      "stable_identity_observed_twice": true,
+      "scope": "Actual live process identity before/after executable digest; incomplete reads repeated without killing or relaunching."
+    }
+  },
+  "binary": {
+    "sha256": "d591b2c16d87a1ee2a432a588da794bec4b6cbc8646df3a83a1e797386de77e3",
+    "build_info": "/tmp/js-wf-native-authority-witness-20261008/blob-race.test: go1.27.1\n\tpath\tjs-wf/internal/blobpublication.test\n\tmod\tjs-wf\tv0.0.0-20261008001634-4178f5003d3a\t\n\tdep\tgithub.com/antithesishq/antithesis-sdk-go\tv0.8.0-default-no-op\th1:1BOWQJweNyvZMlpAHXGLiZQn9S+QXGcz3xh94lC0w6E=\n\tdep\tgithub.com/klauspost/compress\tv1.20.0\th1:a3C1ke2ohxFymNlb2HWAHjDeKCI90scRskErZkR0ezA=\n\tdep\tgithub.com/minio/highwayhash\tv1.0.4\th1:asJizugGgchQod2ja9NJlGOWq4s7KsAWr5XUc9Clgl4=\n\tdep\tgithub.com/nats-io/jwt/v2\tv2.8.2\th1:XXRgB60MSTnqsRwejQurVDs/hcv2dkt+86GjI+I/bMc=\n\tdep\tgithub.com/nats-io/nats-server/v2\tv2.15.0\th1:M99yf0y05rTr46/qc/Is6ZAowI58Ryp2SjufLCUeVJc=\n\tdep\tgithub.com/nats-io/nats.go\tv1.54.0\th1:vsXoOxjHp/GmPUN+EcI7uOf/uB+iAP+kEsAFNQN0yzA=\n\tdep\tgithub.com/nats-io/nkeys\tv0.4.16\th1:rd5oAuLOb8mnAycB0xleuEBNS1pVVnN0fv/FF34Eypg=\n\tdep\tgithub.com/nats-io/nuid\tv1.0.1\th1:5iA8DT8V7q8WK2EScv2padNa/rTESc1KdnPw4TC2paw=\n\tdep\tgolang.org/x/crypto\tv0.57.0\th1:3ZVCjf8Ggz7zneR/EHRVx68Ctf+2pmIMP2UFhh9cC6M=\n\tdep\tgolang.org/x/sys\tv0.48.0\th1:bbX/i/6MgT9BVLM9RT1thmxL04yeTAhbEz4SyadbXoo=\n\tdep\tgolang.org/x/time\tv0.16.0\th1:vMb6ptszcQMkcwiRTAuNNU50gom6++Q/6gY2hDM6VDE=\n\tbuild\t-buildmode=exe\n\tbuild\t-compiler=gc\n\tbuild\t-race=true\n\tbuild\tCGO_ENABLED=1\n\tbuild\tCGO_CFLAGS=\n\tbuild\tCGO_CPPFLAGS=\n\tbuild\tCGO_CXXFLAGS=\n\tbuild\tCGO_LDFLAGS=\n\tbuild\tGOARCH=amd64\n\tbuild\tGOOS=linux\n\tbuild\tGOAMD64=v1\n\tbuild\tvcs=git\n\tbuild\tvcs.revision=4178f5003d3ac1160613e81d4f4a25b3ba0709b8\n\tbuild\tvcs.time=2026-10-08T00:16:34Z\n\tbuild\tvcs.modified=false\n"
+  },
+  "execution": {
+    "label": "blob",
+    "source": "4178f5003d3ac1160613e81d4f4a25b3ba0709b8",
+    "exit_code": 0,
+    "elapsed_seconds": 43.47331903700251
+  },
+  "proofs": {
+    "TestNativeBlobUploaderAndCollectorSIGKILL-R3-upload-root": {
+      "scenario": "process-sigkill-upload-root",
+      "replicas": 3,
+      "child_pid": 2753200,
+      "child_sha256": "d591b2c16d87a1ee2a432a588da794bec4b6cbc8646df3a83a1e797386de77e3",
+      "native_exit_signal": 9,
+      "held_packet_bytes": 535,
+      "object_acknowledgments": 4,
+      "server_info": {
+        "server_id": "NAWL5IHKIYRL2BIRPE3Y2TZSCQYQ5XEJUDM3NTGDOHZLL62YAHX7XD2W",
+        "server_name": "wf-test-0",
+        "version": "2.15.0",
+        "proto": 1,
+        "git_commit": "4178f50",
+        "go": "go1.27.1",
+        "host": "127.0.0.1",
+        "port": 35441,
+        "headers": true,
+        "auth_required": true,
+        "max_payload": 1048576,
+        "jetstream": true,
+        "client_id": 25,
+        "client_ip": "127.0.0.1",
+        "cluster": "wf-test",
+        "connect_urls": [
+          "127.0.0.1:35441",
+          "127.0.0.1:34259",
+          "127.0.0.1:44573"
+        ],
+        "api_lvl": 5,
+        "xkey": "XDDGADZIRBOE4PBG5OXWRXFEE3QQEAFQ2S4W6GVIHUVS32QDNXIBCSUA"
+      },
+      "wire_frames": 81,
+      "identity": {
+        "parent_budget_seconds": 30,
+        "peers": [
+          {
+            "embedding_commit": "4178f50",
+            "id": "NAWL5IHKIYRL2BIRPE3Y2TZSCQYQ5XEJUDM3NTGDOHZLL62YAHX7XD2W",
+            "name": "wf-test-0",
+            "version": "2.15.0"
+          },
+          {
+            "embedding_commit": "4178f50",
+            "id": "NCPYN3DRBT5JWZDJAI7AIK5KCEN7JZWWD3K6QZMT3Y2IPQMFYPC7KLV7",
+            "name": "wf-test-1",
+            "version": "2.15.0"
+          },
+          {
+            "embedding_commit": "4178f50",
+            "id": "NDXL2QH7RPGID45TKCIO5TD2CZJAF2GP3VEAT5IRHNX6UD2DWPXW2GGT",
+            "name": "wf-test-2",
+            "version": "2.15.0"
+          }
+        ],
+        "replicas": 3,
+        "test": "TestNativeBlobUploaderAndCollectorSIGKILL/R3/upload-root"
+      }
+    },
+    "TestNativeBlobUploaderAndCollectorSIGKILL-R3-upload-metadata": {
+      "scenario": "process-sigkill-upload-metadata",
+      "replicas": 3,
+      "child_pid": 2753195,
+      "child_sha256": "d591b2c16d87a1ee2a432a588da794bec4b6cbc8646df3a83a1e797386de77e3",
+      "native_exit_signal": 9,
+      "held_packet_bytes": 671,
+      "object_acknowledgments": 3,
+      "server_info": {
+        "server_id": "NAS6QEWOJLHCXRI5STYVCISW3S72WIYZPNXGY4LEOGBBQRUV36GNXPV5",
+        "server_name": "wf-test-0",
+        "version": "2.15.0",
+        "proto": 1,
+        "git_commit": "4178f50",
+        "go": "go1.27.1",
+        "host": "127.0.0.1",
+        "port": 41765,
+        "headers": true,
+        "auth_required": true,
+        "max_payload": 1048576,
+        "jetstream": true,
+        "client_id": 25,
+        "client_ip": "127.0.0.1",
+        "cluster": "wf-test",
+        "connect_urls": [
+          "127.0.0.1:41765",
+          "127.0.0.1:45791",
+          "127.0.0.1:40953"
+        ],
+        "api_lvl": 5,
+        "xkey": "XCZIDJJ4MLLMMNZKTA3TDVJ3VOME4RC7IMW6ERIOPS2FQQD7Q5VSC2J3"
+      },
+      "wire_frames": 57,
+      "identity": {
+        "parent_budget_seconds": 30,
+        "peers": [
+          {
+            "embedding_commit": "4178f50",
+            "id": "NAS6QEWOJLHCXRI5STYVCISW3S72WIYZPNXGY4LEOGBBQRUV36GNXPV5",
+            "name": "wf-test-0",
+            "version": "2.15.0"
+          },
+          {
+            "embedding_commit": "4178f50",
+            "id": "NB3TXGRZSCJR275JDCAVYF4D6FHDILEP37627TN4QKVQFU5EYMUH6755",
+            "name": "wf-test-1",
+            "version": "2.15.0"
+          },
+          {
+            "embedding_commit": "4178f50",
+            "id": "NA6OIIZZUGEW3NB3GKJN5Z3MW3TMJAC7TCPPKOKPJN55X4IWJ6DY4TXL",
+            "name": "wf-test-2",
+            "version": "2.15.0"
+          }
+        ],
+        "replicas": 3,
+        "test": "TestNativeBlobUploaderAndCollectorSIGKILL/R3/upload-metadata"
+      }
+    },
+    "TestNativePartialUploadPublicationFence-R3-resume": {
+      "scenario": "paused-partial-resume",
+      "replicas": 3,
+      "wire": {
+        "name": "5837129fba752f3d4c82ebda4eb0aa7912de0981b918cb260dc1a6be016c6e56/1/attempt",
+        "server_info": {
+          "server_id": "NBP2ZANTXV7WEINQ2PVYPNWMVDLEHJ52VG7PS7GRKT62F5XDDBFMRJGA",
+          "server_name": "wf-test-0",
+          "version": "2.15.0",
+          "proto": 1,
+          "git_commit": "4178f50",
+          "go": "go1.27.1",
+          "host": "127.0.0.1",
+          "port": 36353,
+          "headers": true,
+          "auth_required": true,
+          "max_payload": 1048576,
+          "jetstream": true,
+          "client_id": 25,
+          "client_ip": "127.0.0.1",
+          "cluster": "wf-test",
+          "connect_urls": [
+            "127.0.0.1:36353",
+            "127.0.0.1:33529",
+            "127.0.0.1:45799"
+          ],
+          "api_lvl": 5,
+          "xkey": "XDXYK2BUNZOABI3K5NTCJZLB6OMQAVXEJIZHFPWQLWNERWO5K64T7M4K"
+        },
+        "chunk_bytes": 308000,
+        "held_packet_bytes": 671,
+        "native_cas_errors": [
+          {
+            "code": 400,
+            "err_code": 10071,
+            "description": "wrong last sequence: 4"
+          }
+        ],
+        "acknowledgments": 3,
+        "wire_frames": 59
+      },
+      "identity": {
+        "parent_budget_seconds": 30,
+        "peers": [
+          {
+            "embedding_commit": "4178f50",
+            "id": "NBP2ZANTXV7WEINQ2PVYPNWMVDLEHJ52VG7PS7GRKT62F5XDDBFMRJGA",
+            "name": "wf-test-0",
+            "version": "2.15.0"
+          },
+          {
+            "embedding_commit": "4178f50",
+            "id": "NBHXPB72KXVBIHK4BUNU6WULSK5EGVXV5UIIHCQTM5HSUFKJORPIMGJW",
+            "name": "wf-test-1",
+            "version": "2.15.0"
+          },
+          {
+            "embedding_commit": "4178f50",
+            "id": "NAEUO4AIX4P5M5VD5ZZP7EWGT4CIF2HZ5E2NQU5OG6EZ3JFM4GDED7NR",
+            "name": "wf-test-2",
+            "version": "2.15.0"
+          }
+        ],
+        "replicas": 3,
+        "test": "TestNativePartialUploadPublicationFence/R3/resume"
+      }
+    },
+    "TestNativeCommittedMetadataReplyLost-R3": {
+      "scenario": "committed-metadata-reply-lost",
+      "replicas": 3,
+      "wire": {
+        "name": "85e36219bb3eeb274a83246ba2eadb488a50dda12e0bb1a8b7497156687efe0c/1/attempt",
+        "server_info": {
+          "server_id": "NCDAUF2SEFT3W3JPURA4AAWMBOMIT4CH7IQ6YPBY4HPHKOXJNEZQLQLM",
+          "server_name": "wf-test-0",
+          "version": "2.15.0",
+          "proto": 1,
+          "git_commit": "4178f50",
+          "go": "go1.27.1",
+          "host": "127.0.0.1",
+          "port": 42833,
+          "headers": true,
+          "auth_required": true,
+          "max_payload": 1048576,
+          "jetstream": true,
+          "client_id": 25,
+          "client_ip": "127.0.0.1",
+          "cluster": "wf-test",
+          "connect_urls": [
+            "127.0.0.1:42833",
+            "127.0.0.1:43557",
+            "127.0.0.1:33875"
+          ],
+          "api_lvl": 5,
+          "xkey": "XB55LPT3VFX3G6T5WBYLWKH56G5E45VWVCJETPR7UDYAKNONSY7GDHCE"
+        },
+        "chunk_bytes": 320000,
+        "held_packet_bytes": 671,
+        "native_cas_errors": [],
+        "acknowledgments": 3,
+        "wire_frames": 58
+      },
+      "identity": {
+        "parent_budget_seconds": 30,
+        "peers": [
+          {
+            "embedding_commit": "4178f50",
+            "id": "NCDAUF2SEFT3W3JPURA4AAWMBOMIT4CH7IQ6YPBY4HPHKOXJNEZQLQLM",
+            "name": "wf-test-0",
+            "version": "2.15.0"
+          },
+          {
+            "embedding_commit": "4178f50",
+            "id": "NDUYC4ZVAHPWX5PN7HEN3LEF5ZMNXFAPR6LVYSZMK7EG6BOUQL7MOE2O",
+            "name": "wf-test-1",
+            "version": "2.15.0"
+          },
+          {
+            "embedding_commit": "4178f50",
+            "id": "NAPXJE6T6EKGIO5R7HWIFEGOPNXU3GERNOOCXTQYMFMWCDSWDZMJP4P4",
+            "name": "wf-test-2",
+            "version": "2.15.0"
+          }
+        ],
+        "replicas": 3,
+        "test": "TestNativeCommittedMetadataReplyLost/R3"
+      }
+    },
+    "TestNativeBlobUploaderAndCollectorSIGKILL-R3-collect-purge": {
+      "scenario": "process-sigkill-collect-purge",
+      "replicas": 3,
+      "child_pid": 2753205,
+      "child_sha256": "d591b2c16d87a1ee2a432a588da794bec4b6cbc8646df3a83a1e797386de77e3",
+      "native_exit_signal": 9,
+      "held_packet_bytes": 259,
+      "object_acknowledgments": 1,
+      "server_info": {
+        "server_id": "NBQ6ZSSAHOPXZIAKH5BHDGDHUBNJUUM7E7XGAQSK4HJX2SH6GXGUUAHW",
+        "server_name": "wf-test-0",
+        "version": "2.15.0",
+        "proto": 1,
+        "git_commit": "4178f50",
+        "go": "go1.27.1",
+        "host": "127.0.0.1",
+        "port": 41427,
+        "headers": true,
+        "auth_required": true,
+        "max_payload": 1048576,
+        "jetstream": true,
+        "client_id": 25,
+        "client_ip": "127.0.0.1",
+        "cluster": "wf-test",
+        "connect_urls": [
+          "127.0.0.1:41427",
+          "127.0.0.1:39783",
+          "127.0.0.1:40045"
+        ],
+        "api_lvl": 5,
+        "xkey": "XCV2CNSEDS7FKGXE4LXMV6LENKQ6LNXFMY57TL2KGT7C3V2BN4SWLY5C"
+      },
+      "wire_frames": 63,
+      "identity": {
+        "parent_budget_seconds": 30,
+        "peers": [
+          {
+            "embedding_commit": "4178f50",
+            "id": "NBQ6ZSSAHOPXZIAKH5BHDGDHUBNJUUM7E7XGAQSK4HJX2SH6GXGUUAHW",
+            "name": "wf-test-0",
+            "version": "2.15.0"
+          },
+          {
+            "embedding_commit": "4178f50",
+            "id": "NBXWG3NA7AJCVTTKAWROYQEXLIKC6NFPBZFVMIYMPMYB4GPCRNEWN27R",
+            "name": "wf-test-1",
+            "version": "2.15.0"
+          },
+          {
+            "embedding_commit": "4178f50",
+            "id": "NASQNYQ2L2UH32CAVTCH2MEW4G62HJSR5XI5OQJP6WQV6PIZTVRCHSYJ",
+            "name": "wf-test-2",
+            "version": "2.15.0"
+          }
+        ],
+        "replicas": 3,
+        "test": "TestNativeBlobUploaderAndCollectorSIGKILL/R3/collect-purge"
+      }
+    },
+    "TestNativeBlobUploaderAndCollectorSIGKILL-R1-upload-root": {
+      "scenario": "process-sigkill-upload-root",
+      "replicas": 1,
+      "child_pid": 2753184,
+      "child_sha256": "d591b2c16d87a1ee2a432a588da794bec4b6cbc8646df3a83a1e797386de77e3",
+      "native_exit_signal": 9,
+      "held_packet_bytes": 535,
+      "object_acknowledgments": 4,
+      "server_info": {
+        "server_id": "NDHJKSCYXJTIF6VID5AIMALT5KM7FI4S5PKEIWDSSBAXANLVHA5BZPHX",
+        "server_name": "wf-test-0",
+        "version": "2.15.0",
+        "proto": 1,
+        "git_commit": "4178f50",
+        "go": "go1.27.1",
+        "host": "127.0.0.1",
+        "port": 40035,
+        "headers": true,
+        "max_payload": 1048576,
+        "jetstream": true,
+        "client_id": 12,
+        "client_ip": "127.0.0.1",
+        "api_lvl": 5,
+        "xkey": "XB2ESTN6C5P27VKVB4VH4ASOYDSBQ2UGED4Y3U3QEICJ63KACV5DBZXE"
+      },
+      "wire_frames": 81,
+      "identity": {
+        "parent_budget_seconds": 30,
+        "peers": [
+          {
+            "embedding_commit": "4178f50",
+            "id": "NDHJKSCYXJTIF6VID5AIMALT5KM7FI4S5PKEIWDSSBAXANLVHA5BZPHX",
+            "name": "wf-test-0",
+            "version": "2.15.0"
+          }
+        ],
+        "replicas": 1,
+        "test": "TestNativeBlobUploaderAndCollectorSIGKILL/R1/upload-root"
+      }
+    },
+    "TestNativeLateChunkAfterGenerationClosed-R1": {
+      "scenario": "late-chunk",
+      "replicas": 1,
+      "wire": {
+        "name": "332a59c4d54092de0d8c777ef03457a15dca640ef5ebd688ccc19ec127b97c84/1/attempt",
+        "server_info": {
+          "server_id": "NBSWWJQ72GCIDWUZJBUEUPOEXDG3EAVFYHKALRG6DIN6YMVIV4YL73RI",
+          "server_name": "wf-test-0",
+          "version": "2.15.0",
+          "proto": 1,
+          "git_commit": "4178f50",
+          "go": "go1.27.1",
+          "host": "127.0.0.1",
+          "port": 32935,
+          "headers": true,
+          "max_payload": 1048576,
+          "jetstream": true,
+          "client_id": 12,
+          "client_ip": "127.0.0.1",
+          "api_lvl": 5,
+          "xkey": "XASIF2NL2JS6ODEZZZ26QA4FAHS6CIKRR3ECYZC62FBX7PQ357SQGAAS"
+        },
+        "chunk_bytes": 323000,
+        "held_packet_bytes": 131308,
+        "native_cas_errors": [],
+        "acknowledgments": 4,
+        "wire_frames": 67
+      },
+      "identity": {
+        "parent_budget_seconds": 30,
+        "peers": [
+          {
+            "embedding_commit": "4178f50",
+            "id": "NBSWWJQ72GCIDWUZJBUEUPOEXDG3EAVFYHKALRG6DIN6YMVIV4YL73RI",
+            "name": "wf-test-0",
+            "version": "2.15.0"
+          }
+        ],
+        "replicas": 1,
+        "test": "TestNativeLateChunkAfterGenerationClosed/R1"
+      }
+    },
+    "TestNativePartialUploadPublicationFence-R1-crash": {
+      "scenario": "paused-partial-crash",
+      "replicas": 1,
+      "wire": {
+        "name": "5837129fba752f3d4c82ebda4eb0aa7912de0981b918cb260dc1a6be016c6e56/1/attempt",
+        "server_info": {
+          "server_id": "NAQ7PV27FAL3D74ZQ5LQTMCJLCKDFXSRSLT3Y6GZT3CIWEUPIZSM5HHQ",
+          "server_name": "wf-test-0",
+          "version": "2.15.0",
+          "proto": 1,
+          "git_commit": "4178f50",
+          "go": "go1.27.1",
+          "host": "127.0.0.1",
+          "port": 36885,
+          "headers": true,
+          "max_payload": 1048576,
+          "jetstream": true,
+          "client_id": 12,
+          "client_ip": "127.0.0.1",
+          "api_lvl": 5,
+          "xkey": "XBMGK3LUQINKPAO6SNSKZQ7B6JHT3IQCICL4XZOS5Y7VJEPO3T2BYUPQ"
+        },
+        "chunk_bytes": 308000,
+        "held_packet_bytes": 671,
+        "native_cas_errors": [],
+        "acknowledgments": 3,
+        "wire_frames": 57
+      },
+      "identity": {
+        "parent_budget_seconds": 30,
+        "peers": [
+          {
+            "embedding_commit": "4178f50",
+            "id": "NAQ7PV27FAL3D74ZQ5LQTMCJLCKDFXSRSLT3Y6GZT3CIWEUPIZSM5HHQ",
+            "name": "wf-test-0",
+            "version": "2.15.0"
+          }
+        ],
+        "replicas": 1,
+        "test": "TestNativePartialUploadPublicationFence/R1/crash"
+      }
+    },
+    "TestNativePartialUploadPublicationFence-R1-resume": {
+      "scenario": "paused-partial-resume",
+      "replicas": 1,
+      "wire": {
+        "name": "5837129fba752f3d4c82ebda4eb0aa7912de0981b918cb260dc1a6be016c6e56/1/attempt",
+        "server_info": {
+          "server_id": "NCV57D2LSUDLPGMY47XT2QP7BKB5NQ22M4ISIWCLQR64EQVX2K7Z6JTR",
+          "server_name": "wf-test-0",
+          "version": "2.15.0",
+          "proto": 1,
+          "git_commit": "4178f50",
+          "go": "go1.27.1",
+          "host": "127.0.0.1",
+          "port": 33299,
+          "headers": true,
+          "max_payload": 1048576,
+          "jetstream": true,
+          "client_id": 12,
+          "client_ip": "127.0.0.1",
+          "api_lvl": 5,
+          "xkey": "XDPKCB7APXS52OZDQT3M2HCGPH7ONMS7RX5D6IJXOFHYLWSELVMFUL3W"
+        },
+        "chunk_bytes": 308000,
+        "held_packet_bytes": 671,
+        "native_cas_errors": [
+          {
+            "code": 400,
+            "err_code": 10071,
+            "description": "wrong last sequence: 4"
+          }
+        ],
+        "acknowledgments": 3,
+        "wire_frames": 59
+      },
+      "identity": {
+        "parent_budget_seconds": 30,
+        "peers": [
+          {
+            "embedding_commit": "4178f50",
+            "id": "NCV57D2LSUDLPGMY47XT2QP7BKB5NQ22M4ISIWCLQR64EQVX2K7Z6JTR",
+            "name": "wf-test-0",
+            "version": "2.15.0"
+          }
+        ],
+        "replicas": 1,
+        "test": "TestNativePartialUploadPublicationFence/R1/resume"
+      }
+    },
+    "TestNativeBlobUploaderAndCollectorSIGKILL-R1-collect-purge": {
+      "scenario": "process-sigkill-collect-purge",
+      "replicas": 1,
+      "child_pid": 2753189,
+      "child_sha256": "d591b2c16d87a1ee2a432a588da794bec4b6cbc8646df3a83a1e797386de77e3",
+      "native_exit_signal": 9,
+      "held_packet_bytes": 259,
+      "object_acknowledgments": 1,
+      "server_info": {
+        "server_id": "NDOFTIX4EVBIAGP46EY3PJCLO22Z6KXBICEPPXMDUCWSWRSKZGY5CI7A",
+        "server_name": "wf-test-0",
+        "version": "2.15.0",
+        "proto": 1,
+        "git_commit": "4178f50",
+        "go": "go1.27.1",
+        "host": "127.0.0.1",
+        "port": 41563,
+        "headers": true,
+        "max_payload": 1048576,
+        "jetstream": true,
+        "client_id": 12,
+        "client_ip": "127.0.0.1",
+        "api_lvl": 5,
+        "xkey": "XDFJYL5OQ3MF7RIHKJVI3RRVGGH5LAWHOAVQRKKTNL6M2NFYFFKXI4KZ"
+      },
+      "wire_frames": 63,
+      "identity": {
+        "parent_budget_seconds": 30,
+        "peers": [
+          {
+            "embedding_commit": "4178f50",
+            "id": "NDOFTIX4EVBIAGP46EY3PJCLO22Z6KXBICEPPXMDUCWSWRSKZGY5CI7A",
+            "name": "wf-test-0",
+            "version": "2.15.0"
+          }
+        ],
+        "replicas": 1,
+        "test": "TestNativeBlobUploaderAndCollectorSIGKILL/R1/collect-purge"
+      }
+    },
+    "TestNativeUnknownChunksBlockCollection": {
+      "scenario": "unknown-chunk-control",
+      "replicas": 1,
+      "identity": {
+        "parent_budget_seconds": 30,
+        "peers": [
+          {
+            "embedding_commit": "4178f50",
+            "id": "NARCIRQ4NK2PCRDEDV3URY76TQK47HUV4CAAJ2L73NBMCW5GAQJBPJBN",
+            "name": "wf-test-0",
+            "version": "2.15.0"
+          }
+        ],
+        "replicas": 1,
+        "test": "TestNativeUnknownChunksBlockCollection"
+      }
+    },
+    "TestNativeObjectSameStoreColdRestart-R3": {
+      "scenario": "same-store-cold-restart",
+      "replicas": 3,
+      "identity": {
+        "parent_budget_seconds": 30,
+        "peers": [
+          {
+            "embedding_commit": "4178f50",
+            "id": "NA6WIZT2CZ55KEM4FRQJURM64D6HTU3WT5KG52YASPMDH4AVT6ZDTKWY",
+            "name": "wf-test-0",
+            "version": "2.15.0"
+          },
+          {
+            "embedding_commit": "4178f50",
+            "id": "NCQIKA54ACIYLPGLKWX5SNYCDGRMPRHHOO3AIDIXO5WY6IUDPVCKDRGQ",
+            "name": "wf-test-1",
+            "version": "2.15.0"
+          },
+          {
+            "embedding_commit": "4178f50",
+            "id": "NDBPJ2P7BWG5S2GC5H6K2A6UBP5J6FOVAFARYT23RHA53V4GPFJEIVDE",
+            "name": "wf-test-2",
+            "version": "2.15.0"
+          }
+        ],
+        "replicas": 3,
+        "test": "TestNativeObjectSameStoreColdRestart/R3"
+      }
+    },
+    "TestNativeObjectSameStoreColdRestart-R1": {
+      "scenario": "same-store-cold-restart",
+      "replicas": 1,
+      "identity": {
+        "parent_budget_seconds": 30,
+        "peers": [
+          {
+            "embedding_commit": "4178f50",
+            "id": "NDE63JVKT43OGRAKT5SHEHQEO63GHRUXFZDZA45PTLVNBCBIK7YXRRVL",
+            "name": "wf-test-0",
+            "version": "2.15.0"
+          }
+        ],
+        "replicas": 1,
+        "test": "TestNativeObjectSameStoreColdRestart/R1"
+      }
+    },
+    "TestNativeBlobUploaderAndCollectorSIGKILL-R1-upload-metadata": {
+      "scenario": "process-sigkill-upload-metadata",
+      "replicas": 1,
+      "child_pid": 2753151,
+      "child_sha256": "d591b2c16d87a1ee2a432a588da794bec4b6cbc8646df3a83a1e797386de77e3",
+      "native_exit_signal": 9,
+      "held_packet_bytes": 671,
+      "object_acknowledgments": 3,
+      "server_info": {
+        "server_id": "NCATWPJVCJO2VGLA4ZYYXUXY5BW2BD6MZU7FAYNT3VHPWMG6S2WXUZLT",
+        "server_name": "wf-test-0",
+        "version": "2.15.0",
+        "proto": 1,
+        "git_commit": "4178f50",
+        "go": "go1.27.1",
+        "host": "127.0.0.1",
+        "port": 40647,
+        "headers": true,
+        "max_payload": 1048576,
+        "jetstream": true,
+        "client_id": 12,
+        "client_ip": "127.0.0.1",
+        "api_lvl": 5,
+        "xkey": "XBP2E733FJAZL75WVPHGI5SXVT7YKHL3FI7DGYP2PJXJEFEYDBJWOXY3"
+      },
+      "wire_frames": 57,
+      "identity": {
+        "parent_budget_seconds": 30,
+        "peers": [
+          {
+            "embedding_commit": "4178f50",
+            "id": "NCATWPJVCJO2VGLA4ZYYXUXY5BW2BD6MZU7FAYNT3VHPWMG6S2WXUZLT",
+            "name": "wf-test-0",
+            "version": "2.15.0"
+          }
+        ],
+        "replicas": 1,
+        "test": "TestNativeBlobUploaderAndCollectorSIGKILL/R1/upload-metadata"
+      }
+    },
+    "TestNativeObjectUnsafeConfiguration": {
+      "scenario": "unsafe-object-config",
+      "replicas": 1,
+      "identity": {
+        "parent_budget_seconds": 30,
+        "peers": [
+          {
+            "embedding_commit": "4178f50",
+            "id": "NDSAENRJXEORACYBGNBNJ5SVMFOFKLDQYSRDWRRJ6Y3QXX4CKTHAI4S5",
+            "name": "wf-test-0",
+            "version": "2.15.0"
+          }
+        ],
+        "replicas": 1,
+        "test": "TestNativeObjectUnsafeConfiguration"
+      }
+    },
+    "TestNativeCommittedMetadataReplyLost-R1": {
+      "scenario": "committed-metadata-reply-lost",
+      "replicas": 1,
+      "wire": {
+        "name": "85e36219bb3eeb274a83246ba2eadb488a50dda12e0bb1a8b7497156687efe0c/1/attempt",
+        "server_info": {
+          "server_id": "NCWARURLW7M2OD2LTN3T2SKNT2I2GGRUOHRNHEVWFW5T4KE5YXT7AE6I",
+          "server_name": "wf-test-0",
+          "version": "2.15.0",
+          "proto": 1,
+          "git_commit": "4178f50",
+          "go": "go1.27.1",
+          "host": "127.0.0.1",
+          "port": 35827,
+          "headers": true,
+          "max_payload": 1048576,
+          "jetstream": true,
+          "client_id": 12,
+          "client_ip": "127.0.0.1",
+          "api_lvl": 5,
+          "xkey": "XBQPZSZA5FN3Q5DLUFMMM6K57QXT2AV7MA6MTCHNYS6BD2ANJYZH5Y56"
+        },
+        "chunk_bytes": 320000,
+        "held_packet_bytes": 671,
+        "native_cas_errors": [],
+        "acknowledgments": 3,
+        "wire_frames": 58
+      },
+      "identity": {
+        "parent_budget_seconds": 30,
+        "peers": [
+          {
+            "embedding_commit": "4178f50",
+            "id": "NCWARURLW7M2OD2LTN3T2SKNT2I2GGRUOHRNHEVWFW5T4KE5YXT7AE6I",
+            "name": "wf-test-0",
+            "version": "2.15.0"
+          }
+        ],
+        "replicas": 1,
+        "test": "TestNativeCommittedMetadataReplyLost/R1"
+      }
+    },
+    "TestNativeLateChunkAfterGenerationClosed-R3": {
+      "scenario": "late-chunk",
+      "replicas": 3,
+      "wire": {
+        "name": "332a59c4d54092de0d8c777ef03457a15dca640ef5ebd688ccc19ec127b97c84/1/attempt",
+        "server_info": {
+          "server_id": "NAX64UY3JVFKQQHDHEJ37MC4D4T5EUBXM5KD3WXGHKZ5EBHW4JASRLDM",
+          "server_name": "wf-test-0",
+          "version": "2.15.0",
+          "proto": 1,
+          "git_commit": "4178f50",
+          "go": "go1.27.1",
+          "host": "127.0.0.1",
+          "port": 45021,
+          "headers": true,
+          "auth_required": true,
+          "max_payload": 1048576,
+          "jetstream": true,
+          "client_id": 25,
+          "client_ip": "127.0.0.1",
+          "cluster": "wf-test",
+          "connect_urls": [
+            "127.0.0.1:45021",
+            "127.0.0.1:46463",
+            "127.0.0.1:42837"
+          ],
+          "api_lvl": 5,
+          "xkey": "XBEWOLIBJJ3GSI25YBWAVU4JBE2DIBYXANX7HB4MJMBPU6BFW5WHW3KB"
+        },
+        "chunk_bytes": 323000,
+        "held_packet_bytes": 131308,
+        "native_cas_errors": [],
+        "acknowledgments": 4,
+        "wire_frames": 67
+      },
+      "identity": {
+        "parent_budget_seconds": 30,
+        "peers": [
+          {
+            "embedding_commit": "4178f50",
+            "id": "NAX64UY3JVFKQQHDHEJ37MC4D4T5EUBXM5KD3WXGHKZ5EBHW4JASRLDM",
+            "name": "wf-test-0",
+            "version": "2.15.0"
+          },
+          {
+            "embedding_commit": "4178f50",
+            "id": "NCC2NMPNBDY6QWJDN3M6LI7JVQZPXDUFN6GTE36HCARMAAD7KSFIP7WC",
+            "name": "wf-test-1",
+            "version": "2.15.0"
+          },
+          {
+            "embedding_commit": "4178f50",
+            "id": "NBGLNATHRD5MFODUIBEB2KF7TINCKZZ5EQYMEHR5PUYJIMSSAFZQU6IN",
+            "name": "wf-test-2",
+            "version": "2.15.0"
+          }
+        ],
+        "replicas": 3,
+        "test": "TestNativeLateChunkAfterGenerationClosed/R3"
+      }
+    },
+    "TestNativeObjectPublicationLifecycle-R3": {
+      "scenario": "shared-lifecycle",
+      "replicas": 3,
+      "identity": {
+        "parent_budget_seconds": 30,
+        "peers": [
+          {
+            "embedding_commit": "4178f50",
+            "id": "NAKQCHCC2Z5XKTIBRMKAOHXYB5QX2OJDPN5ODKTNAV7SI5K6PRCUQHAQ",
+            "name": "wf-test-0",
+            "version": "2.15.0"
+          },
+          {
+            "embedding_commit": "4178f50",
+            "id": "NCQKZIPTMXFPDPRC67BLB7NN5GVUOCABWLJRHH6V23ILESZ7UYQXUYZQ",
+            "name": "wf-test-1",
+            "version": "2.15.0"
+          },
+          {
+            "embedding_commit": "4178f50",
+            "id": "NBEJVSP6CFP3LW5BCY75SJSADZVJGYEE4RB4HPMTQ2ZZENZM3I4BXMCM",
+            "name": "wf-test-2",
+            "version": "2.15.0"
+          }
+        ],
+        "replicas": 3,
+        "test": "TestNativeObjectPublicationLifecycle/R3"
+      }
+    },
+    "TestNativeObjectPublicationLifecycle-R1": {
+      "scenario": "shared-lifecycle",
+      "replicas": 1,
+      "identity": {
+        "parent_budget_seconds": 30,
+        "peers": [
+          {
+            "embedding_commit": "4178f50",
+            "id": "NCPTL4C7HZWCEKEVFHBXEM3MI6BSTSHXXSIWY33RZCTNHIP2HZAJ2V7B",
+            "name": "wf-test-0",
+            "version": "2.15.0"
+          }
+        ],
+        "replicas": 1,
+        "test": "TestNativeObjectPublicationLifecycle/R1"
+      }
+    },
+    "TestNativePartialUploadPublicationFence-R3-crash": {
+      "scenario": "paused-partial-crash",
+      "replicas": 3,
+      "wire": {
+        "name": "5837129fba752f3d4c82ebda4eb0aa7912de0981b918cb260dc1a6be016c6e56/1/attempt",
+        "server_info": {
+          "server_id": "NAQXPFX4QCFMUWH7K6DFY5WFZTOHYYE4YMHNL5GB7A7KEFMEV7UIZXGC",
+          "server_name": "wf-test-0",
+          "version": "2.15.0",
+          "proto": 1,
+          "git_commit": "4178f50",
+          "go": "go1.27.1",
+          "host": "127.0.0.1",
+          "port": 41315,
+          "headers": true,
+          "auth_required": true,
+          "max_payload": 1048576,
+          "jetstream": true,
+          "client_id": 25,
+          "client_ip": "127.0.0.1",
+          "cluster": "wf-test",
+          "connect_urls": [
+            "127.0.0.1:41315",
+            "127.0.0.1:45153",
+            "127.0.0.1:45943"
+          ],
+          "api_lvl": 5,
+          "xkey": "XCTOSL2QXEHSTJ3PSR6RJ3K3WOHDEJJBFKGHFRL3EMEUG55JLBIXGFGV"
+        },
+        "chunk_bytes": 308000,
+        "held_packet_bytes": 671,
+        "native_cas_errors": [],
+        "acknowledgments": 3,
+        "wire_frames": 57
+      },
+      "identity": {
+        "parent_budget_seconds": 30,
+        "peers": [
+          {
+            "embedding_commit": "4178f50",
+            "id": "NAQXPFX4QCFMUWH7K6DFY5WFZTOHYYE4YMHNL5GB7A7KEFMEV7UIZXGC",
+            "name": "wf-test-0",
+            "version": "2.15.0"
+          },
+          {
+            "embedding_commit": "4178f50",
+            "id": "NB6QEAR2BGSAE7OKDVNCHE6TOSC4VYCJ2NMA5ZPGYDVYW55S2C7G2WJM",
+            "name": "wf-test-1",
+            "version": "2.15.0"
+          },
+          {
+            "embedding_commit": "4178f50",
+            "id": "NAMS4A6LSQ3SMNIMMCMAAXBKEBPXFRPLWU2VKFERU5DKBC4UQJLENKAD",
+            "name": "wf-test-2",
+            "version": "2.15.0"
+          }
+        ],
+        "replicas": 3,
+        "test": "TestNativePartialUploadPublicationFence/R3/crash"
+      }
+    }
+  },
+  "actual_positive_proof_substitutions_rejected": [
+    "TestNativeBlobUploaderAndCollectorSIGKILL-R3-upload-root/chunks_remain",
+    "TestNativeBlobUploaderAndCollectorSIGKILL-R3-upload-root/direct_reads",
+    "TestNativeBlobUploaderAndCollectorSIGKILL-R3-upload-root/ttl",
+    "TestNativeBlobUploaderAndCollectorSIGKILL-R3-upload-root/rollup_disabled",
+    "TestNativeBlobUploaderAndCollectorSIGKILL-R3-upload-root/reclamation_false",
+    "TestNativeBlobUploaderAndCollectorSIGKILL-R3-upload-root/already_forwarded",
+    "TestNativeBlobUploaderAndCollectorSIGKILL-R3-upload-root/truncated_wire",
+    "TestNativeBlobUploaderAndCollectorSIGKILL-R3-upload-root/wrong_packet_subject",
+    "TestNativeBlobUploaderAndCollectorSIGKILL-R3-upload-root/generation_reused",
+    "TestNativeBlobUploaderAndCollectorSIGKILL-R3-upload-root/tombstone_absent",
+    "TestNativeBlobUploaderAndCollectorSIGKILL-R3-upload-root/wrong_child_binary",
+    "TestNativeBlobUploaderAndCollectorSIGKILL-R3-upload-root/not_sigkill",
+    "TestNativeBlobUploaderAndCollectorSIGKILL-R3-upload-root/child_not_joined",
+    "TestNativeBlobUploaderAndCollectorSIGKILL-R3-upload-root/child_still_present",
+    "TestNativeBlobUploaderAndCollectorSIGKILL-R3-upload-root/identity_unstable",
+    "TestNativeBlobUploaderAndCollectorSIGKILL-R3-upload-root/held_packet_forwarded",
+    "TestNativeBlobUploaderAndCollectorSIGKILL-R3-upload-root/root_fence_reset",
+    "TestNativeBlobUploaderAndCollectorSIGKILL-R3-upload-root/generation_reset",
+    "TestNativeBlobUploaderAndCollectorSIGKILL-R3-upload-root/partial_census_wrong",
+    "TestNativeBlobUploaderAndCollectorSIGKILL-R3-upload-root/chunks_in_final_census",
+    "TestNativeBlobUploaderAndCollectorSIGKILL-R3-upload-metadata/chunks_remain",
+    "TestNativeBlobUploaderAndCollectorSIGKILL-R3-upload-metadata/direct_reads",
+    "TestNativeBlobUploaderAndCollectorSIGKILL-R3-upload-metadata/ttl",
+    "TestNativeBlobUploaderAndCollectorSIGKILL-R3-upload-metadata/rollup_disabled",
+    "TestNativeBlobUploaderAndCollectorSIGKILL-R3-upload-metadata/reclamation_false",
+    "TestNativeBlobUploaderAndCollectorSIGKILL-R3-upload-metadata/already_forwarded",
+    "TestNativeBlobUploaderAndCollectorSIGKILL-R3-upload-metadata/truncated_wire",
+    "TestNativeBlobUploaderAndCollectorSIGKILL-R3-upload-metadata/wrong_packet_subject",
+    "TestNativeBlobUploaderAndCollectorSIGKILL-R3-upload-metadata/generation_reused",
+    "TestNativeBlobUploaderAndCollectorSIGKILL-R3-upload-metadata/tombstone_absent",
+    "TestNativeBlobUploaderAndCollectorSIGKILL-R3-upload-metadata/wrong_child_binary",
+    "TestNativeBlobUploaderAndCollectorSIGKILL-R3-upload-metadata/not_sigkill",
+    "TestNativeBlobUploaderAndCollectorSIGKILL-R3-upload-metadata/child_not_joined",
+    "TestNativeBlobUploaderAndCollectorSIGKILL-R3-upload-metadata/child_still_present",
+    "TestNativeBlobUploaderAndCollectorSIGKILL-R3-upload-metadata/identity_unstable",
+    "TestNativeBlobUploaderAndCollectorSIGKILL-R3-upload-metadata/held_packet_forwarded",
+    "TestNativeBlobUploaderAndCollectorSIGKILL-R3-upload-metadata/root_fence_reset",
+    "TestNativeBlobUploaderAndCollectorSIGKILL-R3-upload-metadata/generation_reset",
+    "TestNativeBlobUploaderAndCollectorSIGKILL-R3-upload-metadata/partial_census_wrong",
+    "TestNativeBlobUploaderAndCollectorSIGKILL-R3-upload-metadata/chunks_in_final_census",
+    "TestNativePartialUploadPublicationFence-R3-resume/chunks_remain",
+    "TestNativePartialUploadPublicationFence-R3-resume/direct_reads",
+    "TestNativePartialUploadPublicationFence-R3-resume/ttl",
+    "TestNativePartialUploadPublicationFence-R3-resume/rollup_disabled",
+    "TestNativePartialUploadPublicationFence-R3-resume/reclamation_false",
+    "TestNativePartialUploadPublicationFence-R3-resume/already_forwarded",
+    "TestNativePartialUploadPublicationFence-R3-resume/truncated_wire",
+    "TestNativePartialUploadPublicationFence-R3-resume/wrong_packet_subject",
+    "TestNativePartialUploadPublicationFence-R3-resume/generation_reused",
+    "TestNativePartialUploadPublicationFence-R3-resume/tombstone_absent",
+    "TestNativeCommittedMetadataReplyLost-R3/chunks_remain",
+    "TestNativeCommittedMetadataReplyLost-R3/direct_reads",
+    "TestNativeCommittedMetadataReplyLost-R3/ttl",
+    "TestNativeCommittedMetadataReplyLost-R3/rollup_disabled",
+    "TestNativeCommittedMetadataReplyLost-R3/reclamation_false",
+    "TestNativeCommittedMetadataReplyLost-R3/already_forwarded",
+    "TestNativeCommittedMetadataReplyLost-R3/truncated_wire",
+    "TestNativeCommittedMetadataReplyLost-R3/wrong_packet_subject",
+    "TestNativeCommittedMetadataReplyLost-R3/no_reply_hold",
+    "TestNativeCommittedMetadataReplyLost-R3/ambiguous_upload_adopted",
+    "TestNativeCommittedMetadataReplyLost-R3/root_published",
+    "TestNativeBlobUploaderAndCollectorSIGKILL-R3-collect-purge/chunks_remain",
+    "TestNativeBlobUploaderAndCollectorSIGKILL-R3-collect-purge/direct_reads",
+    "TestNativeBlobUploaderAndCollectorSIGKILL-R3-collect-purge/ttl",
+    "TestNativeBlobUploaderAndCollectorSIGKILL-R3-collect-purge/rollup_disabled",
+    "TestNativeBlobUploaderAndCollectorSIGKILL-R3-collect-purge/reclamation_false",
+    "TestNativeBlobUploaderAndCollectorSIGKILL-R3-collect-purge/already_forwarded",
+    "TestNativeBlobUploaderAndCollectorSIGKILL-R3-collect-purge/truncated_wire",
+    "TestNativeBlobUploaderAndCollectorSIGKILL-R3-collect-purge/wrong_packet_subject",
+    "TestNativeBlobUploaderAndCollectorSIGKILL-R3-collect-purge/generation_reused",
+    "TestNativeBlobUploaderAndCollectorSIGKILL-R3-collect-purge/tombstone_absent",
+    "TestNativeBlobUploaderAndCollectorSIGKILL-R3-collect-purge/wrong_child_binary",
+    "TestNativeBlobUploaderAndCollectorSIGKILL-R3-collect-purge/not_sigkill",
+    "TestNativeBlobUploaderAndCollectorSIGKILL-R3-collect-purge/child_not_joined",
+    "TestNativeBlobUploaderAndCollectorSIGKILL-R3-collect-purge/child_still_present",
+    "TestNativeBlobUploaderAndCollectorSIGKILL-R3-collect-purge/identity_unstable",
+    "TestNativeBlobUploaderAndCollectorSIGKILL-R3-collect-purge/held_packet_forwarded",
+    "TestNativeBlobUploaderAndCollectorSIGKILL-R3-collect-purge/root_fence_reset",
+    "TestNativeBlobUploaderAndCollectorSIGKILL-R3-collect-purge/generation_reset",
+    "TestNativeBlobUploaderAndCollectorSIGKILL-R3-collect-purge/partial_census_wrong",
+    "TestNativeBlobUploaderAndCollectorSIGKILL-R3-collect-purge/chunks_in_final_census",
+    "TestNativeBlobUploaderAndCollectorSIGKILL-R1-upload-root/chunks_remain",
+    "TestNativeBlobUploaderAndCollectorSIGKILL-R1-upload-root/direct_reads",
+    "TestNativeBlobUploaderAndCollectorSIGKILL-R1-upload-root/ttl",
+    "TestNativeBlobUploaderAndCollectorSIGKILL-R1-upload-root/rollup_disabled",
+    "TestNativeBlobUploaderAndCollectorSIGKILL-R1-upload-root/reclamation_false",
+    "TestNativeBlobUploaderAndCollectorSIGKILL-R1-upload-root/already_forwarded",
+    "TestNativeBlobUploaderAndCollectorSIGKILL-R1-upload-root/truncated_wire",
+    "TestNativeBlobUploaderAndCollectorSIGKILL-R1-upload-root/wrong_packet_subject",
+    "TestNativeBlobUploaderAndCollectorSIGKILL-R1-upload-root/generation_reused",
+    "TestNativeBlobUploaderAndCollectorSIGKILL-R1-upload-root/tombstone_absent",
+    "TestNativeBlobUploaderAndCollectorSIGKILL-R1-upload-root/wrong_child_binary",
+    "TestNativeBlobUploaderAndCollectorSIGKILL-R1-upload-root/not_sigkill",
+    "TestNativeBlobUploaderAndCollectorSIGKILL-R1-upload-root/child_not_joined",
+    "TestNativeBlobUploaderAndCollectorSIGKILL-R1-upload-root/child_still_present",
+    "TestNativeBlobUploaderAndCollectorSIGKILL-R1-upload-root/identity_unstable",
+    "TestNativeBlobUploaderAndCollectorSIGKILL-R1-upload-root/held_packet_forwarded",
+    "TestNativeBlobUploaderAndCollectorSIGKILL-R1-upload-root/root_fence_reset",
+    "TestNativeBlobUploaderAndCollectorSIGKILL-R1-upload-root/generation_reset",
+    "TestNativeBlobUploaderAndCollectorSIGKILL-R1-upload-root/partial_census_wrong",
+    "TestNativeBlobUploaderAndCollectorSIGKILL-R1-upload-root/chunks_in_final_census",
+    "TestNativeLateChunkAfterGenerationClosed-R1/chunks_remain",
+    "TestNativeLateChunkAfterGenerationClosed-R1/direct_reads",
+    "TestNativeLateChunkAfterGenerationClosed-R1/ttl",
+    "TestNativeLateChunkAfterGenerationClosed-R1/rollup_disabled",
+    "TestNativeLateChunkAfterGenerationClosed-R1/reclamation_false",
+    "TestNativeLateChunkAfterGenerationClosed-R1/already_forwarded",
+    "TestNativeLateChunkAfterGenerationClosed-R1/truncated_wire",
+    "TestNativeLateChunkAfterGenerationClosed-R1/wrong_packet_subject",
+    "TestNativeLateChunkAfterGenerationClosed-R1/generation_reused",
+    "TestNativeLateChunkAfterGenerationClosed-R1/tombstone_absent",
+    "TestNativePartialUploadPublicationFence-R1-crash/chunks_remain",
+    "TestNativePartialUploadPublicationFence-R1-crash/direct_reads",
+    "TestNativePartialUploadPublicationFence-R1-crash/ttl",
+    "TestNativePartialUploadPublicationFence-R1-crash/rollup_disabled",
+    "TestNativePartialUploadPublicationFence-R1-crash/reclamation_false",
+    "TestNativePartialUploadPublicationFence-R1-crash/already_forwarded",
+    "TestNativePartialUploadPublicationFence-R1-crash/truncated_wire",
+    "TestNativePartialUploadPublicationFence-R1-crash/wrong_packet_subject",
+    "TestNativePartialUploadPublicationFence-R1-crash/generation_reused",
+    "TestNativePartialUploadPublicationFence-R1-crash/tombstone_absent",
+    "TestNativePartialUploadPublicationFence-R1-resume/chunks_remain",
+    "TestNativePartialUploadPublicationFence-R1-resume/direct_reads",
+    "TestNativePartialUploadPublicationFence-R1-resume/ttl",
+    "TestNativePartialUploadPublicationFence-R1-resume/rollup_disabled",
+    "TestNativePartialUploadPublicationFence-R1-resume/reclamation_false",
+    "TestNativePartialUploadPublicationFence-R1-resume/already_forwarded",
+    "TestNativePartialUploadPublicationFence-R1-resume/truncated_wire",
+    "TestNativePartialUploadPublicationFence-R1-resume/wrong_packet_subject",
+    "TestNativePartialUploadPublicationFence-R1-resume/generation_reused",
+    "TestNativePartialUploadPublicationFence-R1-resume/tombstone_absent",
+    "TestNativeBlobUploaderAndCollectorSIGKILL-R1-collect-purge/chunks_remain",
+    "TestNativeBlobUploaderAndCollectorSIGKILL-R1-collect-purge/direct_reads",
+    "TestNativeBlobUploaderAndCollectorSIGKILL-R1-collect-purge/ttl",
+    "TestNativeBlobUploaderAndCollectorSIGKILL-R1-collect-purge/rollup_disabled",
+    "TestNativeBlobUploaderAndCollectorSIGKILL-R1-collect-purge/reclamation_false",
+    "TestNativeBlobUploaderAndCollectorSIGKILL-R1-collect-purge/already_forwarded",
+    "TestNativeBlobUploaderAndCollectorSIGKILL-R1-collect-purge/truncated_wire",
+    "TestNativeBlobUploaderAndCollectorSIGKILL-R1-collect-purge/wrong_packet_subject",
+    "TestNativeBlobUploaderAndCollectorSIGKILL-R1-collect-purge/generation_reused",
+    "TestNativeBlobUploaderAndCollectorSIGKILL-R1-collect-purge/tombstone_absent",
+    "TestNativeBlobUploaderAndCollectorSIGKILL-R1-collect-purge/wrong_child_binary",
+    "TestNativeBlobUploaderAndCollectorSIGKILL-R1-collect-purge/not_sigkill",
+    "TestNativeBlobUploaderAndCollectorSIGKILL-R1-collect-purge/child_not_joined",
+    "TestNativeBlobUploaderAndCollectorSIGKILL-R1-collect-purge/child_still_present",
+    "TestNativeBlobUploaderAndCollectorSIGKILL-R1-collect-purge/identity_unstable",
+    "TestNativeBlobUploaderAndCollectorSIGKILL-R1-collect-purge/held_packet_forwarded",
+    "TestNativeBlobUploaderAndCollectorSIGKILL-R1-collect-purge/root_fence_reset",
+    "TestNativeBlobUploaderAndCollectorSIGKILL-R1-collect-purge/generation_reset",
+    "TestNativeBlobUploaderAndCollectorSIGKILL-R1-collect-purge/partial_census_wrong",
+    "TestNativeBlobUploaderAndCollectorSIGKILL-R1-collect-purge/chunks_in_final_census",
+    "TestNativeUnknownChunksBlockCollection/unknown_not_blocked",
+    "TestNativeObjectSameStoreColdRestart-R3/chunks_remain",
+    "TestNativeObjectSameStoreColdRestart-R3/direct_reads",
+    "TestNativeObjectSameStoreColdRestart-R3/ttl",
+    "TestNativeObjectSameStoreColdRestart-R3/rollup_disabled",
+    "TestNativeObjectSameStoreColdRestart-R3/reclamation_false",
+    "TestNativeObjectSameStoreColdRestart-R3/same_server_instances",
+    "TestNativeObjectSameStoreColdRestart-R3/head_reset",
+    "TestNativeObjectSameStoreColdRestart-R3/cold_tombstone_missing",
+    "TestNativeObjectSameStoreColdRestart-R1/chunks_remain",
+    "TestNativeObjectSameStoreColdRestart-R1/direct_reads",
+    "TestNativeObjectSameStoreColdRestart-R1/ttl",
+    "TestNativeObjectSameStoreColdRestart-R1/rollup_disabled",
+    "TestNativeObjectSameStoreColdRestart-R1/reclamation_false",
+    "TestNativeObjectSameStoreColdRestart-R1/same_server_instances",
+    "TestNativeObjectSameStoreColdRestart-R1/head_reset",
+    "TestNativeObjectSameStoreColdRestart-R1/cold_tombstone_missing",
+    "TestNativeBlobUploaderAndCollectorSIGKILL-R1-upload-metadata/chunks_remain",
+    "TestNativeBlobUploaderAndCollectorSIGKILL-R1-upload-metadata/direct_reads",
+    "TestNativeBlobUploaderAndCollectorSIGKILL-R1-upload-metadata/ttl",
+    "TestNativeBlobUploaderAndCollectorSIGKILL-R1-upload-metadata/rollup_disabled",
+    "TestNativeBlobUploaderAndCollectorSIGKILL-R1-upload-metadata/reclamation_false",
+    "TestNativeBlobUploaderAndCollectorSIGKILL-R1-upload-metadata/already_forwarded",
+    "TestNativeBlobUploaderAndCollectorSIGKILL-R1-upload-metadata/truncated_wire",
+    "TestNativeBlobUploaderAndCollectorSIGKILL-R1-upload-metadata/wrong_packet_subject",
+    "TestNativeBlobUploaderAndCollectorSIGKILL-R1-upload-metadata/generation_reused",
+    "TestNativeBlobUploaderAndCollectorSIGKILL-R1-upload-metadata/tombstone_absent",
+    "TestNativeBlobUploaderAndCollectorSIGKILL-R1-upload-metadata/wrong_child_binary",
+    "TestNativeBlobUploaderAndCollectorSIGKILL-R1-upload-metadata/not_sigkill",
+    "TestNativeBlobUploaderAndCollectorSIGKILL-R1-upload-metadata/child_not_joined",
+    "TestNativeBlobUploaderAndCollectorSIGKILL-R1-upload-metadata/child_still_present",
+    "TestNativeBlobUploaderAndCollectorSIGKILL-R1-upload-metadata/identity_unstable",
+    "TestNativeBlobUploaderAndCollectorSIGKILL-R1-upload-metadata/held_packet_forwarded",
+    "TestNativeBlobUploaderAndCollectorSIGKILL-R1-upload-metadata/root_fence_reset",
+    "TestNativeBlobUploaderAndCollectorSIGKILL-R1-upload-metadata/generation_reset",
+    "TestNativeBlobUploaderAndCollectorSIGKILL-R1-upload-metadata/partial_census_wrong",
+    "TestNativeBlobUploaderAndCollectorSIGKILL-R1-upload-metadata/chunks_in_final_census",
+    "TestNativeObjectUnsafeConfiguration/unsafe_accepted",
+    "TestNativeObjectUnsafeConfiguration/unsafe_mutation_allowed",
+    "TestNativeCommittedMetadataReplyLost-R1/chunks_remain",
+    "TestNativeCommittedMetadataReplyLost-R1/direct_reads",
+    "TestNativeCommittedMetadataReplyLost-R1/ttl",
+    "TestNativeCommittedMetadataReplyLost-R1/rollup_disabled",
+    "TestNativeCommittedMetadataReplyLost-R1/reclamation_false",
+    "TestNativeCommittedMetadataReplyLost-R1/already_forwarded",
+    "TestNativeCommittedMetadataReplyLost-R1/truncated_wire",
+    "TestNativeCommittedMetadataReplyLost-R1/wrong_packet_subject",
+    "TestNativeCommittedMetadataReplyLost-R1/no_reply_hold",
+    "TestNativeCommittedMetadataReplyLost-R1/ambiguous_upload_adopted",
+    "TestNativeCommittedMetadataReplyLost-R1/root_published",
+    "TestNativeLateChunkAfterGenerationClosed-R3/chunks_remain",
+    "TestNativeLateChunkAfterGenerationClosed-R3/direct_reads",
+    "TestNativeLateChunkAfterGenerationClosed-R3/ttl",
+    "TestNativeLateChunkAfterGenerationClosed-R3/rollup_disabled",
+    "TestNativeLateChunkAfterGenerationClosed-R3/reclamation_false",
+    "TestNativeLateChunkAfterGenerationClosed-R3/already_forwarded",
+    "TestNativeLateChunkAfterGenerationClosed-R3/truncated_wire",
+    "TestNativeLateChunkAfterGenerationClosed-R3/wrong_packet_subject",
+    "TestNativeLateChunkAfterGenerationClosed-R3/generation_reused",
+    "TestNativeLateChunkAfterGenerationClosed-R3/tombstone_absent",
+    "TestNativeObjectPublicationLifecycle-R3/chunks_remain",
+    "TestNativeObjectPublicationLifecycle-R3/direct_reads",
+    "TestNativeObjectPublicationLifecycle-R3/ttl",
+    "TestNativeObjectPublicationLifecycle-R3/rollup_disabled",
+    "TestNativeObjectPublicationLifecycle-R3/reclamation_false",
+    "TestNativeObjectPublicationLifecycle-R1/chunks_remain",
+    "TestNativeObjectPublicationLifecycle-R1/direct_reads",
+    "TestNativeObjectPublicationLifecycle-R1/ttl",
+    "TestNativeObjectPublicationLifecycle-R1/rollup_disabled",
+    "TestNativeObjectPublicationLifecycle-R1/reclamation_false",
+    "TestNativePartialUploadPublicationFence-R3-crash/chunks_remain",
+    "TestNativePartialUploadPublicationFence-R3-crash/direct_reads",
+    "TestNativePartialUploadPublicationFence-R3-crash/ttl",
+    "TestNativePartialUploadPublicationFence-R3-crash/rollup_disabled",
+    "TestNativePartialUploadPublicationFence-R3-crash/reclamation_false",
+    "TestNativePartialUploadPublicationFence-R3-crash/already_forwarded",
+    "TestNativePartialUploadPublicationFence-R3-crash/truncated_wire",
+    "TestNativePartialUploadPublicationFence-R3-crash/wrong_packet_subject",
+    "TestNativePartialUploadPublicationFence-R3-crash/generation_reused",
+    "TestNativePartialUploadPublicationFence-R3-crash/tombstone_absent"
+  ],
+  "complete_archive_verified": {
+    "bytes": 65663385,
+    "sha256": "2345d307ee6dc62b878b038b2e0ebad9d08d4033b25f7b8dbb3f697a6ef2e361"
+  },
+  "reviewed_utc": "2026-10-08T00:21:13.122124+00:00",
+  "scope": "Experimental isolated full blob protocol native port including R1/R3 actual uploader/collector SIGKILL subprocesses at metadata/root/pre-purge boundaries: standard reads/sharing/retirement, R1/R3 partial metadata fences, late chunks/new generation, committed metadata with caller reply loss, all-peer same-store graceful cold restart, unknown chunks and native unsafe configurations. Crash mode is controlled connection loss, not process SIGKILL. INFO/Varz commits bind the embedding application, not separately captured upstream code. Selected source/actual embedded SDK/media/archive binding; external module files not independently captured. No runtime migration/history wiring, privileged permissions, native server process kill/power loss, arbitrary partition/lost-root-response/full124/matrix/release/online-GC/default-adoption qualification."
+}

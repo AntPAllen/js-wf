@@ -1,0 +1,20 @@
+{
+  "build": [
+    "go",
+    "test",
+    "-p=1",
+    "-buildvcs=true",
+    "-race",
+    "-c",
+    "-o",
+    "/tmp/js-wf-native-authority-witness-20261008/blob-race.test",
+    "./internal/blobpublication"
+  ],
+  "run": [
+    "/tmp/js-wf-native-authority-witness-20261008/blob-race.test",
+    "-test.run=.",
+    "-test.v",
+    "-test.count=1",
+    "-test.timeout=3m"
+  ]
+}

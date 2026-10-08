@@ -1,0 +1,155 @@
+{
+  "absence_physical_sequence": 6,
+  "canceled_before_get": true,
+  "cases": [
+    {
+      "after_sequence": 3,
+      "before_sequence": 2,
+      "expected_root": {
+        "Head": 2,
+        "Token": "new",
+        "Blobs": null,
+        "Data": "bmV3"
+      },
+      "mode": "stale-value",
+      "rejected": false,
+      "returned_root": {
+        "Head": 2,
+        "Token": "new",
+        "Blobs": null,
+        "Data": "bmV3"
+      },
+      "snapshot_reads": 2
+    },
+    {
+      "after_sequence": 4,
+      "before_sequence": 3,
+      "expected_root": {
+        "Head": 2,
+        "Token": "new",
+        "Blobs": null,
+        "Data": "bmV3"
+      },
+      "mode": "stale-absence",
+      "rejected": false,
+      "returned_root": {
+        "Head": 2,
+        "Token": "new",
+        "Blobs": null,
+        "Data": "bmV3"
+      },
+      "snapshot_reads": 2
+    },
+    {
+      "after_sequence": 5,
+      "before_sequence": 4,
+      "expected_root": {
+        "Head": 2,
+        "Token": "new",
+        "Blobs": null,
+        "Data": "bmV3"
+      },
+      "mode": "future-value",
+      "rejected": false,
+      "returned_root": {
+        "Head": 2,
+        "Token": "new",
+        "Blobs": null,
+        "Data": "bmV3"
+      },
+      "snapshot_reads": 2
+    },
+    {
+      "after_sequence": 5,
+      "before_sequence": 5,
+      "expected_root": {
+        "Head": 2,
+        "Token": "new",
+        "Blobs": null,
+        "Data": "bmV3"
+      },
+      "mode": "persistent-stale",
+      "rejected": true,
+      "returned_root": {
+        "Head": 0,
+        "Token": "",
+        "Blobs": null,
+        "Data": null
+      },
+      "snapshot_reads": 16
+    },
+    {
+      "expected_blob": {
+        "Revision": 2,
+        "Fence": {
+          "Generation": 1,
+          "Phase": "closed",
+          "Object": "",
+          "Intents": null
+        }
+      },
+      "mode": "blob-missing-false",
+      "returned_blob": {
+        "Revision": 2,
+        "Fence": {
+          "Generation": 1,
+          "Phase": "closed",
+          "Object": "",
+          "Intents": null
+        }
+      },
+      "snapshot_reads": 2
+    },
+    {
+      "expected_blob": {
+        "Revision": 2,
+        "Fence": {
+          "Generation": 1,
+          "Phase": "closed",
+          "Object": "",
+          "Intents": null
+        }
+      },
+      "mode": "blob-missing-true",
+      "returned_blob": {
+        "Revision": 2,
+        "Fence": {
+          "Generation": 1,
+          "Phase": "closed",
+          "Object": "",
+          "Intents": null
+        }
+      },
+      "snapshot_reads": 2
+    },
+    {
+      "envelope": {
+        "schema": "js-wf-blob-authority-v2",
+        "kind": "root",
+        "identity": "legacy-root",
+        "revision": 7,
+        "root": {
+          "Head": 7,
+          "Token": "legacy",
+          "Blobs": null,
+          "Data": "cmV0YWluZWQtdjE="
+        }
+      },
+      "mode": "legacy-v1-upgrade",
+      "physical_sequence": 13,
+      "root": {
+        "Head": 7,
+        "Token": "legacy",
+        "Blobs": null,
+        "Data": "cmV0YWluZWQtdjE="
+      }
+    }
+  ],
+  "first_logical_head": 1,
+  "logical_root_head_unchanged": 2,
+  "lost_acknowledgments": 1,
+  "lost_response_rejected": true,
+  "parent_budget_seconds": 30,
+  "replicas": 3,
+  "scenario": "authority-read-witness"
+}

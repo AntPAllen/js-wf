@@ -1,0 +1,33 @@
+{
+  "pid": 2753038,
+  "stat": "2753038 (journal-race.te) S 2750523 2750522 2750522 0 -1 4194304 6255 0 0 0 2 0 0 0 20 0 5 0 23234499 1963933696 11132 18446744073709551615 4194304 23892944 140725410432752 0 0 0 0 0 2143420159 0 0 0 17 1 0 0 0 0 0 36646912 37136384 671277056 140725410439641 140725410439773 140725410439773 140725410443193 0\n",
+  "start_ticks": "23234499",
+  "args": [
+    "/tmp/js-wf-native-authority-witness-20261008/journal-race.test",
+    "-test.run=Snapshot|Checkpoint",
+    "-test.v",
+    "-test.count=1",
+    "-test.timeout=3m"
+  ],
+  "exe": "/tmp/js-wf-native-authority-witness-20261008/journal-race.test",
+  "working_directory": "/home/exedev/js-wf",
+  "environment": {
+    "GOMAXPROCS": "2",
+    "GOMEMLIMIT": "512MiB",
+    "WF_NATIVE_SNAPSHOT_ROOT": "/tmp/js-wf-native-authority-witness-20261008/snapshot-stores",
+    "WF_BLOB_AUTHORITY_ROOT": "/tmp/js-wf-native-authority-witness-20261008/blob-stores"
+  },
+  "exe_sha256": "e2c51ed07df2123cc9adf3852ef87dd2195ca139199e3a56044e5b0944a491aa",
+  "admission": {
+    "observations": 2,
+    "rejected_observations": 1,
+    "first_missing_environment_keys": [
+      "GOMAXPROCS",
+      "GOMEMLIMIT",
+      "WF_BLOB_AUTHORITY_ROOT",
+      "WF_NATIVE_SNAPSHOT_ROOT"
+    ],
+    "stable_identity_observed_twice": true,
+    "scope": "Actual live process identity before/after executable digest; incomplete reads repeated without killing or relaunching."
+  }
+}

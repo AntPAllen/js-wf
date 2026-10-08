@@ -1,0 +1,444 @@
+{
+  "all_records_replayed": 4,
+  "existing_canonical_root_not_replaced": true,
+  "legacy_objects_deleted": true,
+  "native_boundary": {
+    "fences": {
+      "49d6abc0d37ed644f8ff0f487feb23d808c3bc0339a57c2a1fd029a7e1858025": {
+        "Revision": 2,
+        "Fence": {
+          "Generation": 1,
+          "Phase": "ready",
+          "Object": "49d6abc0d37ed644f8ff0f487feb23d808c3bc0339a57c2a1fd029a7e1858025/1/d1f1ba0bfd80858ac6baa67a73d0a214",
+          "Intents": {
+            "eaa8c027c6dc7266749e83b99b581dd9": {
+              "Root": "snapshot.snap.test.atomic",
+              "Expected": 0,
+              "Expires": "2026-10-08T00:18:17.1097661Z"
+            }
+          }
+        }
+      },
+      "513346d27a4fc4368ec0d893a4c0e29a5493375778abea9e4630a44dc1b05ac9": {
+        "Revision": 2,
+        "Fence": {
+          "Generation": 1,
+          "Phase": "ready",
+          "Object": "513346d27a4fc4368ec0d893a4c0e29a5493375778abea9e4630a44dc1b05ac9/1/a2dadc43af4fe39451ba8fecab266d3e",
+          "Intents": {
+            "eaa8c027c6dc7266749e83b99b581dd9": {
+              "Root": "snapshot.snap.test.atomic",
+              "Expected": 0,
+              "Expires": "2026-10-08T00:18:17.1097661Z"
+            }
+          }
+        }
+      }
+    },
+    "objects": [
+      {
+        "Key": "49d6abc0d37ed644f8ff0f487feb23d808c3bc0339a57c2a1fd029a7e1858025",
+        "Reference": {
+          "Generation": 1,
+          "Object": "49d6abc0d37ed644f8ff0f487feb23d808c3bc0339a57c2a1fd029a7e1858025/1/d1f1ba0bfd80858ac6baa67a73d0a214"
+        }
+      },
+      {
+        "Key": "513346d27a4fc4368ec0d893a4c0e29a5493375778abea9e4630a44dc1b05ac9",
+        "Reference": {
+          "Generation": 1,
+          "Object": "513346d27a4fc4368ec0d893a4c0e29a5493375778abea9e4630a44dc1b05ac9/1/a2dadc43af4fe39451ba8fecab266d3e"
+        }
+      }
+    ],
+    "root": {
+      "Head": 1,
+      "Token": "eaa8c027c6dc7266749e83b99b581dd9",
+      "Blobs": {
+        "49d6abc0d37ed644f8ff0f487feb23d808c3bc0339a57c2a1fd029a7e1858025": {
+          "Generation": 1,
+          "Object": "49d6abc0d37ed644f8ff0f487feb23d808c3bc0339a57c2a1fd029a7e1858025/1/d1f1ba0bfd80858ac6baa67a73d0a214"
+        },
+        "513346d27a4fc4368ec0d893a4c0e29a5493375778abea9e4630a44dc1b05ac9": {
+          "Generation": 1,
+          "Object": "513346d27a4fc4368ec0d893a4c0e29a5493375778abea9e4630a44dc1b05ac9/1/a2dadc43af4fe39451ba8fecab266d3e"
+        }
+      },
+      "Data": "eyJzY2hlbWEiOiJqcy13Zi1uYXRpdmUtc25hcHNob3QtdjEiLCJrZXkiOiJzbmFwLnRlc3QuYXRvbWljIiwibWFuaWZlc3QiOnsidmVyc2lvbiI6MSwibGFzdF9zZXEiOjMsImxhc3RfaW5kZXgiOjIsImVwb2NoIjoxLCJvYmplY3QiOiJzbmFwc2hvdC1kODllMGJiZTM0YTU1YjFkLTMtNTEzMzQ2ZDI3YTRmYzQzNiIsInNoYTI1NiI6IjUxMzM0NmQyN2E0ZmM0MzY4ZWMwZDg5M2E0YzBlMjlhNTQ5MzM3NTc3OGFiZWE5ZTQ2MzBhNDRkYzFiMDVhYzkifSwib2JqZWN0cyI6eyJzbmFwc2hvdC1kODllMGJiZTM0YTU1YjFkLTMtNTEzMzQ2ZDI3YTRmYzQzNiI6IjUxMzM0NmQyN2E0ZmM0MzY4ZWMwZDg5M2E0YzBlMjlhNTQ5MzM3NTc3OGFiZWE5ZTQ2MzBhNDRkYzFiMDVhYzkiLCJzdGVwLXJlc3VsdC00OWQ2YWJjMGQzN2VkNjQ0ZjhmZjBmNDg3ZmViMjNkODA4YzNiYzAzMzlhNTdjMmExZmQwMjlhN2UxODU4MDI1IjoiNDlkNmFiYzBkMzdlZDY0NGY4ZmYwZjQ4N2ZlYjIzZDgwOGMzYmMwMzM5YTU3YzJhMWZkMDI5YTdlMTg1ODAyNSJ9fQ=="
+    },
+    "streams": {
+      "OBJ_SNAP_BLOB": {
+        "config": {
+          "name": "OBJ_SNAP_BLOB",
+          "subjects": [
+            "$O.SNAP_BLOB.C.\u003e",
+            "$O.SNAP_BLOB.M.\u003e"
+          ],
+          "retention": "limits",
+          "max_consumers": -1,
+          "max_msgs": -1,
+          "max_bytes": -1,
+          "discard": "old",
+          "max_age": 0,
+          "max_msgs_per_subject": -1,
+          "max_msg_size": -1,
+          "storage": "file",
+          "num_replicas": 3,
+          "duplicate_window": 120000000000,
+          "deny_delete": true,
+          "allow_rollup_hdrs": true,
+          "compression": "none",
+          "allow_direct": false,
+          "mirror_direct": false,
+          "consumer_limits": {},
+          "metadata": {
+            "_nats.level": "5",
+            "_nats.req.level": "0",
+            "_nats.ver": "2.15.0",
+            "js-wf-blob-format": "recoverable-v1"
+          }
+        },
+        "created": "2026-10-08T00:17:16.858751812Z",
+        "state": {
+          "messages": 4,
+          "bytes": 2265,
+          "first_seq": 1,
+          "first_ts": "2026-10-08T00:17:17.139740899Z",
+          "last_seq": 4,
+          "last_ts": "2026-10-08T00:17:17.175990933Z",
+          "consumer_count": 0,
+          "deleted": null,
+          "num_deleted": 0,
+          "num_subjects": 4,
+          "subjects": {
+            "$O.SNAP_BLOB.C.NDlkNmFiYzBkMzdlZDY0NGY4ZmYwZjQ4N2ZlYjIzZDgwOGMzYmMwMzM5YTU3YzJhMWZkMDI5YTdlMTg1ODAyNS8xL2QxZjFiYTBiZmQ4MDg1OGFjNmJhYTY3YTczZDBhMjE0": 1,
+            "$O.SNAP_BLOB.C.NTEzMzQ2ZDI3YTRmYzQzNjhlYzBkODkzYTRjMGUyOWE1NDkzMzc1Nzc4YWJlYTllNDYzMGE0NGRjMWIwNWFjOS8xL2EyZGFkYzQzYWY0ZmUzOTQ1MWJhOGZlY2FiMjY2ZDNl": 1,
+            "$O.SNAP_BLOB.M.NDlkNmFiYzBkMzdlZDY0NGY4ZmYwZjQ4N2ZlYjIzZDgwOGMzYmMwMzM5YTU3YzJhMWZkMDI5YTdlMTg1ODAyNS8xL2QxZjFiYTBiZmQ4MDg1OGFjNmJhYTY3YTczZDBhMjE0": 1,
+            "$O.SNAP_BLOB.M.NTEzMzQ2ZDI3YTRmYzQzNjhlYzBkODkzYTRjMGUyOWE1NDkzMzc1Nzc4YWJlYTllNDYzMGE0NGRjMWIwNWFjOS8xL2EyZGFkYzQzYWY0ZmUzOTQ1MWJhOGZlY2FiMjY2ZDNl": 1
+          }
+        },
+        "cluster": {
+          "name": "wf-test",
+          "raft_group": "S-R3F-oUWRmGuu",
+          "leader": "wf-test-0",
+          "leader_since": "2026-10-08T00:17:16.988299289Z",
+          "system_account": true,
+          "traffic_account": "$SYS",
+          "replicas": [
+            {
+              "name": "wf-test-1",
+              "current": true,
+              "active": 188844064,
+              "peer": "OFrOUlB0"
+            },
+            {
+              "name": "wf-test-2",
+              "current": true,
+              "active": 188732074,
+              "peer": "80zpbVEM"
+            }
+          ]
+        },
+        "ts": "2026-10-08T00:17:17.365348597Z"
+      },
+      "OBJ_WF_BLOB": {
+        "config": {
+          "name": "OBJ_WF_BLOB",
+          "subjects": [
+            "$O.WF_BLOB.C.\u003e",
+            "$O.WF_BLOB.M.\u003e"
+          ],
+          "retention": "limits",
+          "max_consumers": -1,
+          "max_msgs": -1,
+          "max_bytes": -1,
+          "discard": "new",
+          "max_age": 0,
+          "max_msgs_per_subject": -1,
+          "max_msg_size": -1,
+          "storage": "file",
+          "num_replicas": 3,
+          "duplicate_window": 120000000000,
+          "allow_rollup_hdrs": true,
+          "compression": "none",
+          "allow_direct": true,
+          "mirror_direct": false,
+          "consumer_limits": {},
+          "metadata": {
+            "_nats.level": "5",
+            "_nats.req.level": "0",
+            "_nats.ver": "2.15.0"
+          }
+        },
+        "created": "2026-10-08T00:17:16.668458847Z",
+        "state": {
+          "messages": 2,
+          "bytes": 766,
+          "first_seq": 5,
+          "first_ts": "2026-10-08T00:17:17.263611121Z",
+          "last_seq": 6,
+          "last_ts": "2026-10-08T00:17:17.268278662Z",
+          "consumer_count": 0,
+          "deleted": null,
+          "num_deleted": 0,
+          "num_subjects": 2,
+          "subjects": {
+            "$O.WF_BLOB.M.c25hcHNob3QtZDg5ZTBiYmUzNGE1NWIxZC0zLTUxMzM0NmQyN2E0ZmM0MzY=": 1,
+            "$O.WF_BLOB.M.c3RlcC1yZXN1bHQtNDlkNmFiYzBkMzdlZDY0NGY4ZmYwZjQ4N2ZlYjIzZDgwOGMzYmMwMzM5YTU3YzJhMWZkMDI5YTdlMTg1ODAyNQ==": 1
+          }
+        },
+        "cluster": {
+          "name": "wf-test",
+          "raft_group": "S-R3F-NnPaJ0TR",
+          "leader": "wf-test-0",
+          "leader_since": "2026-10-08T00:17:16.765261656Z",
+          "system_account": true,
+          "traffic_account": "$SYS",
+          "replicas": [
+            {
+              "name": "wf-test-1",
+              "current": true,
+              "active": 103046986,
+              "peer": "OFrOUlB0"
+            },
+            {
+              "name": "wf-test-2",
+              "current": true,
+              "active": 103019053,
+              "peer": "80zpbVEM"
+            }
+          ]
+        },
+        "ts": "2026-10-08T00:17:17.373113174Z"
+      },
+      "SNAP_AUTH": {
+        "config": {
+          "name": "SNAP_AUTH",
+          "subjects": [
+            "wf.snapshot.authority.\u003e"
+          ],
+          "retention": "limits",
+          "max_consumers": -1,
+          "max_msgs": -1,
+          "max_bytes": -1,
+          "discard": "old",
+          "max_age": 0,
+          "max_msgs_per_subject": 1,
+          "max_msg_size": -1,
+          "storage": "file",
+          "num_replicas": 3,
+          "duplicate_window": 120000000000,
+          "deny_delete": true,
+          "deny_purge": true,
+          "compression": "none",
+          "allow_direct": false,
+          "mirror_direct": false,
+          "consumer_limits": {},
+          "metadata": {
+            "_nats.level": "5",
+            "_nats.req.level": "0",
+            "_nats.ver": "2.15.0"
+          }
+        },
+        "created": "2026-10-08T00:17:16.769727691Z",
+        "state": {
+          "messages": 3,
+          "bytes": 2767,
+          "first_seq": 28,
+          "first_ts": "2026-10-08T00:17:17.343018572Z",
+          "last_seq": 30,
+          "last_ts": "2026-10-08T00:17:17.356496078Z",
+          "consumer_count": 0,
+          "deleted": null,
+          "num_deleted": 0,
+          "num_subjects": 3,
+          "subjects": {
+            "wf.snapshot.authority.blob.49d6abc0d37ed644f8ff0f487feb23d808c3bc0339a57c2a1fd029a7e1858025": 1,
+            "wf.snapshot.authority.blob.513346d27a4fc4368ec0d893a4c0e29a5493375778abea9e4630a44dc1b05ac9": 1,
+            "wf.snapshot.authority.root.fe554b17afcf08b15690204aa634746193ee75f3b9d6cd2d0caa551f3265d828": 1
+          }
+        },
+        "cluster": {
+          "name": "wf-test",
+          "raft_group": "S-R3F-KWOrToKG",
+          "leader": "wf-test-2",
+          "leader_since": "2026-10-08T00:17:16.855284915Z",
+          "system_account": true,
+          "traffic_account": "$SYS",
+          "replicas": [
+            {
+              "name": "wf-test-0",
+              "current": true,
+              "active": 5919463,
+              "peer": "fPPVT2kZ"
+            },
+            {
+              "name": "wf-test-1",
+              "current": true,
+              "active": 5802425,
+              "peer": "OFrOUlB0"
+            }
+          ]
+        },
+        "ts": "2026-10-08T00:17:17.363203138Z"
+      },
+      "WF_JRN": {
+        "config": {
+          "name": "WF_JRN",
+          "subjects": [
+            "wf.jrn.*.*"
+          ],
+          "retention": "limits",
+          "max_consumers": -1,
+          "max_msgs": -1,
+          "max_bytes": -1,
+          "discard": "new",
+          "max_age": 0,
+          "max_msgs_per_subject": -1,
+          "max_msg_size": -1,
+          "storage": "file",
+          "num_replicas": 3,
+          "duplicate_window": 120000000000,
+          "compression": "none",
+          "allow_direct": false,
+          "mirror_direct": false,
+          "consumer_limits": {},
+          "metadata": {
+            "_nats.level": "5",
+            "_nats.req.level": "0",
+            "_nats.ver": "2.15.0"
+          }
+        },
+        "created": "2026-10-08T00:17:15.886362185Z",
+        "state": {
+          "messages": 1,
+          "bytes": 144,
+          "first_seq": 4,
+          "first_ts": "2026-10-08T00:17:17.033600985Z",
+          "last_seq": 4,
+          "last_ts": "2026-10-08T00:17:17.033600985Z",
+          "consumer_count": 0,
+          "deleted": null,
+          "num_deleted": 0,
+          "num_subjects": 1,
+          "subjects": {
+            "wf.jrn.test.atomic": 1
+          }
+        },
+        "cluster": {
+          "name": "wf-test",
+          "raft_group": "S-R3F-6YcGNyZj",
+          "leader": "wf-test-1",
+          "leader_since": "2026-10-08T00:17:15.970540945Z",
+          "system_account": true,
+          "traffic_account": "$SYS",
+          "replicas": [
+            {
+              "name": "wf-test-0",
+              "current": true,
+              "active": 303884091,
+              "peer": "fPPVT2kZ"
+            },
+            {
+              "name": "wf-test-2",
+              "current": true,
+              "active": 303927677,
+              "peer": "80zpbVEM"
+            }
+          ]
+        },
+        "ts": "2026-10-08T00:17:17.368104334Z"
+      },
+      "WF_SIG": {
+        "config": {
+          "name": "WF_SIG",
+          "subjects": [
+            "wf.sig.*.*.*"
+          ],
+          "retention": "limits",
+          "max_consumers": -1,
+          "max_msgs": -1,
+          "max_bytes": -1,
+          "discard": "new",
+          "max_age": 0,
+          "max_msgs_per_subject": -1,
+          "max_msg_size": -1,
+          "storage": "file",
+          "num_replicas": 3,
+          "duplicate_window": 120000000000,
+          "compression": "none",
+          "allow_direct": false,
+          "mirror_direct": false,
+          "consumer_limits": {},
+          "metadata": {
+            "_nats.level": "5",
+            "_nats.req.level": "0",
+            "_nats.ver": "2.15.0"
+          }
+        },
+        "created": "2026-10-08T00:17:15.981474476Z",
+        "state": {
+          "messages": 0,
+          "bytes": 0,
+          "first_seq": 0,
+          "first_ts": "0001-01-01T00:00:00Z",
+          "last_seq": 0,
+          "last_ts": "0001-01-01T00:00:00Z",
+          "consumer_count": 0,
+          "deleted": null,
+          "num_deleted": 0,
+          "num_subjects": 0,
+          "subjects": {}
+        },
+        "cluster": {
+          "name": "wf-test",
+          "raft_group": "S-R3F-7i8dgo9m",
+          "leader": "wf-test-2",
+          "leader_since": "2026-10-08T00:17:16.098851293Z",
+          "system_account": true,
+          "traffic_account": "$SYS",
+          "replicas": [
+            {
+              "name": "wf-test-0",
+              "current": true,
+              "active": 271409663,
+              "peer": "fPPVT2kZ"
+            },
+            {
+              "name": "wf-test-1",
+              "current": true,
+              "active": 271384094,
+              "peer": "OFrOUlB0"
+            }
+          ]
+        },
+        "ts": "2026-10-08T00:17:17.370796204Z"
+      }
+    }
+  },
+  "replicas": 3,
+  "root": {
+    "Head": 1,
+    "Token": "eaa8c027c6dc7266749e83b99b581dd9",
+    "Blobs": {
+      "49d6abc0d37ed644f8ff0f487feb23d808c3bc0339a57c2a1fd029a7e1858025": {
+        "Generation": 1,
+        "Object": "49d6abc0d37ed644f8ff0f487feb23d808c3bc0339a57c2a1fd029a7e1858025/1/d1f1ba0bfd80858ac6baa67a73d0a214"
+      },
+      "513346d27a4fc4368ec0d893a4c0e29a5493375778abea9e4630a44dc1b05ac9": {
+        "Generation": 1,
+        "Object": "513346d27a4fc4368ec0d893a4c0e29a5493375778abea9e4630a44dc1b05ac9/1/a2dadc43af4fe39451ba8fecab266d3e"
+      }
+    },
+    "Data": "eyJzY2hlbWEiOiJqcy13Zi1uYXRpdmUtc25hcHNob3QtdjEiLCJrZXkiOiJzbmFwLnRlc3QuYXRvbWljIiwibWFuaWZlc3QiOnsidmVyc2lvbiI6MSwibGFzdF9zZXEiOjMsImxhc3RfaW5kZXgiOjIsImVwb2NoIjoxLCJvYmplY3QiOiJzbmFwc2hvdC1kODllMGJiZTM0YTU1YjFkLTMtNTEzMzQ2ZDI3YTRmYzQzNiIsInNoYTI1NiI6IjUxMzM0NmQyN2E0ZmM0MzY4ZWMwZDg5M2E0YzBlMjlhNTQ5MzM3NTc3OGFiZWE5ZTQ2MzBhNDRkYzFiMDVhYzkifSwib2JqZWN0cyI6eyJzbmFwc2hvdC1kODllMGJiZTM0YTU1YjFkLTMtNTEzMzQ2ZDI3YTRmYzQzNiI6IjUxMzM0NmQyN2E0ZmM0MzY4ZWMwZDg5M2E0YzBlMjlhNTQ5MzM3NTc3OGFiZWE5ZTQ2MzBhNDRkYzFiMDVhYzkiLCJzdGVwLXJlc3VsdC00OWQ2YWJjMGQzN2VkNjQ0ZjhmZjBmNDg3ZmViMjNkODA4YzNiYzAzMzlhNTdjMmExZmQwMjlhN2UxODU4MDI1IjoiNDlkNmFiYzBkMzdlZDY0NGY4ZmYwZjQ4N2ZlYjIzZDgwOGMzYmMwMzM5YTU3YzJhMWZkMDI5YTdlMTg1ODAyNSJ9fQ=="
+  },
+  "scenario": "legacy-import",
+  "snapshot": {
+    "version": 1,
+    "last_seq": 3,
+    "last_index": 2,
+    "epoch": 1,
+    "object": "snapshot-d89e0bbe34a55b1d-3-513346d27a4fc436",
+    "sha256": "513346d27a4fc4368ec0d893a4c0e29a5493375778abea9e4630a44dc1b05ac9"
+  }
+}
