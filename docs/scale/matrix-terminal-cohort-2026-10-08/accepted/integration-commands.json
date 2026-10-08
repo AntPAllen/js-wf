@@ -1,0 +1,20 @@
+{
+  "build": [
+    "go",
+    "test",
+    "-p=1",
+    "-buildvcs=true",
+    "-race",
+    "-c",
+    "-o",
+    "/tmp/js-wf-matrix-terminal-cohort-20261008/integration-race.test",
+    "./integration"
+  ],
+  "run": [
+    "/tmp/js-wf-matrix-terminal-cohort-20261008/integration-race.test",
+    "-test.run=^(TestMatrixTerminalCohort.*|TestNativeMatrixTerminalCapturedPopulation|TestMatrixRetainedAudit.*)$",
+    "-test.v",
+    "-test.count=1",
+    "-test.timeout=3m"
+  ]
+}
