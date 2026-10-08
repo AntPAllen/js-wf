@@ -1,0 +1,99 @@
+=== RUN   TestAppendGraphMembershipSeededCensusAndForks
+=== RUN   TestAppendGraphMembershipSeededCensusAndForks/1
+=== RUN   TestAppendGraphMembershipSeededCensusAndForks/2
+=== RUN   TestAppendGraphMembershipSeededCensusAndForks/3
+=== RUN   TestAppendGraphMembershipSeededCensusAndForks/4
+=== RUN   TestAppendGraphMembershipSeededCensusAndForks/5
+=== RUN   TestAppendGraphMembershipSeededCensusAndForks/6
+=== RUN   TestAppendGraphMembershipSeededCensusAndForks/7
+=== RUN   TestAppendGraphMembershipSeededCensusAndForks/8
+=== RUN   TestAppendGraphMembershipSeededCensusAndForks/9
+=== RUN   TestAppendGraphMembershipSeededCensusAndForks/10
+=== RUN   TestAppendGraphMembershipSeededCensusAndForks/11
+=== RUN   TestAppendGraphMembershipSeededCensusAndForks/12
+=== RUN   TestAppendGraphMembershipSeededCensusAndForks/13
+=== RUN   TestAppendGraphMembershipSeededCensusAndForks/14
+=== RUN   TestAppendGraphMembershipSeededCensusAndForks/15
+=== RUN   TestAppendGraphMembershipSeededCensusAndForks/16
+=== RUN   TestAppendGraphMembershipSeededCensusAndForks/17
+=== RUN   TestAppendGraphMembershipSeededCensusAndForks/18
+=== RUN   TestAppendGraphMembershipSeededCensusAndForks/19
+=== RUN   TestAppendGraphMembershipSeededCensusAndForks/20
+=== RUN   TestAppendGraphMembershipSeededCensusAndForks/21
+=== RUN   TestAppendGraphMembershipSeededCensusAndForks/22
+=== RUN   TestAppendGraphMembershipSeededCensusAndForks/23
+=== RUN   TestAppendGraphMembershipSeededCensusAndForks/24
+=== RUN   TestAppendGraphMembershipSeededCensusAndForks/25
+=== RUN   TestAppendGraphMembershipSeededCensusAndForks/26
+=== RUN   TestAppendGraphMembershipSeededCensusAndForks/27
+=== RUN   TestAppendGraphMembershipSeededCensusAndForks/28
+=== RUN   TestAppendGraphMembershipSeededCensusAndForks/29
+=== RUN   TestAppendGraphMembershipSeededCensusAndForks/30
+=== RUN   TestAppendGraphMembershipSeededCensusAndForks/31
+=== RUN   TestAppendGraphMembershipSeededCensusAndForks/32
+panic: test timed out after 2m0s
+	running tests:
+		TestAppendGraphMembershipSeededCensusAndForks (2m0s)
+		TestAppendGraphMembershipSeededCensusAndForks/32 (3s)
+
+goroutine 56 [running]:
+testing.(*M).startAlarm.func1()
+	/usr/local/go/src/testing/testing.go:2959 +0x605
+created by time.goFunc
+	/usr/local/go/src/time/sleep.go:182 +0x45
+
+goroutine 1 [chan receive, 1 minutes]:
+testing.(*T).Run(0xc0000fa6c8, {0x86b4d7, 0x2d}, 0xb651f8)
+	/usr/local/go/src/testing/testing.go:2266 +0xb3e
+testing.runTests.func1(0xc0000fa6c8)
+	/usr/local/go/src/testing/testing.go:2742 +0x85
+testing.tRunner(0xc0000fa6c8, 0xc0000dda40)
+	/usr/local/go/src/testing/testing.go:2193 +0x21d
+testing.runTests({0x85b540, 0x5}, {0x8644e2, 0x1c}, 0xc0000ac378, {0xbbfb48, 0x9, 0x9}, {0xc2a9ddbd14734414, 0x1bf0ae5a0d, ...})
+	/usr/local/go/src/testing/testing.go:2740 +0x9ea
+testing.(*M).Run(0xc00011cfa0)
+	/usr/local/go/src/testing/testing.go:2600 +0xf45
+main.main()
+	_testmain.go:62 +0x165
+
+goroutine 23 [chan receive]:
+testing.(*T).Run(0xc0000fa908, {0x87070b, 0x2}, 0xc0000f9c80)
+	/usr/local/go/src/testing/testing.go:2266 +0xb3e
+js-wf/internal/retainedgraph.TestAppendGraphMembershipSeededCensusAndForks(0xc0000fa908)
+	/home/exedev/js-wf/internal/retainedgraph/membership_test.go:56 +0x6e
+testing.tRunner(0xc0000fa908, 0xb651f8)
+	/usr/local/go/src/testing/testing.go:2193 +0x21d
+created by testing.(*T).Run in goroutine 1
+	/usr/local/go/src/testing/testing.go:2258 +0xb13
+
+goroutine 55 [runnable]:
+encoding/json/internal/jsonwire.AppendQuote({0xc000390700, 0x55, 0x80}, {0xc00039a980, 0x40, 0x40}, 0xc0003b60c8)
+	/usr/local/go/src/encoding/json/internal/jsonwire/encode.go:104 +0x9b1
+encoding/json/v2.makeStringArshaler.func1(0xc0003b6000, {{0xb236c0?, 0xc0002ff680?, 0x0?}, 0xe0?}, 0xc0003b60c8)
+	/usr/local/go/src/encoding/json/v2/arshal_default.go:231 +0x327
+encoding/json/v2.makeStructArshaler.func2(0xc0003b6000, {{0xb38018?, 0xc0002ff680?, 0x0?}, 0x34?}, 0xc0003b60c8)
+	/usr/local/go/src/encoding/json/v2/arshal_default.go:1228 +0x12e3
+encoding/json/v2.makeSliceArshaler.func2(0xc0003b6000, {{0xafeca0?, 0xc00031aea0?, 0x3?}, 0x40?}, 0xc0003b60c8)
+	/usr/local/go/src/encoding/json/v2/arshal_default.go:1528 +0xd68
+encoding/json/v2.makeStructArshaler.func2(0xc0003b6000, {{0xb50688?, 0xc00031ae80?, 0x0?}, 0x0?}, 0xc0003b60c8)
+	/usr/local/go/src/encoding/json/v2/arshal_default.go:1228 +0x12e3
+encoding/json/v2.marshalEncode(0xc0003b6000, {0xaef0b0, 0xc00031ae80}, 0xc0003b60c8)
+	/usr/local/go/src/encoding/json/v2/arshal.go:248 +0x306
+encoding/json/v2.Marshal({0xaef0b0, 0xc00031ae80}, {0xc00002d340, 0x1, 0x1})
+	/usr/local/go/src/encoding/json/v2/arshal.go:168 +0x212
+encoding/json.Marshal(...)
+	/usr/local/go/src/encoding/json/v2_encode.go:186
+js-wf/internal/retainedgraph.decode({0xc0003934a0, 0x1d0, 0x1e0}, 0x30000, {0xaef0b0, 0xc00031ae80})
+	/home/exedev/js-wf/internal/retainedgraph/graph.go:125 +0x21e
+js-wf/internal/retainedgraph.load({0xb64508, 0xbe8940}, {0xb63b00, 0xc0002e6730}, {0x60, 0x4, {{0xc00039a700, 0x40}, {0x1, {0xc000375590, ...}}}})
+	/home/exedev/js-wf/internal/retainedgraph/graph.go:193 +0x2aa
+js-wf/internal/retainedgraph.FindTree({0xb64508, 0xbe8940}, {0xb63b00, 0xc0002e6730}, {{0x86533d, 0x1e}, 0x80, {0xc000108000, 0x1, 0x7}}, ...)
+	/home/exedev/js-wf/internal/retainedgraph/membership.go:31 +0x628
+js-wf/internal/retainedgraph.TestAppendGraphMembershipSeededCensusAndForks.func1(0xc0000fad88)
+	/home/exedev/js-wf/internal/retainedgraph/membership_test.go:93 +0x148b
+testing.tRunner(0xc0000fad88, 0xc0000f9c80)
+	/usr/local/go/src/testing/testing.go:2193 +0x21d
+created by testing.(*T).Run in goroutine 23
+	/usr/local/go/src/testing/testing.go:2258 +0xb13
+FAIL	js-wf/internal/retainedgraph	120.019s
+FAIL
