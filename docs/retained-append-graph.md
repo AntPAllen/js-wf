@@ -20,6 +20,12 @@ These are snapshot queries, not durable ownership grants, publication decisions 
 
 The caller still must obtain base from its canonical destination/head, acquire/register durable intents before uploads, verify all delta receipts against those intents, and handle uncertain publication replies. An arbitrary base or structural success confers no ownership. This helper does not independently audit unchanged inherited bytes. [Seeded delta/census and hostile-inheritance controls](scale/retained-graph-extension-2026-10-08/) cover this structural contract.
 
+## Experimental publication coordinator
+
+`internal/graphpublication` now prototypes intent-before-upload, inheritance/grant validation, original-head publication CAS and graph-aware collection over a typed linearizable Port. Collection protects earlier receipts across later appends, fences expired pending publishers, retains closed generation records and uses immutable physical names to isolate delayed deletion. Each publication/content pair has its own permanent authority scope and at most one bounded grant, capped at32KiB; repeated content does not grow a global intent map. Fresh payloads are staged per publication. This does not yet provide owned-payload reuse or reader/retention pins.
+
+[Seeded model and interleaving evidence](scale/graph-publication-2026-10-08/) covers an isolated deterministic memory Port. The shared fault/replay transport integration, native quorum-witnessed authority/object adapter, schema/namespace rollout, migration and canonical runtime adoption are still required. The existing direct-reference collector cannot enumerate this protocol's objects. Production collection remains quiescent.
+
 ## Adoption requirements
 
 The package does not publish authority roots, change workflow storage, supply a native Store, or enable online collection. Its returned roots and competing forks are pending publication plans. A root supplied to Append must come from the caller's canonical authority; unchanged subtrees are not rescanned on every append. This is necessary for bounded append work and is not a complete audit of inherited storage.
