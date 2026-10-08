@@ -1,5 +1,9 @@
 # JetStream Durable Workflow Runtime — Implementation Plan
 
+## Complete normal 148-family suite accepted — 2026-10-08
+
+At isolated frozen `7ee9882`, the complete normal default suite passes 209 groups, all 148 families × 1,000 contiguous seed bodies and all 748 pins in 967.855 s. Executed independent review verifies 3,046 selected inputs against Git and unchanged before/after, exact coverage and retained binary/event integrity. [Complete normal evidence](scale/graph-terminal-catalog-2026-10-08/complete-normal1000/). This includes terminal catalog discovery but excludes later shared Start/Signal cycle changes. The original full 146-family race campaign continues unchanged at `2b71f1d`; current and extended simulation, remaining runtime/native/scale/24h/million physical-drain/adoption/release gates remain required.
+
 ## Complete current 148-family normal qualification in progress — 2026-10-08
 
 The complete normal default suite runs from isolated frozen `7ee9882`, requiring all 148 families × 1,000 contiguous seed bodies and all 748 pins. Its retained binary/source/command/event evidence is under `/home/exedev/js-wf-tier1-full148-normal1000-20261008`; terminal evidence and independent review remain pending. The full 146-family race campaign continues unchanged at `2b71f1d` under its 180-minute CPU budget. It does not qualify later projection/catalog changes. Every original remaining current/extended/runtime/native/scale/24h/million physical-drain/default-adoption/release requirement remains required.

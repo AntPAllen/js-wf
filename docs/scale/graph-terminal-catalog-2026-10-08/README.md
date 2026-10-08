@@ -24,7 +24,7 @@ Projection lookups use legacy KV observations; read staleness can delay or dupli
 
 Full invocation/state/timer/tombstone/snapshot/continuation/import/history/projection-consumer/CLI/deployment migration, arbitrary fault combinations/permutations, extended and complete current suites, all original native process/storage/power-loss/concurrency/capacity/matrices/actual24h/million physical-drain/default-adoption/release requirements remain open. Fixture collection does not enable production online GC. The accepted normal 147-family suite and live race 146-family campaign retain their original frozen-source scopes.
 
-## Frozen complete normal qualification in progress
+## Frozen complete normal qualification accepted at 7ee9882
 
 Source `7ee9882` is isolated at `/home/exedev/js-wf-terminal-catalog-qualification`:
 
@@ -32,4 +32,4 @@ Source `7ee9882` is isolated at `/home/exedev/js-wf-terminal-catalog-qualificati
 python3 scripts/check-tier1-race.py --root /home/exedev/js-wf-tier1-full148-normal1000-20261008 --seeds 1000 --no-race
 ```
 
-All 148 families × 1,000 contiguous bodies and all 748 pins are required. Terminal evidence and independent review remain pending. The earlier complete race campaign remains at its original 146-family source.
+All 148 families × 1,000 contiguous bodies and all 748 pins are required. The full normal suite passes 209 groups, all 148 families × 1,000 contiguous bodies and all 748 pins in 967.855 s. `complete-normal1000/` contains executed independent review of 3,046 selected inputs against Git and unchanged before/after, exact coverage and retained binary/event integrity. The earlier complete race campaign remains at its original 146-family source.
