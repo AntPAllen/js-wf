@@ -1,0 +1,11 @@
+# Shared graph publication transport/replay workload
+
+`GraphPublicationTransport` now implements the same graph coordinator Port over the common Scheduler/Trace. It records authority/object operations, drop-before-commit and committed-reply-loss boundaries, copy-safe roots/grants, context/byte-limited Get and deterministic pauses outside its lock. Read/enumeration faults currently model dropped operations; mutation faults model precommit loss and postcommit acknowledgment loss. This is an in-memory linearizable model, not NATS conformance.
+
+The new `graph_publication_protocol` workload has17 modes: inherited append/owned reuse, paused commit/upload, lost pin/ready/upload/root/fence/close/delete replies, both publish-versus-collect winners, dropped root/blob/node reads and foreign reuse. Every generated trace is exactly replayed through common dispatch. The terminal oracle requires exact population/leaf values and reused receipts by mode, verifies live physical bytes/ready origin scopes with a separate raw-object census, and retires/reclaims every object. The independent census separately requires original payload edges to remain canonical. Deep-copy, canceled read, unsupported-fault and deliberately damaged origin controls are included.
+
+Seventeen exact traces join the regression corpus and common workload dispatcher. CI runs the new seeded loop/copy controls and only this pin family in normal/race modes. The source seeded inventory now adds one workload; complete suite qualification at the new graph remains required. Older full126 normal100k continues at its original source/profile without restart.
+
+Normal1000 with final exact-state checks passes. A precursor race1000/pin run predates the extra exact-state reads; final-source race/pins and extended normal qualification remain pending at preparation. Initial build failure (reader Store interface mismatch) and export-directory failure are retained; corrected tests do not restart any native workload.
+
+Still open: wider operation/fault combinations, native quorum/object/schema/namespace/crash/permission/concurrency qualification, reader/retention ownership and partial compaction/import, all canonical runtime destinations, production online GC and the original full native matrices/24h/million physical drain/dependency adoption/release gates.

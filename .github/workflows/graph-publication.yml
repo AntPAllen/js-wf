@@ -5,6 +5,9 @@ on:
     paths:
       - 'internal/graphpublication/**'
       - 'internal/retainedgraph/**'
+      - 'sim/graph_publication*'
+      - 'sim/journal_transport_test.go'
+      - 'sim/testdata/regressions/graph-publication-*'
       - 'internal/blobpublication/protocol.go'
       - '.github/workflows/graph-publication.yml'
       - 'go.mod'
@@ -13,6 +16,9 @@ on:
     paths:
       - 'internal/graphpublication/**'
       - 'internal/retainedgraph/**'
+      - 'sim/graph_publication*'
+      - 'sim/journal_transport_test.go'
+      - 'sim/testdata/regressions/graph-publication-*'
       - 'internal/blobpublication/protocol.go'
       - '.github/workflows/graph-publication.yml'
       - 'go.mod'
@@ -41,8 +47,20 @@ jobs:
           graph_flags=()
           if [ "$GRAPH_MODE" = race ]; then graph_flags=(-race); fi
           go test -p=1 "${graph_flags[@]}" ./internal/graphpublication -count=1 -timeout=5m -json > graph-publication-events.jsonl
+      - name: Common seeded transport and pinned trace dispatch
+        env:
+          GOMAXPROCS: '1'
+          GOMEMLIMIT: 512MiB
+          GRAPH_MODE: ${{ matrix.mode }}
+          SIM_COVERAGE_SUMMARY: '1'
+        run: |
+          graph_flags=()
+          if [ "$GRAPH_MODE" = race ]; then graph_flags=(-race); fi
+          go test -p=1 "${graph_flags[@]}" ./sim -run '^(TestSeededGraphPublicationReplay|TestGraphPublicationTransportCopiesFaultsAndIndependentCensus|TestPinnedRegressionCorpus)$/^graph-publication-' -count=1 -timeout=5m -json > graph-transport-events.jsonl
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: graph-publication-${{ matrix.mode }}
-          path: graph-publication-events.jsonl
+          path: |
+            graph-publication-events.jsonl
+            graph-transport-events.jsonl
