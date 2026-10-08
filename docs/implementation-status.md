@@ -1,5 +1,9 @@
 # Implementation status against the supplied plan
 
+## Dispatch fetch lifetime bounded — 2026-10-08
+
+At684c899, the native dispatch adapter now propagates cancellation and a one-second absolute pull deadline through the SDK `FetchContext`. A controlled core NATS API reproduction confirms the old adapter ignored cancellation and its expiry restarted under informational replies; fixed focused race controls and actual R1 JetStream delivery/confirmed acknowledgment pass. Complete worker normal/count1/3m passes75.137s. [Regression evidence, initial test setup failure and precise limits](scale/dispatch-fetch-context-2026-10-08/). This establishes a client lifetime defect, not the cause of corrected partition seed2's30.188s fanout outlier; that campaign remains failed and no full native retry or p99 gate change is made. The live full126 normal100k SDK2827904 remains at original074bcfc/profile with no restart. Full matrices/original24h/million physical drain/default dependency/canonical graph migration/production onlineGC remain open.
+
 ## Original full124 normal100k independently accepted — 2026-10-08
 
 Frozen4412481 actual SDK2697740 completes12400000 workload bodies,410 source pins,182 top-level passes and two documented trace-only skips in13274.288s under original300m/count1/twoGoCPU/512MiB. Original unitdbd776bba70f4cbcb588387200367910 exits successfully; original SDK/producer/supervisor are closed. Independent terminal review verifies2351 selected Git inputs, before/after equality, exact original committed launch identity, full events/compiled inventories and15 altered-proof rejection controls. [Complete accepted original](scale/tier1-full124-2026-10-07/normal100k-accepted/). Full S3 readback is verified; closed originals/source/archive are retired after fresh remote/member/closure checks (79.7MiB distinct-inode allocations).

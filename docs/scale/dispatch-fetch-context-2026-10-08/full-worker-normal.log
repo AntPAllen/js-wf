@@ -1,0 +1,121 @@
+=== RUN   TestChildStartWholeBudgetPreservesUnfinishedRequestAndReplay
+=== RUN   TestChildStartWholeBudgetPreservesUnfinishedRequestAndReplay/create_request_lost
+=== RUN   TestChildStartWholeBudgetPreservesUnfinishedRequestAndReplay/enqueue_reply_lost
+--- PASS: TestChildStartWholeBudgetPreservesUnfinishedRequestAndReplay (10.00s)
+    --- PASS: TestChildStartWholeBudgetPreservesUnfinishedRequestAndReplay/create_request_lost (5.00s)
+    --- PASS: TestChildStartWholeBudgetPreservesUnfinishedRequestAndReplay/enqueue_reply_lost (5.00s)
+=== RUN   TestConfirmedDispatchAcknowledgementRespectsDeadline
+=== RUN   TestConfirmedDispatchAcknowledgementRespectsDeadline/success
+=== RUN   TestConfirmedDispatchAcknowledgementRespectsDeadline/parent_deadline
+=== RUN   TestConfirmedDispatchAcknowledgementRespectsDeadline/cancelled
+--- PASS: TestConfirmedDispatchAcknowledgementRespectsDeadline (0.02s)
+    --- PASS: TestConfirmedDispatchAcknowledgementRespectsDeadline/success (0.00s)
+    --- PASS: TestConfirmedDispatchAcknowledgementRespectsDeadline/parent_deadline (0.02s)
+    --- PASS: TestConfirmedDispatchAcknowledgementRespectsDeadline/cancelled (0.00s)
+=== RUN   TestContinuationLimitKillChild
+    continuation_limit_kill_test.go:119: continuation limit process helper
+--- SKIP: TestContinuationLimitKillChild (0.00s)
+=== RUN   TestContinuationLimitAfterWorkerKillAndClusterRestart
+    continuation_limit_kill_test.go:176: set WF_CONTINUATION_LIMIT_KILL=1 for combined near-limit process/server faults
+--- SKIP: TestContinuationLimitAfterWorkerKillAndClusterRestart (0.00s)
+=== RUN   TestContinuationPreservesGlobalJournalLimitAndTerminalSlot
+    continuation_limit_test.go:41: continuation global limit: budget=16 logical_entries=16 anchor=9 sdk_offset=8 effects=0 archive_reads=0 frame_reads=1 offline_steps=11 continuations=2 initial_before=1 middle_before=1
+--- PASS: TestContinuationPreservesGlobalJournalLimitAndTerminalSlot (3.53s)
+=== RUN   TestContinuationProductionJournalLimitBoundary
+    continuation_limit_test.go:46: set WF_CONTINUATION_BOUNDARY=1 for the real 100,000-entry continuation boundary
+--- SKIP: TestContinuationProductionJournalLimitBoundary (0.00s)
+=== RUN   TestContinuationAnchorUsesHistoricalRuntimeFacts
+--- PASS: TestContinuationAnchorUsesHistoricalRuntimeFacts (0.00s)
+=== RUN   TestPartitionCancellationDuringStalledBatch
+=== RUN   TestPartitionCancellationDuringStalledBatch/1
+=== RUN   TestPartitionCancellationDuringStalledBatch/4
+--- PASS: TestPartitionCancellationDuringStalledBatch (0.00s)
+    --- PASS: TestPartitionCancellationDuringStalledBatch/1 (0.00s)
+    --- PASS: TestPartitionCancellationDuringStalledBatch/4 (0.00s)
+=== RUN   TestDispatchFetchContextBoundsInformationalReplies
+=== RUN   TestDispatchFetchContextBoundsInformationalReplies/deadline
+    dispatch_fetch_context_test.go:130: mode=deadline elapsed=1.006242732s informational_replies=50 inbox_released=true
+=== RUN   TestDispatchFetchContextBoundsInformationalReplies/cancel
+    dispatch_fetch_context_test.go:130: mode=cancel elapsed=171.28µs informational_replies=0 inbox_released=true
+--- PASS: TestDispatchFetchContextBoundsInformationalReplies (1.06s)
+    --- PASS: TestDispatchFetchContextBoundsInformationalReplies/deadline (1.03s)
+    --- PASS: TestDispatchFetchContextBoundsInformationalReplies/cancel (0.03s)
+=== RUN   TestDispatchFetchRejectsCanceledContextBeforeConsumer
+--- PASS: TestDispatchFetchRejectsCanceledContextBeforeConsumer (0.00s)
+=== RUN   TestDispatchFetchContextPreservesNativeDelivery
+--- PASS: TestDispatchFetchContextPreservesNativeDelivery (0.04s)
+=== RUN   TestOuterHandlerNativeLeaseExpiryAndLateAppend
+=== RUN   TestOuterHandlerNativeLeaseExpiryAndLateAppend/handler
+    handler_lease_loss_native_test.go:153: production TTL12s / AckWait13s takeover=13.085240308s
+    handler_lease_loss_native_test.go:170: old owner fenced: {At:2026-10-08 02:19:38.071956779 +0000 UTC Worker:expired-old Type:lease-expiry ID:handler RunSequence:1 Delivery:1 Epoch:1 Reason:lease_heartbeat_lost Error:workflow lease was lost: nats: nats: API error: code=400 err_code=10071 description=wrong last sequence: 10: nats: key revision mismatch}
+=== RUN   TestOuterHandlerNativeLeaseExpiryAndLateAppend/continuation
+    handler_lease_loss_native_test.go:153: production TTL12s / AckWait13s takeover=13.063110487s
+    handler_lease_loss_native_test.go:170: old owner fenced: {At:2026-10-08 02:19:54.437366158 +0000 UTC Worker:expired-old Type:lease-expiry ID:continuation RunSequence:2 Delivery:1 Epoch:11 Reason:lease_heartbeat_lost Error:workflow lease was lost: nats: nats: API error: code=400 err_code=10071 description=wrong last sequence: 19: nats: key revision mismatch}
+--- PASS: TestOuterHandlerNativeLeaseExpiryAndLateAppend (32.74s)
+    --- PASS: TestOuterHandlerNativeLeaseExpiryAndLateAppend/handler (16.35s)
+    --- PASS: TestOuterHandlerNativeLeaseExpiryAndLateAppend/continuation (16.40s)
+=== RUN   TestOuterHandlerGoexitRecordsBoundedAttempts
+--- PASS: TestOuterHandlerGoexitRecordsBoundedAttempts (6.33s)
+=== RUN   TestOuterHandlerNativeCancellationAndLateAppend
+=== RUN   TestOuterHandlerNativeCancellationAndLateAppend/worker_stop
+    handler_native_test.go:176: outer handler shutdown elapsed=404.525µs
+=== RUN   TestOuterHandlerNativeCancellationAndLateAppend/durable_cancel
+--- PASS: TestOuterHandlerNativeCancellationAndLateAppend (8.49s)
+    --- PASS: TestOuterHandlerNativeCancellationAndLateAppend/worker_stop (4.31s)
+    --- PASS: TestOuterHandlerNativeCancellationAndLateAppend/durable_cancel (4.18s)
+=== RUN   TestHandlerReturnPanicAndGoexit
+=== RUN   TestHandlerReturnPanicAndGoexit/return
+=== RUN   TestHandlerReturnPanicAndGoexit/panic
+=== RUN   TestHandlerReturnPanicAndGoexit/goexit
+--- PASS: TestHandlerReturnPanicAndGoexit (0.00s)
+    --- PASS: TestHandlerReturnPanicAndGoexit/return (0.00s)
+    --- PASS: TestHandlerReturnPanicAndGoexit/panic (0.00s)
+    --- PASS: TestHandlerReturnPanicAndGoexit/goexit (0.00s)
+=== RUN   TestHandlerCancellationAbandonsLateReturn
+=== RUN   TestHandlerCancellationAbandonsLateReturn/return
+=== RUN   TestHandlerCancellationAbandonsLateReturn/panic
+=== RUN   TestHandlerCancellationAbandonsLateReturn/goexit
+--- PASS: TestHandlerCancellationAbandonsLateReturn (0.00s)
+    --- PASS: TestHandlerCancellationAbandonsLateReturn/return (0.00s)
+    --- PASS: TestHandlerCancellationAbandonsLateReturn/panic (0.00s)
+    --- PASS: TestHandlerCancellationAbandonsLateReturn/goexit (0.00s)
+=== RUN   TestAlreadyCancelledHandlerDoesNotEnterUserCode
+--- PASS: TestAlreadyCancelledHandlerDoesNotEnterUserCode (0.00s)
+=== RUN   TestHandlerCancellationWinsReturnedValue
+--- PASS: TestHandlerCancellationWinsReturnedValue (0.00s)
+=== RUN   TestKVAssignmentMovesInflightInvocation
+--- PASS: TestKVAssignmentMovesInflightInvocation (5.26s)
+=== RUN   TestHeldLeaseRunUsesBoundedRedeliveryDelay
+--- PASS: TestHeldLeaseRunUsesBoundedRedeliveryDelay (0.00s)
+=== RUN   TestHeldLeaseDispatchReportsExistingEntryWithoutExtraRead
+--- PASS: TestHeldLeaseDispatchReportsExistingEntryWithoutExtraRead (0.00s)
+=== RUN   TestMetricsHandlerAggregatesLatencyDistributions
+--- PASS: TestMetricsHandlerAggregatesLatencyDistributions (0.00s)
+=== RUN   TestStaticPartitionsCoverAllWithoutOverlap
+--- PASS: TestStaticPartitionsCoverAllWithoutOverlap (0.00s)
+=== RUN   TestTerminalHintsRequireSnapshotRepairAndStayBounded
+--- PASS: TestTerminalHintsRequireSnapshotRepairAndStayBounded (0.00s)
+=== RUN   TestWorkerDomainTimerTranslatesNativeHintAndPreservesDeadline
+--- PASS: TestWorkerDomainTimerTranslatesNativeHintAndPreservesDeadline (0.00s)
+=== RUN   TestWorkerDomainClockFailureDoesNotPublish
+=== RUN   TestWorkerDomainClockFailureDoesNotPublish/unknown
+=== RUN   TestWorkerDomainClockFailureDoesNotPublish/empty
+=== RUN   TestWorkerDomainClockFailureDoesNotPublish/reversed
+=== RUN   TestWorkerDomainClockFailureDoesNotPublish/unavailable
+=== RUN   TestWorkerDomainClockFailureDoesNotPublish/canceled
+--- PASS: TestWorkerDomainClockFailureDoesNotPublish (0.00s)
+    --- PASS: TestWorkerDomainClockFailureDoesNotPublish/unknown (0.00s)
+    --- PASS: TestWorkerDomainClockFailureDoesNotPublish/empty (0.00s)
+    --- PASS: TestWorkerDomainClockFailureDoesNotPublish/reversed (0.00s)
+    --- PASS: TestWorkerDomainClockFailureDoesNotPublish/unavailable (0.00s)
+    --- PASS: TestWorkerDomainClockFailureDoesNotPublish/canceled (0.00s)
+=== RUN   TestJournalLimitRecordsTerminalFailure
+--- PASS: TestJournalLimitRecordsTerminalFailure (0.19s)
+=== RUN   TestJournalLimitRecordsRejectedSignalDrain
+--- PASS: TestJournalLimitRecordsRejectedSignalDrain (1.22s)
+=== RUN   TestJournalLimitRecordsRejectedPanicAttempt
+--- PASS: TestJournalLimitRecordsRejectedPanicAttempt (1.20s)
+=== RUN   TestWorkerConstructorBoundsMetadataLookup
+--- PASS: TestWorkerConstructorBoundsMetadataLookup (5.05s)
+PASS
+ok  	js-wf/worker	75.137s

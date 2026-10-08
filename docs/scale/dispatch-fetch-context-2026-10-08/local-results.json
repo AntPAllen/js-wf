@@ -1,0 +1,13 @@
+{
+  "observed_utc": "2026-10-08T02:21:05.844411+00:00",
+  "source_revision": "684c899a4784e5a10851d4fe73a86fc215c9b174",
+  "normal_command": "GOMAXPROCS=2 GOMEMLIMIT=512MiB go test ./worker -count=1 -timeout=3m -v",
+  "normal_package_elapsed_seconds": 75.137,
+  "normal_top_level_pass_count": 27,
+  "normal_original_exec_session": 26260,
+  "normal_exit_code": 0,
+  "focused_race_command": "GOMAXPROCS=2 GOMEMLIMIT=512MiB go test -race ./worker -run '^(TestDispatchFetch.*|TestPartitionCancellationDuringStalledBatch)$' -count=1 -timeout=60s -v",
+  "focused_race_package_elapsed_seconds": 2.138,
+  "focused_race_exit_code": 0,
+  "scope": "Local full-worker normal regression and focused race regression only; full native partition/full graph/runtime release gates unqualified."
+}
