@@ -1,0 +1,1 @@
+Initial launcher failed before creating a checkout or test SDK because cleanup evidence was copied into the main worktree while its clean-tree admission ran. No test body executed. Commit evidence first and launch a new retained unit; preserve this terminal admission failure.
