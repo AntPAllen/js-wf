@@ -81,7 +81,7 @@ func validateStartRequest(r GraphStartRequest) error {
 	}
 	return nil
 }
-func validateStartCursor(root graphpublication.Root, c graphCursor, typ, id string, limit int) error {
+func validateStartCursor(root graphpublication.Root, c graphCursor, typ, id string, limit int, signals bool) error {
 	if c.Start == nil || c.Start.Schema != graphStartSchema || !validStartToken(c.Start.Token) || !startHex(c.Start.InputSHA256, 32) || c.Start.InputSize < 0 || c.Start.InputSize > limit || validateStartRequest(c.Start.Request) != nil || c.Start.Request.Type != typ || c.Start.Request.ID != id {
 		return ErrGap
 	}
@@ -92,7 +92,7 @@ func validateStartCursor(root graphpublication.Root, c graphCursor, typ, id stri
 	} else if c.Invocation <= c.PreviousInvocation {
 		return ErrGap
 	}
-	if len(root.Streams) != 1 || root.Streams[0].Name != "input" {
+	if len(root.Streams) == 0 || root.Streams[0].Name != "input" || !signals && len(root.Streams) != 1 {
 		return ErrGap
 	}
 	want := uint64(1)
@@ -101,6 +101,25 @@ func validateStartCursor(root graphpublication.Root, c graphCursor, typ, id stri
 	}
 	if root.Streams[0].Graph.Count != want {
 		return ErrGap
+	}
+	if signals {
+		if c.Invocation == 0 && c.SignalInputs != 0 {
+			return ErrGap
+		}
+		var inputs uint64
+		for _, stream := range root.Streams[1:] {
+			if stream.Name != graphSignalInputForest {
+				return ErrGap
+			}
+			inputs = stream.Graph.Count
+		}
+		want = c.SignalInputs
+		if c.Retired {
+			want = 0
+		}
+		if inputs != want {
+			return ErrGap
+		}
 	}
 	return nil
 }
@@ -150,6 +169,9 @@ func (s *GraphStore) ReserveStart(ctx context.Context, r GraphStartRequest, inpu
 	}
 	start := GraphStart{Schema: graphStartSchema, Token: token, Request: r, InputSHA256: hash, InputSize: len(input)}
 	next := graphCursor{Schema: graphStartCursorSchema, Start: &start}
+	if s.cfg.CanonicalSignals {
+		next.Schema = graphSignalCursorSchema
+	}
 	if c != nil {
 		next.Base = c.Base + c.Count
 		next.PreviousInvocation = c.Invocation

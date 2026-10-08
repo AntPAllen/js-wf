@@ -34,6 +34,9 @@ func WithGraphJournal(store *journal.GraphStore) Option {
 }
 
 func (w *Worker) validateGraphOptions() error {
+	if w.graphJournal != nil && w.graphJournal.CanonicalSignals() {
+		return fmt.Errorf("canonical Signal worker queue intake is not integrated")
+	}
 	if w.graphJournal != nil && (w.legacyJournalOption || w.resultBlobPort != nil) {
 		return fmt.Errorf("graph journal conflicts with legacy journal/result options")
 	}

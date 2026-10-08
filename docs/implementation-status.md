@@ -1,5 +1,10 @@
 # Implementation status against the supplied plan
 
+## Canonical Signal reservation and owned input component — 2026-10-08
+
+The new opt-in `CanonicalSignals` runtime cursor v3 reserves an immutable Signal request, owned body and bounded key index in one canonical root publication. Duplicate/mismatch, reopened storage, unknown outcomes, same/different key publication conflicts, retirement/replacement and pin lifetime controls are implemented. Native R1/R3 development fixtures retain a 5 MiB input through retirement, replace the invocation and drain physical objects/chunks. [Component scope, preserved development failures and next integration](scale/graph-signal-input-2026-10-08/). Frozen qualification is pending. Client publication and worker intake explicitly reject this new mode until ordered source binding and queue integration are implemented; current default modes remain unchanged. Full shared simulation/native matrices/24h/million drain/default adoption/release and production online GC remain open.
+
+
 ## Shared native stream-cache guard covers both adapters — 2026-10-08
 
 The older direct blob adapter also reproduces the pinned nats.go v1.54.0 Stream.Info cache pointer race. Its original R1 report/source are retained. The graph guard is now shared as `internal/natsstream.Guard` and applied to both direct and graph authority/object handles, protecting individual Info/cache/Get/Purge calls while preserving concurrent conditional publications and context cancellation for waiters. Direct R1/R3 four-actor/eight-round controls retain root/generation/physical bytes through concurrent reads/census and completely drain after retirement. Both CI workflows include the shared guard package. [Evidence, staging/input timing and limits](scale/native-stream-cache-2026-10-08/).

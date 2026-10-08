@@ -19,6 +19,7 @@ import (
 
 const graphCursorSchema = "js-wf-graph-journal-cursor-v1"
 const graphStartCursorSchema = "js-wf-graph-runtime-cursor-v2"
+const graphSignalCursorSchema = "js-wf-graph-runtime-cursor-v3"
 const graphEntrySchema = "js-wf-graph-journal-entry-v1"
 const MaxGraphEntryBytes = 1 << 20
 const DefaultGraphPayloadLimit = 64 << 20
@@ -37,6 +38,9 @@ type GraphConfig struct {
 	// CanonicalStarts selects the versioned input/pending-start lifecycle.
 	// Existing legacy/v3 histories require explicit import before enabling it.
 	CanonicalStarts bool
+	// CanonicalSignals selects owned, indexed Signal reservations. Publication
+	// and worker queue intake must be integrated before runtime adoption.
+	CanonicalSignals bool
 }
 
 type GraphStore struct{ cfg GraphConfig }
@@ -52,6 +56,7 @@ type graphCursor struct {
 	Purging            bool        `json:"purging,omitempty"`
 	Start              *GraphStart `json:"start,omitempty"`
 	PreviousInvocation uint64      `json:"previous_invocation,omitempty"`
+	SignalInputs       uint64      `json:"signal_inputs,omitempty"`
 }
 
 type graphEntry struct {
@@ -62,7 +67,7 @@ type graphEntry struct {
 }
 
 func NewGraphStore(cfg GraphConfig) (*GraphStore, error) {
-	if cfg.Protocol.Port == nil || validateEncoding(cfg.Encoding) != nil || cfg.PinTTL < 0 || cfg.IntentTTL < 0 || cfg.PayloadReadLimit < 0 || int64(cfg.PayloadReadLimit) == math.MaxInt64 {
+	if cfg.Protocol.Port == nil || validateEncoding(cfg.Encoding) != nil || cfg.PinTTL < 0 || cfg.IntentTTL < 0 || cfg.PayloadReadLimit < 0 || int64(cfg.PayloadReadLimit) == math.MaxInt64 || cfg.CanonicalSignals && !cfg.CanonicalStarts {
 		return nil, fmt.Errorf("invalid graph journal configuration")
 	}
 	if cfg.Now == nil {
@@ -81,8 +86,9 @@ func NewGraphStore(cfg GraphConfig) (*GraphStore, error) {
 }
 
 // PayloadReadLimit is the explicit byte budget for configured runtime reads.
-func (s *GraphStore) PayloadReadLimit() int { return s.cfg.PayloadReadLimit }
-func (s *GraphStore) CanonicalStarts() bool { return s.cfg.CanonicalStarts }
+func (s *GraphStore) PayloadReadLimit() int  { return s.cfg.PayloadReadLimit }
+func (s *GraphStore) CanonicalStarts() bool  { return s.cfg.CanonicalStarts }
+func (s *GraphStore) CanonicalSignals() bool { return s.cfg.CanonicalSignals }
 
 func graphDestination(typ, id string) (string, error) {
 	if err := identity.Validate(typ, id); err != nil {
@@ -135,16 +141,19 @@ func (s *GraphStore) validateRoot(root graphpublication.Root, typ, id string) (*
 	rootSchema, cursorSchema := graphpublication.ApplicationSchema, graphCursorSchema
 	if s.cfg.CanonicalStarts {
 		rootSchema, cursorSchema = graphpublication.StreamsSchema, graphStartCursorSchema
+		if s.cfg.CanonicalSignals {
+			cursorSchema = graphSignalCursorSchema
+		}
 	}
 	if root.Schema != rootSchema || root.Head == 0 || len(root.Application) == 0 || len(root.Application) > graphpublication.MaxApplicationBytes {
 		return nil, ErrGap
 	}
 	var c graphCursor
-	if graphDecode(root.Application, &c) != nil || c.Schema != cursorSchema || !s.cfg.CanonicalStarts && (c.Invocation == 0 || c.Start != nil || c.PreviousInvocation != 0) || c.Count > MaxEntries || c.Base > math.MaxUint64-c.Count {
+	if graphDecode(root.Application, &c) != nil || c.Schema != cursorSchema || !s.cfg.CanonicalStarts && (c.Invocation == 0 || c.Start != nil || c.PreviousInvocation != 0) || !s.cfg.CanonicalSignals && c.SignalInputs != 0 || c.SignalInputs > math.MaxInt64 || c.Count > MaxEntries || c.Base > math.MaxUint64-c.Count {
 		return nil, ErrGap
 	}
 	if s.cfg.CanonicalStarts {
-		if err := validateStartCursor(root, c, typ, id, s.cfg.PayloadReadLimit); err != nil {
+		if err := validateStartCursor(root, c, typ, id, s.cfg.PayloadReadLimit, s.cfg.CanonicalSignals); err != nil {
 			return nil, err
 		}
 	}

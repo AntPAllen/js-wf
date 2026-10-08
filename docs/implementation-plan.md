@@ -1,5 +1,10 @@
 # JetStream Durable Workflow Runtime — Implementation Plan
 
+## Canonical Signal reservation and owned input component — 2026-10-08
+
+The new opt-in `CanonicalSignals` runtime cursor v3 reserves an immutable Signal request, owned body and bounded key index in one canonical root publication. Duplicate/mismatch, reopened storage, unknown outcomes, same/different key publication conflicts, retirement/replacement and pin lifetime controls are implemented. Native R1/R3 development fixtures retain a 5 MiB input through retirement, replace the invocation and drain physical objects/chunks. [Component scope, preserved development failures and next integration](scale/graph-signal-input-2026-10-08/). Frozen qualification is pending. Client publication and worker intake explicitly reject this new mode until ordered source binding and queue integration are implemented; current default modes remain unchanged. Full shared simulation/native matrices/24h/million drain/default adoption/release and production online GC remain open.
+
+
 ## Graph protocol joins shared seeded transport and pinned replay — 2026-10-08
 
 Frozen4b860e5 adds `GraphPublicationTransport` and the common `graph_publication_protocol` workload with17 modes covering inherited append/reuse, paused publisher/upload, mutation/ack loss, both publish/collect winners, dropped authority/node reads and foreign reuse. Every trace exactly replays; the separate raw-object/hash/origin census, exact terminal population/values/receipts and complete retirement checks pass. Focused normal100000106.023s/race100013.976s plus17 corpus pins pass under count1/5m/twoGoCPU/512MiB. Actual normal SDK2837837 is twice observed;655 selected inputs match frozen Git and remain unchanged. [Evidence, retained setup errors and exact limits](scale/graph-shared-transport-2026-10-08/).

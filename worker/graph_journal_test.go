@@ -75,6 +75,14 @@ func TestNativeGraphWorkerReplayInputsSignalsAndResults(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
+			signalStore, e := journal.NewGraphStore(journal.GraphConfig{Protocol: p, CanonicalStarts: true, CanonicalSignals: true})
+			if e != nil {
+				t.Fatal(e)
+			}
+			guarded := &Worker{graphJournal: signalStore}
+			if e = guarded.validateGraphOptions(); e == nil || !strings.Contains(e.Error(), "queue intake is not integrated") {
+				t.Fatal("unintegrated Signal worker admitted", e)
+			}
 			c, err := client.NewWithGraphJournal(js, store)
 			if err != nil {
 				t.Fatal(err)
