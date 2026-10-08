@@ -1,0 +1,71 @@
+{
+  "frozen_source": "1956655db902559aa96b2e7164372f0c6e3ed680",
+  "selected_inputs": 66,
+  "selected_inputs_before_after_unchanged": true,
+  "results": {
+    "normal": {
+      "elapsed": 10.609,
+      "groups": [
+        "TestNativeGraphAuthorityPersistenceAndSchemaIsolation",
+        "TestNativeGraphAuthorityReadWitness",
+        "TestGraphAuthorityCanonicalEnvelope",
+        "TestNativeGraphAuthorityUnsafeConfiguration",
+        "TestNativeGraphAuthorityRejectsMalformedWireWithoutRepair",
+        "TestNativeGraphAuthorityLostMutationReplies",
+        "TestNativeGraphAuthorityRejectsLossyDestinationEncoding",
+        "TestNativeGraphObjectAppendReuseAndRetirement",
+        "TestNativeGraphObjectReservationsLostRepliesAndLateCompletion",
+        "TestNativeGraphObjectCancellationBoundsAndUnknownChunks",
+        "TestNativeGraphObjectPublishCollectOrderAndDelayedDelete",
+        "TestNativeGraphObjectReadUncertaintyAndFormatIsolation",
+        "TestNativeGraphObjectOpeningBoundsReadOnlyAdmission",
+        "TestGraphSubjectAccessRejectsUnsafeNamespaces",
+        "TestNativeGraphRuntimePermissions"
+      ],
+      "role_logs": [
+        "    nats_permissions_test.go:230: R1 named roles append/reuse/read/live collection/authenticated restart/retirement/chunk purge passed; exact denials=37 consumers=0\n",
+        "    nats_permissions_test.go:230: R3 named roles append/reuse/read/live collection/authenticated restart/retirement/chunk purge passed; exact denials=37 consumers=0\n"
+      ],
+      "count": 1,
+      "timeout": "5m",
+      "GOMAXPROCS": 2,
+      "GOMEMLIMIT": "512MiB",
+      "race": false,
+      "events_sha256": "2e9862c4e90718c6822a375cdb1f35b11fe660718cd03028b57f9692335debc2"
+    },
+    "race": {
+      "elapsed": 39.752,
+      "groups": [
+        "TestNativeGraphAuthorityPersistenceAndSchemaIsolation",
+        "TestNativeGraphAuthorityReadWitness",
+        "TestGraphAuthorityCanonicalEnvelope",
+        "TestNativeGraphAuthorityUnsafeConfiguration",
+        "TestNativeGraphAuthorityRejectsMalformedWireWithoutRepair",
+        "TestNativeGraphAuthorityLostMutationReplies",
+        "TestNativeGraphAuthorityRejectsLossyDestinationEncoding",
+        "TestNativeGraphObjectAppendReuseAndRetirement",
+        "TestNativeGraphObjectReservationsLostRepliesAndLateCompletion",
+        "TestNativeGraphObjectCancellationBoundsAndUnknownChunks",
+        "TestNativeGraphObjectPublishCollectOrderAndDelayedDelete",
+        "TestNativeGraphObjectReadUncertaintyAndFormatIsolation",
+        "TestNativeGraphObjectOpeningBoundsReadOnlyAdmission",
+        "TestGraphSubjectAccessRejectsUnsafeNamespaces",
+        "TestNativeGraphRuntimePermissions"
+      ],
+      "role_logs": [
+        "    nats_permissions_test.go:230: R1 named roles append/reuse/read/live collection/authenticated restart/retirement/chunk purge passed; exact denials=37 consumers=0\n",
+        "    nats_permissions_test.go:230: R3 named roles append/reuse/read/live collection/authenticated restart/retirement/chunk purge passed; exact denials=37 consumers=0\n"
+      ],
+      "count": 1,
+      "timeout": "5m",
+      "GOMAXPROCS": 2,
+      "GOMEMLIMIT": "512MiB",
+      "race": true,
+      "events_sha256": "9a269491523142206c06b3a6fc4499cefa09cfd2b3e1748e6881f72ce432841c"
+    }
+  },
+  "failed_previous_source": "d2ff06262c5f074ea4d17d9c818f0e89fa51c9cc",
+  "failed_previous_scope": "R1 passed; R3 object admission expired the original 45s fixture context. Failure retained; server-side cause not confirmed.",
+  "scope": "Focused complete native graph/metadata/envelope/permission/admission component controls. The earlier complete 27-group package regression remains at0c00893; no final 30-group package, full simulation, SDK process/dependency/media admission, domain/account import/deployment/malicious-principal/native release or runtime migration acceptance.",
+  "utc": "2026-10-08T04:18:40.038271+00:00"
+}

@@ -53,3 +53,9 @@ The experimental graph `NativePort` now combines native graph authority with a d
 Complete 27-group package regression at0c00893 passes normal20.834s/race77.039s. R1/R3 actual Port controls preserve 17 appended records/one shared payload across sweeps, independently inspect raw child JSON, reclaim all live objects/physical chunks after retirement, reject lost replies and collector-winning completion/publication, and preserve a fresh same-content payload through old-receipt deletion. [Evidence and precise limits](scale/graph-native-objects-2026-10-08/).
 
 Native roles/domain/account permissions, server/process/power loss and real partitions, concurrent and scale campaigns, durable reader retention/partial compaction/import and canonical runtime paths remain unimplemented or unqualified. The runtime's production collector remains quiescent.
+
+## Trusted native graph principal roles
+
+`NativeSubjectAccess` adds only one graph bucket's physical read/upload subjects to the authority allowlist. Native reads create no consumer; both roles therefore deny consumer lifecycle/flow-control APIs. A collector additionally receives the named bucket purge API. R1/R3 controls verify37 exact denials each, unchanged denied-request state, append/reuse/live preservation/authenticated restart and complete retirement/chunk purge. Read-only bucket admission is bounded to three2s attempts after a retained45s admission failure. [Focused final native controls and limits](scale/graph-native-permissions-2026-10-08/).
+
+These are trusted implementation roles. Metadata and message headers can still damage assigned storage; lack of a purge API grant is not an untrusted-principal security boundary. Collector JSON filter/admin ownership/domain/account-import/deployment controls and full native qualification remain required.

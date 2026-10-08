@@ -1,5 +1,13 @@
 # Implementation status against the supplied plan
 
+## Native graph publisher/collector roles and bounded admission — 2026-10-08
+
+Added default-deny subject allowlists for trusted graph publishers and collectors. Graph physical reads require no consumer lifecycle or flow-control grants. R1/R3 named-principal controls append/reuse/read, preserve live graphs, reconnect after original-store server restart, retire/purge chunks and retain tombstones; each fixture confirms37 exact denials, unchanged state after denied requests and zero consumers. Focused15 native/envelope/permission/admission groups at1956655 pass normal10.609s/race39.752s under count1/5m/twoGoCPU/512MiB, with66 selected Git inputs unchanged. [Evidence and trust/source limits](scale/graph-native-permissions-2026-10-08/).
+
+A preceding normal run atd2ff062 passed R1 but expired the45s R3 context during read-only object admission; it remains failed with no confirmed server-side cause. Graph object admission now uses at most three read-only attempts bounded to2s each in the original context, reports the failing stage, and never recreates missing storage or retries a write. Synthetic controls verify each admission stage, failure bound and cancellation. The earlier complete27-group package result keeps its0c00893 scope; no final30-group package acceptance is inferred.
+
+The publisher has no purge API grant, but metadata publication/headers are not constrained by NATS subject permissions. Both roles must remain trusted adapters; collector purge JSON filters and administrator ownership remain separate controls. Domain/account imports/deployed identities, real partitions/crashes/power loss/concurrency/scale, reader pins/partial compaction/import/canonical runtime migration and production onlineGC remain open. Original full126 SDK2827904/user unit is confirmed live unchanged at074bcfc; complete127 simulation and every original native/24h/million physical drain/default-adoption/release gate remain required.
+
 ## Isolated native graph object Port — 2026-10-08
 
 Added the complete experimental native graph Port with a dedicated graph-only object bucket, witnessed scoped upload grants, permanent staging reservations before chunks, acknowledged completion conditional on the reservation, and tombstones before chunk purge. Reads bound bytes and verify exact physical chunk count/subject/sequence/SHA using context-bound native requests. The legacy collector cannot open this bucket format. Complete27-group package regression at0c00893 passes normal20.834s/race77.039s under count1/5m/twoGoCPU/512MiB;63 selected inputs match frozen Git and remain unchanged. [Component evidence and exact scope](scale/graph-native-objects-2026-10-08/).
