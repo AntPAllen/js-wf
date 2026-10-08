@@ -1,0 +1,179 @@
+{
+  "source": "7e272f18561280ff08a0bc742085c798fbbca566",
+  "runs": [
+    {
+      "name": "journal-normal",
+      "command": [
+        "go",
+        "test",
+        "-p=1",
+        "./journal",
+        "-run",
+        "^(TestGraphJournal|TestNativeGraphJournal)",
+        "-count=1",
+        "-timeout=5m",
+        "-json"
+      ],
+      "working_directory": "/home/exedev/js-wf",
+      "environment": {
+        "GOMAXPROCS": "2",
+        "GOMEMLIMIT": "512MiB"
+      },
+      "exit_code": 0,
+      "wall_seconds": 11.543263634986943,
+      "package_results": [
+        {
+          "package": "js-wf/journal",
+          "action": "pass",
+          "elapsed": 10.432
+        }
+      ],
+      "top_level_passes": [
+        "TestNativeGraphJournalGenerationAndDrain",
+        "TestNativeGraphJournalPublicSDK",
+        "TestNativeGraphJournalPublicAdmission",
+        "TestGraphJournalPublicConfiguration",
+        "TestGraphJournalGenerationRetainedReaderAndDrain",
+        "TestGraphJournalStaleAndUnknownAppends",
+        "TestGraphJournalCorruptCursorAndLeaseBoundary",
+        "TestGraphJournalLimitsAndForeignRoot",
+        "TestGraphJournalEntryPayloadAlias",
+        "TestGraphJournalCloseContentionAndAmbiguousRelease",
+        "TestGraphJournalAcquireRenewContention"
+      ]
+    },
+    {
+      "name": "worker-normal",
+      "command": [
+        "go",
+        "test",
+        "-p=1",
+        "./worker",
+        "-run",
+        "^TestNativeGraphWorkerReplayInputsSignalsAndResults$",
+        "-count=1",
+        "-timeout=5m",
+        "-json"
+      ],
+      "working_directory": "/home/exedev/js-wf",
+      "environment": {
+        "GOMAXPROCS": "2",
+        "GOMEMLIMIT": "512MiB"
+      },
+      "exit_code": 0,
+      "wall_seconds": 5.10501645799377,
+      "package_results": [
+        {
+          "package": "js-wf/worker",
+          "action": "pass",
+          "elapsed": 4.051
+        }
+      ],
+      "top_level_passes": [
+        "TestNativeGraphWorkerReplayInputsSignalsAndResults"
+      ]
+    },
+    {
+      "name": "journal-race",
+      "command": [
+        "go",
+        "test",
+        "-p=1",
+        "-race",
+        "./journal",
+        "-run",
+        "^(TestGraphJournal|TestNativeGraphJournal)",
+        "-count=1",
+        "-timeout=5m",
+        "-json"
+      ],
+      "working_directory": "/home/exedev/js-wf",
+      "environment": {
+        "GOMAXPROCS": "2",
+        "GOMEMLIMIT": "512MiB"
+      },
+      "exit_code": 0,
+      "wall_seconds": 69.24479376402451,
+      "package_results": [
+        {
+          "package": "js-wf/journal",
+          "action": "pass",
+          "elapsed": 60.695
+        }
+      ],
+      "top_level_passes": [
+        "TestNativeGraphJournalGenerationAndDrain",
+        "TestNativeGraphJournalPublicSDK",
+        "TestNativeGraphJournalPublicAdmission",
+        "TestGraphJournalPublicConfiguration",
+        "TestGraphJournalGenerationRetainedReaderAndDrain",
+        "TestGraphJournalStaleAndUnknownAppends",
+        "TestGraphJournalCorruptCursorAndLeaseBoundary",
+        "TestGraphJournalLimitsAndForeignRoot",
+        "TestGraphJournalEntryPayloadAlias",
+        "TestGraphJournalCloseContentionAndAmbiguousRelease",
+        "TestGraphJournalAcquireRenewContention"
+      ]
+    },
+    {
+      "name": "worker-race",
+      "command": [
+        "go",
+        "test",
+        "-p=1",
+        "-race",
+        "./worker",
+        "-run",
+        "^TestNativeGraphWorkerReplayInputsSignalsAndResults$",
+        "-count=1",
+        "-timeout=5m",
+        "-json"
+      ],
+      "working_directory": "/home/exedev/js-wf",
+      "environment": {
+        "GOMAXPROCS": "2",
+        "GOMEMLIMIT": "512MiB"
+      },
+      "exit_code": 0,
+      "wall_seconds": 27.871035995020065,
+      "package_results": [
+        {
+          "package": "js-wf/worker",
+          "action": "pass",
+          "elapsed": 20.865
+        }
+      ],
+      "top_level_passes": [
+        "TestNativeGraphWorkerReplayInputsSignalsAndResults"
+      ]
+    },
+    {
+      "name": "external-consumer",
+      "command": [
+        "go",
+        "test",
+        "-p=1",
+        "-mod=mod",
+        "./...",
+        "-count=1",
+        "-timeout=5m",
+        "-json"
+      ],
+      "working_directory": "/home/exedev/js-wf/docs/scale/graph-public-sdk-2026-10-08/external-consumer",
+      "environment": {
+        "GOMAXPROCS": "2",
+        "GOMEMLIMIT": "512MiB"
+      },
+      "exit_code": 0,
+      "wall_seconds": 0.9356802419933956,
+      "package_results": [
+        {
+          "package": "graph-sdk-consumer",
+          "action": "skip",
+          "elapsed": 0
+        }
+      ],
+      "top_level_passes": []
+    }
+  ]
+}
