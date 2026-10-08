@@ -7,3 +7,5 @@ The new corrected-source review requires exactly one terminal cohort proof befor
 The complete native archive contains6495 members and98498269 compressed bytes; [complete inventory and fingerprint](archive-verification.json). Separate reviewer/model artifacts and initial preparation are archived completely with S3 readback receipts. Native original remains available to the continuing campaign and eventual whole-row review. No broker/store was reopened by the reviewer and no independent disk-store reconstruction is claimed.
 
 This accepts only corrected seed1 with the experimental a569 candidate. Full200, default dependency adoption, complete native matrices/actual24h/million physical drain, canonical runtime reference migration and production onlineGC remain open. The original supervisor continues seed2 without retry.
+
+After committed/pushed S3 receipts, fresh complete remote byte/member readback, unchanged local inventories and closure checks, redundant local archives and reviewer/preparation roots were retired, reclaiming144.3MiB. The native original remains in the continuing campaign for full-row review. [Removal ledger](redundant-reclaimed/removal.json).
