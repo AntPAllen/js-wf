@@ -6,6 +6,14 @@ Appending stages a leaf and merges equal-height frontier trees, reading and writ
 
 The Store contract requires immutable uploaded bytes and exact physical receipts. Upload errors never adopt objects by observing their presence. Store reads must obey the byte limit and caller context. References identify content hash plus physical generation/name; an encoding check is not evidence of existence or ownership. Nodes support64KiB metadata and128 external payload references. Large runtime inputs/results are external objects, not constrained to the metadata limit.
 
+## Bounded receipt membership
+
+`FindTree` resolves an aligned `(first,height)` coordinate by validating only its ancestors. `ContainsNode` compares the exact content hash and physical generation/name; `ContainsBlob` reads one leaf and checks its bounded external edge list. These checks require logarithmic node reads and do not flatten the graph. The target itself may be missing while its canonical receipt still protects it. Missing/corrupt ancestry and storage failures are uncertainty and must stop a collector. Only coordinates outside a validated snapshot establish certain absence; even a storage adapter returning the index sentinel must remain an error.
+
+These are snapshot queries, not durable ownership grants, publication decisions or GC fences. To use them for collection, each expiring intent still needs its destination, original head and exact node/payload coordinate. A collector must read that destination's canonical graph, protect exact reachable receipts across appended root replacements, and fence an expired original head before closing an otherwise unreferenced generation. Publication must validate inherited receipts and acquire all new node/payload intents before upload, preventing arbitrary subtree adoption. Versioned native authority isolation and high-water marks are still required. None of this protocol is implemented by the membership helpers.
+
+[Seeded census, physical identity, uncertainty and budget evidence](scale/retained-graph-membership-2026-10-08/) covers the helper APIs. It does not qualify online collection.
+
 ## Adoption requirements
 
 The package does not publish authority roots, change workflow storage, supply a native Store, or enable online collection. Its returned roots and competing forks are pending publication plans. A root supplied to Append must come from the caller's canonical authority; unchanged subtrees are not rescanned on every append. This is necessary for bounded append work and is not a complete audit of inherited storage.
