@@ -1,0 +1,5 @@
+# Full126 normal100000 live qualification
+
+Original126 workloads/433 pins are running100000 seeds each at frozen074bcfc, actual SDK2827904. Independent live review binds2498 selected Git inputs, exact original unitb2521868d0e34dc49e70a618dcd2b424, compiled/source inventories and SDK birth/argv/cwd/profile/executable hash observed twice. Original count1/nonrace/300m/twoGoCPU/512MiB SDK and5h15m Type=exec/no-restart supervisor remain. The whole supervisor has3GiB memory guard; this is separate from the SDK512MiB Go target.
+
+[Independent launch proof](launch.json). Terminal/full12600000-body/source-after/event/trace/archive review remains required. This qualifies live admission only. The original full124 normal SDK2697740/unitdbd776bba70f4cbcb588387200367910 is independently observed live and unchanged. Native candidate200 has stopped on seed2 failure and its complete original is S3-preserved; no failed native row is promoted or retried. Frozen older full126 race acceptance is separate from this updated source and every runtime/native/onlineGC/release gate.
