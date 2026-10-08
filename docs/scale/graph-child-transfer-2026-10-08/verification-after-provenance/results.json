@@ -1,0 +1,464 @@
+{
+  "source": "31f8e04edb04edbb581d2eb1a852f7bbda7800d2",
+  "runs": [
+    {
+      "name": "worker-normal",
+      "command": [
+        "go",
+        "test",
+        "-p=1",
+        "./worker",
+        "-run",
+        "^(TestNativeGraphWorkerReplayInputsSignalsAndResults|TestNativeGraphChildResultTransferAndReplay|TestGraphChildReplayRejectsForgedProvenance|TestGraphSelectedChildRequiresExactRecordedSignal)$",
+        "-count=1",
+        "-timeout=5m",
+        "-json"
+      ],
+      "working_directory": "/home/exedev/js-wf",
+      "environment": {
+        "GOMAXPROCS": "2",
+        "GOMEMLIMIT": "512MiB",
+        "SIM_COVERAGE_SUMMARY": "1",
+        "SIM_SEEDS": "1000",
+        "FAULT_TRACE_OUT": "/tmp/js-wf-graph-child-provenance-worker-normal-failure-20261008.json"
+      },
+      "exit_code": 0,
+      "wall_seconds": 21.668677205976564,
+      "package_passes": [
+        {
+          "package": "js-wf/worker",
+          "elapsed": 20.677
+        }
+      ],
+      "top_level_passes": [
+        "TestNativeGraphChildResultTransferAndReplay",
+        "TestGraphChildReplayRejectsForgedProvenance",
+        "TestGraphSelectedChildRequiresExactRecordedSignal",
+        "TestNativeGraphWorkerReplayInputsSignalsAndResults"
+      ]
+    },
+    {
+      "name": "wf-normal",
+      "command": [
+        "go",
+        "test",
+        "-p=1",
+        "./wf",
+        "-count=1",
+        "-timeout=5m",
+        "-json"
+      ],
+      "working_directory": "/home/exedev/js-wf",
+      "environment": {
+        "GOMAXPROCS": "2",
+        "GOMEMLIMIT": "512MiB",
+        "SIM_COVERAGE_SUMMARY": "1",
+        "SIM_SEEDS": "1000",
+        "FAULT_TRACE_OUT": "/tmp/js-wf-graph-child-provenance-wf-normal-failure-20261008.json"
+      },
+      "exit_code": 0,
+      "wall_seconds": 1.8107931559788994,
+      "package_passes": [
+        {
+          "package": "js-wf/wf",
+          "elapsed": 1.18
+        }
+      ],
+      "top_level_passes": [
+        "TestCheckpointCursorPreservesSDKIdentitiesAndReplay",
+        "TestCheckpointStateMatchesUninterruptedContinuation",
+        "TestCheckpointRejectsUnfinishedOrLiveTimerBoundary",
+        "TestCheckpointRejectsRuntimeObjectsInLocalsBeforeWrites",
+        "TestCheckpointRestoreRejectsGenerationAndSuffixBeforeEffects",
+        "TestCheckpointPositiveTimerMustBeCanceledEvenAfterSignalSelection",
+        "TestCheckpointRestoredPromiseVerifiesReferencedOutcome",
+        "TestCheckpointLocalValidationVisitsOverlappingSlices",
+        "TestCheckpointRestoresNullableEmptyStateAsWritableMap",
+        "TestStepRecovery",
+        "TestConcurrentStepOrderChangeFailsReplay",
+        "TestEffectPanicIsJournaled",
+        "TestEffectGoexitIsJournaled",
+        "TestBlockedEffectReturnsOnCancellationWithoutCompletion",
+        "TestContinueCapturesStateAndEndsDelivery",
+        "TestContinueRepairsPublicationCutsWithoutDuplicateEntries",
+        "TestContinueRejectsChangedLocalsAndStagesBeforeObjectReads",
+        "TestContinueRejectsUnregisteredAndInvalidBoundaries",
+        "TestContinueMarshalsLocalsOnceAndProtectsStoreInput",
+        "TestPromiseResolvesLargeChildResult",
+        "TestPromiseRepeatedAwaitReplaysOneConsumptionAndCopiesResult",
+        "TestPromiseObjectReadRetryDoesNotConsumeAnotherSignal",
+        "TestPromiseRepeatedChildFailureAndCorruptOutcome",
+        "TestPromiseResultCacheRemainsBounded",
+        "TestRandomWorkflowDAGsRecoverAfterKill",
+        "TestReplayAcrossContinuationFramesAndHistoricalFacts",
+        "TestReplayContinuationCanceledPendingEffect",
+        "TestReplayContinuationRejectsMissingObjectsUnknownStagesAndChanges",
+        "TestReplayContinuationPendingCorruptionAndStagePanic",
+        "TestReplayContinuationRejectsRebuiltStateMismatch",
+        "TestReplayContinuationChecksTerminalResultAndObjectHash",
+        "TestReplayRetainedLimitRequest",
+        "TestReplayLimitCannotHidePendingRequest",
+        "TestReplayLimitUnknownContinuationBeforeHandler",
+        "TestReplayLimitAtHardJournalCap",
+        "TestOfflineReplayNeverRunsIncompleteEffect",
+        "TestOfflineReplayWithSignalAndObjectResult",
+        "TestOfflineReplayObservesSuspensionAndFailure",
+        "TestOfflineReplayObservesChildSuspension",
+        "TestUnserializableStepResultsAreDurable",
+        "TestUnknownStepResultErrorKindFailsClosed",
+        "TestSearchAttributesReplayAndValidation",
+        "TestSelectManySuspendsReplaysChoiceAndRetainsLosers",
+        "TestSelectManyRejectsInvalidCasesAndCorruptCompletion",
+        "TestSelectManyUnknownCompletionReplaysRecordedWinner",
+        "TestTimerSelectSignalSuspendsAndReplaysChoice",
+        "TestTimerSelectSignalTimerBranchReplaysWithoutFiringAgain",
+        "TestJournaledStateReplayAndDivergence",
+        "TestDomainTimersUseUpperOriginAndLowerDueAcrossDeliveryClocks",
+        "TestDomainClockRejectsInvalidBoundsAndPreservesLegacy",
+        "TestDomainNativeHintFailureUsesDurableRepair",
+        "TestFreshPositiveTimersIgnoreCurrentDeliveryWakeup",
+        "TestTimerHandlesCancelAndCoalesceOnReplay",
+        "TestTimerHandleRetriesScheduleAfterRequest",
+        "TestSleepUsesServerClockAndReplays",
+        "TestNonpositiveSleepCompletesImmediately",
+        "TestRunOnceRetryKeepsDeduplicationKey",
+        "TestJournaledNowAndRandomReplay",
+        "TestVersionReplaysDecision"
+      ]
+    },
+    {
+      "name": "client-normal",
+      "command": [
+        "go",
+        "test",
+        "-p=1",
+        "./client",
+        "-count=1",
+        "-timeout=5m",
+        "-json"
+      ],
+      "working_directory": "/home/exedev/js-wf",
+      "environment": {
+        "GOMAXPROCS": "2",
+        "GOMEMLIMIT": "512MiB",
+        "SIM_COVERAGE_SUMMARY": "1",
+        "SIM_SEEDS": "1000",
+        "FAULT_TRACE_OUT": "/tmp/js-wf-graph-child-provenance-client-normal-failure-20261008.json"
+      },
+      "exit_code": 0,
+      "wall_seconds": 4.77586237405194,
+      "package_passes": [
+        {
+          "package": "js-wf/client",
+          "elapsed": 3.172
+        }
+      ],
+      "top_level_passes": [
+        "TestObservedSignalStatus",
+        "TestSignalRecordsPrePublicationDeadline",
+        "TestNativeGraphClientCanonicalTerminals"
+      ]
+    },
+    {
+      "name": "child-sim-normal",
+      "command": [
+        "go",
+        "test",
+        "-p=1",
+        "./sim",
+        "-run",
+        "^(TestSeededGraphChildReplay|TestGraphPublicationTransportCopiesFaultsAndIndependentCensus|TestPinnedRegressionCorpus)$",
+        "-count=1",
+        "-timeout=5m",
+        "-json"
+      ],
+      "working_directory": "/home/exedev/js-wf",
+      "environment": {
+        "GOMAXPROCS": "2",
+        "GOMEMLIMIT": "512MiB",
+        "SIM_COVERAGE_SUMMARY": "1",
+        "SIM_SEEDS": "10000",
+        "FAULT_TRACE_OUT": "/tmp/js-wf-graph-child-provenance-child-sim-normal-failure-20261008.json"
+      },
+      "exit_code": 0,
+      "wall_seconds": 218.72899483103538,
+      "package_passes": [
+        {
+          "package": "js-wf/sim",
+          "elapsed": 211.099
+        }
+      ],
+      "top_level_passes": [
+        "TestSeededGraphChildReplay",
+        "TestGraphPublicationTransportCopiesFaultsAndIndependentCensus",
+        "TestPinnedRegressionCorpus"
+      ]
+    },
+    {
+      "name": "signal-sim-normal",
+      "command": [
+        "go",
+        "test",
+        "-p=1",
+        "./sim",
+        "-run",
+        "^(TestSeededGraphChildSignalReplay|TestGraphChildSeedPipelineOrdersAndJoins)$",
+        "-count=1",
+        "-timeout=5m",
+        "-json"
+      ],
+      "working_directory": "/home/exedev/js-wf",
+      "environment": {
+        "GOMAXPROCS": "2",
+        "GOMEMLIMIT": "512MiB",
+        "SIM_COVERAGE_SUMMARY": "1",
+        "SIM_SEEDS": "10000",
+        "FAULT_TRACE_OUT": "/tmp/js-wf-graph-child-provenance-signal-sim-normal-failure-20261008.json"
+      },
+      "exit_code": 0,
+      "wall_seconds": 87.49688992096344,
+      "package_passes": [
+        {
+          "package": "js-wf/sim",
+          "elapsed": 86.795
+        }
+      ],
+      "top_level_passes": [
+        "TestGraphChildSeedPipelineOrdersAndJoins",
+        "TestSeededGraphChildSignalReplay"
+      ]
+    },
+    {
+      "name": "worker-race",
+      "command": [
+        "go",
+        "test",
+        "-p=1",
+        "-race",
+        "./worker",
+        "-run",
+        "^(TestNativeGraphWorkerReplayInputsSignalsAndResults|TestNativeGraphChildResultTransferAndReplay|TestGraphChildReplayRejectsForgedProvenance|TestGraphSelectedChildRequiresExactRecordedSignal)$",
+        "-count=1",
+        "-timeout=5m",
+        "-json"
+      ],
+      "working_directory": "/home/exedev/js-wf",
+      "environment": {
+        "GOMAXPROCS": "2",
+        "GOMEMLIMIT": "512MiB",
+        "SIM_COVERAGE_SUMMARY": "1",
+        "SIM_SEEDS": "1000",
+        "FAULT_TRACE_OUT": "/tmp/js-wf-graph-child-provenance-worker-race-failure-20261008.json"
+      },
+      "exit_code": 0,
+      "wall_seconds": 81.05370082199806,
+      "package_passes": [
+        {
+          "package": "js-wf/worker",
+          "elapsed": 76.141
+        }
+      ],
+      "top_level_passes": [
+        "TestNativeGraphChildResultTransferAndReplay",
+        "TestGraphChildReplayRejectsForgedProvenance",
+        "TestGraphSelectedChildRequiresExactRecordedSignal",
+        "TestNativeGraphWorkerReplayInputsSignalsAndResults"
+      ]
+    },
+    {
+      "name": "wf-race",
+      "command": [
+        "go",
+        "test",
+        "-p=1",
+        "-race",
+        "./wf",
+        "-count=1",
+        "-timeout=5m",
+        "-json"
+      ],
+      "working_directory": "/home/exedev/js-wf",
+      "environment": {
+        "GOMAXPROCS": "2",
+        "GOMEMLIMIT": "512MiB",
+        "SIM_COVERAGE_SUMMARY": "1",
+        "SIM_SEEDS": "1000",
+        "FAULT_TRACE_OUT": "/tmp/js-wf-graph-child-provenance-wf-race-failure-20261008.json"
+      },
+      "exit_code": 0,
+      "wall_seconds": 14.361754325975198,
+      "package_passes": [
+        {
+          "package": "js-wf/wf",
+          "elapsed": 12.222
+        }
+      ],
+      "top_level_passes": [
+        "TestCheckpointCursorPreservesSDKIdentitiesAndReplay",
+        "TestCheckpointStateMatchesUninterruptedContinuation",
+        "TestCheckpointRejectsUnfinishedOrLiveTimerBoundary",
+        "TestCheckpointRejectsRuntimeObjectsInLocalsBeforeWrites",
+        "TestCheckpointRestoreRejectsGenerationAndSuffixBeforeEffects",
+        "TestCheckpointPositiveTimerMustBeCanceledEvenAfterSignalSelection",
+        "TestCheckpointRestoredPromiseVerifiesReferencedOutcome",
+        "TestCheckpointLocalValidationVisitsOverlappingSlices",
+        "TestCheckpointRestoresNullableEmptyStateAsWritableMap",
+        "TestStepRecovery",
+        "TestConcurrentStepOrderChangeFailsReplay",
+        "TestEffectPanicIsJournaled",
+        "TestEffectGoexitIsJournaled",
+        "TestBlockedEffectReturnsOnCancellationWithoutCompletion",
+        "TestContinueCapturesStateAndEndsDelivery",
+        "TestContinueRepairsPublicationCutsWithoutDuplicateEntries",
+        "TestContinueRejectsChangedLocalsAndStagesBeforeObjectReads",
+        "TestContinueRejectsUnregisteredAndInvalidBoundaries",
+        "TestContinueMarshalsLocalsOnceAndProtectsStoreInput",
+        "TestPromiseResolvesLargeChildResult",
+        "TestPromiseRepeatedAwaitReplaysOneConsumptionAndCopiesResult",
+        "TestPromiseObjectReadRetryDoesNotConsumeAnotherSignal",
+        "TestPromiseRepeatedChildFailureAndCorruptOutcome",
+        "TestPromiseResultCacheRemainsBounded",
+        "TestRandomWorkflowDAGsRecoverAfterKill",
+        "TestReplayAcrossContinuationFramesAndHistoricalFacts",
+        "TestReplayContinuationCanceledPendingEffect",
+        "TestReplayContinuationRejectsMissingObjectsUnknownStagesAndChanges",
+        "TestReplayContinuationPendingCorruptionAndStagePanic",
+        "TestReplayContinuationRejectsRebuiltStateMismatch",
+        "TestReplayContinuationChecksTerminalResultAndObjectHash",
+        "TestReplayRetainedLimitRequest",
+        "TestReplayLimitCannotHidePendingRequest",
+        "TestReplayLimitUnknownContinuationBeforeHandler",
+        "TestReplayLimitAtHardJournalCap",
+        "TestOfflineReplayNeverRunsIncompleteEffect",
+        "TestOfflineReplayWithSignalAndObjectResult",
+        "TestOfflineReplayObservesSuspensionAndFailure",
+        "TestOfflineReplayObservesChildSuspension",
+        "TestUnserializableStepResultsAreDurable",
+        "TestUnknownStepResultErrorKindFailsClosed",
+        "TestSearchAttributesReplayAndValidation",
+        "TestSelectManySuspendsReplaysChoiceAndRetainsLosers",
+        "TestSelectManyRejectsInvalidCasesAndCorruptCompletion",
+        "TestSelectManyUnknownCompletionReplaysRecordedWinner",
+        "TestTimerSelectSignalSuspendsAndReplaysChoice",
+        "TestTimerSelectSignalTimerBranchReplaysWithoutFiringAgain",
+        "TestJournaledStateReplayAndDivergence",
+        "TestDomainTimersUseUpperOriginAndLowerDueAcrossDeliveryClocks",
+        "TestDomainClockRejectsInvalidBoundsAndPreservesLegacy",
+        "TestDomainNativeHintFailureUsesDurableRepair",
+        "TestFreshPositiveTimersIgnoreCurrentDeliveryWakeup",
+        "TestTimerHandlesCancelAndCoalesceOnReplay",
+        "TestTimerHandleRetriesScheduleAfterRequest",
+        "TestSleepUsesServerClockAndReplays",
+        "TestNonpositiveSleepCompletesImmediately",
+        "TestRunOnceRetryKeepsDeduplicationKey",
+        "TestJournaledNowAndRandomReplay",
+        "TestVersionReplaysDecision"
+      ]
+    },
+    {
+      "name": "client-race",
+      "command": [
+        "go",
+        "test",
+        "-p=1",
+        "-race",
+        "./client",
+        "-count=1",
+        "-timeout=5m",
+        "-json"
+      ],
+      "working_directory": "/home/exedev/js-wf",
+      "environment": {
+        "GOMAXPROCS": "2",
+        "GOMEMLIMIT": "512MiB",
+        "SIM_COVERAGE_SUMMARY": "1",
+        "SIM_SEEDS": "1000",
+        "FAULT_TRACE_OUT": "/tmp/js-wf-graph-child-provenance-client-race-failure-20261008.json"
+      },
+      "exit_code": 0,
+      "wall_seconds": 9.876663568022195,
+      "package_passes": [
+        {
+          "package": "js-wf/client",
+          "elapsed": 7.769
+        }
+      ],
+      "top_level_passes": [
+        "TestObservedSignalStatus",
+        "TestSignalRecordsPrePublicationDeadline",
+        "TestNativeGraphClientCanonicalTerminals"
+      ]
+    },
+    {
+      "name": "child-sim-race",
+      "command": [
+        "go",
+        "test",
+        "-p=1",
+        "-race",
+        "./sim",
+        "-run",
+        "^(TestSeededGraphChildReplay|TestGraphPublicationTransportCopiesFaultsAndIndependentCensus|TestPinnedRegressionCorpus)$",
+        "-count=1",
+        "-timeout=5m",
+        "-json"
+      ],
+      "working_directory": "/home/exedev/js-wf",
+      "environment": {
+        "GOMAXPROCS": "2",
+        "GOMEMLIMIT": "512MiB",
+        "SIM_COVERAGE_SUMMARY": "1",
+        "SIM_SEEDS": "1000",
+        "FAULT_TRACE_OUT": "/tmp/js-wf-graph-child-provenance-child-sim-race-failure-20261008.json"
+      },
+      "exit_code": 0,
+      "wall_seconds": 238.3089651929913,
+      "package_passes": [
+        {
+          "package": "js-wf/sim",
+          "elapsed": 226.251
+        }
+      ],
+      "top_level_passes": [
+        "TestSeededGraphChildReplay",
+        "TestGraphPublicationTransportCopiesFaultsAndIndependentCensus",
+        "TestPinnedRegressionCorpus"
+      ]
+    },
+    {
+      "name": "signal-sim-race",
+      "command": [
+        "go",
+        "test",
+        "-p=1",
+        "-race",
+        "./sim",
+        "-run",
+        "^(TestSeededGraphChildSignalReplay|TestGraphChildSeedPipelineOrdersAndJoins)$",
+        "-count=1",
+        "-timeout=5m",
+        "-json"
+      ],
+      "working_directory": "/home/exedev/js-wf",
+      "environment": {
+        "GOMAXPROCS": "2",
+        "GOMEMLIMIT": "512MiB",
+        "SIM_COVERAGE_SUMMARY": "1",
+        "SIM_SEEDS": "1000",
+        "FAULT_TRACE_OUT": "/tmp/js-wf-graph-child-provenance-signal-sim-race-failure-20261008.json"
+      },
+      "exit_code": 0,
+      "wall_seconds": 119.82446781999897,
+      "package_passes": [
+        {
+          "package": "js-wf/sim",
+          "elapsed": 118.883
+        }
+      ],
+      "top_level_passes": [
+        "TestGraphChildSeedPipelineOrdersAndJoins",
+        "TestSeededGraphChildSignalReplay"
+      ]
+    }
+  ]
+}
