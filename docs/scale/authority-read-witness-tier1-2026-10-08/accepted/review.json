@@ -1,0 +1,129 @@
+{
+  "source": "44c6631bc003ddba97c7108ab4da6073dd26e7de",
+  "source_inputs": 2433,
+  "native_source_inputs": 2433,
+  "model_archive": {
+    "bytes": 34860327,
+    "sha256": "d85952b09a223ddc91177db6f1b1211855dd9385945a99caf88e5bd052f5e298"
+  },
+  "native_archive": {
+    "bytes": 23512111,
+    "sha256": "5d7c5707565071432597f30f0c7ba8d90a65ee3f18c0d0f8d2568733d2d886a9"
+  },
+  "profiles": {
+    "normal100k": {
+      "execution": {
+        "source": "44c6631bc003ddba97c7108ab4da6073dd26e7de",
+        "exit_code": 0,
+        "elapsed_seconds": 5.8329360829957295,
+        "profile": "normal100k",
+        "seeds": 100000,
+        "race": false,
+        "command": [
+          "/tmp/js-wf-authority-witness-tier1-20261008/normal100k/sim.test",
+          "-test.v",
+          "-test.run=^(TestSeededAuthorityReadWitnessReplay|TestPinnedRegressionCorpus)$/^authority-witness-",
+          "-test.count=1",
+          "-test.timeout=3m"
+        ],
+        "build": [
+          "go",
+          "test",
+          "-p=1",
+          "-buildvcs=true",
+          "-c",
+          "-o",
+          "/tmp/js-wf-authority-witness-tier1-20261008/normal100k/sim.test",
+          "./sim"
+        ],
+        "body_complete": true,
+        "scope": "Focused shared Tier1 workload, 14 pins; not full126 graph or native transport qualification."
+      },
+      "mode_counts": {
+        "cancel_after": 7354,
+        "cancel_before": 7063,
+        "fresh_absence": 7075,
+        "fresh_value": 7211,
+        "lost_ack": 7102,
+        "no_quorum": 7165,
+        "persistent_stale": 7088,
+        "replacement": 7200,
+        "same_ack": 7215,
+        "snapshot_error": 7110,
+        "speculative_value": 7076,
+        "stale_absence": 7164,
+        "stale_value": 7058,
+        "zero_ack": 7119
+      },
+      "actual_pid": 2771993
+    },
+    "race1000": {
+      "execution": {
+        "source": "44c6631bc003ddba97c7108ab4da6073dd26e7de",
+        "exit_code": 0,
+        "elapsed_seconds": 1.3798768389970064,
+        "profile": "race1000",
+        "seeds": 1000,
+        "race": true,
+        "command": [
+          "/tmp/js-wf-authority-witness-tier1-20261008/race1000/sim.test",
+          "-test.v",
+          "-test.run=^(TestSeededAuthorityReadWitnessReplay|TestPinnedRegressionCorpus)$/^authority-witness-",
+          "-test.count=1",
+          "-test.timeout=3m"
+        ],
+        "build": [
+          "go",
+          "test",
+          "-p=1",
+          "-buildvcs=true",
+          "-race",
+          "-c",
+          "-o",
+          "/tmp/js-wf-authority-witness-tier1-20261008/race1000/sim.test",
+          "./sim"
+        ],
+        "body_complete": true,
+        "scope": "Focused shared Tier1 workload, 14 pins; not full126 graph or native transport qualification."
+      },
+      "mode_counts": {
+        "cancel_after": 79,
+        "cancel_before": 73,
+        "fresh_absence": 73,
+        "fresh_value": 60,
+        "lost_ack": 82,
+        "no_quorum": 71,
+        "persistent_stale": 65,
+        "replacement": 85,
+        "same_ack": 61,
+        "snapshot_error": 75,
+        "speculative_value": 65,
+        "stale_absence": 85,
+        "stale_value": 57,
+        "zero_ack": 69
+      },
+      "actual_pid": 2774386
+    }
+  },
+  "native_execution": {
+    "label": "blob",
+    "source": "44c6631bc003ddba97c7108ab4da6073dd26e7de",
+    "exit_code": 0,
+    "elapsed_seconds": 12.633720248006284
+  },
+  "actual_positive_log_mutations_rejected": [
+    "normal100k/short_count",
+    "normal100k/missing_pin",
+    "normal100k/race",
+    "normal100k/missing_choices",
+    "normal100k/no_ack_mode",
+    "normal100k/failed",
+    "race1000/short_count",
+    "race1000/missing_pin",
+    "race1000/race",
+    "race1000/missing_choices",
+    "race1000/no_ack_mode",
+    "race1000/failed"
+  ],
+  "scope": "Focused production shared decision helper model normal100k/race1000, fourteen exact common regression replays per profile and five native cases. Not full126/433 final-source qualification or broad native/release/production online GC."
+}

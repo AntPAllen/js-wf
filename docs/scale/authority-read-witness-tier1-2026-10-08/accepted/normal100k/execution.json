@@ -1,0 +1,27 @@
+{
+  "source": "44c6631bc003ddba97c7108ab4da6073dd26e7de",
+  "exit_code": 0,
+  "elapsed_seconds": 5.8329360829957295,
+  "profile": "normal100k",
+  "seeds": 100000,
+  "race": false,
+  "command": [
+    "/tmp/js-wf-authority-witness-tier1-20261008/normal100k/sim.test",
+    "-test.v",
+    "-test.run=^(TestSeededAuthorityReadWitnessReplay|TestPinnedRegressionCorpus)$/^authority-witness-",
+    "-test.count=1",
+    "-test.timeout=3m"
+  ],
+  "build": [
+    "go",
+    "test",
+    "-p=1",
+    "-buildvcs=true",
+    "-c",
+    "-o",
+    "/tmp/js-wf-authority-witness-tier1-20261008/normal100k/sim.test",
+    "./sim"
+  ],
+  "body_complete": true,
+  "scope": "Focused shared Tier1 workload, 14 pins; not full126 graph or native transport qualification."
+}
