@@ -44,4 +44,12 @@ Existing production collection remains quiescent. Tests of the graph's data stru
 
 The graph prototype now has an experimental versioned native metadata authority on a dedicated JetStream stream/prefix. Same-subject conditional read witnesses preserve physical-sequence fencing and permanent logical heads/scoped generations; direct and graph adapters reject each other’s envelopes. Strict bounded canonical decode and stream retention/admission checks fail closed. R1/R3 restart, stale GET/absence, lost reply, malformed-wire and encoding controls pass, alongside complete package regression at its recorded source scope. [Evidence and exact source limits](scale/graph-native-authority-2026-10-08/).
 
-It implements only `Authority`, not the full graph `Port`: native graph object uploads/partial attempts/tombstones, isolated bucket admission, graph-aware native collection, deployment permission checks and native end-to-end fault/scale qualification are next. Reader retention ownership, partial compaction/import and canonical runtime migration remain required.
+That metadata source implements only `Authority`. The subsequent isolated native graph Port adds object uploads, staging reservations, tombstones, bounded physical reads and native collection controls; deployment permission checks and end-to-end fault/scale qualification remain open. Reader retention ownership, partial compaction/import and canonical runtime migration remain required.
+
+## Isolated native graph Port component
+
+The experimental graph `NativePort` now combines native graph authority with a dedicated `graph-recoverable-v1` object bucket. Durable per-attempt staging reservations precede bytes, completion is conditional on the reservation, and collector tombstones fence delayed completion before chunk purge. Read bytes/count/subject/sequence/SHA and context are checked with native message requests; no consumer is created. Graph and direct bucket formats reject each other.
+
+Complete 27-group package regression at0c00893 passes normal20.834s/race77.039s. R1/R3 actual Port controls preserve 17 appended records/one shared payload across sweeps, independently inspect raw child JSON, reclaim all live objects/physical chunks after retirement, reject lost replies and collector-winning completion/publication, and preserve a fresh same-content payload through old-receipt deletion. [Evidence and precise limits](scale/graph-native-objects-2026-10-08/).
+
+Native roles/domain/account permissions, server/process/power loss and real partitions, concurrent and scale campaigns, durable reader retention/partial compaction/import and canonical runtime paths remain unimplemented or unqualified. The runtime's production collector remains quiescent.
