@@ -1,0 +1,402 @@
+{
+  "source": "1c777bb21af7972f7dd0e309c6fa4ab170d04d33",
+  "runs": [
+    {
+      "name": "client-normal",
+      "command": [
+        "go",
+        "test",
+        "-p=1",
+        "./client",
+        "-count=1",
+        "-timeout=5m",
+        "-json"
+      ],
+      "working_directory": "/home/exedev/js-wf",
+      "environment": {
+        "GOMAXPROCS": "2",
+        "GOMEMLIMIT": "512MiB",
+        "SIM_COVERAGE_SUMMARY": "1",
+        "SIM_SEEDS": "1000",
+        "FAULT_TRACE_OUT": "/tmp/js-wf-graph-start-client-normal-failure-20261008.json"
+      },
+      "exit_code": 0,
+      "wall_seconds": 5.610875966027379,
+      "package_passes": [
+        {
+          "package": "js-wf/client",
+          "elapsed": 4.751
+        }
+      ],
+      "top_level_passes": [
+        "TestObservedSignalStatus",
+        "TestSignalRecordsPrePublicationDeadline",
+        "TestGraphClientBindingKeepsOriginalModeAndUsesProvidedTransports",
+        "TestNativeGraphClientCanonicalTerminals",
+        "TestNativeGraphClientSignalsUseCanonicalHistory"
+      ]
+    },
+    {
+      "name": "journal-normal",
+      "command": [
+        "go",
+        "test",
+        "-p=1",
+        "./journal",
+        "-run",
+        "^(TestGraphJournal|TestNativeGraphJournal|TestGraphCanonicalStart)",
+        "-count=1",
+        "-timeout=5m",
+        "-json"
+      ],
+      "working_directory": "/home/exedev/js-wf",
+      "environment": {
+        "GOMAXPROCS": "2",
+        "GOMEMLIMIT": "512MiB",
+        "SIM_COVERAGE_SUMMARY": "1",
+        "SIM_SEEDS": "1000",
+        "FAULT_TRACE_OUT": "/tmp/js-wf-graph-start-journal-normal-failure-20261008.json"
+      },
+      "exit_code": 0,
+      "wall_seconds": 7.922062108002137,
+      "package_passes": [
+        {
+          "package": "js-wf/journal",
+          "elapsed": 7.016
+        }
+      ],
+      "top_level_passes": [
+        "TestNativeGraphJournalGenerationAndDrain",
+        "TestNativeGraphJournalPublicSDK",
+        "TestNativeGraphJournalPublicAdmission",
+        "TestGraphJournalPublicConfiguration",
+        "TestGraphCanonicalStartPendingBindingAndRetainedInput",
+        "TestGraphCanonicalStartRejectsLegacyAndBounds",
+        "TestGraphJournalGenerationRetainedReaderAndDrain",
+        "TestGraphJournalStaleAndUnknownAppends",
+        "TestGraphJournalCorruptCursorAndLeaseBoundary",
+        "TestGraphJournalLimitsAndForeignRoot",
+        "TestGraphJournalEntryPayloadAlias",
+        "TestGraphJournalCloseContentionAndAmbiguousRelease",
+        "TestGraphJournalAcquireRenewContention",
+        "TestGraphJournalTerminalSnapshotAdmission",
+        "TestGraphJournalExistingHistoryIsNotStaleAbsence",
+        "TestGraphJournalPurgeFenceRetainsReadersAndGeneration"
+      ]
+    },
+    {
+      "name": "worker-normal",
+      "command": [
+        "go",
+        "test",
+        "-p=1",
+        "./worker",
+        "-run",
+        "^(TestNativeGraphWorkerReplayInputsSignalsAndResults|TestNativeGraphChildResultTransferAndReplay|TestGraphChildReplayRejectsForgedProvenance|TestGraphSelectedChildRequiresExactRecordedSignal|TestNativeGraphWorkerParentNotifications|TestNativeCanonicalStartRecoveryWorkerReplayAndPurge)$",
+        "-count=1",
+        "-timeout=5m",
+        "-json"
+      ],
+      "working_directory": "/home/exedev/js-wf",
+      "environment": {
+        "GOMAXPROCS": "2",
+        "GOMEMLIMIT": "512MiB",
+        "SIM_COVERAGE_SUMMARY": "1",
+        "SIM_SEEDS": "1000",
+        "FAULT_TRACE_OUT": "/tmp/js-wf-graph-start-worker-normal-failure-20261008.json"
+      },
+      "exit_code": 0,
+      "wall_seconds": 31.905982684984338,
+      "package_passes": [
+        {
+          "package": "js-wf/worker",
+          "elapsed": 31.052
+        }
+      ],
+      "top_level_passes": [
+        "TestNativeGraphChildResultTransferAndReplay",
+        "TestGraphChildReplayRejectsForgedProvenance",
+        "TestGraphSelectedChildRequiresExactRecordedSignal",
+        "TestNativeGraphWorkerReplayInputsSignalsAndResults",
+        "TestNativeGraphWorkerParentNotifications",
+        "TestNativeCanonicalStartRecoveryWorkerReplayAndPurge"
+      ]
+    },
+    {
+      "name": "retention-normal",
+      "command": [
+        "go",
+        "test",
+        "-p=1",
+        "./retention",
+        "-count=1",
+        "-timeout=5m",
+        "-json"
+      ],
+      "working_directory": "/home/exedev/js-wf",
+      "environment": {
+        "GOMAXPROCS": "2",
+        "GOMEMLIMIT": "512MiB",
+        "SIM_COVERAGE_SUMMARY": "1",
+        "SIM_SEEDS": "1000",
+        "FAULT_TRACE_OUT": "/tmp/js-wf-graph-start-retention-normal-failure-20261008.json"
+      },
+      "exit_code": 0,
+      "wall_seconds": 10.074678680044599,
+      "package_passes": [
+        {
+          "package": "js-wf/retention",
+          "elapsed": 9.25
+        }
+      ],
+      "top_level_passes": [
+        "TestNativeGraphPurgeEveryCommittedStageAndRetainedReader",
+        "TestPurgeResumesAfterEveryStage",
+        "TestPurgeFallbackTimersByGenerationAndResume",
+        "TestSweepTombstonesChecksExpiryGenerationAndPurgeOrder",
+        "TestTombstoneScanDrainsPhysicalDeleteMarkers",
+        "TestTombstoneMarkerPurgeProtectsConcurrentReuse",
+        "TestTombstonePartialCursorDoesNotSkipUncertainReadGenerationOrDelete",
+        "TestTombstoneScanPagesAndProtectsNewerState",
+        "TestNativeGraphRetentionWorkflowBindsAndPurgesTarget"
+      ]
+    },
+    {
+      "name": "sim-normal",
+      "command": [
+        "go",
+        "test",
+        "-p=1",
+        "./sim",
+        "-run",
+        "^(TestSeededGraphStartReplay|TestGraphPublicationTransportCopiesFaultsAndIndependentCensus|TestPinnedRegressionCorpus|TestGraphChildSeedPipelineOrdersAndJoins)$",
+        "-count=1",
+        "-timeout=5m",
+        "-json"
+      ],
+      "working_directory": "/home/exedev/js-wf",
+      "environment": {
+        "GOMAXPROCS": "2",
+        "GOMEMLIMIT": "512MiB",
+        "SIM_COVERAGE_SUMMARY": "1",
+        "SIM_SEEDS": "10000",
+        "FAULT_TRACE_OUT": "/tmp/js-wf-graph-start-sim-normal-failure-20261008.json"
+      },
+      "exit_code": 0,
+      "wall_seconds": 101.46511833096156,
+      "package_passes": [
+        {
+          "package": "js-wf/sim",
+          "elapsed": 100.75
+        }
+      ],
+      "top_level_passes": [
+        "TestGraphChildSeedPipelineOrdersAndJoins",
+        "TestGraphPublicationTransportCopiesFaultsAndIndependentCensus",
+        "TestSeededGraphStartReplay",
+        "TestPinnedRegressionCorpus"
+      ]
+    },
+    {
+      "name": "client-race",
+      "command": [
+        "go",
+        "test",
+        "-p=1",
+        "-race",
+        "./client",
+        "-count=1",
+        "-timeout=5m",
+        "-json"
+      ],
+      "working_directory": "/home/exedev/js-wf",
+      "environment": {
+        "GOMAXPROCS": "2",
+        "GOMEMLIMIT": "512MiB",
+        "SIM_COVERAGE_SUMMARY": "1",
+        "SIM_SEEDS": "1000",
+        "FAULT_TRACE_OUT": "/tmp/js-wf-graph-start-client-race-failure-20261008.json"
+      },
+      "exit_code": 0,
+      "wall_seconds": 21.702332058979664,
+      "package_passes": [
+        {
+          "package": "js-wf/client",
+          "elapsed": 15.285
+        }
+      ],
+      "top_level_passes": [
+        "TestObservedSignalStatus",
+        "TestSignalRecordsPrePublicationDeadline",
+        "TestGraphClientBindingKeepsOriginalModeAndUsesProvidedTransports",
+        "TestNativeGraphClientCanonicalTerminals",
+        "TestNativeGraphClientSignalsUseCanonicalHistory"
+      ]
+    },
+    {
+      "name": "journal-race",
+      "command": [
+        "go",
+        "test",
+        "-p=1",
+        "-race",
+        "./journal",
+        "-run",
+        "^(TestGraphJournal|TestNativeGraphJournal|TestGraphCanonicalStart)",
+        "-count=1",
+        "-timeout=5m",
+        "-json"
+      ],
+      "working_directory": "/home/exedev/js-wf",
+      "environment": {
+        "GOMAXPROCS": "2",
+        "GOMEMLIMIT": "512MiB",
+        "SIM_COVERAGE_SUMMARY": "1",
+        "SIM_SEEDS": "1000",
+        "FAULT_TRACE_OUT": "/tmp/js-wf-graph-start-journal-race-failure-20261008.json"
+      },
+      "exit_code": 0,
+      "wall_seconds": 54.18752754997695,
+      "package_passes": [
+        {
+          "package": "js-wf/journal",
+          "elapsed": 46.637
+        }
+      ],
+      "top_level_passes": [
+        "TestNativeGraphJournalGenerationAndDrain",
+        "TestNativeGraphJournalPublicSDK",
+        "TestNativeGraphJournalPublicAdmission",
+        "TestGraphJournalPublicConfiguration",
+        "TestGraphCanonicalStartPendingBindingAndRetainedInput",
+        "TestGraphCanonicalStartRejectsLegacyAndBounds",
+        "TestGraphJournalGenerationRetainedReaderAndDrain",
+        "TestGraphJournalStaleAndUnknownAppends",
+        "TestGraphJournalCorruptCursorAndLeaseBoundary",
+        "TestGraphJournalLimitsAndForeignRoot",
+        "TestGraphJournalEntryPayloadAlias",
+        "TestGraphJournalCloseContentionAndAmbiguousRelease",
+        "TestGraphJournalAcquireRenewContention",
+        "TestGraphJournalTerminalSnapshotAdmission",
+        "TestGraphJournalExistingHistoryIsNotStaleAbsence",
+        "TestGraphJournalPurgeFenceRetainsReadersAndGeneration"
+      ]
+    },
+    {
+      "name": "worker-race",
+      "command": [
+        "go",
+        "test",
+        "-p=1",
+        "-race",
+        "./worker",
+        "-run",
+        "^(TestNativeGraphWorkerReplayInputsSignalsAndResults|TestNativeGraphChildResultTransferAndReplay|TestGraphChildReplayRejectsForgedProvenance|TestGraphSelectedChildRequiresExactRecordedSignal|TestNativeGraphWorkerParentNotifications|TestNativeCanonicalStartRecoveryWorkerReplayAndPurge)$",
+        "-count=1",
+        "-timeout=5m",
+        "-json"
+      ],
+      "working_directory": "/home/exedev/js-wf",
+      "environment": {
+        "GOMAXPROCS": "2",
+        "GOMEMLIMIT": "512MiB",
+        "SIM_COVERAGE_SUMMARY": "1",
+        "SIM_SEEDS": "1000",
+        "FAULT_TRACE_OUT": "/tmp/js-wf-graph-start-worker-race-failure-20261008.json"
+      },
+      "exit_code": 0,
+      "wall_seconds": 172.5823298659525,
+      "package_passes": [
+        {
+          "package": "js-wf/worker",
+          "elapsed": 168.801
+        }
+      ],
+      "top_level_passes": [
+        "TestNativeGraphChildResultTransferAndReplay",
+        "TestGraphChildReplayRejectsForgedProvenance",
+        "TestGraphSelectedChildRequiresExactRecordedSignal",
+        "TestNativeGraphWorkerReplayInputsSignalsAndResults",
+        "TestNativeGraphWorkerParentNotifications",
+        "TestNativeCanonicalStartRecoveryWorkerReplayAndPurge"
+      ]
+    },
+    {
+      "name": "retention-race",
+      "command": [
+        "go",
+        "test",
+        "-p=1",
+        "-race",
+        "./retention",
+        "-count=1",
+        "-timeout=5m",
+        "-json"
+      ],
+      "working_directory": "/home/exedev/js-wf",
+      "environment": {
+        "GOMAXPROCS": "2",
+        "GOMEMLIMIT": "512MiB",
+        "SIM_COVERAGE_SUMMARY": "1",
+        "SIM_SEEDS": "1000",
+        "FAULT_TRACE_OUT": "/tmp/js-wf-graph-start-retention-race-failure-20261008.json"
+      },
+      "exit_code": 0,
+      "wall_seconds": 34.058049168030266,
+      "package_passes": [
+        {
+          "package": "js-wf/retention",
+          "elapsed": 30.107
+        }
+      ],
+      "top_level_passes": [
+        "TestNativeGraphPurgeEveryCommittedStageAndRetainedReader",
+        "TestPurgeResumesAfterEveryStage",
+        "TestPurgeFallbackTimersByGenerationAndResume",
+        "TestSweepTombstonesChecksExpiryGenerationAndPurgeOrder",
+        "TestTombstoneScanDrainsPhysicalDeleteMarkers",
+        "TestTombstoneMarkerPurgeProtectsConcurrentReuse",
+        "TestTombstonePartialCursorDoesNotSkipUncertainReadGenerationOrDelete",
+        "TestTombstoneScanPagesAndProtectsNewerState",
+        "TestNativeGraphRetentionWorkflowBindsAndPurgesTarget"
+      ]
+    },
+    {
+      "name": "sim-race",
+      "command": [
+        "go",
+        "test",
+        "-p=1",
+        "-race",
+        "./sim",
+        "-run",
+        "^(TestSeededGraphStartReplay|TestGraphPublicationTransportCopiesFaultsAndIndependentCensus|TestPinnedRegressionCorpus|TestGraphChildSeedPipelineOrdersAndJoins)$",
+        "-count=1",
+        "-timeout=5m",
+        "-json"
+      ],
+      "working_directory": "/home/exedev/js-wf",
+      "environment": {
+        "GOMAXPROCS": "2",
+        "GOMEMLIMIT": "512MiB",
+        "SIM_COVERAGE_SUMMARY": "1",
+        "SIM_SEEDS": "1000",
+        "FAULT_TRACE_OUT": "/tmp/js-wf-graph-start-sim-race-failure-20261008.json"
+      },
+      "exit_code": 0,
+      "wall_seconds": 178.17820059100632,
+      "package_passes": [
+        {
+          "package": "js-wf/sim",
+          "elapsed": 164.288
+        }
+      ],
+      "top_level_passes": [
+        "TestGraphChildSeedPipelineOrdersAndJoins",
+        "TestGraphPublicationTransportCopiesFaultsAndIndependentCensus",
+        "TestSeededGraphStartReplay",
+        "TestPinnedRegressionCorpus"
+      ]
+    }
+  ]
+}
