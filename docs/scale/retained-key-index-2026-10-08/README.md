@@ -11,3 +11,8 @@ Thirty-two deterministic map cases perform512 updates each, compare captured pop
 The owned model checks captured population stability, an unpublished competing fork, unknown reads, retained retirement, released/expired pins including an empty forest, and complete fixture object drain. Native R1/R3 reopen adapters after16 appends and retirement using the exact retained checkpoint: eight captured keys resolve to their owned input payloads, eight later keys remain absent, and release rejects further reads. Fixture collection verifies zero objects plus a complete native subject census containing zero physical chunks. Permanent metadata may remain. Collection clock advances are explicit fixture controls, not server clock faults or production GC.
 
 This supplies the bounded lookup primitive needed by canonical Signal idempotency. It does not implement Signal reservation descriptors, publication, source-order binding, queue intake/drain, generation lifecycle migration, a shared simulation workload/corpus, native concurrent publishers, process/storage faults or scale. The existing codec reader interface allows the eventual Signal reader to extract a bounded packet from its validated owned record envelope. Runtime adoption and all original plan acceptance gates remain open.
+
+
+## Integrated main verification
+
+The unchanged index code also passes full-package normal/race at frozen main `e6c3c4041da188247d1bef84898fb221d8678676`, including the completion retry and CI integration changes. [Merged-source evidence](integrated-qualification/). The original isolated source revisions are retained as main-history merge parents so their committed input checks remain reproducible from a clone.
