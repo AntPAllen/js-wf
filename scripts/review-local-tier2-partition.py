@@ -129,7 +129,7 @@ def terminal_cohort(segment, invocations, required):
     require(type(invocations) is int and invocations > 0 and invocations % 28 == 0
             and cutoff >= invocations and expected == visited == invocations,
             'terminal latency population differs from complete retained cohort')
-    retained = segment.find('MATRIX_RETAINED row=partition ')
+    retained = segment.find('MATRIX_RETAINED row=server_partition ')
     require(retained > matches[0].end(), 'terminal cohort must precede final retained report')
     checkpoints = [(int(batch), int(tail)) for batch, tail in re.findall(
         r'checkpoint audit batch=(\d+) invocation_cutoff=(\d+) started', segment)]

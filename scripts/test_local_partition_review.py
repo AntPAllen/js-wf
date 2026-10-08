@@ -22,7 +22,7 @@ class LocalPartitionReviewControls(unittest.TestCase):
     def test_corrected_source_requires_complete_terminal_latency_population(self):
         marker = 'MATRIX_TERMINAL_COHORT cutoff=840 expected_invocations=840 visited_invocations=840\n'
         checkpoint = 'checkpoint audit batch=30 invocation_cutoff=840 started\n'
-        retained = 'MATRIX_RETAINED row=partition report=...\n'
+        retained = 'MATRIX_RETAINED row=server_partition report=...\n'
         positive = checkpoint + marker + retained
         self.assertEqual(review.terminal_cohort(positive, 840, True)['cutoff'], 840)
         # A physical tail may exceed the count because of retained holes.
