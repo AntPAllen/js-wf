@@ -74,19 +74,19 @@ func (w *Worker) drainCanonicalSignals(ctx context.Context, g *graphDelivery, cu
 		if json.Unmarshal(record.Payload, &event) != nil || event.Canonical == nil || event.Canonical.Index != next || event.Sequence <= lastSequence {
 			return nil, wf.ErrCorruptJournal
 		}
-		binding, _, e := queue.SignalAt(ctx, next)
+		binding, e := queue.SignalBindingAt(ctx, next)
 		if e != nil {
 			return nil, e
 		}
 		if binding.Input.Token != event.Canonical.Token || binding.Sequence != event.Sequence || binding.Input.Request.Name != event.Name || binding.Input.InputSHA256 != event.Hash {
 			return nil, wf.ErrCorruptJournal
 		}
-		var data []byte
-		if event.Ref != "" {
-			data, e = g.GetBytes(ctx, event.Ref)
-		} else {
-			data = event.Payload
+		// Canonical replay must resolve the journal-owned edge. Inline bytes
+		// or an alternate locator cannot authorize the consumed payload.
+		if event.Ref != "graph-signal-"+event.Hash || len(event.Payload) != 0 {
+			return nil, wf.ErrCorruptJournal
 		}
+		data, e := g.GetBytes(ctx, event.Ref)
 		if e != nil {
 			return nil, e
 		}

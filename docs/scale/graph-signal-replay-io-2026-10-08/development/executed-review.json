@@ -1,0 +1,74 @@
+{
+  "scope": "development controls; no frozen whole-suite claim",
+  "results": [
+    {
+      "log": "final-worker-normal.jsonl",
+      "sha256": "f187280c77c4f9ce9d82fec61467e761d9369abb3cb090c092838ef4562a6314",
+      "groups": [
+        "TestGraphCanonicalSignalReplayReadsJournalOwnedBodyOnce",
+        "TestNativeCanonicalSignalQueueChildTransferAndReplay",
+        "TestNativeCanonicalSignalQueueWorkerReplay"
+      ],
+      "seconds": 31.947
+    },
+    {
+      "log": "final-worker-race.jsonl",
+      "sha256": "35018ec1113a92baac79df37bcf8549a8aeadbbcf2ef61ee40d23face6d9732d",
+      "groups": [
+        "TestGraphCanonicalSignalReplayReadsJournalOwnedBodyOnce",
+        "TestNativeCanonicalSignalQueueChildTransferAndReplay",
+        "TestNativeCanonicalSignalQueueWorkerReplay"
+      ],
+      "seconds": 154.976
+    },
+    {
+      "log": "final-journal-normal.jsonl",
+      "sha256": "5bdd42c25d54c11c3984ed32d3ec6369283a1a00998a44a0b7c0ac9465c0ac25",
+      "groups": [
+        "TestGraphCanonicalSignalQueueConcurrentBindingAndRetirement",
+        "TestGraphCanonicalSignalQueueNeverSkipsUnknownOrForgedSource",
+        "TestGraphCanonicalSignalQueueOrderAndPersistentDuplicates",
+        "TestGraphCanonicalSignalQueueReplacementAndFutureFence"
+      ],
+      "seconds": 3.046
+    },
+    {
+      "log": "final-journal-race.jsonl",
+      "sha256": "628ad7b8c4167d72a6646aa9fe5f876cfedd88654303ae689585b9d66525c6cd",
+      "groups": [
+        "TestGraphCanonicalSignalQueueConcurrentBindingAndRetirement",
+        "TestGraphCanonicalSignalQueueNeverSkipsUnknownOrForgedSource",
+        "TestGraphCanonicalSignalQueueOrderAndPersistentDuplicates",
+        "TestGraphCanonicalSignalQueueReplacementAndFutureFence"
+      ],
+      "seconds": 33.847
+    },
+    {
+      "log": "final-pins-normal.jsonl",
+      "sha256": "b599f429e6745b992affe87b24dfa33faa5ee08a946c4214d4a072181a8369f3",
+      "groups": [
+        "TestPinnedRegressionCorpus"
+      ],
+      "seconds": 2.848
+    },
+    {
+      "log": "final-pins-race.jsonl",
+      "sha256": "684af10c549452d19c14d526bfbdace2024183b6759761d3376261a7fda047bf",
+      "groups": [
+        "TestPinnedRegressionCorpus"
+      ],
+      "seconds": 46.819
+    },
+    {
+      "log": "capture-1000.jsonl",
+      "sha256": "d682c8c5f56bd1f353cd639bfc4bef4cf16f5cebae35779728c0d8d7bfb98906",
+      "groups": [
+        "TestSeededGraphSignalRuntimeReplay"
+      ],
+      "seconds": 114.998
+    }
+  ],
+  "migrated_pins": 18,
+  "unchanged_pins": 710,
+  "expected_original_control": "FAIL: duplicate body read"
+}

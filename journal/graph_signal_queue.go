@@ -87,6 +87,20 @@ func (v *GraphView) SignalInputAt(ctx context.Context, index uint64) (GraphSigna
 	return record.Input, data, nil
 }
 
+// SignalBindingAt validates queue identity on this exact retained generation
+// without fetching its input body. This metadata is not a payload grant: fresh
+// consumption uses SignalAt; replay validates its separately journal-owned body.
+func (v *GraphView) SignalBindingAt(ctx context.Context, index uint64) (GraphSignalBinding, error) {
+	if !v.store.cfg.CanonicalSignals || index >= v.cursor.SignalBindings {
+		return GraphSignalBinding{}, ErrGap
+	}
+	record, _, err := (signalQueueIndexReader{v}).record(ctx, index)
+	if err != nil {
+		return GraphSignalBinding{}, err
+	}
+	return record.Binding, nil
+}
+
 // SignalAt reads canonical queue order, independently of retained WF_SIG.
 func (v *GraphView) SignalAt(ctx context.Context, index uint64) (GraphSignalBinding, []byte, error) {
 	if !v.store.cfg.CanonicalSignals || index >= v.cursor.SignalBindings {

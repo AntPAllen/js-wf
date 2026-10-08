@@ -171,6 +171,9 @@ func TestNativeCanonicalSignalQueueWorkerReplay(t *testing.T) {
 				func(e *signalRecord) { e.Sequence++ },
 				func(e *signalRecord) { e.Name = "foreign" },
 				func(e *signalRecord) { e.Hash = "foreign" },
+				func(e *signalRecord) { e.Ref = "foreign" },
+				func(e *signalRecord) { e.Ref = ""; e.Payload = append(json.RawMessage(nil), body...) },
+				func(e *signalRecord) { e.Payload = append(json.RawMessage(nil), body...) },
 			}
 			for index, mutate := range mutations {
 				hostile := append([]journal.Record(nil), records...)

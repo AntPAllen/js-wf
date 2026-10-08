@@ -53,12 +53,22 @@ func TestGraphCanonicalSignalQueueOrderAndPersistentDuplicates(t *testing.T) {
 			for i := range inputs {
 				b, data, e := v.SignalAt(ctx, uint64(i))
 				want := inputs[len(inputs)-1-i]
+				descriptor, descriptorErr := v.SignalBindingAt(ctx, uint64(i))
+				if descriptorErr != nil || descriptor != b {
+					t.Fatal("metadata differs from owned queue binding", i, descriptor, descriptorErr)
+				}
 				if e != nil || b.Input != want || b.Sequence != uint64(i+1) || string(data) != fmt.Sprint(want.Index) {
 					t.Fatal(i, b, e)
 				}
 			}
+			if _, err = v.SignalBindingAt(ctx, 32); !errors.Is(err, journal.ErrGap) {
+				t.Fatal("out-of-range queue metadata accepted", err)
+			}
 			if err = v.Close(ctx); err != nil {
 				t.Fatal(err)
+			}
+			if _, err = v.SignalBindingAt(ctx, 0); err == nil {
+				t.Fatal("closed queue reader admitted metadata")
 			}
 			// New source sequence after native dedup expiry does not add another queue
 			// operation. Purging all sources does not erase canonical identity/bodies.
