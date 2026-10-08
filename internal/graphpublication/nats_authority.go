@@ -494,3 +494,16 @@ func (p *NativeAuthority) NextRoot(ctx context.Context, next uint64) (*RootCatal
 	}
 	return &RootCatalogEntry{Sequence: msg.Sequence, Destination: header.Identity}, nil
 }
+
+// RootCatalogHighWater bounds a catalog pass without reading root bodies.
+// This is a scan scheduling bound, not a payload or lifecycle authority grant.
+func (p *NativeAuthority) RootCatalogHighWater(ctx context.Context) (uint64, error) {
+	if err := p.validate(ctx); err != nil {
+		return 0, err
+	}
+	info, err := p.stream.Info(ctx)
+	if err != nil {
+		return 0, err
+	}
+	return info.State.LastSeq, nil
+}

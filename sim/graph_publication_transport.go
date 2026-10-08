@@ -115,7 +115,7 @@ func (m *GraphPublicationTransport) event(op, subject string, expected, seq uint
 func (m *GraphPublicationTransport) QueueFault(op string, f AppendFault) error {
 	switch op {
 	case "cas_blob", "cas_root", "put", "delete":
-	case "next_root", "read_blob", "read_root", "get", "objects", "blob_keys", "root_keys":
+	case "catalog_high_water", "next_root", "read_blob", "read_root", "get", "objects", "blob_keys", "root_keys":
 		if f != DropBeforeCommit {
 			return fmt.Errorf("read faults require drop-before-commit")
 		}
@@ -528,4 +528,14 @@ func (m *GraphPublicationTransport) NextRoot(ctx context.Context, next uint64) (
 	}
 	m.event("next_root", "", next, m.catalogSerial, entry, "ok")
 	return entry, nil
+}
+
+func (m *GraphPublicationTransport) RootCatalogHighWater(ctx context.Context) (uint64, error) {
+	_, err := m.enter(ctx, "catalog_high_water", "")
+	if err != nil {
+		return 0, err
+	}
+	defer m.mu.Unlock()
+	m.event("catalog_high_water", "", 0, m.catalogSerial, nil, "ok")
+	return m.catalogSerial, nil
 }

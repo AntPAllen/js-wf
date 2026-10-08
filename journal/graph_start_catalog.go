@@ -64,6 +64,29 @@ func (s *GraphStore) InspectStartDestination(ctx context.Context, destination st
 // NextStart discovers one retained authority root and confirms its current
 // lifecycle. Work is bounded per call; no full catalog or input body is loaded.
 func (s *GraphStore) NextStart(ctx context.Context, next uint64) (*graphpublication.RootCatalogEntry, *GraphStartStatus, error) {
+	return s.NextStartThrough(ctx, next, ^uint64(0))
+}
+
+// StartCatalogHighWater is a scheduling bound only. Each discovered root still
+// requires its current quorum lifecycle observation and worker input validation.
+func (s *GraphStore) StartCatalogHighWater(ctx context.Context) (uint64, error) {
+	port, ok := s.cfg.Protocol.Port.(graphpublication.RootCatalogWatermarkPort)
+	if !s.cfg.CanonicalStarts || !ok {
+		return 0, ErrGap
+	}
+	through, err := port.RootCatalogHighWater(ctx)
+	if err != nil {
+		return 0, fmt.Errorf("%w: %w", ErrUnknown, err)
+	}
+	if through == ^uint64(0) {
+		return 0, ErrGap
+	}
+	return through, nil
+}
+
+// NextStartThrough excludes roots created after this cycle's watermark before
+// performing a quorum read that could itself publish another catalog record.
+func (s *GraphStore) NextStartThrough(ctx context.Context, next, through uint64) (*graphpublication.RootCatalogEntry, *GraphStartStatus, error) {
 	port, ok := s.cfg.Protocol.Port.(graphpublication.RootScanPort)
 	if !s.cfg.CanonicalStarts || !ok {
 		return nil, nil, ErrGap
@@ -77,6 +100,9 @@ func (s *GraphStore) NextStart(ctx context.Context, next uint64) (*graphpublicat
 	}
 	if entry.Sequence == 0 || entry.Sequence < next || entry.Sequence == ^uint64(0) {
 		return nil, nil, ErrGap
+	}
+	if entry.Sequence > through {
+		return nil, nil, nil
 	}
 	status, err := s.InspectStartDestination(ctx, entry.Destination)
 	return entry, status, err

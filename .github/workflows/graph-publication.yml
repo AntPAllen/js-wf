@@ -164,7 +164,7 @@ jobs:
         run: |
           graph_flags=()
           if [ "$GRAPH_MODE" = race ]; then graph_flags=(-race); fi
-          go test -p=1 "${graph_flags[@]}" ./reconcile -run '^(TestGraphReconcile|TestNativeGraphReconcile|TestGraphCanonicalStart|TestGraphCanonicalSignal)' -count=1 -timeout=5m -json > graph-reconcile-events.jsonl
+          go test -p=1 "${graph_flags[@]}" ./reconcile -run '^(TestGraphReconcile|TestNativeGraphReconcile|TestGraphCanonicalStart|TestGraphCanonicalSignal|TestGraphCanonicalTerminalScan)' -count=1 -timeout=5m -json > graph-reconcile-events.jsonl
       - name: Canonical graph client terminal reads
         env:
           GOMAXPROCS: '2'
@@ -212,7 +212,7 @@ jobs:
       fail-fast: false
       matrix:
         mode: [normal, race]
-        family: [Publication, Readers, ReaderResume, Catalog, Application, Streams, Journal, Worker, Result, TerminalWorker, TerminalProjection, Child, ChildSignal, Reconcile, Purge, SignalClient, ParentWorker, Start, StartRepair, SignalRuntime, SignalRuntimeCombined, Corpus]
+        family: [Publication, Readers, ReaderResume, Catalog, Application, Streams, Journal, Worker, Result, TerminalWorker, TerminalProjection, TerminalCatalog, Child, ChildSignal, Reconcile, Purge, SignalClient, ParentWorker, Start, StartRepair, SignalRuntime, SignalRuntimeCombined, Corpus]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-go@v5

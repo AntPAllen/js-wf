@@ -143,6 +143,13 @@ type RootScanPort interface {
 	NextRoot(context.Context, uint64) (*RootCatalogEntry, error)
 }
 
+// RootCatalogWatermarkPort supplies a bounded authority-stream snapshot for
+// catalog cycles. Readers may publish quorum witnesses after this watermark;
+// those records are deferred to the next cycle, avoiding self-generated churn.
+type RootCatalogWatermarkPort interface {
+	RootCatalogHighWater(context.Context) (uint64, error)
+}
+
 // NewID must be globally unique across producers, retries and restarts.
 type Protocol struct {
 	Port  Port
