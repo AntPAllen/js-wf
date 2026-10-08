@@ -14,6 +14,12 @@ These are snapshot queries, not durable ownership grants, publication decisions 
 
 [Seeded census, physical identity, uncertainty and budget evidence](scale/retained-graph-membership-2026-10-08/) covers the helper APIs. It does not qualify online collection.
 
+## Bounded append inheritance validation
+
+`ValidateAppend` checks a single-record extension against the exact base frontier. It preserves unchanged frontier receipts and every inherited left child while reading only the new right spine. The returned `AppendDelta` names at most63 new nodes and copies the appended record's bounded payload edges, without flattening the old history. A coordinator can use this delta to check the new upload intents before its root CAS.
+
+The caller still must obtain base from its canonical destination/head, acquire/register durable intents before uploads, verify all delta receipts against those intents, and handle uncertain publication replies. An arbitrary base or structural success confers no ownership. This helper does not independently audit unchanged inherited bytes. [Seeded delta/census and hostile-inheritance controls](scale/retained-graph-extension-2026-10-08/) cover this structural contract.
+
 ## Adoption requirements
 
 The package does not publish authority roots, change workflow storage, supply a native Store, or enable online collection. Its returned roots and competing forks are pending publication plans. A root supplied to Append must come from the caller's canonical authority; unchanged subtrees are not rescanned on every append. This is necessary for bounded append work and is not a complete audit of inherited storage.

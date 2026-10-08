@@ -1,0 +1,41 @@
+{
+  "observed_utc": "2026-10-08T02:35:44.809860+00:00",
+  "normal_elapsed_seconds": 0.342,
+  "race_elapsed_seconds": 7.274,
+  "seeds": 32,
+  "records_per_seed": 128,
+  "appends": 4096,
+  "observed_max_delta_nodes": 8,
+  "observed_max_validation_reads": 8,
+  "commands": {
+    "normal": "GOMAXPROCS=2 GOMEMLIMIT=512MiB go test ./internal/retainedgraph -run '^TestAppendGraphExtension' -count=1 -timeout=5m -v",
+    "race": "GOMAXPROCS=2 GOMEMLIMIT=512MiB go test -race ./internal/retainedgraph -run '^TestAppendGraphExtension' -count=1 -timeout=5m -v"
+  },
+  "selected_file_hashes": {
+    "internal/retainedgraph/graph.go": {
+      "bytes": 10582,
+      "sha256": "8d3c29dc32b1b0fb22335d13dfd0191646320ed3810848cf2a5caa0561a622f4"
+    },
+    "internal/retainedgraph/membership.go": {
+      "bytes": 3332,
+      "sha256": "5783bd1ab492a42e785645d4cab55d62ac986d87fc9db20aaa148ddbacce24a5"
+    },
+    "internal/retainedgraph/membership_test.go": {
+      "bytes": 8728,
+      "sha256": "a76e1ae3625a45660842a4a86c514819d803dcd7afa1b80f8d066e32bd845f81"
+    },
+    "internal/retainedgraph/extension.go": {
+      "bytes": 2836,
+      "sha256": "a2c9b3e153d603f44b9cf8a33c4e0bdd35a48fba09eb8ff7ee1862ad602aee8b"
+    },
+    "internal/retainedgraph/extension_test.go": {
+      "bytes": 8146,
+      "sha256": "798070fe4bf2397869422353a34cbee1097f6ff1bf025b672a9a4b6a3925cf42"
+    },
+    "internal/retainedgraph/graph_test.go": {
+      "bytes": 10803,
+      "sha256": "ecc878cacddf43eb612856ab984e4345fe2b41003092b338a6e6a68ffb500c04"
+    }
+  },
+  "scope": "Local seeded structural extension regression only; no ownership grants, authority/CAS publication, native adapter or online GC qualification."
+}
