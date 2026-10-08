@@ -398,3 +398,65 @@ func (p *NativeAuthority) BlobKeys(ctx context.Context) ([]string, error) {
 	sort.Strings(keys)
 	return keys, nil
 }
+
+// RootKeys obtains a complete namespace census and validates each root identity
+// against its hashed subject and strict envelope. These GETs discover names;
+// callers must subsequently use ReadRoot before ownership or expiry decisions.
+func (p *NativeAuthority) RootKeys(ctx context.Context) ([]string, error) {
+	if err := p.validate(ctx); err != nil {
+		return nil, err
+	}
+	info, err := p.stream.Info(ctx, jetstream.WithSubjectFilter(p.prefix+".>"))
+	if err != nil {
+		return nil, err
+	}
+	if uint64(len(info.State.Subjects)) != info.State.NumSubjects {
+		return nil, errors.New("incomplete destination census")
+	}
+	rootPrefix, blobPrefix := p.prefix+".root.", p.prefix+".blob."
+	subjects := []string{}
+	for subject, count := range info.State.Subjects {
+		if count != 1 {
+			return nil, errors.New("invalid authority subject count")
+		}
+		if strings.HasPrefix(subject, rootPrefix) && validHash(strings.TrimPrefix(subject, rootPrefix)) {
+			subjects = append(subjects, subject)
+			continue
+		}
+		if strings.HasPrefix(subject, blobPrefix) && validHash(strings.TrimPrefix(subject, blobPrefix)) {
+			continue
+		}
+		return nil, errors.New("unexpected authority subject")
+	}
+	sort.Strings(subjects)
+	keys := []string{}
+	for _, subject := range subjects {
+		message, err := p.stream.GetLastMsgForSubject(ctx, subject)
+		if err != nil {
+			return nil, err
+		}
+		if message.Subject != subject || message.Sequence == 0 || len(message.Data) == 0 || len(message.Data) > MaxAuthorityBytes {
+			return nil, errors.New("invalid destination census message")
+		}
+		var header struct {
+			Identity string `json:"identity"`
+		}
+		if err = json.Unmarshal(message.Data, &header); err != nil {
+			return nil, err
+		}
+		if _, err = decodeAuthority(message.Data, "root", header.Identity); err != nil {
+			return nil, err
+		}
+		if subject != p.subject("root", header.Identity) {
+			return nil, errors.New("destination subject identity mismatch")
+		}
+		keys = append(keys, header.Identity)
+	}
+	sort.Strings(keys)
+	for i := 1; i < len(keys); i++ {
+		if keys[i-1] == keys[i] {
+			return nil, errors.New("duplicate destination identity")
+		}
+	}
+	return keys, nil
+}

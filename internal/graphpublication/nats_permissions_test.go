@@ -140,6 +140,12 @@ func TestNativeGraphRuntimePermissions(t *testing.T) {
 			if n, err := collector.Sweep(c, time.Now().Add(2*time.Hour)); err != nil || n != 0 {
 				t.Fatal("restricted live preservation", n, err)
 			}
+			for _, name := range []string{"publisher", "collector"} {
+				keys, err := roles[name].port.RootKeys(c)
+				if err != nil || len(keys) != 1 || keys[0] != "workflow" {
+					t.Fatal("restricted destination catalog", name, keys, err)
+				}
+			}
 			authBefore, err := authStream.Info(c)
 			if err != nil {
 				t.Fatal(err)

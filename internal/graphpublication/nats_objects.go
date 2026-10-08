@@ -43,6 +43,7 @@ type NativePort struct {
 }
 
 var _ Port = (*NativePort)(nil)
+var _ RootCatalogPort = (*NativePort)(nil)
 
 // NativeObjectStreamConfig provisions a NEW isolated protocol bucket. Metadata
 // uses standard ObjectStore rollups; chunk subjects retain all their messages.

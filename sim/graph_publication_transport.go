@@ -22,6 +22,7 @@ type GraphPublicationTransport struct {
 	schedule        *Scheduler
 	blobs           map[string]graphpublication.Record
 	roots           map[string]graphpublication.Root
+	observedRoots   map[string]bool
 	objects         map[string][]byte
 	faults          map[string][]AppendFault
 	serial          uint64
@@ -30,6 +31,7 @@ type GraphPublicationTransport struct {
 }
 
 var _ graphpublication.Port = (*GraphPublicationTransport)(nil)
+var _ graphpublication.RootCatalogPort = (*GraphPublicationTransport)(nil)
 
 func NewGraphPublicationTransport(s *Scheduler) *GraphPublicationTransport {
 	return &GraphPublicationTransport{schedule: s, blobs: map[string]graphpublication.Record{}, roots: map[string]graphpublication.Root{}, objects: map[string][]byte{}, faults: map[string][]AppendFault{}}
@@ -68,7 +70,7 @@ func (m *GraphPublicationTransport) event(op, subject string, expected, seq uint
 func (m *GraphPublicationTransport) QueueFault(op string, f AppendFault) error {
 	switch op {
 	case "cas_blob", "cas_root", "put", "delete":
-	case "read_blob", "read_root", "get", "objects", "blob_keys":
+	case "read_blob", "read_root", "get", "objects", "blob_keys", "root_keys":
 		if f != DropBeforeCommit {
 			return fmt.Errorf("read faults require drop-before-commit")
 		}
@@ -173,6 +175,10 @@ func (m *GraphPublicationTransport) ReadRoot(ctx context.Context, k string) (gra
 	}
 	defer m.mu.Unlock()
 	r, ok := m.roots[k]
+	if m.observedRoots == nil {
+		m.observedRoots = map[string]bool{}
+	}
+	m.observedRoots[k] = true
 	if !ok {
 		r = graphpublication.EmptyRoot()
 	}
@@ -240,6 +246,27 @@ func (m *GraphPublicationTransport) BlobKeys(ctx context.Context) ([]string, err
 	}
 	sort.Strings(keys)
 	m.event("blob_keys", "", 0, uint64(len(keys)), keys, "ok")
+	return keys, nil
+}
+func (m *GraphPublicationTransport) RootKeys(ctx context.Context) ([]string, error) {
+	_, err := m.enter(ctx, "root_keys", "")
+	if err != nil {
+		return nil, err
+	}
+	defer m.mu.Unlock()
+	seen := map[string]bool{}
+	for k := range m.roots {
+		seen[k] = true
+	}
+	for k := range m.observedRoots {
+		seen[k] = true
+	}
+	keys := []string{}
+	for k := range seen {
+		keys = append(keys, k)
+	}
+	sort.Strings(keys)
+	m.event("root_keys", "", 0, uint64(len(keys)), keys, "ok")
 	return keys, nil
 }
 func (m *GraphPublicationTransport) Objects(ctx context.Context) ([]blobpublication.Object, error) {

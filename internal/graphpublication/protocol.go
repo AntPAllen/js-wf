@@ -98,6 +98,17 @@ type Port interface {
 	Objects(context.Context) ([]blobpublication.Object, error)
 }
 
+// RootCatalogPort enumerates every retained destination in this isolated
+// authority namespace, including empty roots and witnessed absences. The
+// catalog is permanent under ordinary operations; enumeration returns no
+// partial result on uncertainty. Concurrent new roots may enter the next census.
+// RootKeys supplies identity discovery only. Ownership requires ReadRoot's
+// quorum witness, never the catalog's tentative metadata image.
+type RootCatalogPort interface {
+	Port
+	RootKeys(context.Context) ([]string, error)
+}
+
 // NewID must be globally unique across producers, retries and restarts.
 type Protocol struct {
 	Port  Port

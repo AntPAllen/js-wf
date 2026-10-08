@@ -24,19 +24,20 @@ var epoch = time.Unix(1000, 0).UTC()
 var ctx = context.Background()
 
 type memoryPort struct {
-	blobs        map[string]Record
-	roots        map[string]Root
-	objects      map[string][]byte
-	serial       int
-	prefix       string
-	rootBefore   func(string, uint64, Root) error
-	rootAfter    func() error
-	blobAfter    func(string, Fence) error
-	putHook      func(string, []byte) error
-	deleteHook   func(string) error
-	readRootHook func(string) error
-	readBlobHook func(string) error
-	deletes      int
+	blobs         map[string]Record
+	roots         map[string]Root
+	observedRoots map[string]bool
+	objects       map[string][]byte
+	serial        int
+	prefix        string
+	rootBefore    func(string, uint64, Root) error
+	rootAfter     func() error
+	blobAfter     func(string, Fence) error
+	putHook       func(string, []byte) error
+	deleteHook    func(string) error
+	readRootHook  func(string) error
+	readBlobHook  func(string) error
+	deletes       int
 }
 
 func cloneFence(f Fence) Fence {
@@ -68,6 +69,10 @@ func (m *memoryPort) ReadRoot(c context.Context, k string) (Root, error) {
 		}
 	}
 	r, ok := m.roots[k]
+	if m.observedRoots == nil {
+		m.observedRoots = map[string]bool{}
+	}
+	m.observedRoots[k] = true
 	if !ok {
 		return EmptyRoot(), nil
 	}
@@ -138,6 +143,23 @@ func (m *memoryPort) BlobKeys(c context.Context) ([]string, error) {
 	}
 	keys := []string{}
 	for k := range m.blobs {
+		keys = append(keys, k)
+	}
+	return keys, nil
+}
+func (m *memoryPort) RootKeys(c context.Context) ([]string, error) {
+	if err := c.Err(); err != nil {
+		return nil, err
+	}
+	seen := map[string]bool{}
+	for k := range m.roots {
+		seen[k] = true
+	}
+	for k := range m.observedRoots {
+		seen[k] = true
+	}
+	keys := []string{}
+	for k := range seen {
 		keys = append(keys, k)
 	}
 	return keys, nil
