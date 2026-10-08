@@ -53,7 +53,15 @@ func (p *graphSignalRuntimeCut) CASRoot(ctx context.Context, key string, head ui
 
 // One scheduler records client, canonical authority, repair, worker and GC
 // operations. Reopened adapters retain no caller input or process-local cursor.
-func runGraphSignalRuntime(seed int64, replay *Trace) (trace Trace, runErr error) {
+func runGraphSignalRuntime(seed int64, replay *Trace) (Trace, error) {
+	return runGraphSignalRuntimeSchedule(seed, replay, false)
+}
+
+func runGraphSignalRuntimeCombined(seed int64, replay *Trace) (Trace, error) {
+	return runGraphSignalRuntimeSchedule(seed, replay, true)
+}
+
+func runGraphSignalRuntimeSchedule(seed int64, replay *Trace, combined bool) (trace Trace, runErr error) {
 	schedule := NewScheduler(seed)
 	if replay != nil {
 		var e error
@@ -62,13 +70,37 @@ func runGraphSignalRuntime(seed int64, replay *Trace) (trace Trace, runErr error
 			return trace, e
 		}
 	}
-	if e := schedule.SetWorkload("graph_canonical_signal_runtime"); e != nil {
+	workload := "graph_canonical_signal_runtime"
+	if combined {
+		workload = "graph_canonical_signal_runtime_combined"
+	}
+	if e := schedule.SetWorkload(workload); e != nil {
 		return trace, e
 	}
 	defer func() { trace = schedule.Trace() }()
-	mode, err := schedule.Choose(graphSignalRuntimeModes)
+	modes := graphSignalRuntimeModes
+	if combined {
+		modes = []string{"healthy", "source_drop", "source_lost_ack", "queue_drop", "queue_lost_readback", "reserved", "batch_restart"}
+	}
+	mode, err := schedule.Choose(modes)
 	if err != nil {
 		return trace, err
+	}
+	discoveryMode, workerMode, enqueueMode := mode, mode, "healthy"
+	if combined {
+		for _, dimension := range []struct {
+			out     *string
+			options []string
+		}{
+			{&discoveryMode, []string{"healthy", "catalog_drop", "lifecycle_unknown", "dry_catalog"}},
+			{&enqueueMode, []string{"healthy", "enqueue_drop", "enqueue_lost_ack"}},
+			{&workerMode, []string{"healthy", "consumption_lost_ack", "consumption_unknown", "prepared_append_repair"}},
+		} {
+			*dimension.out, err = schedule.Choose(dimension.options)
+			if err != nil {
+				return trace, err
+			}
+		}
 	}
 	ctx, stop := context.WithTimeout(context.Background(), 10*time.Second)
 	defer stop()
@@ -104,6 +136,15 @@ func runGraphSignalRuntime(seed int64, replay *Trace) (trace Trace, runErr error
 			r := requests[0]
 			r.Key = fmt.Sprint(i)
 			requests = append(requests, r)
+		}
+	}
+	if enqueueMode != "healthy" {
+		kind := "drop_before_commit"
+		if enqueueMode == "enqueue_lost_ack" {
+			kind = "lose_ack_after_commit"
+		}
+		if err = transport.QueueFault(StartFault{Operation: "enqueue_run", Kind: kind}); err != nil {
+			return trace, err
 		}
 	}
 	fixture := mode == "reserved" || mode == "source_committed" || mode == "bound_no_enqueue" || mode == "bound_source_purged" || mode == "batch_restart" || mode == "dry_catalog" || mode == "catalog_drop" || mode == "lifecycle_unknown"
@@ -144,18 +185,24 @@ func runGraphSignalRuntime(seed int64, replay *Trace) (trace Trace, runErr error
 			return trace, err
 		}
 		_, err = c.Signal(ctx, typ, id, "first", []byte(`true`), "first")
-		switch mode {
-		case "source_drop", "queue_drop":
-			if !errors.Is(err, client.ErrSignalUnknown) {
-				return trace, fmt.Errorf("expected uncertain publication: %v", err)
-			}
-		case "enqueue_drop", "enqueue_lost_ack":
-			if !errors.Is(err, client.ErrEnqueueUnknown) {
-				return trace, fmt.Errorf("expected uncertain enqueue: %v", err)
-			}
-		default:
-			if err != nil {
+		if combined {
+			if err != nil && !errors.Is(err, client.ErrSignalUnknown) && !errors.Is(err, client.ErrEnqueueUnknown) {
 				return trace, err
+			}
+		} else {
+			switch mode {
+			case "source_drop", "queue_drop":
+				if !errors.Is(err, client.ErrSignalUnknown) {
+					return trace, fmt.Errorf("expected uncertain publication: %v", err)
+				}
+			case "enqueue_drop", "enqueue_lost_ack":
+				if !errors.Is(err, client.ErrEnqueueUnknown) {
+					return trace, fmt.Errorf("expected uncertain enqueue: %v", err)
+				}
+			default:
+				if err != nil {
+					return trace, err
+				}
 			}
 		}
 	}
@@ -172,15 +219,16 @@ func runGraphSignalRuntime(seed int64, replay *Trace) (trace Trace, runErr error
 	if err != nil {
 		return trace, err
 	}
-	if mode == "dry_catalog" {
+	if discoveryMode == "dry_catalog" {
+		beforeRuns := len(transport.Runs())
 		dry, e := scan.Scan(ctx, 1, 1, true)
-		if e != nil || len(dry.Candidates) != 1 || dry.Reenqueued != 0 || len(transport.Runs()) != 1 {
+		if e != nil || len(dry.Candidates) < 1 || (!combined && len(dry.Candidates) != 1) || len(dry.Candidates) > reconcile.CanonicalSignalRepairBatch || dry.Reenqueued != 0 || len(transport.Runs()) != beforeRuns {
 			return trace, fmt.Errorf("dry repair mutated: %+v %v", dry, e)
 		}
 	}
-	if mode == "catalog_drop" || mode == "lifecycle_unknown" {
+	if discoveryMode == "catalog_drop" || discoveryMode == "lifecycle_unknown" {
 		op := "next_root"
-		if mode == "lifecycle_unknown" {
+		if discoveryMode == "lifecycle_unknown" {
 			op = "read_root"
 		}
 		if err = model.QueueFault(op, DropBeforeCommit); err != nil {
@@ -191,9 +239,30 @@ func runGraphSignalRuntime(seed int64, replay *Trace) (trace Trace, runErr error
 			return trace, fmt.Errorf("uncertain discovery advanced: %+v %v", result, e)
 		}
 	}
-	for pass := 0; pass < 3; pass++ {
+	repairPasses := 3
+	if combined {
+		repairPasses = 8
+	}
+	for pass := 0; pass < repairPasses; pass++ {
 		result, e := scan.Scan(ctx, 1, 1, false)
 		if e != nil {
+			if combined && errors.Is(e, journal.ErrUnknown) && result.NextSequence == 1 && result.RetrySequence == 0 {
+				// Reopen after every unknown outcome; no local recovery cursor
+				// or caller payload survives between attempts.
+				graph, err = newStore()
+				if err != nil {
+					return trace, err
+				}
+				c, err = newClient()
+				if err != nil {
+					return trace, err
+				}
+				scan, err = reconcile.NewCanonicalSignalScanWithPort(graph, c)
+				if err != nil {
+					return trace, err
+				}
+				continue
+			}
 			return trace, fmt.Errorf("repair %d: %+v %w", pass, result, e)
 		}
 		state, e := graph.InspectStart(ctx, typ, id)
@@ -203,7 +272,7 @@ func runGraphSignalRuntime(seed int64, replay *Trace) (trace Trace, runErr error
 		if state.SignalBindings == uint64(len(requests)) {
 			break
 		}
-		if mode != "batch_restart" || state.SignalRepair != uint64((pass+1)*reconcile.CanonicalSignalRepairBatch) {
+		if !combined && (mode != "batch_restart" || state.SignalRepair != uint64((pass+1)*reconcile.CanonicalSignalRepairBatch)) {
 			return trace, fmt.Errorf("repair position: %+v", state)
 		}
 		graph, err = newStore()
@@ -258,11 +327,11 @@ func runGraphSignalRuntime(seed int64, replay *Trace) (trace Trace, runErr error
 			if workerCut || e.Operation != "lease_renew_append" || e.JournalKind != journal.SignalConsumed || e.Error != "" {
 				return
 			}
-			if mode != "consumption_lost_ack" && mode != "consumption_unknown" && mode != "prepared_append_repair" {
+			if workerMode != "consumption_lost_ack" && workerMode != "consumption_unknown" && workerMode != "prepared_append_repair" {
 				return
 			}
 			workerCut = true
-			if mode == "prepared_append_repair" {
+			if workerMode == "prepared_append_repair" {
 				model.PauseBefore("cas_root", func() error {
 					preparedCuts++
 					result, e := scan.Scan(ctx, 1, 1, false)
@@ -273,7 +342,7 @@ func runGraphSignalRuntime(seed int64, replay *Trace) (trace Trace, runErr error
 				})
 			} else {
 				runErr = model.QueueFault("cas_root", LoseAckAfterCommit)
-				if mode == "consumption_unknown" {
+				if workerMode == "consumption_unknown" {
 					model.PauseBefore("cas_root", func() error { return model.QueueFault("read_root", DropBeforeCommit) })
 				}
 			}
@@ -336,10 +405,10 @@ func runGraphSignalRuntime(seed int64, replay *Trace) (trace Trace, runErr error
 	if err != nil || consumed != len(requests)+1 || status.SignalConsumed != uint64(consumed) {
 		return trace, fmt.Errorf("consumption prefix=%d: %v", consumed, err)
 	}
-	if (mode == "consumption_lost_ack" || mode == "consumption_unknown" || mode == "prepared_append_repair") && !workerCut {
+	if (workerMode == "consumption_lost_ack" || workerMode == "consumption_unknown" || workerMode == "prepared_append_repair") && !workerCut {
 		return trace, fmt.Errorf("worker cut not reached")
 	}
-	if mode == "prepared_append_repair" {
+	if workerMode == "prepared_append_repair" {
 		if preparedCuts != 1 {
 			return trace, fmt.Errorf("prepared repair cuts=%d", preparedCuts)
 		}
@@ -381,6 +450,26 @@ func runGraphSignalRuntime(seed int64, replay *Trace) (trace Trace, runErr error
 	}
 	if err = transport.Dispatch.CheckDrained(); err != nil {
 		return trace, err
+	}
+	if combined {
+		// Every queued fault must have reached a real production-port call.
+		// A surviving injection would make marginal coverage misleading.
+		transport.SignalTransport.mu.Lock()
+		signalPending := len(transport.SignalTransport.faults)
+		transport.SignalTransport.mu.Unlock()
+		transport.StartTransport.mu.Lock()
+		enqueuePending := len(transport.StartTransport.faults)
+		transport.StartTransport.mu.Unlock()
+		model.mu.Lock()
+		graphPending := 0
+		for _, faults := range model.faults {
+			graphPending += len(faults)
+		}
+		model.mu.Unlock()
+		if signalPending+enqueuePending+graphPending != 0 {
+			return trace, fmt.Errorf("unreached combined fault: signal=%d enqueue=%d graph=%d", signalPending, enqueuePending, graphPending)
+		}
+		mode = mode + "/" + discoveryMode + "/" + enqueueMode + "/" + workerMode
 	}
 	schedule.RecordTransport(TransportEvent{Operation: "check_graph_canonical_signal_runtime", Outcome: mode})
 	if err = schedule.Finish(); err != nil {

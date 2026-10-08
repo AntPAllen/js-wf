@@ -53,7 +53,7 @@ try:
     with (root/'tier1-events.jsonl').open('w') as out, (root/'stderr.log').open('w') as err:
         call(['/usr/bin/time', '-o', str(root/'tier1-time.txt'), '-f', 'elapsed=%e user=%U system=%S',
               'go', 'tool', 'test2json', '-t', '-p', 'js-wf/sim', str(binary),
-              '-test.v=test2json', '-test.count=1', '-test.timeout='+('300m' if a.no_race else '60m')], cwd=REPO/'sim', stdout=out, stderr=err)
+              '-test.v=test2json', '-test.count=1', '-test.timeout='+('300m' if a.no_race else '180m')], cwd=REPO/'sim', stdout=out, stderr=err)
     call(['python3', 'scripts/check-tier1-suite.py', '--events', str(root/'tier1-events.jsonl'),
           '--inventory', str(root/'tier1-inventory.txt'), '--regressions', str(root/'tier1-regression-inventory.txt'),
           '--source', str(root/'tier1-source.txt'), '--seeded-inventory', str(root/'tier1-seeded-inventory.txt'),
