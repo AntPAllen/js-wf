@@ -24,6 +24,7 @@ on:
       - 'client/graph_start*.go'
       - 'client/client.go'
       - 'internal/retainedgraph/**'
+      - 'internal/retainedindex/**'
       - 'sim/graph_publication*'
       - 'sim/journal_transport_test.go'
       - 'sim/purge_transport.go'
@@ -72,6 +73,7 @@ on:
       - 'client/graph_start*.go'
       - 'client/client.go'
       - 'internal/retainedgraph/**'
+      - 'internal/retainedindex/**'
       - 'sim/graph_publication*'
       - 'sim/journal_transport_test.go'
       - 'sim/purge_transport.go'
@@ -120,7 +122,7 @@ jobs:
         run: |
           graph_flags=()
           if [ "$GRAPH_MODE" = race ]; then graph_flags=(-race); fi
-          go test -p=1 "${graph_flags[@]}" ./internal/natsstream ./internal/graphpublication -count=1 -timeout=5m -json > graph-publication-events.jsonl
+          go test -p=1 "${graph_flags[@]}" ./internal/natsstream ./internal/graphpublication ./internal/retainedindex -count=1 -timeout=5m -json > graph-publication-events.jsonl
       - name: Generation-aware graph journal and native payload retention
         env:
           GOMAXPROCS: '2'
