@@ -1,0 +1,20 @@
+{
+  "build": [
+    "go",
+    "test",
+    "-p=1",
+    "-buildvcs=true",
+    "-race",
+    "-c",
+    "-o",
+    "/tmp/js-wf-native-cohort-20261008/integrity-race.test",
+    "./integrity"
+  ],
+  "run": [
+    "/tmp/js-wf-native-cohort-20261008/integrity-race.test",
+    "-test.run=^(TestNativeCapturedCohortIncludesAcknowledgedTail|TestCapturedCohort.*|TestRetainedWindowUsesSameCapturedBoundary)$",
+    "-test.v",
+    "-test.count=1",
+    "-test.timeout=3m"
+  ]
+}

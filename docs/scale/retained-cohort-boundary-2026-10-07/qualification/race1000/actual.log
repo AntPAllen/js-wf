@@ -1,0 +1,26 @@
+=== RUN   TestPinnedRegressionCorpus
+=== RUN   TestPinnedRegressionCorpus/retained-cohort-canceled.json
+=== RUN   TestPinnedRegressionCorpus/retained-cohort-invalid_tail_subject.json
+=== RUN   TestPinnedRegressionCorpus/retained-cohort-leader_behind_ack.json
+=== RUN   TestPinnedRegressionCorpus/retained-cohort-metadata_ahead.json
+=== RUN   TestPinnedRegressionCorpus/retained-cohort-metadata_behind.json
+=== RUN   TestPinnedRegressionCorpus/retained-cohort-metadata_empty.json
+=== RUN   TestPinnedRegressionCorpus/retained-cohort-missing_tail.json
+=== RUN   TestPinnedRegressionCorpus/retained-cohort-native-seed31.json
+=== RUN   TestPinnedRegressionCorpus/retained-cohort-wrong_coordinate.json
+--- PASS: TestPinnedRegressionCorpus (0.18s)
+    --- PASS: TestPinnedRegressionCorpus/retained-cohort-canceled.json (0.00s)
+    --- PASS: TestPinnedRegressionCorpus/retained-cohort-invalid_tail_subject.json (0.00s)
+    --- PASS: TestPinnedRegressionCorpus/retained-cohort-leader_behind_ack.json (0.00s)
+    --- PASS: TestPinnedRegressionCorpus/retained-cohort-metadata_ahead.json (0.00s)
+    --- PASS: TestPinnedRegressionCorpus/retained-cohort-metadata_behind.json (0.00s)
+    --- PASS: TestPinnedRegressionCorpus/retained-cohort-metadata_empty.json (0.00s)
+    --- PASS: TestPinnedRegressionCorpus/retained-cohort-missing_tail.json (0.00s)
+    --- PASS: TestPinnedRegressionCorpus/retained-cohort-native-seed31.json (0.04s)
+    --- PASS: TestPinnedRegressionCorpus/retained-cohort-wrong_coordinate.json (0.00s)
+=== RUN   TestSeededRetainedCohortBoundaryReplay
+    retained_cohort_replay_test.go:181: retained cohort: modes=map[canceled:123 invalid_tail_subject:139 leader_behind_ack:122 metadata_ahead:122 metadata_behind:121 metadata_empty:132 missing_tail:116 wrong_coordinate:125]; every generated trace exactly replayed; stale cut and missing/corrupt controls detected
+    seed_count_test.go:32: TIER1_SEEDS test=TestSeededRetainedCohortBoundaryReplay first=1 last=1000 completed=1000 requested=1000
+--- PASS: TestSeededRetainedCohortBoundaryReplay (0.34s)
+PASS
+TIER1_COVERAGE model_version=3 seeds_per_workload=1000 generated_schedules=1000 scheduler_choices=1000 choices_per_second=1900.1 transport_events=8265 virtual_ms_max=0 virtual_buckets_zero=1000 under_1s=0 under_1m=0 at_least_1m=0 elapsed=526.296119ms
