@@ -1,0 +1,160 @@
+{
+  "source": "5d6e17471e6b864c98e64ca91149498e74a54ca1",
+  "tracked_inputs": 1534,
+  "committed_inputs_unchanged": true,
+  "all_twelve_commands_pass": true,
+  "all_fourteen_commands_pass": true,
+  "standard_retention_boundary_skip_covered_by_two_explicit_runs": true,
+  "checks": [
+    {
+      "name": "retention-normal",
+      "package": {
+        "package": "js-wf/retention",
+        "elapsed": 11.879
+      },
+      "top_groups": 9,
+      "pins": 0,
+      "skips": [
+        "TestBlobSweepConcurrentRefreshContract"
+      ]
+    },
+    {
+      "name": "wf-normal",
+      "package": {
+        "package": "js-wf/wf",
+        "elapsed": 1.153
+      },
+      "top_groups": 60,
+      "pins": 0,
+      "skips": []
+    },
+    {
+      "name": "reconcile-normal",
+      "package": {
+        "package": "js-wf/reconcile",
+        "elapsed": 35.967
+      },
+      "top_groups": 29,
+      "pins": 0,
+      "skips": []
+    },
+    {
+      "name": "journal-normal",
+      "package": {
+        "package": "js-wf/journal",
+        "elapsed": 6.991
+      },
+      "top_groups": 14,
+      "pins": 0,
+      "skips": []
+    },
+    {
+      "name": "worker-normal",
+      "package": {
+        "package": "js-wf/worker",
+        "elapsed": 25.143
+      },
+      "top_groups": 4,
+      "pins": 0,
+      "skips": []
+    },
+    {
+      "name": "sim-normal",
+      "package": {
+        "package": "js-wf/sim",
+        "elapsed": 179.036
+      },
+      "top_groups": 3,
+      "pins": 611,
+      "skips": []
+    },
+    {
+      "name": "retention-race",
+      "package": {
+        "package": "js-wf/retention",
+        "elapsed": 31.154
+      },
+      "top_groups": 9,
+      "pins": 0,
+      "skips": [
+        "TestBlobSweepConcurrentRefreshContract"
+      ]
+    },
+    {
+      "name": "wf-race",
+      "package": {
+        "package": "js-wf/wf",
+        "elapsed": 15.322
+      },
+      "top_groups": 60,
+      "pins": 0,
+      "skips": []
+    },
+    {
+      "name": "reconcile-race",
+      "package": {
+        "package": "js-wf/reconcile",
+        "elapsed": 45.345
+      },
+      "top_groups": 29,
+      "pins": 0,
+      "skips": []
+    },
+    {
+      "name": "journal-race",
+      "package": {
+        "package": "js-wf/journal",
+        "elapsed": 47.375
+      },
+      "top_groups": 14,
+      "pins": 0,
+      "skips": []
+    },
+    {
+      "name": "worker-race",
+      "package": {
+        "package": "js-wf/worker",
+        "elapsed": 83.39
+      },
+      "top_groups": 4,
+      "pins": 0,
+      "skips": []
+    },
+    {
+      "name": "sim-race",
+      "package": {
+        "package": "js-wf/sim",
+        "elapsed": 40.11
+      },
+      "top_groups": 3,
+      "pins": 611,
+      "skips": []
+    },
+    {
+      "name": "boundary-normal",
+      "package": {
+        "package": "js-wf/retention",
+        "elapsed": 0.119
+      },
+      "top_groups": 1,
+      "pins": 0,
+      "skips": []
+    },
+    {
+      "name": "boundary-race",
+      "package": {
+        "package": "js-wf/retention",
+        "elapsed": 1.341
+      },
+      "top_groups": 1,
+      "pins": 0,
+      "skips": []
+    }
+  ],
+  "all_583_previous_pins_unchanged": true,
+  "current_seeded_workloads": 139,
+  "current_pins": 611,
+  "new_graph_purge_pins": 28,
+  "ci_yaml_and_family_inventory_checked": true,
+  "scope": "Focused canonical graph retention. Native prepared committed-stage cuts and joined actual workers R1/R3, not process/storage crashes. Model uses prepared terminals, direct purge retries and explicit graph expiry/drain; negative fixtures and unrelated dispatch stay retained. Remaining canonical publication/state/snapshot/continuation/import/history/projection/CLI/deployment, complete139 qualification and all original native/scale/24h/million physical-drain/dependency/default-adoption/release gates remain open."
+}

@@ -1,0 +1,690 @@
+{
+  "source": "5d6e17471e6b864c98e64ca91149498e74a54ca1",
+  "runs": [
+    {
+      "name": "retention-normal",
+      "command": [
+        "go",
+        "test",
+        "-p=1",
+        "./retention",
+        "-count=1",
+        "-timeout=5m",
+        "-json"
+      ],
+      "working_directory": "/home/exedev/js-wf",
+      "environment": {
+        "GOMAXPROCS": "2",
+        "GOMEMLIMIT": "512MiB",
+        "SIM_COVERAGE_SUMMARY": "1",
+        "SIM_SEEDS": "1000",
+        "FAULT_TRACE_OUT": "/tmp/js-wf-graph-purge-retention-normal-failure-20261008.json"
+      },
+      "exit_code": 0,
+      "wall_seconds": 12.772934153967071,
+      "package_passes": [
+        {
+          "package": "js-wf/retention",
+          "elapsed": 11.879
+        }
+      ],
+      "top_level_passes": [
+        "TestNativeGraphPurgeEveryCommittedStageAndRetainedReader",
+        "TestPurgeResumesAfterEveryStage",
+        "TestPurgeFallbackTimersByGenerationAndResume",
+        "TestSweepTombstonesChecksExpiryGenerationAndPurgeOrder",
+        "TestTombstoneScanDrainsPhysicalDeleteMarkers",
+        "TestTombstoneMarkerPurgeProtectsConcurrentReuse",
+        "TestTombstonePartialCursorDoesNotSkipUncertainReadGenerationOrDelete",
+        "TestTombstoneScanPagesAndProtectsNewerState",
+        "TestNativeGraphRetentionWorkflowBindsAndPurgesTarget"
+      ]
+    },
+    {
+      "name": "wf-normal",
+      "command": [
+        "go",
+        "test",
+        "-p=1",
+        "./wf",
+        "-count=1",
+        "-timeout=5m",
+        "-json"
+      ],
+      "working_directory": "/home/exedev/js-wf",
+      "environment": {
+        "GOMAXPROCS": "2",
+        "GOMEMLIMIT": "512MiB",
+        "SIM_COVERAGE_SUMMARY": "1",
+        "SIM_SEEDS": "1000",
+        "FAULT_TRACE_OUT": "/tmp/js-wf-graph-purge-wf-normal-failure-20261008.json"
+      },
+      "exit_code": 0,
+      "wall_seconds": 1.751454156008549,
+      "package_passes": [
+        {
+          "package": "js-wf/wf",
+          "elapsed": 1.153
+        }
+      ],
+      "top_level_passes": [
+        "TestCheckpointCursorPreservesSDKIdentitiesAndReplay",
+        "TestCheckpointStateMatchesUninterruptedContinuation",
+        "TestCheckpointRejectsUnfinishedOrLiveTimerBoundary",
+        "TestCheckpointRejectsRuntimeObjectsInLocalsBeforeWrites",
+        "TestCheckpointRestoreRejectsGenerationAndSuffixBeforeEffects",
+        "TestCheckpointPositiveTimerMustBeCanceledEvenAfterSignalSelection",
+        "TestCheckpointRestoredPromiseVerifiesReferencedOutcome",
+        "TestCheckpointLocalValidationVisitsOverlappingSlices",
+        "TestCheckpointRestoresNullableEmptyStateAsWritableMap",
+        "TestStepRecovery",
+        "TestConcurrentStepOrderChangeFailsReplay",
+        "TestEffectPanicIsJournaled",
+        "TestEffectGoexitIsJournaled",
+        "TestBlockedEffectReturnsOnCancellationWithoutCompletion",
+        "TestContinueCapturesStateAndEndsDelivery",
+        "TestContinueRepairsPublicationCutsWithoutDuplicateEntries",
+        "TestContinueRejectsChangedLocalsAndStagesBeforeObjectReads",
+        "TestContinueRejectsUnregisteredAndInvalidBoundaries",
+        "TestContinueMarshalsLocalsOnceAndProtectsStoreInput",
+        "TestPromiseResolvesLargeChildResult",
+        "TestPromiseRepeatedAwaitReplaysOneConsumptionAndCopiesResult",
+        "TestPromiseObjectReadRetryDoesNotConsumeAnotherSignal",
+        "TestPromiseRepeatedChildFailureAndCorruptOutcome",
+        "TestPromiseResultCacheRemainsBounded",
+        "TestRandomWorkflowDAGsRecoverAfterKill",
+        "TestReplayAcrossContinuationFramesAndHistoricalFacts",
+        "TestReplayContinuationCanceledPendingEffect",
+        "TestReplayContinuationRejectsMissingObjectsUnknownStagesAndChanges",
+        "TestReplayContinuationPendingCorruptionAndStagePanic",
+        "TestReplayContinuationRejectsRebuiltStateMismatch",
+        "TestReplayContinuationChecksTerminalResultAndObjectHash",
+        "TestReplayRetainedLimitRequest",
+        "TestReplayLimitCannotHidePendingRequest",
+        "TestReplayLimitUnknownContinuationBeforeHandler",
+        "TestReplayLimitAtHardJournalCap",
+        "TestOfflineReplayNeverRunsIncompleteEffect",
+        "TestOfflineReplayWithSignalAndObjectResult",
+        "TestOfflineReplayObservesSuspensionAndFailure",
+        "TestOfflineReplayObservesChildSuspension",
+        "TestUnserializableStepResultsAreDurable",
+        "TestUnknownStepResultErrorKindFailsClosed",
+        "TestSearchAttributesReplayAndValidation",
+        "TestSelectManySuspendsReplaysChoiceAndRetainsLosers",
+        "TestSelectManyRejectsInvalidCasesAndCorruptCompletion",
+        "TestSelectManyUnknownCompletionReplaysRecordedWinner",
+        "TestTimerSelectSignalSuspendsAndReplaysChoice",
+        "TestTimerSelectSignalTimerBranchReplaysWithoutFiringAgain",
+        "TestJournaledStateReplayAndDivergence",
+        "TestDomainTimersUseUpperOriginAndLowerDueAcrossDeliveryClocks",
+        "TestDomainClockRejectsInvalidBoundsAndPreservesLegacy",
+        "TestDomainNativeHintFailureUsesDurableRepair",
+        "TestFreshPositiveTimersIgnoreCurrentDeliveryWakeup",
+        "TestTimerHandlesCancelAndCoalesceOnReplay",
+        "TestTimerHandleRetriesScheduleAfterRequest",
+        "TestSleepUsesServerClockAndReplays",
+        "TestNonpositiveSleepCompletesImmediately",
+        "TestRunOnceRetryKeepsDeduplicationKey",
+        "TestJournaledNowAndRandomReplay",
+        "TestVersionReplaysDecision",
+        "TestGraphChildRetentionRequiresExactParentOwnership"
+      ]
+    },
+    {
+      "name": "reconcile-normal",
+      "command": [
+        "go",
+        "test",
+        "-p=1",
+        "./reconcile",
+        "-count=1",
+        "-timeout=5m",
+        "-json"
+      ],
+      "working_directory": "/home/exedev/js-wf",
+      "environment": {
+        "GOMAXPROCS": "2",
+        "GOMEMLIMIT": "512MiB",
+        "SIM_COVERAGE_SUMMARY": "1",
+        "SIM_SEEDS": "1000",
+        "FAULT_TRACE_OUT": "/tmp/js-wf-graph-purge-reconcile-normal-failure-20261008.json"
+      },
+      "exit_code": 0,
+      "wall_seconds": 40.47045972599881,
+      "package_passes": [
+        {
+          "package": "js-wf/reconcile",
+          "elapsed": 35.967
+        }
+      ],
+      "top_level_passes": [
+        "TestContinuationRepairBeforeAndAfterSuspension",
+        "TestFallbackTimerScanRetriesCommittedWakeupBeforeDelete",
+        "TestFallbackTimerScanRemovesRetiredGenerations",
+        "TestGraphReconcileLoopRetriesUncertaintyWithoutSkippingBoundary",
+        "TestReconcileRetriesLostLeaseInitialization",
+        "TestCursorPersistsAcrossLeadersAndUsesCAS",
+        "TestCursorLostAcknowledgmentRereadsRealKV",
+        "TestTombstoneLoopReclaimsExpiredState",
+        "TestNativeRetirementDeleteDoesNotEraseConcurrentReplacement",
+        "TestNativeRetirementRejectsUnboundHint",
+        "TestMultiSelectReadFailureDoesNotSuppressDueTimer",
+        "TestSignalPartialCursorRepairsRealGapAfterRepeatedReadTimeoutsAndLostEnqueueAck",
+        "TestSignalPartialCursorDoesNotSkipUnconfirmedSignal",
+        "TestStartPartialCursorDoesNotSkipUnconfirmedInvocation",
+        "TestStartPartialCursorRequiresFreshOwnershipAndDoesNotSaveFatalOrCancelledPass",
+        "TestStartPartialCursorRepairsRealGapAfterRepeatedReadTimeoutsAndLostEnqueueAck",
+        "TestSuspendedPartialCursorRepairsRealGapAfterRepeatedReadTimeoutsAndLostEnqueueAck",
+        "TestSuspendedPartialCursorCertifiesOnlyContiguousAcknowledgedPrefix",
+        "TestRepairScannersRespectDomainClockAndFailClosed",
+        "TestSuspendedDomainTimersIncludeGrace",
+        "TestDomainRepairClockHonorsCanceledContext",
+        "TestTimerPartialCursorRepairsRealNativeAndFallbackGaps",
+        "TestTimerPartialCursorDoesNotSkipUnconfirmedReadRetirementClockOrEnqueue",
+        "TestFallbackTimerPartialCursorDoesNotSkipUncertainPublicationOrDeletion",
+        "TestTombstonePartialCursorRepairsRealDropAndLostDeleteAck",
+        "TestNativeGraphReconcileRepairsStartSignalAndTimerHistory",
+        "TestGraphReconcileSignalCacheBindsInvocationGeneration",
+        "TestGraphReconcileRejectsMissingConfiguration",
+        "TestGraphReconcileFailedReadCannotCertifyCursorPrefix"
+      ]
+    },
+    {
+      "name": "journal-normal",
+      "command": [
+        "go",
+        "test",
+        "-p=1",
+        "./journal",
+        "-run",
+        "^(TestGraphJournal|TestNativeGraphJournal)",
+        "-count=1",
+        "-timeout=5m",
+        "-json"
+      ],
+      "working_directory": "/home/exedev/js-wf",
+      "environment": {
+        "GOMAXPROCS": "2",
+        "GOMEMLIMIT": "512MiB",
+        "SIM_COVERAGE_SUMMARY": "1",
+        "SIM_SEEDS": "1000",
+        "FAULT_TRACE_OUT": "/tmp/js-wf-graph-purge-journal-normal-failure-20261008.json"
+      },
+      "exit_code": 0,
+      "wall_seconds": 10.718653463991359,
+      "package_passes": [
+        {
+          "package": "js-wf/journal",
+          "elapsed": 6.991
+        }
+      ],
+      "top_level_passes": [
+        "TestNativeGraphJournalGenerationAndDrain",
+        "TestNativeGraphJournalPublicSDK",
+        "TestNativeGraphJournalPublicAdmission",
+        "TestGraphJournalPublicConfiguration",
+        "TestGraphJournalGenerationRetainedReaderAndDrain",
+        "TestGraphJournalStaleAndUnknownAppends",
+        "TestGraphJournalCorruptCursorAndLeaseBoundary",
+        "TestGraphJournalLimitsAndForeignRoot",
+        "TestGraphJournalEntryPayloadAlias",
+        "TestGraphJournalCloseContentionAndAmbiguousRelease",
+        "TestGraphJournalAcquireRenewContention",
+        "TestGraphJournalTerminalSnapshotAdmission",
+        "TestGraphJournalExistingHistoryIsNotStaleAbsence",
+        "TestGraphJournalPurgeFenceRetainsReadersAndGeneration"
+      ]
+    },
+    {
+      "name": "worker-normal",
+      "command": [
+        "go",
+        "test",
+        "-p=1",
+        "./worker",
+        "-run",
+        "^(TestNativeGraphWorkerReplayInputsSignalsAndResults|TestNativeGraphChildResultTransferAndReplay|TestGraphChildReplayRejectsForgedProvenance|TestGraphSelectedChildRequiresExactRecordedSignal)$",
+        "-count=1",
+        "-timeout=5m",
+        "-json"
+      ],
+      "working_directory": "/home/exedev/js-wf",
+      "environment": {
+        "GOMAXPROCS": "2",
+        "GOMEMLIMIT": "512MiB",
+        "SIM_COVERAGE_SUMMARY": "1",
+        "SIM_SEEDS": "1000",
+        "FAULT_TRACE_OUT": "/tmp/js-wf-graph-purge-worker-normal-failure-20261008.json"
+      },
+      "exit_code": 0,
+      "wall_seconds": 27.32575303700287,
+      "package_passes": [
+        {
+          "package": "js-wf/worker",
+          "elapsed": 25.143
+        }
+      ],
+      "top_level_passes": [
+        "TestNativeGraphChildResultTransferAndReplay",
+        "TestGraphChildReplayRejectsForgedProvenance",
+        "TestGraphSelectedChildRequiresExactRecordedSignal",
+        "TestNativeGraphWorkerReplayInputsSignalsAndResults"
+      ]
+    },
+    {
+      "name": "sim-normal",
+      "command": [
+        "go",
+        "test",
+        "-p=1",
+        "./sim",
+        "-run",
+        "^(TestSeededGraphPurgeReplay|TestGraphPublicationTransportCopiesFaultsAndIndependentCensus|TestPinnedRegressionCorpus)$",
+        "-count=1",
+        "-timeout=5m",
+        "-json"
+      ],
+      "working_directory": "/home/exedev/js-wf",
+      "environment": {
+        "GOMAXPROCS": "2",
+        "GOMEMLIMIT": "512MiB",
+        "SIM_COVERAGE_SUMMARY": "1",
+        "SIM_SEEDS": "100000",
+        "FAULT_TRACE_OUT": "/tmp/js-wf-graph-purge-sim-normal-failure-20261008.json"
+      },
+      "exit_code": 0,
+      "wall_seconds": 187.35044504597317,
+      "package_passes": [
+        {
+          "package": "js-wf/sim",
+          "elapsed": 179.036
+        }
+      ],
+      "top_level_passes": [
+        "TestSeededGraphPurgeReplay",
+        "TestGraphPublicationTransportCopiesFaultsAndIndependentCensus",
+        "TestPinnedRegressionCorpus"
+      ]
+    },
+    {
+      "name": "retention-race",
+      "command": [
+        "go",
+        "test",
+        "-p=1",
+        "-race",
+        "./retention",
+        "-count=1",
+        "-timeout=5m",
+        "-json"
+      ],
+      "working_directory": "/home/exedev/js-wf",
+      "environment": {
+        "GOMAXPROCS": "2",
+        "GOMEMLIMIT": "512MiB",
+        "SIM_COVERAGE_SUMMARY": "1",
+        "SIM_SEEDS": "1000",
+        "FAULT_TRACE_OUT": "/tmp/js-wf-graph-purge-retention-race-failure-20261008.json"
+      },
+      "exit_code": 0,
+      "wall_seconds": 36.56055514496984,
+      "package_passes": [
+        {
+          "package": "js-wf/retention",
+          "elapsed": 31.154
+        }
+      ],
+      "top_level_passes": [
+        "TestNativeGraphPurgeEveryCommittedStageAndRetainedReader",
+        "TestPurgeResumesAfterEveryStage",
+        "TestPurgeFallbackTimersByGenerationAndResume",
+        "TestSweepTombstonesChecksExpiryGenerationAndPurgeOrder",
+        "TestTombstoneScanDrainsPhysicalDeleteMarkers",
+        "TestTombstoneMarkerPurgeProtectsConcurrentReuse",
+        "TestTombstonePartialCursorDoesNotSkipUncertainReadGenerationOrDelete",
+        "TestTombstoneScanPagesAndProtectsNewerState",
+        "TestNativeGraphRetentionWorkflowBindsAndPurgesTarget"
+      ]
+    },
+    {
+      "name": "wf-race",
+      "command": [
+        "go",
+        "test",
+        "-p=1",
+        "-race",
+        "./wf",
+        "-count=1",
+        "-timeout=5m",
+        "-json"
+      ],
+      "working_directory": "/home/exedev/js-wf",
+      "environment": {
+        "GOMAXPROCS": "2",
+        "GOMEMLIMIT": "512MiB",
+        "SIM_COVERAGE_SUMMARY": "1",
+        "SIM_SEEDS": "1000",
+        "FAULT_TRACE_OUT": "/tmp/js-wf-graph-purge-wf-race-failure-20261008.json"
+      },
+      "exit_code": 0,
+      "wall_seconds": 21.075216664001346,
+      "package_passes": [
+        {
+          "package": "js-wf/wf",
+          "elapsed": 15.322
+        }
+      ],
+      "top_level_passes": [
+        "TestCheckpointCursorPreservesSDKIdentitiesAndReplay",
+        "TestCheckpointStateMatchesUninterruptedContinuation",
+        "TestCheckpointRejectsUnfinishedOrLiveTimerBoundary",
+        "TestCheckpointRejectsRuntimeObjectsInLocalsBeforeWrites",
+        "TestCheckpointRestoreRejectsGenerationAndSuffixBeforeEffects",
+        "TestCheckpointPositiveTimerMustBeCanceledEvenAfterSignalSelection",
+        "TestCheckpointRestoredPromiseVerifiesReferencedOutcome",
+        "TestCheckpointLocalValidationVisitsOverlappingSlices",
+        "TestCheckpointRestoresNullableEmptyStateAsWritableMap",
+        "TestStepRecovery",
+        "TestConcurrentStepOrderChangeFailsReplay",
+        "TestEffectPanicIsJournaled",
+        "TestEffectGoexitIsJournaled",
+        "TestBlockedEffectReturnsOnCancellationWithoutCompletion",
+        "TestContinueCapturesStateAndEndsDelivery",
+        "TestContinueRepairsPublicationCutsWithoutDuplicateEntries",
+        "TestContinueRejectsChangedLocalsAndStagesBeforeObjectReads",
+        "TestContinueRejectsUnregisteredAndInvalidBoundaries",
+        "TestContinueMarshalsLocalsOnceAndProtectsStoreInput",
+        "TestPromiseResolvesLargeChildResult",
+        "TestPromiseRepeatedAwaitReplaysOneConsumptionAndCopiesResult",
+        "TestPromiseObjectReadRetryDoesNotConsumeAnotherSignal",
+        "TestPromiseRepeatedChildFailureAndCorruptOutcome",
+        "TestPromiseResultCacheRemainsBounded",
+        "TestRandomWorkflowDAGsRecoverAfterKill",
+        "TestReplayAcrossContinuationFramesAndHistoricalFacts",
+        "TestReplayContinuationCanceledPendingEffect",
+        "TestReplayContinuationRejectsMissingObjectsUnknownStagesAndChanges",
+        "TestReplayContinuationPendingCorruptionAndStagePanic",
+        "TestReplayContinuationRejectsRebuiltStateMismatch",
+        "TestReplayContinuationChecksTerminalResultAndObjectHash",
+        "TestReplayRetainedLimitRequest",
+        "TestReplayLimitCannotHidePendingRequest",
+        "TestReplayLimitUnknownContinuationBeforeHandler",
+        "TestReplayLimitAtHardJournalCap",
+        "TestOfflineReplayNeverRunsIncompleteEffect",
+        "TestOfflineReplayWithSignalAndObjectResult",
+        "TestOfflineReplayObservesSuspensionAndFailure",
+        "TestOfflineReplayObservesChildSuspension",
+        "TestUnserializableStepResultsAreDurable",
+        "TestUnknownStepResultErrorKindFailsClosed",
+        "TestSearchAttributesReplayAndValidation",
+        "TestSelectManySuspendsReplaysChoiceAndRetainsLosers",
+        "TestSelectManyRejectsInvalidCasesAndCorruptCompletion",
+        "TestSelectManyUnknownCompletionReplaysRecordedWinner",
+        "TestTimerSelectSignalSuspendsAndReplaysChoice",
+        "TestTimerSelectSignalTimerBranchReplaysWithoutFiringAgain",
+        "TestJournaledStateReplayAndDivergence",
+        "TestDomainTimersUseUpperOriginAndLowerDueAcrossDeliveryClocks",
+        "TestDomainClockRejectsInvalidBoundsAndPreservesLegacy",
+        "TestDomainNativeHintFailureUsesDurableRepair",
+        "TestFreshPositiveTimersIgnoreCurrentDeliveryWakeup",
+        "TestTimerHandlesCancelAndCoalesceOnReplay",
+        "TestTimerHandleRetriesScheduleAfterRequest",
+        "TestSleepUsesServerClockAndReplays",
+        "TestNonpositiveSleepCompletesImmediately",
+        "TestRunOnceRetryKeepsDeduplicationKey",
+        "TestJournaledNowAndRandomReplay",
+        "TestVersionReplaysDecision",
+        "TestGraphChildRetentionRequiresExactParentOwnership"
+      ]
+    },
+    {
+      "name": "reconcile-race",
+      "command": [
+        "go",
+        "test",
+        "-p=1",
+        "-race",
+        "./reconcile",
+        "-count=1",
+        "-timeout=5m",
+        "-json"
+      ],
+      "working_directory": "/home/exedev/js-wf",
+      "environment": {
+        "GOMAXPROCS": "2",
+        "GOMEMLIMIT": "512MiB",
+        "SIM_COVERAGE_SUMMARY": "1",
+        "SIM_SEEDS": "1000",
+        "FAULT_TRACE_OUT": "/tmp/js-wf-graph-purge-reconcile-race-failure-20261008.json"
+      },
+      "exit_code": 0,
+      "wall_seconds": 51.48105188901536,
+      "package_passes": [
+        {
+          "package": "js-wf/reconcile",
+          "elapsed": 45.345
+        }
+      ],
+      "top_level_passes": [
+        "TestContinuationRepairBeforeAndAfterSuspension",
+        "TestFallbackTimerScanRetriesCommittedWakeupBeforeDelete",
+        "TestFallbackTimerScanRemovesRetiredGenerations",
+        "TestGraphReconcileLoopRetriesUncertaintyWithoutSkippingBoundary",
+        "TestReconcileRetriesLostLeaseInitialization",
+        "TestCursorPersistsAcrossLeadersAndUsesCAS",
+        "TestCursorLostAcknowledgmentRereadsRealKV",
+        "TestTombstoneLoopReclaimsExpiredState",
+        "TestNativeRetirementDeleteDoesNotEraseConcurrentReplacement",
+        "TestNativeRetirementRejectsUnboundHint",
+        "TestMultiSelectReadFailureDoesNotSuppressDueTimer",
+        "TestSignalPartialCursorRepairsRealGapAfterRepeatedReadTimeoutsAndLostEnqueueAck",
+        "TestSignalPartialCursorDoesNotSkipUnconfirmedSignal",
+        "TestStartPartialCursorDoesNotSkipUnconfirmedInvocation",
+        "TestStartPartialCursorRequiresFreshOwnershipAndDoesNotSaveFatalOrCancelledPass",
+        "TestStartPartialCursorRepairsRealGapAfterRepeatedReadTimeoutsAndLostEnqueueAck",
+        "TestSuspendedPartialCursorRepairsRealGapAfterRepeatedReadTimeoutsAndLostEnqueueAck",
+        "TestSuspendedPartialCursorCertifiesOnlyContiguousAcknowledgedPrefix",
+        "TestRepairScannersRespectDomainClockAndFailClosed",
+        "TestSuspendedDomainTimersIncludeGrace",
+        "TestDomainRepairClockHonorsCanceledContext",
+        "TestTimerPartialCursorRepairsRealNativeAndFallbackGaps",
+        "TestTimerPartialCursorDoesNotSkipUnconfirmedReadRetirementClockOrEnqueue",
+        "TestFallbackTimerPartialCursorDoesNotSkipUncertainPublicationOrDeletion",
+        "TestTombstonePartialCursorRepairsRealDropAndLostDeleteAck",
+        "TestNativeGraphReconcileRepairsStartSignalAndTimerHistory",
+        "TestGraphReconcileSignalCacheBindsInvocationGeneration",
+        "TestGraphReconcileRejectsMissingConfiguration",
+        "TestGraphReconcileFailedReadCannotCertifyCursorPrefix"
+      ]
+    },
+    {
+      "name": "journal-race",
+      "command": [
+        "go",
+        "test",
+        "-p=1",
+        "-race",
+        "./journal",
+        "-run",
+        "^(TestGraphJournal|TestNativeGraphJournal)",
+        "-count=1",
+        "-timeout=5m",
+        "-json"
+      ],
+      "working_directory": "/home/exedev/js-wf",
+      "environment": {
+        "GOMAXPROCS": "2",
+        "GOMEMLIMIT": "512MiB",
+        "SIM_COVERAGE_SUMMARY": "1",
+        "SIM_SEEDS": "1000",
+        "FAULT_TRACE_OUT": "/tmp/js-wf-graph-purge-journal-race-failure-20261008.json"
+      },
+      "exit_code": 0,
+      "wall_seconds": 54.70999067899538,
+      "package_passes": [
+        {
+          "package": "js-wf/journal",
+          "elapsed": 47.375
+        }
+      ],
+      "top_level_passes": [
+        "TestNativeGraphJournalGenerationAndDrain",
+        "TestNativeGraphJournalPublicSDK",
+        "TestNativeGraphJournalPublicAdmission",
+        "TestGraphJournalPublicConfiguration",
+        "TestGraphJournalGenerationRetainedReaderAndDrain",
+        "TestGraphJournalStaleAndUnknownAppends",
+        "TestGraphJournalCorruptCursorAndLeaseBoundary",
+        "TestGraphJournalLimitsAndForeignRoot",
+        "TestGraphJournalEntryPayloadAlias",
+        "TestGraphJournalCloseContentionAndAmbiguousRelease",
+        "TestGraphJournalAcquireRenewContention",
+        "TestGraphJournalTerminalSnapshotAdmission",
+        "TestGraphJournalExistingHistoryIsNotStaleAbsence",
+        "TestGraphJournalPurgeFenceRetainsReadersAndGeneration"
+      ]
+    },
+    {
+      "name": "worker-race",
+      "command": [
+        "go",
+        "test",
+        "-p=1",
+        "-race",
+        "./worker",
+        "-run",
+        "^(TestNativeGraphWorkerReplayInputsSignalsAndResults|TestNativeGraphChildResultTransferAndReplay|TestGraphChildReplayRejectsForgedProvenance|TestGraphSelectedChildRequiresExactRecordedSignal)$",
+        "-count=1",
+        "-timeout=5m",
+        "-json"
+      ],
+      "working_directory": "/home/exedev/js-wf",
+      "environment": {
+        "GOMAXPROCS": "2",
+        "GOMEMLIMIT": "512MiB",
+        "SIM_COVERAGE_SUMMARY": "1",
+        "SIM_SEEDS": "1000",
+        "FAULT_TRACE_OUT": "/tmp/js-wf-graph-purge-worker-race-failure-20261008.json"
+      },
+      "exit_code": 0,
+      "wall_seconds": 86.74251189501956,
+      "package_passes": [
+        {
+          "package": "js-wf/worker",
+          "elapsed": 83.39
+        }
+      ],
+      "top_level_passes": [
+        "TestNativeGraphChildResultTransferAndReplay",
+        "TestGraphChildReplayRejectsForgedProvenance",
+        "TestGraphSelectedChildRequiresExactRecordedSignal",
+        "TestNativeGraphWorkerReplayInputsSignalsAndResults"
+      ]
+    },
+    {
+      "name": "sim-race",
+      "command": [
+        "go",
+        "test",
+        "-p=1",
+        "-race",
+        "./sim",
+        "-run",
+        "^(TestSeededGraphPurgeReplay|TestGraphPublicationTransportCopiesFaultsAndIndependentCensus|TestPinnedRegressionCorpus)$",
+        "-count=1",
+        "-timeout=5m",
+        "-json"
+      ],
+      "working_directory": "/home/exedev/js-wf",
+      "environment": {
+        "GOMAXPROCS": "2",
+        "GOMEMLIMIT": "512MiB",
+        "SIM_COVERAGE_SUMMARY": "1",
+        "SIM_SEEDS": "1000",
+        "FAULT_TRACE_OUT": "/tmp/js-wf-graph-purge-sim-race-failure-20261008.json"
+      },
+      "exit_code": 0,
+      "wall_seconds": 52.38006379298167,
+      "package_passes": [
+        {
+          "package": "js-wf/sim",
+          "elapsed": 40.11
+        }
+      ],
+      "top_level_passes": [
+        "TestSeededGraphPurgeReplay",
+        "TestGraphPublicationTransportCopiesFaultsAndIndependentCensus",
+        "TestPinnedRegressionCorpus"
+      ]
+    },
+    {
+      "name": "boundary-normal",
+      "command": [
+        "go",
+        "test",
+        "-p=1",
+        "./retention",
+        "-run",
+        "^TestBlobSweepConcurrentRefreshContract$",
+        "-count=1",
+        "-timeout=5m",
+        "-json"
+      ],
+      "working_directory": "/home/exedev/js-wf",
+      "environment": {
+        "GOMAXPROCS": "2",
+        "GOMEMLIMIT": "512MiB",
+        "SIM_COVERAGE_SUMMARY": "1",
+        "SIM_SEEDS": "1000",
+        "FAULT_TRACE_OUT": "/tmp/js-wf-graph-purge-boundary-normal-failure-20261008.json",
+        "WF_BLOB_BOUNDARY_ROOT": "/tmp/js-wf-graph-purge-boundary-normal-20261008"
+      },
+      "exit_code": 0,
+      "wall_seconds": 0.9385299169807695,
+      "package_passes": [
+        {
+          "package": "js-wf/retention",
+          "elapsed": 0.119
+        }
+      ],
+      "top_level_passes": [
+        "TestBlobSweepConcurrentRefreshContract"
+      ]
+    },
+    {
+      "name": "boundary-race",
+      "command": [
+        "go",
+        "test",
+        "-p=1",
+        "-race",
+        "./retention",
+        "-run",
+        "^TestBlobSweepConcurrentRefreshContract$",
+        "-count=1",
+        "-timeout=5m",
+        "-json"
+      ],
+      "working_directory": "/home/exedev/js-wf",
+      "environment": {
+        "GOMAXPROCS": "2",
+        "GOMEMLIMIT": "512MiB",
+        "SIM_COVERAGE_SUMMARY": "1",
+        "SIM_SEEDS": "1000",
+        "FAULT_TRACE_OUT": "/tmp/js-wf-graph-purge-boundary-race-failure-20261008.json",
+        "WF_BLOB_BOUNDARY_ROOT": "/tmp/js-wf-graph-purge-boundary-race-20261008"
+      },
+      "exit_code": 0,
+      "wall_seconds": 2.4433830810012296,
+      "package_passes": [
+        {
+          "package": "js-wf/retention",
+          "elapsed": 1.341
+        }
+      ],
+      "top_level_passes": [
+        "TestBlobSweepConcurrentRefreshContract"
+      ]
+    }
+  ]
+}
