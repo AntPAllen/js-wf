@@ -99,7 +99,7 @@ func (p *NativeAuthority) validate(ctx context.Context) error {
 		return err
 	}
 	c := info.Config
-	if c.Name != p.name || !reflect.DeepEqual(c.Subjects, []string{p.prefix + ".>"}) || c.Storage != jetstream.FileStorage || c.Retention != jetstream.LimitsPolicy || c.Discard != jetstream.DiscardOld || c.MaxMsgsPerSubject != 1 || c.MaxAge != 0 || c.MaxMsgs > 0 || c.MaxBytes > 0 || !c.DenyDelete || !c.DenyPurge || c.AllowDirect || c.AllowMsgTTL || c.SubjectDeleteMarkerTTL != 0 || c.AllowRollup || c.NoAck || c.Sealed || c.Mirror != nil || len(c.Sources) != 0 || c.SubjectTransform != nil || c.RePublish != nil || c.Replicas < 1 || c.DiscardNewPerSubject {
+	if c.Name != p.name || !reflect.DeepEqual(c.Subjects, []string{p.prefix + ".>"}) || c.Storage != jetstream.FileStorage || c.Retention != jetstream.LimitsPolicy || c.Discard != jetstream.DiscardOld || c.MaxMsgsPerSubject != 1 || c.MaxAge != 0 || c.MaxMsgs > 0 || c.MaxBytes > 0 || !c.DenyDelete || !c.DenyPurge || c.AllowDirect || c.AllowMsgTTL || c.SubjectDeleteMarkerTTL != 0 || c.AllowRollup || c.NoAck || c.Sealed || c.Mirror != nil || len(c.Sources) != 0 || c.SubjectTransform != nil || c.RePublish != nil || c.Replicas < 1 || c.DiscardNewPerSubject || c.AllowAtomicPublish || c.AllowMsgSchedules || c.PersistMode != jetstream.DefaultPersistMode {
 		return errors.New("unsafe graph authority stream configuration")
 	}
 	return nil
@@ -238,6 +238,7 @@ func (p *NativeAuthority) publishWithSequence(ctx context.Context, expected uint
 		return 0, errors.New("graph authority byte limit")
 	}
 	message := &nats.Msg{Subject: p.subject(v.Kind, v.Identity), Data: data, Header: nats.Header{}}
+	message.Header.Set(jetstream.ExpectedStreamHeader, p.name)
 	message.Header.Set(jetstream.ExpectedLastSubjSeqHeader, fmt.Sprint(expected))
 	if witness {
 		message.Header.Set("Wf-Authority-Read-Witness", "1")
