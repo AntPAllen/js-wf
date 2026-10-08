@@ -5,3 +5,5 @@ The original frozen c13c8a6 run passed at actual SDK2748644:125000 contiguous re
 Full fixture archive contains2445 members, including raw events, binary, source checkout bytes, launch and terminal state. Canonical hashes and complete inventory are in `race-terminal`. Source worktree metadata must be reconstructed using the recorded commit in a fresh destination. Archived `.git` links do not supply a portable checkout. Complete selected repository source is bound; exhaustive hermetic toolchain/module-cache provenance is not claimed.
 
 The prelaunch clean-tree admission failure remains separate in `prelaunch-failure`; it started no SDK and the admitted v2 body was not retried. This result qualifies the125-workload source only. Current126-workload source, full normal100k, native matrices, original24h, million physical drain, production online GC and dependency adoption remain open.
+
+The complete fixture now has a committed/pushed S3 receipt. Originals, archive and registered clean source worktree were retired after fresh full remote/member/current-inventory/closure verification, reclaiming90.5MiB. [Retirement and restore scope](reclaimed/README.md).

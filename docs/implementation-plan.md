@@ -5802,3 +5802,10 @@ Authority GET snapshots require a same-destination quorum-acknowledged condition
 ## Shared authority witness seeded coverage accepted — 2026-10-08
 
 The authority adapter's production witness decision helper is now used by common seeded Tier1 transport/replay. Fourteen modes cover both authority value kinds, stale/false absence/speculative reads, persistent conflict, concurrent replacement, no quorum, committed reply loss, snapshot failure, cancellation before/after GET and invalid acknowledgment sequences, with GET-only failure controls and14 saved exact regression traces. Frozen44c6631 focused100k normal/1k race and five native R1/R3 controls qualify this shared decision path. [Evidence](scale/authority-read-witness-tier1-2026-10-08/). The source inventory now has126 workloads/433 pins; complete final-source normal/race qualification, all runtime reference migration, full native/scale/permissions/server crash gates and production online GC are still required.
+
+
+## Complete125 race accepted and current126 qualification running — 2026-10-08
+
+Full frozen c13c8a6 race1000 completes125000 required contiguous seed bodies,419 pins,183 passes and two documented trace-only skips in1987.002s under original60m. All2402 selected inputs, admitted SDK2748644/unit/terminal/full raw events and15 altered-proof controls are independently verified; complete2445-member archive is S3-preserved and locally retired. [Accepted scope](scale/tier1-full125-2026-10-08/).
+
+Current126-workload/433-pin race1000 is independently admitted at frozen cf99bc0, actual SDK2778787, original60m/count1/twoGoCPU/512MiB, with original75m absolute supervisor guard. [Live qualification](scale/tier1-full126-2026-10-08/). Terminal qualification remains required. Original full124 normal100k remains active under unchanged300m; current126 full normal100k must follow with adequate resources. Full native matrices, original24h, million physical drain, dependency adoption, every canonical runtime reference/migration and production online GC remain uncompleted requirements.
