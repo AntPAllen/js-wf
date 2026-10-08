@@ -1,0 +1,361 @@
+[
+  {
+    "name": "journal-normal",
+    "argv": [
+      "go",
+      "test",
+      "-json",
+      "-p=1",
+      "./journal",
+      "-run",
+      "^(TestGraphJournal|TestNativeGraphJournal|TestGraphCanonicalStart|TestGraphCanonicalSignalInputs|TestNativeGraphCanonicalSignalInputs)",
+      "-count=1",
+      "-timeout=5m"
+    ],
+    "returncode": 0,
+    "wall_seconds": 12.69956374168396,
+    "expected": {
+      "js-wf/journal": [
+        "TestGraphCanonicalSignalInputsIndexedIdentityAndReopen",
+        "TestGraphCanonicalSignalInputsNamesPointersAndReadExpiry",
+        "TestGraphCanonicalSignalInputsPublicationInterleavings",
+        "TestGraphCanonicalSignalInputsRetirementAndReplacement",
+        "TestGraphCanonicalSignalInputsSchemaAndExpiry",
+        "TestGraphCanonicalSignalInputsUnknownAndReadFailures",
+        "TestGraphCanonicalStartPendingBindingAndRetainedInput",
+        "TestGraphCanonicalStartRejectsLegacyAndBounds",
+        "TestGraphJournalAcquireRenewContention",
+        "TestGraphJournalCloseContentionAndAmbiguousRelease",
+        "TestGraphJournalCorruptCursorAndLeaseBoundary",
+        "TestGraphJournalEntryPayloadAlias",
+        "TestGraphJournalExistingHistoryIsNotStaleAbsence",
+        "TestGraphJournalGenerationRetainedReaderAndDrain",
+        "TestGraphJournalLimitsAndForeignRoot",
+        "TestGraphJournalPublicConfiguration",
+        "TestGraphJournalPurgeFenceRetainsReadersAndGeneration",
+        "TestGraphJournalStaleAndUnknownAppends",
+        "TestGraphJournalTerminalSnapshotAdmission",
+        "TestNativeGraphCanonicalSignalInputs",
+        "TestNativeGraphJournalGenerationAndDrain",
+        "TestNativeGraphJournalPublicAdmission",
+        "TestNativeGraphJournalPublicSDK"
+      ]
+    },
+    "actual": {
+      "js-wf/journal": [
+        "TestGraphCanonicalSignalInputsIndexedIdentityAndReopen",
+        "TestGraphCanonicalSignalInputsNamesPointersAndReadExpiry",
+        "TestGraphCanonicalSignalInputsPublicationInterleavings",
+        "TestGraphCanonicalSignalInputsRetirementAndReplacement",
+        "TestGraphCanonicalSignalInputsSchemaAndExpiry",
+        "TestGraphCanonicalSignalInputsUnknownAndReadFailures",
+        "TestGraphCanonicalStartPendingBindingAndRetainedInput",
+        "TestGraphCanonicalStartRejectsLegacyAndBounds",
+        "TestGraphJournalAcquireRenewContention",
+        "TestGraphJournalCloseContentionAndAmbiguousRelease",
+        "TestGraphJournalCorruptCursorAndLeaseBoundary",
+        "TestGraphJournalEntryPayloadAlias",
+        "TestGraphJournalExistingHistoryIsNotStaleAbsence",
+        "TestGraphJournalGenerationRetainedReaderAndDrain",
+        "TestGraphJournalLimitsAndForeignRoot",
+        "TestGraphJournalPublicConfiguration",
+        "TestGraphJournalPurgeFenceRetainsReadersAndGeneration",
+        "TestGraphJournalStaleAndUnknownAppends",
+        "TestGraphJournalTerminalSnapshotAdmission",
+        "TestNativeGraphCanonicalSignalInputs",
+        "TestNativeGraphJournalGenerationAndDrain",
+        "TestNativeGraphJournalPublicAdmission",
+        "TestNativeGraphJournalPublicSDK"
+      ]
+    },
+    "terminal": [
+      {
+        "Time": "2026-10-08T16:27:33.404868312Z",
+        "Action": "pass",
+        "Package": "js-wf/journal",
+        "Elapsed": 11.814
+      }
+    ],
+    "log_sha256": "8bc769aab5dd3915acaeb1f58fcaf6c05635b8a2e1b504d1a107591b3102ad14"
+  },
+  {
+    "name": "client-worker-normal",
+    "argv": [
+      "go",
+      "test",
+      "-json",
+      "-p=1",
+      "./client",
+      "./worker",
+      "-run",
+      "^(TestNativeGraphWorkerReplayInputsSignalsAndResults|TestGraph|TestNativeGraphClient|TestNativeGraphSignal|TestCanonicalStart)",
+      "-count=1",
+      "-timeout=5m"
+    ],
+    "returncode": 0,
+    "wall_seconds": 9.60047721862793,
+    "expected": {
+      "js-wf/client": [
+        "TestCanonicalStartAwaitMissingSourceCannotProvePurge",
+        "TestCanonicalStartAwaitPendingReplacementAndMissingReadyPointer",
+        "TestCanonicalStartAwaitSourceCommittedBeforeBinding",
+        "TestCanonicalStartRecoveryCannotReserveReplacementAfterRetirement",
+        "TestGraphClientBindingKeepsOriginalModeAndUsesProvidedTransports",
+        "TestNativeGraphClientCanonicalTerminals",
+        "TestNativeGraphClientSignalsUseCanonicalHistory"
+      ],
+      "js-wf/worker": [
+        "TestGraphChildReplayRejectsForgedProvenance",
+        "TestGraphSelectedChildRequiresExactRecordedSignal",
+        "TestNativeGraphWorkerReplayInputsSignalsAndResults"
+      ]
+    },
+    "actual": {
+      "js-wf/client": [
+        "TestCanonicalStartAwaitMissingSourceCannotProvePurge",
+        "TestCanonicalStartAwaitPendingReplacementAndMissingReadyPointer",
+        "TestCanonicalStartAwaitSourceCommittedBeforeBinding",
+        "TestCanonicalStartRecoveryCannotReserveReplacementAfterRetirement",
+        "TestGraphClientBindingKeepsOriginalModeAndUsesProvidedTransports",
+        "TestNativeGraphClientCanonicalTerminals",
+        "TestNativeGraphClientSignalsUseCanonicalHistory"
+      ],
+      "js-wf/worker": [
+        "TestGraphChildReplayRejectsForgedProvenance",
+        "TestGraphSelectedChildRequiresExactRecordedSignal",
+        "TestNativeGraphWorkerReplayInputsSignalsAndResults"
+      ]
+    },
+    "terminal": [
+      {
+        "Time": "2026-10-08T16:27:38.890014825Z",
+        "Action": "pass",
+        "Package": "js-wf/client",
+        "Elapsed": 4.598
+      },
+      {
+        "Time": "2026-10-08T16:27:43.013218974Z",
+        "Action": "pass",
+        "Package": "js-wf/worker",
+        "Elapsed": 3.4779999999999998
+      }
+    ],
+    "log_sha256": "bd58681c73cfcf49b21d47b96df95908203a719da4793021c4d43974de875090"
+  },
+  {
+    "name": "pins-normal",
+    "argv": [
+      "go",
+      "test",
+      "-json",
+      "-p=1",
+      "./sim",
+      "-run",
+      "^TestPinnedRegressionCorpus$",
+      "-count=1",
+      "-timeout=5m"
+    ],
+    "returncode": 0,
+    "wall_seconds": 2.237682819366455,
+    "expected": {
+      "js-wf/sim": [
+        "TestPinnedRegressionCorpus"
+      ]
+    },
+    "actual": {
+      "js-wf/sim": [
+        "TestPinnedRegressionCorpus"
+      ]
+    },
+    "terminal": [
+      {
+        "Time": "2026-10-08T16:27:45.261900972Z",
+        "Action": "pass",
+        "Package": "js-wf/sim",
+        "Elapsed": 1.5190000000000001
+      }
+    ],
+    "log_sha256": "2135ebf6740687cd37855c27ec8bdca98107a29ca9fdd9b9d5f01f5b81f64775"
+  },
+  {
+    "name": "journal-race",
+    "argv": [
+      "go",
+      "test",
+      "-json",
+      "-p=1",
+      "-race",
+      "./journal",
+      "-run",
+      "^(TestGraphJournal|TestNativeGraphJournal|TestGraphCanonicalStart|TestGraphCanonicalSignalInputs|TestNativeGraphCanonicalSignalInputs)",
+      "-count=1",
+      "-timeout=5m"
+    ],
+    "returncode": 0,
+    "wall_seconds": 104.02376437187195,
+    "expected": {
+      "js-wf/journal": [
+        "TestGraphCanonicalSignalInputsIndexedIdentityAndReopen",
+        "TestGraphCanonicalSignalInputsNamesPointersAndReadExpiry",
+        "TestGraphCanonicalSignalInputsPublicationInterleavings",
+        "TestGraphCanonicalSignalInputsRetirementAndReplacement",
+        "TestGraphCanonicalSignalInputsSchemaAndExpiry",
+        "TestGraphCanonicalSignalInputsUnknownAndReadFailures",
+        "TestGraphCanonicalStartPendingBindingAndRetainedInput",
+        "TestGraphCanonicalStartRejectsLegacyAndBounds",
+        "TestGraphJournalAcquireRenewContention",
+        "TestGraphJournalCloseContentionAndAmbiguousRelease",
+        "TestGraphJournalCorruptCursorAndLeaseBoundary",
+        "TestGraphJournalEntryPayloadAlias",
+        "TestGraphJournalExistingHistoryIsNotStaleAbsence",
+        "TestGraphJournalGenerationRetainedReaderAndDrain",
+        "TestGraphJournalLimitsAndForeignRoot",
+        "TestGraphJournalPublicConfiguration",
+        "TestGraphJournalPurgeFenceRetainsReadersAndGeneration",
+        "TestGraphJournalStaleAndUnknownAppends",
+        "TestGraphJournalTerminalSnapshotAdmission",
+        "TestNativeGraphCanonicalSignalInputs",
+        "TestNativeGraphJournalGenerationAndDrain",
+        "TestNativeGraphJournalPublicAdmission",
+        "TestNativeGraphJournalPublicSDK"
+      ]
+    },
+    "actual": {
+      "js-wf/journal": [
+        "TestGraphCanonicalSignalInputsIndexedIdentityAndReopen",
+        "TestGraphCanonicalSignalInputsNamesPointersAndReadExpiry",
+        "TestGraphCanonicalSignalInputsPublicationInterleavings",
+        "TestGraphCanonicalSignalInputsRetirementAndReplacement",
+        "TestGraphCanonicalSignalInputsSchemaAndExpiry",
+        "TestGraphCanonicalSignalInputsUnknownAndReadFailures",
+        "TestGraphCanonicalStartPendingBindingAndRetainedInput",
+        "TestGraphCanonicalStartRejectsLegacyAndBounds",
+        "TestGraphJournalAcquireRenewContention",
+        "TestGraphJournalCloseContentionAndAmbiguousRelease",
+        "TestGraphJournalCorruptCursorAndLeaseBoundary",
+        "TestGraphJournalEntryPayloadAlias",
+        "TestGraphJournalExistingHistoryIsNotStaleAbsence",
+        "TestGraphJournalGenerationRetainedReaderAndDrain",
+        "TestGraphJournalLimitsAndForeignRoot",
+        "TestGraphJournalPublicConfiguration",
+        "TestGraphJournalPurgeFenceRetainsReadersAndGeneration",
+        "TestGraphJournalStaleAndUnknownAppends",
+        "TestGraphJournalTerminalSnapshotAdmission",
+        "TestNativeGraphCanonicalSignalInputs",
+        "TestNativeGraphJournalGenerationAndDrain",
+        "TestNativeGraphJournalPublicAdmission",
+        "TestNativeGraphJournalPublicSDK"
+      ]
+    },
+    "terminal": [
+      {
+        "Time": "2026-10-08T16:29:29.279539497Z",
+        "Action": "pass",
+        "Package": "js-wf/journal",
+        "Elapsed": 101.964
+      }
+    ],
+    "log_sha256": "c07cb376212d98e8ed54c86dbd4645e75c20a71bb2cac47c0209329a97d770c5"
+  },
+  {
+    "name": "client-worker-race",
+    "argv": [
+      "go",
+      "test",
+      "-json",
+      "-p=1",
+      "-race",
+      "./client",
+      "./worker",
+      "-run",
+      "^(TestNativeGraphWorkerReplayInputsSignalsAndResults|TestGraph|TestNativeGraphClient|TestNativeGraphSignal|TestCanonicalStart)",
+      "-count=1",
+      "-timeout=5m"
+    ],
+    "returncode": 0,
+    "wall_seconds": 43.47078061103821,
+    "expected": {
+      "js-wf/client": [
+        "TestCanonicalStartAwaitMissingSourceCannotProvePurge",
+        "TestCanonicalStartAwaitPendingReplacementAndMissingReadyPointer",
+        "TestCanonicalStartAwaitSourceCommittedBeforeBinding",
+        "TestCanonicalStartRecoveryCannotReserveReplacementAfterRetirement",
+        "TestGraphClientBindingKeepsOriginalModeAndUsesProvidedTransports",
+        "TestNativeGraphClientCanonicalTerminals",
+        "TestNativeGraphClientSignalsUseCanonicalHistory"
+      ],
+      "js-wf/worker": [
+        "TestGraphChildReplayRejectsForgedProvenance",
+        "TestGraphSelectedChildRequiresExactRecordedSignal",
+        "TestNativeGraphWorkerReplayInputsSignalsAndResults"
+      ]
+    },
+    "actual": {
+      "js-wf/client": [
+        "TestCanonicalStartAwaitMissingSourceCannotProvePurge",
+        "TestCanonicalStartAwaitPendingReplacementAndMissingReadyPointer",
+        "TestCanonicalStartAwaitSourceCommittedBeforeBinding",
+        "TestCanonicalStartRecoveryCannotReserveReplacementAfterRetirement",
+        "TestGraphClientBindingKeepsOriginalModeAndUsesProvidedTransports",
+        "TestNativeGraphClientCanonicalTerminals",
+        "TestNativeGraphClientSignalsUseCanonicalHistory"
+      ],
+      "js-wf/worker": [
+        "TestGraphChildReplayRejectsForgedProvenance",
+        "TestGraphSelectedChildRequiresExactRecordedSignal",
+        "TestNativeGraphWorkerReplayInputsSignalsAndResults"
+      ]
+    },
+    "terminal": [
+      {
+        "Time": "2026-10-08T16:29:52.597855753Z",
+        "Action": "pass",
+        "Package": "js-wf/client",
+        "Elapsed": 15.998
+      },
+      {
+        "Time": "2026-10-08T16:30:12.760616399Z",
+        "Action": "pass",
+        "Package": "js-wf/worker",
+        "Elapsed": 16.8
+      }
+    ],
+    "log_sha256": "7fba57348ce4dc0aa7ff63be68f5412b34450cec3414814b255dfc7a84077921"
+  },
+  {
+    "name": "pins-race",
+    "argv": [
+      "go",
+      "test",
+      "-json",
+      "-p=1",
+      "-race",
+      "./sim",
+      "-run",
+      "^TestPinnedRegressionCorpus$",
+      "-count=1",
+      "-timeout=5m"
+    ],
+    "returncode": 0,
+    "wall_seconds": 33.711769342422485,
+    "expected": {
+      "js-wf/sim": [
+        "TestPinnedRegressionCorpus"
+      ]
+    },
+    "actual": {
+      "js-wf/sim": [
+        "TestPinnedRegressionCorpus"
+      ]
+    },
+    "terminal": [
+      {
+        "Time": "2026-10-08T16:30:46.464482966Z",
+        "Action": "pass",
+        "Package": "js-wf/sim",
+        "Elapsed": 20.079
+      }
+    ],
+    "log_sha256": "d6facd42e55a58a44af221041eb64f6611066b2b281910f7f923fffacbaf5b3e"
+  }
+]

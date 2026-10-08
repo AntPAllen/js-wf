@@ -18,7 +18,9 @@ Development logs are preserved under `development/`, including the receiver-name
 
 Native R1/R3 fixtures stage a 5 MiB input, reopen adapters, validate duplicates, retain the body after retirement and collection, replace the invocation and completely drain objects and physical chunk subjects after releasing the reader. Their invocation sequence is fixture-bound with `BindStart`; they do not prove native Start source confirmation, native Signal publication, crash recovery, production online collection or server fault behavior.
 
-Frozen source qualification is pending. The shared simulation inventory remains 144 workloads and 710 existing pins; these direct deterministic production-API cuts do not add a shared seeded family.
+Frozen source `691434f221d3b6e2825849a7794c06fff7daa2c2` passes all six commands under two Go CPUs, 512 MiB Go memory limit, count one and five-minute package deadlines. Each mode passes 23 journal groups, seven client groups, three worker groups, and the full 710-pin corpus. Normal journal/client-worker/pins commands take 12.700/9.600/2.238 seconds; race commands take 104.024/43.471/33.712 seconds.
+
+The separate executed source/trace review verifies all 1,592 selected Go/config/corpus inputs against that Git commit and unchanged before/after, regenerates the exact selected group sets, checks every package terminal result and every one of the 710 pin names, and verifies both native replica cases and physical drain output. No selected test skips or data races occur. Complete commands, JSON events, inventories and review are under `qualification/`. The shared simulation inventory remains 144 workloads and 710 existing pins; these direct deterministic production-API cuts do not add a shared seeded family.
 
 ## Next integration
 
