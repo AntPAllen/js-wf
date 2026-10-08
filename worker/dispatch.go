@@ -48,8 +48,31 @@ func (jetStreamDispatchPort) Wait(ctx context.Context, delay time.Duration) erro
 
 type jetStreamDispatchConsumer struct{ consumer jetstream.Consumer }
 
-func (c jetStreamDispatchConsumer) FetchOne(_ context.Context) (DispatchBatch, error) {
-	return c.consumer.Fetch(1, jetstream.FetchMaxWait(time.Second))
+func (c jetStreamDispatchConsumer) FetchOne(ctx context.Context) (DispatchBatch, error) {
+	if err := ctx.Err(); err != nil {
+		return nil, err
+	}
+	// The SDK's expiry timer restarts on informational replies. Bound the
+	// entire pull with a context, including its inbox subscription, rather
+	// than relying only on the server's request expiry.
+	attempt, cancel := context.WithTimeout(ctx, time.Second)
+	batch, err := c.consumer.Fetch(1, jetstream.FetchContext(attempt))
+	if err != nil {
+		cancel()
+		return nil, err
+	}
+	return dispatchFetchBatch{MessageBatch: batch, cancel: cancel}, nil
+}
+
+type dispatchFetchBatch struct {
+	jetstream.MessageBatch
+	cancel context.CancelFunc
+}
+
+func (b dispatchFetchBatch) Error() error {
+	err := b.MessageBatch.Error()
+	b.cancel()
+	return err
 }
 
 func (c jetStreamDispatchConsumer) Info(ctx context.Context) (uint64, int, error) {
