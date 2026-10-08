@@ -19,6 +19,8 @@ import (
 	"js-wf/internal/blobpublication"
 	"js-wf/internal/retainedgraph"
 
+	"js-wf/internal/natsstream"
+
 	"github.com/nats-io/nats.go"
 	"github.com/nats-io/nats.go/jetstream"
 )
@@ -80,7 +82,7 @@ func openNativePortAttempt(ctx context.Context, authority *NativeAuthority, buck
 	if err != nil {
 		return nil, fmt.Errorf("open graph object stream: %w", err)
 	}
-	p := &NativePort{NativeAuthority: authority, bucket: bucket, objectStream: guardStream(stream)}
+	p := &NativePort{NativeAuthority: authority, bucket: bucket, objectStream: natsstream.Guard(stream)}
 	if err = p.validateObjects(ctx); err != nil {
 		return nil, fmt.Errorf("validate graph object stream: %w", err)
 	}

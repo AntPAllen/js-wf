@@ -12,6 +12,8 @@ import (
 	"strconv"
 	"strings"
 
+	"js-wf/internal/natsstream"
+
 	"github.com/nats-io/nats.go"
 	"github.com/nats-io/nats.go/jetstream"
 )
@@ -48,7 +50,7 @@ func OpenNativePort(ctx context.Context, authority *NativeAuthority, bucket stri
 	if err != nil {
 		return nil, err
 	}
-	p := &NativePort{NativeAuthority: authority, bucket: bucket, objectStream: stream}
+	p := &NativePort{NativeAuthority: authority, bucket: bucket, objectStream: natsstream.Guard(stream)}
 	if err = p.validateObjects(ctx); err != nil {
 		return nil, err
 	}

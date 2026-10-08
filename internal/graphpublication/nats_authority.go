@@ -15,6 +15,8 @@ import (
 
 	"js-wf/internal/blobpublication"
 
+	"js-wf/internal/natsstream"
+
 	"github.com/nats-io/nats.go"
 	"github.com/nats-io/nats.go/jetstream"
 )
@@ -73,7 +75,7 @@ func OpenNativeAuthority(ctx context.Context, js jetstream.JetStream, name, pref
 		stream, err := js.Stream(lookup, name)
 		var p *NativeAuthority
 		if err == nil {
-			p = &NativeAuthority{js: js, stream: guardStream(stream), name: name, prefix: prefix}
+			p = &NativeAuthority{js: js, stream: natsstream.Guard(stream), name: name, prefix: prefix}
 			err = p.validate(lookup)
 		}
 		stop()

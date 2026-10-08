@@ -1,0 +1,90 @@
+package blobpublication
+
+import (
+	"errors"
+	"fmt"
+	"sync"
+	"testing"
+	"time"
+)
+
+// Concurrent read/census operations share each adapter's actual SDK handles.
+// The root and generation stay live; conflict exhaustion is a bounded read
+// abort, not permission to consume speculative bytes or delete an object.
+func TestNativeBlobSharedStreamHandleConcurrency(t *testing.T) {
+	for _, replicas := range []int{1, 3} {
+		t.Run(fmt.Sprintf("R%d", replicas), func(t *testing.T) {
+			_, port, c, _ := nativeObjectFixture(t, replicas)
+			p := Protocol{Port: port}
+			data := []byte("shared-stream-handle")
+			prepared := nativePrepare(t, p, c, "workflow", data)
+			root := nativeCommit(t, p, c, prepared)
+			hash := key(data)
+			ref := root.Blobs[hash]
+			errorsByActor := make([]error, 4)
+			var wg sync.WaitGroup
+			start := make(chan struct{})
+			for actor := 0; actor < 4; actor++ {
+				wg.Add(1)
+				go func(actor int) {
+					defer wg.Done()
+					<-start
+					for turn := 0; turn < 8; turn++ {
+						read, err := port.ReadRoot(c, "workflow")
+						if err != nil && !errors.Is(err, ErrConflict) {
+							errorsByActor[actor] = err
+							return
+						}
+						if err == nil && (read.Head != root.Head || read.Token != root.Token || read.Blobs[hash] != ref) {
+							errorsByActor[actor] = errors.New("root changed during read contention")
+							return
+						}
+						record, err := port.ReadBlob(c, hash)
+						if err != nil && !errors.Is(err, ErrConflict) {
+							errorsByActor[actor] = err
+							return
+						}
+						if err == nil && (record.Fence.Generation != ref.Generation || record.Fence.Object != ref.Object || record.Fence.Phase != "ready") {
+							errorsByActor[actor] = errors.New("generation changed during read contention")
+							return
+						}
+						if _, err = port.BlobKeys(c); err != nil {
+							errorsByActor[actor] = err
+							return
+						}
+						objects, err := port.Objects(c)
+						if err != nil || len(objects) != 1 {
+							if err == nil {
+								err = errors.New("wrong live census")
+							}
+							errorsByActor[actor] = err
+							return
+						}
+					}
+				}(actor)
+			}
+			close(start)
+			wg.Wait()
+			for actor, err := range errorsByActor {
+				if err != nil {
+					t.Fatal(actor, err)
+				}
+			}
+			read, err := port.GetBytes(c, ref.Object)
+			if err != nil || string(read) != string(data) {
+				t.Fatal("joined physical read", err)
+			}
+			if err = p.Retire(c, "workflow", root.Head); err != nil {
+				t.Fatal(err)
+			}
+			if _, err = p.Sweep(c, time.Now().Add(time.Hour)); err != nil {
+				t.Fatal(err)
+			}
+			nativeNoChunks(t, port, c)
+			if objects, err := port.Objects(c); err != nil || len(objects) != 0 {
+				t.Fatal("retired census", objects, err)
+			}
+			t.Logf("R%d actors4 rounds8 shared root/blob/authority census/object census, retained bytes and retirement passed", replicas)
+		})
+	}
+}

@@ -1,0 +1,90 @@
+=== RUN   TestNativeBlobSharedStreamHandleConcurrency
+=== RUN   TestNativeBlobSharedStreamHandleConcurrency/R1
+==================
+WARNING: DATA RACE
+Write at 0x00c00019ab70 by goroutine 106:
+  github.com/nats-io/nats.go/jetstream.(*stream).Info()
+      /home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/jetstream/stream.go:498 +0xd4e
+  js-wf/internal/blobpublication.(*NativeAuthority).validate()
+      /home/exedev/js-wf/internal/blobpublication/nats_authority.go:84 +0x87
+  js-wf/internal/blobpublication.(*NativeAuthority).readSnapshot()
+      /home/exedev/js-wf/internal/blobpublication/nats_authority.go:107 +0x22a
+  js-wf/internal/blobpublication.(*NativeAuthority).read.func1()
+      /home/exedev/js-wf/internal/blobpublication/nats_authority.go:165 +0xc6
+  js-wf/internal/blobpublication.ReadWithWitness[go.shape.struct { Schema string "json:\"schema\""; Kind string "json:\"kind\""; Identity string "json:\"identity\""; Revision uint64 "json:\"revision\""; Root *js-wf/internal/blobpublication.Root "json:\"root,omitempty\""; Fence *js-wf/internal/blobpublication.Fence "json:\"fence,omitempty\"" }]()
+      /home/exedev/js-wf/internal/blobpublication/read_witness.go:28 +0x2c5
+  js-wf/internal/blobpublication.(*NativeAuthority).read()
+      /home/exedev/js-wf/internal/blobpublication/nats_authority.go:164 +0x1c4
+  js-wf/internal/blobpublication.(*NativeAuthority).ReadRoot()
+      /home/exedev/js-wf/internal/blobpublication/nats_authority.go:267 +0xa4
+  js-wf/internal/blobpublication.TestNativeBlobSharedStreamHandleConcurrency.func1.1()
+      /home/exedev/js-wf/internal/blobpublication/nats_concurrency_test.go:35 +0x1a6
+  js-wf/internal/blobpublication.TestNativeBlobSharedStreamHandleConcurrency.func1.gowrap1()
+      /home/exedev/js-wf/internal/blobpublication/nats_concurrency_test.go:66 +0x38
+
+Previous write at 0x00c00019ab70 by goroutine 108:
+  github.com/nats-io/nats.go/jetstream.(*stream).Info()
+      /home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/jetstream/stream.go:498 +0xd4e
+  js-wf/internal/blobpublication.(*NativeAuthority).validate()
+      /home/exedev/js-wf/internal/blobpublication/nats_authority.go:84 +0x87
+  js-wf/internal/blobpublication.(*NativeAuthority).readSnapshot()
+      /home/exedev/js-wf/internal/blobpublication/nats_authority.go:107 +0x22a
+  js-wf/internal/blobpublication.(*NativeAuthority).read.func1()
+      /home/exedev/js-wf/internal/blobpublication/nats_authority.go:165 +0xc6
+  js-wf/internal/blobpublication.ReadWithWitness[go.shape.struct { Schema string "json:\"schema\""; Kind string "json:\"kind\""; Identity string "json:\"identity\""; Revision uint64 "json:\"revision\""; Root *js-wf/internal/blobpublication.Root "json:\"root,omitempty\""; Fence *js-wf/internal/blobpublication.Fence "json:\"fence,omitempty\"" }]()
+      /home/exedev/js-wf/internal/blobpublication/read_witness.go:28 +0x2c5
+  js-wf/internal/blobpublication.(*NativeAuthority).read()
+      /home/exedev/js-wf/internal/blobpublication/nats_authority.go:164 +0x1c4
+  js-wf/internal/blobpublication.(*NativeAuthority).ReadRoot()
+      /home/exedev/js-wf/internal/blobpublication/nats_authority.go:267 +0xa4
+  js-wf/internal/blobpublication.TestNativeBlobSharedStreamHandleConcurrency.func1.1()
+      /home/exedev/js-wf/internal/blobpublication/nats_concurrency_test.go:35 +0x1a6
+  js-wf/internal/blobpublication.TestNativeBlobSharedStreamHandleConcurrency.func1.gowrap1()
+      /home/exedev/js-wf/internal/blobpublication/nats_concurrency_test.go:66 +0x38
+
+Goroutine 106 (running) created at:
+  js-wf/internal/blobpublication.TestNativeBlobSharedStreamHandleConcurrency.func1()
+      /home/exedev/js-wf/internal/blobpublication/nats_concurrency_test.go:31 +0x384
+  js-wf/internal/blobpublication.TestNativeBlobSharedStreamHandleConcurrency.func1()
+      /home/exedev/js-wf/internal/blobpublication/nats_concurrency_test.go:23 +0x206
+  js-wf/internal/blobpublication.Protocol.prepareAt()
+      /home/exedev/js-wf/internal/blobpublication/protocol.go:172 +0x4ed
+  js-wf/internal/blobpublication.Protocol.Prepare()
+      /home/exedev/js-wf/internal/blobpublication/protocol.go:140 +0x317
+  js-wf/internal/blobpublication.Protocol.Prepare()
+      /home/exedev/js-wf/internal/blobpublication/protocol.go:136 +0x17d
+  js-wf/internal/blobpublication.nativePrepare()
+      /home/exedev/js-wf/internal/blobpublication/nats_objects_test.go:83 +0x176
+  js-wf/internal/blobpublication.TestNativeBlobSharedStreamHandleConcurrency.func1()
+      /home/exedev/js-wf/internal/blobpublication/nats_concurrency_test.go:22 +0x168
+  js-wf/internal/blobpublication.TestNativeBlobSharedStreamHandleConcurrency.func1()
+      /home/exedev/js-wf/internal/blobpublication/nats_concurrency_test.go:19 +0x52
+  testing.tRunner()
+      /usr/local/go/src/testing/testing.go:2193 +0x21c
+  testing.(*T).Run.gowrap1()
+      /usr/local/go/src/testing/testing.go:2258 +0x38
+
+Goroutine 108 (running) created at:
+  js-wf/internal/blobpublication.TestNativeBlobSharedStreamHandleConcurrency.func1()
+      /home/exedev/js-wf/internal/blobpublication/nats_concurrency_test.go:31 +0x384
+  js-wf/internal/blobpublication.TestNativeBlobSharedStreamHandleConcurrency.func1()
+      /home/exedev/js-wf/internal/blobpublication/nats_concurrency_test.go:23 +0x206
+  js-wf/internal/blobpublication.Protocol.prepareAt()
+      /home/exedev/js-wf/internal/blobpublication/protocol.go:172 +0x4ed
+  js-wf/internal/blobpublication.Protocol.Prepare()
+      /home/exedev/js-wf/internal/blobpublication/protocol.go:140 +0x317
+  js-wf/internal/blobpublication.Protocol.Prepare()
+      /home/exedev/js-wf/internal/blobpublication/protocol.go:136 +0x17d
+  js-wf/internal/blobpublication.nativePrepare()
+      /home/exedev/js-wf/internal/blobpublication/nats_objects_test.go:83 +0x176
+  js-wf/internal/blobpublication.TestNativeBlobSharedStreamHandleConcurrency.func1()
+      /home/exedev/js-wf/internal/blobpublication/nats_concurrency_test.go:22 +0x168
+  js-wf/internal/blobpublication.TestNativeBlobSharedStreamHandleConcurrency.func1()
+      /home/exedev/js-wf/internal/blobpublication/nats_concurrency_test.go:19 +0x52
+  testing.tRunner()
+      /usr/local/go/src/testing/testing.go:2193 +0x21c
+  testing.(*T).Run.gowrap1()
+      /usr/local/go/src/testing/testing.go:2258 +0x38
+==================
+FAIL	js-wf/internal/blobpublication	0.091s
+FAIL

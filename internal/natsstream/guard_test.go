@@ -1,4 +1,4 @@
-package graphpublication
+package natsstream
 
 import (
 	"context"
@@ -24,9 +24,9 @@ func (s *heldStreamInfo) GetLastMsgForSubject(context.Context, string) (*jetstre
 	s.gets++
 	return nil, jetstream.ErrMsgNotFound
 }
-func TestNativeGraphStreamGuardHonorsWaitingContext(t *testing.T) {
+func TestStreamGuardHonorsWaitingContext(t *testing.T) {
 	raw := &heldStreamInfo{entered: make(chan struct{}), release: make(chan struct{})}
-	stream := guardStream(raw)
+	stream := Guard(raw)
 	ownerDone := make(chan error, 1)
 	go func() { _, err := stream.Info(context.Background()); ownerDone <- err }()
 	<-raw.entered

@@ -1,4 +1,7 @@
-package graphpublication
+// Package natsstream protects the mutable SDK stream cache used by native
+// metadata/object adapters. Only the guarded methods below are covered; callers
+// must retain exclusive ownership of the wrapped SDK handle.
+package natsstream
 
 import (
 	"context"
@@ -17,7 +20,9 @@ type guardedStream struct {
 	gate chan struct{}
 }
 
-func guardStream(stream jetstream.Stream) jetstream.Stream {
+// Guard wraps one owned SDK stream handle for concurrent Info/cache/Get/Purge
+// calls. It does not serialize a protocol operation or metadata publication.
+func Guard(stream jetstream.Stream) jetstream.Stream {
 	gate := make(chan struct{}, 1)
 	gate <- struct{}{}
 	return &guardedStream{Stream: stream, gate: gate}

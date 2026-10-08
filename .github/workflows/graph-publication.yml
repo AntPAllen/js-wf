@@ -9,6 +9,7 @@ on:
       - 'sim/journal_transport_test.go'
       - 'sim/testdata/regressions/graph-publication-*'
       - 'internal/blobpublication/**'
+      - 'internal/natsstream/**'
       - 'testcluster/cluster.go'
       - '.github/workflows/graph-publication.yml'
       - 'go.mod'
@@ -21,6 +22,7 @@ on:
       - 'sim/journal_transport_test.go'
       - 'sim/testdata/regressions/graph-publication-*'
       - 'internal/blobpublication/**'
+      - 'internal/natsstream/**'
       - 'testcluster/cluster.go'
       - '.github/workflows/graph-publication.yml'
       - 'go.mod'
@@ -48,7 +50,7 @@ jobs:
         run: |
           graph_flags=()
           if [ "$GRAPH_MODE" = race ]; then graph_flags=(-race); fi
-          go test -p=1 "${graph_flags[@]}" ./internal/graphpublication -count=1 -timeout=5m -json > graph-publication-events.jsonl
+          go test -p=1 "${graph_flags[@]}" ./internal/natsstream ./internal/graphpublication -count=1 -timeout=5m -json > graph-publication-events.jsonl
       - name: Common seeded transport and pinned trace dispatch
         env:
           GOMAXPROCS: '1'
