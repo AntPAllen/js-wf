@@ -1,0 +1,56 @@
+{
+  "source": "f5fa502daeb108951587bb1f6ec5cfe63963faef",
+  "commands": [
+    {
+      "name": "components",
+      "command": [
+        "go",
+        "test",
+        "-p=1",
+        "-race",
+        "./journal",
+        "./reconcile",
+        "./worker",
+        "-run",
+        "^TestGraphCanonicalSignal|^TestNativeCanonicalSignalQueue|^TestNativeGraphReconcileCanonicalSignals$",
+        "-json",
+        "-count=1",
+        "-timeout=5m"
+      ],
+      "exit_code": 0,
+      "wall_seconds": 276.27985763549805
+    },
+    {
+      "name": "client",
+      "command": [
+        "go",
+        "test",
+        "-p=1",
+        "-race",
+        "./client",
+        "-json",
+        "-count=1",
+        "-timeout=5m"
+      ],
+      "exit_code": 0,
+      "wall_seconds": 49.449124574661255
+    },
+    {
+      "name": "pins",
+      "command": [
+        "go",
+        "test",
+        "-p=1",
+        "-race",
+        "./sim",
+        "-run",
+        "^TestPinnedRegressionCorpus$",
+        "-json",
+        "-count=1",
+        "-timeout=5m"
+      ],
+      "exit_code": 0,
+      "wall_seconds": 32.73972463607788
+    }
+  ]
+}
