@@ -161,11 +161,8 @@ func (p *NativeAuthority) readSnapshot(ctx context.Context, kind, identity strin
 // Reads require publish permission and perform a durable write, including for
 // absent identities. All authority users must tolerate physical sequence churn.
 func (p *NativeAuthority) read(ctx context.Context, kind, identity string) (authorityValue, uint64, error) {
-	for attempt := 0; attempt < 16; attempt++ {
-		if err := ctx.Err(); err != nil {
-			return authorityValue{}, 0, err
-		}
-		v, seq, err := p.readSnapshot(ctx, kind, identity)
+	return ReadWithWitness(ctx, func(call context.Context) (authorityValue, uint64, error) {
+		v, seq, err := p.readSnapshot(call, kind, identity)
 		if err != nil {
 			return v, 0, err
 		}
@@ -174,18 +171,12 @@ func (p *NativeAuthority) read(ctx context.Context, kind, identity string) (auth
 		}
 		// Upgrade validated v1 records without resetting logical high-water marks.
 		v.Schema = authoritySchema
-		confirmed, err := p.publishWithSequence(ctx, seq, v, true)
-		if errors.Is(err, ErrConflict) {
-			continue
-		}
-		if err != nil {
-			// A lost witness acknowledgment cannot be upgraded by another GET.
-			return authorityValue{}, 0, err
-		}
-		return v, confirmed, nil
-	}
-	return authorityValue{}, 0, ErrConflict
+		return v, seq, nil
+	}, func(call context.Context, seq uint64, v authorityValue) (uint64, error) {
+		return p.publishWithSequence(call, seq, v, true)
+	})
 }
+
 func validHash(k string) bool {
 	if len(k) != 64 {
 		return false

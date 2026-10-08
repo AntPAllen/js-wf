@@ -1,0 +1,95 @@
+{
+  "version": 3,
+  "seed": 3,
+  "workload": "authority_read_witness",
+  "step_limit": 100000,
+  "decisions": [
+    {
+      "at_ms": 0,
+      "enabled": [
+        "cancel_after",
+        "cancel_before",
+        "fresh_absence",
+        "fresh_value",
+        "lost_ack",
+        "no_quorum",
+        "persistent_stale",
+        "replacement",
+        "same_ack",
+        "snapshot_error",
+        "speculative_value",
+        "stale_absence",
+        "stale_value",
+        "zero_ack"
+      ],
+      "chosen": "speculative_value"
+    },
+    {
+      "at_ms": 0,
+      "enabled": [
+        "blob",
+        "root"
+      ],
+      "chosen": "root"
+    },
+    {
+      "at_ms": 0,
+      "enabled": [
+        "19",
+        "31",
+        "7"
+      ],
+      "chosen": "19"
+    }
+  ],
+  "transport": [
+    {
+      "at_ms": 0,
+      "operation": "authority_snapshot",
+      "subject": "root",
+      "expected": 107,
+      "sequence": 122,
+      "outcome": "speculative_value"
+    },
+    {
+      "at_ms": 0,
+      "operation": "authority_witness",
+      "subject": "root",
+      "expected": 122,
+      "sequence": 19,
+      "outcome": "conflict"
+    },
+    {
+      "at_ms": 0,
+      "operation": "authority_snapshot",
+      "subject": "root",
+      "expected": 7,
+      "sequence": 19,
+      "outcome": "speculative_value"
+    },
+    {
+      "at_ms": 0,
+      "operation": "authority_witness",
+      "subject": "root",
+      "expected": 19,
+      "sequence": 23,
+      "outcome": "acknowledged"
+    },
+    {
+      "at_ms": 0,
+      "operation": "authority_get_only_control",
+      "subject": "root",
+      "expected": 7,
+      "sequence": 122,
+      "outcome": "unsafe_without_witness"
+    },
+    {
+      "at_ms": 0,
+      "operation": "authority_read_check",
+      "subject": "root",
+      "expected": 2,
+      "sequence": 23,
+      "outcome": "speculative_value"
+    }
+  ]
+}

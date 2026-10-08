@@ -1,0 +1,70 @@
+{
+  "version": 3,
+  "seed": 2,
+  "workload": "authority_read_witness",
+  "step_limit": 100000,
+  "decisions": [
+    {
+      "at_ms": 0,
+      "enabled": [
+        "cancel_after",
+        "cancel_before",
+        "fresh_absence",
+        "fresh_value",
+        "lost_ack",
+        "no_quorum",
+        "persistent_stale",
+        "replacement",
+        "same_ack",
+        "snapshot_error",
+        "speculative_value",
+        "stale_absence",
+        "stale_value",
+        "zero_ack"
+      ],
+      "chosen": "lost_ack"
+    },
+    {
+      "at_ms": 0,
+      "enabled": [
+        "blob",
+        "root"
+      ],
+      "chosen": "blob"
+    },
+    {
+      "at_ms": 0,
+      "enabled": [
+        "19",
+        "31",
+        "7"
+      ],
+      "chosen": "19"
+    }
+  ],
+  "transport": [
+    {
+      "at_ms": 0,
+      "operation": "authority_snapshot",
+      "subject": "blob",
+      "expected": 7,
+      "sequence": 19,
+      "outcome": "lost_ack"
+    },
+    {
+      "at_ms": 0,
+      "operation": "authority_witness",
+      "subject": "blob",
+      "expected": 19,
+      "sequence": 23,
+      "outcome": "committed_reply_lost"
+    },
+    {
+      "at_ms": 0,
+      "operation": "authority_read_check",
+      "subject": "blob",
+      "expected": 1,
+      "outcome": "lost_ack"
+    }
+  ]
+}

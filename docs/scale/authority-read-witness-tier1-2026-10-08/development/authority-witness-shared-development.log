@@ -1,0 +1,23 @@
+=== RUN   TestSeededAuthorityReadWitnessReplay
+    authority_witness_replay_test.go:242: authority witness modes=map[cancel_after:79 cancel_before:73 fresh_absence:73 fresh_value:60 lost_ack:82 no_quorum:71 persistent_stale:65 replacement:85 same_ack:61 snapshot_error:75 speculative_value:65 stale_absence:85 stale_value:57 zero_ack:69]; every generated trace exactly replayed; production decision helper bounds/cancel/quorum acknowledgment checks
+--- PASS: TestSeededAuthorityReadWitnessReplay (0.20s)
+PASS
+ok  	js-wf/sim	1.212s
+=== RUN   TestNativeAuthorityReadWitness
+=== RUN   TestNativeAuthorityReadWitness/R1
+    nats_read_witness_test.go:202: native authority witness: R1 stale/absent/speculative replies rejected by actual conditional CAS; logical heads preserved; lost acknowledgment fails closed
+=== RUN   TestNativeAuthorityReadWitness/R3
+    nats_read_witness_test.go:202: native authority witness: R3 stale/absent/speculative replies rejected by actual conditional CAS; logical heads preserved; lost acknowledgment fails closed
+--- PASS: TestNativeAuthorityReadWitness (1.11s)
+    --- PASS: TestNativeAuthorityReadWitness/R1 (0.21s)
+    --- PASS: TestNativeAuthorityReadWitness/R3 (0.90s)
+=== RUN   TestNativeAuthorityWitnessRacesCommittedReplacement
+=== RUN   TestNativeAuthorityWitnessRacesCommittedReplacement/R1
+=== RUN   TestNativeAuthorityWitnessRacesCommittedReplacement/R3
+--- PASS: TestNativeAuthorityWitnessRacesCommittedReplacement (0.68s)
+    --- PASS: TestNativeAuthorityWitnessRacesCommittedReplacement/R1 (0.04s)
+    --- PASS: TestNativeAuthorityWitnessRacesCommittedReplacement/R3 (0.64s)
+=== RUN   TestNativeAuthorityReadRequiresQuorum
+--- PASS: TestNativeAuthorityReadRequiresQuorum (8.07s)
+PASS
+ok  	js-wf/internal/blobpublication	10.877s

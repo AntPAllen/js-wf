@@ -6,8 +6,10 @@ on:
       - 'internal/blobpublication/**'
       - 'testcluster/client_proxy*'
       - 'sim/blob_publication*'
+      - 'sim/authority_witness*'
       - 'sim/journal_transport_test.go'
       - 'sim/testdata/regressions/blob-publication-*'
+      - 'sim/testdata/regressions/authority-witness-*'
       - '.github/workflows/blob-publication-protocol.yml'
       - 'go.mod'
       - 'go.sum'
@@ -16,8 +18,10 @@ on:
       - 'internal/blobpublication/**'
       - 'testcluster/client_proxy*'
       - 'sim/blob_publication*'
+      - 'sim/authority_witness*'
       - 'sim/journal_transport_test.go'
       - 'sim/testdata/regressions/blob-publication-*'
+      - 'sim/testdata/regressions/authority-witness-*'
       - '.github/workflows/blob-publication-protocol.yml'
       - 'go.mod'
       - 'go.sum'
@@ -49,7 +53,7 @@ jobs:
           GOMAXPROCS: '2'
           GOMEMLIMIT: 512MiB
           SIM_COVERAGE_SUMMARY: '1'
-        run: go test -race ./sim -run '^(TestSeededBlobPublicationReplay|TestPinnedRegressionCorpus)$/^blob-publication-' -count=1 -timeout=3m -json > blob-publication-tier1-events.jsonl
+        run: go test -race ./sim -run '^(TestSeededBlobPublicationReplay|TestSeededAuthorityReadWitnessReplay|TestPinnedRegressionCorpus)$/^(blob-publication-|authority-witness-)' -count=1 -timeout=3m -json > blob-publication-tier1-events.jsonl
       - uses: actions/upload-artifact@v4
         if: always()
         with:
