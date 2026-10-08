@@ -1,0 +1,52 @@
+name: matrix-terminal-cohort
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'integration/mixed_matrix_leader_test.go'
+      - 'integration/matrix_terminal_cohort*'
+      - 'integration/matrix_retained_audit_retry_test.go'
+      - 'integrity/cohort_boundary*'
+      - 'integrity/check.go'
+      - 'internal/natsutil/**'
+      - 'testcluster/cluster.go'
+      - '.github/workflows/matrix-terminal-cohort.yml'
+      - 'go.mod'
+      - 'go.sum'
+  pull_request:
+    paths:
+      - 'integration/mixed_matrix_leader_test.go'
+      - 'integration/matrix_terminal_cohort*'
+      - 'integration/matrix_retained_audit_retry_test.go'
+      - 'integrity/cohort_boundary*'
+      - 'integrity/check.go'
+      - 'internal/natsutil/**'
+      - 'testcluster/cluster.go'
+      - '.github/workflows/matrix-terminal-cohort.yml'
+      - 'go.mod'
+      - 'go.sum'
+permissions:
+  contents: read
+jobs:
+  terminal-population:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - name: Exact terminal population, native R3 and original retry budgets
+        env:
+          GOMAXPROCS: '2'
+          GOMEMLIMIT: 512MiB
+        run: |
+          mkdir -p "$RUNNER_TEMP/matrix-terminal-cohort"
+          WF_MATRIX_TERMINAL_COHORT_ROOT="$RUNNER_TEMP/matrix-terminal-cohort" go test -p=1 -race ./integration -run '^(TestMatrixTerminalCohort.*|TestNativeMatrixTerminalCapturedPopulation|TestMatrixRetainedAudit.*)$' -count=1 -timeout=3m -json > matrix-terminal-cohort-events.jsonl
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: matrix-terminal-cohort-evidence
+          path: |
+            matrix-terminal-cohort-events.jsonl
+            ${{ runner.temp }}/matrix-terminal-cohort

@@ -869,22 +869,25 @@ func runMixedMatrixLeaderWithChallenge(t *testing.T, row, mutationMode string) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	info, err := inv.Info(ctx)
+	acknowledgedMu.Lock()
+	minimum := acknowledgedStart
+	acknowledgedMu.Unlock()
+	invocationCutoff, err := matrixReadMetadata(ctx, func(attempt context.Context) (uint64, error) {
+		return integrity.CaptureInvocationCutoff(attempt, minimum, func(call context.Context) (*jetstream.RawStreamMsg, error) {
+			return natsutil.GetInvocationTailFromLeader(call, js)
+		})
+	})
 	if err != nil {
 		t.Fatal(err)
 	}
-	invocationCutoff := info.State.LastSeq
-	for sequence := info.State.FirstSeq; sequence <= info.State.LastSeq; sequence++ {
-		msg, err := inv.GetMsg(ctx, sequence)
-		if err != nil {
-			t.Fatal(err)
-		}
+	want := batches * 28
+	err = matrixVisitCompletedInvocations(ctx, inv, invocationCutoff, want, func(msg *jetstream.RawStreamMsg) error {
 		parts := strings.Split(msg.Subject, ".")
 		attempt, done := context.WithTimeout(ctx, 20*time.Second)
 		samples, err := matrixInvocationLatenciesWithClock(attempt, js, parts[2], parts[3], msg.Time, completionDeadline, serverOffset)
 		done()
 		if err != nil {
-			t.Fatal(err)
+			return err
 		}
 		latencySamples = append(latencySamples, samples...)
 		for _, sample := range samples {
@@ -895,10 +898,16 @@ func runMixedMatrixLeaderWithChallenge(t *testing.T, row, mutationMode string) {
 				progressByType[parts[2]] = append(progressByType[parts[2]], sample.Delay)
 			}
 		}
+		return nil
+	})
+	if err != nil {
+		t.Fatal(err)
 	}
-	report, err := matrixRetainedAudit(ctx, js)
-	want := batches * 28
-	if err != nil || report.Invocations != want || report.Journals != want || report.Terminal != want {
+	t.Logf("MATRIX_TERMINAL_COHORT cutoff=%d expected_invocations=%d visited_invocations=%d", invocationCutoff, want, want)
+	report, err := matrixRetainedAuditUsing(ctx, func(attempt context.Context) (integrity.Report, error) {
+		return matrixRetainedCheck(attempt, js, &invocationCutoff)
+	})
+	if err != nil || integrity.ValidateCompletedCohortReport(report, want) != nil {
 		t.Fatalf("mixed retained state=%+v want=%d err=%v", report, want, err)
 	}
 	t.Logf("MATRIX_RETAINED row=%s report=%+v expected_invocations=%d", row, report, want)
@@ -976,6 +985,33 @@ func runMixedMatrixLeaderWithChallenge(t *testing.T, row, mutationMode string) {
 		}
 		challengeSustainedMixedMutation(t, ctx, cluster, js, mutationMode, seed, duration, time.Since(start), batches, len(faults), invocationCutoff, report)
 	}
+}
+
+// The terminal latency population and retained-state audit share one immutable
+// leader-captured cut. Missing invocations cannot silently shrink p99 coverage.
+func matrixVisitCompletedInvocations(ctx context.Context, stream integrity.RetainedPointReadPort, cutoff uint64, expected int, visit func(*jetstream.RawStreamMsg) error) error {
+	if cutoff == 0 || expected < 1 || visit == nil {
+		return errors.New("completed matrix cohort and visitor required")
+	}
+	visited := 0
+	err := integrity.ScanRetainedPointReadsThrough(ctx, stream, cutoff, func(raw *jetstream.RawStreamMsg) error {
+		parts := strings.Split(raw.Subject, ".")
+		if len(parts) != 4 || parts[0] != "wf" || parts[1] != "inv" || identity.Validate(parts[2], parts[3]) != nil {
+			return errors.New("invalid terminal invocation subject")
+		}
+		if err := visit(raw); err != nil {
+			return err
+		}
+		visited++
+		return nil
+	})
+	if err != nil {
+		return err
+	}
+	if visited != expected {
+		return fmt.Errorf("terminal invocation cohort visited=%d expected=%d cutoff=%d", visited, expected, cutoff)
+	}
+	return nil
 }
 
 // Lost read replies during a leader kill must not consume the entire workload
