@@ -1,0 +1,58 @@
+{
+  "source": "45d355fc07d44250a44641c67f3700daa1d8526e",
+  "runs": [
+    {
+      "mode": "normal",
+      "command": [
+        "go",
+        "test",
+        "-p=1",
+        "./internal/retainedindex",
+        "-count=1",
+        "-timeout=5m",
+        "-json"
+      ],
+      "environment": {
+        "GOMAXPROCS": "2",
+        "GOMEMLIMIT": "512MiB"
+      },
+      "exit_code": 0,
+      "package_passes": [
+        {
+          "Time": "2026-10-08T15:36:03.289845074Z",
+          "Action": "pass",
+          "Package": "js-wf/internal/retainedindex",
+          "Elapsed": 5.338
+        }
+      ],
+      "wall_seconds": 6.647767302987631
+    },
+    {
+      "mode": "race",
+      "command": [
+        "go",
+        "test",
+        "-p=1",
+        "-race",
+        "./internal/retainedindex",
+        "-count=1",
+        "-timeout=5m",
+        "-json"
+      ],
+      "environment": {
+        "GOMAXPROCS": "2",
+        "GOMEMLIMIT": "512MiB"
+      },
+      "exit_code": 0,
+      "package_passes": [
+        {
+          "Time": "2026-10-08T15:36:28.887623199Z",
+          "Action": "pass",
+          "Package": "js-wf/internal/retainedindex",
+          "Elapsed": 22.804
+        }
+      ],
+      "wall_seconds": 25.601836881018244
+    }
+  ]
+}
