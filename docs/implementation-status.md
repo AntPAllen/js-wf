@@ -1,5 +1,11 @@
 # Implementation status against the supplied plan
 
+## Corrected partition seed1 independently accepted — 2026-10-08
+
+Original frozen2ef3e8b SDK2801348 passes670.24s with19 partitions,1680 invocations/journals/terminal records,18573 journal entries and7920 raw latency samples. Independent review binds776 Git Go/module and3355 external inputs, original SDK profile and all three exact a569 candidate peer identities;2160 operations in each of three history models are `Ok`. New corrected-source review requires the latency cohort cutoff1680/expected1680/visited1680 to match the full retained report and cover checkpoints; eight actual-log and27 candidate-proof substitutions reject. Initial reviewer log-label/import setup mistakes are preserved and corrected offline against the same original fixture, without native repetition. Complete native/reviewer/initial-preparation archives are captured for S3. [Terminal proof](scale/corrected-partition200-2026-10-08/seed001-independent/); [actual SDK/peer admission](scale/corrected-partition200-2026-10-08/native-launch/).
+
+Original corrected supervisor2798859 continues seed2; full200/default dependency/full matrices/actual24h/million physical drain/canonical runtime migration/production onlineGC remain open. Original full124 normal SDK2697740 remains live unchanged. Full126 frozen race is independently accepted and S3-preserved, not normal100k or current production-source acceptance.
+
 ## Temporary storage offload and full126 race terminal — 2026-10-08
 
 The original full126 race SDK2778787 passed at isolatedcf99bc0:126000 workload bodies,433 source pins,184 top-level passes and two documented trace-only skips,1976.87s wall time. Independent terminal review binds the original launch/unit/SDK identities, before/after2444-source equality, full raw events and15 altered-proof rejection controls. Complete fixture archive has full S3 byte/member verification; closed local fixture/source worktree/archive are retired. [Terminal evidence](scale/tier1-full126-2026-10-08/race-terminal/).
