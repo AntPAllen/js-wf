@@ -54,8 +54,9 @@ func (p jetStreamGraphResultPort) Wait(ctx context.Context, d time.Duration) err
 }
 
 // NewWithGraphJournal reads all terminal outcomes through the experimental
-// graph journal. Start/signal publication and purge lifecycle still use legacy
-// storage; importer and retention migration remain required before online GC.
+// graph journal. Signal admission and duplicate confirmation use graph history;
+// start/signal publication still uses legacy storage. Use graph-aware retention;
+// remaining canonical publication/import migration is required before online GC.
 func NewWithGraphJournal(js jetstream.JetStream, store *journal.GraphStore) (*Client, error) {
 	if js == nil || store == nil {
 		return nil, fmt.Errorf("invalid graph client configuration")
@@ -67,7 +68,8 @@ func NewWithGraphJournal(js jetstream.JetStream, store *journal.GraphStore) (*Cl
 }
 
 // NewWithGraphJournalPorts runs production graph result decisions through
-// supplied transports. It also exposes the ordinary start and signal paths.
+// supplied transports. Start/signal publication uses supplied legacy transports,
+// with graph-aware signal admission, retirement and duplicate confirmation.
 func NewWithGraphJournalPorts(start StartPort, signal SignalPort, results GraphResultPort, store *journal.GraphStore) (*Client, error) {
 	if start == nil || signal == nil || results == nil || store == nil {
 		return nil, fmt.Errorf("invalid graph client ports")

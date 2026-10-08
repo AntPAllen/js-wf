@@ -454,37 +454,46 @@ func (c *Client) signal(ctx context.Context, typ, id, name string, payload []byt
 		}
 		return 0, err
 	}
+	if invocation == nil || invocation.Sequence == 0 {
+		return 0, wf.ErrCorruptJournal
+	}
 	observedInvSeq = invocation.Sequence
 	if expectedInvSeq != 0 && invocation.Sequence != expectedInvSeq {
 		return 0, ErrStaleGeneration
 	}
-	if value, getErr := port.StateValue(ctx, identity.Key(typ, id)); getErr == nil {
-		marker, tomb, decodeErr := retention.Decode(value)
-		if decodeErr != nil {
-			return 0, decodeErr
-		}
-		if tomb && marker.InvSeq == invocation.Sequence {
-			return 0, ErrPurged
-		}
-	} else if !errors.Is(getErr, jetstream.ErrKeyNotFound) {
-		return 0, getErr
-	}
-	if requireRunning {
-		last, err := port.LastJournal(ctx, identity.JournalSubject(typ, id))
-		if err != nil && !errors.Is(err, jetstream.ErrMsgNotFound) {
+	if c.graphJournal != nil {
+		if err := c.graphSignalAdmission(ctx, typ, id, invocation.Sequence, requireRunning); err != nil {
 			return 0, err
 		}
-		if err == nil {
-			var entry journal.Entry
-			if journal.UnmarshalEntry(last.Data, &entry) != nil || entry.Kind == "" {
-				return 0, journal.ErrGap
+	} else {
+		if value, getErr := port.StateValue(ctx, identity.Key(typ, id)); getErr == nil {
+			marker, tomb, decodeErr := retention.Decode(value)
+			if decodeErr != nil {
+				return 0, decodeErr
 			}
-			switch entry.Kind {
-			case journal.Completed, journal.Failed:
-				return 0, ErrNotRunning
-			case journal.Started, journal.StepRequested, journal.StepCompleted, journal.Suspended, journal.SignalConsumed, journal.Attempt:
-			default:
-				return 0, journal.ErrGap
+			if tomb && marker.InvSeq == invocation.Sequence {
+				return 0, ErrPurged
+			}
+		} else if !errors.Is(getErr, jetstream.ErrKeyNotFound) {
+			return 0, getErr
+		}
+		if requireRunning {
+			last, err := port.LastJournal(ctx, identity.JournalSubject(typ, id))
+			if err != nil && !errors.Is(err, jetstream.ErrMsgNotFound) {
+				return 0, err
+			}
+			if err == nil {
+				var entry journal.Entry
+				if journal.UnmarshalEntry(last.Data, &entry) != nil || entry.Kind == "" {
+					return 0, journal.ErrGap
+				}
+				switch entry.Kind {
+				case journal.Completed, journal.Failed:
+					return 0, ErrNotRunning
+				case journal.Started, journal.StepRequested, journal.StepCompleted, journal.Suspended, journal.SignalConsumed, journal.Attempt:
+				default:
+					return 0, journal.ErrGap
+				}
 			}
 		}
 	}
@@ -501,21 +510,36 @@ func (c *Client) signal(ctx context.Context, typ, id, name string, payload []byt
 		m.Header.Set("Wf-Signal-Ref", key)
 	}
 	messageID := "signal:" + typ + ":" + id + ":" + strconv.FormatUint(invocation.Sequence, 10) + ":" + name + ":" + idempotencyKey
+	if c.graphJournal != nil {
+		if err := c.recheckGraphSignal(ctx, typ, id, invocation.Sequence, requireRunning); err != nil {
+			return 0, err
+		}
+	}
 	publishAttempted = true
 	ack, err := port.PublishSignal(ctx, m, messageID)
 	if err != nil {
 		return 0, fmt.Errorf("%w: %v", ErrSignalUnknown, err)
 	}
+	if c.graphJournal != nil && ack.Sequence == 0 {
+		return 0, wf.ErrCorruptJournal
+	}
 	if ack.Duplicate {
 		prior, err := port.SignalBySequence(ctx, ack.Sequence)
 		if errors.Is(err, jetstream.ErrMsgNotFound) {
-			if err := c.verifyConsumedSignal(ctx, typ, id, name, ack.Sequence, hex.EncodeToString(digest[:])); err != nil {
+			if err := c.verifyConsumedSignal(ctx, typ, id, name, invocation.Sequence, ack.Sequence, hex.EncodeToString(digest[:])); err != nil {
 				return 0, err
 			}
 		} else if err != nil {
 			return 0, err
+		} else if c.graphJournal != nil && (prior == nil || prior.Subject != m.Subject) {
+			return 0, wf.ErrCorruptJournal
 		} else if prior.Header.Get(inputHashHeader) != hex.EncodeToString(digest[:]) || prior.Header.Get("Wf-Inv-Seq") != strconv.FormatUint(invocation.Sequence, 10) {
 			return 0, ErrSignalMismatch
+		}
+	}
+	if c.graphJournal != nil {
+		if err := c.recheckGraphSignal(ctx, typ, id, invocation.Sequence, requireRunning); err != nil {
+			return ack.Sequence, err
 		}
 	}
 	if err := enqueueRunWithRetry(ctx, c.startOperations().Wait, func(attempt context.Context) error {
@@ -527,6 +551,9 @@ func (c *Client) signal(ctx context.Context, typ, id, name string, payload []byt
 }
 
 func (c *Client) generationRetired(ctx context.Context, typ, id string, invSeq uint64) (bool, error) {
+	if c.graphJournal != nil {
+		return c.graphGenerationRetired(ctx, typ, id, invSeq)
+	}
 	port := c.signalOperations()
 	key := identity.Key(typ, id)
 	if value, err := port.StateValue(ctx, key); err == nil {
@@ -552,7 +579,10 @@ func (c *Client) generationRetired(ctx context.Context, typ, id string, invSeq u
 	return false, nil
 }
 
-func (c *Client) verifyConsumedSignal(ctx context.Context, typ, id, name string, seq uint64, hash string) error {
+func (c *Client) verifyConsumedSignal(ctx context.Context, typ, id, name string, invocation, seq uint64, hash string) error {
+	if c.graphJournal != nil {
+		return c.verifyGraphConsumedSignal(ctx, typ, id, name, invocation, seq, hash)
+	}
 	records, err := c.signalOperations().ReadJournal(ctx, typ, id)
 	if err != nil {
 		return err

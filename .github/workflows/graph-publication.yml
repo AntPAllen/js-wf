@@ -17,6 +17,7 @@ on:
       - 'worker/terminal_delivery.go'
       - 'worker/continuation.go'
       - 'client/graph_journal*.go'
+      - 'client/graph_signal*.go'
       - 'client/client.go'
       - 'internal/retainedgraph/**'
       - 'sim/graph_publication*'
@@ -34,6 +35,7 @@ on:
       - 'sim/testdata/regressions/graph-child-*'
       - 'sim/testdata/regressions/graph-reconcile-*'
       - 'sim/testdata/regressions/graph-purge-*'
+      - 'sim/testdata/regressions/graph-signal-client-*'
       - 'internal/blobpublication/**'
       - 'internal/natsstream/**'
       - 'testcluster/cluster.go'
@@ -56,6 +58,7 @@ on:
       - 'worker/terminal_delivery.go'
       - 'worker/continuation.go'
       - 'client/graph_journal*.go'
+      - 'client/graph_signal*.go'
       - 'client/client.go'
       - 'internal/retainedgraph/**'
       - 'sim/graph_publication*'
@@ -73,6 +76,7 @@ on:
       - 'sim/testdata/regressions/graph-child-*'
       - 'sim/testdata/regressions/graph-reconcile-*'
       - 'sim/testdata/regressions/graph-purge-*'
+      - 'sim/testdata/regressions/graph-signal-client-*'
       - 'internal/blobpublication/**'
       - 'internal/natsstream/**'
       - 'testcluster/cluster.go'
@@ -176,7 +180,7 @@ jobs:
       fail-fast: false
       matrix:
         mode: [normal, race]
-        family: [Publication, Readers, ReaderResume, Catalog, Application, Journal, Worker, Result, TerminalWorker, Child, ChildSignal, Reconcile, Purge, Corpus]
+        family: [Publication, Readers, ReaderResume, Catalog, Application, Journal, Worker, Result, TerminalWorker, Child, ChildSignal, Reconcile, Purge, SignalClient, Corpus]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-go@v5

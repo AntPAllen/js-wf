@@ -18,9 +18,9 @@ import (
 // WithGraphJournal selects experimental explicit-generation journal and payload
 // ownership for deliveries. Every external terminal reader must also use graph
 // results. Legacy start/state/signal publication, import, snapshots, continuation
-// and retention migration remain separate; production online GC is not enabled.
-// A child terminal must remain available until its parent publishes the owned
-// SignalConsumed copy; production child retention coordination is still pending.
+// migration remain separate; production online GC is not enabled. Use graph-aware
+// retention to keep child terminals until their parent publishes an owned
+// SignalConsumed copy or its canonical generation completes/retires.
 func WithGraphJournal(store *journal.GraphStore) Option {
 	return func(w *Worker) error {
 		if store == nil {
