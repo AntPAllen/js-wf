@@ -22,6 +22,10 @@ import (
 var graphWorkerModes = []string{"ordinary", "put_drop", "put_lost", "append_lost", "readback_lost", "collector_wins"}
 
 func runGraphWorker(seed int64, replay *Trace) (trace Trace, runErr error) {
+	return runGraphWorkerWithInterleaving(seed, replay, "")
+}
+
+func runGraphWorkerWithInterleaving(seed int64, replay *Trace, interleaving string) (trace Trace, runErr error) {
 	schedule := NewScheduler(seed)
 	if replay != nil {
 		var err error
@@ -37,6 +41,9 @@ func runGraphWorker(seed int64, replay *Trace) (trace Trace, runErr error) {
 	mode, err := schedule.Choose(graphWorkerModes)
 	if err != nil {
 		return trace, err
+	}
+	if interleaving != "" {
+		mode = interleaving
 	}
 	ctx, stop := context.WithTimeout(context.Background(), 5*time.Second)
 	defer stop()
@@ -100,6 +107,19 @@ func runGraphWorker(seed int64, replay *Trace) (trace Trace, runErr error) {
 					_, e := m.Protocol().SweepWithReaders(ctx, now())
 					return e
 				})
+			case "reader_pin":
+				m.PauseBefore("cas_root", func() error {
+					view, e := graph.OpenExisting(ctx, typ, id, 1)
+					if e != nil {
+						return e
+					}
+					if view == nil {
+						return fmt.Errorf("missing interleaved reader")
+					}
+					return view.Close(ctx)
+				})
+			case "unknown_completion":
+				runErr = m.QueueFault("cas_root", DropBeforeCommit)
 			}
 		}}, worker.WithGraphJournal(graph))
 	}
@@ -146,7 +166,7 @@ func runGraphWorker(seed int64, replay *Trace) (trace Trace, runErr error) {
 		return trace, fmt.Errorf("terminal graph and state differ")
 	}
 	wantEffects := 1
-	if mode == "put_drop" || mode == "put_lost" || mode == "collector_wins" {
+	if mode == "put_drop" || mode == "put_lost" || mode == "unknown_completion" {
 		wantEffects = 2
 	}
 	if effects != wantEffects {
@@ -190,6 +210,23 @@ func runGraphWorker(seed int64, replay *Trace) (trace Trace, runErr error) {
 		return trace, err
 	}
 	return trace, nil
+}
+
+func TestGraphWorkerCompletionAppendReaderInterleaving(t *testing.T) {
+	for seed := int64(1); seed <= 32; seed++ {
+		for _, mode := range []string{"reader_pin", "unknown_completion"} {
+			t.Run(fmt.Sprintf("seed%d/%s", seed, mode), func(t *testing.T) {
+				generated, err := runGraphWorkerWithInterleaving(seed, nil, mode)
+				if err != nil {
+					t.Fatal(err)
+				}
+				replayed, err := runGraphWorkerWithInterleaving(seed, &generated, mode)
+				if err != nil || !reflect.DeepEqual(generated, replayed) {
+					t.Fatal("completion retry interleaving did not replay", err)
+				}
+			})
+		}
+	}
 }
 
 func TestSeededGraphWorkerReplay(t *testing.T) {

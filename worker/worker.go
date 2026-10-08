@@ -16,6 +16,7 @@ import (
 
 	"js-wf/client"
 	"js-wf/identity"
+	"js-wf/internal/graphpublication"
 	"js-wf/journal"
 	"js-wf/lease"
 	"js-wf/provision"
@@ -990,7 +991,28 @@ func (w *Worker) execute(ctx context.Context, typ, id string, l *lease.Lease, wa
 				payload = entry.Payload
 			}
 			appendCtx, stopAppend := context.WithTimeout(ctx, 15*time.Second)
-			seq, err = graph.append(appendCtx, entry, tail)
+			for attempt := 0; attempt < 16; attempt++ {
+				if attempt > 0 {
+					// A definite graph CAS loss can be caused by reader pins,
+					// without advancing the journal. Retain this entry's result
+					// and recheck the lease before preparing a fresh append.
+					// GraphStore revalidates generation, tail/index and epoch;
+					// unknown publication and revoked grants are not retried.
+					renewStarted := ops.begin()
+					retryCtx, stopRetry := context.WithTimeout(appendCtx, 3*time.Second)
+					_, retryTiming, retryErr := ops.renew(retryCtx, l, 0)
+					stopRetry()
+					ops.finish(renewStarted, "lease_renew_append_retry", nextIndex(), kind, retryErr, retryTiming)
+					if retryErr != nil {
+						err = retryErr
+						break
+					}
+				}
+				seq, err = graph.append(appendCtx, entry, tail)
+				if !errors.Is(err, graphpublication.ErrConflict) || errors.Is(err, journal.ErrUnknown) || errors.Is(err, graphpublication.ErrRevoked) || appendCtx.Err() != nil {
+					break
+				}
+			}
 			stopAppend()
 		} else {
 			seq, err = w.jrn.Append(ctx, typ, id, entry, tail)

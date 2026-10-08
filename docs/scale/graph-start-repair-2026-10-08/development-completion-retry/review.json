@@ -1,0 +1,86 @@
+{
+  "development_only": true,
+  "checks": {
+    "native-race": {
+      "package_passes": [
+        {
+          "Time": "2026-10-08T15:13:04.477309958Z",
+          "Action": "pass",
+          "Package": "js-wf/reconcile",
+          "Elapsed": 12.82
+        }
+      ]
+    },
+    "interleaving-normal": {
+      "package_passes": [
+        {
+          "Time": "2026-10-08T15:14:26.257316817Z",
+          "Action": "pass",
+          "Package": "js-wf/sim",
+          "Elapsed": 0.81
+        }
+      ]
+    },
+    "interleaving-race": {
+      "package_passes": [
+        {
+          "Time": "2026-10-08T15:17:40.611721227Z",
+          "Action": "pass",
+          "Package": "js-wf/sim",
+          "Elapsed": 12.391
+        }
+      ]
+    },
+    "worker-model": {
+      "package_passes": [
+        {
+          "Time": "2026-10-08T15:16:20.100329779Z",
+          "Action": "pass",
+          "Package": "js-wf/sim",
+          "Elapsed": 12.102
+        }
+      ]
+    },
+    "corpus-after-migration": {
+      "package_passes": [
+        {
+          "Time": "2026-10-08T15:17:52.225298591Z",
+          "Action": "pass",
+          "Package": "js-wf/sim",
+          "Elapsed": 1.43
+        }
+      ]
+    }
+  },
+  "original_source_negative_control": "c194e8c worker/worker.go via Go overlay; every selected reader-pin case reruns effect (2 instead of1), while unknown-completion cases pass unchanged.",
+  "negative_control_failed_reader_cases": [
+    "TestGraphWorkerCompletionAppendReaderInterleaving/seed1/reader_pin",
+    "TestGraphWorkerCompletionAppendReaderInterleaving/seed10/reader_pin",
+    "TestGraphWorkerCompletionAppendReaderInterleaving/seed11/reader_pin",
+    "TestGraphWorkerCompletionAppendReaderInterleaving/seed12/reader_pin",
+    "TestGraphWorkerCompletionAppendReaderInterleaving/seed13/reader_pin",
+    "TestGraphWorkerCompletionAppendReaderInterleaving/seed14/reader_pin",
+    "TestGraphWorkerCompletionAppendReaderInterleaving/seed15/reader_pin",
+    "TestGraphWorkerCompletionAppendReaderInterleaving/seed16/reader_pin",
+    "TestGraphWorkerCompletionAppendReaderInterleaving/seed17/reader_pin",
+    "TestGraphWorkerCompletionAppendReaderInterleaving/seed18/reader_pin",
+    "TestGraphWorkerCompletionAppendReaderInterleaving/seed19/reader_pin"
+  ],
+  "negative_control_passing_unknown_cases": [
+    "TestGraphWorkerCompletionAppendReaderInterleaving/seed1/unknown_completion",
+    "TestGraphWorkerCompletionAppendReaderInterleaving/seed10/unknown_completion",
+    "TestGraphWorkerCompletionAppendReaderInterleaving/seed11/unknown_completion",
+    "TestGraphWorkerCompletionAppendReaderInterleaving/seed12/unknown_completion",
+    "TestGraphWorkerCompletionAppendReaderInterleaving/seed13/unknown_completion",
+    "TestGraphWorkerCompletionAppendReaderInterleaving/seed14/unknown_completion",
+    "TestGraphWorkerCompletionAppendReaderInterleaving/seed15/unknown_completion",
+    "TestGraphWorkerCompletionAppendReaderInterleaving/seed16/unknown_completion",
+    "TestGraphWorkerCompletionAppendReaderInterleaving/seed17/unknown_completion",
+    "TestGraphWorkerCompletionAppendReaderInterleaving/seed18/unknown_completion",
+    "TestGraphWorkerCompletionAppendReaderInterleaving/seed19/unknown_completion"
+  ],
+  "source_not_frozen": true,
+  "pins": 710,
+  "migrated_pins": 1,
+  "limits": "Original14-command campaign remains failed. Fresh committed-source normal/race qualification required; no full implementation or original gate acceptance."
+}

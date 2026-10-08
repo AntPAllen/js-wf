@@ -1,0 +1,20 @@
+{
+  "original_commit": "c194e8c09e4b6527b0727ea4d503a4a8b101a060",
+  "reason": "Production worker retries definite graph CAS conflicts with the computed entry/result after lease renewal and generation/index/tail/epoch validation. Collector contention no longer reruns a completed effect. Unknown publication and revoked grants are not retried.",
+  "changes": [
+    {
+      "path": "sim/testdata/regressions/graph-worker-collector_wins.json",
+      "seed": 4,
+      "old_sha256": "0dc39c4d72a0bebdc52be6fec3f79d05d8e8b95eb4cd7cfa5369c45298ef7336",
+      "new_sha256": "47ec3c44e36bf843e534d675e21fc508d2d153e5dd41197ec6dc688ac7c7f653",
+      "choices_unchanged": true
+    }
+  ],
+  "unchanged": [
+    "sim/testdata/regressions/graph-worker-append_lost.json",
+    "sim/testdata/regressions/graph-worker-ordinary.json",
+    "sim/testdata/regressions/graph-worker-put_drop.json",
+    "sim/testdata/regressions/graph-worker-put_lost.json",
+    "sim/testdata/regressions/graph-worker-readback_lost.json"
+  ]
+}
