@@ -57,6 +57,7 @@ func graphFenceCopy(f graphpublication.Fence) graphpublication.Fence {
 }
 func graphRootCopy(r graphpublication.Root) graphpublication.Root {
 	r.Graph.Frontier = append([]retainedgraph.Tree{}, r.Graph.Frontier...)
+	r.Application = append([]byte(nil), r.Application...)
 	r.Readers = append([]graphpublication.ReaderPin(nil), r.Readers...)
 	for i := range r.Readers {
 		r.Readers[i].Graph.Frontier = append([]retainedgraph.Tree{}, r.Readers[i].Graph.Frontier...)
@@ -200,7 +201,7 @@ func (m *GraphPublicationTransport) CASRoot(ctx context.Context, k string, head 
 	if head == ^uint64(0) {
 		return graphpublication.Root{}, fmt.Errorf("head exhausted")
 	}
-	if current.Schema == graphpublication.RetentionSchema && r.Schema != graphpublication.RetentionSchema {
+	if (current.Schema == graphpublication.ApplicationSchema && r.Schema != graphpublication.ApplicationSchema) || (current.Schema == graphpublication.RetentionSchema && r.Schema != graphpublication.RetentionSchema && r.Schema != graphpublication.ApplicationSchema) {
 		m.event("cas_root", k, head, current.Head, r, "schema_downgrade")
 		return graphpublication.Root{}, fmt.Errorf("retention schema downgrade")
 	}
@@ -317,7 +318,7 @@ func (m *GraphPublicationTransport) CheckReferences() error {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 	for destination, root := range m.roots {
-		if (root.Schema != graphpublication.Schema && root.Schema != graphpublication.RetentionSchema) || (root.Schema == graphpublication.Schema && len(root.Readers) != 0) || len(root.Readers) > graphpublication.MaxReaders || root.Graph.Validate() != nil {
+		if (root.Schema != graphpublication.Schema && root.Schema != graphpublication.RetentionSchema && root.Schema != graphpublication.ApplicationSchema) || (root.Schema == graphpublication.Schema && len(root.Readers) != 0) || len(root.Readers) > graphpublication.MaxReaders || len(root.Application) > graphpublication.MaxApplicationBytes || (root.Schema == graphpublication.ApplicationSchema && root.Head == 0) || (root.Schema != graphpublication.ApplicationSchema && len(root.Application) != 0) || root.Graph.Validate() != nil {
 			return fmt.Errorf("invalid graph authority")
 		}
 		graphs := []retainedgraph.Root{root.Graph}

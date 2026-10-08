@@ -177,7 +177,9 @@ func (p Protocol) AcquireReader(ctx context.Context, destination string, expecte
 		}
 	}
 	reader := Reader{destination: destination, id: id, graph: copyGraph(root.Graph)}
-	root.Schema = RetentionSchema
+	if root.Schema == Schema {
+		root.Schema = RetentionSchema
+	}
 	root.Readers = append(copyReaders(root.Readers), ReaderPin{ID: id, Expires: expires.UTC(), Graph: copyGraph(root.Graph)})
 	ack, err := p.readerCAS(ctx, destination, expected, root)
 	if err != nil {

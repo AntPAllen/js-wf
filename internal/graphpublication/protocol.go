@@ -24,6 +24,8 @@ import (
 
 const Schema = "js-wf-graph-publication-v1"
 const RetentionSchema = "js-wf-graph-publication-retention-v2"
+const ApplicationSchema = "js-wf-graph-publication-application-v3"
+const MaxApplicationBytes = 4096
 const MaxReaders = 8
 const MaxRootBytes = 256 << 10
 const MaxIntentLocations = 63 + retainedgraph.MaxBlobReferences
@@ -56,11 +58,12 @@ type Record struct {
 	Fence    Fence
 }
 type Root struct {
-	Schema  string
-	Head    uint64
-	Token   string
-	Graph   retainedgraph.Root
-	Readers []ReaderPin `json:",omitempty"`
+	Schema      string
+	Head        uint64
+	Token       string
+	Graph       retainedgraph.Root
+	Readers     []ReaderPin `json:",omitempty"`
+	Application []byte      `json:",omitempty"`
 }
 
 // ReaderPin is canonical authority, not a portable ownership receipt. Its graph
@@ -74,8 +77,10 @@ type ReaderPin struct {
 // Port provides linearizable quorum-witnessed reads and acknowledged CAS.
 // CASRoot advances Head exactly once; blob revisions and generations never
 // reset, even after retirement. Returned maps/slices are independent copies.
-// CASRoot MUST reject downgrading RetentionSchema to Schema, including when no
-// reader pins remain. A v1 retirement cannot silently erase reader authority.
+// CASRoot MUST reject schema downgrades (v3 to v2/v1, v2 to v1), even
+// when readers and application bytes are empty. Retirement cannot erase the
+// permanent application lifecycle or reader-authority schema. Application bytes
+// are an opaque descriptor; they never establish ownership of external objects.
 // Put uses new immutable names, never acknowledges uncertain upload outcomes,
 // and has no delayed cleanup that can remove an acknowledged object. Get is
 // context-bound and honors the byte limit. Missing objects are successful Delete.
@@ -132,10 +137,10 @@ type OwnedPayload struct {
 
 func EmptyRoot() Root { return Root{Schema: Schema, Graph: retainedgraph.Empty()} }
 func normalizeRoot(root Root) (Root, error) {
-	if root.Schema == "" && root.Head == 0 && root.Token == "" && root.Graph.Schema == "" && root.Graph.Count == 0 && root.Graph.Frontier == nil && len(root.Readers) == 0 {
+	if root.Schema == "" && root.Head == 0 && root.Token == "" && root.Graph.Schema == "" && root.Graph.Count == 0 && root.Graph.Frontier == nil && len(root.Readers) == 0 && len(root.Application) == 0 {
 		return EmptyRoot(), nil
 	}
-	if (root.Schema != Schema && root.Schema != RetentionSchema) || (root.Schema == Schema && len(root.Readers) != 0) || len(root.Readers) > MaxReaders || (root.Graph.Count > 0 && (root.Head == 0 || !validID(root.Token))) || (root.Token != "" && !validID(root.Token)) {
+	if schemaRank(root.Schema) == 0 || (root.Schema == Schema && len(root.Readers) != 0) || (root.Schema != ApplicationSchema && len(root.Application) != 0) || len(root.Application) > MaxApplicationBytes || (root.Schema == ApplicationSchema && root.Head == 0) || len(root.Readers) > MaxReaders || (root.Graph.Count > 0 && (root.Head == 0 || !validID(root.Token))) || (root.Token != "" && !validID(root.Token)) {
 		return Root{}, errors.New("invalid graph authority root")
 	}
 	if err := root.Graph.Validate(); err != nil {
@@ -162,6 +167,18 @@ func normalizeRoot(root Root) (Root, error) {
 		return Root{}, errors.New("graph root byte limit")
 	}
 	return root, nil
+}
+func schemaRank(schema string) int {
+	switch schema {
+	case Schema:
+		return 1
+	case RetentionSchema:
+		return 2
+	case ApplicationSchema:
+		return 3
+	default:
+		return 0
+	}
 }
 func validLocation(location Location) bool {
 	if location.First >= math.MaxInt64 {

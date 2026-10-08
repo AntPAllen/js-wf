@@ -1,6 +1,7 @@
 package graphpublication
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"errors"
@@ -22,7 +23,7 @@ func (p Protocol) readRoot(ctx context.Context, destination string) (Root, error
 	return normalizeRoot(root)
 }
 func samePublication(a, b Root) bool {
-	return a.Schema == b.Schema && a.Token == b.Token && reflect.DeepEqual(a.Graph, b.Graph)
+	return a.Schema == b.Schema && a.Token == b.Token && reflect.DeepEqual(a.Graph, b.Graph) && bytes.Equal(a.Application, b.Application)
 }
 func (p Protocol) casRoot(ctx context.Context, destination string, expected uint64, root Root) (Root, error) {
 	if expected == math.MaxUint64 {
@@ -80,6 +81,20 @@ func (p Protocol) PrepareAppend(ctx context.Context, destination string, expecte
 // their origin grants. Only append and whole-graph retirement are supported:
 // partial compaction must transfer ownership before dropping origin leaves.
 func (p Protocol) PrepareAppendWithOwned(ctx context.Context, destination string, expected uint64, data []byte, payloads [][]byte, owned []OwnedPayload, expires time.Time) (Prepared, error) {
+	return p.prepareAppend(ctx, destination, expected, data, payloads, owned, expires, nil, false)
+}
+
+// PrepareAppendWithApplication publishes bounded application metadata in the
+// same original-head CAS as the append. It is a logical cursor/state descriptor,
+// not object ownership; referenced bytes still require exact graph edges.
+func (p Protocol) PrepareAppendWithApplication(ctx context.Context, destination string, expected uint64, data []byte, payloads [][]byte, owned []OwnedPayload, expires time.Time, application []byte) (Prepared, error) {
+	if len(application) > MaxApplicationBytes {
+		return Prepared{}, errors.New("application byte limit")
+	}
+	return p.prepareAppend(ctx, destination, expected, data, payloads, owned, expires, application, true)
+}
+
+func (p Protocol) prepareAppend(ctx context.Context, destination string, expected uint64, data []byte, payloads [][]byte, owned []OwnedPayload, expires time.Time, application []byte, updateApplication bool) (Prepared, error) {
 	if err := ctx.Err(); err != nil {
 		return Prepared{}, err
 	}
@@ -104,7 +119,11 @@ func (p Protocol) PrepareAppendWithOwned(ctx context.Context, destination string
 		return Prepared{}, errors.New("invalid publication ID")
 	}
 	expires = expires.UTC()
-	result := Prepared{destination: destination, expected: expected, expires: expires, base: base, publication: Root{Schema: base.Schema, Token: token, Readers: copyReaders(base.Readers)}, owned: map[retainedgraph.Link]uint64{}}
+	result := Prepared{destination: destination, expected: expected, expires: expires, base: base, publication: Root{Schema: base.Schema, Token: token, Readers: copyReaders(base.Readers), Application: append([]byte(nil), base.Application...)}, owned: map[retainedgraph.Link]uint64{}}
+	if updateApplication {
+		result.publication.Schema = ApplicationSchema
+		result.publication.Application = append([]byte(nil), application...)
+	}
 	selected := map[string]retainedgraph.Link{}
 	for _, payload := range owned {
 		if err = p.verifyOwned(ctx, destination, base, payload); err != nil {

@@ -52,6 +52,7 @@ func cloneFence(f Fence) Fence {
 func cloneRoot(r Root) Root {
 	r.Graph.Frontier = append([]retainedgraph.Tree{}, r.Graph.Frontier...)
 	r.Readers = copyReaders(r.Readers)
+	r.Application = append([]byte(nil), r.Application...)
 	return r
 }
 func newModel(prefix string) (*memoryPort, Protocol) {
@@ -92,7 +93,7 @@ func (m *memoryPort) CASRoot(c context.Context, k string, head uint64, r Root) (
 	if m.roots[k].Head != head {
 		return Root{}, ErrConflict
 	}
-	if m.roots[k].Schema == RetentionSchema && r.Schema != RetentionSchema {
+	if schemaRank(r.Schema) < schemaRank(m.roots[k].Schema) {
 		return Root{}, errors.New("retention schema downgrade")
 	}
 	r = cloneRoot(r)
