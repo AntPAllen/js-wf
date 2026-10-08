@@ -16,7 +16,7 @@ Replay requires the exact `graph-signal-<hash>` reference and rejects inline pay
 
 The existing full default race campaign remains isolated at `dd98e39`; these working-tree changes do not alter its source or trace bytes. It passed its 1,000-seed Signal runtime group in 1465.960 s, but complete-suite terminal evidence is still pending.
 
-## Complete normal qualification in progress
+## Complete normal qualification accepted at 7626120
 
 The complete default normal suite runs at frozen `7626120` from `/home/exedev/js-wf-signal-replay-io-qualification`, retaining its binary, source inventories and results under `/home/exedev/js-wf-tier1-full145-replay-io-normal1000-20261008`. Command:
 
@@ -24,7 +24,7 @@ The complete default normal suite runs at frozen `7626120` from `/home/exedev/js
 python3 scripts/check-tier1-race.py --root /home/exedev/js-wf-tier1-full145-replay-io-normal1000-20261008 --seeds 1000 --no-race
 ```
 
-The full 145-family/728-pin result and independent review are pending. The other full race campaign remains at its original source; it does not qualify this later change.
+The full suite passes 206 groups, all 145 families × 1,000 contiguous seed bodies and all 728 pins in 441.615 s. Executed independent review in `complete-normal1000/` verifies 3,013 selected inputs against Git and unchanged before/after, exact inventory/seed/pin coverage and the retained binary/event hashes. The other full race campaign remains at its original source; it does not qualify this later change.
 
 ## Scope still open
 
