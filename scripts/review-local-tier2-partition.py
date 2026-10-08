@@ -115,6 +115,30 @@ def candidate_binding(root, revision, canonical):
     return expected
 
 
+def terminal_cohort(segment, invocations, required):
+    """Bind corrected-source latency population to the retained report."""
+    marker = 'MATRIX_TERMINAL_COHORT '
+    if not required:
+        require(marker not in segment, 'terminal cohort marker absent from executed source')
+        return None
+    matches = list(re.finditer(
+        r'MATRIX_TERMINAL_COHORT cutoff=(\d+) expected_invocations=(\d+) visited_invocations=(\d+)(?=\s|$)',
+        segment))
+    require(segment.count(marker) == len(matches) == 1, 'requires exactly one terminal cohort proof')
+    cutoff, expected, visited = map(int, matches[0].groups())
+    require(type(invocations) is int and invocations > 0 and invocations % 28 == 0
+            and cutoff >= invocations and expected == visited == invocations,
+            'terminal latency population differs from complete retained cohort')
+    retained = segment.find('MATRIX_RETAINED row=partition ')
+    require(retained > matches[0].end(), 'terminal cohort must precede final retained report')
+    checkpoints = [(int(batch), int(tail)) for batch, tail in re.findall(
+        r'checkpoint audit batch=(\d+) invocation_cutoff=(\d+) started', segment)]
+    require(all(batch * 28 <= expected and tail <= cutoff for batch, tail in checkpoints),
+            'terminal cohort precedes acknowledged checkpoint population')
+    return dict(cutoff=cutoff, expected_invocations=expected, visited_invocations=visited,
+                bound_to_raw_retained_invocations=True)
+
+
 def seed_review(campaign_root, record, revision, model_root, output_root, candidate_proof=None):
     profile='experimental-component-candidate' if candidate_proof is not None else 'default'
     seed = record['seed']
@@ -217,12 +241,15 @@ def seed_review(campaign_root, record, revision, model_root, output_root, candid
     result = raw.review_raw(revision, root, seed, seed, {seed:segment}, model_root=model_root,
                             model_binary_out=output_root/f'history-model-{seed:03d}', row='partition',
                             event_files={seed:'converted-events.jsonl'})
+    cohort = terminal_cohort(segment, result['invocations'],
+                             b'MATRIX_TERMINAL_COHORT ' in git('integration/mixed_matrix_leader_test.go'))
     require(fixture_archive.inventory(root) == before, 'original fixture changed during independent review')
     require(all(sha(name) == digest for name,digest in external.items()), 'external model input changed during review')
     return dict(seed=seed, source=revision, actual_sdk_pid=execution['pid'], actual_sdk_sha256=execution['sha256'],
                 source_inputs=len(names), external_inputs=len(external), observed_servers=servers,
                 server_profile=profile, candidate_sha256=candidate_sha,
-                closure=closure, fixture_inventory=before, raw_review=result, native_seed_qualified=True,
+                closure=closure, fixture_inventory=before, raw_review=result, terminal_cohort=cohort,
+                native_seed_qualified=True,
                 scope='Original closed normal10m local partition seed; raw nineteen faults, latency samples, three history models and native final assertions. No broker opened or independent disk-store reconstruction.')
 
 

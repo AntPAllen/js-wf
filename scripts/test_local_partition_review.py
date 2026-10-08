@@ -19,6 +19,28 @@ def state():
 
 
 class LocalPartitionReviewControls(unittest.TestCase):
+    def test_corrected_source_requires_complete_terminal_latency_population(self):
+        marker = 'MATRIX_TERMINAL_COHORT cutoff=840 expected_invocations=840 visited_invocations=840\n'
+        checkpoint = 'checkpoint audit batch=30 invocation_cutoff=840 started\n'
+        retained = 'MATRIX_RETAINED row=partition report=...\n'
+        positive = checkpoint + marker + retained
+        self.assertEqual(review.terminal_cohort(positive, 840, True)['cutoff'], 840)
+        # A physical tail may exceed the count because of retained holes.
+        self.assertEqual(review.terminal_cohort(positive.replace('cutoff=840 expected', 'cutoff=868 expected'),
+                                              840, True)['visited_invocations'], 840)
+        for changed in [checkpoint + retained, positive + marker,
+                        positive.replace('visited_invocations=840', 'visited_invocations=812'),
+                        positive.replace('expected_invocations=840', 'expected_invocations=812'),
+                        positive.replace('cutoff=840 expected', 'cutoff=812 expected'),
+                        retained + checkpoint + marker,
+                        positive.replace('batch=30', 'batch=31'),
+                        positive.replace('invocation_cutoff=840', 'invocation_cutoff=868')]:
+            with self.subTest(changed=changed), self.assertRaises(ValueError):
+                review.terminal_cohort(changed, 840, True)
+        with self.assertRaises(ValueError):review.terminal_cohort(positive, 812, True)
+        with self.assertRaises(ValueError):review.terminal_cohort(positive, 840, False)
+        self.assertIsNone(review.terminal_cohort(retained, 840, False))
+
     def test_full_coverage_is_strict_and_partial_cannot_be_full(self):
         with patch.object(review,'closed_instance'):
             self.assertEqual(len(review.contract(state())),200)
