@@ -19,6 +19,17 @@ All 728 prior pins remain byte-identical to `44fe6bf`; the corpus now contains 7
 
 CI includes the combined family with 1,000 seeds, completed-seed diagnostics and a 60-minute test/65-minute job CPU budget. Future complete race runs use 180-minute test/195-minute job budgets: the earlier 145-family campaign already consumed nearly its original 60-minute limit before this additional family. The existing campaign failed its original 60-minute alarm during suspended-scan capacity testing, with its source and failure retained; no recovery target, seed count or domain assertion is relaxed.
 
+## Frozen complete qualification in progress
+
+Source `2b71f1d` is isolated at `/home/exedev/js-wf-signal-combined-qualification`. Both full default campaigns are running:
+
+```sh
+python3 scripts/check-tier1-race.py --root /home/exedev/js-wf-tier1-full146-normal1000-20261008 --seeds 1000 --no-race
+python3 scripts/check-tier1-race.py --root /home/exedev/js-wf-tier1-full146-race1000-20261008 --seeds 1000
+```
+
+Each requires all 146 families × 1,000 contiguous seed bodies and all 731 pins. Binary/source/event retention is automatic. Terminal results and separate executed review remain pending; no complete current-suite acceptance is inferred from development controls.
+
 ## Remaining work
 
 Sixteen combinations were not sampled by the first 1,000 seeds. Exhaustive combinations, arbitrary operation permutations, extended 10,000/100,000 campaigns, complete current normal/race qualification, and all original native/process/storage/power-loss/concurrency/capacity/matrix/24h/million physical-drain/runtime migration/default-adoption/release requirements remain open. Fixture collection does not enable production online GC. The combined family only expands Signal coverage; it does not complete the full implementation plan.
