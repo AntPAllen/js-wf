@@ -378,3 +378,55 @@ func TestGraphJournalEntryPayloadAlias(t *testing.T) {
 		t.Fatal(err)
 	}
 }
+
+func TestGraphJournalCloseContentionAndAmbiguousRelease(t *testing.T) {
+	for _, mode := range []string{"competitor", "lost", "readback"} {
+		t.Run(mode, func(t *testing.T) {
+			s, m, now := graphModel(t, journal.JSON)
+			ctx := context.Background()
+			if _, err := s.Begin(ctx, "flow", "id", 1); err != nil {
+				t.Fatal(err)
+			}
+			first, err := s.Open(ctx, "flow", "id", 1)
+			if err != nil {
+				t.Fatal(err)
+			}
+			second, err := s.Open(ctx, "flow", "id", 1)
+			if err != nil {
+				t.Fatal(err)
+			}
+			if mode == "competitor" {
+				m.PauseBefore("cas_root", func() error { return second.Close(ctx) })
+			} else {
+				if err = m.QueueFault("cas_root", sim.LoseAckAfterCommit); err != nil {
+					t.Fatal(err)
+				}
+				if mode == "readback" {
+					m.PauseBefore("cas_root", func() error { return m.QueueFault("read_root", sim.DropBeforeCommit) })
+				}
+			}
+			err = first.Close(ctx)
+			if mode == "readback" {
+				if err == nil {
+					t.Fatal("ambiguous release silently retried")
+				}
+			} else {
+				if err != nil {
+					t.Fatal(err)
+				}
+				if err = first.Close(ctx); err != nil {
+					t.Fatal("close not idempotent", err)
+				}
+			}
+			if mode != "competitor" {
+				*now = now.Add(time.Second)
+				if err = second.Renew(ctx); err != nil {
+					t.Fatal("foreign pin changed", err)
+				}
+				if err = second.Close(ctx); err != nil {
+					t.Fatal(err)
+				}
+			}
+		})
+	}
+}

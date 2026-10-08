@@ -394,15 +394,24 @@ func (v *GraphView) Close(ctx context.Context) error {
 	if v.closed {
 		return nil
 	}
-	root, err := v.store.cfg.Protocol.Port.ReadRoot(ctx, v.destination)
-	if err != nil {
-		return err
+	// Other readers may advance this root while releasing their own pins.
+	// Retry only a definite CAS rejection, with a fresh authority head. An
+	// ambiguous release must retain its original-head readback semantics.
+	for attempt := 0; attempt < 16; attempt++ {
+		root, err := v.store.cfg.Protocol.Port.ReadRoot(ctx, v.destination)
+		if err != nil {
+			return err
+		}
+		_, err = v.store.cfg.Protocol.ReleaseReader(ctx, v.reader, root.Head)
+		if err == nil {
+			v.closed = true
+			return nil
+		}
+		if !errors.Is(err, graphpublication.ErrConflict) || ctx.Err() != nil {
+			return err
+		}
 	}
-	_, err = v.store.cfg.Protocol.ReleaseReader(ctx, v.reader, root.Head)
-	if err == nil {
-		v.closed = true
-	}
-	return err
+	return graphpublication.ErrConflict
 }
 
 // Read validates a complete retained snapshot and releases its pin afterward.
