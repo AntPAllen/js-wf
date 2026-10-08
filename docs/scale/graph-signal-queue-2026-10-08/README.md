@@ -1,6 +1,16 @@
 # Canonical Signal publication, binding and worker intake
 
-This follows the frozen owned-reservation component at `691434f`. The opt-in canonical Signal path now publishes bounded source pointers, binds a canonical ordered queue, copies consumed bodies into journal ownership, and replays through production workers. Frozen source qualification is pending.
+This follows the frozen owned-reservation component at `691434f`. The opt-in canonical Signal path now publishes bounded source pointers, binds a canonical ordered queue, copies consumed bodies into journal ownership, and replays through production workers. Frozen source `271a7e334586937b70cb2d088bd5ba6792826d21` passes all ten qualification commands under two Go CPUs, 512 MiB Go memory limit, count one and five-minute package deadlines.
+
+| Command scope | Groups per mode | Normal wall time | Race wall time |
+| --- | ---: | ---: | ---: |
+| Journal | 27 | 14.450 s | 132.304 s |
+| Complete client package | 12 | 12.295 s | 52.319 s |
+| Existing graph workers | 6 | 31.470 s | 167.570 s |
+| Canonical Signal workers | 2 | 25.032 s | 149.902 s |
+| Complete 710-pin corpus | 1 | 10.288 s | 35.540 s |
+
+The separate executed source/trace review verifies 1,599 selected Go/config/corpus inputs against that Git commit and unchanged before/after, regenerates exact group sets, checks every package terminal result, all 710 pin names, every one of the 112 client cuts per mode, both replica cases and all eight canonical child-transfer cases. No selected test skips or data races occur. Complete commands, JSON events, inventories and review are under `qualification/`.
 
 ## Protocol
 
