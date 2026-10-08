@@ -281,7 +281,21 @@ type GraphRecord struct {
 	EntryBlob GraphPayloadLink
 }
 
+// OpenTerminal pins a canonical terminal snapshot. A nil view means the
+// matching invocation has not completed (including an uninitialized graph).
+// A replaced or retired generation fails rather than reading another outcome.
+func (s *GraphStore) OpenTerminal(ctx context.Context, typ, id string, invocation uint64) (*GraphView, error) {
+	if invocation == 0 {
+		return nil, ErrStale
+	}
+	return s.open(ctx, typ, id, invocation, true)
+}
+
 func (s *GraphStore) Open(ctx context.Context, typ, id string, invocation uint64) (*GraphView, error) {
+	return s.open(ctx, typ, id, invocation, false)
+}
+
+func (s *GraphStore) open(ctx context.Context, typ, id string, invocation uint64, terminalOnly bool) (*GraphView, error) {
 	// Each definite conflict requires a fresh generation observation: a
 	// concurrent retirement/replacement must never attach an old cursor to a
 	// newly acquired snapshot. Unknown acquisitions are not retried.
@@ -290,8 +304,14 @@ func (s *GraphStore) Open(ctx context.Context, typ, id string, invocation uint64
 		if err != nil {
 			return nil, err
 		}
+		if c == nil && terminalOnly {
+			return nil, nil
+		}
 		if c == nil || c.Invocation != invocation || c.Retired {
 			return nil, ErrStale
+		}
+		if terminalOnly && c.Kind != Completed && c.Kind != Failed {
+			return nil, nil
 		}
 		expires := s.cfg.Now().Add(s.cfg.PinTTL)
 		reader, _, err := s.cfg.Protocol.AcquireReader(ctx, destination, root.Head, expires)

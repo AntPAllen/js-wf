@@ -516,3 +516,57 @@ func TestGraphJournalAcquireRenewContention(t *testing.T) {
 		})
 	}
 }
+
+func TestGraphJournalTerminalSnapshotAdmission(t *testing.T) {
+	s, m, _ := graphModel(t, journal.JSON)
+	ctx := context.Background()
+	if view, err := s.OpenTerminal(ctx, "flow", "id", 1); view != nil || err != nil {
+		t.Fatal("uninitialized not pending", err)
+	}
+	tail, err := s.Begin(ctx, "flow", "id", 1)
+	if err != nil {
+		t.Fatal(err)
+	}
+	tail, err = s.Append(ctx, "flow", "id", 1, journal.Entry{Kind: journal.Started}, tail, nil, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	keys, err := m.RootKeys(ctx)
+	if err != nil || len(keys) != 1 {
+		t.Fatal(keys, err)
+	}
+	before, err := m.ReadRoot(ctx, keys[0])
+	if err != nil {
+		t.Fatal(err)
+	}
+	if view, e := s.OpenTerminal(ctx, "flow", "id", 1); view != nil || e != nil {
+		t.Fatal("active not pending", e)
+	}
+	after, err := m.ReadRoot(ctx, keys[0])
+	if err != nil || after.Head != before.Head || len(after.Readers) != 0 {
+		t.Fatal("pending poll acquired reader", after, err)
+	}
+	tail, err = s.Append(ctx, "flow", "id", 1, journal.Entry{Kind: journal.Completed, Index: 1}, tail, nil, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	view, err := s.OpenTerminal(ctx, "flow", "id", 1)
+	if err != nil || view == nil || view.Count() != 2 {
+		t.Fatal(view, err)
+	}
+	if err = view.Close(ctx); err != nil {
+		t.Fatal(err)
+	}
+	if err = s.Retire(ctx, "flow", "id", 1, tail); err != nil {
+		t.Fatal(err)
+	}
+	if view, err = s.OpenTerminal(ctx, "flow", "id", 1); view != nil || !errors.Is(err, journal.ErrStale) {
+		t.Fatal("retired terminal admitted", err)
+	}
+	if _, err = s.Begin(ctx, "flow", "id", 2); err != nil {
+		t.Fatal(err)
+	}
+	if view, err = s.OpenTerminal(ctx, "flow", "id", 1); view != nil || !errors.Is(err, journal.ErrStale) {
+		t.Fatal("replaced terminal admitted", err)
+	}
+}

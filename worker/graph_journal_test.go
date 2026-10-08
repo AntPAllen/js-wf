@@ -240,6 +240,11 @@ func TestNativeGraphWorkerReplayInputsSignalsAndResults(t *testing.T) {
 			if err = state.Delete(ctx, identity.Key("graph", "native")); err != nil {
 				t.Fatal(err)
 			}
+			// The graph terminal remains authoritative with the legacy mirror gone.
+			actual, err = c.Await(ctx, "graph", "native")
+			if err != nil || !bytes.Equal(actual, terminal) {
+				t.Fatal("missing legacy state hid graph result", err)
+			}
 			if err = invocation.Purge(ctx, jetstream.WithPurgeSubject(identity.InvocationSubject("graph", "native"))); err != nil {
 				t.Fatal(err)
 			}

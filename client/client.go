@@ -55,11 +55,12 @@ type Handle struct {
 }
 
 type Client struct {
-	js           jetstream.JetStream
-	startPort    StartPort
-	signalPort   SignalPort
-	observer     Observer
-	graphJournal *journal.GraphStore
+	js              jetstream.JetStream
+	startPort       StartPort
+	signalPort      SignalPort
+	observer        Observer
+	graphJournal    *journal.GraphStore
+	graphResultPort GraphResultPort
 }
 
 func New(js jetstream.JetStream) *Client {
@@ -607,6 +608,9 @@ func (c *Client) Await(ctx context.Context, typ, id string) (value []byte, err e
 	if err := identity.Validate(typ, id); err != nil {
 		return nil, err
 	}
+	if c.graphJournal != nil {
+		return c.awaitGraph(ctx, typ, id, &observedInvSeq, &terminalFailed)
+	}
 	state, err := retryAwaitRead(ctx, func(attempt context.Context) (jetstream.KeyValue, error) {
 		return c.js.KeyValue(attempt, "WF_STATE")
 	})
@@ -690,9 +694,6 @@ func (c *Client) Await(ctx context.Context, typ, id string) (value []byte, err e
 				return out.ResultBytes(ctx, nil)
 			}
 
-			if c.graphJournal != nil {
-				return c.graphTerminalResult(ctx, typ, id, out)
-			}
 			return out.ResultBytes(ctx, func(ctx context.Context, name string) ([]byte, error) {
 				return retryAwaitRead(ctx, func(attempt context.Context) ([]byte, error) {
 					return natsutil.GetObjectBytes(attempt, c.js, "WF_BLOB", name)
