@@ -13,15 +13,17 @@ import (
 )
 
 type Cluster struct {
-	Servers    []*server.Server
-	Clients    []*nats.Conn
-	root       string
-	ports      []int
-	routes     []int
-	routeMesh  *RouteMesh
-	serverTags map[int][]string
-	domain     string
-	leafPorts  []int
+	Servers       []*server.Server
+	Clients       []*nats.Conn
+	root          string
+	ports         []int
+	routes        []int
+	routeMesh     *RouteMesh
+	serverTags    map[int][]string
+	domain        string
+	leafPorts     []int
+	users         []*server.User
+	clientOptions []nats.Option
 }
 
 func freePort() (int, error) {
@@ -80,11 +82,23 @@ func start(root string, count int, partitionable bool, tags map[int][]string, do
 	return startWithLeaves(root, count, partitionable, tags, domain, false)
 }
 
+// StartWithUsers retains named client authentication across same-store restarts.
+// Users and permissions must remain immutable for the lifetime of this fixture.
+func StartWithUsers(root string, count int, users []*server.User, clientOptions ...nats.Option) (*Cluster, error) {
+	if len(users) == 0 {
+		return nil, fmt.Errorf("named users required")
+	}
+	return startConfigured(root, count, false, nil, "", false, users, clientOptions)
+}
+
 func startWithLeaves(root string, count int, partitionable bool, tags map[int][]string, domain string, leaves bool) (*Cluster, error) {
+	return startConfigured(root, count, partitionable, tags, domain, leaves, nil, nil)
+}
+func startConfigured(root string, count int, partitionable bool, tags map[int][]string, domain string, leaves bool, users []*server.User, clientOptions []nats.Option) (*Cluster, error) {
 	if count < 1 || count > 3 {
 		return nil, fmt.Errorf("count must be 1..3")
 	}
-	c := &Cluster{root: root, serverTags: make(map[int][]string, len(tags)), domain: domain}
+	c := &Cluster{root: root, serverTags: make(map[int][]string, len(tags)), domain: domain, users: append([]*server.User(nil), users...), clientOptions: append([]nats.Option(nil), clientOptions...)}
 	for node, values := range tags {
 		if node < 0 || node >= count {
 			return nil, fmt.Errorf("server tag node %d out of range", node)
@@ -154,7 +168,7 @@ func startWithLeaves(root string, count int, partitionable bool, tags map[int][]
 			c.Close()
 			return nil, fmt.Errorf("node %d not ready (running=%v, url=%s)", i, s.Running(), s.ClientURL())
 		}
-		nc, err := nats.Connect(s.ClientURL(), nats.NoReconnect())
+		nc, err := nats.Connect(s.ClientURL(), append([]nats.Option{nats.NoReconnect()}, c.clientOptions...)...)
 		if err != nil {
 			c.Close()
 			return nil, err
@@ -189,6 +203,10 @@ func (c *Cluster) ApplyFault(event FaultEvent) error {
 func (c *Cluster) options(i int) *server.Options {
 	opts := &server.Options{Host: "127.0.0.1", Port: c.ports[i], JetStream: true, StoreDir: filepath.Join(c.root, fmt.Sprintf("node-%d", i)), NoLog: true, NoSigs: true, ServerName: fmt.Sprintf("wf-test-%d", i)}
 	opts.JetStreamDomain = c.domain
+	for _, user := range c.users {
+		copy := *user
+		opts.Users = append(opts.Users, &copy)
+	}
 	if len(c.leafPorts) != 0 {
 		opts.LeafNode = server.LeafNodeOpts{Host: "127.0.0.1", Port: c.leafPorts[i]}
 	}
@@ -238,7 +256,7 @@ func (c *Cluster) RestartNode(i int) error {
 		s.WaitForShutdown()
 		return fmt.Errorf("restarted node %d not ready", i)
 	}
-	nc, err := nats.Connect(s.ClientURL(), nats.NoReconnect())
+	nc, err := nats.Connect(s.ClientURL(), append([]nats.Option{nats.NoReconnect()}, c.clientOptions...)...)
 	if err != nil {
 		s.Shutdown()
 		s.WaitForShutdown()
