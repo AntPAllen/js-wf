@@ -243,7 +243,7 @@ func TestNativeBlobUploaderAndCollectorSIGKILL(t *testing.T) {
 					t.Fatal(err)
 				}
 				t.Cleanup(proxy.Close)
-				if err = proxy.HoldFirstPublication(subject); err != nil {
+				if err = proxy.HoldFirstPublicationExceptHeader(subject, "Wf-Authority-Read-Witness", "1"); err != nil {
 					t.Fatal(err)
 				}
 				if err = proxy.EnableTrafficTrace(2 << 20); err != nil {

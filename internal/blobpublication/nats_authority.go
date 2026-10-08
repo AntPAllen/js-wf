@@ -16,13 +16,17 @@ import (
 	"github.com/nats-io/nats.go/jetstream"
 )
 
-const authoritySchema = "js-wf-blob-authority-v1"
+const authoritySchema = "js-wf-blob-authority-v2"
+const legacyAuthoritySchema = "js-wf-blob-authority-v1"
 
 // NativeAuthority is experimental. Its root stream is the publication
 // destination; a side record cannot fence publication to a different stream.
 // Administrators must not delete/recreate this stream or relax its retention
 // contract. Open never creates a missing stream and checks configuration on
-// every operation. ObjectStore integration and runtime migration are separate.
+// every operation. Reads upgrade validated v1 envelopes to v2 at the same
+// logical revision; quiesce old adapters before migration. Older adapters reject
+// v2 records. Never recreate the stream to perform this upgrade. ObjectStore
+// integration and runtime migration are separate.
 type NativeAuthority struct {
 	js           jetstream.JetStream
 	stream       jetstream.Stream
@@ -93,7 +97,7 @@ func (p *NativeAuthority) subject(kind, identity string) string {
 	}
 	return p.prefix + "." + kind + "." + identity
 }
-func (p *NativeAuthority) read(ctx context.Context, kind, identity string) (authorityValue, uint64, error) {
+func (p *NativeAuthority) readSnapshot(ctx context.Context, kind, identity string) (authorityValue, uint64, error) {
 	if identity == "" {
 		return authorityValue{}, 0, errors.New("empty authority identity")
 	}
@@ -120,8 +124,16 @@ func (p *NativeAuthority) read(ctx context.Context, kind, identity string) (auth
 	if err = decoder.Decode(new(any)); err != io.EOF {
 		return value, 0, errors.New("trailing authority value")
 	}
-	if message.Subject != subject || message.Sequence == 0 || value.Schema != authoritySchema || value.Kind != kind || value.Identity != identity || value.Revision == 0 {
+	if message.Subject != subject || message.Sequence == 0 || (value.Schema != authoritySchema && value.Schema != legacyAuthoritySchema) || value.Kind != kind || value.Identity != identity {
 		return value, 0, errors.New("invalid authority envelope")
+	}
+	// A committed absence witness consumes a physical stream sequence without
+	// inventing a logical head or generation. It is permanent authority metadata.
+	if value.Revision == 0 {
+		if value.Schema != authoritySchema || value.Root != nil || value.Fence != nil {
+			return value, 0, errors.New("invalid authority absence witness")
+		}
+		return value, message.Sequence, nil
 	}
 	if kind == "root" {
 		if value.Root == nil || value.Fence != nil || value.Root.Head != value.Revision {
@@ -139,6 +151,40 @@ func (p *NativeAuthority) read(ctx context.Context, kind, identity string) (auth
 		}
 	}
 	return value, message.Sequence, nil
+}
+
+// read establishes a quorum-acknowledged witness at the same destination as
+// the observed value. Administrative GET alone only checks current leadership;
+// it does not establish the linearizable read contract required by Port. The
+// conditional reaffirmation rejects stale value/absence snapshots, preserves
+// logical heads and generations, and returns the acknowledged physical sequence.
+// Reads require publish permission and perform a durable write, including for
+// absent identities. All authority users must tolerate physical sequence churn.
+func (p *NativeAuthority) read(ctx context.Context, kind, identity string) (authorityValue, uint64, error) {
+	for attempt := 0; attempt < 16; attempt++ {
+		if err := ctx.Err(); err != nil {
+			return authorityValue{}, 0, err
+		}
+		v, seq, err := p.readSnapshot(ctx, kind, identity)
+		if err != nil {
+			return v, 0, err
+		}
+		if seq == 0 {
+			v = authorityValue{Schema: authoritySchema, Kind: kind, Identity: identity}
+		}
+		// Upgrade validated v1 records without resetting logical high-water marks.
+		v.Schema = authoritySchema
+		confirmed, err := p.publishWithSequence(ctx, seq, v, true)
+		if errors.Is(err, ErrConflict) {
+			continue
+		}
+		if err != nil {
+			// A lost witness acknowledgment cannot be upgraded by another GET.
+			return authorityValue{}, 0, err
+		}
+		return v, confirmed, nil
+	}
+	return authorityValue{}, 0, ErrConflict
 }
 func validHash(k string) bool {
 	if len(k) != 64 {
@@ -195,29 +241,37 @@ func validateFence(k string, f Fence) error {
 	}
 	return nil
 }
-func (p *NativeAuthority) publish(ctx context.Context, expected uint64, v authorityValue) error {
+func (p *NativeAuthority) publishWithSequence(ctx context.Context, expected uint64, v authorityValue, witness bool) (uint64, error) {
 	if err := p.validate(ctx); err != nil {
-		return err
+		return 0, err
 	}
 	data, err := json.Marshal(v)
 	if err != nil {
-		return err
+		return 0, err
 	}
 	message := &nats.Msg{Subject: p.subject(v.Kind, v.Identity), Data: data, Header: nats.Header{}}
 	message.Header.Set(jetstream.ExpectedLastSubjSeqHeader, fmt.Sprint(expected))
+	if witness {
+		message.Header.Set("Wf-Authority-Read-Witness", "1")
+	}
 	ack, err := p.js.PublishMsg(ctx, message)
 	if err != nil {
 		var api *jetstream.APIError
 		if errors.As(err, &api) && (api.ErrorCode == jetstream.JSErrCodeStreamWrongLastSequence || api.ErrorCode == jetstream.JSErrCodeStreamWrongLastSequenceConstant) {
-			return ErrConflict
+			return 0, ErrConflict
 		}
-		return err
+		return 0, err
 	}
 	if ack.Stream != p.name || ack.Sequence <= expected || ack.Duplicate {
-		return errors.New("unexpected authority acknowledgment")
+		return 0, errors.New("unexpected authority acknowledgment")
 	}
-	return nil
+	return ack.Sequence, nil
 }
+func (p *NativeAuthority) publish(ctx context.Context, expected uint64, v authorityValue) error {
+	_, err := p.publishWithSequence(ctx, expected, v, false)
+	return err
+}
+
 func (p *NativeAuthority) ReadRoot(ctx context.Context, destination string) (Root, error) {
 	v, _, err := p.read(ctx, "root", destination)
 	if err != nil {
@@ -229,7 +283,7 @@ func (p *NativeAuthority) ReadRoot(ctx context.Context, destination string) (Roo
 	return *v.Root, nil
 }
 func (p *NativeAuthority) CASRoot(ctx context.Context, destination string, head uint64, next Root) (Root, error) {
-	v, seq, err := p.read(ctx, "root", destination)
+	v, seq, err := p.readSnapshot(ctx, "root", destination)
 	if err != nil {
 		return Root{}, err
 	}
@@ -266,7 +320,7 @@ func (p *NativeAuthority) ReadBlob(ctx context.Context, k string) (Record, error
 	return Record{v.Revision, *v.Fence}, nil
 }
 func (p *NativeAuthority) CASBlob(ctx context.Context, k string, revision uint64, next Fence) (Record, error) {
-	v, seq, err := p.read(ctx, "blob", k)
+	v, seq, err := p.readSnapshot(ctx, "blob", k)
 	if err != nil {
 		return Record{}, err
 	}

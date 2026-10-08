@@ -22,12 +22,14 @@ type ClientProxyPendingAPI struct {
 }
 
 type clientAPIBarrier struct {
-	prefix   string
-	exact    bool
-	release  chan struct{}
-	cancel   chan struct{}
-	released bool
-	pending  *ClientProxyPendingAPI
+	prefix       string
+	exact        bool
+	exceptHeader string
+	exceptValue  string
+	release      chan struct{}
+	cancel       chan struct{}
+	released     bool
+	pending      *ClientProxyPendingAPI
 }
 
 // HoldFirstAPI must be configured before connecting. Only this opt-in fixture
@@ -66,6 +68,46 @@ func (p *ClientProxy) HoldFirstPublication(subject string) error {
 	}
 	p.apiBarrier = &clientAPIBarrier{prefix: subject, exact: true, release: make(chan struct{}), cancel: make(chan struct{})}
 	return nil
+}
+
+// HoldFirstPublicationExceptHeader leaves witnessed authority reads flowing
+// while holding the first state-changing publication on the same destination.
+// Only HPUB headers are inspected; payload bytes cannot exempt a publication.
+func (p *ClientProxy) HoldFirstPublicationExceptHeader(subject, header, value string) error {
+	if header == "" || strings.ContainsAny(header, ": \t\r\n") || strings.ContainsAny(value, "\r\n") {
+		return fmt.Errorf("invalid publication exemption header")
+	}
+	if err := p.HoldFirstPublication(subject); err != nil {
+		return err
+	}
+	p.mu.Lock()
+	defer p.mu.Unlock()
+	p.apiBarrier.exceptHeader, p.apiBarrier.exceptValue = header, value
+	return nil
+}
+func publicationHasHeader(packet []byte, name, value string) bool {
+	if name == "" {
+		return false
+	}
+	end := bytes.Index(packet, []byte("\r\n"))
+	if end < 0 {
+		return false
+	}
+	fields := strings.Fields(string(packet[:end]))
+	if len(fields) < 4 || fields[0] != "HPUB" {
+		return false
+	}
+	n, err := strconv.Atoi(fields[len(fields)-2])
+	if err != nil || n < 0 || end+2+n > len(packet) {
+		return false
+	}
+	for _, line := range strings.Split(string(packet[end+2:end+2+n]), "\r\n") {
+		key, val, ok := strings.Cut(line, ":")
+		if ok && strings.EqualFold(key, name) && strings.TrimSpace(val) == value {
+			return true
+		}
+	}
+	return false
 }
 
 func (p *ClientProxy) holdFirstAPIPrefix(prefix string) error {
@@ -153,7 +195,7 @@ func (p *ClientProxy) copyWithAPIBarrier(client, upstream net.Conn, connection u
 			return err
 		}
 		p.mu.Lock()
-		held := barrier.pending == nil && strings.HasPrefix(subject, barrier.prefix) && (!barrier.exact || subject == barrier.prefix)
+		held := barrier.pending == nil && strings.HasPrefix(subject, barrier.prefix) && (!barrier.exact || subject == barrier.prefix) && !publicationHasHeader(packet, barrier.exceptHeader, barrier.exceptValue)
 		if held {
 			barrier.pending = &ClientProxyPendingAPI{Connection: connection, Subject: subject, Packet: append([]byte(nil), packet...), Disposition: "held"}
 		}

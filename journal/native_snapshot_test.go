@@ -360,7 +360,7 @@ func TestNativeSnapshotPublicationFencedWhilePaused(t *testing.T) {
 			}
 			defer proxy.Close()
 			subject := "wf.snapshot.authority.root." + snapshotHash([]byte(nativeSnapshotDestination(key)))
-			if err = proxy.HoldFirstPublication(subject); err != nil {
+			if err = proxy.HoldFirstPublicationExceptHeader(subject, "Wf-Authority-Read-Witness", "1"); err != nil {
 				t.Fatal(err)
 			}
 			if err = proxy.EnableTrafficTrace(2 << 20); err != nil {
