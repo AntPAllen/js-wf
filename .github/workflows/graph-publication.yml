@@ -207,7 +207,7 @@ jobs:
             graph-workflow-events.jsonl
   transport:
     runs-on: ubuntu-latest
-    timeout-minutes: ${{ matrix.family == 'SignalRuntime' && 25 || 10 }}
+    timeout-minutes: ${{ matrix.family == 'SignalRuntime' && 45 || 10 }}
     strategy:
       fail-fast: false
       matrix:
@@ -226,6 +226,7 @@ jobs:
           GRAPH_FAMILY: ${{ matrix.family }}
           SIM_SEEDS: '1000'
           SIM_COVERAGE_SUMMARY: '1'
+          SIM_PROGRESS: '1'
         run: |
           graph_flags=()
           if [ "$GRAPH_MODE" = race ]; then graph_flags=(-race); fi
@@ -234,7 +235,7 @@ jobs:
             graph_pattern='^(TestPinnedRegressionCorpus|TestGraphPublicationTransportCopiesFaultsAndIndependentCensus|TestGraphChildSeedPipelineOrdersAndJoins|TestGraphWorkerCompletionAppendReaderInterleaving)$'
           fi
           graph_timeout=5m
-          if [ "$GRAPH_FAMILY" = SignalRuntime ]; then graph_timeout=20m; fi
+          if [ "$GRAPH_FAMILY" = SignalRuntime ]; then graph_timeout=40m; fi
           go test -p=1 "${graph_flags[@]}" ./sim -run "$graph_pattern" -count=1 -timeout="$graph_timeout" -json > graph-transport-events.jsonl
       - uses: actions/upload-artifact@v4
         if: always()

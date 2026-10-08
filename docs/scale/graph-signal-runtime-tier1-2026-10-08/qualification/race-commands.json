@@ -1,0 +1,29 @@
+{
+  "source": "dd98e39c29c5e8689f06fdbdcca7e944b53c0963",
+  "cwd": "/home/exedev/js-wf-signal-runtime-qualification",
+  "environment": {
+    "GOMAXPROCS": "2",
+    "GOMEMLIMIT": "512MiB",
+    "SIM_SEEDS": "1000",
+    "SIM_COVERAGE_SUMMARY": "1"
+  },
+  "commands": [
+    {
+      "name": "family",
+      "command": [
+        "go",
+        "test",
+        "-p=1",
+        "-race",
+        "./sim",
+        "-run",
+        "^TestSeededGraphSignalRuntimeReplay$",
+        "-json",
+        "-count=1",
+        "-timeout=20m"
+      ],
+      "exit_code": 1,
+      "wall_seconds": 1221.7638990879059
+    }
+  ]
+}

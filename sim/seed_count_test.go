@@ -35,7 +35,21 @@ func seededSchedules(t *testing.T) func(func(int64) bool) {
 			t.Errorf("seed range incomplete: completed %d of %d", completed, limit)
 		}
 	})
-	return trackedSeeds(limit, &completed)
+	seeds := trackedSeeds(limit, &completed)
+	if os.Getenv("SIM_PROGRESS") != "1" {
+		return seeds
+	}
+	return func(yield func(int64) bool) {
+		seeds(func(seed int64) bool {
+			if !yield(seed) {
+				return false
+			}
+			if seed%100 == 0 {
+				t.Logf("TIER1_PROGRESS test=%s completed=%d requested=%d", t.Name(), seed, limit)
+			}
+			return true
+		})
+	}
 }
 
 func trackedSeeds(limit int64, completed *int64) func(func(int64) bool) {

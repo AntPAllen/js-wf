@@ -26,7 +26,7 @@ before = inventory()
 (root/'source-before.json').write_text(json.dumps(dict(revision=revision, files=before), indent=2)+'\n')
 (root/'tier1-source.txt').write_text(revision+'\n')
 (root/'tier1-regression-inventory.txt').write_text('\n'.join(n for n in names if n.startswith('sim/testdata/regressions/') and n.endswith('.json'))+'\n')
-env = dict(os.environ, GOMEMLIMIT='512MiB', GOMAXPROCS='2', SIM_SEEDS=str(a.seeds), SIM_COVERAGE_SUMMARY='1', FAULT_TRACE_OUT=str(root/'failure-trace.json'))
+env = dict(os.environ, GOMEMLIMIT='512MiB', GOMAXPROCS='2', SIM_SEEDS=str(a.seeds), SIM_COVERAGE_SUMMARY='1', SIM_PROGRESS='1', FAULT_TRACE_OUT=str(root/'failure-trace.json'))
 commands = []
 execution_contexts = []
 def call(command, **kwargs):
@@ -47,7 +47,7 @@ try:
     provenance = dict(binary_sha256=hashlib.sha256(binary.read_bytes()).hexdigest(), race_instrumented=not a.no_race,
                      go_version=subprocess.check_output(['go', 'version'], text=True).strip(),
                      build_info=subprocess.check_output(['go', 'version', '-m', str(binary)], text=True),
-                     environment={k: env[k] for k in ('GOMEMLIMIT', 'GOMAXPROCS', 'SIM_SEEDS', 'SIM_COVERAGE_SUMMARY')})
+                     environment={k: env[k] for k in ('GOMEMLIMIT', 'GOMAXPROCS', 'SIM_SEEDS', 'SIM_COVERAGE_SUMMARY', 'SIM_PROGRESS')})
     assert ('-race=true' in provenance['build_info']) == provenance['race_instrumented'], 'binary race provenance mismatch'
     (root/'binary.json').write_text(json.dumps(provenance, indent=2)+'\n')
     with (root/'tier1-events.jsonl').open('w') as out, (root/'stderr.log').open('w') as err:
