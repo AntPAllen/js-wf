@@ -521,6 +521,8 @@ func replayTrace(loaded Trace) (Trace, error) {
 		replayed, err = runGraphReaders(loaded.Seed, &loaded)
 	case "graph_reader_resume":
 		replayed, err = runGraphReaderResume(loaded.Seed, &loaded)
+	case "graph_worker_execution":
+		replayed, err = runGraphWorker(loaded.Seed, &loaded)
 	case "graph_journal_generation":
 		replayed, err = runGraphJournal(loaded.Seed, &loaded)
 	case "graph_application_state":

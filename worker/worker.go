@@ -50,6 +50,8 @@ type Worker struct {
 	fencingObserver            func(FencingEvent)
 	js                         jetstream.JetStream
 	jrn                        *journal.Store
+	graphJournal               *journal.GraphStore
+	legacyJournalOption        bool
 	leases                     *lease.Store
 	state                      jetstream.KeyValue
 	outcomePort                OutcomePort
@@ -137,6 +139,7 @@ func WithJournalEncoding(encoding journal.Encoding) Option {
 			return err
 		}
 		w.jrn = store
+		w.legacyJournalOption = true
 		return nil
 	}
 }
@@ -236,6 +239,9 @@ func New(ctx context.Context, js jetstream.JetStream, id string, handlers map[st
 			return nil, err
 		}
 	}
+	if err := w.validateGraphOptions(); err != nil {
+		return nil, err
+	}
 	w.cancelStream, err = js.Stream(attemptCtx, "WF_SIG")
 	if err != nil {
 		return nil, fmt.Errorf("signal stream: %w", err)
@@ -302,6 +308,9 @@ func NewWithPorts(id string, handlers map[string]Handler, ports ModeledWorkerPor
 		if err := option(w); err != nil {
 			return nil, err
 		}
+	}
+	if err := w.validateGraphOptions(); err != nil {
+		return nil, err
 	}
 	return w, nil
 }
@@ -718,7 +727,7 @@ func (w *Worker) handle(parent context.Context, msg jetstream.Msg) {
 	if !terminalDuplicate {
 		err = w.execute(ctx, typ, id, l, metadata.Timestamp, timer, &cancelledTimerNoOp, ops)
 	}
-	if err == nil && ctx.Err() == nil && !terminalDuplicate && w.jrn.HasSnapshotTransport() && w.continuations[typ] == nil {
+	if err == nil && ctx.Err() == nil && !terminalDuplicate && w.graphJournal == nil && w.jrn.HasSnapshotTransport() && w.continuations[typ] == nil {
 		// Missing snapshot metadata/object replies must not keep a suspended
 		// invocation owned for its entire workflow lifetime. Publication and
 		// purge already support uncertain replies; retry them on redelivery.
@@ -824,7 +833,7 @@ func (w *Worker) execute(ctx context.Context, typ, id string, l *lease.Lease, wa
 	var tail, baseIndex uint64
 	var resumed *journal.CheckpointRead
 	var checkpointInfo wf.CheckpointInfo
-	if w.continuations[typ] == nil {
+	if w.graphJournal == nil && w.continuations[typ] == nil {
 		started := ops.begin()
 		readCtx, stop := context.WithTimeout(ctx, 15*time.Second)
 		var err error
@@ -849,6 +858,24 @@ func (w *Worker) execute(ctx context.Context, typ, id string, l *lease.Lease, wa
 	} // Purged invocation: wakeup is a no-op.
 	if err != nil {
 		return err
+	}
+	var graph *graphDelivery
+	if w.graphJournal != nil {
+		if !validGraphHash(input.Header.Get("Wf-Input-SHA256")) {
+			return wf.ErrCorruptJournal
+		}
+		readCtx, stopRead := context.WithTimeout(ctx, 15*time.Second)
+		graph, err = openGraphDelivery(readCtx, w.graphJournal, typ, id, input.Sequence)
+		stopRead()
+		if err != nil {
+			return err
+		}
+		defer func() {
+			cleanup, stop := context.WithTimeout(context.WithoutCancel(ctx), 3*time.Second)
+			defer stop()
+			_ = graph.close(cleanup)
+		}()
+		records, tail = graph.records, graph.view.Tail()
 	}
 	if w.continuations[typ] != nil {
 		readStarted := ops.begin()
@@ -896,7 +923,12 @@ func (w *Worker) execute(ctx context.Context, typ, id string, l *lease.Lease, wa
 		*cancelledTimerNoOp = true
 	}
 	inputData := input.Data
-	if key := input.Header.Get("Wf-Input-Ref"); key != "" {
+	if graph != nil && len(records) > 0 {
+		inputData, err = graph.GetBytes(ctx, "input:"+input.Header.Get("Wf-Input-SHA256"))
+		if err != nil {
+			return err
+		}
+	} else if key := input.Header.Get("Wf-Input-Ref"); key != "" {
 		inputData, err = invocationPort.InputBlob(ctx, key)
 		if err != nil {
 			return err
@@ -916,6 +948,9 @@ func (w *Worker) execute(ctx context.Context, typ, id string, l *lease.Lease, wa
 	if *cancelledTimerNoOp {
 		return nil
 	}
+	if graph != nil {
+		graph.input = bytes.Clone(inputData)
+	}
 	writeEntry := func(kind journal.Kind, payload json.RawMessage) error {
 		if err := ctx.Err(); err != nil {
 			return err
@@ -929,7 +964,21 @@ func (w *Worker) execute(ctx context.Context, typ, id string, l *lease.Lease, wa
 			return err
 		}
 		started = ops.begin()
-		seq, err := w.jrn.Append(ctx, typ, id, journal.Entry{Epoch: l.Epoch(), Index: nextIndex(), Kind: kind, Payload: payload, WorkerID: w.ID}, tail)
+		entry := journal.Entry{Epoch: l.Epoch(), Index: nextIndex(), Kind: kind, Payload: payload, WorkerID: w.ID}
+		var seq uint64
+		if graph != nil {
+			if kind == journal.Started {
+				entry.Payload, _ = json.Marshal(struct {
+					InputSHA256 string `json:"input_sha256"`
+				}{graphHash(inputData)})
+				payload = entry.Payload
+			}
+			appendCtx, stopAppend := context.WithTimeout(ctx, 15*time.Second)
+			seq, err = graph.append(appendCtx, entry, tail)
+			stopAppend()
+		} else {
+			seq, err = w.jrn.Append(ctx, typ, id, entry, tail)
+		}
 		ops.finish(started, "journal_append", nextIndex(), kind, err)
 		if err != nil {
 			return err
@@ -995,7 +1044,20 @@ func (w *Worker) execute(ctx context.Context, typ, id string, l *lease.Lease, wa
 		}
 		return failPanic(lastPanic)
 	}
-	signals, err := w.drainSignalsFrom(ctx, typ, id, input.Sequence, checkpointInfo.SignalCursor, records, appendEntry, ops)
+	var signals []wf.Signal
+	if graph == nil {
+		signals, err = w.drainSignalsFrom(ctx, typ, id, input.Sequence, checkpointInfo.SignalCursor, records, appendEntry, ops)
+	} else {
+		port := w.signalDrainPort
+		if port == nil {
+			port = NewSignalDrainPort(w.js)
+		}
+		port = graphSignalDrain{SignalDrainPort: port, graph: graph}
+		if ops != nil {
+			port = observedSignalDrain{SignalDrainPort: port, operations: ops}
+		}
+		signals, err = drainSignalsFromPort(ctx, port, typ, id, input.Sequence, checkpointInfo.SignalCursor, records, appendEntry)
+	}
 	if err != nil {
 		return err
 	}
@@ -1076,6 +1138,9 @@ func (w *Worker) execute(ctx context.Context, typ, id string, l *lease.Lease, wa
 		})
 	}
 	resultBlobs := w.resultBlobs()
+	if graph != nil {
+		resultBlobs = graph
+	}
 	if resultBlobs != nil {
 		resultBlobs = boundedResultBlobPort{ResultBlobPort: resultBlobs, operations: ops}
 	}
@@ -1269,7 +1334,7 @@ func (w *Worker) persistAndNotify(ctx context.Context, typ, id string, invSeq ui
 	}
 	// A failed automatic snapshot must still be repaired on redelivery before
 	// future terminal duplicates can skip it. Continuations own their snapshots.
-	w.terminalHints.add(identity.Key(typ, id), !w.jrn.HasSnapshotTransport() || w.continuations[typ] != nil)
+	w.terminalHints.add(identity.Key(typ, id), w.graphJournal != nil || !w.jrn.HasSnapshotTransport() || w.continuations[typ] != nil)
 	return nil
 }
 

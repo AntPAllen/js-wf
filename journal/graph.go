@@ -20,6 +20,7 @@ import (
 const graphCursorSchema = "js-wf-graph-journal-cursor-v1"
 const graphEntrySchema = "js-wf-graph-journal-entry-v1"
 const MaxGraphEntryBytes = 1 << 20
+const DefaultGraphPayloadLimit = 64 << 20
 
 // GraphConfig selects an isolated graph journal. Now must share the collector's
 // clock. This does not import WF_JRN or enable runtime collection.
@@ -29,6 +30,9 @@ type GraphConfig struct {
 	PinTTL    time.Duration
 	IntentTTL time.Duration
 	Encoding  Encoding
+	// PayloadReadLimit bounds runtime input/result/signal reads. Direct GraphView
+	// callers can supply their own explicit bound. Zero selects 64MiB.
+	PayloadReadLimit int
 }
 
 type GraphStore struct{ cfg GraphConfig }
@@ -51,7 +55,7 @@ type graphEntry struct {
 }
 
 func NewGraphStore(cfg GraphConfig) (*GraphStore, error) {
-	if cfg.Protocol.Port == nil || validateEncoding(cfg.Encoding) != nil || cfg.PinTTL < 0 || cfg.IntentTTL < 0 {
+	if cfg.Protocol.Port == nil || validateEncoding(cfg.Encoding) != nil || cfg.PinTTL < 0 || cfg.IntentTTL < 0 || cfg.PayloadReadLimit < 0 || int64(cfg.PayloadReadLimit) == math.MaxInt64 {
 		return nil, fmt.Errorf("invalid graph journal configuration")
 	}
 	if cfg.Now == nil {
@@ -63,8 +67,14 @@ func NewGraphStore(cfg GraphConfig) (*GraphStore, error) {
 	if cfg.IntentTTL == 0 {
 		cfg.IntentTTL = time.Minute
 	}
+	if cfg.PayloadReadLimit == 0 {
+		cfg.PayloadReadLimit = DefaultGraphPayloadLimit
+	}
 	return &GraphStore{cfg: cfg}, nil
 }
+
+// PayloadReadLimit is the explicit byte budget for configured runtime reads.
+func (s *GraphStore) PayloadReadLimit() int { return s.cfg.PayloadReadLimit }
 
 func graphDestination(typ, id string) (string, error) {
 	if err := identity.Validate(typ, id); err != nil {
@@ -258,6 +268,9 @@ type GraphView struct {
 type GraphRecord struct {
 	Record
 	Blobs []retainedgraph.Link
+	// EntryBlob is the exact owned encoded entry edge. It can also be an
+	// external payload when identical bytes were deduplicated in this leaf.
+	EntryBlob retainedgraph.Link
 }
 
 func (s *GraphStore) Open(ctx context.Context, typ, id string, invocation uint64) (*GraphView, error) {
@@ -310,6 +323,7 @@ func (v *GraphView) Read(ctx context.Context, index uint64) (GraphRecord, error)
 			return GraphRecord{}, ErrGap
 		}
 		found = true
+		result.EntryBlob = link
 		data, e := v.store.cfg.Protocol.Port.Get(ctx, link, MaxGraphEntryBytes)
 		if e != nil {
 			return GraphRecord{}, e
@@ -341,7 +355,7 @@ func (v *GraphView) Payload(ctx context.Context, index uint64, link retainedgrap
 	if err != nil {
 		return nil, err
 	}
-	found := false
+	found := record.EntryBlob == link
 	for _, edge := range record.Blobs {
 		if edge == link {
 			found = true

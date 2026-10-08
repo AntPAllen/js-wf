@@ -344,3 +344,37 @@ func TestGraphJournalLimitsAndForeignRoot(t *testing.T) {
 		t.Fatal("foreign root adopted", err)
 	}
 }
+
+func TestGraphJournalEntryPayloadAlias(t *testing.T) {
+	s, m, _ := graphModel(t, journal.JSON)
+	ctx := context.Background()
+	tail, err := s.Begin(ctx, "flow", "alias", 1)
+	if err != nil {
+		t.Fatal(err)
+	}
+	entry := journal.Entry{Kind: journal.Started, Epoch: 1}
+	encoded, err := journal.MarshalEntry(entry, journal.JSON)
+	if err != nil {
+		t.Fatal(err)
+	}
+	tail, err = s.Append(ctx, "flow", "alias", 1, entry, tail, [][]byte{encoded}, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	view, err := s.Open(ctx, "flow", "alias", 1)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer view.Close(ctx)
+	record, err := view.Read(ctx, 0)
+	if err != nil || record.EntryBlob.Hash == "" {
+		t.Fatal(record, err)
+	}
+	data, err := view.Payload(ctx, 0, record.EntryBlob, len(encoded))
+	if err != nil || !bytes.Equal(data, encoded) {
+		t.Fatal(string(data), err)
+	}
+	if err = m.CheckReferences(); err != nil {
+		t.Fatal(err)
+	}
+}

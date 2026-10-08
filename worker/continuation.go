@@ -159,6 +159,7 @@ func WithJournalStore(store *journal.Store) Option {
 			return fmt.Errorf("nil worker journal store")
 		}
 		w.jrn = store
+		w.legacyJournalOption = true
 		return nil
 	}
 }
