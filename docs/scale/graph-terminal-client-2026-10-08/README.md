@@ -1,0 +1,20 @@
+# Canonical graph terminal-client reads — focused verification accepted
+
+Frozen code **376be79** reads every graph-configured client outcome from a pinned graph terminal entry. Inline and external successes, failures and cancellation all use the same canonical terminal path. WF_STATE terminal contents are ignored as result authority; existing invocation identity and legacy purge markers remain lifecycle fences. OpenTerminal polls pending/uninitialized graph cursors without acquiring pins, and pins only a matching live terminal generation. Kind/generation consistency, exact payload edges/hashes and final invocation/purge rechecks protect returned values. Unknown graph operations propagate, and wrapped definite CAS exhaustion is not mistaken for purge.
+
+| Check | Normal | Race |
+| --- | ---: | ---: |
+| Native graph worker R1/R3, including mirror deletion | 4.584s | 21.156s |
+| Twelve focused graph journal groups | 11.252s | 61.227s |
+| Client package, including native canonical terminal group | 2.474s | 8.576s |
+| New result model + transport control + every pinned trace | 19.071s | 35.403s |
+
+All eight commands ran once with their original five-minute timeout, GOMAXPROCS=2 and GOMEMLIMIT=512MiB. All **1,416** selected tracked inputs matched the frozen Git revision before execution, remained unchanged afterward and matched the frozen revision again during review. Review rejects skips/failures/race reports, missing native replica/scenario passes, changed inputs, missing command completions or wrong seed/pin counts.
+
+Native client R1/R3 covers six scenarios: inline,750KB external, failure, cancellation, wrong terminal invocation and completion carrying an error. Each reads with no legacy state and again with forged legacy terminal bytes; valid results remain the graph outcome and malformed graph terminals reject. A matching legacy purge marker rejects afterward. The worker control replays its actual large payload workflow and reads the same terminal again after stopping the worker and deleting WF_STATE. These tests use healthy in-process NATS fixtures, not process/peer crashes, route faults or power loss. The public native constructor remains exercised.
+
+The new `graph_terminal_client` workload runs **10,000 normal** and **1,000 race** schedules, each exactly replayed. Thirteen modes cover inline/external results, failure/cancellation, absent/forged legacy state, pending graph completion despite a terminal-looking mirror, invocation replacement during return, purge racing return, retired graph generation, uncertain authority read, uncertain reader acquisition and an unowned terminal payload. Every fixture drains graph objects after explicit lifecycle cleanup and reader expiry/pruning. This proves closed-fixture cleanup and the modeled decisions; it does not prove cross-store atomic retention ordering or native physical drain for the new result fixture.
+
+All **516** unique pinned traces pass in both simulation runs, including the new13 result pins and all503 prior pins byte-for-byte unchanged. There are now **134** source-inventoried seeded workloads. This runs the new result family and pinned cases, not the full134-workload current-source campaign. The initial development pin-export command failed because its target directory did not exist; creating that directory fixed the export setup. It was not a runtime or NATS fault and is not counted as an accepted command here.
+
+Workers still mirror terminal outcomes into legacy state, and other worker duplicate probes, reconcilers, snapshot/continuation/import/history/retention paths still need graph migration. Start/input and signal publication, canonical lifecycle identity/purge, native reader capacity/concurrency/scale/partitions, actual process/storage crashes, deployment migration, all original full native matrices/24h/million physical-drain/default-adoption/dependency/release gates remain open. Production collection remains quiescent. This is accepted focused canonical client-result evidence, not full runtime/release completion.
