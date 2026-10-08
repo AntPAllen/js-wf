@@ -84,9 +84,37 @@ func NewWithGraphJournalPorts(start StartPort, signal SignalPort, results GraphR
 
 func (c *Client) awaitGraph(ctx context.Context, typ, id string, observed *uint64, failed *bool) ([]byte, error) {
 	port := c.graphResultPort
-	input, err := retryAwaitRead(ctx, func(attempt context.Context) (*jetstream.RawStreamMsg, error) {
-		return port.LastInvocation(attempt, identity.InvocationSubject(typ, id))
-	})
+	var input *jetstream.RawStreamMsg
+	var err error
+	for {
+		input, err = retryAwaitRead(ctx, func(attempt context.Context) (*jetstream.RawStreamMsg, error) {
+			return port.LastInvocation(attempt, identity.InvocationSubject(typ, id))
+		})
+		if errors.Is(err, jetstream.ErrMsgNotFound) && c.graphJournal.CanonicalStarts() {
+			lifecycle, e := c.graphJournal.InspectRetirement(ctx, typ, id)
+			if e != nil {
+				return nil, e
+			}
+			// Pending replacement retains proof of the previous retirement;
+			// that proof does not mean the new pending attempt is purged.
+			if lifecycle.PendingStart {
+				if e = port.Wait(ctx, 100*time.Millisecond); e != nil {
+					return nil, e
+				}
+				continue
+			}
+			if lifecycle.Retired || lifecycle.Purging {
+				*observed = lifecycle.Invocation
+				return nil, ErrPurged
+			}
+
+			if lifecycle.Invocation != 0 {
+				*observed = lifecycle.Invocation
+				return nil, ErrStartUnknown
+			}
+		}
+		break
+	}
 	if errors.Is(err, jetstream.ErrMsgNotFound) {
 		marker, tomb, stateErr := c.graphPurgeMarker(ctx, typ, id)
 		if stateErr != nil {

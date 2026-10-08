@@ -127,6 +127,22 @@ type RootCatalogPort interface {
 	RootKeys(context.Context) ([]string, error)
 }
 
+// RootCatalogEntry is identity discovery at a retained authority-stream sequence.
+// Sequence is not a logical root head. ReadRoot must confirm ownership/lifecycle.
+type RootCatalogEntry struct {
+	Sequence    uint64
+	Destination string
+}
+
+// RootScanPort reads the next retained root with authority sequence >= next.
+// A nil entry witnesses current exhaustion. It performs bounded work per call;
+// concurrent writes can move roots forward and are revisited by periodic scans.
+// Errors return no entry and may not advance the caller's checkpoint.
+type RootScanPort interface {
+	Port
+	NextRoot(context.Context, uint64) (*RootCatalogEntry, error)
+}
+
 // NewID must be globally unique across producers, retries and restarts.
 type Protocol struct {
 	Port  Port

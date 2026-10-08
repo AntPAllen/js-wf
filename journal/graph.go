@@ -121,46 +121,51 @@ func (s *GraphStore) observe(ctx context.Context, typ, id string) (string, graph
 	if err != nil {
 		return destination, root, nil, fmt.Errorf("%w: %w", ErrUnknown, err)
 	}
+	cursor, err := s.validateRoot(root, typ, id)
+	return destination, root, cursor, err
+}
+
+func (s *GraphStore) validateRoot(root graphpublication.Root, typ, id string) (*graphCursor, error) {
 	if root.Graph.Validate() != nil {
-		return destination, root, nil, ErrGap
+		return nil, ErrGap
 	}
 	if (root.Head == 0 || s.cfg.CanonicalStarts) && root.Schema == graphpublication.Schema && root.Graph.Count == 0 && root.Token == "" && len(root.Readers) == 0 && len(root.Application) == 0 && len(root.Streams) == 0 {
-		return destination, root, nil, nil
+		return nil, nil
 	}
 	rootSchema, cursorSchema := graphpublication.ApplicationSchema, graphCursorSchema
 	if s.cfg.CanonicalStarts {
 		rootSchema, cursorSchema = graphpublication.StreamsSchema, graphStartCursorSchema
 	}
 	if root.Schema != rootSchema || root.Head == 0 || len(root.Application) == 0 || len(root.Application) > graphpublication.MaxApplicationBytes {
-		return destination, root, nil, ErrGap
+		return nil, ErrGap
 	}
 	var c graphCursor
 	if graphDecode(root.Application, &c) != nil || c.Schema != cursorSchema || !s.cfg.CanonicalStarts && (c.Invocation == 0 || c.Start != nil || c.PreviousInvocation != 0) || c.Count > MaxEntries || c.Base > math.MaxUint64-c.Count {
-		return destination, root, nil, ErrGap
+		return nil, ErrGap
 	}
 	if s.cfg.CanonicalStarts {
 		if err := validateStartCursor(root, c, typ, id, s.cfg.PayloadReadLimit); err != nil {
-			return destination, root, nil, err
+			return nil, err
 		}
 	}
 	if c.Count == 0 {
 		if c.Kind != "" || c.Epoch != 0 || c.Retired {
-			return destination, root, nil, ErrGap
+			return nil, ErrGap
 		}
 	} else if _, ok := kinds[c.Kind]; !ok || c.Count > 1 && c.Kind == Started || c.Count == 1 && c.Kind != Started {
-		return destination, root, nil, ErrGap
+		return nil, ErrGap
 	}
 	if c.Purging && c.Kind != Completed && c.Kind != Failed {
-		return destination, root, nil, ErrGap
+		return nil, ErrGap
 	}
 	if c.Retired {
 		if c.Kind != Completed && c.Kind != Failed || root.Graph.Count != 0 || root.Token != "" {
-			return destination, root, nil, ErrGap
+			return nil, ErrGap
 		}
 	} else if root.Graph.Count != c.Count {
-		return destination, root, nil, ErrGap
+		return nil, ErrGap
 	}
-	return destination, root, &c, nil
+	return &c, nil
 }
 
 func graphMutationError(err error) error {

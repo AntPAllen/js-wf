@@ -26,11 +26,14 @@ type GraphPublicationTransport struct {
 	objects         map[string][]byte
 	faults          map[string][]AppendFault
 	serial          uint64
+	catalogSerial   uint64
+	catalogRoots    map[string]uint64
 	beforeOperation string
 	before          func() error
 }
 
 var _ graphpublication.Port = (*GraphPublicationTransport)(nil)
+var _ graphpublication.RootScanPort = (*GraphPublicationTransport)(nil)
 var _ graphpublication.RootCatalogPort = (*GraphPublicationTransport)(nil)
 
 func NewGraphPublicationTransport(s *Scheduler) *GraphPublicationTransport {
@@ -112,7 +115,7 @@ func (m *GraphPublicationTransport) event(op, subject string, expected, seq uint
 func (m *GraphPublicationTransport) QueueFault(op string, f AppendFault) error {
 	switch op {
 	case "cas_blob", "cas_root", "put", "delete":
-	case "read_blob", "read_root", "get", "objects", "blob_keys", "root_keys":
+	case "next_root", "read_blob", "read_root", "get", "objects", "blob_keys", "root_keys":
 		if f != DropBeforeCommit {
 			return fmt.Errorf("read faults require drop-before-commit")
 		}
@@ -183,6 +186,7 @@ func (m *GraphPublicationTransport) ReadBlob(ctx context.Context, k string) (gra
 		return graphpublication.Record{}, err
 	}
 	defer m.mu.Unlock()
+	m.catalogSerial++
 	r := m.blobs[k]
 	r.Fence = graphFenceCopy(r.Fence)
 	m.event("read_blob", k, 0, r.Revision, r, "ok")
@@ -204,6 +208,7 @@ func (m *GraphPublicationTransport) CASBlob(ctx context.Context, k string, revis
 	}
 	r = graphpublication.Record{Revision: revision + 1, Fence: graphFenceCopy(f)}
 	m.blobs[k] = r
+	m.catalogSerial++
 	if err = m.finish("cas_blob", k, revision, r.Revision, r, fault); err != nil {
 		return graphpublication.Record{}, err
 	}
@@ -221,6 +226,7 @@ func (m *GraphPublicationTransport) ReadRoot(ctx context.Context, k string) (gra
 		m.observedRoots = map[string]bool{}
 	}
 	m.observedRoots[k] = true
+	m.catalogRoot(k)
 	if !ok {
 		r = graphpublication.EmptyRoot()
 	}
@@ -249,6 +255,7 @@ func (m *GraphPublicationTransport) CASRoot(ctx context.Context, k string, head 
 	r = graphRootCopy(r)
 	r.Head = head + 1
 	m.roots[k] = r
+	m.catalogRoot(k)
 	if err = m.finish("cas_root", k, head, r.Head, r, fault); err != nil {
 		return graphpublication.Root{}, err
 	}
@@ -495,4 +502,30 @@ func (m *GraphPublicationTransport) CheckReferences() error {
 	}
 	m.event("check_references", "", 0, uint64(len(m.objects)), nil, "ok")
 	return nil
+}
+
+func (m *GraphPublicationTransport) catalogRoot(k string) {
+	m.catalogSerial++
+	if m.catalogRoots == nil {
+		m.catalogRoots = map[string]uint64{}
+	}
+	m.catalogRoots[k] = m.catalogSerial
+}
+func (m *GraphPublicationTransport) NextRoot(ctx context.Context, next uint64) (*graphpublication.RootCatalogEntry, error) {
+	_, err := m.enter(ctx, "next_root", "")
+	if err != nil {
+		return nil, err
+	}
+	defer m.mu.Unlock()
+	if next == 0 {
+		next = 1
+	}
+	var entry *graphpublication.RootCatalogEntry
+	for key, seq := range m.catalogRoots {
+		if seq >= next && (entry == nil || seq < entry.Sequence) {
+			entry = &graphpublication.RootCatalogEntry{Sequence: seq, Destination: key}
+		}
+	}
+	m.event("next_root", "", next, m.catalogSerial, entry, "ok")
+	return entry, nil
 }

@@ -18,11 +18,14 @@ import (
 	"js-wf/identity"
 	"js-wf/journal"
 	"js-wf/lease"
+	"js-wf/reconcile"
 	"js-wf/wf"
 	"js-wf/worker"
 )
 
 var graphStartModes = []string{"ordinary", "reserved", "source_committed", "bound_no_enqueue", "drop_reserve", "lost_reserve", "unknown_reserve", "put_drop", "put_lost", "drop_source", "lost_source", "bind_drop", "bind_lost", "unknown_bind", "enqueue_drop", "enqueue_lost", "input_mismatch", "foreign_pointer"}
+
+var graphStartRepairModes = append(append([]string{}, graphStartModes...), "catalog_drop", "lifecycle_unknown", "dry_catalog", "lost_repair_enqueue")
 
 type graphStartPort struct {
 	*SignalTransport
@@ -44,7 +47,13 @@ func (p *graphStartPort) PublishInvocation(ctx context.Context, msg *nats.Msg) (
 	return sequence, err
 }
 
-func runGraphStart(seed int64, replay *Trace) (trace Trace, runErr error) {
+func runGraphStart(seed int64, replay *Trace) (Trace, error) {
+	return runGraphStartWithRecovery(seed, replay, false)
+}
+func runGraphStartRepair(seed int64, replay *Trace) (Trace, error) {
+	return runGraphStartWithRecovery(seed, replay, true)
+}
+func runGraphStartWithRecovery(seed int64, replay *Trace, repair bool) (trace Trace, runErr error) {
 	s := NewScheduler(seed)
 	if replay != nil {
 		var err error
@@ -53,11 +62,19 @@ func runGraphStart(seed int64, replay *Trace) (trace Trace, runErr error) {
 			return Trace{}, err
 		}
 	}
-	if err := s.SetWorkload("graph_canonical_start"); err != nil {
+	workload := "graph_canonical_start"
+	if repair {
+		workload = "graph_canonical_start_repair"
+	}
+	if err := s.SetWorkload(workload); err != nil {
 		return Trace{}, err
 	}
 	defer func() { trace = s.Trace() }()
-	mode, err := s.Choose(graphStartModes)
+	modes := graphStartModes
+	if repair {
+		modes = graphStartRepairModes
+	}
+	mode, err := s.Choose(modes)
 	if err != nil {
 		return trace, err
 	}
@@ -85,7 +102,8 @@ func runGraphStart(seed int64, replay *Trace) (trace Trace, runErr error) {
 	id := integratedWorkerIDs(1)[0]
 	input := []byte(`7`)
 	request := journal.GraphStartRequest{Type: typ, ID: id}
-	if mode == "reserved" || mode == "source_committed" || mode == "bound_no_enqueue" || mode == "input_mismatch" || mode == "foreign_pointer" {
+	extraRepair := repair && (mode == "catalog_drop" || mode == "lifecycle_unknown" || mode == "dry_catalog" || mode == "lost_repair_enqueue")
+	if extraRepair || mode == "reserved" || mode == "source_committed" || mode == "bound_no_enqueue" || mode == "input_mismatch" || mode == "foreign_pointer" {
 		state, e := graph.ReserveStart(ctx, request, input)
 		if e != nil {
 			return trace, e
@@ -161,7 +179,9 @@ func runGraphStart(seed int64, replay *Trace) (trace Trace, runErr error) {
 		return trace, err
 	}
 	var handle client.Handle
-	if mode == "reserved" || mode == "source_committed" || mode == "bound_no_enqueue" || mode == "foreign_pointer" {
+	if extraRepair || repair && (mode == "reserved" || mode == "source_committed" || mode == "bound_no_enqueue") {
+		// The repair family leaves the durable cut unresolved for catalog discovery.
+	} else if mode == "reserved" || mode == "source_committed" || mode == "bound_no_enqueue" || mode == "foreign_pointer" {
 		handle, err = c.RecoverStart(ctx, typ, id)
 	} else {
 		data := input
@@ -210,14 +230,63 @@ func runGraphStart(seed int64, replay *Trace) (trace Trace, runErr error) {
 	if err != nil {
 		return trace, err
 	}
-	if mode == "drop_reserve" || mode == "put_drop" || mode == "put_lost" {
-		if _, e := c.RecoverStart(ctx, typ, id); !errors.Is(e, client.ErrNotFound) {
-			return trace, fmt.Errorf("unpublished fork adopted: %v", e)
+	if repair {
+		scan, e := reconcile.NewCanonicalStartScanWithPort(graph, c)
+		if e != nil {
+			return trace, e
 		}
-		handle, err = c.Start(ctx, typ, id, input)
+		switch mode {
+		case "catalog_drop":
+			e = m.QueueFault("next_root", DropBeforeCommit)
+		case "lifecycle_unknown":
+			e = m.QueueFault("read_root", DropBeforeCommit)
+		case "lost_repair_enqueue":
+			e = port.QueueFault(StartFault{Operation: "enqueue_run", Kind: "lose_ack_after_commit"})
+		case "dry_catalog":
+			dry, de := scan.Scan(ctx, 1, 1, true)
+			if de != nil || len(dry.Candidates) != 1 || dry.Reenqueued != 0 || len(port.Runs()) != 0 {
+				return trace, fmt.Errorf("dry catalog published: %v %v", dry, de)
+			}
+		}
+		if e != nil {
+			return trace, e
+		}
+		result, e := scan.Scan(ctx, 1, 1, false)
+		if mode == "catalog_drop" || mode == "lifecycle_unknown" || mode == "lost_repair_enqueue" {
+			if !errors.Is(e, journal.ErrUnknown) || result.RetrySequence != 0 || result.Reenqueued != 0 {
+				return trace, fmt.Errorf("unconfirmed repair checkpoint: %v %v", result, e)
+			}
+			result, e = scan.Scan(ctx, 1, 1, false)
+		}
+		if e != nil {
+			return trace, e
+		}
+		if mode == "drop_reserve" || mode == "put_drop" || mode == "put_lost" {
+			if result.Reenqueued != 0 {
+				return trace, fmt.Errorf("unpublished fork adopted by catalog")
+			}
+			handle, err = c.Start(ctx, typ, id, input)
+		} else {
+			if result.Reenqueued != 1 {
+				return trace, fmt.Errorf("catalog did not recover durable cut: %v", result)
+			}
+			state, _, e := graph.ReadStart(ctx, typ, id)
+			if e != nil {
+				return trace, e
+			}
+			handle = client.Handle{Type: typ, ID: id, InvSeq: state.Invocation}
+		}
 	} else {
-		handle, err = c.RecoverStart(ctx, typ, id)
+		if mode == "drop_reserve" || mode == "put_drop" || mode == "put_lost" {
+			if _, e := c.RecoverStart(ctx, typ, id); !errors.Is(e, client.ErrNotFound) {
+				return trace, fmt.Errorf("unpublished fork adopted: %v", e)
+			}
+			handle, err = c.Start(ctx, typ, id, input)
+		} else {
+			handle, err = c.RecoverStart(ctx, typ, id)
+		}
 	}
+
 	if err != nil {
 		return trace, err
 	}
@@ -315,7 +384,21 @@ func runGraphStart(seed int64, replay *Trace) (trace Trace, runErr error) {
 	return trace, nil
 }
 
-func TestSeededGraphStartReplay(t *testing.T) {
+func TestSeededGraphStartReplay(t *testing.T) { testGraphStartReplay(t, false, seededSchedules(t)) }
+func TestSeededGraphStartRepairReplay(t *testing.T) {
+	testGraphStartReplay(t, true, seededSchedules(t))
+}
+func testGraphStartReplay(t *testing.T, repair bool, seeds func(func(int64) bool)) {
+	run := runGraphStart
+	modes := graphStartModes
+	capture := "SIM_GRAPH_START_ROOT"
+	label := "graph start"
+	if repair {
+		run = runGraphStartRepair
+		modes = graphStartRepairModes
+		capture = "SIM_GRAPH_START_REPAIR_ROOT"
+		label = "graph start repair"
+	}
 	observed := map[string]int{}
 	fail := func(seed int64, trace Trace, cause error) {
 		path := os.Getenv("FAULT_TRACE_OUT")
@@ -331,25 +414,25 @@ func TestSeededGraphStartReplay(t *testing.T) {
 		}
 		t.Fatalf("FAULT_SEED=%d FAULT_TRACE=%s: %v", seed, path, cause)
 	}
-	for seed := range seededSchedules(t) {
-		generated, e := runGraphStart(seed, nil)
+	for seed := range seeds {
+		generated, e := run(seed, nil)
 		if e != nil {
 			fail(seed, generated, e)
 		}
 		mode := generated.Decisions[0].Chosen
 		observed[mode]++
-		replayed, e := runGraphStart(seed, &generated)
+		replayed, e := run(seed, &generated)
 		if e != nil || !reflect.DeepEqual(generated, replayed) {
 			fail(seed, generated, fmt.Errorf("start replay differs: %v", e))
 		}
-		if dir := os.Getenv("SIM_GRAPH_START_ROOT"); dir != "" && observed[mode] == 1 {
+		if dir := os.Getenv(capture); dir != "" && observed[mode] == 1 {
 			if e = generated.Save(filepath.Join(dir, mode+".json")); e != nil {
 				t.Fatal(e)
 			}
 		}
 	}
-	if len(observed) != len(graphStartModes) {
+	if len(observed) != len(modes) {
 		t.Fatalf("start coverage=%v", observed)
 	}
-	t.Logf("graph start: modes=%v; canonical staging, source-sequence binding, durable restart recovery, production worker replay/effect one and explicit fixture graph drain", observed)
+	t.Logf("%s: modes=%v; canonical staging, source-sequence binding, durable restart recovery, production worker replay/effect one and explicit fixture graph drain", label, observed)
 }

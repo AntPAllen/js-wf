@@ -460,3 +460,37 @@ func (p *NativeAuthority) RootKeys(ctx context.Context) ([]string, error) {
 	}
 	return keys, nil
 }
+
+// NextRoot discovers one retained root without materializing the namespace.
+// Administrative GET supplies identity only; the caller must use ReadRoot.
+func (p *NativeAuthority) NextRoot(ctx context.Context, next uint64) (*RootCatalogEntry, error) {
+	if next == 0 {
+		next = 1
+	}
+	if err := p.validate(ctx); err != nil {
+		return nil, err
+	}
+	msg, err := p.stream.GetMsg(ctx, next, jetstream.WithGetMsgSubject(p.prefix+".root.>"))
+	if errors.Is(err, jetstream.ErrMsgNotFound) {
+		return nil, nil
+	}
+	if err != nil {
+		return nil, err
+	}
+	if msg.Sequence < next || msg.Sequence == ^uint64(0) || len(msg.Data) == 0 || len(msg.Data) > MaxAuthorityBytes {
+		return nil, errors.New("invalid root scan message")
+	}
+	var header struct {
+		Identity string `json:"identity"`
+	}
+	if err = json.Unmarshal(msg.Data, &header); err != nil {
+		return nil, err
+	}
+	if _, err = decodeAuthority(msg.Data, "root", header.Identity); err != nil {
+		return nil, err
+	}
+	if msg.Subject != p.subject("root", header.Identity) {
+		return nil, errors.New("root scan identity mismatch")
+	}
+	return &RootCatalogEntry{Sequence: msg.Sequence, Destination: header.Identity}, nil
+}

@@ -43,6 +43,14 @@ func (c *Client) startCanonical(ctx context.Context, r journal.GraphStartRequest
 	if err != nil {
 		return h, fmt.Errorf("%w: reserve: %w", ErrStartUnknown, err)
 	}
+	return c.finishCanonicalStart(ctx, state)
+}
+
+// finishCanonicalStart never reserves a replacement; recovery must remain bound
+// to the captured durable token even if retirement races a later observation.
+func (c *Client) finishCanonicalStart(ctx context.Context, state journal.GraphStartState) (Handle, error) {
+	r := state.Start.Request
+	h := Handle{Type: r.Type, ID: r.ID, InvSeq: state.Invocation}
 	validated, _, err := c.graphJournal.ReadStart(ctx, r.Type, r.ID)
 	if err != nil {
 		return h, fmt.Errorf("%w: input: %w", ErrStartUnknown, err)
@@ -114,18 +122,27 @@ func (c *Client) startCanonical(ctx context.Context, r journal.GraphStartRequest
 // prepared object is needed. This is an explicit recovery operation; catalog
 // scanning and deployed repair-loop integration remain separate requirements.
 func (c *Client) RecoverStart(ctx context.Context, typ, id string) (Handle, error) {
+	return c.RecoverStartAttempt(ctx, typ, id, "")
+}
+
+// RecoverStartAttempt resumes only the captured durable token when token is
+// nonempty. It never reserves a replacement generation after retirement.
+func (c *Client) RecoverStartAttempt(ctx context.Context, typ, id, token string) (Handle, error) {
 	h := Handle{Type: typ, ID: id}
 	if c.graphJournal == nil || !c.graphJournal.CanonicalStarts() {
 		return h, fmt.Errorf("canonical starts are not configured")
 	}
-	state, input, err := c.graphJournal.ReadStart(ctx, typ, id)
+	state, _, err := c.graphJournal.ReadStart(ctx, typ, id)
 	if err != nil {
 		return h, err
 	}
 	if state.Start.Token == "" {
 		return h, ErrNotFound
 	}
-	h, err = c.startCanonical(ctx, state.Start.Request, input)
+	if token != "" && state.Start.Token != token {
+		return h, ErrStaleGeneration
+	}
+	h, err = c.finishCanonicalStart(ctx, state)
 	if errors.Is(err, ErrAlreadyStarted) {
 		err = nil
 	}
