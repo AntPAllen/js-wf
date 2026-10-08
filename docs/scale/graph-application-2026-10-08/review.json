@@ -1,0 +1,103 @@
+{
+  "source": "75be04996f3606c6779dc869f97eb926a15e8450",
+  "selected_source_inputs": 1375,
+  "selected_inputs_match_git_before": true,
+  "selected_inputs_unchanged_after": true,
+  "verified_runs": [
+    {
+      "name": "native-normal",
+      "package_passes": [
+        {
+          "package": "js-wf/internal/natsstream",
+          "elapsed": 0.024
+        },
+        {
+          "package": "js-wf/internal/graphpublication",
+          "elapsed": 33.97
+        }
+      ],
+      "graph_top_level_groups": 51,
+      "reader_native_replicas": [
+        1,
+        3
+      ]
+    },
+    {
+      "name": "application-normal100k",
+      "package_passes": [
+        {
+          "package": "js-wf/sim",
+          "elapsed": 87.479
+        }
+      ],
+      "modes": {
+        "dropped_update": 12549,
+        "empty_expiry": 12566,
+        "lost_append": 12449,
+        "lost_update": 12521,
+        "ordinary": 12569,
+        "renewal_wins": 12490,
+        "stale_append": 12401,
+        "unknown_readback": 12455
+      },
+      "total_schedules": 100000,
+      "exact_graph_pins": 55
+    },
+    {
+      "name": "native-race",
+      "package_passes": [
+        {
+          "package": "js-wf/internal/natsstream",
+          "elapsed": 1.032
+        },
+        {
+          "package": "js-wf/internal/graphpublication",
+          "elapsed": 109.684
+        }
+      ],
+      "graph_top_level_groups": 51,
+      "reader_native_replicas": [
+        1,
+        3
+      ]
+    },
+    {
+      "name": "application-race1k",
+      "package_passes": [
+        {
+          "package": "js-wf/sim",
+          "elapsed": 13.999
+        }
+      ],
+      "modes": {
+        "dropped_update": 123,
+        "empty_expiry": 139,
+        "lost_append": 122,
+        "lost_update": 122,
+        "ordinary": 121,
+        "renewal_wins": 132,
+        "stale_append": 116,
+        "unknown_readback": 125
+      },
+      "total_schedules": 1000,
+      "exact_graph_pins": 55
+    }
+  ],
+  "go_version": "go version go1.27.1 linux/amd64",
+  "utc": "2026-10-08T06:17:17.266774+00:00",
+  "scope": "Standard local package and focused seeded regression only; not independent SDK executable/peer-media provenance, full current-source Tier1 qualification, deployment rollout or complete native release qualification.",
+  "original_full126_terminal": {
+    "Restart": "no",
+    "RuntimeMaxUSec": "5h 15min",
+    "MainPID": "0",
+    "Result": "success",
+    "ExecMainPID": "2827550",
+    "ExecMainStatus": "0",
+    "CPUWeight": "5",
+    "MemoryMax": "3221225472",
+    "Nice": "19",
+    "ActiveState": "active",
+    "SubState": "exited",
+    "InvocationID": "b2521868d0e34dc49e70a618dcd2b424"
+  }
+}

@@ -1,0 +1,251 @@
+{
+  "source": "75be04996f3606c6779dc869f97eb926a15e8450",
+  "runs": [
+    {
+      "name": "native-normal",
+      "command": [
+        "go",
+        "test",
+        "-p=1",
+        "./internal/natsstream",
+        "./internal/graphpublication",
+        "-count=1",
+        "-timeout=5m",
+        "-json"
+      ],
+      "working_directory": "/home/exedev/js-wf",
+      "environment": {
+        "GOMAXPROCS": "2",
+        "GOMEMLIMIT": "512MiB",
+        "SIM_COVERAGE_SUMMARY": "1",
+        "SIM_SEEDS": "1000",
+        "FAULT_TRACE_OUT": "/tmp/js-wf-graph-application-native-normal-failure-20261008.json"
+      },
+      "exit_code": 0,
+      "wall_seconds": 34.94511285799672,
+      "package_passes": [
+        {
+          "package": "js-wf/internal/natsstream",
+          "elapsed": 0.024
+        },
+        {
+          "package": "js-wf/internal/graphpublication",
+          "elapsed": 33.97
+        }
+      ],
+      "top_level_passes": [
+        "TestStreamGuardHonorsWaitingContext",
+        "TestGraphApplicationLifecycle",
+        "TestGraphApplicationOriginalHeadAndUnknownReplies",
+        "TestGraphApplicationLimitsAndOpaqueOwnership",
+        "TestGraphCatalogExpiresEmptySnapshots",
+        "TestGraphCatalogFailureStopsObjectCollection",
+        "TestGraphCatalogRenewalConflictAndClosedGrants",
+        "TestNativeGraphApplicationRetirement",
+        "TestNativeGraphAuthorityPersistenceAndSchemaIsolation",
+        "TestNativeGraphAuthorityReadWitness",
+        "TestGraphAuthorityCanonicalEnvelope",
+        "TestNativeGraphAuthorityUnsafeConfiguration",
+        "TestNativeGraphAuthorityRejectsMalformedWireWithoutRepair",
+        "TestNativeGraphAuthorityLostMutationReplies",
+        "TestNativeGraphAuthorityRejectsLossyDestinationEncoding",
+        "TestNativeGraphDestinationCatalogEmptyPins",
+        "TestNativeGraphDestinationCatalogRejectsPartialAndCorrupt",
+        "TestNativeGraphConcurrentPublishersAndCollectors",
+        "TestNativeGraphObjectAppendReuseAndRetirement",
+        "TestNativeGraphObjectReservationsLostRepliesAndLateCompletion",
+        "TestNativeGraphObjectCancellationBoundsAndUnknownChunks",
+        "TestNativeGraphObjectPublishCollectOrderAndDelayedDelete",
+        "TestNativeGraphObjectReadUncertaintyAndFormatIsolation",
+        "TestNativeGraphObjectOpeningBoundsReadOnlyAdmission",
+        "TestGraphSubjectAccessRejectsUnsafeNamespaces",
+        "TestNativeGraphRuntimePermissions",
+        "TestNativeGraphReadersRetirementAndExpiry",
+        "TestNativeGraphReaderCheckpointStoreRestart",
+        "TestGraphOwnedPayloadSeededReuseAndCompleteReclamation",
+        "TestGraphOwnedLargePayloadNotRecopied",
+        "TestGraphOwnedPayloadRejectsUnownedStaleAndAmbiguousReferences",
+        "TestGraphOwnedPayloadRetirementAndCollectorFence",
+        "TestGraphOwnedPayloadUncertainReadsAndCallerMutation",
+        "TestGraphPublicationSeededAppendsSweepAndRetirement",
+        "TestGraphPublicationCollectorAndCommitInterleavings",
+        "TestGraphPublicationUnknownRepliesNeverAdoptUploads",
+        "TestGraphPublicationForeignDestinationAndRevokedGrants",
+        "TestGraphPublicationUncertainCensusFailsClosed",
+        "TestGraphPublicationDelayedDeleteCannotTouchNewGeneration",
+        "TestGraphPublicationContextAndCopies",
+        "TestGraphPublicationMetadataBoundAndPermanentScopedGenerations",
+        "TestGraphPublicationRejectsForeignPhysicalOwner",
+        "TestGraphPublicationInvalidAcknowledgmentsAndInputBounds",
+        "TestGraphReaderCheckpointRecovery",
+        "TestGraphReaderCheckpointRejectsUnknownAndRevoked",
+        "TestGraphReaderCheckpointCanonicalBounds",
+        "TestGraphReaderAppendRetireRelease",
+        "TestGraphReaderRenewalExpiryFences",
+        "TestGraphReaderUnknownAcknowledgements",
+        "TestGraphReaderBoundsAndFailClosed",
+        "TestGraphReaderOriginalHeadAndEmptySnapshots",
+        "TestGraphReaderAcquireRetirementRace"
+      ]
+    },
+    {
+      "name": "application-normal100k",
+      "command": [
+        "go",
+        "test",
+        "-p=1",
+        "./sim",
+        "-run",
+        "^(TestSeededGraphApplicationReplay|TestGraphPublicationTransportCopiesFaultsAndIndependentCensus|TestPinnedRegressionCorpus)$/^(graph-publication-|graph-readers-|graph-reader-resume-|graph-catalog-|graph-application-)",
+        "-count=1",
+        "-timeout=5m",
+        "-json"
+      ],
+      "working_directory": "/home/exedev/js-wf",
+      "environment": {
+        "GOMAXPROCS": "2",
+        "GOMEMLIMIT": "512MiB",
+        "SIM_COVERAGE_SUMMARY": "1",
+        "SIM_SEEDS": "100000",
+        "FAULT_TRACE_OUT": "/tmp/js-wf-graph-application-application-normal100k-failure-20261008.json"
+      },
+      "exit_code": 0,
+      "wall_seconds": 88.2266571020009,
+      "package_passes": [
+        {
+          "package": "js-wf/sim",
+          "elapsed": 87.479
+        }
+      ],
+      "top_level_passes": [
+        "TestSeededGraphApplicationReplay",
+        "TestGraphPublicationTransportCopiesFaultsAndIndependentCensus",
+        "TestPinnedRegressionCorpus"
+      ]
+    },
+    {
+      "name": "native-race",
+      "command": [
+        "go",
+        "test",
+        "-p=1",
+        "-race",
+        "./internal/natsstream",
+        "./internal/graphpublication",
+        "-count=1",
+        "-timeout=5m",
+        "-json"
+      ],
+      "working_directory": "/home/exedev/js-wf",
+      "environment": {
+        "GOMAXPROCS": "2",
+        "GOMEMLIMIT": "512MiB",
+        "SIM_COVERAGE_SUMMARY": "1",
+        "SIM_SEEDS": "1000",
+        "FAULT_TRACE_OUT": "/tmp/js-wf-graph-application-native-race-failure-20261008.json"
+      },
+      "exit_code": 0,
+      "wall_seconds": 114.01341131300433,
+      "package_passes": [
+        {
+          "package": "js-wf/internal/natsstream",
+          "elapsed": 1.032
+        },
+        {
+          "package": "js-wf/internal/graphpublication",
+          "elapsed": 109.684
+        }
+      ],
+      "top_level_passes": [
+        "TestStreamGuardHonorsWaitingContext",
+        "TestGraphApplicationLifecycle",
+        "TestGraphApplicationOriginalHeadAndUnknownReplies",
+        "TestGraphApplicationLimitsAndOpaqueOwnership",
+        "TestGraphCatalogExpiresEmptySnapshots",
+        "TestGraphCatalogFailureStopsObjectCollection",
+        "TestGraphCatalogRenewalConflictAndClosedGrants",
+        "TestNativeGraphApplicationRetirement",
+        "TestNativeGraphAuthorityPersistenceAndSchemaIsolation",
+        "TestNativeGraphAuthorityReadWitness",
+        "TestGraphAuthorityCanonicalEnvelope",
+        "TestNativeGraphAuthorityUnsafeConfiguration",
+        "TestNativeGraphAuthorityRejectsMalformedWireWithoutRepair",
+        "TestNativeGraphAuthorityLostMutationReplies",
+        "TestNativeGraphAuthorityRejectsLossyDestinationEncoding",
+        "TestNativeGraphDestinationCatalogEmptyPins",
+        "TestNativeGraphDestinationCatalogRejectsPartialAndCorrupt",
+        "TestNativeGraphConcurrentPublishersAndCollectors",
+        "TestNativeGraphObjectAppendReuseAndRetirement",
+        "TestNativeGraphObjectReservationsLostRepliesAndLateCompletion",
+        "TestNativeGraphObjectCancellationBoundsAndUnknownChunks",
+        "TestNativeGraphObjectPublishCollectOrderAndDelayedDelete",
+        "TestNativeGraphObjectReadUncertaintyAndFormatIsolation",
+        "TestNativeGraphObjectOpeningBoundsReadOnlyAdmission",
+        "TestGraphSubjectAccessRejectsUnsafeNamespaces",
+        "TestNativeGraphRuntimePermissions",
+        "TestNativeGraphReadersRetirementAndExpiry",
+        "TestNativeGraphReaderCheckpointStoreRestart",
+        "TestGraphOwnedPayloadSeededReuseAndCompleteReclamation",
+        "TestGraphOwnedLargePayloadNotRecopied",
+        "TestGraphOwnedPayloadRejectsUnownedStaleAndAmbiguousReferences",
+        "TestGraphOwnedPayloadRetirementAndCollectorFence",
+        "TestGraphOwnedPayloadUncertainReadsAndCallerMutation",
+        "TestGraphPublicationSeededAppendsSweepAndRetirement",
+        "TestGraphPublicationCollectorAndCommitInterleavings",
+        "TestGraphPublicationUnknownRepliesNeverAdoptUploads",
+        "TestGraphPublicationForeignDestinationAndRevokedGrants",
+        "TestGraphPublicationUncertainCensusFailsClosed",
+        "TestGraphPublicationDelayedDeleteCannotTouchNewGeneration",
+        "TestGraphPublicationContextAndCopies",
+        "TestGraphPublicationMetadataBoundAndPermanentScopedGenerations",
+        "TestGraphPublicationRejectsForeignPhysicalOwner",
+        "TestGraphPublicationInvalidAcknowledgmentsAndInputBounds",
+        "TestGraphReaderCheckpointRecovery",
+        "TestGraphReaderCheckpointRejectsUnknownAndRevoked",
+        "TestGraphReaderCheckpointCanonicalBounds",
+        "TestGraphReaderAppendRetireRelease",
+        "TestGraphReaderRenewalExpiryFences",
+        "TestGraphReaderUnknownAcknowledgements",
+        "TestGraphReaderBoundsAndFailClosed",
+        "TestGraphReaderOriginalHeadAndEmptySnapshots",
+        "TestGraphReaderAcquireRetirementRace"
+      ]
+    },
+    {
+      "name": "application-race1k",
+      "command": [
+        "go",
+        "test",
+        "-p=1",
+        "-race",
+        "./sim",
+        "-run",
+        "^(TestSeededGraphApplicationReplay|TestGraphPublicationTransportCopiesFaultsAndIndependentCensus|TestPinnedRegressionCorpus)$/^(graph-publication-|graph-readers-|graph-reader-resume-|graph-catalog-|graph-application-)",
+        "-count=1",
+        "-timeout=5m",
+        "-json"
+      ],
+      "working_directory": "/home/exedev/js-wf",
+      "environment": {
+        "GOMAXPROCS": "2",
+        "GOMEMLIMIT": "512MiB",
+        "SIM_COVERAGE_SUMMARY": "1",
+        "SIM_SEEDS": "1000",
+        "FAULT_TRACE_OUT": "/tmp/js-wf-graph-application-application-race1k-failure-20261008.json"
+      },
+      "exit_code": 0,
+      "wall_seconds": 24.61779163000756,
+      "package_passes": [
+        {
+          "package": "js-wf/sim",
+          "elapsed": 13.999
+        }
+      ],
+      "top_level_passes": [
+        "TestSeededGraphApplicationReplay",
+        "TestGraphPublicationTransportCopiesFaultsAndIndependentCensus",
+        "TestPinnedRegressionCorpus"
+      ]
+    }
+  ]
+}
