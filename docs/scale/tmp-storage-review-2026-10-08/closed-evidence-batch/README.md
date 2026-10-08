@@ -5,3 +5,7 @@ Storage preservation of 301 closed evidence directories and all 4,164 current re
 `fixture-inventory.json` preserves every relative path, byte hash, size, mode and original nanosecond modification time. `archive-verification.json` identifies the full compressed archive. The forthcoming S3 receipt records a complete remote byte readback; local originals remain until that receipt is committed and pushed and a fresh remote member verification and closure check pass.
 
 To restore after removal, download the archive URL in `s3-readback.json` using the authorized S3 credentials. Verify its complete compressed SHA-256 and members against the committed metadata and inventory using `scripts/fixture_archive.py:restore`, specifying a fresh destination. Each archived top-level directory has its original `/tmp` basename. Restore files for inspection; do not automatically execute restored programs or reopen native stores.
+
+## Local retirement completed
+
+All 301 selected original directories and the local transfer archive were removed after the receipt was committed and pushed, fresh complete remote compressed-byte/member verification, unchanged original inventories and a privileged process/descriptor/container/mount/loop check with no permission gaps. The removal report records 221069312 allocated bytes including the temporary transfer archive. S3 is the canonical archive; Git retains its complete inventory and recovery receipt.
