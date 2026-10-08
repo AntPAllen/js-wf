@@ -71,10 +71,18 @@ func (p Protocol) casBlob(ctx context.Context, k string, revision uint64, f Fenc
 // Metadata belongs in the leaf; large payloads are separate immutable objects.
 // Failed or ambiguous uploads are abandoned, never adopted by presence checks.
 func (p Protocol) PrepareAppend(ctx context.Context, destination string, expected uint64, data []byte, payloads [][]byte, expires time.Time) (Prepared, error) {
+	return p.PrepareAppendWithOwned(ctx, destination, expected, data, payloads, nil, expires)
+}
+
+// PrepareAppendWithOwned reuses exact payload edges already owned by this
+// destination's canonical graph, without uploading their bytes or rewriting
+// their origin grants. Only append and whole-graph retirement are supported:
+// partial compaction must transfer ownership before dropping origin leaves.
+func (p Protocol) PrepareAppendWithOwned(ctx context.Context, destination string, expected uint64, data []byte, payloads [][]byte, owned []OwnedPayload, expires time.Time) (Prepared, error) {
 	if err := ctx.Err(); err != nil {
 		return Prepared{}, err
 	}
-	if p.Port == nil || destination == "" || len(destination) > 256 || expected == math.MaxUint64 || expires.IsZero() || len(data) > retainedgraph.MaxDataBytes || len(payloads) > retainedgraph.MaxBlobReferences {
+	if p.Port == nil || destination == "" || len(destination) > 256 || expected == math.MaxUint64 || expires.IsZero() || len(data) > retainedgraph.MaxDataBytes || len(payloads) > retainedgraph.MaxBlobReferences || len(owned) > retainedgraph.MaxBlobReferences-len(payloads) {
 		return Prepared{}, errors.New("invalid graph append configuration")
 	}
 	base, err := p.readRoot(ctx, destination)
@@ -95,7 +103,20 @@ func (p Protocol) PrepareAppend(ctx context.Context, destination string, expecte
 		return Prepared{}, errors.New("invalid publication ID")
 	}
 	expires = expires.UTC()
-	result := Prepared{destination: destination, expected: expected, expires: expires, base: base, publication: Root{Schema: Schema, Token: token}}
+	result := Prepared{destination: destination, expected: expected, expires: expires, base: base, publication: Root{Schema: Schema, Token: token}, owned: map[retainedgraph.Link]uint64{}}
+	selected := map[string]retainedgraph.Link{}
+	for _, payload := range owned {
+		if err = p.verifyOwned(ctx, destination, base, payload); err != nil {
+			return Prepared{}, err
+		}
+		if previous, exists := selected[payload.Link.Hash]; exists && previous != payload.Link {
+			return Prepared{}, errors.New("ambiguous owned payload generations")
+		}
+		selected[payload.Link.Hash] = payload.Link
+		if index, exists := result.owned[payload.Link]; !exists || payload.Index < index {
+			result.owned[payload.Link] = payload.Index
+		}
+	}
 	unique := map[string][]byte{}
 	for _, payload := range payloads {
 		unique[key(payload)] = payload
@@ -107,12 +128,18 @@ func (p Protocol) PrepareAppend(ctx context.Context, destination string, expecte
 	sort.Strings(keys)
 	record := retainedgraph.Record{Data: append([]byte{}, data...), Blobs: []retainedgraph.Link{}}
 	for _, k := range keys {
+		if _, exists := selected[k]; exists {
+			continue
+		}
 		intent := Intent{Destination: destination, Expected: expected, Expires: expires, Locations: []Location{{Kind: "payload", First: base.Graph.Count}}}
 		ref, err := p.acquire(ctx, k, unique[k], token, intent)
 		if err != nil {
 			return Prepared{}, err
 		}
-		record.Blobs = append(record.Blobs, retainedgraph.Link{Hash: k, Reference: ref})
+		selected[k] = retainedgraph.Link{Hash: k, Reference: ref}
+	}
+	for _, link := range selected {
+		record.Blobs = append(record.Blobs, link)
 	}
 	next, err := retainedgraph.Append(ctx, stageStore{protocol: p, destination: destination, expected: expected, expires: expires, token: token, index: base.Graph.Count}, base.Graph, record)
 	if err != nil {
@@ -202,6 +229,12 @@ func (p Protocol) Commit(ctx context.Context, prepared Prepared) (Root, error) {
 		}
 	}
 	for _, link := range delta.Record.Blobs {
+		if index, exists := prepared.owned[link]; exists {
+			if err = p.verifyOwned(ctx, prepared.destination, prepared.base, OwnedPayload{Index: index, Link: link}); err != nil {
+				return Root{}, err
+			}
+			continue
+		}
 		if err = check(link, Location{Kind: "payload", First: prepared.base.Graph.Count}); err != nil {
 			return Root{}, err
 		}

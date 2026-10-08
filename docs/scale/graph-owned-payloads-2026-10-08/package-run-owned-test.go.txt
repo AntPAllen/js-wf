@@ -1,0 +1,281 @@
+package graphpublication
+
+import (
+	"bytes"
+	"context"
+	"errors"
+	"fmt"
+	"math/rand"
+	"reflect"
+	"strconv"
+	"testing"
+	"time"
+
+	"js-wf/internal/blobpublication"
+	"js-wf/internal/retainedgraph"
+)
+
+func sourcePayload(t *testing.T, m *memoryPort, root Root, index uint64) OwnedPayload {
+	t.Helper()
+	record, err := retainedgraph.Read(ctx, stageStore{protocol: Protocol{Port: m}}, root.Graph, index)
+	if err != nil || len(record.Blobs) != 1 {
+		t.Fatal("source payload missing", err)
+	}
+	return OwnedPayload{Index: index, Link: record.Blobs[0]}
+}
+func appendOwned(t *testing.T, m *memoryPort, p Protocol, data []byte, source OwnedPayload, fresh [][]byte) Root {
+	t.Helper()
+	base, err := m.ReadRoot(ctx, "owner")
+	if err != nil {
+		t.Fatal(err)
+	}
+	prepared, err := p.PrepareAppendWithOwned(ctx, "owner", base.Head, data, fresh, []OwnedPayload{source}, epoch.Add(time.Second))
+	if err != nil {
+		t.Fatal(err)
+	}
+	// Changing the caller's descriptor after prepare must not mutate the plan.
+	source.Index++
+	source.Link.Reference.Generation++
+	root, err := p.Commit(ctx, prepared)
+	if err != nil {
+		t.Fatal(err)
+	}
+	return root
+}
+
+func TestGraphOwnedPayloadSeededReuseAndCompleteReclamation(t *testing.T) {
+	for seed := int64(1); seed <= 32; seed++ {
+		t.Run(strconv.FormatInt(seed, 10), func(t *testing.T) {
+			m, p := newModel(fmt.Sprintf("reuse%d", seed))
+			random := rand.New(rand.NewSource(seed))
+			payload := []byte(fmt.Sprintf("payload/%d", seed))
+			want := [][]byte{[]byte("origin")}
+			root := appendOne(t, m, p, "owner", want[0], [][]byte{payload})
+			source := sourcePayload(t, m, root, 0)
+			scope, owner, err := objectAuthority(structObject(source.Link))
+			if err != nil {
+				t.Fatal(err)
+			}
+			origin := m.blobs[scope]
+			for i := 1; i <= 32; i++ {
+				source.Index = uint64(random.Intn(i)) // Includes leaves which already reused it.
+				data := []byte(fmt.Sprintf("reuse/%d", i))
+				var fresh [][]byte
+				if random.Intn(3) == 0 {
+					fresh = [][]byte{payload}
+				} // Reuse wins over identical bytes.
+				root = appendOwned(t, m, p, data, source, fresh)
+				want = append(want, data)
+				got := sourcePayload(t, m, root, uint64(i))
+				if got.Link != source.Link {
+					t.Fatal("reuse changed the physical receipt")
+				}
+				if !reflect.DeepEqual(m.blobs[scope], origin) {
+					t.Fatal("reuse rewrote origin grant")
+				}
+				if len(m.blobs[scope].Fence.Intents) != 1 || m.blobs[scope].Fence.Owner != owner {
+					t.Fatal("reuse grew or changed origin ownership")
+				}
+				if _, err = p.Sweep(ctx, epoch.Add(time.Hour)); err != nil {
+					t.Fatal(err)
+				}
+				census(t, m, root, want)
+			}
+			payloadObjects := 0
+			objects, err := m.Objects(ctx)
+			if err != nil {
+				t.Fatal(err)
+			}
+			for _, object := range objects {
+				if object.Key == key(payload) {
+					payloadObjects++
+				}
+			}
+			if payloadObjects != 1 {
+				t.Fatal("reuse recopied content", payloadObjects)
+			}
+			if err = p.Retire(ctx, "owner", root.Head); err != nil {
+				t.Fatal(err)
+			}
+			if _, err = p.Sweep(ctx, epoch.Add(time.Hour)); err != nil {
+				t.Fatal(err)
+			}
+			if len(m.objects) != 0 || m.blobs[scope].Fence.Phase != "closed" {
+				t.Fatal("reused graph did not reclaim completely")
+			}
+		})
+	}
+	t.Log("GRAPH_OWNED_PAYLOAD_REUSE seeds=32 reused_records=1024 original_payload_objects_per_seed=1 origin_grant_unchanged=true complete_retirements=32")
+}
+
+func TestGraphOwnedLargePayloadNotRecopied(t *testing.T) {
+	m, p := newModel("large")
+	payload := bytes.Repeat([]byte("x"), 1<<20)
+	root := appendOne(t, m, p, "owner", []byte("origin"), [][]byte{payload})
+	source := sourcePayload(t, m, root, 0)
+	before := bytes.Clone(m.objects[source.Link.Reference.Object])
+	for i := 0; i < 16; i++ {
+		root = appendOwned(t, m, p, []byte(fmt.Sprintf("use%d", i)), source, nil)
+	}
+	objects, err := m.Objects(ctx)
+	if err != nil {
+		t.Fatal(err)
+	}
+	matching := 0
+	for _, object := range objects {
+		if object.Key == source.Link.Hash {
+			matching++
+		}
+	}
+	if matching != 1 || !bytes.Equal(before, m.objects[source.Link.Reference.Object]) {
+		t.Fatal("large reused content changed or copied")
+	}
+	if _, err = p.Sweep(ctx, epoch.Add(time.Hour)); err != nil {
+		t.Fatal(err)
+	}
+	if !bytes.Equal(payload, m.objects[source.Link.Reference.Object]) {
+		t.Fatal("large reused content deleted")
+	}
+}
+
+func TestGraphOwnedPayloadRejectsUnownedStaleAndAmbiguousReferences(t *testing.T) {
+	for _, mode := range []string{"wrong_index", "wrong_upload", "wrong_generation", "foreign_destination", "foreign_grant", "closed_origin", "future_origin_head", "stale_head", "ambiguous"} {
+		t.Run(mode, func(t *testing.T) {
+			m, p := newModel(mode)
+			payload := []byte("payload")
+			root := appendOne(t, m, p, "owner", []byte("origin"), [][]byte{payload})
+			source := sourcePayload(t, m, root, 0)
+			expected := root.Head
+			destination := "owner"
+			owned := []OwnedPayload{source}
+			switch mode {
+			case "wrong_index":
+				owned[0].Index = root.Graph.Count
+			case "wrong_upload":
+				owned[0].Link.Reference.Object += "different"
+			case "wrong_generation":
+				owned[0].Link.Reference.Generation++
+			case "foreign_destination":
+				destination = "foreign"
+				expected = 0
+			case "foreign_grant", "closed_origin", "future_origin_head":
+				scope, _, err := objectAuthority(structObject(source.Link))
+				if err != nil {
+					t.Fatal(err)
+				}
+				record := m.blobs[scope]
+				if mode == "closed_origin" {
+					record.Fence.Phase = "closed"
+					record.Fence.Object = ""
+					record.Fence.Intents = map[string]Intent{}
+				} else {
+					for token, intent := range record.Fence.Intents {
+						if mode == "foreign_grant" {
+							intent.Destination = "foreign"
+						} else {
+							intent.Expected = root.Head
+						}
+						record.Fence.Intents[token] = intent
+					}
+				}
+				m.blobs[scope] = record
+			case "stale_head":
+				appendOne(t, m, p, "owner", []byte("advanced"), nil)
+			case "ambiguous":
+				root = appendOne(t, m, p, "owner", []byte("second-origin"), [][]byte{payload})
+				expected = root.Head
+				owned = append(owned, sourcePayload(t, m, root, 1))
+			}
+			beforeObjects, beforeMetadata := len(m.objects), len(m.blobs)
+			if _, err := p.PrepareAppendWithOwned(ctx, destination, expected, []byte("unowned"), nil, owned, epoch.Add(time.Second)); err == nil {
+				t.Fatal("unsafe reuse accepted")
+			}
+			if len(m.objects) != beforeObjects || len(m.blobs) != beforeMetadata {
+				t.Fatal("rejected reuse uploaded or registered objects")
+			}
+		})
+	}
+}
+
+func TestGraphOwnedPayloadRetirementAndCollectorFence(t *testing.T) {
+	for _, mode := range []string{"retired", "collector_wins", "commit_wins"} {
+		t.Run(mode, func(t *testing.T) {
+			m, p := newModel(mode)
+			root := appendOne(t, m, p, "owner", []byte("origin"), [][]byte{[]byte("payload")})
+			source := sourcePayload(t, m, root, 0)
+			prepared, err := p.PrepareAppendWithOwned(ctx, "owner", root.Head, []byte("reuse"), nil, []OwnedPayload{source}, epoch.Add(time.Second))
+			if err != nil {
+				t.Fatal(err)
+			}
+			switch mode {
+			case "retired":
+				if err = p.Retire(ctx, "owner", root.Head); err != nil {
+					t.Fatal(err)
+				}
+				if _, err = p.Sweep(ctx, epoch.Add(time.Hour)); err != nil {
+					t.Fatal(err)
+				}
+				if _, err = p.Commit(ctx, prepared); !errors.Is(err, ErrConflict) {
+					t.Fatal("retired source resurrected", err)
+				}
+				if len(m.objects) != 0 {
+					t.Fatal("retired staged reuse retained objects")
+				}
+			case "collector_wins":
+				m.rootBefore = func(string, uint64, Root) error { _, err := p.Sweep(ctx, epoch.Add(time.Hour)); return err }
+				if _, err = p.Commit(ctx, prepared); !errors.Is(err, ErrConflict) {
+					t.Fatal("reuse escaped collector fence", err)
+				}
+				actual, _ := m.ReadRoot(ctx, "owner")
+				census(t, m, actual, [][]byte{[]byte("origin")})
+			case "commit_wins":
+				m.rootBefore = func(string, uint64, Root) error { _, err := p.Commit(ctx, prepared); return err }
+				if _, err = p.Sweep(ctx, epoch.Add(time.Hour)); err != nil {
+					t.Fatal(err)
+				}
+				actual, _ := m.ReadRoot(ctx, "owner")
+				census(t, m, actual, [][]byte{[]byte("origin"), []byte("reuse")})
+			}
+		})
+	}
+}
+
+func TestGraphOwnedPayloadUncertainReadsAndCallerMutation(t *testing.T) {
+	m, p := newModel("uncertain")
+	root := appendOne(t, m, p, "owner", []byte("origin"), [][]byte{[]byte("payload")})
+	source := sourcePayload(t, m, root, 0)
+	owned := []OwnedPayload{source}
+	prepared, err := p.PrepareAppendWithOwned(ctx, "owner", root.Head, []byte("reuse"), nil, owned, epoch.Add(time.Second))
+	if err != nil {
+		t.Fatal(err)
+	}
+	owned[0].Index++
+	owned[0].Link.Reference.Object += "different"
+	m.readBlobHook = func(string) error { return lostReply }
+	if _, err = p.Commit(ctx, prepared); !errors.Is(err, lostReply) {
+		t.Fatal("uncertain origin grant accepted", err)
+	}
+	m.readBlobHook = nil
+	actual, err := p.Commit(ctx, prepared)
+	if err != nil {
+		t.Fatal("caller mutation changed prepared reuse", err)
+	}
+	census(t, m, actual, [][]byte{[]byte("origin"), []byte("reuse")})
+	delete(m.objects, actual.Graph.Frontier[0].Link.Reference.Object)
+	before := len(m.objects)
+	if _, err = p.PrepareAppendWithOwned(ctx, "owner", actual.Head, nil, nil, []OwnedPayload{source}, epoch.Add(time.Second)); err == nil {
+		t.Fatal("missing source ancestry accepted")
+	}
+	if len(m.objects) != before {
+		t.Fatal("uncertain ancestry uploaded new objects")
+	}
+	canceled, cancel := context.WithCancel(ctx)
+	cancel()
+	if _, err = p.PrepareAppendWithOwned(canceled, "owner", actual.Head, nil, nil, []OwnedPayload{source}, epoch.Add(time.Second)); !errors.Is(err, context.Canceled) {
+		t.Fatal("canceled reuse ignored", err)
+	}
+}
+
+func structObject(link retainedgraph.Link) blobpublication.Object {
+	return blobpublication.Object{Key: link.Hash, Reference: link.Reference}
+}

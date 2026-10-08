@@ -93,6 +93,14 @@ type Prepared struct {
 	expires     time.Time
 	base        Root
 	publication Root
+	owned       map[retainedgraph.Link]uint64
+}
+
+// OwnedPayload locates an exact payload edge in the destination's original
+// canonical graph. A receipt or content hash alone does not establish ownership.
+type OwnedPayload struct {
+	Index uint64
+	Link  retainedgraph.Link
 }
 
 func EmptyRoot() Root { return Root{Schema: Schema, Graph: retainedgraph.Empty()} }
