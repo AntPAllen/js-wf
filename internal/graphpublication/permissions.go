@@ -19,7 +19,9 @@ type SubjectAccess = blobpublication.SubjectAccess
 // client's actual JetStream namespace; domain/account imports need admission.
 // Collectors may purge only the named bucket's API subject. NATS permissions
 // cannot constrain the JSON purge filter, so collector credentials must remain
-// confined to the trusted adapter; administrative ownership remains separate.
+// confined to the trusted adapter. Publication headers/metadata are also not
+// constrained: publisher roles are trusted too. Administrative ownership is
+// separate; this policy is not an untrusted-principal storage boundary.
 func NativeSubjectAccess(name, prefix, apiPrefix, bucket string, collector bool) (SubjectAccess, error) {
 	if !utf8.ValidString(name) || !utf8.ValidString(prefix) || !utf8.ValidString(apiPrefix) {
 		return SubjectAccess{}, errors.New("invalid graph permission encoding")

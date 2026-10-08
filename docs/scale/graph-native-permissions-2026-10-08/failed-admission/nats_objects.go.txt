@@ -14,7 +14,6 @@ import (
 	"sort"
 	"strconv"
 	"strings"
-	"time"
 
 	"js-wf/internal/blobpublication"
 	"js-wf/internal/retainedgraph"
@@ -52,45 +51,20 @@ func OpenNativePort(ctx context.Context, authority *NativeAuthority, bucket stri
 	if authority == nil || !validID(strings.ReplaceAll(bucket, "_", "-")) {
 		return nil, errors.New("invalid native blob bucket")
 	}
-	var last error
-	for attempt := 0; attempt < 3; attempt++ {
-		if err := ctx.Err(); err != nil {
-			return nil, err
-		}
-		lookup, stop := context.WithTimeout(ctx, 2*time.Second)
-		p, err := openNativePortAttempt(lookup, authority, bucket)
-		stop()
-		if err == nil {
-			return p, nil
-		}
-		if ctx.Err() != nil {
-			return nil, ctx.Err()
-		}
-		last = err
-		if !errors.Is(err, context.DeadlineExceeded) && !errors.Is(err, nats.ErrTimeout) {
-			return nil, err
-		}
-	}
-	return nil, last
-}
-
-// Admission is read-only: no stream/bucket creation or mutation is retried.
-func openNativePortAttempt(ctx context.Context, authority *NativeAuthority, bucket string) (*NativePort, error) {
 	stream, err := authority.js.Stream(ctx, "OBJ_"+bucket)
 	if err != nil {
-		return nil, fmt.Errorf("open graph object stream: %w", err)
+		return nil, err
 	}
 	p := &NativePort{NativeAuthority: authority, bucket: bucket, objectStream: stream}
 	if err = p.validateObjects(ctx); err != nil {
-		return nil, fmt.Errorf("validate graph object stream: %w", err)
+		return nil, err
 	}
 	p.objects, err = authority.js.ObjectStore(ctx, bucket)
 	if err != nil {
-		return nil, fmt.Errorf("open graph object reader: %w", err)
+		return nil, err
 	}
 	return p, nil
 }
-
 func (p *NativePort) validateObjects(ctx context.Context) error {
 	info, err := p.objectStream.Info(ctx)
 	if err != nil {
