@@ -1,6 +1,6 @@
 // Package graphpublication implements an experimental append-only graph
-// ownership protocol. Native metadata is experimental; graph object storage
-// and canonical runtime adoption are pending. It does not enable runtime GC.
+// ownership protocol. Its native Port is experimental and isolated from the
+// runtime. Canonical adoption is pending; it does not enable production GC.
 package graphpublication
 
 import (
