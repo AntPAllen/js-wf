@@ -1,5 +1,11 @@
 # Implementation status against the supplied plan
 
+## Graph protocol joins shared seeded transport and pinned replay — 2026-10-08
+
+Frozen4b860e5 adds `GraphPublicationTransport` and the common `graph_publication_protocol` workload with17 modes covering inherited append/reuse, paused publisher/upload, mutation/ack loss, both publish/collect winners, dropped authority/node reads and foreign reuse. Every trace exactly replays; the separate raw-object/hash/origin census, exact terminal population/values/receipts and complete retirement checks pass. Focused normal100000106.023s/race100013.976s plus17 corpus pins pass under count1/5m/twoGoCPU/512MiB. Actual normal SDK2837837 is twice observed;655 selected inputs match frozen Git and remain unchanged. [Evidence, retained setup errors and exact limits](scale/graph-shared-transport-2026-10-08/).
+
+The current source graph is127 workloads/450 pins; complete127 qualification is pending. Original full126 normal SDK2827904 remains live at074bcfc under its unchanged300m budget, with no restart. Wider fault combinations, native schema/quorum/object/permissions/crash/concurrency, reader/retention ownership/partial compaction/import, canonical runtime migration/production online GC and every original native matrix/24h/million drain/default-adoption/release gate remain open.
+
 ## Canonical owned-payload reuse in the graph prototype — 2026-10-08
 
 At7d2787a, `PrepareAppendWithOwned` verifies exact source edges and ready origin grants on the original canonical destination/head, then rechecks at commit. Reuse uploads no payload bytes and does not rewrite/grow origin grants; same-content fresh inputs choose the verified existing receipt.32 seeds/1024 reused references preserve one payload object per seed and unchanged grants, then completely reclaim32 retired graphs; a1MiB payload remains one object after16 further references. Foreign/stale/closed/ambiguous receipts, uncertain/missing ancestry, cancellation and retire/collect interleavings reject. Complete15-group package regression passes normal3.491s/race47.467s; a final targeted race control specifically loses the origin-grant read. [Evidence and source scopes](scale/graph-owned-payloads-2026-10-08/).
