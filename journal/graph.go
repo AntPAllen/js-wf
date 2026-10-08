@@ -45,6 +45,7 @@ type graphCursor struct {
 	Epoch      uint64 `json:"epoch"`
 	Kind       Kind   `json:"kind"`
 	Retired    bool   `json:"retired"`
+	Purging    bool   `json:"purging,omitempty"`
 }
 
 type graphEntry struct {
@@ -133,6 +134,9 @@ func (s *GraphStore) observe(ctx context.Context, typ, id string) (string, graph
 	} else if _, ok := kinds[c.Kind]; !ok || c.Count > 1 && c.Kind == Started || c.Count == 1 && c.Kind != Started {
 		return destination, root, nil, ErrGap
 	}
+	if c.Purging && c.Kind != Completed && c.Kind != Failed {
+		return destination, root, nil, ErrGap
+	}
 	if c.Retired {
 		if c.Kind != Completed && c.Kind != Failed || root.Graph.Count != 0 || root.Token != "" {
 			return destination, root, nil, ErrGap
@@ -167,7 +171,7 @@ func (s *GraphStore) Begin(ctx context.Context, typ, id string, invocation uint6
 	}
 	next := graphCursor{Schema: graphCursorSchema, Invocation: invocation}
 	if c != nil {
-		if c.Invocation == invocation && !c.Retired {
+		if c.Invocation == invocation && !c.Retired && !c.Purging {
 			return c.Base + c.Count, nil
 		}
 		if invocation <= c.Invocation || !c.Retired {
@@ -205,7 +209,7 @@ func (s *GraphStore) Append(ctx context.Context, typ, id string, invocation uint
 	if err != nil {
 		return 0, err
 	}
-	if c == nil || c.Invocation != invocation || c.Retired || c.Base+c.Count != expected || c.Count != e.Index || e.Epoch < c.Epoch || c.Count == 0 && e.Kind != Started || c.Count > 0 && (e.Kind == Started || c.Kind == Completed || c.Kind == Failed) {
+	if c == nil || c.Invocation != invocation || c.Retired || c.Purging || c.Base+c.Count != expected || c.Count != e.Index || e.Epoch < c.Epoch || c.Count == 0 && e.Kind != Started || c.Count > 0 && (e.Kind == Started || c.Kind == Completed || c.Kind == Failed) {
 		return 0, ErrStale
 	}
 	if expected == math.MaxUint64 {
@@ -317,7 +321,7 @@ func (s *GraphStore) open(ctx context.Context, typ, id string, invocation uint64
 		if c == nil && allowMissing {
 			return nil, nil
 		}
-		if c == nil || c.Invocation != invocation || c.Retired {
+		if c == nil || c.Invocation != invocation || c.Retired || c.Purging {
 			return nil, ErrStale
 		}
 		if terminalOnly && c.Kind != Completed && c.Kind != Failed {

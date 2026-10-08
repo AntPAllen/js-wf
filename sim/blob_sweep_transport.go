@@ -39,7 +39,7 @@ var _ retention.BlobSweepPort = (*BlobSweepTransport)(nil)
 
 func NewBlobSweepTransport(schedule *Scheduler) *BlobSweepTransport {
 	streams := map[string]*blobSweepStream{}
-	for _, name := range []string{"WF_INV", "WF_SIG", "WF_JRN", "WF_TIMER", "WF_PURGE"} {
+	for _, name := range []string{"WF_INV", "WF_SIG", "WF_JRN", "WF_TIMER", "WF_PURGE", "WF_RUN"} {
 		streams[name] = &blobSweepStream{messages: map[uint64]retention.BlobSweepMessage{}}
 	}
 	return &BlobSweepTransport{schedule: schedule, state: NewKVTransport(schedule, 0), streams: streams, objects: map[string]blobSweepObject{}}

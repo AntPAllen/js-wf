@@ -6,6 +6,7 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"strings"
 	"sync/atomic"
@@ -18,6 +19,7 @@ import (
 	"js-wf/internal/graphpublication"
 	"js-wf/journal"
 	"js-wf/provision"
+	"js-wf/retention"
 	"js-wf/testcluster"
 	"js-wf/wf"
 )
@@ -182,7 +184,7 @@ func TestNativeGraphChildResultTransferAndReplay(t *testing.T) {
 					t.Fatal(err)
 				}
 				stage("child", identity.Partition(childType, childID, provision.Partitions))
-				childRecords, childTail, err := graph.Read(ctx, childType, childID, childInput.Sequence)
+				childRecords, _, err := graph.Read(ctx, childType, childID, childInput.Sequence)
 				if err != nil || len(childRecords) < 2 || childRecords[len(childRecords)-1].Kind != journal.Completed {
 					t.Fatal("child did not complete", err)
 				}
@@ -209,6 +211,9 @@ func TestNativeGraphChildResultTransferAndReplay(t *testing.T) {
 				}
 				if err = childView.Close(ctx); err != nil {
 					t.Fatal(err)
+				}
+				if err = retention.PurgeGraph(ctx, js, graph, childType, childID, time.Minute); !errors.Is(err, retention.ErrNotTerminal) {
+					t.Fatal("child purged before parent ownership", err)
 				}
 				stage("parent-transfer", parentPartition)
 				parentRecords, _, err := graph.Read(ctx, "parent", "transfer", handle.InvSeq)
@@ -240,11 +245,8 @@ func TestNativeGraphChildResultTransferAndReplay(t *testing.T) {
 				if err = state.Delete(ctx, identity.Key(childType, childID)); err != nil {
 					t.Fatal(err)
 				}
-				if err = inv.Purge(ctx, jetstream.WithPurgeSubject(identity.InvocationSubject(childType, childID))); err != nil {
-					t.Fatal(err)
-				}
-				if err = graph.Retire(ctx, childType, childID, childInput.Sequence, childTail); err != nil {
-					t.Fatal(err)
+				if err = retention.PurgeGraph(ctx, js, graph, childType, childID, time.Minute); err != nil {
+					t.Fatal("production child graph purge", err)
 				}
 				signals, err := js.Stream(ctx, "WF_SIG")
 				if err != nil {
@@ -305,18 +307,11 @@ func TestNativeGraphChildResultTransferAndReplay(t *testing.T) {
 				if err != nil || info.State.Msgs != 0 {
 					t.Fatal("legacy journal was used", err)
 				}
-				_, parentTail, err := graph.Read(ctx, "parent", "transfer", handle.InvSeq)
-				if err != nil {
-					t.Fatal(err)
-				}
 				if err = state.Delete(ctx, identity.Key("parent", "transfer")); err != nil {
 					t.Fatal(err)
 				}
-				if err = inv.Purge(ctx, jetstream.WithPurgeSubject(identity.InvocationSubject("parent", "transfer"))); err != nil {
-					t.Fatal(err)
-				}
-				if err = graph.Retire(ctx, "parent", "transfer", handle.InvSeq, parentTail); err != nil {
-					t.Fatal(err)
+				if err = retention.PurgeGraph(ctx, js, graph, "parent", "transfer", time.Minute); err != nil {
+					t.Fatal("production parent graph purge", err)
 				}
 				now = now.Add(2 * time.Minute)
 				if _, err = protocol.SweepWithReaders(ctx, now); err != nil {

@@ -6,10 +6,12 @@ on:
       - 'internal/graphpublication/**'
       - 'journal/graph*.go'
       - 'reconcile/**'
+      - 'retention/**'
       - 'worker/graph_journal*.go'
       - 'worker/graph_terminal*.go'
       - 'worker/graph_child*.go'
       - 'wf/graph_outcome.go'
+      - 'wf/graph_child_retention*.go'
       - 'wf/context.go'
       - 'worker/worker.go'
       - 'worker/terminal_delivery.go'
@@ -19,6 +21,8 @@ on:
       - 'internal/retainedgraph/**'
       - 'sim/graph_publication*'
       - 'sim/journal_transport_test.go'
+      - 'sim/purge_transport.go'
+      - 'sim/blob_sweep_transport.go'
       - 'sim/testdata/regressions/graph-publication-*'
       - 'sim/testdata/regressions/graph-readers-*'
       - 'sim/testdata/regressions/graph-reader-resume-*'
@@ -29,6 +33,7 @@ on:
       - 'sim/testdata/regressions/graph-result-*'
       - 'sim/testdata/regressions/graph-child-*'
       - 'sim/testdata/regressions/graph-reconcile-*'
+      - 'sim/testdata/regressions/graph-purge-*'
       - 'internal/blobpublication/**'
       - 'internal/natsstream/**'
       - 'testcluster/cluster.go'
@@ -40,10 +45,12 @@ on:
       - 'internal/graphpublication/**'
       - 'journal/graph*.go'
       - 'reconcile/**'
+      - 'retention/**'
       - 'worker/graph_journal*.go'
       - 'worker/graph_terminal*.go'
       - 'worker/graph_child*.go'
       - 'wf/graph_outcome.go'
+      - 'wf/graph_child_retention*.go'
       - 'wf/context.go'
       - 'worker/worker.go'
       - 'worker/terminal_delivery.go'
@@ -53,6 +60,8 @@ on:
       - 'internal/retainedgraph/**'
       - 'sim/graph_publication*'
       - 'sim/journal_transport_test.go'
+      - 'sim/purge_transport.go'
+      - 'sim/blob_sweep_transport.go'
       - 'sim/testdata/regressions/graph-publication-*'
       - 'sim/testdata/regressions/graph-readers-*'
       - 'sim/testdata/regressions/graph-reader-resume-*'
@@ -63,6 +72,7 @@ on:
       - 'sim/testdata/regressions/graph-result-*'
       - 'sim/testdata/regressions/graph-child-*'
       - 'sim/testdata/regressions/graph-reconcile-*'
+      - 'sim/testdata/regressions/graph-purge-*'
       - 'internal/blobpublication/**'
       - 'internal/natsstream/**'
       - 'testcluster/cluster.go'
@@ -86,7 +96,7 @@ jobs:
           go-version-file: go.mod
       - name: Seeded graph ownership and collection controls
         env:
-          GOMAXPROCS: '1'
+          GOMAXPROCS: '2'
           GOMEMLIMIT: 512MiB
           GRAPH_MODE: ${{ matrix.mode }}
         run: |
@@ -95,7 +105,7 @@ jobs:
           go test -p=1 "${graph_flags[@]}" ./internal/natsstream ./internal/graphpublication -count=1 -timeout=5m -json > graph-publication-events.jsonl
       - name: Generation-aware graph journal and native payload retention
         env:
-          GOMAXPROCS: '1'
+          GOMAXPROCS: '2'
           GOMEMLIMIT: 512MiB
           GRAPH_MODE: ${{ matrix.mode }}
         run: |
@@ -104,7 +114,7 @@ jobs:
           go test -p=1 "${graph_flags[@]}" ./journal -run '^(TestGraphJournal|TestNativeGraphJournal)' -count=1 -timeout=5m -json > graph-journal-events.jsonl
       - name: Native graph worker input signal result replay and drain
         env:
-          GOMAXPROCS: '1'
+          GOMAXPROCS: '2'
           GOMEMLIMIT: 512MiB
           GRAPH_MODE: ${{ matrix.mode }}
         run: |
@@ -113,7 +123,7 @@ jobs:
           go test -p=1 "${graph_flags[@]}" ./worker -run '^(TestNativeGraphWorkerReplayInputsSignalsAndResults|TestNativeGraphChildResultTransferAndReplay|TestGraphChildReplayRejectsForgedProvenance|TestGraphSelectedChildRequiresExactRecordedSignal)$' -count=1 -timeout=5m -json > graph-worker-events.jsonl
       - name: Canonical graph repair decisions and native wakeup recovery
         env:
-          GOMAXPROCS: '1'
+          GOMAXPROCS: '2'
           GOMEMLIMIT: 512MiB
           GRAPH_MODE: ${{ matrix.mode }}
         run: |
@@ -122,31 +132,74 @@ jobs:
           go test -p=1 "${graph_flags[@]}" ./reconcile -run '^(TestGraphReconcile|TestNativeGraphReconcile)' -count=1 -timeout=5m -json > graph-reconcile-events.jsonl
       - name: Canonical graph client terminal reads
         env:
-          GOMAXPROCS: '1'
+          GOMAXPROCS: '2'
           GOMEMLIMIT: 512MiB
           GRAPH_MODE: ${{ matrix.mode }}
         run: |
           graph_flags=()
           if [ "$GRAPH_MODE" = race ]; then graph_flags=(-race); fi
           go test -p=1 "${graph_flags[@]}" ./client -count=1 -timeout=5m -json > graph-client-events.jsonl
-      - name: Common seeded transport and pinned trace dispatch
+      - name: Canonical graph purge and durable retention workflow
         env:
-          GOMAXPROCS: '1'
+          GOMAXPROCS: '2'
           GOMEMLIMIT: 512MiB
           GRAPH_MODE: ${{ matrix.mode }}
-          SIM_COVERAGE_SUMMARY: '1'
         run: |
           graph_flags=()
           if [ "$GRAPH_MODE" = race ]; then graph_flags=(-race); fi
-          go test -p=1 "${graph_flags[@]}" ./sim -run '^(TestSeededGraphPublicationReplay|TestSeededGraphReadersReplay|TestSeededGraphReaderResumeReplay|TestSeededGraphCatalogReplay|TestSeededGraphApplicationReplay|TestSeededGraphJournalReplay|TestSeededGraphWorkerReplay|TestSeededGraphResultReplay|TestSeededGraphTerminalWorkerReplay|TestSeededGraphChildReplay|TestSeededGraphChildSignalReplay|TestSeededGraphReconcileReplay|TestGraphChildSeedPipelineOrdersAndJoins|TestGraphPublicationTransportCopiesFaultsAndIndependentCensus|TestPinnedRegressionCorpus)$/^(graph-publication-|graph-readers-|graph-reader-resume-|graph-catalog-|graph-application-|graph-journal-|graph-worker-|graph-result-|graph-child-|graph-reconcile-)' -count=1 -timeout=5m -json > graph-transport-events.jsonl
+          go test -p=1 "${graph_flags[@]}" ./retention -count=1 -timeout=5m -json > graph-retention-events.jsonl
+      - name: Workflow child ownership authorization
+        env:
+          GOMAXPROCS: '2'
+          GOMEMLIMIT: 512MiB
+          GRAPH_MODE: ${{ matrix.mode }}
+        run: |
+          graph_flags=()
+          if [ "$GRAPH_MODE" = race ]; then graph_flags=(-race); fi
+          go test -p=1 "${graph_flags[@]}" ./wf -count=1 -timeout=5m -json > graph-workflow-events.jsonl
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: graph-publication-${{ matrix.mode }}
           path: |
             graph-publication-events.jsonl
-            graph-transport-events.jsonl
             graph-journal-events.jsonl
             graph-worker-events.jsonl
             graph-client-events.jsonl
             graph-reconcile-events.jsonl
+            graph-retention-events.jsonl
+            graph-workflow-events.jsonl
+  transport:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        mode: [normal, race]
+        family: [Publication, Readers, ReaderResume, Catalog, Application, Journal, Worker, Result, TerminalWorker, Child, ChildSignal, Reconcile, Purge, Corpus]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - name: Seeded family or complete pinned corpus
+        env:
+          GOMAXPROCS: '2'
+          GOMEMLIMIT: 512MiB
+          GRAPH_MODE: ${{ matrix.mode }}
+          GRAPH_FAMILY: ${{ matrix.family }}
+          SIM_SEEDS: '1000'
+          SIM_COVERAGE_SUMMARY: '1'
+        run: |
+          graph_flags=()
+          if [ "$GRAPH_MODE" = race ]; then graph_flags=(-race); fi
+          graph_pattern="^TestSeededGraph${GRAPH_FAMILY}Replay$"
+          if [ "$GRAPH_FAMILY" = Corpus ]; then
+            graph_pattern='^(TestPinnedRegressionCorpus|TestGraphPublicationTransportCopiesFaultsAndIndependentCensus|TestGraphChildSeedPipelineOrdersAndJoins)$'
+          fi
+          go test -p=1 "${graph_flags[@]}" ./sim -run "$graph_pattern" -count=1 -timeout=5m -json > graph-transport-events.jsonl
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: graph-transport-${{ matrix.family }}-${{ matrix.mode }}
+          path: graph-transport-events.jsonl

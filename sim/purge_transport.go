@@ -3,6 +3,7 @@ package sim
 import (
 	"context"
 	"fmt"
+	"sort"
 	"strconv"
 	"strings"
 	"time"
@@ -355,4 +356,54 @@ func (m *PurgeTransport) PurgeEventCount() int {
 	m.Blobs.mu.Lock()
 	defer m.Blobs.mu.Unlock()
 	return len(m.Blobs.streams["WF_PURGE"].messages)
+}
+
+func (m *PurgeTransport) CreateState(ctx context.Context, key string, value []byte) error {
+	_, err := m.Blobs.State().Create(ctx, key, value)
+	return err
+}
+
+func (m *PurgeTransport) NativeTimerSubjects(ctx context.Context, typ, id string) ([]string, error) {
+	if err := ctx.Err(); err != nil {
+		return nil, err
+	}
+	m.Blobs.mu.Lock()
+	defer m.Blobs.mu.Unlock()
+	seen := map[string]bool{}
+	var subjects []string
+	for _, message := range m.Blobs.streams["WF_RUN"].messages {
+		if strings.HasPrefix(message.Subject, "wf.schedule."+typ+"."+id+".") && !seen[message.Subject] {
+			seen[message.Subject] = true
+			subjects = append(subjects, message.Subject)
+		}
+	}
+	sort.Strings(subjects)
+	m.Blobs.event(TransportEvent{Operation: "purge_native_timer_subjects", Subject: typ + "." + id, Sequence: uint64(len(subjects)), Outcome: "ok"})
+	return subjects, nil
+}
+func (m *PurgeTransport) LastNativeTimer(ctx context.Context, subject string) (*jetstream.RawStreamMsg, error) {
+	if err := ctx.Err(); err != nil {
+		return nil, err
+	}
+	m.Blobs.mu.Lock()
+	defer m.Blobs.mu.Unlock()
+	var seq uint64
+	var result *jetstream.RawStreamMsg
+	for current, message := range m.Blobs.streams["WF_RUN"].messages {
+		if message.Subject == subject && current > seq {
+			seq = current
+			result = &jetstream.RawStreamMsg{Subject: subject, Sequence: current, Header: cloneHeader(message.Header), Data: append([]byte(nil), message.Data...)}
+		}
+	}
+	if result == nil {
+		return nil, jetstream.ErrMsgNotFound
+	}
+	m.Blobs.event(TransportEvent{Operation: "purge_native_timer_get", Subject: subject, Sequence: seq, Outcome: "ok"})
+	return result, nil
+}
+func (m *PurgeTransport) DeleteNativeTimer(ctx context.Context, sequence uint64) error {
+	if err := ctx.Err(); err != nil {
+		return err
+	}
+	return m.Blobs.Purge("WF_RUN", sequence)
 }

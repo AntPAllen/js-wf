@@ -625,3 +625,69 @@ func TestGraphJournalExistingHistoryIsNotStaleAbsence(t *testing.T) {
 		t.Fatal(records, readTail, err)
 	}
 }
+
+func TestGraphJournalPurgeFenceRetainsReadersAndGeneration(t *testing.T) {
+	s, m, now := graphModel(t, journal.JSON)
+	ctx := context.Background()
+	tail, err := s.Begin(ctx, "flow", "fenced", 7)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, entry := range []journal.Entry{{Kind: journal.Started}, {Kind: journal.Completed, Index: 1, Payload: []byte(`{"inv_seq":7,"result":"NDI="}`)}} {
+		tail, err = s.Append(ctx, "flow", "fenced", 7, entry, tail, nil, nil)
+		if err != nil {
+			t.Fatal(err)
+		}
+	}
+	view, err := s.Open(ctx, "flow", "fenced", 7)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err = s.FencePurge(ctx, "flow", "fenced", 7, tail); err != nil {
+		t.Fatal(err)
+	}
+	status, err := s.InspectRetirement(ctx, "flow", "fenced")
+	if err != nil || !status.Purging || status.Retired || status.Invocation != 7 || status.Tail != tail {
+		t.Fatal(status, err)
+	}
+	for _, open := range []func(context.Context, string, string, uint64) (*journal.GraphView, error){s.Open, s.OpenExisting, s.OpenTerminal} {
+		if v, e := open(ctx, "flow", "fenced", 7); e != journal.ErrStale || v != nil {
+			t.Fatal("new reader passed fence", v, e)
+		}
+	}
+	if _, err = s.Begin(ctx, "flow", "fenced", 7); err != journal.ErrStale {
+		t.Fatal("current begin passed fence", err)
+	}
+	if _, err = s.Begin(ctx, "flow", "fenced", 8); err != journal.ErrStale {
+		t.Fatal("replacement passed live fence", err)
+	}
+	if err = s.Retire(ctx, "flow", "fenced", 7, tail); err != nil {
+		t.Fatal(err)
+	}
+	if _, err = m.Protocol().SweepWithReaders(ctx, *now); err != nil {
+		t.Fatal(err)
+	}
+	if record, err := view.Read(ctx, 1); err != nil || record.Kind != journal.Completed {
+		t.Fatal("retained reader lost terminal", record, err)
+	}
+	if _, err = s.Begin(ctx, "flow", "fenced", 8); err != nil {
+		t.Fatal(err)
+	}
+	status, err = s.InspectRetirement(ctx, "flow", "fenced")
+	if err != nil || status.Invocation != 8 || status.Purging || status.Retired || status.Tail != tail {
+		t.Fatal(status, err)
+	}
+	if err = s.FencePurge(ctx, "flow", "fenced", 7, tail); err != journal.ErrStale {
+		t.Fatal("old fence affected new generation", err)
+	}
+	if err = view.Close(ctx); err != nil {
+		t.Fatal(err)
+	}
+	if _, err = m.Protocol().SweepWithReaders(ctx, *now); err != nil {
+		t.Fatal(err)
+	}
+	objects, err := m.Objects(ctx)
+	if err != nil || len(objects) != 0 {
+		t.Fatal(objects, err)
+	}
+}

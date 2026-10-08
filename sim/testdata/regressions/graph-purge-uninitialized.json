@@ -1,0 +1,204 @@
+{
+  "version": 3,
+  "seed": 37,
+  "workload": "graph_canonical_purge",
+  "step_limit": 100000,
+  "decisions": [
+    {
+      "at_ms": 0,
+      "enabled": [
+        "bad_terminal",
+        "cancelled",
+        "clean",
+        "event_lost",
+        "failed",
+        "fence_drop",
+        "fence_lost_known",
+        "fence_lost_unknown",
+        "forged_mirror",
+        "held_reader",
+        "invocation_lost",
+        "journal_drop",
+        "marker_drop",
+        "marker_lost",
+        "missing_mirror",
+        "older_tombstone",
+        "pending",
+        "retire_drop",
+        "retire_lost_unknown",
+        "reuse",
+        "signals_drop",
+        "signals_lost",
+        "snapshot_drop",
+        "timers_drop",
+        "tombstone_drop",
+        "tombstone_lost",
+        "uninitialized",
+        "wrong_generation"
+      ],
+      "chosen": "uninitialized"
+    }
+  ],
+  "transport": [
+    {
+      "at_ms": 0,
+      "operation": "blob_stream_publish",
+      "subject": "WF_INV",
+      "sequence": 1,
+      "data_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "blob_stream_publish",
+      "subject": "WF_INV",
+      "sequence": 2,
+      "data_sha256": "7902699be42c8a8e46fbbb4501726517e86b22c56a189f7625a6da49081b2451",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "kv_put",
+      "subject": "test.purge",
+      "sequence": 1,
+      "data_sha256": "e9513f01af35ebb812b641ddfea2a324751bdaae10ff1f967e6f5c9113b9967d",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "kv_put",
+      "subject": "snap.test.purge",
+      "sequence": 2,
+      "data_sha256": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "blob_stream_publish",
+      "subject": "WF_SIG",
+      "sequence": 1,
+      "data_sha256": "73475cb40a568e8da8a045ced110137e159f890ac4da883b6b17dc651b3a8049",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "blob_stream_publish",
+      "subject": "WF_TIMER",
+      "sequence": 1,
+      "data_sha256": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "blob_stream_publish",
+      "subject": "WF_RUN",
+      "sequence": 1,
+      "data_sha256": "23adc281ab1a8dd9e944b23fdee57b2c48916a31b48ea718651730622dc0c434",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "blob_stream_publish",
+      "subject": "WF_RUN",
+      "sequence": 2,
+      "data_sha256": "23adc281ab1a8dd9e944b23fdee57b2c48916a31b48ea718651730622dc0c434",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "kv_create",
+      "subject": "test.purge",
+      "sequence": 1,
+      "data_sha256": "b8771b6e75094dcc237e637058c93070ca632dc3309a780ada8114f995b95459",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "kv_update",
+      "subject": "test.purge",
+      "expected": 1,
+      "sequence": 2,
+      "data_sha256": "d7cba8d91bfda7a0d6d072cc3dfc5de7e19bfc7fd00a40159e7618a4b018ae41",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "purge_invocation_get",
+      "subject": "wf.inv.test.purge",
+      "sequence": 2,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "graph_publication_read_root",
+      "subject": "journal/ee2cde7264b2ba1f78960f99788dd6bf83f53b89d64537f72e59d52fe52a8882",
+      "data_sha256": "a783c2092db369aee83d9a37ee90da7a173390a0b3efb6e25341f7a4e4827180",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "kv_delete",
+      "subject": "test.purge",
+      "expected": 2,
+      "sequence": 3,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "graph_publication_read_root",
+      "subject": "journal/ee2cde7264b2ba1f78960f99788dd6bf83f53b89d64537f72e59d52fe52a8882",
+      "data_sha256": "a783c2092db369aee83d9a37ee90da7a173390a0b3efb6e25341f7a4e4827180",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "purge_invocation_get",
+      "subject": "wf.inv.test.purge",
+      "sequence": 2,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "graph_publication_root_keys",
+      "sequence": 1,
+      "data_sha256": "aeee144f2c1cf7240e7a9b658a3466a984b76c874de4d859b3540c51051d6ea6",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "graph_publication_read_root",
+      "subject": "journal/ee2cde7264b2ba1f78960f99788dd6bf83f53b89d64537f72e59d52fe52a8882",
+      "data_sha256": "a783c2092db369aee83d9a37ee90da7a173390a0b3efb6e25341f7a4e4827180",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "graph_publication_blob_keys",
+      "data_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "graph_publication_objects",
+      "data_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "graph_publication_objects",
+      "data_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "graph_publication_check_references",
+      "data_sha256": "74234e98afe7498fb5daf1f36ac2d78acc339464f950703b8c019892f982b90b",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "check_graph_purge",
+      "outcome": "uninitialized"
+    }
+  ]
+}
