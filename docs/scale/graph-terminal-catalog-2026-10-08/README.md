@@ -23,3 +23,13 @@ The counterfactual overlay removing the watermark fails the explicit cycle-wrap 
 Projection lookups use legacy KV observations; read staleness can delay or duplicate discovery and never grants result authority. Metadata/source rechecks do not provide an atomic cross-stream purge/enqueue/state publication fence. Present forged/stale/corrupt projections remain outside this absent-key recovery. Catalog scanning still requires canonical Start metadata and a retained matching invocation source.
 
 Full invocation/state/timer/tombstone/snapshot/continuation/import/history/projection-consumer/CLI/deployment migration, arbitrary fault combinations/permutations, extended and complete current suites, all original native process/storage/power-loss/concurrency/capacity/matrices/actual24h/million physical-drain/default-adoption/release requirements remain open. Fixture collection does not enable production online GC. The accepted normal 147-family suite and live race 146-family campaign retain their original frozen-source scopes.
+
+## Frozen complete normal qualification in progress
+
+Source `7ee9882` is isolated at `/home/exedev/js-wf-terminal-catalog-qualification`:
+
+```sh
+python3 scripts/check-tier1-race.py --root /home/exedev/js-wf-tier1-full148-normal1000-20261008 --seeds 1000 --no-race
+```
+
+All 148 families × 1,000 contiguous bodies and all 748 pins are required. Terminal evidence and independent review remain pending. The earlier complete race campaign remains at its original 146-family source.
