@@ -5913,3 +5913,10 @@ Native release timing is nondeterministic and is not Tier1 replay. The direct ad
 The direct blob adapter independently reproduces the pinned SDK cache pointer race. A common context-aware owned-stream guard now covers both direct and graph Info/cache/Get/Purge access, while protocol operations/publications remain concurrent. Complete helper/direct/graph packages pass normal/race atd6ef52f, with explicit standard-regression source timing. [Failure and final scope](scale/native-stream-cache-2026-10-08/).
 
 Continue durable reader retention and partial-compaction/import ownership, then canonical runtime migration and complete native history/partition/crash/power-loss/scale/deployment qualifications. No old server-side cause, full campaign, current-source simulation/default dependency/production onlineGC/release gate is inferred from this component fix.
+
+
+## Canonical graph repair history verified — 2026-10-08
+
+Explicit graph start/signal/timer/suspended scanners and the fenced repair loop now use generation-bound canonical history with no legacy fallback. Witnessed uninitialized roots permit missing-start repair; stale/retired/unknown/corrupt history cannot authorize absence. Signal caches include invocation generation. Frozen `6a218b8` passes complete reconciler normal/race, graph journal/native worker controls,100,000 new-family normal/1,000 race schedules and every583 pin; all557 previous pins are unchanged. Native R1/R3 actual workers recover missing start/signal wakeups with effect count one. Prepared timer fixtures verify native decisions and terminal hint retirement. [Evidence and exact limits](scale/graph-reconcile-2026-10-08/).
+
+Continue graph-aware purge/child retention coordination and remaining canonical invocation/signal/state/snapshot/continuation/import/history/projection/CLI/deployment paths. Prepared fixtures and joined replacements do not prove production purge ordering or process-crash qualification. Current138-family full simulation, all original native matrices/actual24h/million physical drain/default dependency adoption and production online GC/release deliverables remain required.

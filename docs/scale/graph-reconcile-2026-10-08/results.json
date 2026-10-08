@@ -1,0 +1,359 @@
+{
+  "source": "6a218b8141a9fbdab9bfe0973a4eebd50231d794",
+  "runs": [
+    {
+      "name": "reconcile-normal",
+      "command": [
+        "go",
+        "test",
+        "-p=1",
+        "./reconcile",
+        "-count=1",
+        "-timeout=5m",
+        "-json"
+      ],
+      "working_directory": "/home/exedev/js-wf",
+      "environment": {
+        "GOMAXPROCS": "2",
+        "GOMEMLIMIT": "512MiB",
+        "SIM_COVERAGE_SUMMARY": "1",
+        "SIM_SEEDS": "1000",
+        "FAULT_TRACE_OUT": "/tmp/js-wf-graph-reconcile-reconcile-normal-failure-20261008.json"
+      },
+      "exit_code": 0,
+      "wall_seconds": 36.98658542300109,
+      "package_passes": [
+        {
+          "package": "js-wf/reconcile",
+          "elapsed": 36.119
+        }
+      ],
+      "top_level_passes": [
+        "TestContinuationRepairBeforeAndAfterSuspension",
+        "TestFallbackTimerScanRetriesCommittedWakeupBeforeDelete",
+        "TestFallbackTimerScanRemovesRetiredGenerations",
+        "TestGraphReconcileLoopRetriesUncertaintyWithoutSkippingBoundary",
+        "TestReconcileRetriesLostLeaseInitialization",
+        "TestCursorPersistsAcrossLeadersAndUsesCAS",
+        "TestCursorLostAcknowledgmentRereadsRealKV",
+        "TestTombstoneLoopReclaimsExpiredState",
+        "TestNativeRetirementDeleteDoesNotEraseConcurrentReplacement",
+        "TestNativeRetirementRejectsUnboundHint",
+        "TestMultiSelectReadFailureDoesNotSuppressDueTimer",
+        "TestSignalPartialCursorRepairsRealGapAfterRepeatedReadTimeoutsAndLostEnqueueAck",
+        "TestSignalPartialCursorDoesNotSkipUnconfirmedSignal",
+        "TestStartPartialCursorDoesNotSkipUnconfirmedInvocation",
+        "TestStartPartialCursorRequiresFreshOwnershipAndDoesNotSaveFatalOrCancelledPass",
+        "TestStartPartialCursorRepairsRealGapAfterRepeatedReadTimeoutsAndLostEnqueueAck",
+        "TestSuspendedPartialCursorRepairsRealGapAfterRepeatedReadTimeoutsAndLostEnqueueAck",
+        "TestSuspendedPartialCursorCertifiesOnlyContiguousAcknowledgedPrefix",
+        "TestRepairScannersRespectDomainClockAndFailClosed",
+        "TestSuspendedDomainTimersIncludeGrace",
+        "TestDomainRepairClockHonorsCanceledContext",
+        "TestTimerPartialCursorRepairsRealNativeAndFallbackGaps",
+        "TestTimerPartialCursorDoesNotSkipUnconfirmedReadRetirementClockOrEnqueue",
+        "TestFallbackTimerPartialCursorDoesNotSkipUncertainPublicationOrDeletion",
+        "TestTombstonePartialCursorRepairsRealDropAndLostDeleteAck",
+        "TestNativeGraphReconcileRepairsStartSignalAndTimerHistory",
+        "TestGraphReconcileSignalCacheBindsInvocationGeneration",
+        "TestGraphReconcileRejectsMissingConfiguration",
+        "TestGraphReconcileFailedReadCannotCertifyCursorPrefix"
+      ]
+    },
+    {
+      "name": "journal-normal",
+      "command": [
+        "go",
+        "test",
+        "-p=1",
+        "./journal",
+        "-run",
+        "^(TestGraphJournal|TestNativeGraphJournal)",
+        "-count=1",
+        "-timeout=5m",
+        "-json"
+      ],
+      "working_directory": "/home/exedev/js-wf",
+      "environment": {
+        "GOMAXPROCS": "2",
+        "GOMEMLIMIT": "512MiB",
+        "SIM_COVERAGE_SUMMARY": "1",
+        "SIM_SEEDS": "1000",
+        "FAULT_TRACE_OUT": "/tmp/js-wf-graph-reconcile-journal-normal-failure-20261008.json"
+      },
+      "exit_code": 0,
+      "wall_seconds": 9.266170000017155,
+      "package_passes": [
+        {
+          "package": "js-wf/journal",
+          "elapsed": 6.677
+        }
+      ],
+      "top_level_passes": [
+        "TestNativeGraphJournalGenerationAndDrain",
+        "TestNativeGraphJournalPublicSDK",
+        "TestNativeGraphJournalPublicAdmission",
+        "TestGraphJournalPublicConfiguration",
+        "TestGraphJournalGenerationRetainedReaderAndDrain",
+        "TestGraphJournalStaleAndUnknownAppends",
+        "TestGraphJournalCorruptCursorAndLeaseBoundary",
+        "TestGraphJournalLimitsAndForeignRoot",
+        "TestGraphJournalEntryPayloadAlias",
+        "TestGraphJournalCloseContentionAndAmbiguousRelease",
+        "TestGraphJournalAcquireRenewContention",
+        "TestGraphJournalTerminalSnapshotAdmission",
+        "TestGraphJournalExistingHistoryIsNotStaleAbsence"
+      ]
+    },
+    {
+      "name": "worker-normal",
+      "command": [
+        "go",
+        "test",
+        "-p=1",
+        "./worker",
+        "-run",
+        "^(TestNativeGraphWorkerReplayInputsSignalsAndResults|TestNativeGraphChildResultTransferAndReplay|TestGraphChildReplayRejectsForgedProvenance|TestGraphSelectedChildRequiresExactRecordedSignal)$",
+        "-count=1",
+        "-timeout=5m",
+        "-json"
+      ],
+      "working_directory": "/home/exedev/js-wf",
+      "environment": {
+        "GOMAXPROCS": "2",
+        "GOMEMLIMIT": "512MiB",
+        "SIM_COVERAGE_SUMMARY": "1",
+        "SIM_SEEDS": "1000",
+        "FAULT_TRACE_OUT": "/tmp/js-wf-graph-reconcile-worker-normal-failure-20261008.json"
+      },
+      "exit_code": 0,
+      "wall_seconds": 19.36940342001617,
+      "package_passes": [
+        {
+          "package": "js-wf/worker",
+          "elapsed": 17.086
+        }
+      ],
+      "top_level_passes": [
+        "TestNativeGraphChildResultTransferAndReplay",
+        "TestGraphChildReplayRejectsForgedProvenance",
+        "TestGraphSelectedChildRequiresExactRecordedSignal",
+        "TestNativeGraphWorkerReplayInputsSignalsAndResults"
+      ]
+    },
+    {
+      "name": "sim-normal",
+      "command": [
+        "go",
+        "test",
+        "-p=1",
+        "./sim",
+        "-run",
+        "^(TestSeededGraphReconcileReplay|TestGraphPublicationTransportCopiesFaultsAndIndependentCensus|TestPinnedRegressionCorpus)$",
+        "-count=1",
+        "-timeout=5m",
+        "-json"
+      ],
+      "working_directory": "/home/exedev/js-wf",
+      "environment": {
+        "GOMAXPROCS": "2",
+        "GOMEMLIMIT": "512MiB",
+        "SIM_COVERAGE_SUMMARY": "1",
+        "SIM_SEEDS": "100000",
+        "FAULT_TRACE_OUT": "/tmp/js-wf-graph-reconcile-sim-normal-failure-20261008.json"
+      },
+      "exit_code": 0,
+      "wall_seconds": 166.501717760053,
+      "package_passes": [
+        {
+          "package": "js-wf/sim",
+          "elapsed": 165.804
+        }
+      ],
+      "top_level_passes": [
+        "TestSeededGraphReconcileReplay",
+        "TestGraphPublicationTransportCopiesFaultsAndIndependentCensus",
+        "TestPinnedRegressionCorpus"
+      ]
+    },
+    {
+      "name": "reconcile-race",
+      "command": [
+        "go",
+        "test",
+        "-p=1",
+        "-race",
+        "./reconcile",
+        "-count=1",
+        "-timeout=5m",
+        "-json"
+      ],
+      "working_directory": "/home/exedev/js-wf",
+      "environment": {
+        "GOMAXPROCS": "2",
+        "GOMEMLIMIT": "512MiB",
+        "SIM_COVERAGE_SUMMARY": "1",
+        "SIM_SEEDS": "1000",
+        "FAULT_TRACE_OUT": "/tmp/js-wf-graph-reconcile-reconcile-race-failure-20261008.json"
+      },
+      "exit_code": 0,
+      "wall_seconds": 52.57669703901047,
+      "package_passes": [
+        {
+          "package": "js-wf/reconcile",
+          "elapsed": 45.327
+        }
+      ],
+      "top_level_passes": [
+        "TestContinuationRepairBeforeAndAfterSuspension",
+        "TestFallbackTimerScanRetriesCommittedWakeupBeforeDelete",
+        "TestFallbackTimerScanRemovesRetiredGenerations",
+        "TestGraphReconcileLoopRetriesUncertaintyWithoutSkippingBoundary",
+        "TestReconcileRetriesLostLeaseInitialization",
+        "TestCursorPersistsAcrossLeadersAndUsesCAS",
+        "TestCursorLostAcknowledgmentRereadsRealKV",
+        "TestTombstoneLoopReclaimsExpiredState",
+        "TestNativeRetirementDeleteDoesNotEraseConcurrentReplacement",
+        "TestNativeRetirementRejectsUnboundHint",
+        "TestMultiSelectReadFailureDoesNotSuppressDueTimer",
+        "TestSignalPartialCursorRepairsRealGapAfterRepeatedReadTimeoutsAndLostEnqueueAck",
+        "TestSignalPartialCursorDoesNotSkipUnconfirmedSignal",
+        "TestStartPartialCursorDoesNotSkipUnconfirmedInvocation",
+        "TestStartPartialCursorRequiresFreshOwnershipAndDoesNotSaveFatalOrCancelledPass",
+        "TestStartPartialCursorRepairsRealGapAfterRepeatedReadTimeoutsAndLostEnqueueAck",
+        "TestSuspendedPartialCursorRepairsRealGapAfterRepeatedReadTimeoutsAndLostEnqueueAck",
+        "TestSuspendedPartialCursorCertifiesOnlyContiguousAcknowledgedPrefix",
+        "TestRepairScannersRespectDomainClockAndFailClosed",
+        "TestSuspendedDomainTimersIncludeGrace",
+        "TestDomainRepairClockHonorsCanceledContext",
+        "TestTimerPartialCursorRepairsRealNativeAndFallbackGaps",
+        "TestTimerPartialCursorDoesNotSkipUnconfirmedReadRetirementClockOrEnqueue",
+        "TestFallbackTimerPartialCursorDoesNotSkipUncertainPublicationOrDeletion",
+        "TestTombstonePartialCursorRepairsRealDropAndLostDeleteAck",
+        "TestNativeGraphReconcileRepairsStartSignalAndTimerHistory",
+        "TestGraphReconcileSignalCacheBindsInvocationGeneration",
+        "TestGraphReconcileRejectsMissingConfiguration",
+        "TestGraphReconcileFailedReadCannotCertifyCursorPrefix"
+      ]
+    },
+    {
+      "name": "journal-race",
+      "command": [
+        "go",
+        "test",
+        "-p=1",
+        "-race",
+        "./journal",
+        "-run",
+        "^(TestGraphJournal|TestNativeGraphJournal)",
+        "-count=1",
+        "-timeout=5m",
+        "-json"
+      ],
+      "working_directory": "/home/exedev/js-wf",
+      "environment": {
+        "GOMAXPROCS": "2",
+        "GOMEMLIMIT": "512MiB",
+        "SIM_COVERAGE_SUMMARY": "1",
+        "SIM_SEEDS": "1000",
+        "FAULT_TRACE_OUT": "/tmp/js-wf-graph-reconcile-journal-race-failure-20261008.json"
+      },
+      "exit_code": 0,
+      "wall_seconds": 53.736085443000775,
+      "package_passes": [
+        {
+          "package": "js-wf/journal",
+          "elapsed": 46.341
+        }
+      ],
+      "top_level_passes": [
+        "TestNativeGraphJournalGenerationAndDrain",
+        "TestNativeGraphJournalPublicSDK",
+        "TestNativeGraphJournalPublicAdmission",
+        "TestGraphJournalPublicConfiguration",
+        "TestGraphJournalGenerationRetainedReaderAndDrain",
+        "TestGraphJournalStaleAndUnknownAppends",
+        "TestGraphJournalCorruptCursorAndLeaseBoundary",
+        "TestGraphJournalLimitsAndForeignRoot",
+        "TestGraphJournalEntryPayloadAlias",
+        "TestGraphJournalCloseContentionAndAmbiguousRelease",
+        "TestGraphJournalAcquireRenewContention",
+        "TestGraphJournalTerminalSnapshotAdmission",
+        "TestGraphJournalExistingHistoryIsNotStaleAbsence"
+      ]
+    },
+    {
+      "name": "worker-race",
+      "command": [
+        "go",
+        "test",
+        "-p=1",
+        "-race",
+        "./worker",
+        "-run",
+        "^(TestNativeGraphWorkerReplayInputsSignalsAndResults|TestNativeGraphChildResultTransferAndReplay|TestGraphChildReplayRejectsForgedProvenance|TestGraphSelectedChildRequiresExactRecordedSignal)$",
+        "-count=1",
+        "-timeout=5m",
+        "-json"
+      ],
+      "working_directory": "/home/exedev/js-wf",
+      "environment": {
+        "GOMAXPROCS": "2",
+        "GOMEMLIMIT": "512MiB",
+        "SIM_COVERAGE_SUMMARY": "1",
+        "SIM_SEEDS": "1000",
+        "FAULT_TRACE_OUT": "/tmp/js-wf-graph-reconcile-worker-race-failure-20261008.json"
+      },
+      "exit_code": 0,
+      "wall_seconds": 82.73859857098432,
+      "package_passes": [
+        {
+          "package": "js-wf/worker",
+          "elapsed": 79.186
+        }
+      ],
+      "top_level_passes": [
+        "TestNativeGraphChildResultTransferAndReplay",
+        "TestGraphChildReplayRejectsForgedProvenance",
+        "TestGraphSelectedChildRequiresExactRecordedSignal",
+        "TestNativeGraphWorkerReplayInputsSignalsAndResults"
+      ]
+    },
+    {
+      "name": "sim-race",
+      "command": [
+        "go",
+        "test",
+        "-p=1",
+        "-race",
+        "./sim",
+        "-run",
+        "^(TestSeededGraphReconcileReplay|TestGraphPublicationTransportCopiesFaultsAndIndependentCensus|TestPinnedRegressionCorpus)$",
+        "-count=1",
+        "-timeout=5m",
+        "-json"
+      ],
+      "working_directory": "/home/exedev/js-wf",
+      "environment": {
+        "GOMAXPROCS": "2",
+        "GOMEMLIMIT": "512MiB",
+        "SIM_COVERAGE_SUMMARY": "1",
+        "SIM_SEEDS": "1000",
+        "FAULT_TRACE_OUT": "/tmp/js-wf-graph-reconcile-sim-race-failure-20261008.json"
+      },
+      "exit_code": 0,
+      "wall_seconds": 48.98903191200225,
+      "package_passes": [
+        {
+          "package": "js-wf/sim",
+          "elapsed": 37.847
+        }
+      ],
+      "top_level_passes": [
+        "TestSeededGraphReconcileReplay",
+        "TestGraphPublicationTransportCopiesFaultsAndIndependentCensus",
+        "TestPinnedRegressionCorpus"
+      ]
+    }
+  ]
+}
