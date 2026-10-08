@@ -65,3 +65,7 @@ These are trusted implementation roles. Metadata and message headers can still d
 Four native appenders and two collectors race across R1/R3 seeded-release fixtures, with raw canonical value/receipt checks and complete joined retirement/drain. The initial race exposes mutable SDK Stream.Info cache pointer access at nats.go v1.54.0. Each owned native graph stream handle now guards individual Info/Get/Purge/cache calls with context-aware waiting; whole operations and CAS publications remain concurrent. Complete32-group package normal/race regression at5d85031 passes. [Failure report, final runs and precise limits](scale/graph-native-concurrency-2026-10-08/).
 
 This component race is not deterministic replay, complete native linearizability or full concurrency/partition/crash/scale qualification. Review the older direct adapter's shared handles separately, then complete reader retention/compaction/import and canonical runtime migration.
+
+## Shared adapter stream-cache guard
+
+The older direct adapter reproduces the same shared SDK stream cache race. Both native adapters now use `internal/natsstream.Guard` for their owned handles; the existing waiting-context test lives in that shared package and both CI workflows include it. Complete helper/direct/graph packages pass normal/race atd6ef52f, with graph31 groups and no coverage removal. [Exact source/input timing and regression limits](scale/native-stream-cache-2026-10-08/). Reader retention/compaction/import and canonical runtime migration remain the next adoption work.

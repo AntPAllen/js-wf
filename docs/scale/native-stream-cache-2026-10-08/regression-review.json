@@ -1,0 +1,200 @@
+{
+  "frozen_source": "d6ef52ff38e481231b5460057dead4a34d2cd6bd",
+  "selected_inputs": 70,
+  "source_checked_during_normal_and_unchanged_after_both": true,
+  "normal_source_scope": "The pre-run inventory check failed against a rename-only intermediate commit. The original normal run used constant working source bytes; all integration files were committed/pushed without changing those bytes while it ran. Selected inputs checked during normal and after both runs; no pre-compilation source/SDK admission claim.",
+  "results": {
+    "normal": {
+      "packages": {
+        "js-wf/internal/natsstream": {
+          "elapsed": 0.024,
+          "groups": [
+            "TestStreamGuardHonorsWaitingContext"
+          ]
+        },
+        "js-wf/internal/blobpublication": {
+          "elapsed": 30.621,
+          "groups": [
+            "TestNativeAuthorityHeadAndGenerationPersistence",
+            "TestNativeAuthorityRejectsUnsafeStream",
+            "TestNativeBlobSharedStreamHandleConcurrency",
+            "TestNativeObjectRuntimePermissions",
+            "TestNativeObjectPublicationLifecycle",
+            "TestNativePartialUploadPublicationFence",
+            "TestNativeUnknownChunksBlockCollection",
+            "TestNativeLateChunkAfterGenerationClosed",
+            "TestNativeCommittedMetadataReplyLost",
+            "TestNativeObjectSameStoreColdRestart",
+            "TestNativeObjectUnsafeConfiguration",
+            "TestNativeAuthorityOpeningBoundedReadRetries",
+            "TestNativeAuthorityOpeningHonorsParentAndMissingStream",
+            "TestAuthoritySubjectAccessRejectsInvalidNamespaces",
+            "TestNativeAuthorityRuntimePermissions",
+            "TestNativeBlobProcessChild",
+            "TestNativeBlobUploaderAndCollectorSIGKILL",
+            "TestNativeAuthorityReadWitness",
+            "TestNativeAuthorityWitnessRacesCommittedReplacement",
+            "TestNativeAuthorityReadRequiresQuorum",
+            "TestPausedPublicationIsFenced",
+            "TestExpiredReplacementPreservesExistingRoot",
+            "TestSharedAndMultipleReferences",
+            "TestAmbiguousUploadUsesFreshPhysicalAttempt",
+            "TestLostRepliesFailClosedAndRecover",
+            "TestCommitWinningFenceRaceRemainsProtected",
+            "TestAcquireWinningCloseRaceRemainsProtected",
+            "TestLateDeleteCannotTouchNewGeneration",
+            "TestDestinationHeadResetIsUnsafeNegativeControl",
+            "TestSeededPublicationLifecycle",
+            "TestGCWhileUploadPaused",
+            "TestPartialMultiBlobPreparationReclaimed",
+            "TestConcurrentPublishersAndCollector",
+            "TestPrepareAtPreservesCallerRevision"
+          ]
+        },
+        "js-wf/internal/graphpublication": {
+          "elapsed": 36.519,
+          "groups": [
+            "TestNativeGraphAuthorityPersistenceAndSchemaIsolation",
+            "TestNativeGraphAuthorityReadWitness",
+            "TestGraphAuthorityCanonicalEnvelope",
+            "TestNativeGraphAuthorityUnsafeConfiguration",
+            "TestNativeGraphAuthorityRejectsMalformedWireWithoutRepair",
+            "TestNativeGraphAuthorityLostMutationReplies",
+            "TestNativeGraphAuthorityRejectsLossyDestinationEncoding",
+            "TestNativeGraphConcurrentPublishersAndCollectors",
+            "TestNativeGraphObjectAppendReuseAndRetirement",
+            "TestNativeGraphObjectReservationsLostRepliesAndLateCompletion",
+            "TestNativeGraphObjectCancellationBoundsAndUnknownChunks",
+            "TestNativeGraphObjectPublishCollectOrderAndDelayedDelete",
+            "TestNativeGraphObjectReadUncertaintyAndFormatIsolation",
+            "TestNativeGraphObjectOpeningBoundsReadOnlyAdmission",
+            "TestGraphSubjectAccessRejectsUnsafeNamespaces",
+            "TestNativeGraphRuntimePermissions",
+            "TestGraphOwnedPayloadSeededReuseAndCompleteReclamation",
+            "TestGraphOwnedLargePayloadNotRecopied",
+            "TestGraphOwnedPayloadRejectsUnownedStaleAndAmbiguousReferences",
+            "TestGraphOwnedPayloadRetirementAndCollectorFence",
+            "TestGraphOwnedPayloadUncertainReadsAndCallerMutation",
+            "TestGraphPublicationSeededAppendsSweepAndRetirement",
+            "TestGraphPublicationCollectorAndCommitInterleavings",
+            "TestGraphPublicationUnknownRepliesNeverAdoptUploads",
+            "TestGraphPublicationForeignDestinationAndRevokedGrants",
+            "TestGraphPublicationUncertainCensusFailsClosed",
+            "TestGraphPublicationDelayedDeleteCannotTouchNewGeneration",
+            "TestGraphPublicationContextAndCopies",
+            "TestGraphPublicationMetadataBoundAndPermanentScopedGenerations",
+            "TestGraphPublicationRejectsForeignPhysicalOwner",
+            "TestGraphPublicationInvalidAcknowledgmentsAndInputBounds"
+          ]
+        }
+      },
+      "direct_shared_handle_logs": [
+        "    nats_concurrency_test.go:87: R1 actors4 rounds8 shared root/blob/authority census/object census, retained bytes and retirement passed\n",
+        "    nats_concurrency_test.go:87: R3 actors4 rounds8 shared root/blob/authority census/object census, retained bytes and retirement passed\n"
+      ],
+      "count": 1,
+      "timeout": "5m per package",
+      "GOMAXPROCS": 2,
+      "GOMEMLIMIT": "512MiB",
+      "race": false,
+      "events_sha256": "d2348eaa463385b8c9d1332ded74680fbc38c736df1c836ebe174d6540f309c5"
+    },
+    "race": {
+      "packages": {
+        "js-wf/internal/natsstream": {
+          "elapsed": 1.035,
+          "groups": [
+            "TestStreamGuardHonorsWaitingContext"
+          ]
+        },
+        "js-wf/internal/blobpublication": {
+          "elapsed": 52.258,
+          "groups": [
+            "TestNativeAuthorityHeadAndGenerationPersistence",
+            "TestNativeAuthorityRejectsUnsafeStream",
+            "TestNativeBlobSharedStreamHandleConcurrency",
+            "TestNativeObjectRuntimePermissions",
+            "TestNativeObjectPublicationLifecycle",
+            "TestNativePartialUploadPublicationFence",
+            "TestNativeUnknownChunksBlockCollection",
+            "TestNativeLateChunkAfterGenerationClosed",
+            "TestNativeCommittedMetadataReplyLost",
+            "TestNativeObjectSameStoreColdRestart",
+            "TestNativeObjectUnsafeConfiguration",
+            "TestNativeAuthorityOpeningBoundedReadRetries",
+            "TestNativeAuthorityOpeningHonorsParentAndMissingStream",
+            "TestAuthoritySubjectAccessRejectsInvalidNamespaces",
+            "TestNativeAuthorityRuntimePermissions",
+            "TestNativeBlobProcessChild",
+            "TestNativeBlobUploaderAndCollectorSIGKILL",
+            "TestNativeAuthorityReadWitness",
+            "TestNativeAuthorityWitnessRacesCommittedReplacement",
+            "TestNativeAuthorityReadRequiresQuorum",
+            "TestPausedPublicationIsFenced",
+            "TestExpiredReplacementPreservesExistingRoot",
+            "TestSharedAndMultipleReferences",
+            "TestAmbiguousUploadUsesFreshPhysicalAttempt",
+            "TestLostRepliesFailClosedAndRecover",
+            "TestCommitWinningFenceRaceRemainsProtected",
+            "TestAcquireWinningCloseRaceRemainsProtected",
+            "TestLateDeleteCannotTouchNewGeneration",
+            "TestDestinationHeadResetIsUnsafeNegativeControl",
+            "TestSeededPublicationLifecycle",
+            "TestGCWhileUploadPaused",
+            "TestPartialMultiBlobPreparationReclaimed",
+            "TestConcurrentPublishersAndCollector",
+            "TestPrepareAtPreservesCallerRevision"
+          ]
+        },
+        "js-wf/internal/graphpublication": {
+          "elapsed": 133.317,
+          "groups": [
+            "TestNativeGraphAuthorityPersistenceAndSchemaIsolation",
+            "TestNativeGraphAuthorityReadWitness",
+            "TestGraphAuthorityCanonicalEnvelope",
+            "TestNativeGraphAuthorityUnsafeConfiguration",
+            "TestNativeGraphAuthorityRejectsMalformedWireWithoutRepair",
+            "TestNativeGraphAuthorityLostMutationReplies",
+            "TestNativeGraphAuthorityRejectsLossyDestinationEncoding",
+            "TestNativeGraphConcurrentPublishersAndCollectors",
+            "TestNativeGraphObjectAppendReuseAndRetirement",
+            "TestNativeGraphObjectReservationsLostRepliesAndLateCompletion",
+            "TestNativeGraphObjectCancellationBoundsAndUnknownChunks",
+            "TestNativeGraphObjectPublishCollectOrderAndDelayedDelete",
+            "TestNativeGraphObjectReadUncertaintyAndFormatIsolation",
+            "TestNativeGraphObjectOpeningBoundsReadOnlyAdmission",
+            "TestGraphSubjectAccessRejectsUnsafeNamespaces",
+            "TestNativeGraphRuntimePermissions",
+            "TestGraphOwnedPayloadSeededReuseAndCompleteReclamation",
+            "TestGraphOwnedLargePayloadNotRecopied",
+            "TestGraphOwnedPayloadRejectsUnownedStaleAndAmbiguousReferences",
+            "TestGraphOwnedPayloadRetirementAndCollectorFence",
+            "TestGraphOwnedPayloadUncertainReadsAndCallerMutation",
+            "TestGraphPublicationSeededAppendsSweepAndRetirement",
+            "TestGraphPublicationCollectorAndCommitInterleavings",
+            "TestGraphPublicationUnknownRepliesNeverAdoptUploads",
+            "TestGraphPublicationForeignDestinationAndRevokedGrants",
+            "TestGraphPublicationUncertainCensusFailsClosed",
+            "TestGraphPublicationDelayedDeleteCannotTouchNewGeneration",
+            "TestGraphPublicationContextAndCopies",
+            "TestGraphPublicationMetadataBoundAndPermanentScopedGenerations",
+            "TestGraphPublicationRejectsForeignPhysicalOwner",
+            "TestGraphPublicationInvalidAcknowledgmentsAndInputBounds"
+          ]
+        }
+      },
+      "direct_shared_handle_logs": [
+        "    nats_concurrency_test.go:87: R1 actors4 rounds8 shared root/blob/authority census/object census, retained bytes and retirement passed\n",
+        "    nats_concurrency_test.go:87: R3 actors4 rounds8 shared root/blob/authority census/object census, retained bytes and retirement passed\n"
+      ],
+      "count": 1,
+      "timeout": "5m per package",
+      "GOMAXPROCS": 2,
+      "GOMEMLIMIT": "512MiB",
+      "race": true,
+      "events_sha256": "957da5acf70f0f0f94ec974e1d2e4c7503224b3dbdcb30b229df39dd9b050af1"
+    }
+  },
+  "scope": "Complete shared-helper/direct-blob/graph package standard regression, including actual native R1/R3. No SDK process/dependency/media admission, full native histories/deployment/partition/power-loss/scale or runtime adoption acceptance. Original unguarded direct race stays failed.",
+  "utc": "2026-10-08T04:44:39.740796+00:00"
+}

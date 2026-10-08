@@ -5907,3 +5907,9 @@ API denials do not constrain arbitrary metadata/header writes or collector purge
 The six-actor native graph append/collection component now completes64 candidate commits across R1/R3 seed1/2 fixtures, preserving exact acknowledged values/receipts and draining after retirement. An initial client SDK stream cache race is retained; context-aware per-handle guards fix the adapter's shared-handle access without serializing protocol publications. Complete32-group package regression at5d85031 passes normal/race. [Evidence/source scope](scale/graph-native-concurrency-2026-10-08/).
 
 Native release timing is nondeterministic and is not Tier1 replay. The direct adapter's shared handles, complete native history/partition/crash/power-loss/scale/deployment qualification, durable reader retention/partial compaction/import, full canonical runtime migration and all original simulation/native/24h/million physical drain/default-adoption/release deliverables remain required.
+
+## Shared native stream-handle progression — 2026-10-08
+
+The direct blob adapter independently reproduces the pinned SDK cache pointer race. A common context-aware owned-stream guard now covers both direct and graph Info/cache/Get/Purge access, while protocol operations/publications remain concurrent. Complete helper/direct/graph packages pass normal/race atd6ef52f, with explicit standard-regression source timing. [Failure and final scope](scale/native-stream-cache-2026-10-08/).
+
+Continue durable reader retention and partial-compaction/import ownership, then canonical runtime migration and complete native history/partition/crash/power-loss/scale/deployment qualifications. No old server-side cause, full campaign, current-source simulation/default dependency/production onlineGC/release gate is inferred from this component fix.
