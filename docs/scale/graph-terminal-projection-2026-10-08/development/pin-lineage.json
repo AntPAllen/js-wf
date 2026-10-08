@@ -1,0 +1,90 @@
+[
+  {
+    "path": "sim/testdata/regressions/graph-worker-terminal-missing_state.json",
+    "prior_source": "48196fb",
+    "prior_sha256": "68b038371f8c42948f9dd63f212486bc1ca4662f18c5e5e4f96d1e7752295080",
+    "current_sha256": "01c016efab8a0d0fef378c7c20ad652a9f4c5dc1881efaee18f1855a230c195f",
+    "seed": 6,
+    "changes": [
+      {
+        "kind": "insert",
+        "old": [],
+        "new": [
+          {
+            "at_ms": 0,
+            "operation": "kv_create",
+            "subject": "test.integrated-043",
+            "sequence": 1,
+            "data_sha256": "77273c1b490dbd925a88f8f1cc1f1dddfccdaecb60f3ce31f1f4ef8c877d9070",
+            "outcome": "ok"
+          }
+        ]
+      },
+      {
+        "kind": "replace",
+        "old": [
+          {
+            "at_ms": 0,
+            "operation": "kv_get",
+            "subject": "test.integrated-043",
+            "outcome": "not_found"
+          }
+        ],
+        "new": [
+          {
+            "at_ms": 0,
+            "operation": "kv_get",
+            "subject": "test.integrated-043",
+            "sequence": 1,
+            "data_sha256": "77273c1b490dbd925a88f8f1cc1f1dddfccdaecb60f3ce31f1f4ef8c877d9070",
+            "outcome": "ok"
+          }
+        ]
+      },
+      {
+        "kind": "insert",
+        "old": [],
+        "new": [
+          {
+            "at_ms": 0,
+            "operation": "kv_get",
+            "subject": "test.integrated-043",
+            "sequence": 1,
+            "data_sha256": "77273c1b490dbd925a88f8f1cc1f1dddfccdaecb60f3ce31f1f4ef8c877d9070",
+            "outcome": "ok"
+          }
+        ]
+      },
+      {
+        "kind": "replace",
+        "old": [
+          {
+            "at_ms": 0,
+            "operation": "kv_get",
+            "subject": "test.integrated-043",
+            "outcome": "not_found"
+          }
+        ],
+        "new": [
+          {
+            "at_ms": 0,
+            "operation": "kv_get",
+            "subject": "test.integrated-043",
+            "sequence": 1,
+            "data_sha256": "77273c1b490dbd925a88f8f1cc1f1dddfccdaecb60f3ce31f1f4ef8c877d9070",
+            "outcome": "ok"
+          },
+          {
+            "at_ms": 0,
+            "operation": "kv_delete",
+            "subject": "test.integrated-043",
+            "expected": 1,
+            "sequence": 2,
+            "outcome": "ok"
+          }
+        ]
+      }
+    ],
+    "nontransport_unchanged": true
+  }
+]

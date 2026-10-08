@@ -20,7 +20,8 @@ import (
 // Every external terminal reader must also use graph
 // results. CanonicalStarts additionally owns Start inputs and validates source
 // pointers. CanonicalSignals owns incoming Signal queues and consumption.
-// State publication, import, snapshots, continuation
+// Terminal probes repair absent state projections from canonical bytes. Atomic
+// lifecycle/state publication, import, snapshots, continuation
 // migration remain separate; production online GC is not enabled. Use graph-aware
 // retention to keep child terminals until their parent publishes an owned
 // SignalConsumed copy or its canonical generation completes/retires.

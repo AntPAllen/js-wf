@@ -32,11 +32,13 @@ func (w *Worker) graphTerminalHeldDelivery(ctx context.Context, typ, id string, 
 		invocationPort = jetStreamInvocationPort{js: w.js}
 	}
 	// Purge ordering is still legacy and must remain a separate lifecycle fence.
+	missingProjection := false
 	purge := func(invocation uint64) (bool, error) {
 		started := ops.begin()
 		state, e := outcomePort.Get(ctx, identity.Key(typ, id))
 		ops.finish(started, "terminal_state_read", 0, "", e)
 		if errors.Is(e, jetstream.ErrKeyNotFound) {
+			missingProjection = true
 			return false, nil
 		}
 		if e != nil {
@@ -104,6 +106,18 @@ func (w *Worker) graphTerminalHeldDelivery(ctx context.Context, typ, id string, 
 	ops.finish(started, "terminal_parent_notify", 0, "", e)
 	if e != nil {
 		return false, false, fmt.Errorf("terminal parent notification: %w", e)
+	}
+	// A crash after terminal journal publication can leave the projection
+	// absent. Rebuild only an absent key from verified canonical bytes. Create
+	// cannot overwrite a concurrent projection or purge marker; neither an
+	// existing mirror nor this write authorizes ACK without the checks below.
+	if missingProjection {
+		started = ops.begin()
+		_, e = outcomePort.Create(ctx, identity.Key(typ, id), verified.Payload)
+		ops.finish(started, "terminal_state_repair", 0, "", e)
+		if e != nil && !errors.Is(e, jetstream.ErrKeyExists) {
+			return false, false, fmt.Errorf("terminal projection repair: %w", e)
+		}
 	}
 	// Recheck lifecycle after notification before authorizing dispatch ACK.
 	started = ops.begin()

@@ -1,32 +1,19 @@
 {
   "version": 3,
-  "seed": 6,
-  "workload": "graph_worker_terminal_delivery",
+  "seed": 3,
+  "workload": "graph_terminal_projection_repair",
   "step_limit": 100000,
   "decisions": [
     {
       "at_ms": 0,
       "enabled": [
-        "ack_lost",
-        "cancelled_timer",
-        "completed",
-        "failed",
-        "forged_state",
-        "malformed_terminal",
-        "missing_state",
-        "parent_notify",
-        "parent_notify_drop",
-        "parent_notify_lost",
-        "pending",
-        "purge_after_notify",
-        "purge_marker",
-        "state_lost",
-        "unknown_graph_root",
-        "unknown_reader_pin",
-        "unowned_result",
-        "wrong_graph_generation"
+        "concurrent_mirror",
+        "create_drop",
+        "create_lost_ack",
+        "missing",
+        "purge_at_create"
       ],
-      "chosen": "missing_state"
+      "chosen": "missing"
     }
   ],
   "transport": [
@@ -1100,7 +1087,7 @@
     {
       "at_ms": 0,
       "operation": "check_graph_worker_terminal_delivery",
-      "outcome": "missing_state"
+      "outcome": "missing"
     }
   ]
 }

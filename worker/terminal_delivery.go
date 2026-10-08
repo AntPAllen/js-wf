@@ -54,7 +54,8 @@ func (h *terminalHints) snapshotReady(key string) {
 
 // A held lease need not delay an already durable terminal wakeup. An owned
 // delivery may use this same probe after a locally observed terminal. This path
-// never changes ownership, journal or outcome. Parent notification still has
+// never changes ownership or journal. Canonical graph delivery may repair an
+// absent terminal projection from verified journal bytes. Parent notification still has
 // to succeed before ACK, using the same generation-scoped idempotency key as
 // terminal execution. Uncertain reads retain the held NAK path or fall back
 // to full journal execution when ownership has been acquired.

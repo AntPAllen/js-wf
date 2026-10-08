@@ -533,6 +533,8 @@ func replayTrace(loaded Trace) (Trace, error) {
 		replayed, err = runGraphChild(loaded.Seed, &loaded)
 	case "graph_worker_parent_notification":
 		replayed, err = runGraphParentWorker(loaded.Seed, &loaded)
+	case "graph_terminal_projection_repair":
+		replayed, err = runGraphTerminalProjection(loaded.Seed, &loaded)
 	case "graph_worker_terminal_delivery":
 		replayed, err = runGraphTerminalWorker(loaded.Seed, &loaded)
 	case "graph_terminal_client":

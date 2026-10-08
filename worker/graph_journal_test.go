@@ -252,6 +252,9 @@ func TestNativeGraphWorkerReplayInputsSignalsAndResults(t *testing.T) {
 			}
 			for _, mirror := range []string{"absent", "forged", "owned"} {
 				if mirror == "forged" {
+					if err = state.Delete(ctx, identity.Key("graph", "native")); err != nil {
+						t.Fatal(err)
+					}
 					forged, _ := json.Marshal(wf.Outcome{InvSeq: handle.InvSeq + 100, Error: "forged legacy failure"})
 					if _, err = state.Create(ctx, identity.Key("graph", "native"), forged); err != nil {
 						t.Fatal(err)
@@ -284,9 +287,25 @@ func TestNativeGraphWorkerReplayInputsSignalsAndResults(t *testing.T) {
 						stopProbe()
 						t.Fatal(err)
 					}
-					before, err = leaseKV.Get(ctx, identity.Key("graph", "native"))
-					if err != nil {
-						t.Fatal(err)
+					// Anchor the baseline to the acknowledged owner initialization,
+					// rather than accepting an older KV GET as the current lease.
+					want, _ := json.Marshal(lease.Value{Worker: "healthy-owner", Epoch: owner.Epoch()})
+					for read := 0; read < 6; read++ {
+						before, err = leaseKV.Get(ctx, identity.Key("graph", "native"))
+						if err != nil {
+							t.Fatal(err)
+						}
+						if bytes.Equal(before.Value(), want) && before.Revision() > owner.Epoch() {
+							break
+						}
+						if before.Revision() > owner.Epoch() {
+							t.Fatalf("foreign lease changed before probe: mirror=%s epoch=%d revision=%d value=%q", mirror, owner.Epoch(), before.Revision(), before.Value())
+						}
+						t.Logf("older lease GET before probe: mirror=%s acknowledged epoch=%d observed revision=%d value=%q", mirror, owner.Epoch(), before.Revision(), before.Value())
+						time.Sleep(20 * time.Millisecond)
+					}
+					if !bytes.Equal(before.Value(), want) || before.Revision() <= owner.Epoch() {
+						t.Fatalf("acknowledged foreign lease not visible: mirror=%s epoch=%d revision=%d value=%q", mirror, owner.Epoch(), before.Revision(), before.Value())
 					}
 				}
 				if _, err = js.Publish(ctx, identity.RunSubject("graph", "native", provision.Partitions), []byte(identity.Key("graph", "native"))); err != nil {
@@ -295,6 +314,13 @@ func TestNativeGraphWorkerReplayInputsSignalsAndResults(t *testing.T) {
 				if err = probe.RunPartition(probeCtx, identity.Partition("graph", "native", provision.Partitions)); err != nil {
 					t.Fatal(err)
 				}
+				if mirror == "absent" {
+					repaired, e := state.Get(ctx, identity.Key("graph", "native"))
+					if e != nil || !bytes.Equal(repaired.Value(), records[len(records)-1].Payload) {
+						t.Fatal("canonical terminal projection not repaired", e)
+					}
+				}
+
 				stopProbe()
 				select {
 				case decision := <-decisions:
@@ -310,8 +336,19 @@ func TestNativeGraphWorkerReplayInputsSignalsAndResults(t *testing.T) {
 					}
 				} else {
 					after, err := leaseKV.Get(ctx, identity.Key("graph", "native"))
-					if err != nil || before.Revision() != after.Revision() || !bytes.Equal(before.Value(), after.Value()) {
-						t.Fatal("terminal ACK changed foreign lease", err)
+					if err != nil {
+						t.Fatal("foreign lease read after probe", err)
+					}
+					for read := 0; read < 5 && after.Revision() < before.Revision(); read++ {
+						t.Logf("older lease GET after probe: mirror=%s baseline=%d observed revision=%d value=%q", mirror, before.Revision(), after.Revision(), after.Value())
+						time.Sleep(20 * time.Millisecond)
+						after, err = leaseKV.Get(ctx, identity.Key("graph", "native"))
+						if err != nil {
+							t.Fatal("foreign lease read after probe", err)
+						}
+					}
+					if before.Revision() != after.Revision() || !bytes.Equal(before.Value(), after.Value()) {
+						t.Fatalf("terminal ACK changed foreign lease: mirror=%s before=%d/%q after=%d/%q metrics=%+v", mirror, before.Revision(), before.Value(), after.Revision(), after.Value(), probe.Metrics())
 					}
 					if probe.Metrics().LeaseContentions != 1 {
 						t.Fatal("probe bypassed held lease", probe.Metrics())

@@ -24,8 +24,20 @@ import (
 
 type graphTerminalStateProbe struct {
 	*heldOutcomeProbe
-	reads      int
-	afterFirst func() error
+	reads        int
+	afterFirst   func() error
+	beforeCreate func(context.Context, string, []byte) error
+}
+
+func (p *graphTerminalStateProbe) Create(ctx context.Context, key string, value []byte) (uint64, error) {
+	if p.beforeCreate != nil {
+		cut := p.beforeCreate
+		p.beforeCreate = nil
+		if err := cut(ctx, key, value); err != nil {
+			return 0, err
+		}
+	}
+	return p.heldOutcomeProbe.Create(ctx, key, value)
 }
 
 func (p *graphTerminalStateProbe) Get(ctx context.Context, key string) (lease.KVEntry, error) {
@@ -40,7 +52,17 @@ func (p *graphTerminalStateProbe) Get(ctx context.Context, key string) (lease.KV
 
 var graphTerminalWorkerModes = []string{"completed", "failed", "pending", "cancelled_timer", "purge_after_notify", "missing_state", "forged_state", "state_lost", "purge_marker", "wrong_graph_generation", "malformed_terminal", "unowned_result", "unknown_graph_root", "unknown_reader_pin", "parent_notify", "parent_notify_drop", "parent_notify_lost", "ack_lost"}
 
-func runGraphTerminalWorker(seed int64, replay *Trace) (trace Trace, runErr error) {
+func runGraphTerminalWorker(seed int64, replay *Trace) (Trace, error) {
+	return runGraphTerminalWorkerSchedule(seed, replay, false)
+}
+
+func runGraphTerminalProjection(seed int64, replay *Trace) (Trace, error) {
+	return runGraphTerminalWorkerSchedule(seed, replay, true)
+}
+
+var graphTerminalProjectionModes = []string{"missing", "create_drop", "create_lost_ack", "concurrent_mirror", "purge_at_create"}
+
+func runGraphTerminalWorkerSchedule(seed int64, replay *Trace, projection bool) (trace Trace, runErr error) {
 	schedule := NewScheduler(seed)
 	if replay != nil {
 		var err error
@@ -49,13 +71,25 @@ func runGraphTerminalWorker(seed int64, replay *Trace) (trace Trace, runErr erro
 			return trace, err
 		}
 	}
-	if err := schedule.SetWorkload("graph_worker_terminal_delivery"); err != nil {
+	workload := "graph_worker_terminal_delivery"
+	if projection {
+		workload = "graph_terminal_projection_repair"
+	}
+	if err := schedule.SetWorkload(workload); err != nil {
 		return trace, err
 	}
 	defer func() { trace = schedule.Trace() }()
-	mode, err := schedule.Choose(graphTerminalWorkerModes)
+	modes := graphTerminalWorkerModes
+	if projection {
+		modes = graphTerminalProjectionModes
+	}
+	mode, err := schedule.Choose(modes)
 	if err != nil {
 		return trace, err
+	}
+	projectionMode := ""
+	if projection {
+		projectionMode, mode = mode, "missing_state"
 	}
 	ctx, stop := context.WithTimeout(context.Background(), 5*time.Second)
 	defer stop()
@@ -153,6 +187,23 @@ func runGraphTerminalWorker(seed int64, replay *Trace) (trace Trace, runErr erro
 		state.override, _ = json.Marshal(retention.Tombstone{Tombstone: true, InvSeq: handle.InvSeq, PurgedAt: now(), ExpiresAt: now().Add(time.Hour)})
 	}
 	stateProbe := &graphTerminalStateProbe{heldOutcomeProbe: state}
+	var concurrentValue []byte
+	if projectionMode != "" && projectionMode != "missing" {
+		stateProbe.beforeCreate = func(ctx context.Context, key string, _ []byte) error {
+			switch projectionMode {
+			case "create_drop":
+				return state.QueueFault(KVFault{Operation: "create", Kind: KVDropBeforeCommit})
+			case "create_lost_ack":
+				return state.QueueFault(KVFault{Operation: "create", Kind: KVLoseAckAfterCommit})
+			case "concurrent_mirror":
+				concurrentValue = []byte(fmt.Sprintf(`{"inv_seq":%d,"error":"concurrent untrusted mirror"}`, handle.InvSeq+100))
+			case "purge_at_create":
+				concurrentValue, _ = json.Marshal(retention.Tombstone{Tombstone: true, InvSeq: handle.InvSeq, PurgedAt: now(), ExpiresAt: now().Add(time.Hour)})
+			}
+			_, e := state.KVTransport.Create(ctx, key, concurrentValue)
+			return e
+		}
+	}
 	if mode == "purge_after_notify" {
 		stateProbe.afterFirst = func() error {
 			entry, e := state.KVTransport.Get(ctx, identity.Key(typ, id))
@@ -198,35 +249,75 @@ func runGraphTerminalWorker(seed int64, replay *Trace) (trace Trace, runErr erro
 		}
 	}
 	negative := mode == "pending" || mode == "purge_after_notify" || mode == "state_lost" || mode == "purge_marker" || mode == "wrong_graph_generation" || mode == "malformed_terminal" || mode == "unowned_result" || mode == "unknown_graph_root" || mode == "unknown_reader_pin" || mode == "parent_notify_drop" || mode == "parent_notify_lost"
+	negative = negative || projectionMode == "purge_at_create"
 	attempts, handlers, effects, acks, naks := 0, 0, 0, 0, 0
 	runCtx, cancel := context.WithCancel(ctx)
 	defer cancel()
-	w, err := worker.NewWithPorts("graph-terminal-probe", map[string]worker.Handler{typ: func(c *wf.Context, _ json.RawMessage) (json.RawMessage, error) {
-		handlers++
-		_, e := wf.Run(c, "unexpected", 1, func(context.Context) (int, error) { effects++; return 1, nil })
-		return []byte(`1`), e
-	}}, worker.ModeledWorkerPorts{Journal: store, Leases: leasing, Outcome: stateProbe, Invocation: transport.SignalTransport, Signals: transport.SignalTransport, Client: c, HeartbeatTicks: make(chan time.Time), OperationNow: now}, worker.WithGraphJournal(graph), worker.WithDispatchObserver(func(e worker.DispatchEvent) {
-		if e.Stage == "lease_held" {
-			attempts++
-		}
-		if e.Stage == "ack" {
-			acks++
-			if mode != "cancelled_timer" || acks == 2 {
+	build := func(name string) (*worker.Worker, error) {
+		return worker.NewWithPorts(name, map[string]worker.Handler{typ: func(c *wf.Context, _ json.RawMessage) (json.RawMessage, error) {
+			handlers++
+			_, e := wf.Run(c, "unexpected", 1, func(context.Context) (int, error) { effects++; return 1, nil })
+			return []byte(`1`), e
+		}}, worker.ModeledWorkerPorts{Journal: store, Leases: leasing, Outcome: stateProbe, Invocation: transport.SignalTransport, Signals: transport.SignalTransport, Client: c, HeartbeatTicks: make(chan time.Time), OperationNow: now}, worker.WithGraphJournal(graph), worker.WithDispatchObserver(func(e worker.DispatchEvent) {
+			if e.Stage == "lease_held" {
+				attempts++
+			}
+			if e.Stage == "ack" {
+				acks++
+				if mode != "cancelled_timer" || acks == 2 {
+					cancel()
+				}
+			}
+			if e.Stage == "nak" {
+				naks++
 				cancel()
 			}
-		}
-		if e.Stage == "nak" {
-			naks++
-			cancel()
-		}
-	}))
+		}))
+	}
+	w, err := build("graph-terminal-probe")
 	if err != nil {
 		return trace, err
 	}
 	if err = w.RunPartitionWithTransport(runCtx, 0, transport.Dispatch); err != nil {
 		return trace, err
 	}
-	if handlers != 0 || effects != 0 || attempts != 1 && (mode != "cancelled_timer" || attempts != 2) {
+	wantAttempts, wantNaks := 1, 0
+	if projectionMode == "create_drop" || projectionMode == "create_lost_ack" {
+		if acks != 0 || naks != 1 || attempts != 1 {
+			return trace, fmt.Errorf("uncertain projection repair authorized ACK: %d/%d/%d", acks, naks, attempts)
+		}
+		// Reopen all adapters after either definite failure or committed-but-
+		// lost acknowledgement. The canonical terminal and foreign lease persist.
+		graph, err = journal.NewGraphStore(journal.GraphConfig{Protocol: m.Protocol(), Now: now, PinTTL: 30 * time.Second, IntentTTL: time.Second})
+		if err != nil {
+			return trace, err
+		}
+		c = client.NewWithSignalPorts(transport.SignalTransport, transport.SignalTransport)
+		runCtx, cancel = context.WithCancel(ctx)
+		defer cancel()
+		w, err = build("graph-terminal-projection-reopened")
+		if err != nil {
+			return trace, err
+		}
+		if err = w.RunPartitionWithTransport(runCtx, 0, transport.Dispatch); err != nil {
+			return trace, err
+		}
+		wantAttempts, wantNaks = 2, 1
+	}
+	if stateProbe.beforeCreate != nil {
+		return trace, fmt.Errorf("projection cut not reached")
+	}
+	if mode == "missing_state" {
+		cached, e := state.KVTransport.Get(ctx, identity.Key(typ, id))
+		want := body
+		if concurrentValue != nil {
+			want = concurrentValue
+		}
+		if e != nil || !bytes.Equal(cached.Value, want) {
+			return trace, fmt.Errorf("terminal projection absent, changed or unverified: %v", e)
+		}
+	}
+	if handlers != 0 || effects != 0 || attempts != wantAttempts && (mode != "cancelled_timer" || attempts != 2) {
 		return trace, fmt.Errorf("terminal probe executed handler/effect or bypassed held lease: %d/%d/%d", handlers, effects, attempts)
 	}
 	wantAcks := 1
@@ -236,7 +327,7 @@ func runGraphTerminalWorker(seed int64, replay *Trace) (trace Trace, runErr erro
 			return trace, fmt.Errorf("canceled timer metric differs: %+v", w.Metrics())
 		}
 	}
-	if negative && (acks != 0 || naks != 1) || !negative && (acks != wantAcks || naks != 0) {
+	if negative && (acks != 0 || naks != 1) || !negative && (acks != wantAcks || naks != wantNaks) {
 		return trace, fmt.Errorf("unsafe ACK/NAK decision %s: %d/%d", mode, acks, naks)
 	}
 	after, err := kv.Get(ctx, identity.Key(typ, id))
@@ -290,6 +381,9 @@ func runGraphTerminalWorker(seed int64, replay *Trace) (trace Trace, runErr erro
 	}
 	if err = m.CheckReferences(); err != nil {
 		return trace, err
+	}
+	if projection {
+		mode = projectionMode
 	}
 	schedule.RecordTransport(TransportEvent{Operation: "check_graph_worker_terminal_delivery", Outcome: mode})
 	if err = schedule.Finish(); err != nil {
