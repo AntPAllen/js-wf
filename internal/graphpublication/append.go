@@ -187,7 +187,7 @@ func (p Protocol) Commit(ctx context.Context, prepared Prepared) (Root, error) {
 	if err := ctx.Err(); err != nil {
 		return Root{}, err
 	}
-	if p.Port == nil || prepared.destination == "" || !utf8.ValidString(destination) || !validID(prepared.publication.Token) {
+	if p.Port == nil || prepared.destination == "" || !utf8.ValidString(prepared.destination) || !validID(prepared.publication.Token) {
 		return Root{}, errors.New("invalid prepared graph append")
 	}
 	current, err := p.readRoot(ctx, prepared.destination)
