@@ -24,6 +24,11 @@ type Reference struct {
 	Generation uint64
 	Object     string
 }
+
+// ValidFor checks the physical identity encoding, not existence, ownership or
+// liveness. Publication and collection still require the authority protocol.
+func (r Reference) ValidFor(hash string) bool { return validObject(Object{hash, r}) }
+
 type Intent struct {
 	Root     string
 	Expected uint64
