@@ -1,0 +1,48 @@
+name: graph-publication
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'internal/graphpublication/**'
+      - 'internal/retainedgraph/**'
+      - 'internal/blobpublication/protocol.go'
+      - '.github/workflows/graph-publication.yml'
+      - 'go.mod'
+      - 'go.sum'
+  pull_request:
+    paths:
+      - 'internal/graphpublication/**'
+      - 'internal/retainedgraph/**'
+      - 'internal/blobpublication/protocol.go'
+      - '.github/workflows/graph-publication.yml'
+      - 'go.mod'
+      - 'go.sum'
+permissions:
+  contents: read
+jobs:
+  ownership:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        mode: [normal, race]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - name: Seeded graph ownership and collection controls
+        env:
+          GOMAXPROCS: '1'
+          GOMEMLIMIT: 512MiB
+          GRAPH_MODE: ${{ matrix.mode }}
+        run: |
+          graph_flags=()
+          if [ "$GRAPH_MODE" = race ]; then graph_flags=(-race); fi
+          go test -p=1 "${graph_flags[@]}" ./internal/graphpublication -count=1 -timeout=5m -json > graph-publication-events.jsonl
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: graph-publication-${{ matrix.mode }}
+          path: graph-publication-events.jsonl
