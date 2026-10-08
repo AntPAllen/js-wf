@@ -6,6 +6,7 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"github.com/nats-io/nats.go/jetstream"
 	"js-wf/client"
@@ -221,9 +222,35 @@ func TestNativeGraphWorkerParentNotifications(t *testing.T) {
 					if err != nil {
 						t.Fatal(err)
 					}
-					before, err := leaseKV.Get(ctx, identity.Key(childType, childID))
-					if err != nil {
-						t.Fatal(err)
+					// Dispatch starts only after its exact initialized fixture
+					// is observable. A setup GET may lag the acknowledged KV
+					// writes; no handler has run and no lease is renewed here.
+					setup, endSetup := context.WithTimeout(ctx, 3*time.Second)
+					defer endSetup()
+					expectedLease, _ := json.Marshal(lease.Value{Worker: "healthy-child-owner", Epoch: owner.Epoch()})
+					var before jetstream.KeyValueEntry
+					for probe := 0; ; probe++ {
+						before, err = leaseKV.Get(setup, identity.Key(childType, childID))
+						if err == nil && before.Revision() > owner.Epoch() && bytes.Equal(before.Value(), expectedLease) {
+							if probe > 0 {
+								t.Logf("lease setup visibility: epoch=%d revision=%d probes=%d", owner.Epoch(), before.Revision(), probe+1)
+							}
+							break
+						}
+						if err != nil && !errors.Is(err, jetstream.ErrKeyNotFound) {
+							t.Fatal(err)
+						}
+						if err == nil {
+							var value lease.Value
+							if json.Unmarshal(before.Value(), &value) != nil || value.Worker != "healthy-child-owner" || value.Epoch != 0 || before.Revision() != owner.Epoch() {
+								t.Fatal("unexpected lease setup value", before.Revision(), string(before.Value()))
+							}
+						}
+						select {
+						case <-setup.Done():
+							t.Fatal("initialized lease fixture not visible", setup.Err())
+						case <-time.After(10 * time.Millisecond):
+						}
 					}
 					var handlers, effects atomic.Int64
 					runCtx, cancel := context.WithCancel(ctx)

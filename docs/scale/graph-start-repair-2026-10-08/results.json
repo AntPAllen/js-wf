@@ -1,0 +1,272 @@
+{
+  "source": "a646f02c74d897283dd554520bc2918a8419d2cf",
+  "runs": [
+    {
+      "name": "ownership-normal",
+      "command": [
+        "go",
+        "test",
+        "-p=1",
+        "./internal/graphpublication",
+        "-count=1",
+        "-timeout=5m",
+        "-json"
+      ],
+      "working_directory": "/home/exedev/js-wf",
+      "environment": {
+        "GOMAXPROCS": "2",
+        "GOMEMLIMIT": "512MiB",
+        "SIM_COVERAGE_SUMMARY": "1",
+        "SIM_SEEDS": "1000",
+        "FAULT_TRACE_OUT": "/tmp/js-wf-graph-start-repair-ownership-normal-failure-20261008.json"
+      },
+      "exit_code": 0,
+      "wall_seconds": 29.929423971974757,
+      "package_passes": [
+        {
+          "package": "js-wf/internal/graphpublication",
+          "elapsed": 27.759
+        }
+      ],
+      "top_level_passes": [
+        "TestGraphApplicationLifecycle",
+        "TestGraphApplicationOriginalHeadAndUnknownReplies",
+        "TestGraphApplicationLimitsAndOpaqueOwnership",
+        "TestGraphCatalogExpiresEmptySnapshots",
+        "TestGraphCatalogFailureStopsObjectCollection",
+        "TestGraphCatalogRenewalConflictAndClosedGrants",
+        "TestNativeGraphApplicationRetirement",
+        "TestNativeGraphAuthorityPersistenceAndSchemaIsolation",
+        "TestNativeGraphAuthorityReadWitness",
+        "TestGraphAuthorityCanonicalEnvelope",
+        "TestNativeGraphAuthorityUnsafeConfiguration",
+        "TestNativeGraphAuthorityRejectsMalformedWireWithoutRepair",
+        "TestNativeGraphAuthorityLostMutationReplies",
+        "TestNativeGraphAuthorityRejectsLossyDestinationEncoding",
+        "TestNativeGraphDestinationCatalogEmptyPins",
+        "TestNativeGraphDestinationCatalogRejectsPartialAndCorrupt",
+        "TestNativeGraphConcurrentPublishersAndCollectors",
+        "TestNativeGraphObjectAppendReuseAndRetirement",
+        "TestNativeGraphObjectReservationsLostRepliesAndLateCompletion",
+        "TestNativeGraphObjectCancellationBoundsAndUnknownChunks",
+        "TestNativeGraphObjectPublishCollectOrderAndDelayedDelete",
+        "TestNativeGraphObjectReadUncertaintyAndFormatIsolation",
+        "TestNativeGraphObjectOpeningBoundsReadOnlyAdmission",
+        "TestGraphSubjectAccessRejectsUnsafeNamespaces",
+        "TestNativeGraphRuntimePermissions",
+        "TestNativeGraphReadersRetirementAndExpiry",
+        "TestNativeGraphReaderCheckpointStoreRestart",
+        "TestNativeGraphStreamsAtomicLifecycleAndRetainedReaders",
+        "TestGraphOwnedPayloadSeededReuseAndCompleteReclamation",
+        "TestGraphOwnedLargePayloadNotRecopied",
+        "TestGraphOwnedPayloadRejectsUnownedStaleAndAmbiguousReferences",
+        "TestGraphOwnedPayloadRetirementAndCollectorFence",
+        "TestGraphOwnedPayloadUncertainReadsAndCallerMutation",
+        "TestGraphPublicationSeededAppendsSweepAndRetirement",
+        "TestGraphPublicationCollectorAndCommitInterleavings",
+        "TestGraphPublicationUnknownRepliesNeverAdoptUploads",
+        "TestGraphPublicationForeignDestinationAndRevokedGrants",
+        "TestGraphPublicationUncertainCensusFailsClosed",
+        "TestGraphPublicationDelayedDeleteCannotTouchNewGeneration",
+        "TestGraphPublicationContextAndCopies",
+        "TestGraphPublicationMetadataBoundAndPermanentScopedGenerations",
+        "TestGraphPublicationRejectsForeignPhysicalOwner",
+        "TestGraphPublicationInvalidAcknowledgmentsAndInputBounds",
+        "TestGraphReaderCheckpointRecovery",
+        "TestGraphReaderCheckpointRejectsUnknownAndRevoked",
+        "TestGraphReaderCheckpointCanonicalBounds",
+        "TestGraphReaderAppendRetireRelease",
+        "TestGraphReaderRenewalExpiryFences",
+        "TestGraphReaderUnknownAcknowledgements",
+        "TestGraphReaderBoundsAndFailClosed",
+        "TestGraphReaderOriginalHeadAndEmptySnapshots",
+        "TestGraphReaderAcquireRetirementRace",
+        "TestGraphStreamsIndependentIndexesPinnedRetirementAndResume",
+        "TestGraphStreamsSingleHeadFencesAllPublishers",
+        "TestGraphStreamsExactUnknownReadback",
+        "TestGraphStreamsRejectCoordinateAndInheritanceForgery",
+        "TestGraphStreamsBoundsCanonicalEncodingAndLegacyBytes",
+        "TestGraphStreamsOldReaderAcrossUpgradeAndUnknownCollection"
+      ]
+    },
+    {
+      "name": "client-normal",
+      "command": [
+        "go",
+        "test",
+        "-p=1",
+        "./client",
+        "-count=1",
+        "-timeout=5m",
+        "-json"
+      ],
+      "working_directory": "/home/exedev/js-wf",
+      "environment": {
+        "GOMAXPROCS": "2",
+        "GOMEMLIMIT": "512MiB",
+        "SIM_COVERAGE_SUMMARY": "1",
+        "SIM_SEEDS": "1000",
+        "FAULT_TRACE_OUT": "/tmp/js-wf-graph-start-repair-client-normal-failure-20261008.json"
+      },
+      "exit_code": 0,
+      "wall_seconds": 5.711136505997274,
+      "package_passes": [
+        {
+          "package": "js-wf/client",
+          "elapsed": 4.883
+        }
+      ],
+      "top_level_passes": [
+        "TestObservedSignalStatus",
+        "TestSignalRecordsPrePublicationDeadline",
+        "TestGraphClientBindingKeepsOriginalModeAndUsesProvidedTransports",
+        "TestNativeGraphClientCanonicalTerminals",
+        "TestNativeGraphClientSignalsUseCanonicalHistory",
+        "TestCanonicalStartRecoveryCannotReserveReplacementAfterRetirement",
+        "TestCanonicalStartAwaitPendingReplacementAndMissingReadyPointer"
+      ]
+    },
+    {
+      "name": "reconcile-normal",
+      "command": [
+        "go",
+        "test",
+        "-p=1",
+        "./reconcile",
+        "-count=1",
+        "-timeout=5m",
+        "-json"
+      ],
+      "working_directory": "/home/exedev/js-wf",
+      "environment": {
+        "GOMAXPROCS": "2",
+        "GOMEMLIMIT": "512MiB",
+        "SIM_COVERAGE_SUMMARY": "1",
+        "SIM_SEEDS": "1000",
+        "FAULT_TRACE_OUT": "/tmp/js-wf-graph-start-repair-reconcile-normal-failure-20261008.json"
+      },
+      "exit_code": 0,
+      "wall_seconds": 41.856415859016124,
+      "package_passes": [
+        {
+          "package": "js-wf/reconcile",
+          "elapsed": 41.049
+        }
+      ],
+      "top_level_passes": [
+        "TestContinuationRepairBeforeAndAfterSuspension",
+        "TestFallbackTimerScanRetriesCommittedWakeupBeforeDelete",
+        "TestFallbackTimerScanRemovesRetiredGenerations",
+        "TestGraphReconcileLoopRetriesUncertaintyWithoutSkippingBoundary",
+        "TestReconcileRetriesLostLeaseInitialization",
+        "TestCursorPersistsAcrossLeadersAndUsesCAS",
+        "TestCursorLostAcknowledgmentRereadsRealKV",
+        "TestTombstoneLoopReclaimsExpiredState",
+        "TestNativeRetirementDeleteDoesNotEraseConcurrentReplacement",
+        "TestNativeRetirementRejectsUnboundHint",
+        "TestMultiSelectReadFailureDoesNotSuppressDueTimer",
+        "TestSignalPartialCursorRepairsRealGapAfterRepeatedReadTimeoutsAndLostEnqueueAck",
+        "TestSignalPartialCursorDoesNotSkipUnconfirmedSignal",
+        "TestStartPartialCursorDoesNotSkipUnconfirmedInvocation",
+        "TestStartPartialCursorRequiresFreshOwnershipAndDoesNotSaveFatalOrCancelledPass",
+        "TestStartPartialCursorRepairsRealGapAfterRepeatedReadTimeoutsAndLostEnqueueAck",
+        "TestSuspendedPartialCursorRepairsRealGapAfterRepeatedReadTimeoutsAndLostEnqueueAck",
+        "TestSuspendedPartialCursorCertifiesOnlyContiguousAcknowledgedPrefix",
+        "TestRepairScannersRespectDomainClockAndFailClosed",
+        "TestSuspendedDomainTimersIncludeGrace",
+        "TestDomainRepairClockHonorsCanceledContext",
+        "TestTimerPartialCursorRepairsRealNativeAndFallbackGaps",
+        "TestTimerPartialCursorDoesNotSkipUnconfirmedReadRetirementClockOrEnqueue",
+        "TestFallbackTimerPartialCursorDoesNotSkipUncertainPublicationOrDeletion",
+        "TestTombstonePartialCursorRepairsRealDropAndLostDeleteAck",
+        "TestNativeGraphReconcileRepairsStartSignalAndTimerHistory",
+        "TestGraphReconcileSignalCacheBindsInvocationGeneration",
+        "TestGraphReconcileRejectsMissingConfiguration",
+        "TestGraphReconcileFailedReadCannotCertifyCursorPrefix",
+        "TestNativeGraphReconcileCanonicalPendingStarts",
+        "TestGraphCanonicalStartScanDryRunUnknownAndPrefix",
+        "TestGraphCanonicalStartScanRetirementIsSupersededNotReenqueued"
+      ]
+    },
+    {
+      "name": "journal-normal",
+      "command": [
+        "go",
+        "test",
+        "-p=1",
+        "./journal",
+        "-run",
+        "^(TestGraphJournal|TestNativeGraphJournal|TestGraphCanonicalStart)",
+        "-count=1",
+        "-timeout=5m",
+        "-json"
+      ],
+      "working_directory": "/home/exedev/js-wf",
+      "environment": {
+        "GOMAXPROCS": "2",
+        "GOMEMLIMIT": "512MiB",
+        "SIM_COVERAGE_SUMMARY": "1",
+        "SIM_SEEDS": "1000",
+        "FAULT_TRACE_OUT": "/tmp/js-wf-graph-start-repair-journal-normal-failure-20261008.json"
+      },
+      "exit_code": 0,
+      "wall_seconds": 12.207059772976208,
+      "package_passes": [
+        {
+          "package": "js-wf/journal",
+          "elapsed": 6.745
+        }
+      ],
+      "top_level_passes": [
+        "TestNativeGraphJournalGenerationAndDrain",
+        "TestNativeGraphJournalPublicSDK",
+        "TestNativeGraphJournalPublicAdmission",
+        "TestGraphJournalPublicConfiguration",
+        "TestGraphCanonicalStartPendingBindingAndRetainedInput",
+        "TestGraphCanonicalStartRejectsLegacyAndBounds",
+        "TestGraphJournalGenerationRetainedReaderAndDrain",
+        "TestGraphJournalStaleAndUnknownAppends",
+        "TestGraphJournalCorruptCursorAndLeaseBoundary",
+        "TestGraphJournalLimitsAndForeignRoot",
+        "TestGraphJournalEntryPayloadAlias",
+        "TestGraphJournalCloseContentionAndAmbiguousRelease",
+        "TestGraphJournalAcquireRenewContention",
+        "TestGraphJournalTerminalSnapshotAdmission",
+        "TestGraphJournalExistingHistoryIsNotStaleAbsence",
+        "TestGraphJournalPurgeFenceRetainsReadersAndGeneration"
+      ]
+    },
+    {
+      "name": "worker-normal",
+      "command": [
+        "go",
+        "test",
+        "-p=1",
+        "./worker",
+        "-run",
+        "^(TestNativeGraphWorkerReplayInputsSignalsAndResults|TestNativeGraphChildResultTransferAndReplay|TestGraphChildReplayRejectsForgedProvenance|TestGraphSelectedChildRequiresExactRecordedSignal|TestNativeGraphWorkerParentNotifications|TestNativeCanonicalStartRecoveryWorkerReplayAndPurge)$",
+        "-count=1",
+        "-timeout=5m",
+        "-json"
+      ],
+      "working_directory": "/home/exedev/js-wf",
+      "environment": {
+        "GOMAXPROCS": "2",
+        "GOMEMLIMIT": "512MiB",
+        "SIM_COVERAGE_SUMMARY": "1",
+        "SIM_SEEDS": "1000",
+        "FAULT_TRACE_OUT": "/tmp/js-wf-graph-start-repair-worker-normal-failure-20261008.json"
+      },
+      "exit_code": 1,
+      "wall_seconds": 34.42713017499773,
+      "package_passes": [],
+      "top_level_passes": [
+        "TestNativeGraphChildResultTransferAndReplay",
+        "TestGraphChildReplayRejectsForgedProvenance",
+        "TestGraphSelectedChildRequiresExactRecordedSignal",
+        "TestNativeGraphWorkerReplayInputsSignalsAndResults",
+        "TestNativeCanonicalStartRecoveryWorkerReplayAndPurge"
+      ]
+    }
+  ]
+}
