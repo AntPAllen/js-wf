@@ -23,6 +23,7 @@ type CanonicalStartScan struct {
 	graph    *journal.GraphStore
 	recovery GraphStartRecoveryPort
 	Observe  func(RepairEvent)
+	cycle    graphCatalogCycle
 }
 
 func NewCanonicalStartScan(js jetstream.JetStream, graph *journal.GraphStore) (*CanonicalStartScan, error) {
@@ -49,13 +50,18 @@ func (s *CanonicalStartScan) Scan(ctx context.Context, next uint64, budget int, 
 	}
 	initial, confirmed := next, next
 	result.NextSequence = next
+	through, err := s.cycle.begin(ctx, s.graph, next)
+	if err != nil {
+		return result, err
+	}
 	defer func() {
+		s.cycle.end(result, scanErr)
 		if scanErr != nil && confirmed > initial {
 			result.RetrySequence = confirmed
 		}
 	}()
 	for i := 0; i < budget; i++ {
-		entry, status, err := s.graph.NextStart(ctx, next)
+		entry, status, err := s.graph.NextStartThrough(ctx, next, through)
 		if err != nil {
 			return result, err
 		}

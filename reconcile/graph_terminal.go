@@ -38,13 +38,11 @@ func (p nativeTerminalProjectionLookup) ProjectionPresent(ctx context.Context, t
 // One loop calls Scan serially; its watermark persists across budgeted calls and
 // refreshes after a completed cycle, a cursor change, an error or process restart.
 type CanonicalTerminalScan struct {
-	graph        *journal.GraphStore
-	projection   TerminalProjectionLookup
-	recovery     GraphTerminalRecoveryPort
-	Observe      func(RepairEvent)
-	through      uint64
-	haveThrough  bool
-	expectedNext uint64
+	graph      *journal.GraphStore
+	projection TerminalProjectionLookup
+	recovery   GraphTerminalRecoveryPort
+	Observe    func(RepairEvent)
+	cycle      graphCatalogCycle
 }
 
 func NewCanonicalTerminalScan(ctx context.Context, js jetstream.JetStream, graph *journal.GraphStore) (*CanonicalTerminalScan, error) {
@@ -77,25 +75,19 @@ func (s *CanonicalTerminalScan) Scan(ctx context.Context, next uint64, budget in
 	}
 	initial, confirmed := next, next
 	result.NextSequence = next
-	if !s.haveThrough || next == 1 || next != s.expectedNext {
-		through, err := s.graph.StartCatalogHighWater(ctx)
-		if err != nil {
-			return result, err
-		}
-		s.through, s.haveThrough = through, true
+	through, err := s.cycle.begin(ctx, s.graph, next)
+	if err != nil {
+		return result, err
 	}
 
 	defer func() {
 		if scanErr != nil && confirmed > initial {
 			result.RetrySequence = confirmed
 		}
-		s.expectedNext = result.NextSequence
-		if scanErr != nil || result.NextSequence == 1 {
-			s.haveThrough = false
-		}
+		s.cycle.end(result, scanErr)
 	}()
 	for i := 0; i < budget; i++ {
-		entry, status, err := s.graph.NextStartThrough(ctx, next, s.through)
+		entry, status, err := s.graph.NextStartThrough(ctx, next, through)
 		if err != nil {
 			return result, err
 		}

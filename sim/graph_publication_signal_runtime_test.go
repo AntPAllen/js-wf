@@ -102,7 +102,10 @@ func runGraphSignalRuntimeSchedule(seed int64, replay *Trace, combined bool) (tr
 			}
 		}
 	}
-	ctx, stop := context.WithTimeout(context.Background(), 10*time.Second)
+	// Wall-clock CPU watchdog for one generated/replayed model schedule.
+	// Race instrumentation and concurrent qualification must not redefine the
+	// virtual transport/recovery deadlines asserted by the workload.
+	ctx, stop := context.WithTimeout(context.Background(), time.Minute)
 	defer stop()
 	model := NewGraphPublicationTransport(schedule)
 	cut := &graphSignalRuntimeCut{GraphPublicationTransport: model, mode: mode}
