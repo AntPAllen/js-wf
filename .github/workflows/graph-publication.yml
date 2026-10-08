@@ -4,6 +4,7 @@ on:
   push:
     paths:
       - 'internal/graphpublication/**'
+      - 'journal/graph*.go'
       - 'internal/retainedgraph/**'
       - 'sim/graph_publication*'
       - 'sim/journal_transport_test.go'
@@ -12,6 +13,7 @@ on:
       - 'sim/testdata/regressions/graph-reader-resume-*'
       - 'sim/testdata/regressions/graph-catalog-*'
       - 'sim/testdata/regressions/graph-application-*'
+      - 'sim/testdata/regressions/graph-journal-*'
       - 'internal/blobpublication/**'
       - 'internal/natsstream/**'
       - 'testcluster/cluster.go'
@@ -21,6 +23,7 @@ on:
   pull_request:
     paths:
       - 'internal/graphpublication/**'
+      - 'journal/graph*.go'
       - 'internal/retainedgraph/**'
       - 'sim/graph_publication*'
       - 'sim/journal_transport_test.go'
@@ -29,6 +32,7 @@ on:
       - 'sim/testdata/regressions/graph-reader-resume-*'
       - 'sim/testdata/regressions/graph-catalog-*'
       - 'sim/testdata/regressions/graph-application-*'
+      - 'sim/testdata/regressions/graph-journal-*'
       - 'internal/blobpublication/**'
       - 'internal/natsstream/**'
       - 'testcluster/cluster.go'
@@ -59,6 +63,15 @@ jobs:
           graph_flags=()
           if [ "$GRAPH_MODE" = race ]; then graph_flags=(-race); fi
           go test -p=1 "${graph_flags[@]}" ./internal/natsstream ./internal/graphpublication -count=1 -timeout=5m -json > graph-publication-events.jsonl
+      - name: Generation-aware graph journal and native payload retention
+        env:
+          GOMAXPROCS: '1'
+          GOMEMLIMIT: 512MiB
+          GRAPH_MODE: ${{ matrix.mode }}
+        run: |
+          graph_flags=()
+          if [ "$GRAPH_MODE" = race ]; then graph_flags=(-race); fi
+          go test -p=1 "${graph_flags[@]}" ./journal -run '^(TestGraphJournal|TestNativeGraphJournal)' -count=1 -timeout=5m -json > graph-journal-events.jsonl
       - name: Common seeded transport and pinned trace dispatch
         env:
           GOMAXPROCS: '1'
@@ -68,7 +81,7 @@ jobs:
         run: |
           graph_flags=()
           if [ "$GRAPH_MODE" = race ]; then graph_flags=(-race); fi
-          go test -p=1 "${graph_flags[@]}" ./sim -run '^(TestSeededGraphPublicationReplay|TestSeededGraphReadersReplay|TestSeededGraphReaderResumeReplay|TestSeededGraphCatalogReplay|TestSeededGraphApplicationReplay|TestGraphPublicationTransportCopiesFaultsAndIndependentCensus|TestPinnedRegressionCorpus)$/^(graph-publication-|graph-readers-|graph-reader-resume-|graph-catalog-|graph-application-)' -count=1 -timeout=5m -json > graph-transport-events.jsonl
+          go test -p=1 "${graph_flags[@]}" ./sim -run '^(TestSeededGraphPublicationReplay|TestSeededGraphReadersReplay|TestSeededGraphReaderResumeReplay|TestSeededGraphCatalogReplay|TestSeededGraphApplicationReplay|TestSeededGraphJournalReplay|TestGraphPublicationTransportCopiesFaultsAndIndependentCensus|TestPinnedRegressionCorpus)$/^(graph-publication-|graph-readers-|graph-reader-resume-|graph-catalog-|graph-application-|graph-journal-)' -count=1 -timeout=5m -json > graph-transport-events.jsonl
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -76,3 +89,4 @@ jobs:
           path: |
             graph-publication-events.jsonl
             graph-transport-events.jsonl
+            graph-journal-events.jsonl

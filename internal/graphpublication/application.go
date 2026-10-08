@@ -3,6 +3,8 @@ package graphpublication
 import (
 	"context"
 	"errors"
+
+	"js-wf/internal/retainedgraph"
 )
 
 // UpdateApplication publishes an application-owned bounded descriptor at the
@@ -20,5 +22,23 @@ func (p Protocol) UpdateApplication(ctx context.Context, destination string, exp
 	}
 	root.Schema = ApplicationSchema
 	root.Application = append([]byte(nil), data...)
+	return p.readerCAS(ctx, destination, expected, root)
+}
+
+// RetireLiveWithApplication atomically clears the live graph and publishes its
+// application lifecycle descriptor. Reader pins and permanent heads survive.
+// Callers enforce their own terminal/generation transition before this CAS.
+func (p Protocol) RetireLiveWithApplication(ctx context.Context, destination string, expected uint64, data []byte) (Root, error) {
+	if len(data) > MaxApplicationBytes {
+		return Root{}, errors.New("application byte limit")
+	}
+	root, err := p.readerRoot(ctx, destination, expected)
+	if err != nil {
+		return Root{}, err
+	}
+	root.Schema = ApplicationSchema
+	root.Application = append([]byte(nil), data...)
+	root.Graph = retainedgraph.Empty()
+	root.Token = ""
 	return p.readerCAS(ctx, destination, expected, root)
 }
