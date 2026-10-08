@@ -1,0 +1,304 @@
+File: graph-child-diagnostic.test
+Build ID: 15ae2e3b66e51fdb1e21361bdc4b299765d74515
+Type: cpu
+Time: 2026-10-08 09:26:35 UTC
+Duration: 26.25s, Total samples = 32.97s (125.61%)
+Showing nodes accounting for 24.52s, 74.37% of 32.97s total
+Dropped 667 nodes (cum <= 0.16s)
+      flat  flat%   sum%        cum   cum%
+         0     0%     0%     20.08s 60.90%  js-wf/sim.TestSeededGraphChildReplay
+         0     0%     0%     20.08s 60.90%  js-wf/sim.TestSeededGraphChildReplay-range1
+         0     0%     0%     20.08s 60.90%  js-wf/sim.trackedSeeds.func1
+         0     0%     0%     20.08s 60.90%  testing.tRunner
+     0.02s 0.061% 0.061%     19.90s 60.36%  js-wf/sim.runGraphChild
+         0     0% 0.061%     11.43s 34.67%  encoding/json.Marshal (inline)
+     0.07s  0.21%  0.27%     11.43s 34.67%  encoding/json/v2.Marshal
+         0     0%  0.27%     11.03s 33.45%  js-wf/worker.(*Worker).execute.func3
+         0     0%  0.27%     11.03s 33.45%  js-wf/worker.(*Worker).execute.func4
+         0     0%  0.27%     10.79s 32.73%  js-wf/worker.(*graphDelivery).append
+     0.07s  0.21%  0.49%      9.45s 28.66%  encoding/json/v2.marshalEncode
+         0     0%  0.49%      9.21s 27.93%  js-wf/sim.runGraphChild.func6
+         0     0%  0.49%      9.16s 27.78%  js-wf/worker.(*Worker).RunPartitionWithTransport (inline)
+         0     0%  0.49%      9.14s 27.72%  js-wf/worker.RunPartitionWithPort
+         0     0%  0.49%      9.10s 27.60%  js-wf/worker.(*Worker).handle
+         0     0%  0.49%      8.79s 26.66%  js-wf/worker.(*Worker).execute
+     2.03s  6.16%  6.64%      8.57s 25.99%  encoding/json/v2.makeStructArshaler.func2
+         0     0%  6.64%      7.21s 21.87%  js-wf/journal.(*GraphStore).Append
+     0.07s  0.21%  6.85%      6.86s 20.81%  js-wf/sim.(*GraphPublicationTransport).event
+     0.01s  0.03%  6.89%      6.69s 20.29%  runtime.systemstack
+         0     0%  6.89%      6.50s 19.71%  js-wf/journal.(*GraphView).Read
+         0     0%  6.89%      5.94s 18.02%  runtime.gcBgMarkWorker
+     0.03s 0.091%  6.98%      5.69s 17.26%  js-wf/internal/graphpublication.Protocol.ReadRetained
+         0     0%  6.98%      5.67s 17.20%  js-wf/worker.runHandler.func1
+         0     0%  6.98%      5.65s 17.14%  js-wf/internal/retainedgraph.load
+     0.02s 0.061%  7.04%      5.63s 17.08%  js-wf/sim.runGraphChild.func3
+         0     0%  7.04%      5.63s 17.08%  js-wf/worker.(*Worker).execute.func16
+         0     0%  7.04%      5.31s 16.11%  js-wf/internal/graphpublication.Protocol.SweepWithReaders
+         0     0%  7.04%      5.26s 15.95%  js-wf/wf.(*Context).next
+         0     0%  7.04%      5.26s 15.95%  js-wf/worker.(*Worker).execute.func6
+         0     0%  7.04%      5.25s 15.92%  js-wf/internal/graphpublication.Protocol.Sweep
+     0.02s 0.061%  7.10%      4.94s 14.98%  js-wf/internal/graphpublication.Protocol.readRoot
+     0.06s  0.18%  7.28%      4.84s 14.68%  js-wf/internal/graphpublication.normalizeRoot
+     0.03s 0.091%  7.37%      4.54s 13.77%  js-wf/internal/retainedgraph.Read
+     0.16s  0.49%  7.86%      4.51s 13.68%  encoding/json/v2.makeSliceArshaler.func2
+         0     0%  7.86%      4.41s 13.38%  js-wf/internal/graphpublication.Protocol.PrepareAppendWithApplication
+     0.02s 0.061%  7.92%      4.41s 13.38%  js-wf/internal/graphpublication.Protocol.prepareAppend
+         0     0%  7.92%      4.22s 12.80%  runtime.gcBgMarkWorker.func2
+     0.02s 0.061%  7.98%      4.22s 12.80%  runtime.gcDrain
+     0.03s 0.091%  8.07%      4.13s 12.53%  js-wf/internal/graphpublication.Protocol.sweepKey
+     0.46s  1.40%  9.46%      3.96s 12.01%  runtime.mallocgc
+         0     0%  9.46%      3.59s 10.89%  js-wf/journal.(*GraphStore).Read
+         0     0%  9.46%      3.52s 10.68%  js-wf/internal/retainedgraph.decode
+     0.01s  0.03%  9.49%      3.31s 10.04%  js-wf/internal/graphpublication.Protocol.acquire
+     0.09s  0.27%  9.77%      3.09s  9.37%  js-wf/internal/graphpublication.validateFence
+     0.07s  0.21%  9.98%         3s  9.10%  js-wf/sim.(*GraphPublicationTransport).ReadRoot
+     0.02s 0.061% 10.04%      2.95s  8.95%  js-wf/internal/graphpublication.Protocol.casRoot
+     0.02s 0.061% 10.10%      2.91s  8.83%  encoding/json.(*Decoder).Decode
+         0     0% 10.10%      2.82s  8.55%  js-wf/worker.(*graphDelivery).refresh
+         0     0% 10.10%      2.77s  8.40%  js-wf/worker.drainSignalsFromPort
+         0     0% 10.10%      2.51s  7.61%  js-wf/internal/graphpublication.Protocol.casBlob
+     0.01s  0.03% 10.13%      2.50s  7.58%  js-wf/journal.(*GraphStore).open
+         0     0% 10.13%      2.45s  7.43%  js-wf/internal/retainedgraph.Append
+         0     0% 10.13%      2.39s  7.25%  js-wf/worker.openGraphDelivery
+         0     0% 10.13%      2.37s  7.19%  js-wf/journal.(*GraphStore).Open (inline)
+     0.44s  1.33% 11.46%      2.37s  7.19%  runtime.scanObject
+     0.01s  0.03% 11.50%      2.31s  7.01%  js-wf/internal/retainedgraph.Root.Encode
+         0     0% 11.50%      2.29s  6.95%  js-wf/internal/graphpublication.Protocol.Commit
+         0     0% 11.50%      2.26s  6.85%  js-wf/internal/graphpublication.Protocol.readerCAS
+         0     0% 11.50%      2.25s  6.82%  runtime.gcDrainMarkWorkerIdle (inline)
+     0.44s  1.33% 12.83%      2.23s  6.76%  encoding/json/v2.makeStringArshaler.func1
+         0     0% 12.83%      2.15s  6.52%  encoding/json/v2.Unmarshal
+     0.01s  0.03% 12.86%      2.11s  6.40%  js-wf/internal/retainedgraph.upload
+         0     0% 12.86%      2.11s  6.40%  js-wf/wf.AwaitSignal
+         0     0% 12.86%      2.05s  6.22%  js-wf/internal/graphpublication.stageStore.Put
+     0.03s 0.091% 12.95%      2.03s  6.16%  encoding/json/v2.unmarshalDecode
+     0.01s  0.03% 12.98%      2.03s  6.16%  js-wf/internal/graphpublication.Protocol.AcquireReader
+     0.01s  0.03% 13.01%      1.97s  5.98%  js-wf/journal.(*GraphView).Close
+         0     0% 13.01%      1.97s  5.98%  runtime.gcDrainMarkWorkerFractional (inline)
+     0.01s  0.03% 13.04%      1.91s  5.79%  js-wf/wf.Call
+     0.03s 0.091% 13.13%      1.88s  5.70%  js-wf/sim.(*GraphPublicationTransport).ReadBlob
+     0.17s  0.52% 13.65%      1.87s  5.67%  runtime.growslice
+     0.07s  0.21% 13.86%      1.82s  5.52%  crypto/sha256.Sum256
+     1.12s  3.40% 17.26%      1.75s  5.31%  runtime.tryDeferToSpanScan
+         0     0% 17.26%      1.72s  5.22%  runtime.gcMarkDone
+     0.17s  0.52% 17.77%      1.65s  5.00%  encoding/json/jsontext.(*decoderState).consumeValue
+         0     0% 17.77%      1.61s  4.88%  js-wf/internal/graphpublication.Protocol.ReleaseReader
+     0.10s   0.3% 18.08%      1.57s  4.76%  encoding/json/jsontext.(*decoderState).ReadValue
+     1.36s  4.12% 22.20%      1.52s  4.61%  encoding/json/internal/jsonwire.AppendQuote
+     0.08s  0.24% 22.44%      1.51s  4.58%  encoding/json/v2.makeStructArshaler.func3
+         0     0% 22.44%      1.48s  4.49%  js-wf/sim.(*GraphPublicationTransport).finish
+     0.01s  0.03% 22.47%      1.47s  4.46%  js-wf/internal/graphpublication.Protocol.protects
+     0.03s 0.091% 22.57%      1.47s  4.46%  js-wf/internal/retainedgraph.validLink
+     0.08s  0.24% 22.81%      1.46s  4.43%  crypto/internal/fips140/sha256.(*Digest).Write
+     0.14s  0.42% 23.23%      1.46s  4.43%  encoding/json/v2.makeMapArshaler.func2
+         0     0% 23.23%      1.42s  4.31%  js-wf/wf.Run[go.shape.int] (inline)
+         0     0% 23.23%      1.42s  4.31%  js-wf/wf.runWithKind[go.shape.int]
+         0     0% 23.23%      1.42s  4.31%  runtime.gcMarkTermination
+     0.22s  0.67% 23.90%      1.41s  4.28%  encoding/json/jsontext.(*decoderState).consumeObject
+     0.01s  0.03% 23.93%      1.40s  4.25%  js-wf/internal/graphpublication.Protocol.readerRoot
+     1.36s  4.12% 28.06%      1.36s  4.12%  runtime.memmove
+         0     0% 28.06%      1.33s  4.03%  encoding/hex.EncodeToString (inline)
+         0     0% 28.06%      1.30s  3.94%  js-wf/sim.digest
+     0.03s 0.091% 28.15%      1.27s  3.85%  crypto/internal/fips140/sha256.block
+     1.24s  3.76% 31.91%      1.24s  3.76%  crypto/internal/fips140/sha256.blockSHANI
+         0     0% 31.91%      1.21s  3.67%  encoding/json/jsontext.(*Decoder).ReadValue (inline)
+         0     0% 31.91%      1.18s  3.58%  runtime.mProf_Flush
+     0.20s  0.61% 32.51%      1.18s  3.58%  runtime.mProf_FlushLocked
+     0.12s  0.36% 32.88%      1.17s  3.55%  encoding/json/jsontext.(*Encoder).WriteToken (partial-inline)
+     0.06s  0.18% 33.06%      1.12s  3.40%  js-wf/internal/retainedgraph.Root.Validate
+         0     0% 33.06%      1.10s  3.34%  bytes.Clone (inline)
+         0     0% 33.06%      1.10s  3.34%  js-wf/sim.(*GraphPublicationTransport).Get
+     0.01s  0.03% 33.09%      1.10s  3.34%  runtime.markroot
+     0.39s  1.18% 34.27%      1.05s  3.18%  encoding/json/jsontext.(*encoderState).WriteToken
+     0.06s  0.18% 34.46%      1.01s  3.06%  runtime.makeslice
+     0.02s 0.061% 34.52%      0.97s  2.94%  js-wf/journal.(*GraphStore).observe
+     0.74s  2.24% 36.76%      0.97s  2.94%  runtime.typePointers.next
+         0     0% 36.76%      0.95s  2.88%  js-wf/internal/retainedgraph.ContainsBlob
+     0.14s  0.42% 37.19%      0.90s  2.73%  runtime.mallocgcSmallNoscan
+         0     0% 37.19%      0.88s  2.67%  js-wf/internal/graphpublication.stageStore.Get
+     0.01s  0.03% 37.22%      0.88s  2.67%  js-wf/sim.(*GraphPublicationTransport).CASBlob
+     0.04s  0.12% 37.34%      0.84s  2.55%  runtime.scanSpan
+     0.55s  1.67% 39.01%      0.81s  2.46%  reflect.Value.Field
+         0     0% 39.01%      0.79s  2.40%  js-wf/internal/retainedgraph.node.validate
+     0.02s 0.061% 39.07%      0.79s  2.40%  reflect.DeepEqual
+         0     0% 39.07%      0.78s  2.37%  js-wf/sim.(*GraphPublicationTransport).CASRoot
+     0.01s  0.03% 39.10%      0.78s  2.37%  runtime.newstack
+         0     0% 39.10%      0.76s  2.31%  js-wf/internal/blobpublication.Reference.ValidFor (inline)
+     0.02s 0.061% 39.16%      0.76s  2.31%  js-wf/internal/blobpublication.validObject
+     0.01s  0.03% 39.19%      0.76s  2.31%  js-wf/internal/graphpublication.Protocol.Commit.func1
+     0.17s  0.52% 39.70%      0.76s  2.31%  reflect.deepValueEqual
+         0     0% 39.70%      0.75s  2.27%  encoding/json/jsontext.(*decoderState).consumeArray
+     0.67s  2.03% 41.73%      0.74s  2.24%  runtime.(*bucket).mp
+         0     0% 41.73%      0.72s  2.18%  encoding/hex.DecodeString
+     0.13s  0.39% 42.13%      0.72s  2.18%  runtime.wbBufFlush1
+         0     0% 42.13%      0.71s  2.15%  js-wf/internal/graphpublication.authorityKey (inline)
+     0.34s  1.03% 43.16%      0.70s  2.12%  runtime.scanblock
+         0     0% 43.16%      0.69s  2.09%  runtime.wbBufFlush
+         0     0% 43.16%      0.69s  2.09%  runtime.wbBufFlush.func1
+     0.65s  1.97% 45.13%      0.66s  2.00%  encoding/json/internal/jsonwire.ConsumeSimpleString (inline)
+     0.66s  2.00% 47.13%      0.66s  2.00%  memeqbody
+     0.03s 0.091% 47.22%      0.65s  1.97%  encoding/json/v2.makeSliceArshaler.func3
+     0.02s 0.061% 47.29%      0.64s  1.94%  js-wf/internal/graphpublication.objectAuthority
+         0     0% 47.29%      0.62s  1.88%  js-wf/sim.runGraphChild.func8
+     0.01s  0.03% 47.32%      0.62s  1.88%  runtime.(*mcache).nextFree
+         0     0% 47.32%      0.61s  1.85%  encoding/json/jsontext.export.GetBufferedEncoder (inline)
+     0.04s  0.12% 47.44%      0.61s  1.85%  encoding/json/jsontext.getBufferedEncoder
+     0.02s 0.061% 47.50%      0.60s  1.82%  runtime.(*mcache).refill
+         0     0% 47.50%      0.60s  1.82%  runtime.markrootBlock
+     0.03s 0.091% 47.59%      0.59s  1.79%  js-wf/internal/graphpublication.key
+     0.09s  0.27% 47.86%      0.58s  1.76%  crypto/internal/fips140/sha256.(*Digest).Sum
+     0.13s  0.39% 48.26%      0.58s  1.76%  runtime.concatstrings
+         0     0% 48.26%      0.57s  1.73%  js-wf/internal/retainedgraph.ValidateAppend
+         0     0% 48.26%      0.57s  1.73%  js-wf/journal.(*GraphView).Payload
+     0.32s  0.97% 49.23%      0.57s  1.73%  runtime.mallocgcSmallNoScanSC6
+         0     0% 49.23%      0.56s  1.70%  js-wf/journal.graphDecode
+         0     0% 49.23%      0.55s  1.67%  runtime.goschedImpl
+     0.55s  1.67% 50.89%      0.55s  1.67%  runtime.memclrNoHeapPointers
+     0.02s 0.061% 50.96%      0.53s  1.61%  encoding/json/jsontext.(*encoderState).AppendRaw
+     0.04s  0.12% 51.08%      0.52s  1.58%  runtime.slicebytetostring
+         0     0% 51.08%      0.50s  1.52%  js-wf/internal/retainedgraph.ContainsNode
+     0.49s  1.49% 52.56%      0.49s  1.49%  encoding/hex.Encode (inline)
+     0.23s   0.7% 53.26%      0.49s  1.49%  encoding/json/jsontext.(*encoderState).reset
+     0.16s  0.49% 53.75%      0.49s  1.49%  encoding/json/v2.makeUintArshaler.func1
+         0     0% 53.75%      0.49s  1.49%  js-wf/internal/retainedgraph.FindTree
+         0     0% 53.75%      0.49s  1.49%  js-wf/worker.(*graphDelivery).GetBytes
+     0.49s  1.49% 55.23%      0.49s  1.49%  runtime.futex
+     0.08s  0.24% 55.47%      0.48s  1.46%  gcWriteBarrier
+     0.01s  0.03% 55.51%      0.48s  1.46%  runtime.convT
+         0     0% 55.51%      0.48s  1.46%  runtime.gopreempt_m (inline)
+         0     0% 55.51%      0.48s  1.46%  runtime.morestack
+     0.02s 0.061% 55.57%      0.47s  1.43%  runtime.markroot.func1
+     0.06s  0.18% 55.75%      0.45s  1.36%  crypto/internal/fips140/sha256.(*Digest).checkSum
+         0     0% 55.75%      0.45s  1.36%  js-wf/sim.runGraphChild.func7
+     0.41s  1.24% 56.99%      0.45s  1.36%  runtime.heapArenaOf (inline)
+     0.02s 0.061% 57.05%      0.45s  1.36%  runtime.schedule
+     0.08s  0.24% 57.29%      0.44s  1.33%  runtime.mallocgcSmallScanNoHeader
+     0.15s  0.45% 57.75%      0.43s  1.30%  js-wf/sim.(*Scheduler).RecordTransport
+     0.05s  0.15% 57.90%      0.43s  1.30%  runtime.(*mcentral).cacheSpan
+         0     0% 57.90%      0.42s  1.27%  encoding/json.Unmarshal (inline)
+     0.01s  0.03% 57.93%      0.42s  1.27%  encoding/json/jsontext.(*decoderState).CheckNextValue
+     0.41s  1.24% 59.18%      0.41s  1.24%  encoding/hex.Decode
+     0.04s  0.12% 59.30%      0.41s  1.24%  encoding/json/v2.makeStringArshaler.func2
+     0.03s 0.091% 59.39%      0.41s  1.24%  runtime.(*sweepLocked).sweep
+     0.11s  0.33% 59.72%      0.40s  1.21%  encoding/json/jsontext.(*decoderState).fetch
+     0.01s  0.03% 59.75%      0.39s  1.18%  js-wf/internal/graphpublication.validObject
+     0.02s 0.061% 59.81%      0.39s  1.18%  reflect.New
+     0.06s  0.18% 59.99%      0.39s  1.18%  runtime.rawstringtmp
+     0.01s  0.03% 60.02%      0.38s  1.15%  runtime.(*unwinder).next
+         0     0% 60.02%      0.38s  1.15%  runtime.findRunnable
+     0.21s  0.64% 60.66%      0.37s  1.12%  runtime.findObject
+         0     0% 60.66%      0.37s  1.12%  runtime.scanstack
+         0     0% 60.66%      0.35s  1.06%  js-wf/internal/retainedgraph.digest
+         0     0% 60.66%      0.35s  1.06%  runtime.bgsweep
+         0     0% 60.66%      0.35s  1.06%  runtime.futexwakeup
+         0     0% 60.66%      0.35s  1.06%  runtime.notewakeup
+     0.12s  0.36% 61.03%      0.35s  1.06%  runtime.pcvalue
+     0.04s  0.12% 61.15%      0.35s  1.06%  runtime.sweepone
+     0.03s 0.091% 61.24%      0.34s  1.03%  js-wf/sim.graphRootCopy (inline)
+         0     0% 61.24%      0.34s  1.03%  js-wf/wf.Outcome.ResultBytes
+         0     0% 61.24%      0.34s  1.03%  js-wf/worker.(*graphDelivery).prepareChildSignal
+         0     0% 61.24%      0.33s  1.00%  encoding/json/jsontext.(*decoderState).consumeString
+         0     0% 61.24%      0.33s  1.00%  encoding/json/v2.makePointerArshaler.func3
+         0     0% 61.24%      0.33s  1.00%  runtime.copystack
+     0.05s  0.15% 61.39%      0.33s  1.00%  runtime.mapaccess2_faststr
+     0.01s  0.03% 61.42%      0.33s  1.00%  runtime.rawstring (inline)
+     0.04s  0.12% 61.54%      0.33s  1.00%  runtime.typedmemmove
+     0.02s 0.061% 61.60%      0.32s  0.97%  encoding/json/v2.makeTimeArshaler.func3
+     0.05s  0.15% 61.75%      0.32s  0.97%  runtime.bulkBarrierPreWrite
+     0.02s 0.061% 61.81%      0.32s  0.97%  runtime.concatstring4
+     0.02s 0.061% 61.87%      0.31s  0.94%  encoding/json/v2.lookupArshaler
+         0     0% 61.87%      0.31s  0.94%  js-wf/journal.(*GraphStore).Read.func1
+         0     0% 61.87%      0.31s  0.94%  runtime.(*mcentral).uncacheSpan
+         0     0% 61.87%      0.31s  0.94%  runtime.lock (inline)
+     0.05s  0.15% 62.03%      0.31s  0.94%  runtime.lock2
+         0     0% 62.03%      0.31s  0.94%  runtime.lockWithRank (inline)
+     0.18s  0.55% 62.57%      0.30s  0.91%  internal/sync.(*HashTrieMap[go.shape.interface {},go.shape.interface {}]).Load
+         0     0% 62.57%      0.30s  0.91%  js-wf/worker.(*Worker).execute.func1
+     0.08s  0.24% 62.81%      0.30s  0.91%  runtime.(*unwinder).resolveInternal
+         0     0% 62.81%      0.30s  0.91%  sync.(*Map).Load (inline)
+     0.03s 0.091% 62.91%      0.29s  0.88%  encoding/json/v2.makeBytesArshaler.func1
+     0.03s 0.091% 63.00%      0.29s  0.88%  js-wf/internal/retainedgraph.canonicalRecord
+         0     0% 63.00%      0.29s  0.88%  js-wf/worker.(*graphDelivery).close (inline)
+         0     0% 63.00%      0.29s  0.88%  reflect.unsafe_New
+     0.01s  0.03% 63.03%      0.28s  0.85%  js-wf/sim.graphFenceCopy (inline)
+     0.01s  0.03% 63.06%      0.28s  0.85%  runtime.forEachP (inline)
+         0     0% 63.06%      0.27s  0.82%  runtime.forEachP.func1
+     0.01s  0.03% 63.09%      0.27s  0.82%  runtime.forEachPInternal
+     0.02s 0.061% 63.15%      0.27s  0.82%  runtime.newobject
+     0.01s  0.03% 63.18%      0.26s  0.79%  js-wf/sim.(*Scheduler).Finish
+     0.12s  0.36% 63.54%      0.26s  0.79%  runtime.mallocgcSmallNoScanSC4
+     0.01s  0.03% 63.57%      0.26s  0.79%  runtime.procyield (inline)
+     0.26s  0.79% 64.36%      0.26s  0.79%  runtime.typePointers.nextFast (inline)
+         0     0% 64.36%      0.25s  0.76%  js-wf/worker.(*Worker).execute.func10
+         0     0% 64.36%      0.25s  0.76%  js-wf/worker.boundedResultBlobPort.GetBytes
+     0.01s  0.03% 64.39%      0.25s  0.76%  runtime.(*mcentral).grow
+     0.16s  0.49% 64.88%      0.25s  0.76%  runtime.(*spanSet).push
+         0     0% 64.88%      0.25s  0.76%  runtime.concatstring2
+     0.25s  0.76% 65.64%      0.25s  0.76%  runtime.procyieldAsm
+         0     0% 65.64%      0.24s  0.73%  encoding/json/v2.makeBytesArshaler.func1.1
+     0.24s  0.73% 66.36%      0.24s  0.73%  internal/abi.Name.IsExported (inline)
+         0     0% 66.36%      0.24s  0.73%  js-wf/wf.AwaitPromise
+     0.24s  0.73% 67.09%      0.24s  0.73%  runtime.(*memRecordCycle).add (inline)
+         0     0% 67.09%      0.24s  0.73%  runtime.mProf_Malloc
+     0.12s  0.36% 67.46%      0.24s  0.73%  runtime.mallocgcSmallScanNoHeaderSC7
+     0.01s  0.03% 67.49%      0.24s  0.73%  runtime.mapaccess1_faststr
+         0     0% 67.49%      0.24s  0.73%  runtime.mcall
+         0     0% 67.49%      0.24s  0.73%  runtime.profilealloc
+         0     0% 67.49%      0.24s  0.73%  runtime.startTheWorldWithSema
+     0.01s  0.03% 67.52%      0.23s   0.7%  encoding/base64.(*Encoding).AppendEncode
+         0     0% 67.52%      0.23s   0.7%  encoding/json/jsontext.export.PutBufferedEncoder
+     0.07s  0.21% 67.73%      0.23s   0.7%  encoding/json/jsontext.putBufferedEncoder
+     0.02s 0.061% 67.79%      0.23s   0.7%  encoding/json/v2.(*timeArshaler).appendMarshal
+     0.01s  0.03% 67.82%      0.23s   0.7%  js-wf/internal/graphpublication.Protocol.id
+     0.01s  0.03% 67.85%      0.23s   0.7%  runtime.(*mheap).alloc
+         0     0% 67.85%      0.23s   0.7%  runtime.callers
+         0     0% 67.85%      0.23s   0.7%  runtime.callers.func1
+         0     0% 67.85%      0.23s   0.7%  runtime.gcAssistAlloc
+         0     0% 67.85%      0.23s   0.7%  runtime.gcAssistAlloc.func2
+         0     0% 67.85%      0.23s   0.7%  runtime.gcAssistAlloc1
+     0.02s 0.061% 67.91%      0.22s  0.67%  encoding/json/jsontext.(*decoderState).consumeWhitespace
+         0     0% 67.91%      0.22s  0.67%  js-wf/sim.(*GraphPublicationTransport).Protocol.func1
+     0.01s  0.03% 67.94%      0.22s  0.67%  runtime.(*mcache).prepareForSweep
+     0.01s  0.03% 67.97%      0.22s  0.67%  runtime.(*mheap).alloc.func1
+         0     0% 67.97%      0.22s  0.67%  runtime.(*wbBuf).get2 (inline)
+         0     0% 67.97%      0.22s  0.67%  runtime.funcspdelta (inline)
+         0     0% 67.97%      0.22s  0.67%  runtime.gcDrainN
+     0.02s 0.061% 68.03%      0.22s  0.67%  runtime.mallocgcSmallNoScanSlowPath
+     0.04s  0.12% 68.15%      0.22s  0.67%  runtime.mallocgcSmallScanHeader
+     0.05s  0.15% 68.30%      0.22s  0.67%  runtime.scanObjectsSmall
+     0.21s  0.64% 68.94%      0.22s  0.67%  runtime.step
+     0.21s  0.64% 69.58%      0.21s  0.64%  encoding/base64.(*Encoding).Encode
+         0     0% 69.58%      0.21s  0.64%  js-wf/sim.(*GraphPublicationTransport).Put
+     0.02s 0.061% 69.64%      0.21s  0.64%  runtime.(*mcache).releaseAll
+     0.14s  0.42% 70.06%      0.21s  0.64%  runtime.mallocgcSmallScanNoHeaderSC5
+     0.01s  0.03% 70.09%      0.21s  0.64%  runtime.tracebackPCs
+     0.02s 0.061% 70.15%      0.21s  0.64%  time.Time.AppendFormat
+     0.20s  0.61% 70.76%      0.20s  0.61%  encoding/json/internal/jsonwire.ConsumeWhitespace (inline)
+     0.11s  0.33% 71.09%      0.20s  0.61%  internal/strconv.AppendUint
+         0     0% 71.09%      0.20s  0.61%  runtime.gcStart
+     0.01s  0.03% 71.13%      0.20s  0.61%  runtime.mapassign_faststr
+         0     0% 71.13%      0.20s  0.61%  strconv.AppendUint (inline)
+     0.10s   0.3% 71.43%      0.19s  0.58%  encoding/json/jsontext.stateMachine.MayAppendDelim (partial-inline)
+         0     0% 71.43%      0.19s  0.58%  internal/runtime/gc/scan.ScanSpanPacked (inline)
+         0     0% 71.43%      0.19s  0.58%  internal/runtime/gc/scan.ScanSpanPackedAVX512
+     0.18s  0.55% 71.97%      0.19s  0.58%  internal/runtime/gc/scan.scanSpanPackedAVX512
+         0     0% 71.97%      0.19s  0.58%  js-wf/journal.UnmarshalEntry
+         0     0% 71.97%      0.19s  0.58%  runtime.wakep
+     0.07s  0.21% 72.19%      0.19s  0.58%  sync.(*Pool).Put
+     0.04s  0.12% 72.31%      0.19s  0.58%  time.Time.appendFormatRFC3339
+         0     0% 72.31%      0.18s  0.55%  js-wf/wf.ReadGraphTerminal
+     0.04s  0.12% 72.43%      0.18s  0.55%  reflect.Value.Set
+     0.02s 0.061% 72.49%      0.18s  0.55%  runtime.(*mheap).allocSpan
+     0.06s  0.18% 72.67%      0.18s  0.55%  runtime.mallocgcSmallScanSlowPath
+         0     0% 72.67%      0.18s  0.55%  runtime.preemptM (inline)
+         0     0% 72.67%      0.18s  0.55%  runtime.signalM
+     0.02s 0.061% 72.73%      0.17s  0.52%  encoding/json.NewDecoder
+     0.11s  0.33% 73.07%      0.17s  0.52%  encoding/json/jsontext.(*stateMachine).pushObject (inline)
+     0.07s  0.21% 73.28%      0.17s  0.52%  internal/runtime/maps.(*Map).getWithoutKeySmallFastStr
+         0     0% 73.28%      0.17s  0.52%  js-wf/journal.(*GraphStore).Begin
+     0.09s  0.27% 73.55%      0.17s  0.52%  runtime.(*spanSet).pop
+         0     0% 73.55%      0.17s  0.52%  runtime.concatbyte4
+     0.02s 0.061% 73.61%      0.17s  0.52%  runtime.concatbytes
+     0.01s  0.03% 73.64%      0.17s  0.52%  runtime.preemptall
+     0.17s  0.52% 74.16%      0.17s  0.52%  runtime.tgkill
+     0.07s  0.21% 74.37%      0.17s  0.52%  sync.(*Pool).pin

@@ -9,6 +9,7 @@ on:
       - 'worker/graph_terminal*.go'
       - 'worker/graph_child*.go'
       - 'wf/graph_outcome.go'
+      - 'wf/context.go'
       - 'worker/worker.go'
       - 'worker/terminal_delivery.go'
       - 'worker/continuation.go'
@@ -40,6 +41,7 @@ on:
       - 'worker/graph_terminal*.go'
       - 'worker/graph_child*.go'
       - 'wf/graph_outcome.go'
+      - 'wf/context.go'
       - 'worker/worker.go'
       - 'worker/terminal_delivery.go'
       - 'worker/continuation.go'
@@ -104,7 +106,7 @@ jobs:
         run: |
           graph_flags=()
           if [ "$GRAPH_MODE" = race ]; then graph_flags=(-race); fi
-          go test -p=1 "${graph_flags[@]}" ./worker -run '^(TestNativeGraphWorkerReplayInputsSignalsAndResults|TestNativeGraphChildResultTransferAndReplay|TestGraphChildReplayRejectsForgedProvenance)$' -count=1 -timeout=5m -json > graph-worker-events.jsonl
+          go test -p=1 "${graph_flags[@]}" ./worker -run '^(TestNativeGraphWorkerReplayInputsSignalsAndResults|TestNativeGraphChildResultTransferAndReplay|TestGraphChildReplayRejectsForgedProvenance|TestGraphSelectedChildRequiresExactRecordedSignal)$' -count=1 -timeout=5m -json > graph-worker-events.jsonl
       - name: Canonical graph client terminal reads
         env:
           GOMAXPROCS: '1'
@@ -123,7 +125,7 @@ jobs:
         run: |
           graph_flags=()
           if [ "$GRAPH_MODE" = race ]; then graph_flags=(-race); fi
-          go test -p=1 "${graph_flags[@]}" ./sim -run '^(TestSeededGraphPublicationReplay|TestSeededGraphReadersReplay|TestSeededGraphReaderResumeReplay|TestSeededGraphCatalogReplay|TestSeededGraphApplicationReplay|TestSeededGraphJournalReplay|TestSeededGraphWorkerReplay|TestSeededGraphResultReplay|TestSeededGraphTerminalWorkerReplay|TestSeededGraphChildReplay|TestGraphPublicationTransportCopiesFaultsAndIndependentCensus|TestPinnedRegressionCorpus)$/^(graph-publication-|graph-readers-|graph-reader-resume-|graph-catalog-|graph-application-|graph-journal-|graph-worker-|graph-result-|graph-child-)' -count=1 -timeout=5m -json > graph-transport-events.jsonl
+          go test -p=1 "${graph_flags[@]}" ./sim -run '^(TestSeededGraphPublicationReplay|TestSeededGraphReadersReplay|TestSeededGraphReaderResumeReplay|TestSeededGraphCatalogReplay|TestSeededGraphApplicationReplay|TestSeededGraphJournalReplay|TestSeededGraphWorkerReplay|TestSeededGraphResultReplay|TestSeededGraphTerminalWorkerReplay|TestSeededGraphChildReplay|TestSeededGraphChildSignalReplay|TestGraphChildSeedPipelineOrdersAndJoins|TestGraphPublicationTransportCopiesFaultsAndIndependentCensus|TestPinnedRegressionCorpus)$/^(graph-publication-|graph-readers-|graph-reader-resume-|graph-catalog-|graph-application-|graph-journal-|graph-worker-|graph-result-|graph-child-)' -count=1 -timeout=5m -json > graph-transport-events.jsonl
       - uses: actions/upload-artifact@v4
         if: always()
         with:

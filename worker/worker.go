@@ -1203,6 +1203,9 @@ func (w *Worker) execute(ctx context.Context, typ, id string, l *lease.Lease, wa
 		}
 	}
 	wctx.SetTimerObserver(w.metrics.recordTimerFired)
+	if graph != nil {
+		wctx.SetChildResultValidator(graph.validateSelectedChild)
+	}
 	wctx.SetChildSupport(typ, id, input.Sequence, func(ctx context.Context, childType, childID string, childInput []byte, signalName string) error {
 		return w.startChild(ctx, childType, childID, childInput, typ, id, input.Sequence, signalName, ops)
 	})

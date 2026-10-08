@@ -138,6 +138,13 @@ func (g *graphDelivery) prepareChildSignal(ctx context.Context, entry *journal.E
 
 // Child identity comes only from the runtime request already in this journal.
 func (g *graphDelivery) childRequest(name string) (*graphChildResult, error) {
+	if g.children != nil {
+		child, ok := g.children[name]
+		if !ok {
+			return nil, nil
+		}
+		return &child, nil
+	}
 	var child *graphChildResult
 	for _, record := range g.records {
 		if record.Kind != journal.StepRequested {
@@ -204,6 +211,63 @@ func (g *graphDelivery) validateChildSignal(ctx context.Context, entry journal.E
 	}
 	var outcome wf.Outcome
 	if json.Unmarshal(payload, &outcome) != nil || outcome.InvSeq != event.Child.Invocation || outcome.ResultRef != event.Child.Ref || outcome.ResultHash != event.Child.Hash {
+		return wf.ErrCorruptJournal
+	}
+	return nil
+}
+
+// Index only explicit runtime declarations; arbitrary user JSON stays opaque.
+func (g *graphDelivery) registerChildDeclarations(entry journal.Entry) error {
+	if entry.Kind == journal.StepRequested && g.children != nil {
+		var request struct {
+			Kind string `json:"kind"`
+			Name string `json:"name"`
+			Type string `json:"child_type"`
+			ID   string `json:"child_id"`
+		}
+		if json.Unmarshal(entry.Payload, &request) != nil {
+			return journal.ErrGap
+		}
+		if request.Kind == "call" || request.Kind == "call_async" {
+			if _, exists := g.children[request.Name]; exists {
+				return journal.ErrGap
+			}
+			if identity.Validate(request.Type, request.ID) != nil {
+				return journal.ErrGap
+			}
+			g.children[request.Name] = graphChildResult{Type: request.Type, ID: request.ID}
+		}
+	}
+	if entry.Kind == journal.SignalConsumed && g.childSignals != nil {
+		var event signalRecord
+		if json.Unmarshal(entry.Payload, &event) != nil {
+			return journal.ErrGap
+		}
+		if event.Child != nil {
+			if _, exists := g.childSignals[event.Sequence]; exists {
+				return journal.ErrGap
+			}
+			g.childSignals[event.Sequence] = event
+		}
+	}
+	return nil
+}
+
+// A child-named user signal consumed before the request is ordinary journal
+// data. It cannot later bypass runtime provenance by matching a Call's name.
+func (g *graphDelivery) validateSelectedChild(ctx context.Context, signal wf.Signal) error {
+	event, ok := g.childSignals[signal.Sequence]
+	if !ok || event.Name != signal.Name || event.Child == nil {
+		return wf.ErrCorruptJournal
+	}
+	if err := ctx.Err(); err != nil {
+		return err
+	}
+	if event.Ref != "" {
+		if graphHash(signal.Payload) != event.Hash {
+			return wf.ErrCorruptJournal
+		}
+	} else if !bytes.Equal(event.Payload, signal.Payload) {
 		return wf.ErrCorruptJournal
 	}
 	return nil

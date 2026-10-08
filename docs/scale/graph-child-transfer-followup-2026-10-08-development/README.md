@@ -1,0 +1,9 @@
+# Child-transfer follow-up development
+
+The frozen c1cf238 attempt remains failed at its original five-minute10000-schedule limit; it is preserved separately. A1000-schedule profile shows trace JSON encoding costs about21% of sampled CPU. A bounded full-image trace-hash cache preserved every old trace but did not improve observed runtime (28.559s/29.388s including additional controls), so that experiment and its tests were removed from active source. Their exact draft files and logs remain here. No transport result, authority observation or trace content is cached in the final implementation.
+
+The child test now has two independent schedules in flight under the same test process CPU/memory/time budget. Each has private production worker/model state and exact generated/replayed trace equality. Results and completion counters are checked in seed order; at most two result slots exist, and workers join on cleanup. The1000-schedule loop passes24.010s with all553 previous pins unchanged. This observation is not final10000-schedule acceptance or a statistical performance comparison.
+
+Review also found an unverified child-named ordinary signal could precede a runtime child request and then be accepted by Call/AwaitPromise. Graph workers now validate the exact selected signal sequence/name/bytes against already recorded child provenance before accepting it. Parent-owned ordinary result bytes alone do not prove child provenance. Four new shared-model cuts cover sync/async with forged inline values and valid parent-owned external references; they pass1000 schedules and exact replay with zero effects and canonical failure. Happy native R1/R3 child transfer/replay still passes after the validator change. Runtime declaration indexes also avoid repeated full-history scans.
+
+All artifacts here are development evidence. Frozen qualification follows at the next committed source with the original limits; the full implementation plan remains incomplete.

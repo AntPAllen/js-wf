@@ -1,0 +1,59 @@
+package sim
+
+import (
+	"encoding/json"
+	"fmt"
+	"testing"
+	"time"
+
+	"js-wf/internal/graphpublication"
+	"js-wf/internal/retainedgraph"
+)
+
+func TestGraphTraceFingerprintPreservesImagesAndMutation(t *testing.T) {
+	m := NewGraphPublicationTransport(NewScheduler(1))
+	check := func(subject string, value any) {
+		t.Helper()
+		data, err := json.Marshal(value)
+		if err != nil {
+			t.Fatal(err)
+		}
+		expected := digest(data)
+		for i := 0; i < 2; i++ {
+			if got := m.traceFingerprint(subject, value); got != expected {
+				t.Fatal("trace fingerprint differs from full JSON image", subject, got, expected)
+			}
+		}
+	}
+	root := graphpublication.Root{Schema: graphpublication.ApplicationSchema, Head: 7, Application: []byte(`{"invocation":1}`), Readers: []graphpublication.ReaderPin{{ID: "reader", Expires: time.Unix(1, 0), Graph: retainedgraph.Root{Frontier: []retainedgraph.Tree{{First: 3}}}}}}
+	check("destination", root)
+	root.Application[1] = 'x'
+	root.Readers[0].Graph.Frontier[0].First++
+	check("destination", root) // Same head, mutated bytes and nested reader image.
+	root.Readers = nil
+	check("destination", root)
+	root.Readers = []graphpublication.ReaderPin{}
+	check("destination", root)
+	record := graphpublication.Record{Revision: 2, Fence: graphpublication.Fence{Intents: map[string]graphpublication.Intent{"one": {Destination: "first"}}}}
+	check("content", record)
+	intent := record.Fence.Intents["one"]
+	intent.Destination = "changed"
+	record.Fence.Intents["one"] = intent
+	check("content", record)
+	data := []byte("first")
+	check("physical", data)
+	data[0] = 'x'
+	check("physical", data)
+	check("physical", []byte(nil))
+	check("physical", []byte{})
+	check("physical", []byte(nil))
+	for i := 0; i < 130; i++ {
+		check(fmt.Sprint(i), []byte("image"))
+		if len(m.traceFingerprints) > 64 {
+			t.Fatal("unbounded trace cache")
+		}
+	}
+	check("destination", root)
+	check("content", record)
+	check("physical", data)
+}

@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"reflect"
 	"strings"
 	"testing"
 	"time"
@@ -506,17 +505,15 @@ func TestSeededGraphChildReplay(t *testing.T) {
 		}
 		t.Fatalf("FAULT_SEED=%d FAULT_TRACE=%s: %v", seed, path, cause)
 	}
+	resultFor := graphChildSeedPipeline(t, seededScheduleLimit(t), runGraphChild)
 	for seed := range seededSchedules(t) {
-		generated, e := runGraphChild(seed, nil)
+		result := resultFor(seed)
+		generated, e := result.trace, result.err
 		if e != nil {
 			fail(seed, generated, e)
 		}
 		mode := generated.Decisions[0].Chosen
 		observed[mode]++
-		replayed, e := runGraphChild(seed, &generated)
-		if e != nil || !reflect.DeepEqual(generated, replayed) {
-			fail(seed, generated, fmt.Errorf("child transfer replay differs: %v", e))
-		}
 		if dir := os.Getenv("SIM_GRAPH_CHILD_ROOT"); dir != "" && observed[mode] == 1 {
 			if e = generated.Save(filepath.Join(dir, mode+".json")); e != nil {
 				t.Fatal(e)

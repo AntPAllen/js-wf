@@ -394,3 +394,39 @@ func TestGraphChildReplayRejectsForgedProvenance(t *testing.T) {
 		}
 	}
 }
+
+func TestGraphSelectedChildRequiresExactRecordedSignal(t *testing.T) {
+	body := []byte(`{"inv_seq":7,"result":"NDI="}`)
+	child := &graphChildResult{Type: "child", ID: "c-native", Invocation: 7}
+	for _, external := range []bool{false, true} {
+		for _, mode := range []string{"valid", "missing", "foreign_sequence", "foreign_name", "foreign_bytes", "ordinary_signal"} {
+			t.Run(fmt.Sprintf("external=%v/%s", external, mode), func(t *testing.T) {
+				event := signalRecord{Sequence: 3, Name: "child_0", Payload: body, Child: child}
+				if external {
+					event.Payload = nil
+					event.Ref = "signal-owned"
+					event.Hash = graphHash(body)
+				}
+				g := &graphDelivery{childSignals: map[uint64]signalRecord{3: event}}
+				selected := wf.Signal{Sequence: 3, Name: "child_0", Payload: body}
+				switch mode {
+				case "missing":
+					delete(g.childSignals, 3)
+				case "foreign_sequence":
+					selected.Sequence = 4
+				case "foreign_name":
+					selected.Name = "foreign"
+				case "foreign_bytes":
+					selected.Payload = []byte(`{"inv_seq":8}`)
+				case "ordinary_signal":
+					event.Child = nil
+					g.childSignals[3] = event
+				}
+				err := g.validateSelectedChild(context.Background(), selected)
+				if (err == nil) != (mode == "valid") {
+					t.Fatal("selected signal provenance differs", err)
+				}
+			})
+		}
+	}
+}

@@ -1,0 +1,9 @@
+{
+  "profile_source": "4b37bd8",
+  "scope": "Unchanged c1cf238 runtime/model code during diagnostic compilation; profiling only, not frozen native/release admission.",
+  "profile_bytes": 107404,
+  "profile_sha256": "15d6cb9bf3dcc8d7cfd351b56684de05077b9ccdcfb70372c78b831784c4ea27",
+  "binary_sha256": "51c69e204394724f077e1eeb60c3415ac74301ace267866824edf60cc8ed6e92",
+  "binary_bytes": 25082502,
+  "command": "GOMAXPROCS=2 GOMEMLIMIT=512MiB SIM_SEEDS=1000 go test ./sim -run ^TestSeededGraphChildReplay$ -count=1 -timeout=5m -cpuprofile /tmp/graph-child-diagnostic-cpu.pprof -o /tmp/graph-child-diagnostic.test"
+}

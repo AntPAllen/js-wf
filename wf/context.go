@@ -72,6 +72,7 @@ type Context struct {
 	parentID                  string
 	parentInvSeq              uint64
 	startChild                func(context.Context, string, string, []byte, string) error
+	childResultValidator      func(context.Context, Signal) error
 	storeResult               func(context.Context, []byte) (string, error)
 	loadResult                func(context.Context, string) ([]byte, error)
 	promiseResults            map[string]*promiseResult
@@ -341,6 +342,19 @@ func (c *Context) SetChildSupport(parentType, parentID string, parentInvSeq uint
 	c.startChild = start
 }
 
+// SetChildResultValidator lets the runtime require provenance before a child
+// completion is accepted. It validates the exact selected signal on new and
+// replayed calls. Nil preserves the ordinary signal-backed child behavior.
+func (c *Context) SetChildResultValidator(validate func(context.Context, Signal) error) {
+	c.childResultValidator = validate
+}
+func (c *Context) validateChildResult(signal Signal) error {
+	if c.childResultValidator != nil {
+		return c.childResultValidator(c.base, signal)
+	}
+	return nil
+}
+
 func (c *Context) childID(childType string, step uint64) string {
 	material := c.parentType + ":" + c.parentID + ":" + strconv.FormatUint(c.parentInvSeq, 10) + ":" + childType + ":" + strconv.FormatUint(step, 10)
 	hash := sha256.Sum256([]byte(material))
@@ -396,6 +410,9 @@ func Call(c *Context, childType string, input []byte) ([]byte, error) {
 		c.position++
 		for _, sig := range c.signals {
 			if sig.Sequence == done.SignalSeq && sig.Name == signalName {
+				if err := c.validateChildResult(sig); err != nil {
+					return nil, err
+				}
 				var out Outcome
 				if err := json.Unmarshal(sig.Payload, &out); err != nil {
 					return nil, ErrCorruptJournal
@@ -411,6 +428,9 @@ func Call(c *Context, childType string, input []byte) ([]byte, error) {
 	for _, sig := range c.signals {
 		if sig.Name != signalName || c.usedSignals[sig.Sequence] {
 			continue
+		}
+		if err := c.validateChildResult(sig); err != nil {
+			return nil, err
 		}
 		var out Outcome
 		if err := json.Unmarshal(sig.Payload, &out); err != nil {
@@ -512,7 +532,7 @@ func AwaitPromise(c *Context, p Promise) ([]byte, error) {
 	}
 	result := c.promiseResults[p.SignalName]
 	if result == nil {
-		data, err := AwaitSignal(c, p.SignalName)
+		data, err := awaitSignal(c, p.SignalName, true)
 		if err != nil {
 			return nil, err
 		}
@@ -667,6 +687,9 @@ func Sleep(c *Context, name string, d time.Duration) error {
 // available, it records the request and asks the worker to suspend. Arrivals
 // are journaled separately by the worker before user code is replayed.
 func AwaitSignal(c *Context, name string) ([]byte, error) {
+	return awaitSignal(c, name, false)
+}
+func awaitSignal(c *Context, name string, child bool) ([]byte, error) {
 	if err := identity.ValidateToken(name); err != nil {
 		return nil, err
 	}
@@ -706,6 +729,11 @@ func AwaitSignal(c *Context, name string) ([]byte, error) {
 		c.position++
 		for _, sig := range c.signals {
 			if sig.Sequence == done.SignalSeq && sig.Name == name {
+				if child {
+					if err := c.validateChildResult(sig); err != nil {
+						return nil, err
+					}
+				}
 				return sig.Payload, nil
 			}
 		}
@@ -714,6 +742,11 @@ func AwaitSignal(c *Context, name string) ([]byte, error) {
 	for _, sig := range c.signals {
 		if sig.Name != name || c.usedSignals[sig.Sequence] {
 			continue
+		}
+		if child {
+			if err := c.validateChildResult(sig); err != nil {
+				return nil, err
+			}
 		}
 		payload, _ := json.Marshal(completion{SignalSeq: sig.Sequence})
 		if err := c.next(StepCompleted, payload); err != nil {

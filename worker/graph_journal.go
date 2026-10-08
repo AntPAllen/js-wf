@@ -55,6 +55,8 @@ type graphDelivery struct {
 	pending        map[string][]byte
 	input          []byte
 	invocationPort InvocationPort
+	childSignals   map[uint64]signalRecord
+	children       map[string]graphChildResult
 }
 
 func openGraphDelivery(ctx context.Context, s *journal.GraphStore, typ, id string, invocation uint64) (g *graphDelivery, err error) {
@@ -65,7 +67,7 @@ func openGraphDelivery(ctx context.Context, s *journal.GraphStore, typ, id strin
 	if err != nil {
 		return nil, err
 	}
-	g = &graphDelivery{store: s, typ: typ, id: id, invocation: invocation, view: view, refs: map[string]graphPayload{}, pending: map[string][]byte{}}
+	g = &graphDelivery{store: s, typ: typ, id: id, invocation: invocation, view: view, refs: map[string]graphPayload{}, pending: map[string][]byte{}, childSignals: map[uint64]signalRecord{}, children: map[string]graphChildResult{}}
 	defer func() {
 		if err != nil {
 			_ = view.Close(ctx)
@@ -175,6 +177,9 @@ func graphReferences(entry journal.Entry) (map[string]string, error) {
 }
 
 func (g *graphDelivery) register(record journal.GraphRecord) error {
+	if err := g.registerChildDeclarations(record.Entry); err != nil {
+		return err
+	}
 	refs, err := graphReferences(record.Entry)
 	if err != nil {
 		return err
