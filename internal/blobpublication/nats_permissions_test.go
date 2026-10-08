@@ -24,6 +24,11 @@ func TestAuthoritySubjectAccessRejectsInvalidNamespaces(t *testing.T) {
 			t.Fatal("unsafe permission namespace admitted", values)
 		}
 	}
+	for _, bucket := range []string{"", "bucket.*", "bucket.name", "bucket\nname", "bucket name"} {
+		if _, err := NativeSubjectAccess("AUTH", "wf.auth", "$JS.API", bucket, false); err == nil {
+			t.Fatal("unsafe object permission bucket admitted", bucket)
+		}
+	}
 }
 
 func TestNativeAuthorityRuntimePermissions(t *testing.T) {

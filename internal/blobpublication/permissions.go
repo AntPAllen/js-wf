@@ -30,3 +30,31 @@ func AuthoritySubjectAccess(name, prefix, apiPrefix string) (SubjectAccess, erro
 		Subscribe: []string{"_INBOX.>"},
 	}, nil
 }
+
+// NativeSubjectAccess adds one isolated native ObjectStore bucket to the
+// authority policy. SDK object reads create ephemeral consumers in that bucket.
+// A collector can also purge that bucket; NATS permissions cannot constrain
+// the purge request body to chunk subjects. Collector credentials therefore
+// belong only to the trusted protocol implementation, never ordinary publishers.
+// Both roles can publish arbitrary object metadata and must be trusted adapters.
+func NativeSubjectAccess(name, prefix, apiPrefix, bucket string, collector bool) (SubjectAccess, error) {
+	access, err := AuthoritySubjectAccess(name, prefix, apiPrefix)
+	if err != nil {
+		return SubjectAccess{}, err
+	}
+	if !validID(strings.ReplaceAll(bucket, "_", "-")) {
+		return SubjectAccess{}, errors.New("invalid native permission bucket")
+	}
+	stream := "OBJ_" + bucket
+	access.Publish = append(access.Publish,
+		"$O."+bucket+".C.*", "$O."+bucket+".M.*",
+		apiPrefix+".STREAM.INFO."+stream, apiPrefix+".STREAM.MSG.GET."+stream,
+		apiPrefix+".CONSUMER.CREATE."+stream+".*.$O."+bucket+".C.*",
+		"$JS.FC."+stream+".>",
+		apiPrefix+".CONSUMER.INFO."+stream+".*",
+		apiPrefix+".CONSUMER.DELETE."+stream+".*")
+	if collector {
+		access.Publish = append(access.Publish, apiPrefix+".STREAM.PURGE."+stream)
+	}
+	return access, nil
+}
