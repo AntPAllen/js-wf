@@ -860,6 +860,12 @@ func (w *Worker) execute(ctx context.Context, typ, id string, l *lease.Lease, wa
 	if err != nil {
 		return err
 	}
+	if input == nil || input.Sequence == 0 {
+		return wf.ErrCorruptJournal
+	}
+	if input.Header.Get(journal.GraphStartTokenHeader) != "" && (w.graphJournal == nil || !w.graphJournal.CanonicalStarts()) {
+		return wf.ErrCorruptJournal
+	}
 	var graph *graphDelivery
 	if w.graphJournal != nil {
 		if !validGraphHash(input.Header.Get("Wf-Input-SHA256")) {
@@ -925,7 +931,15 @@ func (w *Worker) execute(ctx context.Context, typ, id string, l *lease.Lease, wa
 		*cancelledTimerNoOp = true
 	}
 	inputData := input.Data
-	if graph != nil && len(records) > 0 {
+	if graph != nil && w.graphJournal.CanonicalStarts() {
+		if err = graph.view.ValidateStartInvocation(ctx, input); err != nil {
+			return err
+		}
+		inputData, err = graph.view.StartInput(ctx)
+		if err != nil {
+			return err
+		}
+	} else if graph != nil && len(records) > 0 {
 		inputData, err = graph.GetBytes(ctx, "input:"+input.Header.Get("Wf-Input-SHA256"))
 		if err != nil {
 			return err

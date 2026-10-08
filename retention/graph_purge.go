@@ -124,6 +124,9 @@ func purgeGraphWithPort(ctx context.Context, port GraphPurgePort, graph *journal
 					err = closeErr
 				}
 			}()
+			if err = view.ValidateStartInvocation(ctx, &jetstream.RawStreamMsg{Subject: identity.InvocationSubject(typ, id), Sequence: input.Sequence, Header: input.Header, Data: input.Data}); err != nil {
+				return
+			}
 			var terminal wf.GraphTerminal
 			terminal, err = wf.ReadGraphTerminal(ctx, view, input.Sequence, graph.PayloadReadLimit())
 			if err != nil {

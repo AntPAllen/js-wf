@@ -15,6 +15,7 @@ import (
 )
 
 type PurgeInvocation struct {
+	Data     []byte `json:",omitempty"`
 	Sequence uint64
 	Header   nats.Header
 }
@@ -88,7 +89,7 @@ func (p *jetStreamPurgePort) Invocation(ctx context.Context, subject string) (Pu
 	if err != nil {
 		return PurgeInvocation{}, err
 	}
-	return PurgeInvocation{Sequence: message.Sequence, Header: message.Header}, nil
+	return PurgeInvocation{Sequence: message.Sequence, Header: message.Header, Data: append([]byte(nil), message.Data...)}, nil
 }
 
 func (p *jetStreamPurgePort) State(ctx context.Context, key string) (PurgeState, error) {

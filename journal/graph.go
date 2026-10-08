@@ -18,6 +18,7 @@ import (
 )
 
 const graphCursorSchema = "js-wf-graph-journal-cursor-v1"
+const graphStartCursorSchema = "js-wf-graph-runtime-cursor-v2"
 const graphEntrySchema = "js-wf-graph-journal-entry-v1"
 const MaxGraphEntryBytes = 1 << 20
 const DefaultGraphPayloadLimit = 64 << 20
@@ -33,19 +34,24 @@ type GraphConfig struct {
 	// PayloadReadLimit bounds runtime input/result/signal reads. Direct GraphView
 	// callers can supply their own explicit bound. Zero selects 64MiB.
 	PayloadReadLimit int
+	// CanonicalStarts selects the versioned input/pending-start lifecycle.
+	// Existing legacy/v3 histories require explicit import before enabling it.
+	CanonicalStarts bool
 }
 
 type GraphStore struct{ cfg GraphConfig }
 
 type graphCursor struct {
-	Schema     string `json:"schema"`
-	Invocation uint64 `json:"invocation"`
-	Base       uint64 `json:"base"`
-	Count      uint64 `json:"count"`
-	Epoch      uint64 `json:"epoch"`
-	Kind       Kind   `json:"kind"`
-	Retired    bool   `json:"retired"`
-	Purging    bool   `json:"purging,omitempty"`
+	Schema             string      `json:"schema"`
+	Invocation         uint64      `json:"invocation"`
+	Base               uint64      `json:"base"`
+	Count              uint64      `json:"count"`
+	Epoch              uint64      `json:"epoch"`
+	Kind               Kind        `json:"kind"`
+	Retired            bool        `json:"retired"`
+	Purging            bool        `json:"purging,omitempty"`
+	Start              *GraphStart `json:"start,omitempty"`
+	PreviousInvocation uint64      `json:"previous_invocation,omitempty"`
 }
 
 type graphEntry struct {
@@ -76,6 +82,7 @@ func NewGraphStore(cfg GraphConfig) (*GraphStore, error) {
 
 // PayloadReadLimit is the explicit byte budget for configured runtime reads.
 func (s *GraphStore) PayloadReadLimit() int { return s.cfg.PayloadReadLimit }
+func (s *GraphStore) CanonicalStarts() bool { return s.cfg.CanonicalStarts }
 
 func graphDestination(typ, id string) (string, error) {
 	if err := identity.Validate(typ, id); err != nil {
@@ -117,15 +124,24 @@ func (s *GraphStore) observe(ctx context.Context, typ, id string) (string, graph
 	if root.Graph.Validate() != nil {
 		return destination, root, nil, ErrGap
 	}
-	if root.Head == 0 && root.Schema == graphpublication.Schema && root.Graph.Count == 0 && root.Token == "" && len(root.Readers) == 0 && len(root.Application) == 0 {
+	if (root.Head == 0 || s.cfg.CanonicalStarts) && root.Schema == graphpublication.Schema && root.Graph.Count == 0 && root.Token == "" && len(root.Readers) == 0 && len(root.Application) == 0 && len(root.Streams) == 0 {
 		return destination, root, nil, nil
 	}
-	if root.Schema != graphpublication.ApplicationSchema || root.Head == 0 || len(root.Application) == 0 || len(root.Application) > graphpublication.MaxApplicationBytes {
+	rootSchema, cursorSchema := graphpublication.ApplicationSchema, graphCursorSchema
+	if s.cfg.CanonicalStarts {
+		rootSchema, cursorSchema = graphpublication.StreamsSchema, graphStartCursorSchema
+	}
+	if root.Schema != rootSchema || root.Head == 0 || len(root.Application) == 0 || len(root.Application) > graphpublication.MaxApplicationBytes {
 		return destination, root, nil, ErrGap
 	}
 	var c graphCursor
-	if graphDecode(root.Application, &c) != nil || c.Schema != graphCursorSchema || c.Invocation == 0 || c.Count > MaxEntries || c.Base > math.MaxUint64-c.Count {
+	if graphDecode(root.Application, &c) != nil || c.Schema != cursorSchema || !s.cfg.CanonicalStarts && (c.Invocation == 0 || c.Start != nil || c.PreviousInvocation != 0) || c.Count > MaxEntries || c.Base > math.MaxUint64-c.Count {
 		return destination, root, nil, ErrGap
+	}
+	if s.cfg.CanonicalStarts {
+		if err := validateStartCursor(root, c, typ, id, s.cfg.PayloadReadLimit); err != nil {
+			return destination, root, nil, err
+		}
 	}
 	if c.Count == 0 {
 		if c.Kind != "" || c.Epoch != 0 || c.Retired {
@@ -168,6 +184,12 @@ func (s *GraphStore) Begin(ctx context.Context, typ, id string, invocation uint6
 	destination, root, c, err := s.observe(ctx, typ, id)
 	if err != nil {
 		return 0, err
+	}
+	if s.cfg.CanonicalStarts {
+		if c == nil || c.Invocation != invocation || c.Retired || c.Purging {
+			return 0, ErrStale
+		}
+		return c.Base + c.Count, nil
 	}
 	next := graphCursor{Schema: graphCursorSchema, Invocation: invocation}
 	if c != nil {

@@ -107,6 +107,10 @@ func (g *graphDelivery) prepareChildSignal(ctx context.Context, entry *journal.E
 		// parent owns a separate copy; release uncertainty cannot revoke it.
 		_ = view.Close(cleanup)
 	}
+	if err = view.ValidateStartInvocation(ctx, input); err != nil {
+		close()
+		return nil, err
+	}
 	verified, err := wf.ReadGraphTerminal(ctx, view, outcome.InvSeq, g.store.PayloadReadLimit())
 	if err != nil {
 		close()

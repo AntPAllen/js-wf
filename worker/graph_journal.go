@@ -18,7 +18,8 @@ import (
 // WithGraphJournal selects experimental explicit-generation journal and payload
 // ownership for deliveries, including graph-aware parent notification clients.
 // Every external terminal reader must also use graph
-// results. Legacy start/state/signal publication, import, snapshots, continuation
+// results. CanonicalStarts additionally owns Start inputs and validates source
+// pointers. State/signal publication, import, snapshots, continuation
 // migration remain separate; production online GC is not enabled. Use graph-aware
 // retention to keep child terminals until their parent publishes an owned
 // SignalConsumed copy or its canonical generation completes/retires.

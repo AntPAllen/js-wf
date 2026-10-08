@@ -22,6 +22,9 @@ func (c *Client) graphSignalAdmission(ctx context.Context, typ, id string, invoc
 	if err != nil {
 		return err
 	}
+	if status.PendingStart {
+		return ErrStartUnknown
+	}
 	if status.Invocation == 0 {
 		return nil
 	}

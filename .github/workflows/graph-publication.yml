@@ -11,6 +11,7 @@ on:
       - 'worker/graph_terminal*.go'
       - 'worker/graph_child*.go'
       - 'worker/graph_parent*.go'
+      - 'worker/graph_start*.go'
       - 'wf/graph_outcome.go'
       - 'wf/graph_child_retention*.go'
       - 'wf/context.go'
@@ -20,6 +21,7 @@ on:
       - 'client/graph_journal*.go'
       - 'client/graph_signal*.go'
       - 'client/graph_bind*.go'
+      - 'client/graph_start*.go'
       - 'client/client.go'
       - 'internal/retainedgraph/**'
       - 'sim/graph_publication*'
@@ -32,6 +34,7 @@ on:
       - 'sim/testdata/regressions/graph-catalog-*'
       - 'sim/testdata/regressions/graph-application-*'
       - 'sim/testdata/regressions/graph-streams-*'
+      - 'sim/testdata/regressions/graph-start-*'
       - 'sim/testdata/regressions/graph-journal-*'
       - 'sim/testdata/regressions/graph-worker-*'
       - 'sim/testdata/regressions/graph-result-*'
@@ -56,6 +59,7 @@ on:
       - 'worker/graph_terminal*.go'
       - 'worker/graph_child*.go'
       - 'worker/graph_parent*.go'
+      - 'worker/graph_start*.go'
       - 'wf/graph_outcome.go'
       - 'wf/graph_child_retention*.go'
       - 'wf/context.go'
@@ -65,6 +69,7 @@ on:
       - 'client/graph_journal*.go'
       - 'client/graph_signal*.go'
       - 'client/graph_bind*.go'
+      - 'client/graph_start*.go'
       - 'client/client.go'
       - 'internal/retainedgraph/**'
       - 'sim/graph_publication*'
@@ -77,6 +82,7 @@ on:
       - 'sim/testdata/regressions/graph-catalog-*'
       - 'sim/testdata/regressions/graph-application-*'
       - 'sim/testdata/regressions/graph-streams-*'
+      - 'sim/testdata/regressions/graph-start-*'
       - 'sim/testdata/regressions/graph-journal-*'
       - 'sim/testdata/regressions/graph-worker-*'
       - 'sim/testdata/regressions/graph-result-*'
@@ -123,7 +129,7 @@ jobs:
         run: |
           graph_flags=()
           if [ "$GRAPH_MODE" = race ]; then graph_flags=(-race); fi
-          go test -p=1 "${graph_flags[@]}" ./journal -run '^(TestGraphJournal|TestNativeGraphJournal)' -count=1 -timeout=5m -json > graph-journal-events.jsonl
+          go test -p=1 "${graph_flags[@]}" ./journal -run '^(TestGraphJournal|TestNativeGraphJournal|TestGraphCanonicalStart)' -count=1 -timeout=5m -json > graph-journal-events.jsonl
       - name: Native graph worker input signal result replay and drain
         env:
           GOMAXPROCS: '2'
@@ -132,7 +138,7 @@ jobs:
         run: |
           graph_flags=()
           if [ "$GRAPH_MODE" = race ]; then graph_flags=(-race); fi
-          go test -p=1 "${graph_flags[@]}" ./worker -run '^(TestNativeGraphWorkerReplayInputsSignalsAndResults|TestNativeGraphChildResultTransferAndReplay|TestGraphChildReplayRejectsForgedProvenance|TestGraphSelectedChildRequiresExactRecordedSignal|TestNativeGraphWorkerParentNotifications)$' -count=1 -timeout=5m -json > graph-worker-events.jsonl
+          go test -p=1 "${graph_flags[@]}" ./worker -run '^(TestNativeGraphWorkerReplayInputsSignalsAndResults|TestNativeGraphChildResultTransferAndReplay|TestGraphChildReplayRejectsForgedProvenance|TestGraphSelectedChildRequiresExactRecordedSignal|TestNativeGraphWorkerParentNotifications|TestNativeCanonicalStartRecoveryWorkerReplayAndPurge)$' -count=1 -timeout=5m -json > graph-worker-events.jsonl
       - name: Canonical graph repair decisions and native wakeup recovery
         env:
           GOMAXPROCS: '2'
@@ -188,7 +194,7 @@ jobs:
       fail-fast: false
       matrix:
         mode: [normal, race]
-        family: [Publication, Readers, ReaderResume, Catalog, Application, Streams, Journal, Worker, Result, TerminalWorker, Child, ChildSignal, Reconcile, Purge, SignalClient, ParentWorker, Corpus]
+        family: [Publication, Readers, ReaderResume, Catalog, Application, Streams, Journal, Worker, Result, TerminalWorker, Child, ChildSignal, Reconcile, Purge, SignalClient, ParentWorker, Start, Corpus]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-go@v5

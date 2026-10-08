@@ -212,6 +212,9 @@ func (c *Client) start(ctx context.Context, typ, id string, input []byte, parent
 	if err := identity.Validate(typ, id); err != nil {
 		return h, err
 	}
+	if c.graphJournal != nil && c.graphJournal.CanonicalStarts() {
+		return c.startCanonical(ctx, journal.GraphStartRequest{Type: typ, ID: id, ParentType: parentType, ParentID: parentID, ParentInvocation: parentInvSeq, SignalName: signalName}, input)
+	}
 	digest := sha256.Sum256(input)
 	m := &nats.Msg{Subject: identity.InvocationSubject(typ, id), Data: input, Header: nats.Header{}}
 	m.Header.Set(inputHashHeader, hex.EncodeToString(digest[:]))

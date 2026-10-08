@@ -55,7 +55,8 @@ func (p jetStreamGraphResultPort) Wait(ctx context.Context, d time.Duration) err
 
 // NewWithGraphJournal reads all terminal outcomes through the experimental
 // graph journal. Signal admission and duplicate confirmation use graph history;
-// start/signal publication still uses legacy storage. Use graph-aware retention;
+// CanonicalStarts stores Start input and pending recovery in the graph; source
+// pointers remain in WF_INV. Signals still use legacy publication. Use graph-aware retention;
 // remaining canonical publication/import migration is required before online GC.
 func NewWithGraphJournal(js jetstream.JetStream, store *journal.GraphStore) (*Client, error) {
 	if js == nil || store == nil {
@@ -68,7 +69,8 @@ func NewWithGraphJournal(js jetstream.JetStream, store *journal.GraphStore) (*Cl
 }
 
 // NewWithGraphJournalPorts runs production graph result decisions through
-// supplied transports. Start/signal publication uses supplied legacy transports,
+// supplied transports. Start uses canonical staging when enabled on the store;
+// invocation pointers and signals use supplied transports,
 // with graph-aware signal admission, retirement and duplicate confirmation.
 func NewWithGraphJournalPorts(start StartPort, signal SignalPort, results GraphResultPort, store *journal.GraphStore) (*Client, error) {
 	if start == nil || signal == nil || results == nil || store == nil {
@@ -181,6 +183,15 @@ func (c *Client) graphTerminalResult(ctx context.Context, typ, id string, invoca
 			err = closeErr
 		}
 	}()
+	if c.graphJournal.CanonicalStarts() {
+		input, e := c.graphResultPort.LastInvocation(ctx, identity.InvocationSubject(typ, id))
+		if e != nil {
+			return nil, terminal, false, e
+		}
+		if e = view.ValidateStartInvocation(ctx, input); e != nil {
+			return nil, terminal, false, e
+		}
+	}
 	verified, err := wf.ReadGraphTerminal(ctx, view, invocation, c.graphJournal.PayloadReadLimit())
 	return verified.Result, verified.Outcome, err == nil, err
 }

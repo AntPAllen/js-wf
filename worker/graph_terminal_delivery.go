@@ -77,6 +77,9 @@ func (w *Worker) graphTerminalHeldDelivery(ctx context.Context, typ, id string, 
 		}
 	}()
 	started = ops.begin()
+	if e = view.ValidateStartInvocation(ctx, input); e != nil {
+		return false, false, e
+	}
 	verified, e := wf.ReadGraphTerminal(ctx, view, input.Sequence, w.graphJournal.PayloadReadLimit())
 	ops.finish(started, "terminal_graph_read", 0, "", e)
 	if e != nil {

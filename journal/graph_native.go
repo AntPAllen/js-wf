@@ -26,6 +26,7 @@ type NativeGraphConfig struct {
 	IntentTTL        time.Duration
 	Encoding         Encoding
 	PayloadReadLimit int
+	CanonicalStarts  bool
 }
 
 var nativeGraphName = regexp.MustCompile(`^[A-Za-z0-9_-]+$`)
@@ -94,5 +95,5 @@ func OpenNativeGraphStore(ctx context.Context, js jetstream.JetStream, cfg Nativ
 	if err != nil {
 		return nil, err
 	}
-	return NewGraphStore(GraphConfig{Protocol: graphpublication.Protocol{Port: port}, Now: cfg.Now, PinTTL: cfg.PinTTL, IntentTTL: cfg.IntentTTL, Encoding: cfg.Encoding, PayloadReadLimit: cfg.PayloadReadLimit})
+	return NewGraphStore(GraphConfig{Protocol: graphpublication.Protocol{Port: port}, Now: cfg.Now, PinTTL: cfg.PinTTL, IntentTTL: cfg.IntentTTL, Encoding: cfg.Encoding, PayloadReadLimit: cfg.PayloadReadLimit, CanonicalStarts: cfg.CanonicalStarts})
 }

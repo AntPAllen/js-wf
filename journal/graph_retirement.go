@@ -10,11 +10,12 @@ import (
 // does not acquire a reader, initialize history or prove application purge
 // ordering. Callers validate terminal bytes before FencePurge.
 type GraphRetirement struct {
-	Invocation uint64
-	Tail       uint64
-	Kind       Kind
-	Purging    bool
-	Retired    bool
+	Invocation   uint64
+	Tail         uint64
+	Kind         Kind
+	Purging      bool
+	PendingStart bool `json:",omitempty"`
+	Retired      bool
 }
 
 func (s *GraphStore) InspectRetirement(ctx context.Context, typ, id string) (GraphRetirement, error) {
@@ -24,6 +25,9 @@ func (s *GraphStore) InspectRetirement(ctx context.Context, typ, id string) (Gra
 	}
 	if c == nil {
 		return GraphRetirement{}, nil
+	}
+	if s.cfg.CanonicalStarts && c.Invocation == 0 {
+		return GraphRetirement{Invocation: c.PreviousInvocation, Tail: c.Base, Retired: c.PreviousInvocation != 0, PendingStart: true}, nil
 	}
 	return GraphRetirement{Invocation: c.Invocation, Tail: c.Base + c.Count, Kind: c.Kind, Purging: c.Purging, Retired: c.Retired}, nil
 }
