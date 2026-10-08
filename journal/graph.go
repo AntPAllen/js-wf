@@ -184,7 +184,7 @@ func (s *GraphStore) Begin(ctx context.Context, typ, id string, invocation uint6
 // enlarge leaf metadata. Additional payloads and owned edges must include every
 // external result/input reference the caller intends to retain. JSON pointers
 // inside Entry.Payload do not automatically grant ownership.
-func (s *GraphStore) Append(ctx context.Context, typ, id string, invocation uint64, e Entry, expected uint64, payloads [][]byte, owned []graphpublication.OwnedPayload) (uint64, error) {
+func (s *GraphStore) Append(ctx context.Context, typ, id string, invocation uint64, e Entry, expected uint64, payloads [][]byte, owned []GraphOwnedPayload) (uint64, error) {
 	if e.Index >= MaxEntries {
 		return 0, ErrTooLong
 	}
@@ -265,12 +265,20 @@ type GraphView struct {
 	closed      bool
 }
 
+// GraphPayloadLink identifies exact immutable payload bytes in a retained view.
+// Only a verified record supplies ownership; constructing a link does not.
+type GraphPayloadLink = retainedgraph.Link
+
+// GraphOwnedPayload reuses a payload edge owned by the current live graph.
+// Append validates the index and exact receipt before accepting it.
+type GraphOwnedPayload = graphpublication.OwnedPayload
+
 type GraphRecord struct {
 	Record
-	Blobs []retainedgraph.Link
+	Blobs []GraphPayloadLink
 	// EntryBlob is the exact owned encoded entry edge. It can also be an
 	// external payload when identical bytes were deduplicated in this leaf.
-	EntryBlob retainedgraph.Link
+	EntryBlob GraphPayloadLink
 }
 
 func (s *GraphStore) Open(ctx context.Context, typ, id string, invocation uint64) (*GraphView, error) {
@@ -358,7 +366,7 @@ func (v *GraphView) Read(ctx context.Context, index uint64) (GraphRecord, error)
 }
 
 // Payload validates the exact edge in this view before reading its bytes.
-func (v *GraphView) Payload(ctx context.Context, index uint64, link retainedgraph.Link, maxBytes int) ([]byte, error) {
+func (v *GraphView) Payload(ctx context.Context, index uint64, link GraphPayloadLink, maxBytes int) ([]byte, error) {
 	record, err := v.Read(ctx, index)
 	if err != nil {
 		return nil, err

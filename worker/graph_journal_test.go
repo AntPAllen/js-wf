@@ -70,7 +70,7 @@ func TestNativeGraphWorkerReplayInputsSignalsAndResults(t *testing.T) {
 			}
 			now := time.Now().UTC()
 			p := graphpublication.Protocol{Port: port}
-			store, err := journal.NewGraphStore(journal.GraphConfig{Protocol: p, Now: func() time.Time { return now }, PinTTL: time.Minute, IntentTTL: time.Minute})
+			store, err := journal.OpenNativeGraphStore(ctx, js, journal.NativeGraphConfig{AuthorityStream: "GRAPH_WORKER_AUTH", AuthorityPrefix: "wf.graph.worker", ObjectBucket: "GRAPH_WORKER_OBJECTS", ExpectedReplicas: replicas, Now: func() time.Time { return now }, PinTTL: time.Minute, IntentTTL: time.Minute})
 			if err != nil {
 				t.Fatal(err)
 			}

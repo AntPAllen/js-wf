@@ -137,3 +137,30 @@ This is a worker/journal payload migration component, not complete canonical mig
 ### Reader cleanup contention
 
 GraphView.Close retries at most sixteen definite root CAS conflicts, reading a fresh authority head before each attempt. Each release still names the exact original reader token and snapshot. Other errors, including uncertain acknowledgement/readback, stop immediately; ambiguous release keeps the protocol's original-head reconciliation. This prevents a concurrent worker/client pin release from discarding an already validated terminal result solely due to definite metadata contention. Open and Renew also retry at most sixteen definite CAS conflicts. Open re-observes the cursor and invocation on every attempt, so retirement or generation replacement rejects rather than attaching an old cursor to a new snapshot. Renew checks local expiry before each attempt and again after the authority read; expired handles cannot be resurrected. Unknown acquisition/renewal errors are never retried. Further native concurrency/capacity qualification remains required.
+
+### Public native graph SDK configuration
+
+Applications can now configure the opt-in graph worker and terminal client without importing Go `internal` packages:
+
+```go
+cfg := journal.NativeGraphConfig{
+    AuthorityStream: "WF_GRAPH_AUTH",
+    AuthorityPrefix: "wf.graph.runtime",
+    ObjectBucket: "WF_GRAPH_OBJECTS",
+    ExpectedReplicas: 3,
+    PinTTL: time.Minute,
+    IntentTTL: time.Minute,
+    PayloadReadLimit: journal.DefaultGraphPayloadLimit,
+}
+graph, err := journal.OpenNativeGraphStore(ctx, js, cfg)
+if err != nil { return err }
+w, err := worker.New(ctx, js, workerID, handlers, worker.WithGraphJournal(graph))
+if err != nil { return err }
+c, err := client.NewWithGraphJournal(js, graph)
+```
+
+`OpenNativeGraphStore` requires existing, isolated stores and validates the graph authority and recoverable object format. It never provisions, updates, imports or collects. `ExpectedReplicas` greater than zero requires both streams to match; zero accepts the underlying adapters' structurally safe positive replica counts. Stream/bucket names use letters, digits, underscores or hyphens; bucket names are at most32 bytes. Authority prefixes are dot-separated tokens from the same alphabet. Zero TTLs/payload budget select the existing graph defaults; zero encoding selects JSON.
+
+For **new** isolated deployments, an administrator can obtain the exact authority/object configurations with `journal.NativeGraphStreamConfigs(cfg, replicas)` and explicitly provision them with `js.CreateStream`. Replica counts must be1–5 and match a nonzero `ExpectedReplicas`. Existing streams must be preserved; this helper does not provide an update/adoption path. Legacy runtime stores still require their ordinary provisioning because canonical input/signal/state/timer migration is incomplete.
+
+`journal.GraphPayloadLink` and `journal.GraphOwnedPayload` let SDK callers read exact edges and pass reused payloads to `Append` using public type names. These aliases preserve the underlying receipt schemas; constructing a link never grants ownership. The store still validates the current live graph and the exact source index/receipt. Retiring a graph does not prove application retention/purge ordering; callers must establish that separately. This API makes the verified opt-in component usable from external modules, while full runtime rollout and production online collection remain open.
