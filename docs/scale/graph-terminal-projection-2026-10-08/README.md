@@ -19,3 +19,13 @@ The first original-family capture attempt failed because its output directory wa
 This repairs an absent projection on a canonical terminal duplicate; it does not replace a present forged/stale mirror, introduce an atomic cross-stream lifecycle/state publication fence, provide autonomous terminal catalog recovery, or migrate snapshots, continuation, import, history, projection consumers, CLI or deployment. Legacy behavior is unchanged. Fixture graph collection does not enable production online GC.
 
 The accepted full normal 146-family suite and the live full 146-family race campaign at `2b71f1d` exclude this later change. Complete current qualification, extended fault combinations/permutations/seed campaigns and every original native/process/storage/power-loss/concurrency/capacity/matrix/actual24h/million physical-drain/default-adoption/release requirement remain open.
+
+## Frozen complete normal qualification in progress
+
+Source `5d84b63` is isolated at `/home/exedev/js-wf-terminal-projection-qualification`:
+
+```sh
+python3 scripts/check-tier1-race.py --root /home/exedev/js-wf-tier1-full147-normal1000-20261008 --seeds 1000 --no-race
+```
+
+This retains the binary and source inventories and requires every current family and pin. Terminal evidence and independent review are pending. The earlier complete race campaign remains at its original 146-family source; no duplicate full race run is started while it remains active.
