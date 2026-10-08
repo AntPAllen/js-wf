@@ -20,7 +20,7 @@ This repairs an absent projection on a canonical terminal duplicate; it does not
 
 The accepted full normal 146-family suite and the live full 146-family race campaign at `2b71f1d` exclude this later change. Complete current qualification, extended fault combinations/permutations/seed campaigns and every original native/process/storage/power-loss/concurrency/capacity/matrix/actual24h/million physical-drain/default-adoption/release requirement remain open.
 
-## Frozen complete normal qualification in progress
+## Frozen complete normal qualification accepted at 5d84b63
 
 Source `5d84b63` is isolated at `/home/exedev/js-wf-terminal-projection-qualification`:
 
@@ -28,4 +28,4 @@ Source `5d84b63` is isolated at `/home/exedev/js-wf-terminal-projection-qualific
 python3 scripts/check-tier1-race.py --root /home/exedev/js-wf-tier1-full147-normal1000-20261008 --seeds 1000 --no-race
 ```
 
-This retains the binary and source inventories and requires every current family and pin. Terminal evidence and independent review are pending. The earlier complete race campaign remains at its original 146-family source; no duplicate full race run is started while it remains active.
+This retains the binary and source inventories and requires every current family and pin. The complete normal suite passes 208 groups, all 147 families × 1,000 contiguous seed bodies and all 736 pins in 728.501 s. `complete-normal1000/` contains executed independent review of 3,028 selected inputs against Git and unchanged before/after, exact coverage and retained binary/event integrity. The earlier complete race campaign remains at its original 146-family source; no duplicate full race run is started while it remains active.

@@ -1,5 +1,9 @@
 # Implementation status against the supplied plan
 
+## Complete normal 147-family suite accepted — 2026-10-08
+
+At isolated frozen `5d84b63`, the complete normal default suite passes 208 groups, all 147 families × 1,000 contiguous seed bodies and all 736 pins in 728.501 s. Executed independent review verifies 3,028 selected inputs against Git and unchanged before/after, exact coverage and retained binary/event integrity. [Evidence](scale/graph-terminal-projection-2026-10-08/complete-normal1000/). This includes absent terminal projection repair, excludes later catalog-discovery changes and does not qualify the complete race or extended suites. The original full 146-family race campaign remains active unchanged at `2b71f1d` under its 180-minute budget. All remaining runtime/native/scale/24h/million physical-drain/adoption/release gates remain required.
+
 ## Complete current 147-family normal qualification in progress — 2026-10-08
 
 The complete normal default suite is running from isolated frozen `5d84b63`, requiring all 147 seeded families × 1,000 contiguous bodies and all 736 pins. Binaries/source inventories/commands/events are retained under `/home/exedev/js-wf-tier1-full147-normal1000-20261008`; terminal evidence and independent review remain pending. The original complete 146-family race campaign remains active unchanged at `2b71f1d` under its 180-minute budget and is not a qualification of the later projection repair. Component normal/race results, accepted frozen normal results and every original remaining runtime/native/extended/scale/24h/million physical-drain/default-adoption/release gate retain their distinct scopes.
