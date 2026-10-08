@@ -218,3 +218,12 @@ Graph-configured clients use canonical lifecycle for ordinary signals, Cancel, S
 A duplicate whose source signal has been deleted must match exactly one canonical SignalConsumed record in the observed generation. Name, sequence, payload hash and bytes must match; an external reference requires the record's exact graph-owned edge. Legacy WF_JRN decoys, malformed/doubled consumption and unowned external bytes cannot authorize confirmation. Reader uncertainty/cleanup failures propagate and no wakeup is authorized.
 
 Invocation/lifecycle are rechecked before PublishSignal and again before EnqueueRun. These checks are not an atomic publication fence. An observed replacement or purge after an acknowledged publish returns the committed sequence and an error, without enqueueing; the signal itself remains retained. Start/signal transport publication, incoming external staging, graph-aware worker parent publishers and every remaining lifecycle/import/deployment path still require migration before production GC changes.
+
+
+## Graph worker parent notification clients
+
+Native and modeled worker constructors bind their client to the selected graph store after option validation. `Client.WithGraphJournal` creates a configuration copy preserving existing transports/observer and the original client. This binding covers terminal execution, replay and duplicate delivery notification; the worker's existing generation-derived child signal key is unchanged.
+
+Canonical parent purge/retirement or observed replacement permits late-notification suppression. A missing parent invocation with no canonical retirement proof remains an error and prevents child ACK. Valid source-deleted duplicate notification requires matching consumed history and owned bytes; corruption/unknown graph metadata prevents ACK. A forged legacy parent tombstone cannot suppress a valid current graph parent. Existing child readers remain held through parent notification and lifecycle rechecks.
+
+Parents and children must share the selected graph runtime lifecycle. Mixed legacy parent rollout, incoming signal publication/staging and atomic publisher/purge fencing remain unqualified. The notification payload can still use legacy incoming signal staging before transfer into parent ownership; production online collection remains disabled.

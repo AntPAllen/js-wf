@@ -16,7 +16,8 @@ import (
 )
 
 // WithGraphJournal selects experimental explicit-generation journal and payload
-// ownership for deliveries. Every external terminal reader must also use graph
+// ownership for deliveries, including graph-aware parent notification clients.
+// Every external terminal reader must also use graph
 // results. Legacy start/state/signal publication, import, snapshots, continuation
 // migration remain separate; production online GC is not enabled. Use graph-aware
 // retention to keep child terminals until their parent publishes an owned
@@ -37,6 +38,13 @@ func (w *Worker) validateGraphOptions() error {
 	}
 	if w.graphJournal != nil && len(w.continuations) != 0 {
 		return fmt.Errorf("graph journal continuation/snapshot migration is incomplete")
+	}
+	if w.graphJournal != nil {
+		bound, err := w.client.WithGraphJournal(w.graphJournal)
+		if err != nil {
+			return err
+		}
+		w.client = bound
 	}
 	return nil
 }

@@ -1,32 +1,26 @@
 {
   "version": 3,
-  "seed": 4,
-  "workload": "graph_worker_terminal_delivery",
+  "seed": 2,
+  "workload": "graph_worker_parent_notification",
   "step_limit": 100000,
   "decisions": [
     {
       "at_ms": 0,
       "enabled": [
-        "ack_lost",
-        "cancelled_timer",
-        "completed",
-        "failed",
-        "forged_state",
-        "malformed_terminal",
-        "missing_state",
-        "parent_notify",
-        "parent_notify_drop",
-        "parent_notify_lost",
-        "pending",
-        "purge_after_notify",
-        "purge_marker",
-        "state_lost",
-        "unknown_graph_root",
-        "unknown_reader_pin",
-        "unowned_result",
-        "wrong_graph_generation"
+        "parent_notify_active",
+        "parent_notify_consumed_corrupt",
+        "parent_notify_consumed_external",
+        "parent_notify_consumed_inline",
+        "parent_notify_forged_mirror",
+        "parent_notify_missing_unconfirmed",
+        "parent_notify_purging",
+        "parent_notify_replaced",
+        "parent_notify_retired",
+        "parent_notify_retired_missing_inv",
+        "parent_notify_uninitialized",
+        "parent_notify_unknown"
       ],
-      "chosen": "parent_notify"
+      "chosen": "parent_notify_uninitialized"
     }
   ],
   "transport": [
@@ -954,6 +948,13 @@
     },
     {
       "at_ms": 0,
+      "operation": "graph_publication_read_root",
+      "subject": "journal/34b6f2cd0c32b15de5fe868545e316aef6e1bb660c1c1afd4a537d989ea1f9d4",
+      "data_sha256": "a783c2092db369aee83d9a37ee90da7a173390a0b3efb6e25341f7a4e4827180",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
       "operation": "graph_publication_root_keys",
       "sequence": 2,
       "data_sha256": "80f92e2d592b06da5a292399fc4269aff499ed49d084a50103ecb3de86dfbdc7",
@@ -1202,8 +1203,8 @@
     },
     {
       "at_ms": 0,
-      "operation": "check_graph_worker_terminal_delivery",
-      "outcome": "parent_notify"
+      "operation": "check_graph_worker_parent_notification",
+      "outcome": "parent_notify_uninitialized"
     }
   ]
 }
