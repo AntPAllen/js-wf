@@ -73,7 +73,7 @@ func OpenNativeAuthority(ctx context.Context, js jetstream.JetStream, name, pref
 		stream, err := js.Stream(lookup, name)
 		var p *NativeAuthority
 		if err == nil {
-			p = &NativeAuthority{js: js, stream: stream, name: name, prefix: prefix}
+			p = &NativeAuthority{js: js, stream: guardStream(stream), name: name, prefix: prefix}
 			err = p.validate(lookup)
 		}
 		stop()

@@ -80,7 +80,7 @@ func openNativePortAttempt(ctx context.Context, authority *NativeAuthority, buck
 	if err != nil {
 		return nil, fmt.Errorf("open graph object stream: %w", err)
 	}
-	p := &NativePort{NativeAuthority: authority, bucket: bucket, objectStream: stream}
+	p := &NativePort{NativeAuthority: authority, bucket: bucket, objectStream: guardStream(stream)}
 	if err = p.validateObjects(ctx); err != nil {
 		return nil, fmt.Errorf("validate graph object stream: %w", err)
 	}
