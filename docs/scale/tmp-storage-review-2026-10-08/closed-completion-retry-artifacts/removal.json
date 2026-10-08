@@ -1,0 +1,124 @@
+{
+  "committed_pushed_head": "2d75e76a09679dd3743d48a052bbbcd571a74440",
+  "roots": [
+    "/tmp/js-wf-start-repair-contention-pins-20261008",
+    "/tmp/js-wf-worker-completion-retry-pins-20261008",
+    "/tmp/js-wf-graph-worker-failure-2953318299"
+  ],
+  "fresh_s3_readback": {
+    "bytes": 355809,
+    "sha256": "e55664c5c0f40e4f6408dc7f1636cb06a2b8c5e0bcd29e6ee241460d3780e85a"
+  },
+  "closure": {
+    "blocked": {},
+    "permission_limits": [],
+    "visible_descriptors": 4376,
+    "docker_ids_including_stopped": [
+      "54f78ad2debd",
+      "460dfd2edd04",
+      "c631ca1436e8",
+      "348f3a6edb32",
+      "27b94b5d0e96"
+    ],
+    "loopdevices": {
+      "loopdevices": []
+    },
+    "mounts": {
+      "filesystems": [
+        {
+          "target": "/",
+          "source": "/dev/vda",
+          "children": [
+            {
+              "target": "/dev",
+              "source": "devtmpfs",
+              "children": [
+                {
+                  "target": "/dev/pts",
+                  "source": "devpts"
+                },
+                {
+                  "target": "/dev/shm",
+                  "source": "shm"
+                },
+                {
+                  "target": "/dev/mqueue",
+                  "source": "mqueue"
+                },
+                {
+                  "target": "/dev/hugepages",
+                  "source": "hugetlbfs"
+                }
+              ]
+            },
+            {
+              "target": "/proc",
+              "source": "proc",
+              "children": [
+                {
+                  "target": "/proc/sys/fs/binfmt_misc",
+                  "source": "systemd-1",
+                  "children": [
+                    {
+                      "target": "/proc/sys/fs/binfmt_misc",
+                      "source": "binfmt_misc"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "target": "/sys",
+              "source": "none",
+              "children": [
+                {
+                  "target": "/sys/fs/cgroup",
+                  "source": "cgroup2"
+                },
+                {
+                  "target": "/sys/kernel/security",
+                  "source": "securityfs"
+                },
+                {
+                  "target": "/sys/fs/selinux",
+                  "source": "selinuxfs"
+                },
+                {
+                  "target": "/sys/fs/bpf",
+                  "source": "bpf"
+                },
+                {
+                  "target": "/sys/kernel/debug",
+                  "source": "debugfs"
+                },
+                {
+                  "target": "/sys/kernel/tracing",
+                  "source": "tracefs"
+                }
+              ]
+            },
+            {
+              "target": "/run",
+              "source": "tmpfs",
+              "children": [
+                {
+                  "target": "/run/lock",
+                  "source": "tmpfs"
+                },
+                {
+                  "target": "/run/user/1000",
+                  "source": "tmpfs"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "original_allocated_bytes": 4177920,
+  "tmp_before": "18576\t/tmp",
+  "tmp_after": "14496\t/tmp",
+  "all_removed": true,
+  "utc": "2026-10-08T16:19:04.231716+00:00"
+}
