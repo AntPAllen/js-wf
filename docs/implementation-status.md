@@ -1,5 +1,11 @@
 # Implementation status against the supplied plan
 
+## Native graph six-actor concurrency and SDK cache guard — 2026-10-08
+
+Four candidate appenders and two collectors now race on actual native graph Port operations across four R1/R3 seed1/2 fixtures and64 candidate commits. Raw child JSON checks every acknowledged value and shared receipt, original-head winner/population constraints, monotonic heads, clean joined collection and final zero objects/physical chunks. The initial R1/seed1 race failed on unsynchronized nats.go v1.54.0 `stream.info` cache reads/writes; its complete report/source are retained. Per-owned-stream call guards now protect SDK cache access while observing waiting caller contexts; metadata CAS publications and whole protocol operations remain concurrent at the server. [Evidence, source scopes and limits](scale/graph-native-concurrency-2026-10-08/).
+
+Complete32-group graph package regression at5d85031 passes normal28.408s/race123.151s under count1/5m/twoGoCPU/512MiB, all69 selected inputs unchanged. Native timing/winner counts remain nondeterministic; this is not Tier1 replay or complete native history/partition/power-loss/scale/deployment admission. The older direct blob adapter's shared SDK handles still need review; reader retention/partial compaction/import/canonical runtime adoption and production onlineGC remain open. Original full126 SDK2827904/user unit is confirmed live unchanged at074bcfc. Complete127 current-source simulation and every original native matrix/24h/million physical drain/default-adoption/release gate remain required.
+
 ## Native graph publisher/collector roles and bounded admission — 2026-10-08
 
 Added default-deny subject allowlists for trusted graph publishers and collectors. Graph physical reads require no consumer lifecycle or flow-control grants. R1/R3 named-principal controls append/reuse/read, preserve live graphs, reconnect after original-store server restart, retire/purge chunks and retain tombstones; each fixture confirms37 exact denials, unchanged state after denied requests and zero consumers. Focused15 native/envelope/permission/admission groups at1956655 pass normal10.609s/race39.752s under count1/5m/twoGoCPU/512MiB, with66 selected Git inputs unchanged. [Evidence and trust/source limits](scale/graph-native-permissions-2026-10-08/).

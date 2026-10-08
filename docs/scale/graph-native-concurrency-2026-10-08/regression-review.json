@@ -1,0 +1,158 @@
+{
+  "frozen_source": "5d8503196448da13b65238ee83db23614dd90071",
+  "selected_inputs": 69,
+  "selected_before_after_unchanged": true,
+  "results": {
+    "normal": {
+      "elapsed": 28.408,
+      "groups": [
+        "TestNativeGraphAuthorityPersistenceAndSchemaIsolation",
+        "TestNativeGraphAuthorityReadWitness",
+        "TestGraphAuthorityCanonicalEnvelope",
+        "TestNativeGraphAuthorityUnsafeConfiguration",
+        "TestNativeGraphAuthorityRejectsMalformedWireWithoutRepair",
+        "TestNativeGraphAuthorityLostMutationReplies",
+        "TestNativeGraphAuthorityRejectsLossyDestinationEncoding",
+        "TestNativeGraphConcurrentPublishersAndCollectors",
+        "TestNativeGraphObjectAppendReuseAndRetirement",
+        "TestNativeGraphObjectReservationsLostRepliesAndLateCompletion",
+        "TestNativeGraphObjectCancellationBoundsAndUnknownChunks",
+        "TestNativeGraphObjectPublishCollectOrderAndDelayedDelete",
+        "TestNativeGraphObjectReadUncertaintyAndFormatIsolation",
+        "TestNativeGraphObjectOpeningBoundsReadOnlyAdmission",
+        "TestGraphSubjectAccessRejectsUnsafeNamespaces",
+        "TestNativeGraphRuntimePermissions",
+        "TestNativeGraphStreamGuardHonorsWaitingContext",
+        "TestGraphOwnedPayloadSeededReuseAndCompleteReclamation",
+        "TestGraphOwnedLargePayloadNotRecopied",
+        "TestGraphOwnedPayloadRejectsUnownedStaleAndAmbiguousReferences",
+        "TestGraphOwnedPayloadRetirementAndCollectorFence",
+        "TestGraphOwnedPayloadUncertainReadsAndCallerMutation",
+        "TestGraphPublicationSeededAppendsSweepAndRetirement",
+        "TestGraphPublicationCollectorAndCommitInterleavings",
+        "TestGraphPublicationUnknownRepliesNeverAdoptUploads",
+        "TestGraphPublicationForeignDestinationAndRevokedGrants",
+        "TestGraphPublicationUncertainCensusFailsClosed",
+        "TestGraphPublicationDelayedDeleteCannotTouchNewGeneration",
+        "TestGraphPublicationContextAndCopies",
+        "TestGraphPublicationMetadataBoundAndPermanentScopedGenerations",
+        "TestGraphPublicationRejectsForeignPhysicalOwner",
+        "TestGraphPublicationInvalidAcknowledgmentsAndInputBounds"
+      ],
+      "concurrency_fixtures": [
+        {
+          "replicas": 1,
+          "seed": 1,
+          "attempts": 16,
+          "committed": 2,
+          "aborted": 14
+        },
+        {
+          "replicas": 1,
+          "seed": 2,
+          "attempts": 16,
+          "committed": 0,
+          "aborted": 16
+        },
+        {
+          "replicas": 3,
+          "seed": 1,
+          "attempts": 16,
+          "committed": 1,
+          "aborted": 15
+        },
+        {
+          "replicas": 3,
+          "seed": 2,
+          "attempts": 16,
+          "committed": 2,
+          "aborted": 14
+        }
+      ],
+      "attempts": 64,
+      "count": 1,
+      "timeout": "5m",
+      "GOMAXPROCS": 2,
+      "GOMEMLIMIT": "512MiB",
+      "race": false,
+      "events_sha256": "1fb64c8c07b41f9653d9d3c6c3027612a29d046e884200789751943a3da7fd51"
+    },
+    "race": {
+      "elapsed": 123.151,
+      "groups": [
+        "TestNativeGraphAuthorityPersistenceAndSchemaIsolation",
+        "TestNativeGraphAuthorityReadWitness",
+        "TestGraphAuthorityCanonicalEnvelope",
+        "TestNativeGraphAuthorityUnsafeConfiguration",
+        "TestNativeGraphAuthorityRejectsMalformedWireWithoutRepair",
+        "TestNativeGraphAuthorityLostMutationReplies",
+        "TestNativeGraphAuthorityRejectsLossyDestinationEncoding",
+        "TestNativeGraphConcurrentPublishersAndCollectors",
+        "TestNativeGraphObjectAppendReuseAndRetirement",
+        "TestNativeGraphObjectReservationsLostRepliesAndLateCompletion",
+        "TestNativeGraphObjectCancellationBoundsAndUnknownChunks",
+        "TestNativeGraphObjectPublishCollectOrderAndDelayedDelete",
+        "TestNativeGraphObjectReadUncertaintyAndFormatIsolation",
+        "TestNativeGraphObjectOpeningBoundsReadOnlyAdmission",
+        "TestGraphSubjectAccessRejectsUnsafeNamespaces",
+        "TestNativeGraphRuntimePermissions",
+        "TestNativeGraphStreamGuardHonorsWaitingContext",
+        "TestGraphOwnedPayloadSeededReuseAndCompleteReclamation",
+        "TestGraphOwnedLargePayloadNotRecopied",
+        "TestGraphOwnedPayloadRejectsUnownedStaleAndAmbiguousReferences",
+        "TestGraphOwnedPayloadRetirementAndCollectorFence",
+        "TestGraphOwnedPayloadUncertainReadsAndCallerMutation",
+        "TestGraphPublicationSeededAppendsSweepAndRetirement",
+        "TestGraphPublicationCollectorAndCommitInterleavings",
+        "TestGraphPublicationUnknownRepliesNeverAdoptUploads",
+        "TestGraphPublicationForeignDestinationAndRevokedGrants",
+        "TestGraphPublicationUncertainCensusFailsClosed",
+        "TestGraphPublicationDelayedDeleteCannotTouchNewGeneration",
+        "TestGraphPublicationContextAndCopies",
+        "TestGraphPublicationMetadataBoundAndPermanentScopedGenerations",
+        "TestGraphPublicationRejectsForeignPhysicalOwner",
+        "TestGraphPublicationInvalidAcknowledgmentsAndInputBounds"
+      ],
+      "concurrency_fixtures": [
+        {
+          "replicas": 1,
+          "seed": 1,
+          "attempts": 16,
+          "committed": 2,
+          "aborted": 14
+        },
+        {
+          "replicas": 1,
+          "seed": 2,
+          "attempts": 16,
+          "committed": 1,
+          "aborted": 15
+        },
+        {
+          "replicas": 3,
+          "seed": 1,
+          "attempts": 16,
+          "committed": 2,
+          "aborted": 14
+        },
+        {
+          "replicas": 3,
+          "seed": 2,
+          "attempts": 16,
+          "committed": 1,
+          "aborted": 15
+        }
+      ],
+      "attempts": 64,
+      "count": 1,
+      "timeout": "5m",
+      "GOMAXPROCS": 2,
+      "GOMEMLIMIT": "512MiB",
+      "race": true,
+      "events_sha256": "57aabaa6bceac645e402a6a73f0e7fe06c9603524b06b76ccd5c69f48e395c4b"
+    }
+  },
+  "initial_failure": "R1/seed1 native race exposed pinned nats.go v1.54.0 stream.Info cache pointer races. Full failure report and exact test source retained; not a NATS server defect claim.",
+  "scope": "Complete graphpublication package standard component regression. Seeded native release order is not deterministic replay; no actual SDK process/dependency/peer-media admission, real partition/power-loss/scale/full native campaign/deployment or canonical runtime migration acceptance.",
+  "utc": "2026-10-08T04:31:56.727070+00:00"
+}
