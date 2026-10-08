@@ -45,6 +45,7 @@ on:
       - 'sim/testdata/regressions/graph-reconcile-*'
       - 'sim/testdata/regressions/graph-purge-*'
       - 'sim/testdata/regressions/graph-signal-client-*'
+      - 'sim/testdata/regressions/graph-signal-runtime-*'
       - 'sim/testdata/regressions/graph-parent-worker-*'
       - 'internal/blobpublication/**'
       - 'internal/natsstream/**'
@@ -96,6 +97,7 @@ on:
       - 'sim/testdata/regressions/graph-reconcile-*'
       - 'sim/testdata/regressions/graph-purge-*'
       - 'sim/testdata/regressions/graph-signal-client-*'
+      - 'sim/testdata/regressions/graph-signal-runtime-*'
       - 'sim/testdata/regressions/graph-parent-worker-*'
       - 'internal/blobpublication/**'
       - 'internal/natsstream/**'
@@ -205,12 +207,12 @@ jobs:
             graph-workflow-events.jsonl
   transport:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: ${{ matrix.family == 'SignalRuntime' && 25 || 10 }}
     strategy:
       fail-fast: false
       matrix:
         mode: [normal, race]
-        family: [Publication, Readers, ReaderResume, Catalog, Application, Streams, Journal, Worker, Result, TerminalWorker, Child, ChildSignal, Reconcile, Purge, SignalClient, ParentWorker, Start, StartRepair, Corpus]
+        family: [Publication, Readers, ReaderResume, Catalog, Application, Streams, Journal, Worker, Result, TerminalWorker, Child, ChildSignal, Reconcile, Purge, SignalClient, ParentWorker, Start, StartRepair, SignalRuntime, Corpus]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-go@v5
@@ -231,7 +233,9 @@ jobs:
           if [ "$GRAPH_FAMILY" = Corpus ]; then
             graph_pattern='^(TestPinnedRegressionCorpus|TestGraphPublicationTransportCopiesFaultsAndIndependentCensus|TestGraphChildSeedPipelineOrdersAndJoins|TestGraphWorkerCompletionAppendReaderInterleaving)$'
           fi
-          go test -p=1 "${graph_flags[@]}" ./sim -run "$graph_pattern" -count=1 -timeout=5m -json > graph-transport-events.jsonl
+          graph_timeout=5m
+          if [ "$GRAPH_FAMILY" = SignalRuntime ]; then graph_timeout=20m; fi
+          go test -p=1 "${graph_flags[@]}" ./sim -run "$graph_pattern" -count=1 -timeout="$graph_timeout" -json > graph-transport-events.jsonl
       - uses: actions/upload-artifact@v4
         if: always()
         with:
