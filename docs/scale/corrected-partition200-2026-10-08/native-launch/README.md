@@ -1,0 +1,5 @@
+# Corrected full200 campaign — independent native admission
+
+At frozen `2ef3e8bea19c233f14c12564b4941b721913ba6b`, actual first SDK2801348 and all three actual candidate peers are independently observed twice with exact birth/argv/cwd/environment/executable identities. All776 selected Go/module inputs match Git and retained copies;3355 selected external inputs match their captured bytes. SDK count1/nonrace/10m/18m/twoGoCPU/2GiB and original seeds1–200 are unchanged. The wrapper unit and campaign producer are bound separately to the resource-gate record and original invocation72f514b866d643b59a3b07b7cca09bc1.
+
+[Independent actual-process review](independent-launch-review.json). This is live admission only. Completed original native bodies, all faults/raw latencies/history models/final integrity/drain/source-after/closed stores require separate terminal review. Candidate coverage cannot clear the default dependency or release gate. No original failed seed was retried; this is a fresh corrected source campaign.

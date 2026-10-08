@@ -1,0 +1,88 @@
+{
+  "source": "2ef3e8bea19c233f14c12564b4941b721913ba6b",
+  "supervisor_pid": 2798859,
+  "supervisor_start_ticks": "23618368",
+  "started_utc": "2026-10-08T01:21:02.215055+00:00",
+  "status": "campaign_producer_active",
+  "native_started": true,
+  "resource_gate": {
+    "unit": "js-wf-tier1-full126-race-20261008.service",
+    "invocation_id": "8019c58f83954c1c9cb06f78d3d32319",
+    "sdk": {
+      "pid": 2778787,
+      "stat": "2778787 (sim.test) S 2778780 2778437 2778437 0 -1 4194304 27183979 913652 0 0 118884 7425 271 184 39 19 6 0 23433984 3840606208 408464 18446744073709551615 4194304 18858896 140724401173920 0 0 0 0 2 2143420157 0 0 0 17 3 0 0 0 0 0 27774976 28229600 128192512 140724401174962 140724401175064 140724401175064 140724401176516 0\n",
+      "start_ticks": "23433984",
+      "args": [
+        "/tmp/js-wf-tier1-full126-race-20261008/run/sim.test",
+        "-test.v=test2json",
+        "-test.count=1",
+        "-test.timeout=60m"
+      ],
+      "exe": "/tmp/js-wf-tier1-full126-race-20261008/run/sim.test",
+      "working_directory": "/tmp/js-wf-tier1-full126-race-20261008/source/sim",
+      "environment": {
+        "GOMEMLIMIT": "512MiB",
+        "GOMAXPROCS": "2",
+        "SIM_SEEDS": "1000",
+        "SIM_COVERAGE_SUMMARY": "1"
+      }
+    },
+    "exe_sha256": "0c22286e16fe0a22520193b2ccf6e53de464b26350357c38a676bbb84754d74a"
+  },
+  "command": [
+    "/usr/bin/python3",
+    "/tmp/js-wf-corrected-partition200-20261008/source/scripts/run-local-tier2-partition-campaign.py",
+    "--root",
+    "/tmp/js-wf-corrected-partition200-20261008/campaign",
+    "--minimum-free-bytes",
+    "21474836480",
+    "--partition-server",
+    "/tmp/js-wf-candidate-partition200-input-20261007/component/candidate-server",
+    "--partition-server-proof",
+    "docs/scale/lease-partition-component-2026-10-06/contiguous-component"
+  ],
+  "last_observed_utc": "2026-10-08T01:23:17.475249+00:00",
+  "original_sdk_live": false,
+  "original_unit": {
+    "MainPID": "0",
+    "Result": "success",
+    "ExecMainPID": "2778437",
+    "ExecMainStatus": "0",
+    "LoadState": "loaded",
+    "ActiveState": "active",
+    "SubState": "exited",
+    "InvocationID": "8019c58f83954c1c9cb06f78d3d32319"
+  },
+  "race_closed_utc": "2026-10-08T01:23:17.476076+00:00",
+  "campaign_producer_pid": 2799342,
+  "first_sdk_admission": {
+    "actual": {
+      "pid": 2801348,
+      "stat": "2801348 (integration.tes) S 2800476 2801348 2801348 0 -1 4194304 823 0 0 0 0 0 0 0 39 19 6 0 23634463 1705275392 4805 18446744073709551615 4194304 22503984 140721213141296 0 0 0 0 0 2143420159 0 0 0 17 1 0 0 0 0 0 40120320 40815552 94855168 140721213143634 140721213143813 140721213143813 140721213145002 0\n",
+      "start_ticks": "23634463",
+      "args": [
+        "/tmp/js-wf-corrected-partition200-20261008/campaign/seed-001/integration.test",
+        "-test.run=^TestMixedMatrixServerPartitionEveryThirtySeconds$",
+        "-test.count=1",
+        "-test.v",
+        "-test.timeout=18m"
+      ],
+      "exe": "/tmp/js-wf-corrected-partition200-20261008/campaign/seed-001/integration.test",
+      "working_directory": "/tmp/js-wf-corrected-partition200-20261008/source/integration",
+      "environment": {
+        "GOMAXPROCS": "2",
+        "GOMEMLIMIT": "2GiB",
+        "WF_MATRIX_CHAOS": "1",
+        "WF_MATRIX_OPERATION_TIMINGS": "1",
+        "WF_MATRIX_DURATION": "10m",
+        "WF_MATRIX_PROCESS_ROOT": "/tmp/js-wf-corrected-partition200-20261008/campaign/seed-001/originals",
+        "MATRIX_ARTIFACT_PREFIX": "/tmp/js-wf-corrected-partition200-20261008/campaign/seed-001/matrix-partition-1",
+        "FAULT_SEED": "1",
+        "WF_MATRIX_PARTITION_SERVER_BIN": "/tmp/js-wf-corrected-partition200-20261008/campaign/seed-001/partition-server.bin"
+      }
+    },
+    "exe_sha256": "0d56d4cbb53d04c37325ad18cc9e010c547e8043bc9df019e49fb6034ce2f4ba",
+    "source": "2ef3e8bea19c233f14c12564b4941b721913ba6b",
+    "stable_identity_observed_twice": true
+  }
+}
