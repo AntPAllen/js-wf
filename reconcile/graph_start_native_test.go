@@ -5,6 +5,9 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"os"
+	"path/filepath"
+	"sync"
 	"sync/atomic"
 	"testing"
 	"time"
@@ -24,7 +27,20 @@ import (
 func TestNativeGraphReconcileCanonicalPendingStarts(t *testing.T) {
 	for _, replicas := range []int{1, 3} {
 		t.Run(fmt.Sprintf("R%d", replicas), func(t *testing.T) {
-			cluster, err := testcluster.Start(t.TempDir(), replicas)
+			root := t.TempDir()
+			if base := os.Getenv("WF_GRAPH_START_REPAIR_ROOT"); base != "" {
+				if !filepath.IsAbs(base) {
+					t.Fatal("artifact root must be absolute")
+				}
+				if e := os.MkdirAll(base, 0700); e != nil {
+					t.Fatal(e)
+				}
+				root = filepath.Join(base, fmt.Sprintf("R%d", replicas))
+				if e := os.Mkdir(root, 0700); e != nil {
+					t.Fatal(e)
+				}
+			}
+			cluster, err := testcluster.Start(root, replicas)
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -113,6 +129,21 @@ func TestNativeGraphReconcileCanonicalPendingStarts(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
+			var eventsMu sync.Mutex
+			var events []string
+			record := func(kind string, value any) {
+				data, _ := json.Marshal(struct {
+					Kind  string
+					Value any
+				}{kind, value})
+				eventsMu.Lock()
+				defer eventsMu.Unlock()
+				if len(events) == 128 {
+					copy(events, events[1:])
+					events = events[:127]
+				}
+				events = append(events, string(data))
+			}
 			var effects atomic.Int64
 			var repairs atomic.Int64
 			runCtx, cancel := context.WithCancel(ctx)
@@ -126,20 +157,35 @@ func TestNativeGraphReconcileCanonicalPendingStarts(t *testing.T) {
 				}
 				return json.Marshal(value)
 			}}
-			w, err := worker.New(ctx, js, "startrepair", handlers, worker.WithGraphJournal(graph))
+			w, err := worker.New(ctx, js, "startrepair", handlers, worker.WithGraphJournal(graph), worker.WithOperationObserver(func(e worker.OperationEvent) { record("worker_operation", e) }), worker.WithDispatchObserver(func(e worker.DispatchEvent) { record("dispatch", e) }))
 			if err != nil {
 				cancel()
 				t.Fatal(err)
 			}
 			workerDone := make(chan error, 1)
 			repairDone := make(chan error, 1)
-			go func() { workerDone <- w.RunPartition(runCtx, 0) }()
+			repairStopped := make(chan struct{})
+			workerStopped := make(chan struct{})
 			go func() {
-				repairDone <- reconcile.RunRepairLoopWithGraphJournal(runCtx, js, "startrepair", "graph-start", 10*time.Millisecond, 1, graph, func(e reconcile.RepairEvent) {
+				e := w.RunPartition(runCtx, 0)
+				record("worker_exit", fmt.Sprint(e))
+				workerDone <- e
+				close(workerStopped)
+			}()
+			go func() {
+				e := reconcile.RunRepairLoopWithGraphJournal(runCtx, js, "startrepair", "graph-start", 10*time.Millisecond, 1, graph, func(e reconcile.RepairEvent) {
+					record("repair", e)
 					if e.Outcome == "acknowledged" {
 						repairs.Add(1)
 					}
-				}, nil, nil)
+				}, nil, func(e reconcile.ScanEvent) {
+					if e.Error != "" || e.Result.Reenqueued > 0 {
+						record("scan", e)
+					}
+				})
+				record("repair_exit", fmt.Sprint(e))
+				repairDone <- e
+				close(repairStopped)
 			}()
 			defer func() {
 				cancel()
@@ -152,9 +198,45 @@ func TestNativeGraphReconcileCanonicalPendingStarts(t *testing.T) {
 				if e := w.Close(); e != nil {
 					t.Error(e)
 				}
+				if t.Failed() {
+					eventsMu.Lock()
+					captured := append([]string{}, events...)
+					eventsMu.Unlock()
+					for _, event := range captured {
+						t.Log(event)
+					}
+					diag, closeDiag := context.WithTimeout(context.Background(), 3*time.Second)
+					defer closeDiag()
+					for _, id := range ids {
+						status, e := graph.InspectRetirement(diag, typ, id)
+						t.Logf("lifecycle %s: %+v %v", id, status, e)
+						source, e := inv.GetLastMsgForSubject(diag, identity.InvocationSubject(typ, id))
+						t.Logf("source %s: %+v %v", id, source, e)
+					}
+					t.Logf("native artifact root: %s", root)
+				}
 			}()
 			for _, id := range ids {
-				result, e := c.Await(ctx, typ, id)
+				type awaited struct {
+					data []byte
+					err  error
+				}
+				awaiting := make(chan awaited, 1)
+				go func() { data, e := c.Await(runCtx, typ, id); awaiting <- awaited{data, e} }()
+				var result []byte
+				var e error
+				select {
+				case value := <-awaiting:
+					result, e = value.data, value.err
+				case <-repairStopped:
+					cancel()
+					<-awaiting
+					e = fmt.Errorf("repair loop stopped before Await completed")
+				case <-workerStopped:
+					cancel()
+					<-awaiting
+					e = fmt.Errorf("worker stopped before Await completed")
+				}
 				if e != nil || !bytes.Equal(result, []byte(`42`)) {
 					t.Fatal(id, string(result), e)
 				}

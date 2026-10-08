@@ -1,0 +1,65 @@
+{
+  "development_only": true,
+  "checks": {
+    "targeted-race": {
+      "packages": [
+        {
+          "Time": "2026-10-08T14:56:44.809048854Z",
+          "Action": "pass",
+          "Package": "js-wf/client",
+          "Elapsed": 1.08
+        },
+        {
+          "Time": "2026-10-08T14:57:04.160798474Z",
+          "Action": "pass",
+          "Package": "js-wf/reconcile",
+          "Elapsed": 14.151
+        }
+      ],
+      "top_level_passes": [
+        "TestCanonicalStartRecoveryCannotReserveReplacementAfterRetirement",
+        "TestCanonicalStartAwaitPendingReplacementAndMissingReadyPointer",
+        "TestCanonicalStartAwaitSourceCommittedBeforeBinding",
+        "TestCanonicalStartAwaitMissingSourceCannotProvePurge",
+        "TestNativeGraphReconcileCanonicalPendingStarts",
+        "TestGraphCanonicalStartRepairDuringPreparedAppend",
+        "TestGraphCanonicalStartScanDryRunUnknownAndPrefix",
+        "TestGraphCanonicalStartScanRetirementIsSupersededNotReenqueued"
+      ]
+    },
+    "repair-model": {
+      "packages": [
+        {
+          "Time": "2026-10-08T14:57:12.14270989Z",
+          "Action": "pass",
+          "Package": "js-wf/sim",
+          "Elapsed": 9.446
+        }
+      ],
+      "top_level_passes": [
+        "TestSeededGraphStartRepairReplay"
+      ]
+    },
+    "corpus": {
+      "packages": [
+        {
+          "Time": "2026-10-08T14:57:51.91992318Z",
+          "Action": "pass",
+          "Package": "js-wf/sim",
+          "Elapsed": 1.5070000000000001
+        }
+      ],
+      "top_level_passes": [
+        "TestPinnedRegressionCorpus"
+      ]
+    }
+  },
+  "interleaving_seeds": 32,
+  "negative_control": "Existing RecoverStartAttempt reader pin makes a staged Started append lose its head CAS; metadata-only bound scanner repair does not.",
+  "native_replica_seconds": {
+    "R1": 3.43,
+    "R3": 8.71
+  },
+  "source_not_frozen": true,
+  "limits": "Prepared native restart cuts, not process kills. Full frozen qualification remains required; original gates stay open."
+}

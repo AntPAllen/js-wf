@@ -13,6 +13,7 @@ import (
 
 type GraphStartRecoveryPort interface {
 	RecoverStartAttempt(context.Context, string, string, string) (client.Handle, error)
+	RepairBoundStartAttempt(context.Context, string, string, string, uint64) (client.Handle, error)
 }
 
 // CanonicalStartScan repairs pending input before WF_INV exists, and bound
@@ -75,7 +76,13 @@ func (s *CanonicalStartScan) Scan(ctx context.Context, next uint64, budget int, 
 				result.Candidates = append(result.Candidates, Candidate{Type: r.Type, ID: r.ID, Reason: reason})
 				reportRepair(s.Observe, event, true, nil)
 			} else {
-				h, e := s.recovery.RecoverStartAttempt(ctx, r.Type, r.ID, state.Start.Token)
+				var h client.Handle
+				var e error
+				if state.Pending {
+					h, e = s.recovery.RecoverStartAttempt(ctx, r.Type, r.ID, state.Start.Token)
+				} else {
+					h, e = s.recovery.RepairBoundStartAttempt(ctx, r.Type, r.ID, state.Start.Token, state.Invocation)
+				}
 				event.InvocationSequence = h.InvSeq
 				recovered := e == nil
 				if e != nil && (errors.Is(e, client.ErrStaleGeneration) || errors.Is(e, journal.ErrStale) || errors.Is(e, client.ErrNotFound)) {

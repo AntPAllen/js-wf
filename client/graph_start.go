@@ -148,3 +148,39 @@ func (c *Client) RecoverStartAttempt(ctx context.Context, typ, id, token string)
 	}
 	return h, err
 }
+
+// RepairBoundStartAttempt repairs delivery of an already-bound generation.
+// It does not open input: repeated reader acquisition would advance the shared
+// logical head and can starve a worker's prepared Started append. Execution
+// still requires the worker's exact binding and owned-input validation.
+func (c *Client) RepairBoundStartAttempt(ctx context.Context, typ, id, token string, invocation uint64) (Handle, error) {
+	h := Handle{Type: typ, ID: id, InvSeq: invocation}
+	if c.graphJournal == nil || !c.graphJournal.CanonicalStarts() || token == "" || invocation == 0 {
+		return h, journal.ErrGap
+	}
+	check := func() (*journal.GraphStartStatus, error) {
+		status, err := c.graphJournal.InspectStart(ctx, typ, id)
+		if err != nil {
+			return nil, err
+		}
+		if status == nil || status.Retired || status.Purging || status.State.Pending || status.State.Invocation != invocation || status.State.Start.Token != token {
+			return nil, journal.ErrStale
+		}
+		return status, nil
+	}
+	status, err := check()
+	if err != nil {
+		return h, err
+	}
+	source, err := c.startOperations().LastInvocation(ctx, identity.InvocationSubject(typ, id))
+	if err != nil || !status.State.Start.MatchesInvocation(source) || source.Sequence != invocation {
+		return h, fmt.Errorf("%w: source pointer: %v", ErrStartUnknown, err)
+	}
+	if _, err = check(); err != nil {
+		return h, err
+	}
+	if err = c.Enqueue(ctx, typ, id, "start:"+identity.Key(typ, id)+":"+strconv.FormatUint(invocation, 10)); err != nil {
+		return h, fmt.Errorf("%w: %w", ErrEnqueueUnknown, err)
+	}
+	return h, nil
+}

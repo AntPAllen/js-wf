@@ -146,6 +146,21 @@ func (c *Client) awaitGraph(ctx context.Context, typ, id string, observed *uint6
 			// Bare ErrStale is generation rejection; wrapped CAS contention
 			// must not be reported as a purge.
 			if err == journal.ErrStale {
+				if c.graphJournal.CanonicalStarts() {
+					lifecycle, e := c.graphJournal.InspectRetirement(ctx, typ, id)
+					if e != nil {
+						return nil, e
+					}
+					if lifecycle.PendingStart && lifecycle.Invocation < input.Sequence {
+						if e = port.Wait(ctx, 100*time.Millisecond); e != nil {
+							return nil, e
+						}
+						continue
+					}
+					if !lifecycle.PendingStart && lifecycle.Invocation == input.Sequence && !lifecycle.Retired && !lifecycle.Purging {
+						return nil, ErrStartUnknown
+					}
+				}
 				return nil, ErrPurged
 			}
 			return nil, err
@@ -154,6 +169,18 @@ func (c *Client) awaitGraph(ctx context.Context, typ, id string, observed *uint6
 			return port.LastInvocation(attempt, identity.InvocationSubject(typ, id))
 		})
 		if errors.Is(getErr, jetstream.ErrMsgNotFound) || getErr == nil && (current == nil || current.Sequence != input.Sequence) {
+			if c.graphJournal.CanonicalStarts() {
+				lifecycle, e := c.graphJournal.InspectRetirement(ctx, typ, id)
+				if e != nil {
+					return nil, e
+				}
+				if !lifecycle.PendingStart && (lifecycle.Purging || lifecycle.Retired || lifecycle.Invocation > input.Sequence) || lifecycle.PendingStart && lifecycle.Invocation >= input.Sequence {
+					return nil, ErrPurged
+				}
+				// A compatibility read cannot prove retirement of live
+				// canonical authority, nor select another source generation.
+				return nil, ErrStartUnknown
+			}
 			return nil, ErrPurged
 		}
 		if getErr != nil {

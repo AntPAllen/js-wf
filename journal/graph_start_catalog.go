@@ -9,12 +9,23 @@ import (
 )
 
 // GraphStartStatus is a quorum-confirmed lifecycle observation, not an input
-// ownership grant. Recovery must validate the retained input and exact token.
+// ownership grant. Pending recovery and workers validate the retained input;
+// bound enqueue repair can check the exact source token without opening input.
 type GraphStartStatus struct {
 	State        GraphStartState
 	JournalCount uint64
 	Retired      bool
 	Purging      bool
+}
+
+// InspectStart observes lifecycle metadata without acquiring an input reader
+// or changing the logical head used by prepared runtime appends.
+func (s *GraphStore) InspectStart(ctx context.Context, typ, id string) (*GraphStartStatus, error) {
+	destination, err := graphDestination(typ, id)
+	if err != nil {
+		return nil, err
+	}
+	return s.InspectStartDestination(ctx, destination)
 }
 
 func (s *GraphStore) InspectStartDestination(ctx context.Context, destination string) (*GraphStartStatus, error) {

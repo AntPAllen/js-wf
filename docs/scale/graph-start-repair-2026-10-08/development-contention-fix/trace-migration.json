@@ -1,0 +1,84 @@
+{
+  "original_commit": "030b328906332cfa0f470ca599c4247ee7b6c721",
+  "reason": "Bound Start scanner enqueue repair now validates lifecycle and exact source pointer without input reader head mutations, preventing runtime append starvation. Pending recovery still validates owned input. Seeds and all decisions unchanged.",
+  "changes": [
+    {
+      "path": "sim/testdata/regressions/graph-start-repair-bind_lost.json",
+      "seed": 1,
+      "old_sha256": "bbcfe896a24ddb9b469d1fccd35183846aff9891526f1fd1d15e2488866dfbec",
+      "new_sha256": "84aff691dd14da07d8875016bbeac6545945e0948e338e7660d7b9711afebb03",
+      "choices_unchanged": true
+    },
+    {
+      "path": "sim/testdata/regressions/graph-start-repair-bound_no_enqueue.json",
+      "seed": 7,
+      "old_sha256": "61b3fc88763865d13e7b0fc8c7fa3bbaf0839d7f6ce18b15192533881243f307",
+      "new_sha256": "517dc0b2d54dc040b49fe48f3af635e89c575c41252d216de29eb37ffefa552c",
+      "choices_unchanged": true
+    },
+    {
+      "path": "sim/testdata/regressions/graph-start-repair-enqueue_drop.json",
+      "seed": 14,
+      "old_sha256": "7cdf8d1b12064ea45a93ae4663a156059b00604c6ee1311569aef7d8f008634a",
+      "new_sha256": "60a9ad2f6d8b2ec342a4f22f7fd99e317c95259f699589aa6c4037bade3eeb08",
+      "choices_unchanged": true
+    },
+    {
+      "path": "sim/testdata/regressions/graph-start-repair-enqueue_lost.json",
+      "seed": 5,
+      "old_sha256": "c50cab9ea252defce4964861905ae50e616efb2be30b3db6a16079caa70c9e89",
+      "new_sha256": "655e61d860800cf137fd9129f59b26120f02b9044bba81d385a54d55e37652f8",
+      "choices_unchanged": true
+    },
+    {
+      "path": "sim/testdata/regressions/graph-start-repair-lost_repair_enqueue.json",
+      "seed": 68,
+      "old_sha256": "82e4f02340b132366ecb30e09ac16230b8cdf5049f30dd8f11143a37d4ca6c05",
+      "new_sha256": "25b344669d96db51492f68f4ba578bef3329d7950625cfb88f5e306d713e6c4b",
+      "choices_unchanged": true
+    },
+    {
+      "path": "sim/testdata/regressions/graph-start-repair-lost_reserve.json",
+      "seed": 34,
+      "old_sha256": "cd6a2dab070d252c45f3b2ae6f192dc2ba33ebd2e0d8e5b809f340818dd0fad3",
+      "new_sha256": "481649fbcd165939a486fd043344acd7f9dd31e82cdacab2e680d90633b13efb",
+      "choices_unchanged": true
+    },
+    {
+      "path": "sim/testdata/regressions/graph-start-repair-lost_source.json",
+      "seed": 21,
+      "old_sha256": "176145c4dcf21c35642a6822422a8a6df645c56a913838e88150c59b6f8ef556",
+      "new_sha256": "0a601ad6a9f22a75c33f293b5b1a594c01c6171eee1e00288bbcd76fe5f0ebab",
+      "choices_unchanged": true
+    },
+    {
+      "path": "sim/testdata/regressions/graph-start-repair-ordinary.json",
+      "seed": 26,
+      "old_sha256": "b2eb8e98d1f328dd96b501da47b4c7fab067ddab95df075c6292385c5dcba3b4",
+      "new_sha256": "52e21112f652b50d60ca86935fcc44442c8538aed7f761dc30d39977af254759",
+      "choices_unchanged": true
+    },
+    {
+      "path": "sim/testdata/regressions/graph-start-repair-unknown_bind.json",
+      "seed": 52,
+      "old_sha256": "1ccc934538ea6994d45aa3759ca06797e5c0355e9306e91db581fb99b99a0696",
+      "new_sha256": "5948d1d3079151e66b6bdb62bcf7d8eefa5e589948011c20d05d605b1bbba06a",
+      "choices_unchanged": true
+    }
+  ],
+  "unchanged": [
+    "sim/testdata/regressions/graph-start-repair-bind_drop.json",
+    "sim/testdata/regressions/graph-start-repair-catalog_drop.json",
+    "sim/testdata/regressions/graph-start-repair-drop_reserve.json",
+    "sim/testdata/regressions/graph-start-repair-drop_source.json",
+    "sim/testdata/regressions/graph-start-repair-dry_catalog.json",
+    "sim/testdata/regressions/graph-start-repair-foreign_pointer.json",
+    "sim/testdata/regressions/graph-start-repair-input_mismatch.json",
+    "sim/testdata/regressions/graph-start-repair-lifecycle_unknown.json",
+    "sim/testdata/regressions/graph-start-repair-put_drop.json",
+    "sim/testdata/regressions/graph-start-repair-put_lost.json",
+    "sim/testdata/regressions/graph-start-repair-reserved.json",
+    "sim/testdata/regressions/graph-start-repair-source_committed.json",
+    "sim/testdata/regressions/graph-start-repair-unknown_reserve.json"
+  ]
+}
