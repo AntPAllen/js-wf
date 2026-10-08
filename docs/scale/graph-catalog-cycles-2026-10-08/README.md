@@ -19,3 +19,13 @@ The new deterministic control requires all three scanners to finish at least two
 Watermarks schedule scanning and confer no payload or lifecycle authority. The cycle state is process-local and can safely refresh on leader restart; existing persistent scan checkpoints and per-generation Signal repair positions remain unchanged. Each scanner is driven serially by its fenced loop. This does not introduce atomic cross-stream lifecycle/state fencing, repair present stale/corrupt projections, migrate remaining runtime/history/CLI/deployment paths or enable production online GC.
 
 Every original extended simulation, native process/storage/power-loss/concurrency/capacity/matrix/actual24h/million physical-drain/default-adoption/release requirement remains open. The live complete normal 148-family campaign at `7ee9882` and race 146-family campaign at `2b71f1d` exclude this later source change.
+
+## Frozen complete normal qualification in progress
+
+Source `55eeb77` is isolated at `/home/exedev/js-wf-catalog-cycles-qualification`:
+
+```sh
+python3 scripts/check-tier1-race.py --root /home/exedev/js-wf-tier1-full148-cycles-normal1000-20261008 --seeds 1000 --no-race
+```
+
+Every current family and pin is required. Terminal evidence and independent review are pending. The existing complete race campaign remains at its original frozen source.
