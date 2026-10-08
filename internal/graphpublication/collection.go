@@ -15,12 +15,13 @@ func (p Protocol) protects(ctx context.Context, root Root, k string, f Fence, in
 		return false, nil
 	}
 	link := retainedgraph.Link{Hash: k, Reference: blobpublication.Reference{Generation: f.Generation, Object: f.Object}}
-	graphs := []retainedgraph.Root{root.Graph}
+	graphs := []Root{{Graph: root.Graph, Streams: root.Streams}}
 	for _, reader := range root.Readers {
-		graphs = append(graphs, reader.Graph)
+		graphs = append(graphs, Root{Graph: reader.Graph, Streams: reader.Streams})
 	}
-	for _, graph := range graphs {
+	for _, snapshot := range graphs {
 		for _, location := range intent.Locations {
+			graph := selectGraph(snapshot.Graph, snapshot.Streams, location.Stream)
 			var present bool
 			var err error
 			if location.Kind == "node" {

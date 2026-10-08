@@ -51,6 +51,7 @@ func cloneFence(f Fence) Fence {
 }
 func cloneRoot(r Root) Root {
 	r.Graph.Frontier = append([]retainedgraph.Tree{}, r.Graph.Frontier...)
+	r.Streams = copyStreams(r.Streams)
 	r.Readers = copyReaders(r.Readers)
 	r.Application = append([]byte(nil), r.Application...)
 	return r

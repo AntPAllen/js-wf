@@ -57,12 +57,53 @@ func graphFenceCopy(f graphpublication.Fence) graphpublication.Fence {
 }
 func graphRootCopy(r graphpublication.Root) graphpublication.Root {
 	r.Graph.Frontier = append([]retainedgraph.Tree{}, r.Graph.Frontier...)
+	r.Streams = graphStreamsCopy(r.Streams)
 	r.Application = append([]byte(nil), r.Application...)
 	r.Readers = append([]graphpublication.ReaderPin(nil), r.Readers...)
 	for i := range r.Readers {
 		r.Readers[i].Graph.Frontier = append([]retainedgraph.Tree{}, r.Readers[i].Graph.Frontier...)
+		r.Readers[i].Streams = graphStreamsCopy(r.Readers[i].Streams)
 	}
 	return r
+}
+func graphStreamsCopy(streams []graphpublication.StreamGraph) []graphpublication.StreamGraph {
+	if len(streams) == 0 {
+		return nil
+	}
+	result := append([]graphpublication.StreamGraph(nil), streams...)
+	for i := range result {
+		result[i].Graph.Frontier = append([]retainedgraph.Tree{}, result[i].Graph.Frontier...)
+	}
+	return result
+}
+func graphSchemaRank(schema string) int {
+	switch schema {
+	case graphpublication.Schema:
+		return 1
+	case graphpublication.RetentionSchema:
+		return 2
+	case graphpublication.ApplicationSchema:
+		return 3
+	case graphpublication.StreamsSchema:
+		return 4
+	}
+	return 0
+}
+func checkGraphStreams(streams []graphpublication.StreamGraph, schema string) error {
+	if len(streams) > graphpublication.MaxStreams || len(streams) != 0 && schema != graphpublication.StreamsSchema {
+		return fmt.Errorf("invalid graph streams")
+	}
+	for i, stream := range streams {
+		if stream.Name == "" || len(stream.Name) > 32 || i > 0 && streams[i-1].Name >= stream.Name || stream.Graph.Validate() != nil {
+			return fmt.Errorf("invalid graph stream name/order/snapshot")
+		}
+		for _, c := range stream.Name {
+			if !(c >= 'a' && c <= 'z' || c >= '0' && c <= '9' || c == '-') {
+				return fmt.Errorf("invalid graph stream name")
+			}
+		}
+	}
+	return nil
 }
 func (m *GraphPublicationTransport) event(op, subject string, expected, seq uint64, value any, outcome string) {
 	data, _ := json.Marshal(value)
@@ -201,7 +242,7 @@ func (m *GraphPublicationTransport) CASRoot(ctx context.Context, k string, head 
 	if head == ^uint64(0) {
 		return graphpublication.Root{}, fmt.Errorf("head exhausted")
 	}
-	if (current.Schema == graphpublication.ApplicationSchema && r.Schema != graphpublication.ApplicationSchema) || (current.Schema == graphpublication.RetentionSchema && r.Schema != graphpublication.RetentionSchema && r.Schema != graphpublication.ApplicationSchema) {
+	if graphSchemaRank(r.Schema) < graphSchemaRank(current.Schema) {
 		m.event("cas_root", k, head, current.Head, r, "schema_downgrade")
 		return graphpublication.Root{}, fmt.Errorf("retention schema downgrade")
 	}
@@ -318,19 +359,36 @@ func (m *GraphPublicationTransport) CheckReferences() error {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 	for destination, root := range m.roots {
-		if (root.Schema != graphpublication.Schema && root.Schema != graphpublication.RetentionSchema && root.Schema != graphpublication.ApplicationSchema) || (root.Schema == graphpublication.Schema && len(root.Readers) != 0) || len(root.Readers) > graphpublication.MaxReaders || len(root.Application) > graphpublication.MaxApplicationBytes || (root.Schema == graphpublication.ApplicationSchema && root.Head == 0) || (root.Schema != graphpublication.ApplicationSchema && len(root.Application) != 0) || root.Graph.Validate() != nil {
+		if graphSchemaRank(root.Schema) == 0 || (root.Schema == graphpublication.Schema && len(root.Readers) != 0) || len(root.Readers) > graphpublication.MaxReaders || len(root.Application) > graphpublication.MaxApplicationBytes || (graphSchemaRank(root.Schema) >= 3 && root.Head == 0) || (graphSchemaRank(root.Schema) < 3 && len(root.Application) != 0) || root.Graph.Validate() != nil {
 			return fmt.Errorf("invalid graph authority")
 		}
-		graphs := []retainedgraph.Root{root.Graph}
+		if root.Graph.Count > 0 && root.Token == "" {
+			return fmt.Errorf("missing live publication token")
+		}
+		for _, stream := range root.Streams {
+			if stream.Graph.Count > 0 && root.Token == "" {
+				return fmt.Errorf("missing live stream token")
+			}
+		}
+		if err := checkGraphStreams(root.Streams, root.Schema); err != nil {
+			return err
+		}
+		graphs := []graphpublication.StreamGraph{{Graph: root.Graph}}
+		graphs = append(graphs, root.Streams...)
 		seenReaders := map[string]bool{}
 		for _, pin := range root.Readers {
 			if pin.ID == "" || pin.Expires.IsZero() || seenReaders[pin.ID] || pin.Graph.Validate() != nil {
 				return fmt.Errorf("invalid reader pin")
 			}
 			seenReaders[pin.ID] = true
-			graphs = append(graphs, pin.Graph)
+			if err := checkGraphStreams(pin.Streams, root.Schema); err != nil {
+				return err
+			}
+			graphs = append(graphs, graphpublication.StreamGraph{Graph: pin.Graph})
+			graphs = append(graphs, pin.Streams...)
 		}
-		for _, graph := range graphs {
+		for _, snapshot := range graphs {
+			graph := snapshot.Graph
 			leaves := uint64(0)
 			edges := map[uint64]map[retainedgraph.Link]bool{}
 			origins := map[retainedgraph.Link][]graphpublication.Location{}
@@ -373,7 +431,7 @@ func (m *GraphPublicationTransport) CheckReferences() error {
 			}
 			var visit func(retainedgraph.Tree) error
 			visit = func(tree retainedgraph.Tree) error {
-				data, err := check(tree.Link, graphpublication.Location{Kind: "node", First: tree.First, Height: tree.Height})
+				data, err := check(tree.Link, graphpublication.Location{Kind: "node", First: tree.First, Height: tree.Height, Stream: snapshot.Name})
 				if err != nil {
 					return err
 				}
@@ -395,7 +453,7 @@ func (m *GraphPublicationTransport) CheckReferences() error {
 						return fmt.Errorf("invalid graph leaf")
 					}
 					for _, link := range node.Record.Blobs {
-						if _, err = check(link, graphpublication.Location{Kind: "payload", First: node.First}); err != nil {
+						if _, err = check(link, graphpublication.Location{Kind: "payload", First: node.First, Stream: snapshot.Name}); err != nil {
 							return err
 						}
 						if edges[node.First] == nil {
@@ -425,7 +483,7 @@ func (m *GraphPublicationTransport) CheckReferences() error {
 			for link, locations := range origins {
 				found := false
 				for _, location := range locations {
-					if location.Kind == "payload" && edges[location.First][link] {
+					if location.Kind == "payload" && location.Stream == snapshot.Name && edges[location.First][link] {
 						found = true
 					}
 				}

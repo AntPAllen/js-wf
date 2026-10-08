@@ -1,0 +1,9 @@
+# Independent canonical graph forests development
+
+The v4 root adds up to four named append forests beside the original journal forest. Publication preserves other forests, uses stream-qualified intent locations and one root CAS head, and includes the application descriptor. Reader pins/checkpoints retain the complete captured set; retirement clears all live forests together. Cross-forest payload reuse is rejected; copying bytes acquires a fresh origin grant. Old bytes remain unchanged when new fields are absent, and downgrade attempts are rejected.
+
+Native R1/R3 adapter reopening, large payload preservation, stale-publication rejection and physical object drain pass. Six model unit groups pass. A 1,000-schedule seeded run covers all16 modes with exact replay, independent raw ownership census and fixture object drain. All654 previous pins pass unchanged;16 new pins are added.
+
+The initial simulation build failed on fixture API references (`Advance` and a dispatcher variable); the corrected run and original failure are preserved. The initial targeted old-unit command matched no tests; a subsequent `TestGraph(Application|Reader|Owned)` command passed. These development commands are not frozen acceptance or runtime adoption.
+
+Incoming canonical start/signal API semantics, generation/idempotency lookup, runtime journal v4 cursor admission and staging/discovery/mirror/purge integration remain required. Application bytes are still opaque to the generic protocol; caller lifecycle validation is required. No current runtime path opts into the new representation. Complete package/native/race/source-bound regression, current142-family complete simulation, full original native matrices/24h/million physical-drain/dependency/default-adoption/release and production online GC remain open.

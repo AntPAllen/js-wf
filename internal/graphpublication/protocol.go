@@ -25,6 +25,8 @@ import (
 const Schema = "js-wf-graph-publication-v1"
 const RetentionSchema = "js-wf-graph-publication-retention-v2"
 const ApplicationSchema = "js-wf-graph-publication-application-v3"
+const StreamsSchema = "js-wf-graph-publication-streams-v4"
+const MaxStreams = 4
 const MaxApplicationBytes = 4096
 const MaxReaders = 8
 const MaxRootBytes = 256 << 10
@@ -38,6 +40,7 @@ type Location struct {
 	Kind   string
 	First  uint64
 	Height uint8
+	Stream string `json:",omitempty"`
 }
 type Intent struct {
 	Destination string
@@ -62,8 +65,17 @@ type Root struct {
 	Head        uint64
 	Token       string
 	Graph       retainedgraph.Root
-	Readers     []ReaderPin `json:",omitempty"`
-	Application []byte      `json:",omitempty"`
+	Readers     []ReaderPin   `json:",omitempty"`
+	Application []byte        `json:",omitempty"`
+	Streams     []StreamGraph `json:",omitempty"`
+}
+
+// StreamGraph is an independently indexed forest under the destination's one
+// CAS head. The unnamed Graph remains the original journal forest. Names are
+// bounded and sorted; a second destination would not share its lifecycle fence.
+type StreamGraph struct {
+	Name  string
+	Graph retainedgraph.Root
 }
 
 // ReaderPin is canonical authority, not a portable ownership receipt. Its graph
@@ -72,12 +84,13 @@ type ReaderPin struct {
 	ID      string
 	Expires time.Time
 	Graph   retainedgraph.Root
+	Streams []StreamGraph `json:",omitempty"`
 }
 
 // Port provides linearizable quorum-witnessed reads and acknowledged CAS.
 // CASRoot advances Head exactly once; blob revisions and generations never
 // reset, even after retirement. Returned maps/slices are independent copies.
-// CASRoot MUST reject schema downgrades (v3 to v2/v1, v2 to v1), even
+// CASRoot MUST reject schema downgrades (v4 to v3/v2/v1, v3 to v2/v1, v2 to v1), even
 // when readers and application bytes are empty. Retirement cannot erase the
 // permanent application lifecycle or reader-authority schema. Application bytes
 // are an opaque descriptor; they never establish ownership of external objects.
@@ -126,21 +139,23 @@ type Prepared struct {
 	base        Root
 	publication Root
 	owned       map[retainedgraph.Link]uint64
+	stream      string
 }
 
 // OwnedPayload locates an exact payload edge in the destination's original
 // canonical graph. A receipt or content hash alone does not establish ownership.
 type OwnedPayload struct {
-	Index uint64
-	Link  retainedgraph.Link
+	Index  uint64
+	Link   retainedgraph.Link
+	Stream string `json:",omitempty"`
 }
 
 func EmptyRoot() Root { return Root{Schema: Schema, Graph: retainedgraph.Empty()} }
 func normalizeRoot(root Root) (Root, error) {
-	if root.Schema == "" && root.Head == 0 && root.Token == "" && root.Graph.Schema == "" && root.Graph.Count == 0 && root.Graph.Frontier == nil && len(root.Readers) == 0 && len(root.Application) == 0 {
+	if root.Schema == "" && root.Head == 0 && root.Token == "" && root.Graph.Schema == "" && root.Graph.Count == 0 && root.Graph.Frontier == nil && len(root.Readers) == 0 && len(root.Application) == 0 && len(root.Streams) == 0 {
 		return EmptyRoot(), nil
 	}
-	if schemaRank(root.Schema) == 0 || (root.Schema == Schema && len(root.Readers) != 0) || (root.Schema != ApplicationSchema && len(root.Application) != 0) || len(root.Application) > MaxApplicationBytes || (root.Schema == ApplicationSchema && root.Head == 0) || len(root.Readers) > MaxReaders || (root.Graph.Count > 0 && (root.Head == 0 || !validID(root.Token))) || (root.Token != "" && !validID(root.Token)) {
+	if schemaRank(root.Schema) == 0 || (root.Schema == Schema && len(root.Readers) != 0) || (schemaRank(root.Schema) < 3 && len(root.Application) != 0) || len(root.Application) > MaxApplicationBytes || (schemaRank(root.Schema) >= 3 && root.Head == 0) || len(root.Readers) > MaxReaders || (root.Graph.Count > 0 && (root.Head == 0 || !validID(root.Token))) || (root.Token != "" && !validID(root.Token)) {
 		return Root{}, errors.New("invalid graph authority root")
 	}
 	if err := root.Graph.Validate(); err != nil {
@@ -148,6 +163,14 @@ func normalizeRoot(root Root) (Root, error) {
 	}
 	if _, err := root.Graph.Encode(); err != nil {
 		return Root{}, err
+	}
+	if err := validateStreams(root.Streams); err != nil || len(root.Streams) != 0 && root.Schema != StreamsSchema {
+		return Root{}, errors.New("invalid authority streams")
+	}
+	for _, stream := range root.Streams {
+		if stream.Graph.Count > 0 && !validID(root.Token) {
+			return Root{}, errors.New("missing stream publication token")
+		}
 	}
 	seen := map[string]bool{}
 	if len(root.Readers) == 0 {
@@ -160,6 +183,9 @@ func normalizeRoot(root Root) (Root, error) {
 		seen[reader.ID] = true
 		if _, err := reader.Graph.Encode(); err != nil {
 			return Root{}, err
+		}
+		if err := validateStreams(reader.Streams); err != nil || len(reader.Streams) != 0 && root.Schema != StreamsSchema {
+			return Root{}, errors.New("invalid retained streams")
 		}
 	}
 	encoded, err := json.Marshal(root)
@@ -176,12 +202,14 @@ func schemaRank(schema string) int {
 		return 2
 	case ApplicationSchema:
 		return 3
+	case StreamsSchema:
+		return 4
 	default:
 		return 0
 	}
 }
 func validLocation(location Location) bool {
-	if location.First >= math.MaxInt64 {
+	if location.First >= math.MaxInt64 || location.Stream != "" && !validStream(location.Stream) {
 		return false
 	}
 	switch location.Kind {

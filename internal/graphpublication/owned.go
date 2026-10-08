@@ -12,7 +12,7 @@ import (
 // changes the destination during this check, the eventual original-head CAS
 // fails. Receipt reuse therefore does not create an independent liveness pin.
 func (p Protocol) verifyOwned(ctx context.Context, destination string, base Root, payload OwnedPayload) error {
-	present, err := retainedgraph.ContainsBlob(ctx, stageStore{protocol: p}, base.Graph, payload.Index, payload.Link)
+	present, err := retainedgraph.ContainsBlob(ctx, stageStore{protocol: p}, selectGraph(base.Graph, base.Streams, payload.Stream), payload.Index, payload.Link)
 	if err != nil {
 		return err
 	}
@@ -36,13 +36,13 @@ func (p Protocol) verifyOwned(ctx context.Context, destination string, base Root
 		return ErrRevoked
 	}
 	for _, location := range origin.Locations {
-		if location.Kind != "payload" {
+		if location.Kind != "payload" || location.Stream != payload.Stream {
 			continue
 		}
 		if location.First == payload.Index {
 			return nil
 		}
-		present, err = retainedgraph.ContainsBlob(ctx, stageStore{protocol: p}, base.Graph, location.First, payload.Link)
+		present, err = retainedgraph.ContainsBlob(ctx, stageStore{protocol: p}, selectGraph(base.Graph, base.Streams, payload.Stream), location.First, payload.Link)
 		if err != nil {
 			return err
 		}

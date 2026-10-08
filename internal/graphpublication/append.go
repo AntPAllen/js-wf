@@ -23,7 +23,7 @@ func (p Protocol) readRoot(ctx context.Context, destination string) (Root, error
 	return normalizeRoot(root)
 }
 func samePublication(a, b Root) bool {
-	return a.Schema == b.Schema && a.Token == b.Token && reflect.DeepEqual(a.Graph, b.Graph) && bytes.Equal(a.Application, b.Application)
+	return a.Schema == b.Schema && a.Token == b.Token && reflect.DeepEqual(a.Graph, b.Graph) && reflect.DeepEqual(a.Streams, b.Streams) && bytes.Equal(a.Application, b.Application)
 }
 func (p Protocol) casRoot(ctx context.Context, destination string, expected uint64, root Root) (Root, error) {
 	if expected == math.MaxUint64 {
@@ -95,6 +95,10 @@ func (p Protocol) PrepareAppendWithApplication(ctx context.Context, destination 
 }
 
 func (p Protocol) prepareAppend(ctx context.Context, destination string, expected uint64, data []byte, payloads [][]byte, owned []OwnedPayload, expires time.Time, application []byte, updateApplication bool) (Prepared, error) {
+	return p.prepareStreamAppend(ctx, destination, expected, "", data, payloads, owned, expires, application, updateApplication)
+}
+
+func (p Protocol) prepareStreamAppend(ctx context.Context, destination string, expected uint64, stream string, data []byte, payloads [][]byte, owned []OwnedPayload, expires time.Time, application []byte, updateApplication bool) (Prepared, error) {
 	if err := ctx.Err(); err != nil {
 		return Prepared{}, err
 	}
@@ -108,7 +112,17 @@ func (p Protocol) prepareAppend(ctx context.Context, destination string, expecte
 	if base.Head != expected {
 		return Prepared{}, ErrConflict
 	}
-	if base.Graph.Count == math.MaxInt64 {
+	graph := selectGraph(base.Graph, base.Streams, stream)
+	if stream != "" && graph.Count == 0 {
+		found := false
+		for _, existing := range base.Streams {
+			found = found || existing.Name == stream
+		}
+		if !found && len(base.Streams) == MaxStreams {
+			return Prepared{}, errors.New("stream limit")
+		}
+	}
+	if graph.Count == math.MaxInt64 {
 		return Prepared{}, errors.New("graph population exhausted")
 	}
 	token, err := p.id()
@@ -119,13 +133,21 @@ func (p Protocol) prepareAppend(ctx context.Context, destination string, expecte
 		return Prepared{}, errors.New("invalid publication ID")
 	}
 	expires = expires.UTC()
-	result := Prepared{destination: destination, expected: expected, expires: expires, base: base, publication: Root{Schema: base.Schema, Token: token, Readers: copyReaders(base.Readers), Application: append([]byte(nil), base.Application...)}, owned: map[retainedgraph.Link]uint64{}}
+	result := Prepared{destination: destination, expected: expected, expires: expires, base: base, stream: stream, publication: Root{Schema: base.Schema, Token: token, Graph: copyGraph(base.Graph), Streams: copyStreams(base.Streams), Readers: copyReaders(base.Readers), Application: append([]byte(nil), base.Application...)}, owned: map[retainedgraph.Link]uint64{}}
 	if updateApplication {
-		result.publication.Schema = ApplicationSchema
+		if schemaRank(result.publication.Schema) < 3 {
+			result.publication.Schema = ApplicationSchema
+		}
 		result.publication.Application = append([]byte(nil), application...)
+	}
+	if stream != "" {
+		result.publication.Schema = StreamsSchema
 	}
 	selected := map[string]retainedgraph.Link{}
 	for _, payload := range owned {
+		if payload.Stream != stream {
+			return Prepared{}, errors.New("cross-stream owned payload transfer requires a copy")
+		}
 		if err = p.verifyOwned(ctx, destination, base, payload); err != nil {
 			return Prepared{}, err
 		}
@@ -151,7 +173,7 @@ func (p Protocol) prepareAppend(ctx context.Context, destination string, expecte
 		if _, exists := selected[k]; exists {
 			continue
 		}
-		intent := Intent{Destination: destination, Expected: expected, Expires: expires, Locations: []Location{{Kind: "payload", First: base.Graph.Count}}}
+		intent := Intent{Destination: destination, Expected: expected, Expires: expires, Locations: []Location{{Kind: "payload", First: graph.Count, Stream: stream}}}
 		ref, err := p.acquire(ctx, k, unique[k], token, intent)
 		if err != nil {
 			return Prepared{}, err
@@ -161,11 +183,11 @@ func (p Protocol) prepareAppend(ctx context.Context, destination string, expecte
 	for _, link := range selected {
 		record.Blobs = append(record.Blobs, link)
 	}
-	next, err := retainedgraph.Append(ctx, stageStore{protocol: p, destination: destination, expected: expected, expires: expires, token: token, index: base.Graph.Count}, base.Graph, record)
+	next, err := retainedgraph.Append(ctx, stageStore{protocol: p, destination: destination, expected: expected, expires: expires, token: token, index: graph.Count, stream: stream}, graph, record)
 	if err != nil {
 		return Prepared{}, err
 	}
-	result.publication.Graph = next
+	setStream(&result.publication, stream, next)
 	return result, nil
 }
 
@@ -176,6 +198,7 @@ type stageStore struct {
 	expires     time.Time
 	token       string
 	index       uint64
+	stream      string
 }
 
 func (s stageStore) Put(ctx context.Context, k string, data []byte) (blobpublication.Reference, error) {
@@ -191,7 +214,7 @@ func (s stageStore) Put(ctx context.Context, k string, data []byte) (blobpublica
 	if span-1 > s.index || header.First != s.index-(span-1) {
 		return blobpublication.Reference{}, errors.New("staged node outside append spine")
 	}
-	intent := Intent{Destination: s.destination, Expected: s.expected, Expires: s.expires, Locations: []Location{{Kind: "node", First: header.First, Height: header.Height}}}
+	intent := Intent{Destination: s.destination, Expected: s.expected, Expires: s.expires, Locations: []Location{{Kind: "node", First: header.First, Height: header.Height, Stream: s.stream}}}
 	return s.protocol.acquire(ctx, k, data, s.token, intent)
 }
 func (s stageStore) Get(ctx context.Context, link retainedgraph.Link, limit int) ([]byte, error) {
@@ -219,7 +242,14 @@ func (p Protocol) Commit(ctx context.Context, prepared Prepared) (Root, error) {
 	if current.Head != prepared.expected || !samePublication(current, prepared.base) {
 		return Root{}, ErrConflict
 	}
-	delta, err := retainedgraph.ValidateAppend(ctx, stageStore{protocol: p}, prepared.base.Graph, prepared.publication.Graph)
+	// The private plan is not an arbitrary graph-set replacement. Verify that
+	// its one append preserves every forest outside the selected stream.
+	preserved := prepared.base
+	setStream(&preserved, prepared.stream, selectGraph(prepared.publication.Graph, prepared.publication.Streams, prepared.stream))
+	if !reflect.DeepEqual(preserved.Graph, prepared.publication.Graph) || !reflect.DeepEqual(preserved.Streams, prepared.publication.Streams) || !reflect.DeepEqual(prepared.base.Readers, prepared.publication.Readers) {
+		return Root{}, errors.New("append changed another forest or reader")
+	}
+	delta, err := retainedgraph.ValidateAppend(ctx, stageStore{protocol: p}, selectGraph(prepared.base.Graph, prepared.base.Streams, prepared.stream), selectGraph(prepared.publication.Graph, prepared.publication.Streams, prepared.stream))
 	if err != nil {
 		return Root{}, err
 	}
@@ -244,18 +274,18 @@ func (p Protocol) Commit(ctx context.Context, prepared Prepared) (Root, error) {
 		return ErrRevoked
 	}
 	for _, tree := range delta.Nodes {
-		if err = check(tree.Link, Location{Kind: "node", First: tree.First, Height: tree.Height}); err != nil {
+		if err = check(tree.Link, Location{Kind: "node", First: tree.First, Height: tree.Height, Stream: prepared.stream}); err != nil {
 			return Root{}, err
 		}
 	}
 	for _, link := range delta.Record.Blobs {
 		if index, exists := prepared.owned[link]; exists {
-			if err = p.verifyOwned(ctx, prepared.destination, prepared.base, OwnedPayload{Index: index, Link: link}); err != nil {
+			if err = p.verifyOwned(ctx, prepared.destination, prepared.base, OwnedPayload{Index: index, Link: link, Stream: prepared.stream}); err != nil {
 				return Root{}, err
 			}
 			continue
 		}
-		if err = check(link, Location{Kind: "payload", First: prepared.base.Graph.Count}); err != nil {
+		if err = check(link, Location{Kind: "payload", First: selectGraph(prepared.base.Graph, prepared.base.Streams, prepared.stream).Count, Stream: prepared.stream}); err != nil {
 			return Root{}, err
 		}
 	}
@@ -291,8 +321,7 @@ func (p Protocol) RetireLive(ctx context.Context, destination string, expected u
 	if err != nil {
 		return err
 	}
-	root.Graph = retainedgraph.Empty()
-	root.Token = ""
+	clearLive(&root)
 	_, err = p.casRoot(ctx, destination, expected, root)
 	return err
 }

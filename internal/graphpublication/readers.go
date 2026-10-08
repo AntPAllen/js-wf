@@ -20,8 +20,10 @@ type Reader struct {
 	destination string
 	id          string
 	graph       retainedgraph.Root
+	streams     []StreamGraph
 }
 
+const StreamReaderCheckpointSchema = "js-wf-graph-reader-handle-v2"
 const ReaderCheckpointSchema = "js-wf-graph-reader-handle-v1"
 const MaxReaderCheckpointBytes = 2048
 
@@ -32,10 +34,11 @@ type readerCheckpoint struct {
 	Destination    string
 	ID             string
 	SnapshotSHA256 string
+	StreamsSHA256  string `json:",omitempty"`
 }
 
 func validReaderCheckpoint(v readerCheckpoint) bool {
-	return v.Schema == ReaderCheckpointSchema && v.Destination != "" && utf8.ValidString(v.Destination) && len(v.Destination) <= 256 && validID(v.ID) && validHash(v.SnapshotSHA256)
+	return (v.Schema == ReaderCheckpointSchema && v.StreamsSHA256 == "" || v.Schema == StreamReaderCheckpointSchema && validHash(v.StreamsSHA256)) && v.Destination != "" && utf8.ValidString(v.Destination) && len(v.Destination) <= 256 && validID(v.ID) && validHash(v.SnapshotSHA256)
 }
 
 // Checkpoint encodes a bounded handle for durable client-side storage. These
@@ -46,6 +49,14 @@ func (r Reader) Checkpoint() ([]byte, error) {
 		return nil, err
 	}
 	v := readerCheckpoint{Schema: ReaderCheckpointSchema, Destination: r.destination, ID: r.id, SnapshotSHA256: key(graph)}
+	if len(r.streams) != 0 {
+		v.Schema = StreamReaderCheckpointSchema
+		encoded, err := json.Marshal(r.streams)
+		if err != nil || validateStreams(r.streams) != nil {
+			return nil, errors.New("invalid reader streams")
+		}
+		v.StreamsSHA256 = key(encoded)
+	}
 	if !validReaderCheckpoint(v) {
 		return nil, errors.New("invalid reader checkpoint")
 	}
@@ -92,10 +103,15 @@ func (p Protocol) ResumeReader(ctx context.Context, data []byte, now time.Time) 
 		if err != nil {
 			return Reader{}, Root{}, err
 		}
-		if key(encoded) != v.SnapshotSHA256 || !now.Before(pin.Expires) {
+		streamHash := ""
+		if len(pin.Streams) != 0 {
+			encoded, _ := json.Marshal(pin.Streams)
+			streamHash = key(encoded)
+		}
+		if key(encoded) != v.SnapshotSHA256 || streamHash != v.StreamsSHA256 || !now.Before(pin.Expires) {
 			return Reader{}, Root{}, ErrRevoked
 		}
-		return Reader{destination: v.Destination, id: v.ID, graph: copyGraph(pin.Graph)}, root, nil
+		return Reader{destination: v.Destination, id: v.ID, graph: copyGraph(pin.Graph), streams: copyStreams(pin.Streams)}, root, nil
 	}
 	return Reader{}, Root{}, ErrRevoked
 }
@@ -111,6 +127,7 @@ func copyReaders(pins []ReaderPin) []ReaderPin {
 	result := append([]ReaderPin(nil), pins...)
 	for i := range result {
 		result[i].Graph = copyGraph(result[i].Graph)
+		result[i].Streams = copyStreams(result[i].Streams)
 	}
 	return result
 }
@@ -176,11 +193,11 @@ func (p Protocol) AcquireReader(ctx context.Context, destination string, expecte
 			return Reader{}, Root{}, errors.New("reader ID reused")
 		}
 	}
-	reader := Reader{destination: destination, id: id, graph: copyGraph(root.Graph)}
+	reader := Reader{destination: destination, id: id, graph: copyGraph(root.Graph), streams: copyStreams(root.Streams)}
 	if root.Schema == Schema {
 		root.Schema = RetentionSchema
 	}
-	root.Readers = append(copyReaders(root.Readers), ReaderPin{ID: id, Expires: expires.UTC(), Graph: copyGraph(root.Graph)})
+	root.Readers = append(copyReaders(root.Readers), ReaderPin{ID: id, Expires: expires.UTC(), Graph: copyGraph(root.Graph), Streams: copyStreams(root.Streams)})
 	ack, err := p.readerCAS(ctx, destination, expected, root)
 	if err != nil {
 		return Reader{}, Root{}, err
@@ -194,7 +211,7 @@ func readerIndex(root Root, reader Reader) (int, error) {
 	}
 	for i, pin := range root.Readers {
 		if pin.ID == reader.id {
-			if !reflect.DeepEqual(pin.Graph, reader.graph) {
+			if !reflect.DeepEqual(pin.Graph, reader.graph) || !reflect.DeepEqual(pin.Streams, reader.streams) {
 				return -1, ErrRevoked
 			}
 			return i, nil
@@ -246,6 +263,10 @@ func (p Protocol) ReleaseReader(ctx context.Context, reader Reader, expected uin
 // expiry. A lease expiring during this call can cause a read error; it never
 // grants authority to extend the lease by observing bytes.
 func (p Protocol) ReadRetained(ctx context.Context, reader Reader, index uint64, now time.Time) (retainedgraph.Record, error) {
+	return p.readRetainedStream(ctx, reader, "", index, now)
+}
+
+func (p Protocol) readRetainedStream(ctx context.Context, reader Reader, stream string, index uint64, now time.Time) (retainedgraph.Record, error) {
 	if p.Port == nil || now.IsZero() {
 		return retainedgraph.Record{}, errors.New("port and reader time required")
 	}
@@ -260,7 +281,7 @@ func (p Protocol) ReadRetained(ctx context.Context, reader Reader, index uint64,
 	if !now.Before(root.Readers[i].Expires) {
 		return retainedgraph.Record{}, ErrRevoked
 	}
-	return retainedgraph.Read(ctx, stageStore{protocol: p}, reader.graph, index)
+	return retainedgraph.Read(ctx, stageStore{protocol: p}, selectGraph(reader.graph, reader.streams, stream), index)
 }
 
 func (p Protocol) pruneReaders(ctx context.Context, destination string, root Root, now time.Time) (Root, error) {

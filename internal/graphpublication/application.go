@@ -3,8 +3,6 @@ package graphpublication
 import (
 	"context"
 	"errors"
-
-	"js-wf/internal/retainedgraph"
 )
 
 // UpdateApplication publishes an application-owned bounded descriptor at the
@@ -20,7 +18,9 @@ func (p Protocol) UpdateApplication(ctx context.Context, destination string, exp
 	if err != nil {
 		return Root{}, err
 	}
-	root.Schema = ApplicationSchema
+	if schemaRank(root.Schema) < 3 {
+		root.Schema = ApplicationSchema
+	}
 	root.Application = append([]byte(nil), data...)
 	return p.readerCAS(ctx, destination, expected, root)
 }
@@ -36,9 +36,10 @@ func (p Protocol) RetireLiveWithApplication(ctx context.Context, destination str
 	if err != nil {
 		return Root{}, err
 	}
-	root.Schema = ApplicationSchema
+	if schemaRank(root.Schema) < 3 {
+		root.Schema = ApplicationSchema
+	}
 	root.Application = append([]byte(nil), data...)
-	root.Graph = retainedgraph.Empty()
-	root.Token = ""
+	clearLive(&root)
 	return p.readerCAS(ctx, destination, expected, root)
 }

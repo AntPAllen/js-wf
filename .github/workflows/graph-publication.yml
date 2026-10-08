@@ -31,6 +31,7 @@ on:
       - 'sim/testdata/regressions/graph-reader-resume-*'
       - 'sim/testdata/regressions/graph-catalog-*'
       - 'sim/testdata/regressions/graph-application-*'
+      - 'sim/testdata/regressions/graph-streams-*'
       - 'sim/testdata/regressions/graph-journal-*'
       - 'sim/testdata/regressions/graph-worker-*'
       - 'sim/testdata/regressions/graph-result-*'
@@ -75,6 +76,7 @@ on:
       - 'sim/testdata/regressions/graph-reader-resume-*'
       - 'sim/testdata/regressions/graph-catalog-*'
       - 'sim/testdata/regressions/graph-application-*'
+      - 'sim/testdata/regressions/graph-streams-*'
       - 'sim/testdata/regressions/graph-journal-*'
       - 'sim/testdata/regressions/graph-worker-*'
       - 'sim/testdata/regressions/graph-result-*'
@@ -186,7 +188,7 @@ jobs:
       fail-fast: false
       matrix:
         mode: [normal, race]
-        family: [Publication, Readers, ReaderResume, Catalog, Application, Journal, Worker, Result, TerminalWorker, Child, ChildSignal, Reconcile, Purge, SignalClient, ParentWorker, Corpus]
+        family: [Publication, Readers, ReaderResume, Catalog, Application, Streams, Journal, Worker, Result, TerminalWorker, Child, ChildSignal, Reconcile, Purge, SignalClient, ParentWorker, Corpus]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-go@v5
