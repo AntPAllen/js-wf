@@ -1,0 +1,152 @@
+{
+  "roots": [
+    "/tmp/js-wf-tier1-full126-normal100k-20261008",
+    "/tmp/js-wf-local-partition200-source-20261006",
+    "/tmp/js-wf-hosted-partition-seed3-review-checkout-20261005",
+    "/tmp/js-wf-audit-reduction-full-population-profile-20261005",
+    "/tmp/js-wf-partition-review-positive-source-20261006",
+    "/tmp/js-wf-planner-checkout-ac3cd53"
+  ],
+  "worktrees": [
+    {
+      "path": "/tmp/js-wf-audit-reduction-full-population-profile-20261005/source",
+      "head": "6adad6e3247fa964e366e93a16dab631bc8c0e40",
+      "status": ""
+    },
+    {
+      "path": "/tmp/js-wf-hosted-partition-seed3-review-checkout-20261005",
+      "head": "605a78adcf993367253fdb57445e29804c84b1e3",
+      "status": ""
+    },
+    {
+      "path": "/tmp/js-wf-local-partition200-source-20261006",
+      "head": "300a36a3917a61e51a4a3584288cd05b1fde0cb3",
+      "status": ""
+    },
+    {
+      "path": "/tmp/js-wf-partition-review-positive-source-20261006",
+      "head": "82a7d6c880b61a6e308ae77cb7f48b4193b20b02",
+      "status": ""
+    },
+    {
+      "path": "/tmp/js-wf-planner-checkout-ac3cd53",
+      "head": "ac3cd53925e38c7e824977c6543173ea8f06a174",
+      "status": ""
+    },
+    {
+      "path": "/tmp/js-wf-tier1-full126-normal100k-20261008/source",
+      "head": "074bcfcc50c5b000a2364a808bf970f31b9cc522",
+      "status": ""
+    }
+  ],
+  "privileged_closure": {
+    "blocked": {},
+    "permission_limits": [],
+    "visible_descriptors": 4993,
+    "docker_ids_including_stopped": [
+      "54f78ad2debd",
+      "460dfd2edd04",
+      "c631ca1436e8",
+      "348f3a6edb32",
+      "27b94b5d0e96"
+    ],
+    "loopdevices": {
+      "loopdevices": []
+    },
+    "mounts": {
+      "filesystems": [
+        {
+          "target": "/",
+          "source": "/dev/vda",
+          "children": [
+            {
+              "target": "/dev",
+              "source": "devtmpfs",
+              "children": [
+                {
+                  "target": "/dev/pts",
+                  "source": "devpts"
+                },
+                {
+                  "target": "/dev/shm",
+                  "source": "shm"
+                },
+                {
+                  "target": "/dev/mqueue",
+                  "source": "mqueue"
+                },
+                {
+                  "target": "/dev/hugepages",
+                  "source": "hugetlbfs"
+                }
+              ]
+            },
+            {
+              "target": "/proc",
+              "source": "proc",
+              "children": [
+                {
+                  "target": "/proc/sys/fs/binfmt_misc",
+                  "source": "systemd-1",
+                  "children": [
+                    {
+                      "target": "/proc/sys/fs/binfmt_misc",
+                      "source": "binfmt_misc"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "target": "/sys",
+              "source": "none",
+              "children": [
+                {
+                  "target": "/sys/fs/cgroup",
+                  "source": "cgroup2"
+                },
+                {
+                  "target": "/sys/kernel/security",
+                  "source": "securityfs"
+                },
+                {
+                  "target": "/sys/fs/selinux",
+                  "source": "selinuxfs"
+                },
+                {
+                  "target": "/sys/fs/bpf",
+                  "source": "bpf"
+                },
+                {
+                  "target": "/sys/kernel/debug",
+                  "source": "debugfs"
+                },
+                {
+                  "target": "/sys/kernel/tracing",
+                  "source": "tracefs"
+                }
+              ]
+            },
+            {
+              "target": "/run",
+              "source": "tmpfs",
+              "children": [
+                {
+                  "target": "/run/lock",
+                  "source": "tmpfs"
+                },
+                {
+                  "target": "/run/user/1000",
+                  "source": "tmpfs"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "archive": "/tmp/tmp-closed-worktrees-20261008.tar.gz",
+  "utc": "2026-10-08T06:07:56.793752+00:00",
+  "scope": "Closed fixture preservation; full regular-file bytes including source and .git pointer files. Git commits remain in the main repository. No verdict changes. Worktree registrations will be removed only after committed S3 verification."
+}
