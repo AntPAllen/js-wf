@@ -16,6 +16,7 @@ import (
 	"js-wf/identity"
 	"js-wf/internal/graphpublication"
 	"js-wf/journal"
+	"js-wf/lease"
 	"js-wf/provision"
 	"js-wf/testcluster"
 	"js-wf/wf"
@@ -244,6 +245,90 @@ func TestNativeGraphWorkerReplayInputsSignalsAndResults(t *testing.T) {
 			actual, err = c.Await(ctx, "graph", "native")
 			if err != nil || !bytes.Equal(actual, terminal) {
 				t.Fatal("missing legacy state hid graph result", err)
+			}
+			leaseKV, err := js.KeyValue(ctx, "WF_LEASE")
+			if err != nil {
+				t.Fatal(err)
+			}
+			for _, mirror := range []string{"absent", "forged", "owned"} {
+				if mirror == "forged" {
+					forged, _ := json.Marshal(wf.Outcome{InvSeq: handle.InvSeq + 100, Error: "forged legacy failure"})
+					if _, err = state.Create(ctx, identity.Key("graph", "native"), forged); err != nil {
+						t.Fatal(err)
+					}
+				}
+				probeCtx, stopProbe := context.WithTimeout(ctx, 10*time.Second)
+				decisions := make(chan DispatchEvent, 1)
+				probe, err := New(ctx, js, "graph-terminal-"+mirror, handlers, WithGraphJournal(store), WithDispatchObserver(func(e DispatchEvent) {
+					if e.Stage == "ack" || e.Stage == "nak" {
+						select {
+						case decisions <- e:
+						default:
+						}
+						stopProbe()
+					}
+				}))
+				if err != nil {
+					stopProbe()
+					t.Fatal(err)
+				}
+				var owner *lease.Lease
+				var before jetstream.KeyValueEntry
+				if mirror == "owned" {
+					// Seed the local hint from the canonical outcome already observed above.
+					// It must still validate durable authority before acknowledging.
+					probe.terminalHints.add(identity.Key("graph", "native"), true)
+				} else {
+					owner, err = probe.leases.Acquire(ctx, "graph", "native", "healthy-owner")
+					if err != nil {
+						stopProbe()
+						t.Fatal(err)
+					}
+					before, err = leaseKV.Get(ctx, identity.Key("graph", "native"))
+					if err != nil {
+						t.Fatal(err)
+					}
+				}
+				if _, err = js.Publish(ctx, identity.RunSubject("graph", "native", provision.Partitions), []byte(identity.Key("graph", "native"))); err != nil {
+					t.Fatal(err)
+				}
+				if err = probe.RunPartition(probeCtx, identity.Partition("graph", "native", provision.Partitions)); err != nil {
+					t.Fatal(err)
+				}
+				stopProbe()
+				select {
+				case decision := <-decisions:
+					if decision.Stage != "ack" || decision.Error != "" {
+						t.Fatal("canonical terminal probe failed", mirror, decision)
+					}
+				default:
+					t.Fatal("canonical terminal probe did not decide", mirror)
+				}
+				if mirror == "owned" {
+					if probe.Metrics().LeaseAcquisitions != 1 || probe.Metrics().LeaseContentions != 0 {
+						t.Fatal("owned duplicate path not exercised", probe.Metrics())
+					}
+				} else {
+					after, err := leaseKV.Get(ctx, identity.Key("graph", "native"))
+					if err != nil || before.Revision() != after.Revision() || !bytes.Equal(before.Value(), after.Value()) {
+						t.Fatal("terminal ACK changed foreign lease", err)
+					}
+					if probe.Metrics().LeaseContentions != 1 {
+						t.Fatal("probe bypassed held lease", probe.Metrics())
+					}
+					if err = owner.Renew(ctx); err != nil {
+						t.Fatal(err)
+					}
+					if err = owner.Release(ctx); err != nil {
+						t.Fatal(err)
+					}
+				}
+				if effects.Load() != 1 {
+					t.Fatal("duplicate reran effect", effects.Load())
+				}
+			}
+			if err = state.Delete(ctx, identity.Key("graph", "native")); err != nil {
+				t.Fatal(err)
 			}
 			if err = invocation.Purge(ctx, jetstream.WithPurgeSubject(identity.InvocationSubject("graph", "native"))); err != nil {
 				t.Fatal(err)

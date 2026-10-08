@@ -2,7 +2,6 @@ package client
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"time"
@@ -180,23 +179,6 @@ func (c *Client) graphTerminalResult(ctx context.Context, typ, id string, invoca
 			err = closeErr
 		}
 	}()
-	record, err := view.Read(ctx, view.Count()-1)
-	if err != nil {
-		return nil, terminal, false, err
-	}
-	if json.Unmarshal(record.Payload, &terminal) != nil || terminal.InvSeq != invocation || record.Kind != journal.Completed && record.Kind != journal.Failed || record.Kind == journal.Completed && terminal.Error != "" || record.Kind == journal.Failed && (terminal.Error == "" || len(terminal.Result) != 0 || terminal.ResultRef != "" || terminal.ResultHash != "") {
-		return nil, terminal, false, wf.ErrCorruptJournal
-	}
-	if terminal.Error != "" {
-		return nil, terminal, true, nil
-	}
-	data, err = terminal.ResultBytes(ctx, func(ctx context.Context, _ string) ([]byte, error) {
-		for _, link := range append(record.Blobs, record.EntryBlob) {
-			if link.Hash == terminal.ResultHash {
-				return view.Payload(ctx, record.Index, link, c.graphJournal.PayloadReadLimit())
-			}
-		}
-		return nil, wf.ErrCorruptJournal
-	})
-	return data, terminal, err == nil, err
+	verified, err := wf.ReadGraphTerminal(ctx, view, invocation, c.graphJournal.PayloadReadLimit())
+	return verified.Result, verified.Outcome, err == nil, err
 }

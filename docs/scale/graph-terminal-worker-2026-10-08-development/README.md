@@ -1,0 +1,3 @@
+# Development fixture failure
+
+Seed5 completed and acknowledged the parent-notification terminal probe, but the test then queried GetSignalAfter with sequence0. The model method requires a positive inclusive starting sequence, so it reported not found despite the recorded publish_signal event at sequence1 with the correct subject/body hash. The probe now starts at1. The original failed trace is preserved here and is not reclassified as a successful test. This is a test cursor error, not a runtime or NATS failure. Earlier compilation also rejected nonexistent fixture helper names; those helper calls were corrected before execution.

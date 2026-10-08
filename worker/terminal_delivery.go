@@ -1,11 +1,9 @@
 package worker
 
 import (
-	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
-	"js-wf/journal"
 	"sync"
 	"time"
 
@@ -63,6 +61,9 @@ func (h *terminalHints) snapshotReady(key string) {
 func (w *Worker) terminalHeldDelivery(ctx context.Context, typ, id string, timer timerWakeup, ops *deliveryOperations) (bool, bool, error) {
 	ctx, stop := context.WithTimeout(ctx, 2*time.Second)
 	defer stop()
+	if w.graphJournal != nil {
+		return w.graphTerminalHeldDelivery(ctx, typ, id, timer, ops)
+	}
 	outcomePort := w.outcomePort
 	if outcomePort == nil {
 		if w.state == nil {
@@ -97,29 +98,12 @@ func (w *Worker) terminalHeldDelivery(ctx context.Context, typ, id string, timer
 	if input == nil || input.Sequence != outcome.InvSeq {
 		return false, false, nil
 	}
-	var graphRecords []journal.Record
-	if w.graphJournal != nil {
-		graphRecords, _, err = w.graphJournal.Read(ctx, typ, id, input.Sequence)
-		if err != nil {
-			return false, false, err
-		}
-		if len(graphRecords) == 0 {
-			return false, false, nil
-		}
-		last := graphRecords[len(graphRecords)-1]
-		if (last.Kind != journal.Completed && last.Kind != journal.Failed) || !bytes.Equal(last.Payload, state.Value) {
-			return false, false, nil
-		}
-	}
 	canceledTimer := false
 	// Preserve the existing canceled-timer no-op metric. Terminal state alone
 	// cannot tell whether this particular timer had been canceled.
 	if timer.scheduled && timer.generation == input.Sequence {
 		started = ops.begin()
-		records := graphRecords
-		if w.graphJournal == nil {
-			records, _, err = w.jrn.Read(ctx, typ, id)
-		}
+		records, _, err := w.jrn.Read(ctx, typ, id)
 		ops.finish(started, "terminal_timer_read", 0, "", err)
 		if err != nil {
 			return false, false, err
