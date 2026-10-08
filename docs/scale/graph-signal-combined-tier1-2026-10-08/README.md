@@ -17,7 +17,7 @@ Repair reopens the graph/client/scanner after uncertain outcomes without caller 
 
 All 728 prior pins remain byte-identical to `44fe6bf`; the corpus now contains 731 pins and the seed inventory has 146 families. Normal and race corpus results are recorded in `development/pins-*.jsonl`. Executed review checks terminal results, exact pin coverage, unchanged prior pins and marginal coverage. This development result is not a frozen complete 146-family qualification.
 
-CI includes the combined family with 1,000 seeds, completed-seed diagnostics and a 60-minute test/65-minute job CPU budget. Future complete race runs use 180-minute test/195-minute job budgets: the earlier 145-family campaign already consumed nearly its original 60-minute limit before this additional family. The existing live campaign retains its original budget/source; no recovery target, seed count or domain assertion is relaxed.
+CI includes the combined family with 1,000 seeds, completed-seed diagnostics and a 60-minute test/65-minute job CPU budget. Future complete race runs use 180-minute test/195-minute job budgets: the earlier 145-family campaign already consumed nearly its original 60-minute limit before this additional family. The existing campaign failed its original 60-minute alarm during suspended-scan capacity testing, with its source and failure retained; no recovery target, seed count or domain assertion is relaxed.
 
 ## Remaining work
 
