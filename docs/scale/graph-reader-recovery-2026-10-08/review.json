@@ -1,0 +1,92 @@
+{
+  "source": "a0630ca4a2dad8cd9d8a757aa34e21af1caa90e4",
+  "selected_source_inputs": 1350,
+  "selected_inputs_match_git_before": true,
+  "selected_inputs_unchanged_after": true,
+  "verified_runs": [
+    {
+      "name": "native-normal",
+      "package_passes": [
+        {
+          "package": "js-wf/internal/natsstream",
+          "elapsed": 0.025
+        },
+        {
+          "package": "js-wf/internal/graphpublication",
+          "elapsed": 41.149
+        }
+      ],
+      "graph_top_level_groups": 42,
+      "reader_native_replicas": [
+        1,
+        3
+      ]
+    },
+    {
+      "name": "recovery-normal100k",
+      "package_passes": [
+        {
+          "package": "js-wf/sim",
+          "elapsed": 74.626
+        }
+      ],
+      "modes": {
+        "collector_after_resume": 11074,
+        "expired_collected": 11021,
+        "expired_uncollected": 11180,
+        "fingerprint_changed": 11242,
+        "foreign_destination": 11211,
+        "released": 11037,
+        "renew_resume": 11018,
+        "retire_resume": 11181,
+        "unknown_root": 11036
+      },
+      "total_schedules": 100000,
+      "exact_graph_pins": 38
+    },
+    {
+      "name": "native-race",
+      "package_passes": [
+        {
+          "package": "js-wf/internal/natsstream",
+          "elapsed": 1.036
+        },
+        {
+          "package": "js-wf/internal/graphpublication",
+          "elapsed": 118.592
+        }
+      ],
+      "graph_top_level_groups": 42,
+      "reader_native_replicas": [
+        1,
+        3
+      ]
+    },
+    {
+      "name": "recovery-race1k",
+      "package_passes": [
+        {
+          "package": "js-wf/sim",
+          "elapsed": 11.158
+        }
+      ],
+      "modes": {
+        "collector_after_resume": 101,
+        "expired_collected": 106,
+        "expired_uncollected": 105,
+        "fingerprint_changed": 107,
+        "foreign_destination": 122,
+        "released": 116,
+        "renew_resume": 117,
+        "retire_resume": 99,
+        "unknown_root": 127
+      },
+      "total_schedules": 1000,
+      "exact_graph_pins": 38
+    }
+  ],
+  "go_version": "go version go1.27.1 linux/amd64",
+  "utc": "2026-10-08T05:26:52.006693+00:00",
+  "scope": "Standard local package and focused seeded regression only; not independent SDK executable/peer-media provenance, full current-source Tier1 qualification, deployment rollout or complete native release qualification.",
+  "original_full126_observation": "    PID     ELAPSED S COMMAND\n2827904    03:28:33 S /tmp/js-wf-tier1-full126-normal100k-20261008/run/sim.test -test.v=test2json -test.count=1 -test.timeout=300m\n"
+}

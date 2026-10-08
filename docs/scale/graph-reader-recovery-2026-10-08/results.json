@@ -1,0 +1,233 @@
+{
+  "source": "a0630ca4a2dad8cd9d8a757aa34e21af1caa90e4",
+  "runs": [
+    {
+      "name": "native-normal",
+      "command": [
+        "go",
+        "test",
+        "-p=1",
+        "./internal/natsstream",
+        "./internal/graphpublication",
+        "-count=1",
+        "-timeout=5m",
+        "-json"
+      ],
+      "working_directory": "/home/exedev/js-wf",
+      "environment": {
+        "GOMAXPROCS": "2",
+        "GOMEMLIMIT": "512MiB",
+        "SIM_COVERAGE_SUMMARY": "1",
+        "SIM_SEEDS": "1000",
+        "FAULT_TRACE_OUT": "/tmp/js-wf-graph-reader-recovery-native-normal-failure-20261008.json"
+      },
+      "exit_code": 0,
+      "wall_seconds": 42.26633047198993,
+      "package_passes": [
+        {
+          "package": "js-wf/internal/natsstream",
+          "elapsed": 0.025
+        },
+        {
+          "package": "js-wf/internal/graphpublication",
+          "elapsed": 41.149
+        }
+      ],
+      "top_level_passes": [
+        "TestStreamGuardHonorsWaitingContext",
+        "TestNativeGraphAuthorityPersistenceAndSchemaIsolation",
+        "TestNativeGraphAuthorityReadWitness",
+        "TestGraphAuthorityCanonicalEnvelope",
+        "TestNativeGraphAuthorityUnsafeConfiguration",
+        "TestNativeGraphAuthorityRejectsMalformedWireWithoutRepair",
+        "TestNativeGraphAuthorityLostMutationReplies",
+        "TestNativeGraphAuthorityRejectsLossyDestinationEncoding",
+        "TestNativeGraphConcurrentPublishersAndCollectors",
+        "TestNativeGraphObjectAppendReuseAndRetirement",
+        "TestNativeGraphObjectReservationsLostRepliesAndLateCompletion",
+        "TestNativeGraphObjectCancellationBoundsAndUnknownChunks",
+        "TestNativeGraphObjectPublishCollectOrderAndDelayedDelete",
+        "TestNativeGraphObjectReadUncertaintyAndFormatIsolation",
+        "TestNativeGraphObjectOpeningBoundsReadOnlyAdmission",
+        "TestGraphSubjectAccessRejectsUnsafeNamespaces",
+        "TestNativeGraphRuntimePermissions",
+        "TestNativeGraphReadersRetirementAndExpiry",
+        "TestNativeGraphReaderCheckpointStoreRestart",
+        "TestGraphOwnedPayloadSeededReuseAndCompleteReclamation",
+        "TestGraphOwnedLargePayloadNotRecopied",
+        "TestGraphOwnedPayloadRejectsUnownedStaleAndAmbiguousReferences",
+        "TestGraphOwnedPayloadRetirementAndCollectorFence",
+        "TestGraphOwnedPayloadUncertainReadsAndCallerMutation",
+        "TestGraphPublicationSeededAppendsSweepAndRetirement",
+        "TestGraphPublicationCollectorAndCommitInterleavings",
+        "TestGraphPublicationUnknownRepliesNeverAdoptUploads",
+        "TestGraphPublicationForeignDestinationAndRevokedGrants",
+        "TestGraphPublicationUncertainCensusFailsClosed",
+        "TestGraphPublicationDelayedDeleteCannotTouchNewGeneration",
+        "TestGraphPublicationContextAndCopies",
+        "TestGraphPublicationMetadataBoundAndPermanentScopedGenerations",
+        "TestGraphPublicationRejectsForeignPhysicalOwner",
+        "TestGraphPublicationInvalidAcknowledgmentsAndInputBounds",
+        "TestGraphReaderCheckpointRecovery",
+        "TestGraphReaderCheckpointRejectsUnknownAndRevoked",
+        "TestGraphReaderCheckpointCanonicalBounds",
+        "TestGraphReaderAppendRetireRelease",
+        "TestGraphReaderRenewalExpiryFences",
+        "TestGraphReaderUnknownAcknowledgements",
+        "TestGraphReaderBoundsAndFailClosed",
+        "TestGraphReaderOriginalHeadAndEmptySnapshots",
+        "TestGraphReaderAcquireRetirementRace"
+      ]
+    },
+    {
+      "name": "recovery-normal100k",
+      "command": [
+        "go",
+        "test",
+        "-p=1",
+        "./sim",
+        "-run",
+        "^(TestSeededGraphReaderResumeReplay|TestGraphPublicationTransportCopiesFaultsAndIndependentCensus|TestPinnedRegressionCorpus)$/^(graph-publication-|graph-readers-|graph-reader-resume-)",
+        "-count=1",
+        "-timeout=5m",
+        "-json"
+      ],
+      "working_directory": "/home/exedev/js-wf",
+      "environment": {
+        "GOMAXPROCS": "2",
+        "GOMEMLIMIT": "512MiB",
+        "SIM_COVERAGE_SUMMARY": "1",
+        "SIM_SEEDS": "100000",
+        "FAULT_TRACE_OUT": "/tmp/js-wf-graph-reader-recovery-recovery-normal100k-failure-20261008.json"
+      },
+      "exit_code": 0,
+      "wall_seconds": 75.43811174001894,
+      "package_passes": [
+        {
+          "package": "js-wf/sim",
+          "elapsed": 74.626
+        }
+      ],
+      "top_level_passes": [
+        "TestGraphPublicationTransportCopiesFaultsAndIndependentCensus",
+        "TestSeededGraphReaderResumeReplay",
+        "TestPinnedRegressionCorpus"
+      ]
+    },
+    {
+      "name": "native-race",
+      "command": [
+        "go",
+        "test",
+        "-p=1",
+        "-race",
+        "./internal/natsstream",
+        "./internal/graphpublication",
+        "-count=1",
+        "-timeout=5m",
+        "-json"
+      ],
+      "working_directory": "/home/exedev/js-wf",
+      "environment": {
+        "GOMAXPROCS": "2",
+        "GOMEMLIMIT": "512MiB",
+        "SIM_COVERAGE_SUMMARY": "1",
+        "SIM_SEEDS": "1000",
+        "FAULT_TRACE_OUT": "/tmp/js-wf-graph-reader-recovery-native-race-failure-20261008.json"
+      },
+      "exit_code": 0,
+      "wall_seconds": 122.96619388498948,
+      "package_passes": [
+        {
+          "package": "js-wf/internal/natsstream",
+          "elapsed": 1.036
+        },
+        {
+          "package": "js-wf/internal/graphpublication",
+          "elapsed": 118.592
+        }
+      ],
+      "top_level_passes": [
+        "TestStreamGuardHonorsWaitingContext",
+        "TestNativeGraphAuthorityPersistenceAndSchemaIsolation",
+        "TestNativeGraphAuthorityReadWitness",
+        "TestGraphAuthorityCanonicalEnvelope",
+        "TestNativeGraphAuthorityUnsafeConfiguration",
+        "TestNativeGraphAuthorityRejectsMalformedWireWithoutRepair",
+        "TestNativeGraphAuthorityLostMutationReplies",
+        "TestNativeGraphAuthorityRejectsLossyDestinationEncoding",
+        "TestNativeGraphConcurrentPublishersAndCollectors",
+        "TestNativeGraphObjectAppendReuseAndRetirement",
+        "TestNativeGraphObjectReservationsLostRepliesAndLateCompletion",
+        "TestNativeGraphObjectCancellationBoundsAndUnknownChunks",
+        "TestNativeGraphObjectPublishCollectOrderAndDelayedDelete",
+        "TestNativeGraphObjectReadUncertaintyAndFormatIsolation",
+        "TestNativeGraphObjectOpeningBoundsReadOnlyAdmission",
+        "TestGraphSubjectAccessRejectsUnsafeNamespaces",
+        "TestNativeGraphRuntimePermissions",
+        "TestNativeGraphReadersRetirementAndExpiry",
+        "TestNativeGraphReaderCheckpointStoreRestart",
+        "TestGraphOwnedPayloadSeededReuseAndCompleteReclamation",
+        "TestGraphOwnedLargePayloadNotRecopied",
+        "TestGraphOwnedPayloadRejectsUnownedStaleAndAmbiguousReferences",
+        "TestGraphOwnedPayloadRetirementAndCollectorFence",
+        "TestGraphOwnedPayloadUncertainReadsAndCallerMutation",
+        "TestGraphPublicationSeededAppendsSweepAndRetirement",
+        "TestGraphPublicationCollectorAndCommitInterleavings",
+        "TestGraphPublicationUnknownRepliesNeverAdoptUploads",
+        "TestGraphPublicationForeignDestinationAndRevokedGrants",
+        "TestGraphPublicationUncertainCensusFailsClosed",
+        "TestGraphPublicationDelayedDeleteCannotTouchNewGeneration",
+        "TestGraphPublicationContextAndCopies",
+        "TestGraphPublicationMetadataBoundAndPermanentScopedGenerations",
+        "TestGraphPublicationRejectsForeignPhysicalOwner",
+        "TestGraphPublicationInvalidAcknowledgmentsAndInputBounds",
+        "TestGraphReaderCheckpointRecovery",
+        "TestGraphReaderCheckpointRejectsUnknownAndRevoked",
+        "TestGraphReaderCheckpointCanonicalBounds",
+        "TestGraphReaderAppendRetireRelease",
+        "TestGraphReaderRenewalExpiryFences",
+        "TestGraphReaderUnknownAcknowledgements",
+        "TestGraphReaderBoundsAndFailClosed",
+        "TestGraphReaderOriginalHeadAndEmptySnapshots",
+        "TestGraphReaderAcquireRetirementRace"
+      ]
+    },
+    {
+      "name": "recovery-race1k",
+      "command": [
+        "go",
+        "test",
+        "-p=1",
+        "-race",
+        "./sim",
+        "-run",
+        "^(TestSeededGraphReaderResumeReplay|TestGraphPublicationTransportCopiesFaultsAndIndependentCensus|TestPinnedRegressionCorpus)$/^(graph-publication-|graph-readers-|graph-reader-resume-)",
+        "-count=1",
+        "-timeout=5m",
+        "-json"
+      ],
+      "working_directory": "/home/exedev/js-wf",
+      "environment": {
+        "GOMAXPROCS": "2",
+        "GOMEMLIMIT": "512MiB",
+        "SIM_COVERAGE_SUMMARY": "1",
+        "SIM_SEEDS": "1000",
+        "FAULT_TRACE_OUT": "/tmp/js-wf-graph-reader-recovery-recovery-race1k-failure-20261008.json"
+      },
+      "exit_code": 0,
+      "wall_seconds": 22.452305860992055,
+      "package_passes": [
+        {
+          "package": "js-wf/sim",
+          "elapsed": 11.158
+        }
+      ],
+      "top_level_passes": [
+        "TestGraphPublicationTransportCopiesFaultsAndIndependentCensus",
+        "TestSeededGraphReaderResumeReplay",
+        "TestPinnedRegressionCorpus"
+      ]
+    }
+  ]
+}
