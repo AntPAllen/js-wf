@@ -11,3 +11,5 @@ The complete compressed archive and every member were verified by S3 readback be
 - [S3 receipt](s3-readback.json)
 - [Member inventory](fixture-inventory.json)
 - [Executed cleanup](executed-cleanup.py)
+
+Removal completed after the second full S3 verification and privileged closure check. Reclaimed **10,956,800 allocated bytes** (10.45 MiB). `/tmp` decreased from 26,760 KiB to 16,060 KiB. The staging directory and transfer archive were also removed. See the [removal ledger](removal.json).
