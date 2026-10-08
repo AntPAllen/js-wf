@@ -9,3 +9,5 @@ Restore by downloading the archive URL recorded in `s3-readback.json`, checking 
 ## Local retirement completed
 
 All 3,989 selected original entries and the local transfer archive were removed after the receipt was committed and pushed, fresh complete remote compressed-byte/member verification, unchanged original inventories and a privileged process/descriptor/container/mount/loop check with no permission gaps. The removal report records 154886144 allocated bytes including the temporary transfer archive. S3 is the canonical archive; Git retains its complete inventory and recovery receipt.
+
+Final measured `/tmp` usage decreased from 268 MiB to 147 MiB. The live simulation still held 64 MiB and its original PID remained running. The removal report includes the privileged resume required for a root-owned temporary log; full remote verification and remaining-file closure were repeated before completion.
