@@ -1,0 +1,98 @@
+{
+  "source": "7a9ea04c82cb139f2d971ceec2723778bee4f0eb",
+  "selected_source_inputs": 1339,
+  "selected_inputs_match_git_before": true,
+  "selected_inputs_unchanged_after": true,
+  "verified_runs": [
+    {
+      "name": "native-normal",
+      "package_passes": [
+        {
+          "package": "js-wf/internal/natsstream",
+          "elapsed": 0.025
+        },
+        {
+          "package": "js-wf/internal/graphpublication",
+          "elapsed": 27.856
+        }
+      ],
+      "graph_top_level_groups": 38,
+      "reader_native_replicas": [
+        1,
+        3
+      ]
+    },
+    {
+      "name": "readers-normal100k",
+      "package_passes": [
+        {
+          "package": "js-wf/sim",
+          "elapsed": 101.529
+        }
+      ],
+      "modes": {
+        "acquire_wins": 8425,
+        "collector_wins": 8436,
+        "expiry": 8288,
+        "lost_acquire": 8307,
+        "lost_expiry": 8390,
+        "lost_release": 8363,
+        "lost_renew": 8345,
+        "release": 8370,
+        "renew_wins": 8303,
+        "retire_read": 8257,
+        "retire_wins": 8217,
+        "uncertain_ancestry": 8299
+      },
+      "total_schedules": 100000,
+      "exact_graph_pins": 29
+    },
+    {
+      "name": "native-race",
+      "package_passes": [
+        {
+          "package": "js-wf/internal/natsstream",
+          "elapsed": 1.035
+        },
+        {
+          "package": "js-wf/internal/graphpublication",
+          "elapsed": 113.461
+        }
+      ],
+      "graph_top_level_groups": 38,
+      "reader_native_replicas": [
+        1,
+        3
+      ]
+    },
+    {
+      "name": "readers-race1k",
+      "package_passes": [
+        {
+          "package": "js-wf/sim",
+          "elapsed": 13.938
+        }
+      ],
+      "modes": {
+        "acquire_wins": 73,
+        "collector_wins": 89,
+        "expiry": 91,
+        "lost_acquire": 77,
+        "lost_expiry": 83,
+        "lost_release": 91,
+        "lost_renew": 84,
+        "release": 92,
+        "renew_wins": 88,
+        "retire_read": 91,
+        "retire_wins": 63,
+        "uncertain_ancestry": 78
+      },
+      "total_schedules": 1000,
+      "exact_graph_pins": 29
+    }
+  ],
+  "go_version": "go version go1.27.1 linux/amd64",
+  "utc": "2026-10-08T05:11:05.959484+00:00",
+  "scope": "Standard local package and focused seeded regression only; not independent SDK executable/peer-media provenance, full current-source Tier1 qualification, deployment rollout or complete native release qualification.",
+  "original_full126_observation": "    PID     ELAPSED S COMMAND\n2827904    03:12:47 S /tmp/js-wf-tier1-full126-normal100k-20261008/run/sim.test -test.v=test2json -test.count=1 -test.timeout=300m\n"
+}
