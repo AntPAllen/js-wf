@@ -18,6 +18,7 @@ import (
 )
 
 type SignalScan struct {
+	graph   *journal.GraphStore
 	Observe func(RepairEvent)
 	port    SignalScanPort
 }
@@ -157,10 +158,33 @@ func (s *SignalScan) Scan(ctx context.Context, next uint64, budget int, dryRun b
 		if err := identity.Validate(typ, id); err != nil {
 			return result, err
 		}
+		// Graph history is scoped to the observed invocation. A cache entry
+		// from another generation cannot suppress its signal repairs.
+		var invocation *jetstream.RawStreamMsg
+		if s.graph != nil {
+			invocation, err = s.port.LastInvocation(ctx, identity.InvocationSubject(typ, id))
+			if errors.Is(err, jetstream.ErrMsgNotFound) {
+				confirmed = next
+				continue
+			}
+			if err != nil {
+				return result, err
+			}
+			if invocation == nil || invocation.Sequence == 0 || invocation.Subject != identity.InvocationSubject(typ, id) {
+				return result, fmt.Errorf("invalid current invocation")
+			}
+		}
 		key := identity.Key(typ, id)
+		if invocation != nil {
+			key += ":" + strconv.FormatUint(invocation.Sequence, 10)
+		}
 		state, ok := cache[key]
 		if !ok {
-			records, err := s.port.ReadJournal(ctx, typ, id)
+			var generation uint64
+			if invocation != nil {
+				generation = invocation.Sequence
+			}
+			records, err := readRepairJournal(ctx, s.graph, s.port, typ, id, generation)
 			if err != nil {
 				return result, err
 			}
@@ -185,7 +209,9 @@ func (s *SignalScan) Scan(ctx context.Context, next uint64, budget int, dryRun b
 			confirmed = next
 			continue
 		}
-		invocation, err := s.port.LastInvocation(ctx, identity.InvocationSubject(typ, id))
+		if invocation == nil {
+			invocation, err = s.port.LastInvocation(ctx, identity.InvocationSubject(typ, id))
+		}
 		if errors.Is(err, jetstream.ErrMsgNotFound) {
 			confirmed = next
 			continue

@@ -1,0 +1,5 @@
+# Graph reconciler development checks
+
+Unfrozen development evidence only; focused committed-source verification follows. The final model runs 1,000 schedules across 26 modes with exact replay and records the new pins. Native R1/R3 actual worker start/signal repair controls pass in 2.960s. The complete reconciler package passes normal in 35.894s. No production GC or broad release qualification is established here.
+
+Preserved failures: initial model/native build API mistakes; seed21 release-lost and seed30 acquisition-lost fixtures wrongly expected uncertainty even when the production protocol successfully reconciled a lost CAS reply by readback. The final model separately covers successful readback reconciliation and genuinely uncertain lost CAS plus lost readback. Seed43 attempted to terminate an initialized but empty graph without Started; final explicit fixture cleanup appends Started first. Original failure logs/traces remain failed development diagnostics, with draft mode sets; no NATS defect is inferred. Prepared model fixtures retain wakeups and require explicit terminal retirement/expiry for graph drain.

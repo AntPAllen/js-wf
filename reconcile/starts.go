@@ -10,11 +10,14 @@ import (
 	"time"
 
 	"js-wf/client"
+	"js-wf/identity"
+	"js-wf/journal"
 
 	"github.com/nats-io/nats.go/jetstream"
 )
 
 type StartScan struct {
+	graph   *journal.GraphStore
 	Observe func(RepairEvent)
 	port    StartScanPort
 }
@@ -158,11 +161,18 @@ func (s *StartScan) Scan(ctx context.Context, next uint64, budget int, dryRun bo
 		result.NextSequence = next
 		result.Inspected++
 		parts := strings.Split(m.Subject, ".")
-		if len(parts) != 4 {
+		if len(parts) != 4 || parts[0] != "wf" || parts[1] != "inv" || identity.Validate(parts[2], parts[3]) != nil {
 			return result, fmt.Errorf("invalid invocation subject %q", m.Subject)
 		}
 		typ, id := parts[2], parts[3]
-		exists, err := s.port.JournalExists(ctx, "wf.jrn."+typ+"."+id)
+		var exists bool
+		if s.graph != nil {
+			var records []journal.Record
+			records, _, err = s.graph.ReadExisting(ctx, typ, id, m.Sequence)
+			exists = len(records) != 0
+		} else {
+			exists, err = s.port.JournalExists(ctx, "wf.jrn."+typ+"."+id)
+		}
 		if err != nil {
 			return result, err
 		}

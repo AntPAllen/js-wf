@@ -521,6 +521,8 @@ func replayTrace(loaded Trace) (Trace, error) {
 		replayed, err = runGraphReaders(loaded.Seed, &loaded)
 	case "graph_reader_resume":
 		replayed, err = runGraphReaderResume(loaded.Seed, &loaded)
+	case "graph_reconciler_history":
+		replayed, err = runGraphReconcile(loaded.Seed, &loaded)
 	case "graph_child_signal_provenance":
 		replayed, err = runGraphChildSignal(loaded.Seed, &loaded)
 	case "graph_child_result_transfer":

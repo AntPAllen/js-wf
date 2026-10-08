@@ -288,14 +288,24 @@ func (s *GraphStore) OpenTerminal(ctx context.Context, typ, id string, invocatio
 	if invocation == 0 {
 		return nil, ErrStale
 	}
-	return s.open(ctx, typ, id, invocation, true)
+	return s.open(ctx, typ, id, invocation, true, true)
 }
 
 func (s *GraphStore) Open(ctx context.Context, typ, id string, invocation uint64) (*GraphView, error) {
-	return s.open(ctx, typ, id, invocation, false)
+	return s.open(ctx, typ, id, invocation, false, false)
 }
 
-func (s *GraphStore) open(ctx context.Context, typ, id string, invocation uint64, terminalOnly bool) (*GraphView, error) {
+// OpenExisting pins matching initialized history. A nil view means no graph
+// has been initialized for this identity; retired or different generations are
+// ErrStale, never absence. It does not initialize or import a journal.
+func (s *GraphStore) OpenExisting(ctx context.Context, typ, id string, invocation uint64) (*GraphView, error) {
+	return s.open(ctx, typ, id, invocation, false, true)
+}
+
+func (s *GraphStore) open(ctx context.Context, typ, id string, invocation uint64, terminalOnly, allowMissing bool) (*GraphView, error) {
+	if invocation == 0 {
+		return nil, ErrStale
+	}
 	// Each definite conflict requires a fresh generation observation: a
 	// concurrent retirement/replacement must never attach an old cursor to a
 	// newly acquired snapshot. Unknown acquisitions are not retried.
@@ -304,7 +314,7 @@ func (s *GraphStore) open(ctx context.Context, typ, id string, invocation uint64
 		if err != nil {
 			return nil, err
 		}
-		if c == nil && terminalOnly {
+		if c == nil && allowMissing {
 			return nil, nil
 		}
 		if c == nil || c.Invocation != invocation || c.Retired {
@@ -464,8 +474,19 @@ func (v *GraphView) Close(ctx context.Context) error {
 // Read validates a complete retained snapshot and releases its pin afterward.
 // For external payload consumption, hold Open's GraphView instead.
 func (s *GraphStore) Read(ctx context.Context, typ, id string, invocation uint64) (records []Record, tail uint64, err error) {
-	view, err := s.Open(ctx, typ, id, invocation)
-	if err != nil {
+	return s.read(ctx, typ, id, invocation, false)
+}
+
+// ReadExisting validates matching history without creating it. Only a witnessed
+// uninitialized root returns empty history; stale/corrupt/unknown reads fail.
+// External payload users must hold an OpenExisting view instead.
+func (s *GraphStore) ReadExisting(ctx context.Context, typ, id string, invocation uint64) ([]Record, uint64, error) {
+	return s.read(ctx, typ, id, invocation, true)
+}
+
+func (s *GraphStore) read(ctx context.Context, typ, id string, invocation uint64, allowMissing bool) (records []Record, tail uint64, err error) {
+	view, err := s.open(ctx, typ, id, invocation, false, allowMissing)
+	if err != nil || view == nil {
 		return nil, 0, err
 	}
 	defer func() {

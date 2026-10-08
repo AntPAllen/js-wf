@@ -570,3 +570,58 @@ func TestGraphJournalTerminalSnapshotAdmission(t *testing.T) {
 		t.Fatal("replaced terminal admitted", err)
 	}
 }
+
+func TestGraphJournalExistingHistoryIsNotStaleAbsence(t *testing.T) {
+	s, m, _ := graphModel(t, journal.JSON)
+	ctx := context.Background()
+	if records, tail, err := s.ReadExisting(ctx, "flow", "id", 7); err != nil || len(records) != 0 || tail != 0 {
+		t.Fatal(records, tail, err)
+	}
+	if _, err := s.Open(ctx, "flow", "id", 7); err != journal.ErrStale {
+		t.Fatal("strict open lost absence rejection", err)
+	}
+	if _, err := s.OpenExisting(ctx, "flow", "id", 0); err != journal.ErrStale {
+		t.Fatal("zero generation accepted", err)
+	}
+	if err := m.QueueFault("read_root", sim.DropBeforeCommit); err != nil {
+		t.Fatal(err)
+	}
+	if records, _, err := s.ReadExisting(ctx, "flow", "id", 7); !errors.Is(err, journal.ErrUnknown) || records != nil {
+		t.Fatal("unknown authority became absence", records, err)
+	}
+	tail, err := s.Begin(ctx, "flow", "id", 7)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if records, readTail, err := s.ReadExisting(ctx, "flow", "id", 7); err != nil || len(records) != 0 || readTail != tail {
+		t.Fatal(records, readTail, err)
+	}
+	tail, err = s.Append(ctx, "flow", "id", 7, journal.Entry{Kind: journal.Started}, tail, nil, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	tail, err = s.Append(ctx, "flow", "id", 7, journal.Entry{Kind: journal.Failed, Index: 1}, tail, nil, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, generation := range []uint64{6, 8} {
+		if records, _, err := s.ReadExisting(ctx, "flow", "id", generation); err != journal.ErrStale || records != nil {
+			t.Fatal("different generation became absence", records, err)
+		}
+	}
+	if err := s.Retire(ctx, "flow", "id", 7, tail); err != nil {
+		t.Fatal(err)
+	}
+	if records, _, err := s.ReadExisting(ctx, "flow", "id", 7); err != journal.ErrStale || records != nil {
+		t.Fatal("retirement became absence", records, err)
+	}
+	if _, err := s.Begin(ctx, "flow", "id", 8); err != nil {
+		t.Fatal(err)
+	}
+	if records, _, err := s.ReadExisting(ctx, "flow", "id", 7); err != journal.ErrStale || records != nil {
+		t.Fatal("old generation became absence", records, err)
+	}
+	if records, readTail, err := s.ReadExisting(ctx, "flow", "id", 8); err != nil || len(records) != 0 || readTail != tail {
+		t.Fatal(records, readTail, err)
+	}
+}

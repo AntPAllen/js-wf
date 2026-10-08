@@ -7,6 +7,8 @@ import (
 	"strconv"
 	"time"
 
+	"js-wf/internal/graphpublication"
+	"js-wf/journal"
 	"js-wf/lease"
 
 	"github.com/nats-io/nats.go"
@@ -263,7 +265,7 @@ func RunLoopWithPort(ctx context.Context, port LoopPort, workerID, kind string, 
 }
 
 func retryableReconcileError(err error) bool {
-	if errors.Is(err, lease.ErrLost) {
+	if errors.Is(err, lease.ErrLost) || errors.Is(err, journal.ErrUnknown) || errors.Is(err, graphpublication.ErrConflict) || errors.Is(err, graphpublication.ErrRevoked) {
 		return true
 	}
 	var api *jetstream.APIError

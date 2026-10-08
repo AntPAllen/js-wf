@@ -10,12 +10,14 @@ import (
 	"time"
 
 	"js-wf/client"
+	"js-wf/identity"
 	"js-wf/journal"
 
 	"github.com/nats-io/nats.go/jetstream"
 )
 
 type TimerScan struct {
+	graph     *journal.GraphStore
 	port      TimerScanPort
 	Now       func() time.Time
 	DomainNow TimerDomainClock
@@ -130,11 +132,11 @@ func (s *TimerScan) Scan(ctx context.Context, next uint64, budget int, dryRun bo
 		result.NextSequence = next
 		result.Inspected++
 		parts := strings.Split(m.Subject, ".")
-		if len(parts) != 4 {
+		if len(parts) != 4 || parts[0] != "wf" || parts[1] != "inv" || identity.Validate(parts[2], parts[3]) != nil {
 			return result, fmt.Errorf("invalid invocation subject %q", m.Subject)
 		}
 		typ, id := parts[2], parts[3]
-		records, err := s.port.ReadJournal(ctx, typ, id)
+		records, err := readRepairJournal(ctx, s.graph, s.port, typ, id, m.Sequence)
 		if err != nil {
 			return result, err
 		}

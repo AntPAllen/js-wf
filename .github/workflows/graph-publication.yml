@@ -5,6 +5,7 @@ on:
     paths:
       - 'internal/graphpublication/**'
       - 'journal/graph*.go'
+      - 'reconcile/**'
       - 'worker/graph_journal*.go'
       - 'worker/graph_terminal*.go'
       - 'worker/graph_child*.go'
@@ -27,6 +28,7 @@ on:
       - 'sim/testdata/regressions/graph-worker-*'
       - 'sim/testdata/regressions/graph-result-*'
       - 'sim/testdata/regressions/graph-child-*'
+      - 'sim/testdata/regressions/graph-reconcile-*'
       - 'internal/blobpublication/**'
       - 'internal/natsstream/**'
       - 'testcluster/cluster.go'
@@ -37,6 +39,7 @@ on:
     paths:
       - 'internal/graphpublication/**'
       - 'journal/graph*.go'
+      - 'reconcile/**'
       - 'worker/graph_journal*.go'
       - 'worker/graph_terminal*.go'
       - 'worker/graph_child*.go'
@@ -59,6 +62,7 @@ on:
       - 'sim/testdata/regressions/graph-worker-*'
       - 'sim/testdata/regressions/graph-result-*'
       - 'sim/testdata/regressions/graph-child-*'
+      - 'sim/testdata/regressions/graph-reconcile-*'
       - 'internal/blobpublication/**'
       - 'internal/natsstream/**'
       - 'testcluster/cluster.go'
@@ -107,6 +111,15 @@ jobs:
           graph_flags=()
           if [ "$GRAPH_MODE" = race ]; then graph_flags=(-race); fi
           go test -p=1 "${graph_flags[@]}" ./worker -run '^(TestNativeGraphWorkerReplayInputsSignalsAndResults|TestNativeGraphChildResultTransferAndReplay|TestGraphChildReplayRejectsForgedProvenance|TestGraphSelectedChildRequiresExactRecordedSignal)$' -count=1 -timeout=5m -json > graph-worker-events.jsonl
+      - name: Canonical graph repair decisions and native wakeup recovery
+        env:
+          GOMAXPROCS: '1'
+          GOMEMLIMIT: 512MiB
+          GRAPH_MODE: ${{ matrix.mode }}
+        run: |
+          graph_flags=()
+          if [ "$GRAPH_MODE" = race ]; then graph_flags=(-race); fi
+          go test -p=1 "${graph_flags[@]}" ./reconcile -run '^(TestGraphReconcile|TestNativeGraphReconcile)' -count=1 -timeout=5m -json > graph-reconcile-events.jsonl
       - name: Canonical graph client terminal reads
         env:
           GOMAXPROCS: '1'
@@ -125,7 +138,7 @@ jobs:
         run: |
           graph_flags=()
           if [ "$GRAPH_MODE" = race ]; then graph_flags=(-race); fi
-          go test -p=1 "${graph_flags[@]}" ./sim -run '^(TestSeededGraphPublicationReplay|TestSeededGraphReadersReplay|TestSeededGraphReaderResumeReplay|TestSeededGraphCatalogReplay|TestSeededGraphApplicationReplay|TestSeededGraphJournalReplay|TestSeededGraphWorkerReplay|TestSeededGraphResultReplay|TestSeededGraphTerminalWorkerReplay|TestSeededGraphChildReplay|TestSeededGraphChildSignalReplay|TestGraphChildSeedPipelineOrdersAndJoins|TestGraphPublicationTransportCopiesFaultsAndIndependentCensus|TestPinnedRegressionCorpus)$/^(graph-publication-|graph-readers-|graph-reader-resume-|graph-catalog-|graph-application-|graph-journal-|graph-worker-|graph-result-|graph-child-)' -count=1 -timeout=5m -json > graph-transport-events.jsonl
+          go test -p=1 "${graph_flags[@]}" ./sim -run '^(TestSeededGraphPublicationReplay|TestSeededGraphReadersReplay|TestSeededGraphReaderResumeReplay|TestSeededGraphCatalogReplay|TestSeededGraphApplicationReplay|TestSeededGraphJournalReplay|TestSeededGraphWorkerReplay|TestSeededGraphResultReplay|TestSeededGraphTerminalWorkerReplay|TestSeededGraphChildReplay|TestSeededGraphChildSignalReplay|TestSeededGraphReconcileReplay|TestGraphChildSeedPipelineOrdersAndJoins|TestGraphPublicationTransportCopiesFaultsAndIndependentCensus|TestPinnedRegressionCorpus)$/^(graph-publication-|graph-readers-|graph-reader-resume-|graph-catalog-|graph-application-|graph-journal-|graph-worker-|graph-result-|graph-child-|graph-reconcile-)' -count=1 -timeout=5m -json > graph-transport-events.jsonl
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -136,3 +149,4 @@ jobs:
             graph-journal-events.jsonl
             graph-worker-events.jsonl
             graph-client-events.jsonl
+            graph-reconcile-events.jsonl

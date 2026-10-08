@@ -20,6 +20,7 @@ import (
 // SuspendedScan inspects retained invocations whose latest journal entry is
 // Suspended. It repairs an overdue timer or an available awaited signal.
 type SuspendedScan struct {
+	graph     *journal.GraphStore
 	Observe   func(RepairEvent)
 	port      SuspendedScanPort
 	Now       func() time.Time
@@ -258,7 +259,7 @@ func (s *SuspendedScan) inspectWithRetirement(ctx context.Context, input *jetstr
 		return Candidate{}, false, fmt.Errorf("invalid invocation subject %q", input.Subject)
 	}
 	typ, id := parts[2], parts[3]
-	records, err := s.port.ReadJournal(ctx, typ, id)
+	records, err := readRepairJournal(ctx, s.graph, s.port, typ, id, input.Sequence)
 	if err != nil {
 		return Candidate{}, false, err
 	}

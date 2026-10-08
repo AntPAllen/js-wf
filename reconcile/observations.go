@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"time"
 
+	"js-wf/journal"
+
 	"github.com/nats-io/nats.go/jetstream"
 )
 
@@ -58,7 +60,7 @@ type ScanEvent struct {
 // RunRepairLoopWithScanObserver observes the same production scan and fenced
 // cursor loop, including unsuccessful passes through retained invocations.
 func RunRepairLoopWithScanObserver(ctx context.Context, js jetstream.JetStream, workerID, kind string, interval time.Duration, budget int, observe func(RepairEvent), progress func(ScanEvent)) error {
-	return runRepairLoopObserved(ctx, js, workerID, kind, interval, budget, observe, nil, progress)
+	return runRepairLoopObserved(ctx, js, workerID, kind, interval, budget, observe, nil, progress, nil)
 }
 
 // RunRepairLoopObserved uses the unchanged fenced cursor loop and production
@@ -71,22 +73,25 @@ func RunRepairLoopObserved(ctx context.Context, js jetstream.JetStream, workerID
 // RunRepairLoopWithClock configures the same domain clock used by tagged
 // workers, retaining the production leader lease, cursor and repair observers.
 func RunRepairLoopWithClock(ctx context.Context, js jetstream.JetStream, workerID, kind string, interval time.Duration, budget int, observe func(RepairEvent), clock TimerDomainClock) error {
-	return runRepairLoopObserved(ctx, js, workerID, kind, interval, budget, observe, clock, nil)
+	return runRepairLoopObserved(ctx, js, workerID, kind, interval, budget, observe, clock, nil, nil)
 }
 
-func runRepairLoopObserved(ctx context.Context, js jetstream.JetStream, workerID, kind string, interval time.Duration, budget int, observe func(RepairEvent), clock TimerDomainClock, progress func(ScanEvent)) error {
+func runRepairLoopObserved(ctx context.Context, js jetstream.JetStream, workerID, kind string, interval time.Duration, budget int, observe func(RepairEvent), clock TimerDomainClock, progress func(ScanEvent), graph *journal.GraphStore) error {
 	var scan scanFunc
 	switch kind {
 	case "start":
 		s := NewStartScan(js)
+		s.graph = graph
 		s.Observe = observe
 		scan = s.Scan
 	case "signal":
 		s := NewSignalScan(js)
+		s.graph = graph
 		s.Observe = observe
 		scan = s.Scan
 	case "timer":
 		s := NewTimerScan(js)
+		s.graph = graph
 		s.DomainNow = clock
 		s.Observe = observe
 		scan = s.Scan
@@ -97,6 +102,7 @@ func runRepairLoopObserved(ctx context.Context, js jetstream.JetStream, workerID
 		scan = s.Scan
 	case "suspended":
 		s := NewSuspendedScan(js)
+		s.graph = graph
 		s.DomainNow = clock
 		s.Observe = observe
 		scan = s.Scan
