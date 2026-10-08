@@ -55,6 +55,10 @@ func graphFenceCopy(f graphpublication.Fence) graphpublication.Fence {
 }
 func graphRootCopy(r graphpublication.Root) graphpublication.Root {
 	r.Graph.Frontier = append([]retainedgraph.Tree{}, r.Graph.Frontier...)
+	r.Readers = append([]graphpublication.ReaderPin(nil), r.Readers...)
+	for i := range r.Readers {
+		r.Readers[i].Graph.Frontier = append([]retainedgraph.Tree{}, r.Readers[i].Graph.Frontier...)
+	}
 	return r
 }
 func (m *GraphPublicationTransport) event(op, subject string, expected, seq uint64, value any, outcome string) {
@@ -190,6 +194,10 @@ func (m *GraphPublicationTransport) CASRoot(ctx context.Context, k string, head 
 	if head == ^uint64(0) {
 		return graphpublication.Root{}, fmt.Errorf("head exhausted")
 	}
+	if current.Schema == graphpublication.RetentionSchema && r.Schema != graphpublication.RetentionSchema {
+		m.event("cas_root", k, head, current.Head, r, "schema_downgrade")
+		return graphpublication.Root{}, fmt.Errorf("retention schema downgrade")
+	}
 	r = graphRootCopy(r)
 	r.Head = head + 1
 	m.roots[k] = r
@@ -282,109 +290,120 @@ func (m *GraphPublicationTransport) CheckReferences() error {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 	for destination, root := range m.roots {
-		if root.Schema != graphpublication.Schema || root.Graph.Validate() != nil {
+		if (root.Schema != graphpublication.Schema && root.Schema != graphpublication.RetentionSchema) || (root.Schema == graphpublication.Schema && len(root.Readers) != 0) || len(root.Readers) > graphpublication.MaxReaders || root.Graph.Validate() != nil {
 			return fmt.Errorf("invalid graph authority")
 		}
-		leaves := uint64(0)
-		edges := map[uint64]map[retainedgraph.Link]bool{}
-		origins := map[retainedgraph.Link][]graphpublication.Location{}
-		check := func(link retainedgraph.Link, location graphpublication.Location) ([]byte, error) {
-			data, ok := m.objects[link.Reference.Object]
-			if !ok || digest(data) != link.Hash || !link.Reference.ValidFor(link.Hash) {
-				return nil, fmt.Errorf("dangling graph receipt")
+		graphs := []retainedgraph.Root{root.Graph}
+		seenReaders := map[string]bool{}
+		for _, pin := range root.Readers {
+			if pin.ID == "" || pin.Expires.IsZero() || seenReaders[pin.ID] || pin.Graph.Validate() != nil {
+				return fmt.Errorf("invalid reader pin")
 			}
-			parts := strings.Split(link.Reference.Object, "/")
-			ids := strings.Split(parts[2], "-")
-			if len(ids) != 2 {
-				return nil, fmt.Errorf("invalid graph physical scope")
+			seenReaders[pin.ID] = true
+			graphs = append(graphs, pin.Graph)
+		}
+		for _, graph := range graphs {
+			leaves := uint64(0)
+			edges := map[uint64]map[retainedgraph.Link]bool{}
+			origins := map[retainedgraph.Link][]graphpublication.Location{}
+			check := func(link retainedgraph.Link, location graphpublication.Location) ([]byte, error) {
+				data, ok := m.objects[link.Reference.Object]
+				if !ok || digest(data) != link.Hash || !link.Reference.ValidFor(link.Hash) {
+					return nil, fmt.Errorf("dangling graph receipt")
+				}
+				parts := strings.Split(link.Reference.Object, "/")
+				ids := strings.Split(parts[2], "-")
+				if len(ids) != 2 {
+					return nil, fmt.Errorf("invalid graph physical scope")
+				}
+				ownerBytes, err := hex.DecodeString(ids[0])
+				if err != nil {
+					return nil, err
+				}
+				owner := string(ownerBytes)
+				scope := digest([]byte("graph-authority/" + link.Hash + "/" + owner))
+				f := m.blobs[scope].Fence
+				intent, ok := f.Intents[owner]
+				if f.Hash != link.Hash || f.Owner != owner || f.Phase != "ready" || f.Generation != link.Reference.Generation || f.Object != link.Reference.Object || !ok || intent.Destination != destination || intent.Expected >= root.Head {
+					return nil, fmt.Errorf("missing graph ownership")
+				}
+				// Reused payload edges retain their original index; append preserves it.
+				if location.Kind == "node" {
+					found := false
+					for _, registered := range intent.Locations {
+						if registered == location {
+							found = true
+						}
+					}
+					if !found {
+						return nil, fmt.Errorf("node lacks exact coordinate grant")
+					}
+				} else {
+					origins[link] = append([]graphpublication.Location{}, intent.Locations...)
+				}
+				return data, nil
 			}
-			ownerBytes, err := hex.DecodeString(ids[0])
-			if err != nil {
-				return nil, err
+			var visit func(retainedgraph.Tree) error
+			visit = func(tree retainedgraph.Tree) error {
+				data, err := check(tree.Link, graphpublication.Location{Kind: "node", First: tree.First, Height: tree.Height})
+				if err != nil {
+					return err
+				}
+				var node struct {
+					Schema   string
+					First    uint64
+					Height   uint8
+					Children []retainedgraph.Link
+					Record   *retainedgraph.Record
+				}
+				if err = json.Unmarshal(data, &node); err != nil {
+					return err
+				}
+				if node.Schema != retainedgraph.Schema || node.First != tree.First || node.Height != tree.Height {
+					return fmt.Errorf("graph position changed")
+				}
+				if node.Height == 0 {
+					if node.Record == nil || len(node.Children) != 0 {
+						return fmt.Errorf("invalid graph leaf")
+					}
+					for _, link := range node.Record.Blobs {
+						if _, err = check(link, graphpublication.Location{Kind: "payload", First: node.First}); err != nil {
+							return err
+						}
+						if edges[node.First] == nil {
+							edges[node.First] = map[retainedgraph.Link]bool{}
+						}
+						edges[node.First][link] = true
+					}
+					leaves++
+					return nil
+				}
+				if node.Record != nil || len(node.Children) != 2 {
+					return fmt.Errorf("invalid graph branch")
+				}
+				if err = visit(retainedgraph.Tree{First: tree.First, Height: tree.Height - 1, Link: node.Children[0]}); err != nil {
+					return err
+				}
+				return visit(retainedgraph.Tree{First: tree.First + (uint64(1) << (tree.Height - 1)), Height: tree.Height - 1, Link: node.Children[1]})
 			}
-			owner := string(ownerBytes)
-			scope := digest([]byte("graph-authority/" + link.Hash + "/" + owner))
-			f := m.blobs[scope].Fence
-			intent, ok := f.Intents[owner]
-			if f.Hash != link.Hash || f.Owner != owner || f.Phase != "ready" || f.Generation != link.Reference.Generation || f.Object != link.Reference.Object || !ok || intent.Destination != destination || intent.Expected >= root.Head {
-				return nil, fmt.Errorf("missing graph ownership")
+			for _, tree := range graph.Frontier {
+				if err := visit(tree); err != nil {
+					return err
+				}
 			}
-			// Reused payload edges retain their original index; append preserves it.
-			if location.Kind == "node" {
+			if leaves != graph.Count {
+				return fmt.Errorf("graph census lost population")
+			}
+			for link, locations := range origins {
 				found := false
-				for _, registered := range intent.Locations {
-					if registered == location {
+				for _, location := range locations {
+					if location.Kind == "payload" && edges[location.First][link] {
 						found = true
 					}
 				}
 				if !found {
-					return nil, fmt.Errorf("node lacks exact coordinate grant")
+					return fmt.Errorf("reused payload lost its canonical origin edge")
 				}
-			} else {
-				origins[link] = append([]graphpublication.Location{}, intent.Locations...)
-			}
-			return data, nil
-		}
-		var visit func(retainedgraph.Tree) error
-		visit = func(tree retainedgraph.Tree) error {
-			data, err := check(tree.Link, graphpublication.Location{Kind: "node", First: tree.First, Height: tree.Height})
-			if err != nil {
-				return err
-			}
-			var node struct {
-				Schema   string
-				First    uint64
-				Height   uint8
-				Children []retainedgraph.Link
-				Record   *retainedgraph.Record
-			}
-			if err = json.Unmarshal(data, &node); err != nil {
-				return err
-			}
-			if node.Schema != retainedgraph.Schema || node.First != tree.First || node.Height != tree.Height {
-				return fmt.Errorf("graph position changed")
-			}
-			if node.Height == 0 {
-				if node.Record == nil || len(node.Children) != 0 {
-					return fmt.Errorf("invalid graph leaf")
-				}
-				for _, link := range node.Record.Blobs {
-					if _, err = check(link, graphpublication.Location{Kind: "payload", First: node.First}); err != nil {
-						return err
-					}
-					if edges[node.First] == nil {
-						edges[node.First] = map[retainedgraph.Link]bool{}
-					}
-					edges[node.First][link] = true
-				}
-				leaves++
-				return nil
-			}
-			if node.Record != nil || len(node.Children) != 2 {
-				return fmt.Errorf("invalid graph branch")
-			}
-			if err = visit(retainedgraph.Tree{First: tree.First, Height: tree.Height - 1, Link: node.Children[0]}); err != nil {
-				return err
-			}
-			return visit(retainedgraph.Tree{First: tree.First + (uint64(1) << (tree.Height - 1)), Height: tree.Height - 1, Link: node.Children[1]})
-		}
-		for _, tree := range root.Graph.Frontier {
-			if err := visit(tree); err != nil {
-				return err
-			}
-		}
-		if leaves != root.Graph.Count {
-			return fmt.Errorf("graph census lost population")
-		}
-		for link, locations := range origins {
-			found := false
-			for _, location := range locations {
-				if location.Kind == "payload" && edges[location.First][link] {
-					found = true
-				}
-			}
-			if !found {
-				return fmt.Errorf("reused payload lost its canonical origin edge")
 			}
 		}
 	}

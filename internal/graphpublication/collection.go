@@ -15,24 +15,31 @@ func (p Protocol) protects(ctx context.Context, root Root, k string, f Fence, in
 		return false, nil
 	}
 	link := retainedgraph.Link{Hash: k, Reference: blobpublication.Reference{Generation: f.Generation, Object: f.Object}}
-	for _, location := range intent.Locations {
-		var present bool
-		var err error
-		if location.Kind == "node" {
-			present, err = retainedgraph.ContainsNode(ctx, stageStore{protocol: p}, root.Graph, retainedgraph.Tree{First: location.First, Height: location.Height, Link: link})
-		} else {
-			present, err = retainedgraph.ContainsBlob(ctx, stageStore{protocol: p}, root.Graph, location.First, link)
-		}
-		if err != nil {
-			return false, err
-		}
-		if present {
-			return true, nil
+	graphs := []retainedgraph.Root{root.Graph}
+	for _, reader := range root.Readers {
+		graphs = append(graphs, reader.Graph)
+	}
+	for _, graph := range graphs {
+		for _, location := range intent.Locations {
+			var present bool
+			var err error
+			if location.Kind == "node" {
+				present, err = retainedgraph.ContainsNode(ctx, stageStore{protocol: p}, graph, retainedgraph.Tree{First: location.First, Height: location.Height, Link: link})
+			} else {
+				present, err = retainedgraph.ContainsBlob(ctx, stageStore{protocol: p}, graph, location.First, link)
+			}
+			if err != nil {
+				return false, err
+			}
+			if present {
+				return true, nil
+			}
 		}
 	}
 	return false, nil
 }
 func (p Protocol) sweepKey(ctx context.Context, k string, now time.Time) error {
+readScope:
 	for attempts := 0; attempts < 32; attempts++ {
 		record, err := p.Port.ReadBlob(ctx, k)
 		if err != nil {
@@ -59,6 +66,13 @@ func (p Protocol) sweepKey(ctx context.Context, k string, now time.Time) error {
 			}
 			if root.Head < intent.Expected {
 				return errors.New("graph destination head regressed")
+			}
+			root, err = p.pruneReaders(ctx, intent.Destination, root, now)
+			if errors.Is(err, ErrConflict) {
+				continue readScope
+			}
+			if err != nil {
+				return err
 			}
 			protected, err := p.protects(ctx, root, f.Hash, f, intent)
 			if err != nil {

@@ -517,6 +517,8 @@ func replayTrace(loaded Trace) (Trace, error) {
 		replayed, err = runRetainedCohort(loaded.Seed, &loaded)
 	case "graph_publication_protocol":
 		replayed, err = runGraphPublication(loaded.Seed, &loaded)
+	case "graph_publication_readers":
+		replayed, err = runGraphReaders(loaded.Seed, &loaded)
 	case "blob_publication_protocol":
 		replayed, err = runBlobPublication(loaded.Seed, &loaded)
 	case "online_blob_boundary":

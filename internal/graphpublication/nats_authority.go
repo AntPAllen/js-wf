@@ -22,7 +22,7 @@ import (
 )
 
 const authoritySchema = "js-wf-graph-authority-v1"
-const MaxAuthorityBytes = MaxFenceBytes + 4096
+const MaxAuthorityBytes = MaxRootBytes + 4096
 
 // NativeAuthority is experimental graph metadata storage. Provision a dedicated
 // stream and subject prefix before opening; it never creates a missing stream.
@@ -189,7 +189,7 @@ func validateAuthority(v authorityValue, kind, identity string) error {
 	}
 	switch kind {
 	case "root":
-		if v.Root == nil || v.Fence != nil || v.Root.Head != v.Revision || v.Root.Schema != Schema {
+		if v.Root == nil || v.Fence != nil || v.Root.Head != v.Revision || (v.Root.Schema != Schema && v.Root.Schema != RetentionSchema) {
 			return errors.New("invalid graph authority root")
 		}
 		_, err := normalizeRoot(*v.Root)
@@ -280,6 +280,9 @@ func (p *NativeAuthority) CASRoot(ctx context.Context, destination string, head 
 	}
 	if v.Revision != head {
 		return Root{}, ErrConflict
+	}
+	if v.Root != nil && v.Root.Schema == RetentionSchema && next.Schema != RetentionSchema {
+		return Root{}, errors.New("retention schema downgrade")
 	}
 	if head == ^uint64(0) {
 		return Root{}, errors.New("head exhausted")

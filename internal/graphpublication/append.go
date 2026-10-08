@@ -42,7 +42,7 @@ func (p Protocol) casRoot(ctx context.Context, destination string, expected uint
 	if err != nil {
 		return Root{}, err
 	}
-	if ack.Head != expected+1 || !samePublication(ack, root) {
+	if ack.Head != expected+1 || !samePublication(ack, root) || !reflect.DeepEqual(ack.Readers, root.Readers) {
 		return Root{}, errors.New("invalid graph root acknowledgment")
 	}
 	return ack, nil
@@ -104,7 +104,7 @@ func (p Protocol) PrepareAppendWithOwned(ctx context.Context, destination string
 		return Prepared{}, errors.New("invalid publication ID")
 	}
 	expires = expires.UTC()
-	result := Prepared{destination: destination, expected: expected, expires: expires, base: base, publication: Root{Schema: Schema, Token: token}, owned: map[retainedgraph.Link]uint64{}}
+	result := Prepared{destination: destination, expected: expected, expires: expires, base: base, publication: Root{Schema: base.Schema, Token: token, Readers: copyReaders(base.Readers)}, owned: map[retainedgraph.Link]uint64{}}
 	selected := map[string]retainedgraph.Link{}
 	for _, payload := range owned {
 		if err = p.verifyOwned(ctx, destination, base, payload); err != nil {
@@ -254,12 +254,26 @@ func (p Protocol) Commit(ctx context.Context, prepared Prepared) (Root, error) {
 	return Root{}, err
 }
 
-// Retire clears the entire graph but preserves the destination high-water head.
-// This is not partial history compaction, retention lease management or import.
+// Retire is the v1 whole-graph retirement operation. Ports reject it after a
+// destination has upgraded to RetentionSchema. Use RetireLive for reader-aware
+// retirement; preserving this v1 operation also preserves historical replay.
 func (p Protocol) Retire(ctx context.Context, destination string, expected uint64) error {
 	if p.Port == nil || destination == "" {
 		return errors.New("invalid graph retirement")
 	}
 	_, err := p.casRoot(ctx, destination, expected, EmptyRoot())
+	return err
+}
+
+// RetireLive clears the live graph, preserving reader pins and the high-water
+// head. This is not partial history compaction or import.
+func (p Protocol) RetireLive(ctx context.Context, destination string, expected uint64) error {
+	root, err := p.readerRoot(ctx, destination, expected)
+	if err != nil {
+		return err
+	}
+	root.Graph = retainedgraph.Empty()
+	root.Token = ""
+	_, err = p.casRoot(ctx, destination, expected, root)
 	return err
 }

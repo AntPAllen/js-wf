@@ -23,6 +23,9 @@ import (
 )
 
 const Schema = "js-wf-graph-publication-v1"
+const RetentionSchema = "js-wf-graph-publication-retention-v2"
+const MaxReaders = 8
+const MaxRootBytes = 256 << 10
 const MaxIntentLocations = 63 + retainedgraph.MaxBlobReferences
 const MaxFenceBytes = 32 << 10
 
@@ -53,15 +56,26 @@ type Record struct {
 	Fence    Fence
 }
 type Root struct {
-	Schema string
-	Head   uint64
-	Token  string
-	Graph  retainedgraph.Root
+	Schema  string
+	Head    uint64
+	Token   string
+	Graph   retainedgraph.Root
+	Readers []ReaderPin `json:",omitempty"`
+}
+
+// ReaderPin is canonical authority, not a portable ownership receipt. Its graph
+// must have been captured from this destination by AcquireReader.
+type ReaderPin struct {
+	ID      string
+	Expires time.Time
+	Graph   retainedgraph.Root
 }
 
 // Port provides linearizable quorum-witnessed reads and acknowledged CAS.
 // CASRoot advances Head exactly once; blob revisions and generations never
 // reset, even after retirement. Returned maps/slices are independent copies.
+// CASRoot MUST reject downgrading RetentionSchema to Schema, including when no
+// reader pins remain. A v1 retirement cannot silently erase reader authority.
 // Put uses new immutable names, never acknowledges uncertain upload outcomes,
 // and has no delayed cleanup that can remove an acknowledged object. Get is
 // context-bound and honors the byte limit. Missing objects are successful Delete.
@@ -107,10 +121,10 @@ type OwnedPayload struct {
 
 func EmptyRoot() Root { return Root{Schema: Schema, Graph: retainedgraph.Empty()} }
 func normalizeRoot(root Root) (Root, error) {
-	if root.Schema == "" && root.Head == 0 && root.Token == "" && root.Graph.Schema == "" && root.Graph.Count == 0 && root.Graph.Frontier == nil {
+	if root.Schema == "" && root.Head == 0 && root.Token == "" && root.Graph.Schema == "" && root.Graph.Count == 0 && root.Graph.Frontier == nil && len(root.Readers) == 0 {
 		return EmptyRoot(), nil
 	}
-	if root.Schema != Schema || (root.Graph.Count > 0 && (root.Head == 0 || !validID(root.Token))) || (root.Token != "" && !validID(root.Token)) {
+	if (root.Schema != Schema && root.Schema != RetentionSchema) || (root.Schema == Schema && len(root.Readers) != 0) || len(root.Readers) > MaxReaders || (root.Graph.Count > 0 && (root.Head == 0 || !validID(root.Token))) || (root.Token != "" && !validID(root.Token)) {
 		return Root{}, errors.New("invalid graph authority root")
 	}
 	if err := root.Graph.Validate(); err != nil {
@@ -118,6 +132,23 @@ func normalizeRoot(root Root) (Root, error) {
 	}
 	if _, err := root.Graph.Encode(); err != nil {
 		return Root{}, err
+	}
+	seen := map[string]bool{}
+	if len(root.Readers) == 0 {
+		root.Readers = nil
+	}
+	for _, reader := range root.Readers {
+		if root.Head == 0 || !validID(reader.ID) || seen[reader.ID] || reader.Expires.IsZero() {
+			return Root{}, errors.New("invalid retained reader")
+		}
+		seen[reader.ID] = true
+		if _, err := reader.Graph.Encode(); err != nil {
+			return Root{}, err
+		}
+	}
+	encoded, err := json.Marshal(root)
+	if err != nil || len(encoded) > MaxRootBytes {
+		return Root{}, errors.New("graph root byte limit")
 	}
 	return root, nil
 }
