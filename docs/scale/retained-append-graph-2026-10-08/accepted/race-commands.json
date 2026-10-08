@@ -1,0 +1,20 @@
+{
+  "build": [
+    "go",
+    "test",
+    "-p=1",
+    "-buildvcs=true",
+    "-race",
+    "-c",
+    "-o",
+    "/tmp/js-wf-retained-append-graph-20261008/race.test",
+    "./internal/retainedgraph"
+  ],
+  "run": [
+    "/tmp/js-wf-retained-append-graph-20261008/race.test",
+    "-test.run=^TestAppendGraph",
+    "-test.v=test2json",
+    "-test.count=1",
+    "-test.timeout=5m"
+  ]
+}
