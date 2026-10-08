@@ -6007,3 +6007,8 @@ This is the lookup primitive for canonical incoming Signal idempotency; Signal r
 
 
 The retained key index is now integrated on main: frozen e6c3c40 full-package normal/race and independent source/test/physical-census review pass with the completion retry fixes present. [Integrated-source qualification](scale/retained-key-index-2026-10-08/integrated-qualification/). Original isolated qualification commits are retained in main history. Proceed with canonical Signal reservation envelopes and ordered source binding using the bounded same-forest index; original remaining scope is unchanged.
+
+
+### Canonical Signal automatic repair progress — 2026-10-08
+
+The `graph-signal` authority-root scanner and its fenced repair loop now implement automatic reserved-publication and bound-wakeup discovery, with at most eight reservation inspections per workflow pass and a durable restart position. Consumption progress is validated against owned queue input and committed with the journal CAS in the opt-in v4 cursor. Development controls cover restart, uncertainty, retirement, reader-free wakeup repair and native R1/R3 repair-to-worker execution. [Current evidence and remaining qualification](scale/graph-signal-repair-2026-10-08/). Extend the shared seeded whole-flow campaigns, qualify frozen source, implement explicit experimental-v3 import/migration and wire runtime deployment selection; all original unresolved implementation and acceptance requirements remain in scope.

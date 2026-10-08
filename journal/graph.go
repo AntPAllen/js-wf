@@ -19,7 +19,7 @@ import (
 
 const graphCursorSchema = "js-wf-graph-journal-cursor-v1"
 const graphStartCursorSchema = "js-wf-graph-runtime-cursor-v2"
-const graphSignalCursorSchema = "js-wf-graph-runtime-cursor-v3"
+const graphSignalCursorSchema = "js-wf-graph-runtime-cursor-v4"
 const graphEntrySchema = "js-wf-graph-journal-entry-v1"
 const MaxGraphEntryBytes = 1 << 20
 const DefaultGraphPayloadLimit = 64 << 20
@@ -59,6 +59,8 @@ type graphCursor struct {
 	SignalInputs       uint64      `json:"signal_inputs,omitempty"`
 	SignalBindings     uint64      `json:"signal_bindings,omitempty"`
 	SignalSource       uint64      `json:"signal_source,omitempty"`
+	SignalConsumed     uint64      `json:"signal_consumed,omitempty"`
+	SignalRepair       uint64      `json:"signal_repair,omitempty"`
 }
 
 type graphEntry struct {
@@ -151,7 +153,7 @@ func (s *GraphStore) validateRoot(root graphpublication.Root, typ, id string) (*
 		return nil, ErrGap
 	}
 	var c graphCursor
-	if graphDecode(root.Application, &c) != nil || c.Schema != cursorSchema || !s.cfg.CanonicalStarts && (c.Invocation == 0 || c.Start != nil || c.PreviousInvocation != 0) || !s.cfg.CanonicalSignals && (c.SignalInputs != 0 || c.SignalBindings != 0 || c.SignalSource != 0) || c.SignalInputs > math.MaxInt64 || c.SignalBindings > c.SignalInputs || c.Count > MaxEntries || c.Base > math.MaxUint64-c.Count {
+	if graphDecode(root.Application, &c) != nil || c.Schema != cursorSchema || !s.cfg.CanonicalStarts && (c.Invocation == 0 || c.Start != nil || c.PreviousInvocation != 0) || !s.cfg.CanonicalSignals && (c.SignalInputs != 0 || c.SignalBindings != 0 || c.SignalSource != 0 || c.SignalConsumed != 0 || c.SignalRepair != 0) || c.SignalInputs > math.MaxInt64 || c.SignalBindings > c.SignalInputs || c.SignalConsumed > c.SignalBindings || c.SignalRepair != 0 && c.SignalRepair >= c.SignalInputs || c.Count > MaxEntries || c.Base > math.MaxUint64-c.Count {
 		return nil, ErrGap
 	}
 	if s.cfg.CanonicalStarts {
@@ -253,7 +255,15 @@ func (s *GraphStore) Append(ctx context.Context, typ, id string, invocation uint
 	if expected == math.MaxUint64 {
 		return 0, ErrTooLong
 	}
+	if s.cfg.CanonicalSignals && e.Kind == SignalConsumed {
+		if err = s.validateSignalConsumption(ctx, root, *c, e, payloads, owned); err != nil {
+			return 0, err
+		}
+	}
 	next := *c
+	if s.cfg.CanonicalSignals && e.Kind == SignalConsumed {
+		next.SignalConsumed++
+	}
 	next.Count++
 	next.Epoch = e.Epoch
 	next.Kind = e.Kind

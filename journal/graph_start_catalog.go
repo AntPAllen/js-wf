@@ -12,10 +12,15 @@ import (
 // ownership grant. Pending recovery and workers validate the retained input;
 // bound enqueue repair can check the exact source token without opening input.
 type GraphStartStatus struct {
-	State        GraphStartState
-	JournalCount uint64
-	Retired      bool
-	Purging      bool
+	State          GraphStartState
+	JournalCount   uint64
+	Retired        bool
+	Purging        bool
+	Kind           Kind
+	SignalInputs   uint64
+	SignalBindings uint64
+	SignalConsumed uint64
+	SignalRepair   uint64
 }
 
 // InspectStart observes lifecycle metadata without acquiring an input reader
@@ -53,7 +58,7 @@ func (s *GraphStore) InspectStartDestination(ctx context.Context, destination st
 	if err != nil || validated == nil {
 		return nil, ErrGap
 	}
-	return &GraphStartStatus{State: startState(validated), JournalCount: validated.Count, Retired: validated.Retired, Purging: validated.Purging}, nil
+	return &GraphStartStatus{State: startState(validated), JournalCount: validated.Count, Retired: validated.Retired, Purging: validated.Purging, Kind: validated.Kind, SignalInputs: validated.SignalInputs, SignalBindings: validated.SignalBindings, SignalConsumed: validated.SignalConsumed, SignalRepair: validated.SignalRepair}, nil
 }
 
 // NextStart discovers one retained authority root and confirms its current

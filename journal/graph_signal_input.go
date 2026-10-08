@@ -205,6 +205,9 @@ func (s *GraphStore) ReserveSignal(ctx context.Context, r GraphSignalRequest, in
 	}
 	next := *current
 	next.SignalInputs++
+	if current.SignalInputs == current.SignalBindings {
+		next.SignalRepair = captured
+	}
 	app, _ := json.Marshal(next)
 	prepared, err := s.cfg.Protocol.PrepareStreamAppendWithApplication(ctx, destination, root.Head, graphSignalInputForest, data, [][]byte{input}, nil, s.cfg.Now().Add(s.cfg.IntentTTL), app)
 	if err != nil {

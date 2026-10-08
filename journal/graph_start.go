@@ -103,7 +103,7 @@ func validateStartCursor(root graphpublication.Root, c graphCursor, typ, id stri
 		return ErrGap
 	}
 	if signals {
-		if c.Invocation == 0 && (c.SignalInputs != 0 || c.SignalBindings != 0 || c.SignalSource != 0) {
+		if c.Invocation == 0 && (c.SignalInputs != 0 || c.SignalBindings != 0 || c.SignalSource != 0 || c.SignalConsumed != 0 || c.SignalRepair != 0) {
 			return ErrGap
 		}
 		inputs, bindings := uint64(0), uint64(0)
