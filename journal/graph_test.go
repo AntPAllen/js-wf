@@ -430,3 +430,89 @@ func TestGraphJournalCloseContentionAndAmbiguousRelease(t *testing.T) {
 		})
 	}
 }
+
+func TestGraphJournalAcquireRenewContention(t *testing.T) {
+	for _, mode := range []string{"open", "renew", "open-replaced", "renew-expired", "open-unknown", "renew-unknown"} {
+		t.Run(mode, func(t *testing.T) {
+			s, m, now := graphModel(t, journal.JSON)
+			ctx := context.Background()
+			tail, err := s.Begin(ctx, "flow", "id", 1)
+			if err != nil {
+				t.Fatal(err)
+			}
+			tail, err = s.Append(ctx, "flow", "id", 1, journal.Entry{Kind: journal.Started}, tail, nil, nil)
+			if err != nil {
+				t.Fatal(err)
+			}
+			tail, err = s.Append(ctx, "flow", "id", 1, journal.Entry{Kind: journal.Completed, Index: 1}, tail, nil, nil)
+			if err != nil {
+				t.Fatal(err)
+			}
+			competing, err := s.Open(ctx, "flow", "id", 1)
+			if err != nil {
+				t.Fatal(err)
+			}
+			var view *journal.GraphView
+			if mode == "renew" || mode == "renew-expired" || mode == "renew-unknown" {
+				view, err = s.Open(ctx, "flow", "id", 1)
+				if err != nil {
+					t.Fatal(err)
+				}
+				*now = now.Add(time.Second)
+			}
+			if mode == "open-unknown" || mode == "renew-unknown" {
+				if err = m.QueueFault("cas_root", sim.LoseAckAfterCommit); err != nil {
+					t.Fatal(err)
+				}
+				m.PauseBefore("cas_root", func() error { return m.QueueFault("read_root", sim.DropBeforeCommit) })
+			} else {
+				m.PauseBefore("cas_root", func() error {
+					if mode == "open-replaced" {
+						if e := s.Retire(ctx, "flow", "id", 1, tail); e != nil {
+							return e
+						}
+						_, e := s.Begin(ctx, "flow", "id", 2)
+						return e
+					}
+					if mode == "renew-expired" {
+						*now = now.Add(time.Minute)
+					}
+					return competing.Close(ctx)
+				})
+			}
+			if view == nil {
+				view, err = s.Open(ctx, "flow", "id", 1)
+			} else {
+				err = view.Renew(ctx)
+			}
+			switch mode {
+			case "open-replaced":
+				if !errors.Is(err, journal.ErrStale) || view != nil {
+					t.Fatal("replaced generation opened", err)
+				}
+			case "renew-expired":
+				if !errors.Is(err, graphpublication.ErrRevoked) {
+					t.Fatal("expired lease renewed", err)
+				}
+			case "open-unknown", "renew-unknown":
+				if err == nil {
+					t.Fatal("ambiguous mutation retried")
+				}
+				*now = now.Add(time.Second)
+				if e := competing.Renew(ctx); e != nil {
+					t.Fatal("foreign pin changed", e)
+				}
+			default:
+				if err != nil {
+					t.Fatal(err)
+				}
+				if view.Count() != 2 {
+					t.Fatal("snapshot changed", view.Count())
+				}
+				if err = view.Close(ctx); err != nil {
+					t.Fatal(err)
+				}
+			}
+		})
+	}
+}

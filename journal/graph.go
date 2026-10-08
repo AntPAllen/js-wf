@@ -274,19 +274,27 @@ type GraphRecord struct {
 }
 
 func (s *GraphStore) Open(ctx context.Context, typ, id string, invocation uint64) (*GraphView, error) {
-	destination, root, c, err := s.observe(ctx, typ, id)
-	if err != nil {
-		return nil, err
+	// Each definite conflict requires a fresh generation observation: a
+	// concurrent retirement/replacement must never attach an old cursor to a
+	// newly acquired snapshot. Unknown acquisitions are not retried.
+	for attempt := 0; attempt < 16; attempt++ {
+		destination, root, c, err := s.observe(ctx, typ, id)
+		if err != nil {
+			return nil, err
+		}
+		if c == nil || c.Invocation != invocation || c.Retired {
+			return nil, ErrStale
+		}
+		expires := s.cfg.Now().Add(s.cfg.PinTTL)
+		reader, _, err := s.cfg.Protocol.AcquireReader(ctx, destination, root.Head, expires)
+		if err == nil {
+			return &GraphView{store: s, destination: destination, reader: reader, cursor: *c, expires: expires}, nil
+		}
+		if !errors.Is(err, graphpublication.ErrConflict) || ctx.Err() != nil {
+			return nil, graphMutationError(err)
+		}
 	}
-	if c == nil || c.Invocation != invocation || c.Retired {
-		return nil, ErrStale
-	}
-	expires := s.cfg.Now().Add(s.cfg.PinTTL)
-	reader, _, err := s.cfg.Protocol.AcquireReader(ctx, destination, root.Head, expires)
-	if err != nil {
-		return nil, graphMutationError(err)
-	}
-	return &GraphView{store: s, destination: destination, reader: reader, cursor: *c, expires: expires}, nil
+	return nil, graphMutationError(graphpublication.ErrConflict)
 }
 func (v *GraphView) Tail() uint64  { return v.cursor.Base + v.cursor.Count }
 func (v *GraphView) Count() uint64 { return v.cursor.Count }
@@ -376,19 +384,30 @@ func (v *GraphView) Payload(ctx context.Context, index uint64, link retainedgrap
 }
 
 func (v *GraphView) Renew(ctx context.Context) error {
-	if err := v.alive(); err != nil {
-		return err
+	for attempt := 0; attempt < 16; attempt++ {
+		if err := v.alive(); err != nil {
+			return err
+		}
+		root, err := v.store.cfg.Protocol.Port.ReadRoot(ctx, v.destination)
+		if err != nil {
+			return err
+		}
+		// Time may advance during the authority read; do not resurrect an expired
+		// local lease even if its durable pin has not yet been pruned.
+		if err = v.alive(); err != nil {
+			return err
+		}
+		expires := v.store.cfg.Now().Add(v.store.cfg.PinTTL)
+		_, err = v.store.cfg.Protocol.RenewReader(ctx, v.reader, root.Head, expires)
+		if err == nil {
+			v.expires = expires
+			return nil
+		}
+		if !errors.Is(err, graphpublication.ErrConflict) || ctx.Err() != nil {
+			return err
+		}
 	}
-	root, err := v.store.cfg.Protocol.Port.ReadRoot(ctx, v.destination)
-	if err != nil {
-		return err
-	}
-	expires := v.store.cfg.Now().Add(v.store.cfg.PinTTL)
-	_, err = v.store.cfg.Protocol.RenewReader(ctx, v.reader, root.Head, expires)
-	if err == nil {
-		v.expires = expires
-	}
-	return err
+	return graphpublication.ErrConflict
 }
 func (v *GraphView) Close(ctx context.Context) error {
 	if v.closed {
