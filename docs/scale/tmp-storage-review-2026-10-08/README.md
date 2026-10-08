@@ -1,12 +1,14 @@
 # Temporary storage review — 2026-10-08
 
-Reclaimed **296.9 MiB**. Observable `/tmp` usage is approximately **1.26 GiB**, with **87.3 GiB** free on the filesystem. Protected system directories are excluded from the `/tmp` measurement; limits are recorded.
+Latest requested cleanup reclaimed **701.7 MiB**, including temporary archive copies. Observable `/tmp` usage is now **1.06 GiB**; the filesystem has **87.2 GiB** free. Protected system directories are excluded from the measurement and visibility limits are recorded.
 
-Removed the completed shared authority witness model/native fixtures, their archives and packaging staging, plus the redundant downloaded candidate component archive. Full S3 compressed bytes and every member were freshly verified against committed/pushed inventories and receipts. Current local inventories/hashes and visible process/descriptor/Docker/mount/loop closure checks preceded deletion. Permission limits are recorded. Complete source, binaries and native media remain restorable from the canonical S3 receipts.
+Moved seven closed directories and223 older loose files to S3, then removed local originals, clean registered source worktrees, temporary archives and hardlink staging. This includes the original seed31 diagnostic/media restore, three independent seed review copies, stopped original campaign checkout, completed full126 race fixture, old logs, reports and diagnostic binaries. Complete compressed bytes and every member were freshly verified from S3 against committed/pushed manifests and receipts; unchanged local inventories/inodes and visible process/descriptor/Docker/mount/loop closure checks preceded removal. Original failed artifacts and verdicts are preserved.
 
-- [Model retirement](../authority-read-witness-tier1-2026-10-08/reclaimed/model/removal.json)
-- [Native retirement](../authority-read-witness-tier1-2026-10-08/reclaimed/native/removal.json)
-- [Redundant download retirement](redundant-candidate-archive/removal.json)
-- [Measured totals](summary.json)
+- [Closed directories and removal ledger](closed-copies/reclaimed/removal.json)
+- [Older loose files and removal ledger](old-loose-files/reclaimed/removal.json)
+- [Full126 terminal proof and S3 receipt](../tier1-full126-2026-10-08/race-terminal/)
+- [Latest measured totals, remaining roots and live units](latest-summary.json)
 
-Remaining major roots: extracted candidate inputs (292 MiB), original seed31 diagnostic restore (175 MiB), active full124 normal run (62 MiB), and newly completed full125 race run (70 MiB), whose terminal acceptance and offload review is pending. These are retained for ongoing work. Smaller source checkouts and review/restore records also remain. No additional loose files over10 MiB were found at the top of `/tmp` after cleanup. Test scope and verdicts are unchanged.
+The corrected native campaign, full124 normal run and extracted candidate server inputs remain local and in use. Smaller historical source/review directories and operational scripts remain. Both original live supervisors are retained; no tests were restarted for cleanup.
+
+Earlier cleanup separately reclaimed296.9MiB: [original measured totals](summary.json), [model retirement](../authority-read-witness-tier1-2026-10-08/reclaimed/model/removal.json), [native retirement](../authority-read-witness-tier1-2026-10-08/reclaimed/native/removal.json), [redundant download retirement](redundant-candidate-archive/removal.json).
