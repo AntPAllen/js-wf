@@ -1,0 +1,115 @@
+package integrity
+
+import (
+	"context"
+	"encoding/json"
+	"fmt"
+	"os"
+	"path/filepath"
+	"strings"
+	"testing"
+
+	"github.com/nats-io/nats.go/jetstream"
+	"js-wf/identity"
+	"js-wf/internal/natsutil"
+)
+
+type staleNativeCohortStream struct {
+	jetstream.Stream
+	info *jetstream.StreamInfo
+}
+
+func (s staleNativeCohortStream) Info(context.Context, ...jetstream.StreamInfoOpt) (*jetstream.StreamInfo, error) {
+	copy := *s.info
+	copy.State.LastSeq = 812
+	copy.State.Msgs = 812
+	return &copy, nil
+}
+
+type staleNativeCohortJS struct {
+	jetstream.JetStream
+	inv jetstream.Stream
+}
+
+func (s staleNativeCohortJS) Stream(ctx context.Context, name string) (jetstream.Stream, error) {
+	if name == "WF_INV" {
+		return s.inv, nil
+	}
+	return s.JetStream.Stream(ctx, name)
+}
+func TestNativeCapturedCohortIncludesAcknowledgedTail(t *testing.T) {
+	js, ctx, cluster := batchedAuditClusterWithServers(t)
+	var witness uint64
+	for i := 0; i < 840; i++ {
+		seq := batchAuditPublish(t, ctx, js, fmt.Sprintf("cohort-%04d", i), batchAuditEntries())
+		if i == 821 {
+			witness = seq
+		}
+	}
+	inv, err := js.Stream(ctx, "WF_INV")
+	if err != nil {
+		t.Fatal(err)
+	}
+	info, err := inv.Info(ctx)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if witness != 822 || info.State.LastSeq != 840 {
+		t.Fatal("native committed tuple differs", witness, info.State)
+	}
+	stale := staleNativeCohortJS{JetStream: js, inv: staleNativeCohortStream{Stream: inv, info: info}}
+	cutoff, err := CaptureInvocationCutoff(ctx, witness, func(call context.Context) (*jetstream.RawStreamMsg, error) {
+		return natsutil.GetInvocationTailFromLeader(call, stale)
+	})
+	if err != nil || cutoff != 840 {
+		t.Fatal("leader capture used stale metadata", cutoff, err)
+	}
+	old, err := CheckThroughInvocationSequence(ctx, stale, 812)
+	if err != nil || old.Invocations != 812 || old.Journals != 812 || old.Terminal != 812 {
+		t.Fatal("old cut control absent", old, err)
+	}
+	point, err := CheckThroughInvocationSequence(ctx, stale, cutoff)
+	want := Report{Invocations: 840, Journals: 840, Entries: 3360, Terminal: 840}
+	if err != nil || point != want {
+		t.Fatal("stale info truncated point cohort", point, err)
+	}
+	bulk, err := CheckThroughInvocationSequenceWithBatchedReads(ctx, stale, cutoff)
+	if err != nil || bulk != want {
+		t.Fatal("stale info truncated batched cohort", bulk, err)
+	}
+	jrn, err := js.Stream(ctx, "WF_JRN")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err = jrn.Purge(ctx, jetstream.WithPurgeSubject(identity.JournalSubject("audit", "cohort-0839"))); err != nil {
+		t.Fatal(err)
+	}
+	corrupt, corruptionErr := CheckThroughInvocationSequence(ctx, stale, cutoff)
+	if corruptionErr == nil || corrupt.Invocations != 840 {
+		t.Fatal("corrected boundary missed damaged tail journal", corrupt, corruptionErr)
+	}
+	missed, err := CheckThroughInvocationSequence(ctx, stale, 812)
+	if err != nil || missed != old {
+		t.Fatal("weak boundary negative control differs", missed, err)
+	}
+	peers := []map[string]any{}
+	for _, server := range cluster.Servers {
+		v, err := server.Varz(nil)
+		if err != nil {
+			t.Fatal(err)
+		}
+		peers = append(peers, map[string]any{"id": server.ID(), "name": server.Name(), "version": v.Version, "embedding_commit": v.GitCommit})
+	}
+	proof := map[string]any{"scenario": "native-captured-cohort", "replicas": 3, "parent_budget_seconds": 180, "acknowledged_witness": witness, "captured_cutoff": cutoff, "weak_metadata_tail": 812, "weak_cut_report": old, "point_report": point, "batched_report": bulk, "damaged_tail_report": corrupt, "damaged_tail_error": corruptionErr.Error(), "weak_cut_missed_damage_report": missed, "peers": peers, "actual_invocation_info": info, "damaged_tail_subject": identity.JournalSubject("audit", "cohort-0839")}
+	if base := os.Getenv("WF_BATCH_AUDIT_ROOT"); base != "" {
+		data, err := json.MarshalIndent(proof, "", "  ")
+		if err != nil {
+			t.Fatal(err)
+		}
+		directory := filepath.Join(base, strings.ReplaceAll(t.Name(), "/", "_"))
+		if err = os.WriteFile(filepath.Join(directory, "cohort-proof.json"), append(data, '\n'), 0600); err != nil {
+			t.Fatal(err)
+		}
+	}
+	t.Logf("cohort witness=%d weak_tail=812 captured=%d point=%+v batch=%+v corruption=%v", witness, cutoff, point, bulk, corruptionErr)
+}
