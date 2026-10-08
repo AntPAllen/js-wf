@@ -1,0 +1,67 @@
+{
+  "source": "dd98e39c29c5e8689f06fdbdcca7e944b53c0963",
+  "selected_inputs": 1694,
+  "seeded_family_inventory": 145,
+  "seeds_per_family_per_mode": 1000,
+  "new_modes": 18,
+  "pins_per_mode": 728,
+  "unchanged_parent_pins": 710,
+  "commands": [
+    {
+      "mode": "normal",
+      "mode_counts": {
+        "batch_restart": 49,
+        "bound_no_enqueue": 58,
+        "bound_source_purged": 55,
+        "catalog_drop": 57,
+        "consumption_lost_ack": 62,
+        "consumption_unknown": 62,
+        "dry_catalog": 58,
+        "enqueue_drop": 63,
+        "enqueue_lost_ack": 70,
+        "healthy": 52,
+        "lifecycle_unknown": 48,
+        "prepared_append_repair": 50,
+        "queue_drop": 50,
+        "queue_lost_readback": 60,
+        "reserved": 54,
+        "source_committed": 59,
+        "source_drop": 36,
+        "source_lost_ack": 57
+      },
+      "name": "family",
+      "command": [
+        "go",
+        "test",
+        "-p=1",
+        "./sim",
+        "-run",
+        "^TestSeededGraphSignalRuntimeReplay$",
+        "-json",
+        "-count=1",
+        "-timeout=20m"
+      ],
+      "exit_code": 0,
+      "wall_seconds": 127.60767483711243
+    },
+    {
+      "mode": "normal",
+      "name": "pins",
+      "command": [
+        "go",
+        "test",
+        "-p=1",
+        "./sim",
+        "-run",
+        "^TestPinnedRegressionCorpus$",
+        "-json",
+        "-count=1",
+        "-timeout=20m"
+      ],
+      "exit_code": 0,
+      "wall_seconds": 3.533907175064087
+    }
+  ],
+  "verdict": "PASS",
+  "scope": "Shared canonical Signal runtime family and complete pinned corpus in listed modes. Complete 145-family suite/extended campaigns and original wider implementation/acceptance gates remain separate."
+}

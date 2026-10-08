@@ -1,0 +1,64 @@
+[
+  {
+    "command": [
+      "go",
+      "test",
+      "-p=1",
+      "-c",
+      "-o",
+      "/home/exedev/js-wf-tier1-full145-normal1000-20261008/sim.test",
+      "./sim"
+    ],
+    "working_directory": "/home/exedev/js-wf-signal-runtime-qualification"
+  },
+  {
+    "command": [
+      "go",
+      "run",
+      "-p=1",
+      "./scripts/tier1-seed-inventory"
+    ],
+    "working_directory": "/home/exedev/js-wf-signal-runtime-qualification"
+  },
+  {
+    "command": [
+      "/usr/bin/time",
+      "-o",
+      "/home/exedev/js-wf-tier1-full145-normal1000-20261008/tier1-time.txt",
+      "-f",
+      "elapsed=%e user=%U system=%S",
+      "go",
+      "tool",
+      "test2json",
+      "-t",
+      "-p",
+      "js-wf/sim",
+      "/home/exedev/js-wf-tier1-full145-normal1000-20261008/sim.test",
+      "-test.v=test2json",
+      "-test.count=1",
+      "-test.timeout=300m"
+    ],
+    "working_directory": "/home/exedev/js-wf-signal-runtime-qualification/sim"
+  },
+  {
+    "command": [
+      "python3",
+      "scripts/check-tier1-suite.py",
+      "--events",
+      "/home/exedev/js-wf-tier1-full145-normal1000-20261008/tier1-events.jsonl",
+      "--inventory",
+      "/home/exedev/js-wf-tier1-full145-normal1000-20261008/tier1-inventory.txt",
+      "--regressions",
+      "/home/exedev/js-wf-tier1-full145-normal1000-20261008/tier1-regression-inventory.txt",
+      "--source",
+      "/home/exedev/js-wf-tier1-full145-normal1000-20261008/tier1-source.txt",
+      "--seeded-inventory",
+      "/home/exedev/js-wf-tier1-full145-normal1000-20261008/tier1-seeded-inventory.txt",
+      "--seeds",
+      "1000",
+      "--output",
+      "/home/exedev/js-wf-tier1-full145-normal1000-20261008/tier1-result.json"
+    ],
+    "working_directory": "/home/exedev/js-wf-signal-runtime-qualification"
+  }
+]
