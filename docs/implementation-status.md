@@ -1,5 +1,9 @@
 # Implementation status against the supplied plan
 
+## Canonical graph checkpoint reader foundation — 2026-10-09
+
+Pinned graph views now discover and validate completed continuation frames from their owned journal edges, returning a captured anchor/suffix/tail without trusting a legacy manifest. JSON/protobuf component race controls verify frame identity/hash/locals/SDK position, absent/pending boundaries, exact ownership, payload-read uncertainty, expiry and stable older pins. [Executed checks and limits](scale/graph-checkpoint-read-2026-10-09/README.md). Worker stage dispatch, publication/recovery, archival prefix compaction, materialized payload ownership, native kill/limit qualification and full audit/offline integration remain incomplete; continuation admission remains rejected. This foundation leaves every original broader runtime/full/extended/native/scale/soak/drain/adoption/release requirement open.
+
 ## Canonical graph fallback timers — 2026-10-09
 
 Graph worker CLI now admits explicit fallback timers and routes the fallback repair loop to canonical Start status and pinned timer history. Hints cannot override generation, retirement, deadline or clock domain; live leases defer pins, uncertain decisions preserve hints, and publication precedes deletion. Native/fallback R1/R3-domain worker component race checks pass alongside nine modeled authority/lease/forgery/publication/deletion/terminal controls, dry-run and existing partial-cursor checks. A direct native scanner proves due wakeup despite forged legacy state and canonical terminal hint retirement. [Executed evidence and limits](scale/graph-fallback-timers-2026-10-09/README.md). These checks leave full/extended qualification and every original remaining continuation/snapshot/import/deployment/GC/runtime/native/scale/soak/drain/adoption/release requirement open.
