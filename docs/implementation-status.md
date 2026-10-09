@@ -1,5 +1,9 @@
 # Implementation status against the supplied plan
 
+## Race command sessions interrupted; supervised replacements started — 2026-10-09
+
+The prior full151 replacement race and corrected actor race processes disappeared without terminal verdicts; the expiry queue supervisor also disappeared. The VM boot identifier was unchanged, and cause is unconfirmed. Their retained partial evidence is not acceptance. Two fresh user systemd services are observed running: full frozen151 qualification and corrected actor race followed sequentially by expiry race. [Evidence, service identities, source scope and verification requirements](scale/race-session-interruption-2026-10-09/README.md). These transient services survive command-session loss but are not configured to restart on VM reboot. Actual terminal results remain pending; full current-source and all original broader gates stay open.
+
 ## Bounded reader-expiry catalog batches — 2026-10-09
 
 Reader maintenance now has a persisted cursor API with a captured authority watermark and at most 256 destinations per batch. A batch advances only after confirmed reader fencing; uncertain scan/read/expiry replies preserve the last confirmed cursor for retry. Sparse catalog sequences, restart checkpoints, lost committed expiry replies, deferred new roots, invalid inputs and empty/cancelled scans pass focused race controls alongside the existing catalog tests (`GOMAXPROCS=1 GOMEMLIMIT=512MiB go test -race ./internal/graphpublication -run 'TestReaderSweep|TestGraphCatalog' -count=1`, exit 0, package 1.162 seconds). An initial malformed-entry test fixture incorrectly filtered out its injected invalid sequence; the corrected fixture returns it directly and verifies rejection.
