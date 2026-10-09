@@ -1,5 +1,11 @@
 # JetStream Durable Workflow Runtime — Implementation Plan
 
+## Complete current normal qualification accepted; full race running — 2026-10-09
+
+Frozen `e5018af` passes all 151 families × 1,000 contiguous completed bodies, all 810 pins, all 336 directed Signal combinations and 214 ordinary top-level groups in 1,208.809 seconds. Independent executed review verifies 3,180 unchanged Git-matched inputs, retained binary/exit/cwd/event evidence, and exact reproduction of the full-suite coverage result. [Complete normal proof and precise remaining scope](scale/graph-current151-qualification-2026-10-09/complete-normal1000/README.md).
+
+The full current race campaign started at 15:35:19 UTC after normal success, against frozen `fb4f086` with 1,757 matching Go/module/trace inputs and the later CPU/exit-recording harness. Terminal race acceptance remains pending. Extended qualification, arbitrary operation permutations and all original native/runtime/fault/scale/actual-24-hour/physical-drain/import/default-adoption/release requirements remain open; public continuation admission and production collection remain disabled. The prior full-149 race watchdog failure is not reclassified.
+
 ## Current complete race queued behind normal success — 2026-10-09
 
 The full current race campaign is queued against clean isolated `fb4f086` using the updated CPU watchdog/child-exit harness. Its launcher waits on the observed normal supervisor identity, then requires actual normal exit zero, complete 151,000 body/810-pin verification, unchanged before/after source and byte-matched Go/module/trace inputs. Only then does it start the complete race suite once. [Exact launch controls and source scopes](scale/graph-current151-qualification-2026-10-09/README.md).
