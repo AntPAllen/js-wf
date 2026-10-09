@@ -45,5 +45,23 @@ cli = json.loads((base / 'cli-source-before.json').read_text())
 for name, digest in cli['files'].items():
     assert hashlib.sha256((repo / name).read_bytes()).hexdigest() == digest, name
 review = {'verdict': 'PASS native physical mutation retry controls and complete authority package race', 'compiled_package_repository_inputs_verified': len(manifest['files']), 'package_test_source': 'Exact captured source; two subsequently appended retry-stop controls qualified separately under race.', 'later_cli_repository_inputs_unchanged': len(cli['files']), 'logs': logs, 'scope': 'Native adapter only. Matching default-four-CPU combined CLI gate remains pending separately; full current-source simulation and original broader gates remain open.'}
+if (base / 'default-cli-race.exit.json').exists():
+    assert json.loads((base / 'default-cli-race.exit.json').read_text())['exit_code'] == 0
+    text = (base / 'default-cli-race.log').read_text()
+    assert not re.search(r'^\s*--- FAIL:|^FAIL(?:\s|$)|WARNING: DATA RACE|^panic:', text, re.M)
+    for package in ['client', 'cmd/wf', 'cmd/wf-worker']:
+        assert re.search(r'^ok\s+js-wf/' + package + r'\s+[0-9.]+s$', text, re.M), package
+    for version in [4, 5, 6]:
+        for replicas in ['R1', 'R3Domain']:
+            name = 'TestWorkerRunnerCanonicalGraphRepair/' + replicas if version == 4 else f'TestWorkerRunnerCanonicalCheckpointGraphRepair/v{version}/{replicas}'
+            assert re.search(r'^\s*--- PASS: ' + re.escape(name) + r' \(', text, re.M), name
+        for replicas in ['R1-domain', 'R3-domain']:
+            name = f'TestNativeGraphCursorOperatorHistory/v{version}/{replicas}'
+            assert re.search(r'^\s*--- PASS: ' + re.escape(name) + r' \(', text, re.M), name
+    closed = json.loads((base / 'default-review.json').read_text())
+    assert hashlib.sha256((base / 'default-cli-race.log').read_bytes()).hexdigest() == closed['log_sha256']
+    assert closed['repository_inputs_unchanged'] == len(cli['files'])
+    review['default_cli_race'] = closed
+    review['scope'] = 'Native authority and matching original default-concurrency CLI gate pass. Later sim-only Cartesian test/workflow edits are excluded; complete current-source simulation and all original broader gates remain open.'
 (base / 'review.json').write_text(json.dumps(review, indent=2) + '\n')
 print(json.dumps(review))
