@@ -1,0 +1,17 @@
+# Shared Tier-1 Await contention family — 2026-10-09
+
+`graph_await_contention` runs production client/store/protocol decisions through the shared transport model. Its 24 combinations cover v4/v5/v6 root witness rejection, pinned read rejection, reader release CAS exhaustion, replacement generation, matching purge marker, caller cancellation, immediate unknown deadline replies and corruption. Every generated schedule replays exactly, checks the captured invocation, validates reference ownership and drains all physical objects after retirement and pin expiry. The two real context deadline controls remain outside the fast seeded family.
+
+The former client-local harness now delegates to the same simulator fixture. The shared replay dispatcher recognizes the new family. Twenty-four new saved regressions raise the repository inventory to 150 seeded families and 786 pins. All 762 existing traces remain byte-identical. The graph publication workflow runs this family normally and under race and includes the larger corpus.
+
+## Reproduced pre-fix client bug
+
+A Go overlay replaces only `client/graph_journal.go` with its Git blob at `436a12a`. The new shared family fails at seed 2 in 0.009 seconds: definite read witness contention prevents the required fresh-generation/purge observation. `baseline-failure.json` preserves the complete failing transcript. The shared minimizer verifies exact failure replay and its resulting saved transcript in four reproductions (0.013 seconds). `baseline-source.json` and the retained blob identify the intentionally replaced input; this is not a claim about the whole old source tree or the native Start binding timeout.
+
+## Qualification
+
+`qualified-normal.log` and `qualified-race.log` execute the entire 1,000-seed family and all 786 saved traces, plus the existing directed client and real deadline/corruption controls. Both use GOMAXPROCS=2 and GOMEMLIMIT=512MiB with a ten-minute process watchdog. No production deadline or native gate is relaxed. `executed-review.py` requires terminal process exit zero, explicit contiguous 1,000 completed bodies, every saved trace pass, all 24 combinations, unchanged repository source inputs and byte-identical prior pins. Both terminal campaigns passed: normal simulator/client packages 11.611/11.799 seconds and race simulator/client packages 133.128/27.633 seconds. The executed verdict is in `review.json`; 1,773 selected source, workflow and trace inputs remain unchanged. The source body inventory uses the canonical Go AST tool, including the 17 seeded families without the TestSeeded name prefix; the corrected initial review failure is preserved.
+
+The initial generation run used an inactive coverage variable and the replay registration was edited just after its launch; it is preserved as development evidence in `normal.log`, not complete component qualification. The later qualification runs use the correct coverage summary and unchanged input snapshot.
+
+Complete current 150-family normal/race/extended qualification remains open. The live complete race job at frozen `fca8264` still covers its original 149 families/762 pins. The R3 native worker Start-binding deadline failures, autonomous collection, continuation CLI/public admission, migration/deployment, original fault matrices, scale/soak/drain and all broader release gates remain open. No server cause is inferred from the old client counterexample.

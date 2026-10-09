@@ -1,0 +1,43 @@
+=== RUN   TestSeededGraphAwaitContentionReplay
+    graph_await_contention_test.go:81: Await contention: modes=map[v4_cancel:36 v4_corrupt:45 v4_generation:46 v4_observe:37 v4_pinned:35 v4_purge:44 v4_release:33 v4_unknown:40 v5_cancel:39 v5_corrupt:47 v5_generation:25 v5_observe:33 v5_pinned:37 v5_purge:44 v5_release:45 v5_unknown:40 v6_cancel:48 v6_corrupt:47 v6_generation:51 v6_observe:52 v6_pinned:49 v6_purge:44 v6_release:38 v6_unknown:45]; captured generation, fresh retry, cancellation/unknown/corruption fail closed and orphan drain
+--- PASS: TestSeededGraphAwaitContentionReplay (7.47s)
+PASS
+ok  	js-wf/sim	7.473s
+=== RUN   TestGraphAwaitContentionFreshReadAndGenerationFence
+=== RUN   TestGraphAwaitContentionFreshReadAndGenerationFence/v4/observe
+=== RUN   TestGraphAwaitContentionFreshReadAndGenerationFence/v4/pinned
+=== RUN   TestGraphAwaitContentionFreshReadAndGenerationFence/v4/release
+=== RUN   TestGraphAwaitContentionFreshReadAndGenerationFence/v4/generation
+=== RUN   TestGraphAwaitContentionFreshReadAndGenerationFence/v4/purge
+=== RUN   TestGraphAwaitContentionFreshReadAndGenerationFence/v4/cancel
+=== RUN   TestGraphAwaitContentionFreshReadAndGenerationFence/v4/unknown
+=== RUN   TestGraphAwaitContentionFreshReadAndGenerationFence/v6/observe
+=== RUN   TestGraphAwaitContentionFreshReadAndGenerationFence/v6/pinned
+=== RUN   TestGraphAwaitContentionFreshReadAndGenerationFence/v6/release
+=== RUN   TestGraphAwaitContentionFreshReadAndGenerationFence/v6/generation
+=== RUN   TestGraphAwaitContentionFreshReadAndGenerationFence/v6/purge
+=== RUN   TestGraphAwaitContentionFreshReadAndGenerationFence/v6/cancel
+=== RUN   TestGraphAwaitContentionFreshReadAndGenerationFence/v6/unknown
+--- PASS: TestGraphAwaitContentionFreshReadAndGenerationFence (2.26s)
+    --- PASS: TestGraphAwaitContentionFreshReadAndGenerationFence/v4/observe (0.11s)
+    --- PASS: TestGraphAwaitContentionFreshReadAndGenerationFence/v4/pinned (0.16s)
+    --- PASS: TestGraphAwaitContentionFreshReadAndGenerationFence/v4/release (0.19s)
+    --- PASS: TestGraphAwaitContentionFreshReadAndGenerationFence/v4/generation (0.23s)
+    --- PASS: TestGraphAwaitContentionFreshReadAndGenerationFence/v4/purge (0.10s)
+    --- PASS: TestGraphAwaitContentionFreshReadAndGenerationFence/v4/cancel (0.11s)
+    --- PASS: TestGraphAwaitContentionFreshReadAndGenerationFence/v4/unknown (0.16s)
+    --- PASS: TestGraphAwaitContentionFreshReadAndGenerationFence/v6/observe (0.12s)
+    --- PASS: TestGraphAwaitContentionFreshReadAndGenerationFence/v6/pinned (0.18s)
+    --- PASS: TestGraphAwaitContentionFreshReadAndGenerationFence/v6/release (0.21s)
+    --- PASS: TestGraphAwaitContentionFreshReadAndGenerationFence/v6/generation (0.24s)
+    --- PASS: TestGraphAwaitContentionFreshReadAndGenerationFence/v6/purge (0.19s)
+    --- PASS: TestGraphAwaitContentionFreshReadAndGenerationFence/v6/cancel (0.11s)
+    --- PASS: TestGraphAwaitContentionFreshReadAndGenerationFence/v6/unknown (0.15s)
+=== RUN   TestGraphAwaitOwnReadDeadline
+=== RUN   TestGraphAwaitOwnReadDeadline/deadline
+=== RUN   TestGraphAwaitOwnReadDeadline/deadline-corrupt
+--- PASS: TestGraphAwaitOwnReadDeadline (10.01s)
+    --- PASS: TestGraphAwaitOwnReadDeadline/deadline (5.00s)
+    --- PASS: TestGraphAwaitOwnReadDeadline/deadline-corrupt (5.00s)
+PASS
+ok  	js-wf/client	12.282s

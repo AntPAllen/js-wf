@@ -29,6 +29,9 @@ on:
       - 'internal/retainedindex/**'
       - 'sim/graph_publication*'
       - 'sim/graph_checkpoint_compaction_test.go'
+      - 'sim/graph_await_contention*'
+      - 'client/graph_await_contention_test.go'
+      - 'sim/testdata/regressions/graph-await-*'
       - 'sim/journal_transport_test.go'
       - 'sim/purge_transport.go'
       - 'sim/blob_sweep_transport.go'
@@ -84,6 +87,9 @@ on:
       - 'internal/retainedindex/**'
       - 'sim/graph_publication*'
       - 'sim/graph_checkpoint_compaction_test.go'
+      - 'sim/graph_await_contention*'
+      - 'client/graph_await_contention_test.go'
+      - 'sim/testdata/regressions/graph-await-*'
       - 'sim/journal_transport_test.go'
       - 'sim/purge_transport.go'
       - 'sim/blob_sweep_transport.go'
@@ -257,7 +263,7 @@ jobs:
       fail-fast: false
       matrix:
         mode: [normal, race]
-        family: [Publication, Readers, ReaderResume, Catalog, Application, Streams, Journal, Worker, Result, TerminalWorker, TerminalProjection, TerminalCatalog, Child, ChildSignal, Reconcile, Purge, SignalClient, ParentWorker, Start, StartRepair, SignalRuntime, SignalRuntimeCombined, CheckpointCompaction, Corpus]
+        family: [Publication, Readers, ReaderResume, Catalog, Application, Streams, Journal, Worker, Result, TerminalWorker, TerminalProjection, TerminalCatalog, Child, ChildSignal, Reconcile, Purge, SignalClient, ParentWorker, Start, StartRepair, SignalRuntime, SignalRuntimeCombined, CheckpointCompaction, AwaitContention, Corpus]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-go@v5

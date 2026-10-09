@@ -1,5 +1,11 @@
 # Implementation status against the supplied plan
 
+## Shared Tier-1 Await contention replay and saved corpus — 2026-10-09
+
+The client contention harness now shares the production-path simulator fixture with the registered `graph_await_contention` family. Twenty-four v4/v5/v6 combinations cover read/release contention, source replacement, purge, cancellation, immediate unknown replies and corruption, with exact replay and complete physical drain. The complete 1,000-body family and all 786 pins pass normally and under race; all 762 prior saved traces remain byte-identical. Actual Go AST inventory now contains 150 seeded families. [Executed source/coverage review, old-code failure and minimizer proof](scale/graph-await-simulation-2026-10-09/README.md).
+
+The shared model reproduces the earlier client bug at seed 2 in 0.009 seconds using a one-file Go overlay and successfully minimizes/replays that failure in four reproductions. This does not explain the native pending Start binding deadline failures. Complete current 150-family and extended qualification, native liveness/fault matrices, autonomous collection, migration/CLI continuation/admission, original scale/soak/drain and release gates remain open. The live frozen `fca8264` race job retains its independent 149-family/762-pin scope.
+
 ## Explicit command cursor selection and Await contention recovery — 2026-10-09
 
 Worker/operator commands now share explicit v4/v5/v6 selection; v4 remains the default and v6 requires new isolated stores. Native describe/export tests inspect full owned archive history after original receipt collection and reject both incorrect schemas. Await retries typed read/release CAS contention and actual local terminal-read deadline errors against the captured invocation; replacement, purge, cancellation, immediate unknown errors and corruption remain fail-closed. Fourteen directed seeded modes and two real deadline controls pass normally and under race. [Source observations, failed attempts, raw evidence, executed verdict and CI wiring](scale/graph-cursor-cli-2026-10-09/README.md).

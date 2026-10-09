@@ -1,0 +1,8 @@
+{
+  "normal": "SIM_COVERAGE_SUMMARY=1 SIM_PROGRESS=1 GOMAXPROCS=2 GOMEMLIMIT=512MiB go test ./sim ./client -run '^(TestSeededGraphAwaitContentionReplay|TestPinnedRegressionCorpus|TestGraphAwaitContentionFreshReadAndGenerationFence|TestGraphAwaitOwnReadDeadline)$' -count=1 -timeout=10m -v",
+  "race": "SIM_COVERAGE_SUMMARY=1 SIM_PROGRESS=1 GOMAXPROCS=2 GOMEMLIMIT=512MiB go test -race -p=1 ./sim ./client -run '^(TestSeededGraphAwaitContentionReplay|TestPinnedRegressionCorpus|TestGraphAwaitContentionFreshReadAndGenerationFence|TestGraphAwaitOwnReadDeadline)$' -count=1 -timeout=10m -v",
+  "baseline": "Go overlay replaces only client/graph_journal.go with Git blob from 436a12a; new shared test executes to first failure at seed 2, saving baseline-failure.json.",
+  "minimize": "Same overlay with FAULT_TRACE=baseline-failure.json FAULT_TRACE_MIN_OUT=baseline-minimized.json, test TestMinimizeFaultTrace, four exact/guided reproductions.",
+  "working_directory": "/home/exedev/js-wf",
+  "go_version": "go1.27.1 linux/amd64"
+}
