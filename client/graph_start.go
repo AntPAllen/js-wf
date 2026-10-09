@@ -173,15 +173,15 @@ func (c *Client) repairBoundGraphAttempt(ctx context.Context, typ, id, token str
 	return c.repairBoundGraphGuard(ctx, typ, id, token, invocation, messageID, terminal, nil)
 }
 
-// RepairContinuationAttempt dispatches only the captured canonical checkpoint
-// generation after checking the native source and observing eligibility again.
+// RepairContinuationAttempt dispatches the captured canonical recovery
+// observation after checking the native source and observing eligibility again.
 // It does not open a frame or authorize execution; workers own those checks.
-func (c *Client) RepairContinuationAttempt(ctx context.Context, typ, id, token string, invocation, checkpointSequence uint64) (bool, error) {
-	if c.graphJournal == nil || !c.graphJournal.CheckpointIndex() || checkpointSequence == 0 {
+func (c *Client) RepairContinuationAttempt(ctx context.Context, typ, id, token string, invocation, recoverySequence uint64) (bool, error) {
+	if c.graphJournal == nil || !c.graphJournal.CheckpointIndex() || recoverySequence == 0 {
 		return false, journal.ErrGap
 	}
 	_, err := c.repairBoundGraphGuard(ctx, typ, id, token, invocation, "", false, func(status *journal.GraphStartStatus) bool {
-		return status.ContinuationReady() && status.Checkpoint.Sequence == checkpointSequence
+		return status.ContinuationRecoverySequence() == recoverySequence
 	})
 	return err == nil, err
 }

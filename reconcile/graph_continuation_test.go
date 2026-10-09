@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"strings"
 	"testing"
 
 	"github.com/nats-io/nats.go/jetstream"
@@ -86,8 +87,10 @@ func (p *continuationRecovery) RepairContinuationAttempt(ctx context.Context, ty
 }
 
 func TestGraphContinuationRecoveryDecisions(t *testing.T) {
-	for _, mode := range []string{"boundary", "before-suspension", "held", "lease-unknown", "source-forged", "publish-before", "publish-ack", "partial-publish", "authority-unknown", "later-wait", "terminal", "retired", "purging", "wait-race", "post-source-wait-race"} {
-		t.Run(mode, func(t *testing.T) {
+	for _, testMode := range []string{"boundary", "before-suspension", "held", "lease-unknown", "source-forged", "publish-before", "publish-ack", "partial-publish", "authority-unknown", "later-wait", "terminal", "retired", "purging", "wait-race", "post-source-wait-race", "unindexed-boundary", "unindexed-held", "unindexed-lease-unknown", "unindexed-source-forged", "unindexed-publish-before", "unindexed-publish-ack", "unindexed-later-wait", "unindexed-wait-race", "unindexed-post-source-wait-race", "unindexed-ordinary", "unindexed-completion-race", "unindexed-pointer-race"} {
+		t.Run(testMode, func(t *testing.T) {
+			unindexed := strings.HasPrefix(testMode, "unindexed-")
+			mode := strings.TrimPrefix(testMode, "unindexed-")
 			ctx := context.Background()
 			scheduler := sim.NewScheduler(31)
 			model := sim.NewGraphPublicationTransport(scheduler)
@@ -148,6 +151,10 @@ func TestGraphContinuationRecoveryDecisions(t *testing.T) {
 			}
 			request, _ := json.Marshal(map[string]string{"kind": "checkpoint", "name": "next", "input_hash": hex.EncodeToString(digest[:])})
 			completion, _ := json.Marshal(map[string]string{"result_ref": "step-result-" + hash, "result_hash": hash})
+			if mode == "ordinary" {
+				request = []byte(`{"kind":"run","name":"ordinary"}`)
+				completion = []byte(`{"result":42}`)
+			}
 			mustAppend(journal.StepRequested, request)
 			mustAppend(journal.StepCompleted, completion, encoded)
 			view, err := graph.OpenExisting(ctx, h.Type, h.ID, h.InvSeq)
@@ -161,10 +168,12 @@ func TestGraphContinuationRecoveryDecisions(t *testing.T) {
 			if err := view.Close(ctx); err != nil {
 				t.Fatal(err)
 			}
-			if err := graph.PublishCheckpoint(ctx, h.Type, h.ID, found.Runtime, tail); err != nil {
-				t.Fatal(err)
+			if !unindexed {
+				if err := graph.PublishCheckpoint(ctx, h.Type, h.ID, found.Runtime, tail); err != nil {
+					t.Fatal(err)
+				}
 			}
-			if mode != "before-suspension" {
+			if !unindexed && mode != "before-suspension" {
 				mustAppend(journal.Suspended, []byte(`{"waiting_on":"continuation:next"}`))
 			}
 			laterWait := func() error {
@@ -207,6 +216,19 @@ func TestGraphContinuationRecoveryDecisions(t *testing.T) {
 					return laterWait()
 				}
 			}
+			if mode == "completion-race" || mode == "pointer-race" {
+				recovery.before = func() error {
+					port.metadataOnly = false
+					defer func() { port.metadataOnly = true }()
+					if mode == "pointer-race" {
+						return graph.PublishCheckpoint(ctx, h.Type, h.ID, found.Runtime, tail)
+					}
+					if err := appendRecord(journal.StepRequested, []byte(`{"kind":"run","name":"later"}`)); err != nil {
+						return err
+					}
+					return appendRecord(journal.StepCompleted, []byte(`{"result":42}`))
+				}
+			}
 			source.forged = mode == "source-forged"
 			scan, err := reconcile.NewCanonicalContinuationScanWithPort(graph, recovery, recovery)
 			if err != nil {
@@ -238,7 +260,7 @@ func TestGraphContinuationRecoveryDecisions(t *testing.T) {
 			result, err := scan.Scan(ctx, 1, budget, false)
 			runs := len(source.Runs()) - before
 			switch mode {
-			case "boundary", "before-suspension":
+			case "boundary", "before-suspension", "ordinary", "pointer-race":
 				if err != nil || result.Reenqueued != 1 || runs != 1 || len(dry.Candidates) != 1 {
 					t.Fatal(result, err, runs, dry)
 				}
@@ -246,7 +268,7 @@ func TestGraphContinuationRecoveryDecisions(t *testing.T) {
 				if err != nil || retry.Reenqueued != 1 || len(source.Runs())-before != 2 {
 					t.Fatal("dedup suppressed recovery", retry, err)
 				}
-			case "held", "later-wait", "terminal", "retired", "purging", "wait-race", "post-source-wait-race":
+			case "held", "later-wait", "terminal", "retired", "purging", "wait-race", "post-source-wait-race", "completion-race":
 				if err != nil || result.Reenqueued != 0 || runs != 0 {
 					t.Fatal(result, err, runs)
 				}
@@ -278,7 +300,7 @@ func TestGraphContinuationRecoveryDecisions(t *testing.T) {
 			if port.forbiddenReads != 0 || port.forbiddenMutations != 0 {
 				t.Fatal("recovery touched payload or root ownership", port.forbiddenReads, port.forbiddenMutations)
 			}
-			t.Logf("mode=%s runs=%d result=%+v error=%v", mode, runs, result, err)
+			t.Logf("mode=%s runs=%d result=%+v error=%v", testMode, runs, result, err)
 		})
 	}
 }

@@ -29,10 +29,19 @@ func TestNativeGraphContinuationHandoff(t *testing.T) {
 		if domain != "" {
 			name = "R3Domain"
 		}
-		t.Run(name, func(t *testing.T) { testNativeGraphContinuationHandoff(t, domain) })
+		t.Run(name, func(t *testing.T) { testNativeGraphContinuationHandoff(t, domain, false) })
 	}
 }
-func testNativeGraphContinuationHandoff(t *testing.T, domain string) {
+func TestNativeGraphUnpublishedContinuationHandoff(t *testing.T) {
+	for _, domain := range []string{"", "WFCONTINUATION"} {
+		name := "R1"
+		if domain != "" {
+			name = "R3Domain"
+		}
+		t.Run(name, func(t *testing.T) { testNativeGraphContinuationHandoff(t, domain, true) })
+	}
+}
+func testNativeGraphContinuationHandoff(t *testing.T, domain string, unpublished bool) {
 	replicas := 1
 	if domain != "" {
 		replicas = 3
@@ -161,50 +170,77 @@ func testNativeGraphContinuationHandoff(t *testing.T, domain string) {
 	if err := runs.Purge(ctx); err != nil {
 		t.Fatal(err)
 	}
-	wrong := point
-	wrong.SHA256 = hex.EncodeToString(digest[:])
-	wrong.Object = "step-result-" + wrong.SHA256
-	if err := worker.publishContinuation(ctx, h.Type, h.ID, h.InvSeq, owner, records, wrong, appendEntry); !errors.Is(err, journal.ErrGap) {
-		t.Fatal("unconfirmed checkpoint dispatched", err)
-	}
-	info, err := runs.Info(ctx)
-	if err != nil || info.State.Msgs != 0 {
-		t.Fatal("invalid handoff published", info, err)
-	}
-	if err := worker.publishContinuation(ctx, h.Type, h.ID, h.InvSeq, owner, records, point, appendEntry); err != nil {
-		t.Fatal(err)
-	}
-	if len(records) != 4 || records[3].Kind != journal.Suspended {
-		t.Fatal("missing suspension", records)
-	}
-	first, err := runs.Info(ctx)
-	if err != nil || first.State.Msgs != 1 {
-		t.Fatal(first, err)
-	}
-	if err := worker.publishContinuation(ctx, h.Type, h.ID, h.InvSeq, owner, records, point, appendEntry); err != nil {
-		t.Fatal(err)
-	}
-	second, err := runs.Info(ctx)
-	if err != nil || second.State.Msgs != 2 || len(records) != 4 {
-		t.Fatal("retry suppressed or appended duplicate suspension", second, err)
-	}
 	scan, err := reconcile.NewCanonicalContinuationScan(js, graph)
 	if err != nil {
 		t.Fatal(err)
 	}
-	held, err := scan.Scan(ctx, 1, 1, false)
-	if err != nil || held.Reenqueued != 0 {
-		t.Fatal("scanner dispatched while delivery held lease", held, err)
+	unpublishedStatus, err := graph.InspectStart(ctx, h.Type, h.ID)
+	if err != nil || unpublishedStatus.Checkpoint != nil || unpublishedStatus.ContinuationRecoverySequence() != records[2].Sequence {
+		t.Fatal("unpublished completion recovery hint", unpublishedStatus, err)
+	}
+	heldUnpublished, err := scan.Scan(ctx, 1, 1, false)
+	if err != nil || heldUnpublished.Reenqueued != 0 {
+		t.Fatal("unpublished handoff dispatched with held lease", heldUnpublished, err)
 	}
 	if err := owner.Release(ctx); err != nil {
 		t.Fatal(err)
 	}
-	if err := worker.publishContinuation(ctx, h.Type, h.ID, h.InvSeq, owner, records, point, appendEntry); !errors.Is(err, lease.ErrLost) {
-		t.Fatal("lost lease authorized handoff", err)
+	recoveredUnpublished, err := scan.Scan(ctx, 1, 1, false)
+	if err != nil || recoveredUnpublished.Reenqueued != 1 {
+		t.Fatal("unpublished handoff not rediscovered", recoveredUnpublished, err)
 	}
-	afterLoss, err := runs.Info(ctx)
-	if err != nil || afterLoss.State.Msgs != 2 || len(records) != 4 {
-		t.Fatal("lost lease mutated handoff", afterLoss, err)
+	owner, err = leases.Acquire(ctx, h.Type, h.ID, "handoff-recovered")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer owner.Release(context.Background())
+	if err := runs.Purge(ctx); err != nil {
+		t.Fatal(err)
+	}
+	if !unpublished {
+		wrong := point
+		wrong.SHA256 = hex.EncodeToString(digest[:])
+		wrong.Object = "step-result-" + wrong.SHA256
+		if err := worker.publishContinuation(ctx, h.Type, h.ID, h.InvSeq, owner, records, wrong, appendEntry); !errors.Is(err, journal.ErrGap) {
+			t.Fatal("unconfirmed checkpoint dispatched", err)
+		}
+		info, err := runs.Info(ctx)
+		if err != nil || info.State.Msgs != 0 {
+			t.Fatal("invalid handoff published", info, err)
+		}
+		if err := worker.publishContinuation(ctx, h.Type, h.ID, h.InvSeq, owner, records, point, appendEntry); err != nil {
+			t.Fatal(err)
+		}
+		if len(records) != 4 || records[3].Kind != journal.Suspended {
+			t.Fatal("missing suspension", records)
+		}
+		first, err := runs.Info(ctx)
+		if err != nil || first.State.Msgs != 1 {
+			t.Fatal(first, err)
+		}
+		if err := worker.publishContinuation(ctx, h.Type, h.ID, h.InvSeq, owner, records, point, appendEntry); err != nil {
+			t.Fatal(err)
+		}
+		second, err := runs.Info(ctx)
+		if err != nil || second.State.Msgs != 2 || len(records) != 4 {
+			t.Fatal("retry suppressed or appended duplicate suspension", second, err)
+		}
+		held, err := scan.Scan(ctx, 1, 1, false)
+		if err != nil || held.Reenqueued != 0 {
+			t.Fatal("scanner dispatched while delivery held lease", held, err)
+		}
+		if err := owner.Release(ctx); err != nil {
+			t.Fatal(err)
+		}
+		if err := worker.publishContinuation(ctx, h.Type, h.ID, h.InvSeq, owner, records, point, appendEntry); !errors.Is(err, lease.ErrLost) {
+			t.Fatal("lost lease authorized handoff", err)
+		}
+		afterLoss, err := runs.Info(ctx)
+		if err != nil || afterLoss.State.Msgs != 2 || len(records) != 4 {
+			t.Fatal("lost lease mutated handoff", afterLoss, err)
+		}
+	} else if err := owner.Release(ctx); err != nil {
+		t.Fatal(err)
 	}
 	// Lose all wakeups twice within the native dedup window. Discovery must
 	// dispatch freshly each time using only the retained checkpoint metadata.
@@ -251,6 +287,12 @@ func testNativeGraphContinuationHandoff(t *testing.T, domain string) {
 	}
 	if event.Outcome != "acknowledged" || event.InvocationSequence != h.InvSeq || event.JournalSequence != records[2].Sequence {
 		t.Fatal("recovery loop source identity", event)
+	}
+	if unpublished {
+		status, err := graph.InspectStart(ctx, h.Type, h.ID)
+		if err != nil || status.Checkpoint != nil || status.Kind != journal.StepCompleted || event.Reason != "interrupted_completion" {
+			t.Fatal("unpublished cut was not preserved through dispatch", status, event, err)
+		}
 	}
 	// Construction admission remains closed. Internal migration tests attach
 	// stage registrations after constructing the ordinary graph worker.

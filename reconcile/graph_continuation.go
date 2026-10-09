@@ -75,24 +75,29 @@ func (s *CanonicalContinuationScan) Scan(ctx context.Context, next uint64, budge
 		}
 		result.Inspected++
 		if status.ContinuationReady() {
+			recoverySequence := status.ContinuationRecoverySequence()
 			request := status.State.Start.Request
 			blocked, err := s.scheduling.GraphRepairBlocked(ctx, request.Type, request.ID)
 			if err != nil {
 				return result, fmt.Errorf("%w: continuation scheduling hint: %w", journal.ErrUnknown, err)
 			}
 			if !blocked {
-				event := RepairEvent{Kind: "graph-continuation", Type: request.Type, ID: request.ID, Reason: "checkpoint_resume", SourceSequence: entry.Sequence, InvocationSequence: status.State.Invocation, JournalSequence: status.Checkpoint.Sequence}
+				reason := "checkpoint_resume"
+				if status.Checkpoint == nil {
+					reason = "interrupted_completion"
+				}
+				event := RepairEvent{Kind: "graph-continuation", Type: request.Type, ID: request.ID, Reason: reason, SourceSequence: entry.Sequence, InvocationSequence: status.State.Invocation, JournalSequence: recoverySequence}
 				if dry {
 					result.Candidates = append(result.Candidates, Candidate{Type: request.Type, ID: request.ID, Reason: event.Reason})
 					reportRepair(s.Observe, event, true, nil)
 				} else {
-					repaired, err := s.recovery.RepairContinuationAttempt(ctx, request.Type, request.ID, status.State.Start.Token, status.State.Invocation, status.Checkpoint.Sequence)
+					repaired, err := s.recovery.RepairContinuationAttempt(ctx, request.Type, request.ID, status.State.Start.Token, status.State.Invocation, recoverySequence)
 					if err != nil && errors.Is(err, journal.ErrStale) {
 						fresh, check := s.graph.InspectStartDestination(ctx, entry.Destination)
 						if check != nil {
 							return result, check
 						}
-						if !fresh.ContinuationReady() || fresh.State.Invocation != status.State.Invocation || fresh.State.Start.Token != status.State.Start.Token || fresh.Checkpoint.Sequence != status.Checkpoint.Sequence {
+						if !fresh.ContinuationReady() || fresh.State.Invocation != status.State.Invocation || fresh.State.Start.Token != status.State.Start.Token || fresh.ContinuationRecoverySequence() != recoverySequence {
 							repaired, err = false, nil
 							event.Reason = "resume_changed"
 						}

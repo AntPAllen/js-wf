@@ -14,6 +14,7 @@ import (
 type GraphStartStatus struct {
 	State          GraphStartState
 	JournalCount   uint64
+	JournalTail    uint64
 	Retired        bool
 	Purging        bool
 	Kind           Kind
@@ -28,10 +29,28 @@ type GraphStartStatus struct {
 // freshly suspended checkpoint boundary. It grants no payload authority. A
 // later timer/signal suspension must be repaired through its own wait source.
 func (s *GraphStartStatus) ContinuationReady() bool {
-	if s == nil || s.Checkpoint == nil || s.Retired || s.Purging || s.State.Pending || s.Kind == Completed || s.Kind == Failed {
-		return false
+	return s.ContinuationRecoverySequence() != 0
+}
+
+// ContinuationRecoverySequence identifies a scheduling observation, never a
+// frame ownership grant. Before the first pointer is published, an unleased
+// StepCompleted tail may be an interrupted checkpoint handoff. Enqueue it using
+// the captured tail; the worker must classify and validate the owned history.
+// Other completed SDK steps can also be retried safely under worker fencing.
+func (s *GraphStartStatus) ContinuationRecoverySequence() uint64 {
+	if s == nil || s.Retired || s.Purging || s.State.Pending || s.Kind == Completed || s.Kind == Failed {
+		return 0
 	}
-	return s.Kind != Suspended || s.JournalCount == s.Checkpoint.Index+2
+	if s.Checkpoint == nil {
+		if s.Kind == StepCompleted {
+			return s.JournalTail
+		}
+		return 0
+	}
+	if s.Kind == Suspended && s.JournalCount != s.Checkpoint.Index+2 {
+		return 0
+	}
+	return s.Checkpoint.Sequence
 }
 
 // InspectStart observes lifecycle metadata without acquiring an input reader
@@ -74,7 +93,7 @@ func (s *GraphStore) InspectStartDestination(ctx context.Context, destination st
 		runtime := validated.Checkpoint.Runtime
 		checkpoint = &runtime
 	}
-	return &GraphStartStatus{Checkpoint: checkpoint, State: startState(validated), JournalCount: validated.Count, Retired: validated.Retired, Purging: validated.Purging, Kind: validated.Kind, SignalInputs: validated.SignalInputs, SignalBindings: validated.SignalBindings, SignalConsumed: validated.SignalConsumed, SignalRepair: validated.SignalRepair}, nil
+	return &GraphStartStatus{Checkpoint: checkpoint, State: startState(validated), JournalCount: validated.Count, JournalTail: validated.Base + validated.Count, Retired: validated.Retired, Purging: validated.Purging, Kind: validated.Kind, SignalInputs: validated.SignalInputs, SignalBindings: validated.SignalBindings, SignalConsumed: validated.SignalConsumed, SignalRepair: validated.SignalRepair}, nil
 }
 
 // NextStart discovers one retained authority root and confirms its current

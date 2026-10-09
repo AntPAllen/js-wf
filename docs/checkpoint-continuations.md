@@ -8,6 +8,22 @@ stage replay is implemented with focused/model/real-journal checks below.
 This document preserves the plan's checkpoint requirement; it does not count
 as a completed checkpoint feature.
 
+## Canonical graph migration status — 2026-10-09
+
+Public graph continuation admission remains closed. Internal migration controls
+now exercise owned graph frame restore, versioned checkpoint pointer publication,
+bounded metadata recovery both before and after pointer publication, and initial
+SDK handler/named stages through native partition queue consumption. R1 and
+R3/domain component race tests pass with state/locals restore, preserved indices,
+one call per handler/effect and one terminal append. The initial SDK flow creates
+its frames through `wf.Continue`; separate recovery controls cover explicit lost
+wakeups and a fixture with an unpublished pointer. [Evidence and limits](scale/graph-unpublished-checkpoint-recovery-2026-10-09/README.md).
+
+The legacy archive/runtime implementation described below does not establish
+canonical prefix compaction or materialized payload ownership. Those migrations,
+bounded worker references, full audit/offline/import/v5 deployment, native process
+kill/failure/limit qualification and original broader gates remain required.
+
 ## Execution contract
 
 An ordinary Go handler starts at its entry point on replay. Loading its final
