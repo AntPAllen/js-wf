@@ -2,7 +2,7 @@
 
 ## Current full race interrupted by VM restart — 2026-10-09
 
-At 19:18 UTC the VM was newly booted and the prior race supervisor/test processes were absent. The retained attempt has no terminal test verdict or child exit. It remains unqualified, with source/binary/output preserved. [Observed interruption](scale/graph-current151-qualification-2026-10-09/race-interrupted/README.md). Complete normal qualification remains accepted at its frozen source; all broader gates remain open.
+At 19:18 UTC the VM was newly booted and the prior race supervisor/test processes were absent. The retained attempt has no terminal test verdict or child exit. It remains unqualified, with source/binary/output preserved. [Observed interruption](scale/graph-current151-qualification-2026-10-09/race-interrupted/README.md). Complete normal qualification remains accepted at its frozen source; all broader gates remain open. A replacement started at 19:19:09 UTC against the same clean frozen `fb4f086`, with a new external evidence root and the same 151-family/810-pin/1,000-body scope, 300-minute watchdog and 1,757 verified matching normal inputs. [Replacement launch](scale/graph-current151-qualification-2026-10-09/race-after-reboot-launch.json). Terminal acceptance remains pending.
 
 ## Complete current normal qualification accepted; full race running — 2026-10-09
 
