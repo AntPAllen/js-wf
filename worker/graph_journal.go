@@ -244,6 +244,11 @@ func (g *graphDelivery) registerReferences(record journal.GraphRecord, refs map[
 }
 
 func (g *graphDelivery) refresh(ctx context.Context) error {
+	if err := g.view.Refresh(ctx, g.typ, g.id); err == nil {
+		return nil
+	} else if !errors.Is(err, graphpublication.ErrRevoked) {
+		return err
+	}
 	fresh, err := g.store.Open(ctx, g.typ, g.id, g.invocation)
 	if err != nil {
 		return err

@@ -1,0 +1,30 @@
+{
+  "command": [
+    "go",
+    "test",
+    "-race",
+    "./internal/graphpublication",
+    "./journal",
+    "./worker",
+    "-run",
+    "^(TestGraphReplaceReaderCurrentForestsAndOldHandleRevocation|TestGraphReplaceReaderFailClosed|TestGraphViewRefreshFencesAndOneCAS|TestGraphCheckpointArchiveLogicalHistoryAndCollection|TestGraphCheckpointMetadataEnvelopeAdmission)$",
+    "-count=1",
+    "-timeout=3m",
+    "-v"
+  ],
+  "started": "2026-10-09T23:01:11.436394+00:00",
+  "files": {
+    "internal/graphpublication/replace_reader.go": "eeecc94fc8c54ce7c04d49de29f407a93817211d3255b5dd5762edd8403a8042",
+    "internal/graphpublication/replace_reader_test.go": "1be04dabaac950364dca6f3ae9daa00aef898ac653bfa1305604bbc577149817",
+    "journal/graph_refresh.go": "8ce8e65841661c61e54dd288ba541136fa0737d7ec24e88f8382ea8c6eeb3f39",
+    "journal/graph_refresh_test.go": "32c630bfba226dd10840606c11ca0775c8842e18da21759094c1e1f700671315",
+    "journal/graph_compaction_test.go": "304f29b0ec7feefa5aa331c5690d5d1cd2901b80e4938bf98bf0ebe49438a3c0",
+    "worker/graph_journal.go": "51b9808472c20e0071fadc507aa80cb26cded498f60189453669d7ce959dabd5"
+  },
+  "env": {
+    "GOMAXPROCS": "4",
+    "GOMEMLIMIT": "512MiB"
+  },
+  "exit": 0,
+  "finished": "2026-10-09T23:02:05.448756+00:00"
+}

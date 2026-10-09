@@ -167,6 +167,13 @@ func checkpointArchiveScenario(t *testing.T, ctx context.Context, seed uint64, c
 	if fresh.Count() != index || fresh.Tail() != tail {
 		t.Fatal("logical cursor changed")
 	}
+	oldHandle := *fresh
+	if err := fresh.Refresh(ctx, h.Type, h.ID); err != nil {
+		t.Fatal("refresh archived and live forests", err)
+	}
+	if _, err := oldHandle.Read(ctx, 0); !errors.Is(err, graphpublication.ErrRevoked) {
+		t.Fatal("refresh retained old archive handle", err)
+	}
 	for i, original := range originals {
 		r, err := fresh.Read(ctx, uint64(i))
 		if err != nil || !reflect.DeepEqual(r.Record, original.Record) || r.EntryBlob.Reference == original.EntryBlob.Reference {
