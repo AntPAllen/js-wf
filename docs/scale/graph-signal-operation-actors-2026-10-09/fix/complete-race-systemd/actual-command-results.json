@@ -1,0 +1,34 @@
+[
+  {
+    "command": [
+      "go",
+      "tool",
+      "test2json",
+      "-t",
+      "-p",
+      "js-wf/sim",
+      "/home/exedev/js-wf-signal-actors-qualified-20261009/race.test",
+      "-test.run=^(TestSeededGraphSignalOperationActorsReplay|TestGraphSignalCallerRetryAfterContention)$",
+      "-test.count=1",
+      "-test.timeout=90m",
+      "-test.v=test2json"
+    ],
+    "working_directory": "/home/exedev/js-wf-signal-actors-qualification/sim",
+    "log": "actor-events.jsonl",
+    "actual_exit_code": 0,
+    "finished_at": "2026-10-09T21:27:07.834268+00:00"
+  },
+  {
+    "command": [
+      "/home/exedev/js-wf-signal-actors-qualified-20261009/race.test",
+      "-test.run=^TestPinnedRegressionCorpus$/^graph-signal-actors-caller-retry[.]json$",
+      "-test.count=1",
+      "-test.timeout=5m",
+      "-test.v"
+    ],
+    "working_directory": "/home/exedev/js-wf-signal-actors-qualification/sim",
+    "log": "actor-pin.log",
+    "actual_exit_code": 0,
+    "finished_at": "2026-10-09T21:27:23.946186+00:00"
+  }
+]

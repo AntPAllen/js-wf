@@ -1,5 +1,11 @@
 # JetStream Durable Workflow Runtime — Implementation Plan
 
+## Corrected Signal actor race accepted; complete current155 normal queued — 2026-10-09
+
+Frozen corrected `cc8363d` completes 1,000 actor bodies/exact replays, directed seed 926 and its caller-retry pin with actual exits zero (package 3,768.886 seconds). [Executed independent review](scale/graph-signal-operation-actors-2026-10-09/fix/complete-race-systemd/README.md) matches 1,755 unchanged Git inputs and retained race binary provenance. It excludes later code. The supervisor has started expiry race, which remains pending; full frozen151 race is still live.
+
+The current `1f316a2` 155-family/835-trace source is frozen with 3,239 pre-compilation hashes. Its complete normal qualification is queued under a live systemd supervisor until one occupied campaign service terminates, with no restart or CPU-slot takeover during handoff. [Exact queue controls and acceptance scope](scale/graph-current155-qualification-2026-10-09/README.md). Complete current normal/race/all-pin/extended and all original broader requirements remain open; the full goal is unchanged.
+
 ## Worker CLI can enable bounded terminal audits — 2026-10-09
 
 Graph workers now accept explicit audit enablement, cadence and scan budget, with early configuration rejection and an independent fenced loop alongside missing-projection repair. [Operator flags](graph-terminal-audits.md). Admission plus the actual matching-race-plugin runner pass on R1 and a three-replica named domain in 81.140 seconds, restoring two deleted and two corrupt projections without changing canonical journal bytes or writing legacy history. [Raw results, prior failures and stronger revision-anchored fixture](scale/graph-terminal-audit-cli-2026-10-09/README.md). The original deadline is unchanged; auditing defaults off. Audit scale, complete current qualification and all original broader gates remain open; live frozen races exclude this change. Inventory remains 155/835.
