@@ -1,5 +1,9 @@
 # Implementation status against the supplied plan
 
+## Persisted reader-expiry maintenance loop added — 2026-10-09
+
+Explicit experimental reader maintenance now captures and persists the watermark before batch work, resumes it across restarts, renews leases before batches/saves, reloads uncertain checkpoint replies, and saves only confirmed partial progress. A versioned atomic `WF_STATE` checkpoint uses cursor CAS. Five focused deterministic scheduler/KV-boundary groups pass race in 1.015 seconds. [Evidence and limitations](scale/graph-reader-expiry-loop-2026-10-09/README.md). Native cluster integration and broader qualification remain open; the loop does not delete objects and is not installed in the default runtime. Both supervised frozen race test processes are observed live, with terminal acceptance pending. Full current-source and every original broader gate remain open.
+
 ## Race command sessions interrupted; supervised replacements started — 2026-10-09
 
 The prior full151 replacement race and corrected actor race processes disappeared without terminal verdicts; the expiry queue supervisor also disappeared. The VM boot identifier was unchanged, and cause is unconfirmed. Their retained partial evidence is not acceptance. Two fresh user systemd services are observed running: full frozen151 qualification and corrected actor race followed sequentially by expiry race. [Evidence, service identities, source scope and verification requirements](scale/race-session-interruption-2026-10-09/README.md). These transient services survive command-session loss but are not configured to restart on VM reboot. Actual terminal results remain pending; full current-source and all original broader gates stay open.
