@@ -3,8 +3,10 @@ package visibility
 import (
 	"context"
 	"crypto/rand"
+	"crypto/sha256"
 	"database/sql"
 	"database/sql/driver"
+	"encoding/binary"
 	"encoding/hex"
 	"encoding/json"
 	"errors"
@@ -20,7 +22,36 @@ const postgresWriterLock int64 = 0x57465f56494557 // "WF_VIEW"
 // PostgresStore is the large-deployment visibility sink. It stores the same
 // Row JSON returned by the KV projection while indexing status and attributes.
 // Run one projection writer for this table at a time.
-type PostgresStore struct{ DB *sql.DB }
+type PostgresStore struct {
+	DB *sql.DB
+	// Namespace isolates rows, indexes, rebuild cleanup and the writer lock.
+	// Empty preserves the legacy wf_visibility table. Treat this configuration
+	// as immutable for the lifetime of the store.
+	Namespace string
+}
+
+func (s *PostgresStore) tableName() string {
+	if s.Namespace == "" {
+		return "wf_visibility"
+	}
+	digest := sha256.Sum256([]byte(s.Namespace))
+	return "wf_visibility_g_" + hex.EncodeToString(digest[:16])
+}
+
+// Only the fixed identifier in internal SQL templates is substituted. User
+// namespaces become hexadecimal digests, never SQL text or value parameters.
+func (s *PostgresStore) statement(query string) string {
+	return strings.ReplaceAll(query, "wf_visibility", s.tableName())
+}
+
+func (s *PostgresStore) writerLock() int64 {
+	if s.Namespace == "" {
+		return postgresWriterLock
+	}
+	digest := sha256.Sum256([]byte("wf_visibility_writer:" + s.Namespace))
+	// Negative keys keep namespaced locks separate from the legacy positive key.
+	return int64(binary.BigEndian.Uint64(digest[:8]) | uint64(1)<<63)
+}
 
 // withWriter keeps the session-level advisory lock for the entire mutation.
 // A heartbeat detects loss of that session while work is still in flight.
@@ -33,8 +64,9 @@ func (s *PostgresStore) withWriter(ctx context.Context, fn func(context.Context)
 		return err
 	}
 	defer conn.Close()
+	lock := s.writerLock()
 	var acquired bool
-	if err := conn.QueryRowContext(ctx, `SELECT pg_try_advisory_lock($1)`, postgresWriterLock).Scan(&acquired); err != nil {
+	if err := conn.QueryRowContext(ctx, `SELECT pg_try_advisory_lock($1)`, lock).Scan(&acquired); err != nil {
 		return err
 	}
 	if !acquired {
@@ -44,7 +76,7 @@ func (s *PostgresStore) withWriter(ctx context.Context, fn func(context.Context)
 		releaseCtx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 		defer cancel()
 		var released bool
-		if err := conn.QueryRowContext(releaseCtx, `SELECT pg_advisory_unlock($1)`, postgresWriterLock).Scan(&released); err != nil || !released {
+		if err := conn.QueryRowContext(releaseCtx, `SELECT pg_advisory_unlock($1)`, lock).Scan(&released); err != nil || !released {
 			// Never return a session that may still hold the lock to the pool.
 			_ = conn.Raw(func(any) error { return driver.ErrBadConn })
 		}
@@ -111,7 +143,7 @@ func (s *PostgresStore) Init(ctx context.Context) error {
 		`CREATE INDEX IF NOT EXISTS wf_visibility_status_idx ON wf_visibility (status, type, id)`,
 		`CREATE INDEX IF NOT EXISTS wf_visibility_attributes_idx ON wf_visibility USING gin (attributes jsonb_path_ops)`}
 	for _, statement := range statements {
-		if _, err := s.DB.ExecContext(ctx, statement); err != nil {
+		if _, err := s.DB.ExecContext(ctx, s.statement(statement)); err != nil {
 			return err
 		}
 	}
@@ -131,26 +163,26 @@ func (s *PostgresStore) Put(ctx context.Context, row Row, generation string) err
 	if err != nil {
 		return err
 	}
-	_, err = s.DB.ExecContext(ctx, `
+	_, err = s.DB.ExecContext(ctx, s.statement(`
 INSERT INTO wf_visibility (type, id, status, attributes, row_data, generation)
 VALUES ($1, $2, $3, $4::jsonb, $5::jsonb, $6)
 ON CONFLICT (type, id) DO UPDATE SET
   status = EXCLUDED.status,
   attributes = EXCLUDED.attributes,
   row_data = EXCLUDED.row_data,
-  generation = EXCLUDED.generation`, row.Type, row.ID, row.Status, string(attributeData), string(data), generation)
+  generation = EXCLUDED.generation`), row.Type, row.ID, row.Status, string(attributeData), string(data), generation)
 	return err
 }
 
 func (s *PostgresStore) Delete(ctx context.Context, typ, id string) error {
-	_, err := s.DB.ExecContext(ctx, `DELETE FROM wf_visibility WHERE type=$1 AND id=$2`, typ, id)
+	_, err := s.DB.ExecContext(ctx, s.statement(`DELETE FROM wf_visibility WHERE type=$1 AND id=$2`), typ, id)
 	return err
 }
 
 // DeleteGeneration applies a retained purge event without removing a row for
 // a newer invocation that has already reused the same type and ID.
 func (s *PostgresStore) DeleteGeneration(ctx context.Context, typ, id string, invSeq uint64) error {
-	_, err := s.DB.ExecContext(ctx, `DELETE FROM wf_visibility WHERE type=$1 AND id=$2 AND row_data->>'inv_seq'=$3`,
+	_, err := s.DB.ExecContext(ctx, s.statement(`DELETE FROM wf_visibility WHERE type=$1 AND id=$2 AND row_data->>'inv_seq'=$3`),
 		typ, id, fmt.Sprint(invSeq))
 	return err
 }
@@ -158,13 +190,13 @@ func (s *PostgresStore) DeleteGeneration(ctx context.Context, typ, id string, in
 // DeleteOtherGenerations runs only after every source invocation was read and
 // written successfully. An interrupted rebuild leaves existing rows intact.
 func (s *PostgresStore) DeleteOtherGenerations(ctx context.Context, generation string) error {
-	_, err := s.DB.ExecContext(ctx, `DELETE FROM wf_visibility WHERE generation <> $1`, generation)
+	_, err := s.DB.ExecContext(ctx, s.statement(`DELETE FROM wf_visibility WHERE generation <> $1`), generation)
 	return err
 }
 
 func (s *PostgresStore) Get(ctx context.Context, typ, id string) (Row, error) {
 	var data []byte
-	err := s.DB.QueryRowContext(ctx, `SELECT row_data FROM wf_visibility WHERE type=$1 AND id=$2`, typ, id).Scan(&data)
+	err := s.DB.QueryRowContext(ctx, s.statement(`SELECT row_data FROM wf_visibility WHERE type=$1 AND id=$2`), typ, id).Scan(&data)
 	if errors.Is(err, sql.ErrNoRows) {
 		return Row{}, ErrNotFound
 	}
@@ -231,7 +263,7 @@ func (s *PostgresStore) QueryPage(ctx context.Context, status string, attributes
 }
 
 func (s *PostgresStore) queryRows(ctx context.Context, query string, args ...any) ([]Row, error) {
-	result, err := s.DB.QueryContext(ctx, query, args...)
+	result, err := s.DB.QueryContext(ctx, s.statement(query), args...)
 	if err != nil {
 		return nil, err
 	}

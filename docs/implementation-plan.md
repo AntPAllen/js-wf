@@ -1,5 +1,9 @@
 # JetStream Durable Workflow Runtime — Implementation Plan
 
+## PostgreSQL visibility namespace foundation — 2026-10-09
+
+The PostgreSQL sink now supports explicit namespaces with separate tables, indexes, generation cleanup and writer locks. Empty configuration retains the legacy table/lock. Component race checks exercise namespace isolation and existing native legacy projection/purge/rebuild/session-loss behavior. [Executed component scope](scale/postgres-namespace-2026-10-09/README.md). Canonical graph PostgreSQL projection and CLI integration remain incomplete; every original full/extended/native/scale/soak/drain/adoption/release requirement remains required.
+
 ## Canonical graph KV visibility and CLI projection — 2026-10-09
 
 Visibility now selects a separately provisioned graph query bucket for canonical describe/rebuild/status/search attributes, bounded pagination and graph lag. Background projection reads a captured canonical catalog watermark, validates bound invocation pointers and pinned history, handles retirement without compatibility state, and defers pins during delivery leases. Graph PostgreSQL namespaces and large-scale/event-consumer adoption remain incomplete.
