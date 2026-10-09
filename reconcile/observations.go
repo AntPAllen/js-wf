@@ -118,6 +118,7 @@ func runRepairLoopObserved(ctx context.Context, js jetstream.JetStream, workerID
 		scan = s.Scan
 	case "fallback-timer":
 		s := NewFallbackTimerScan(js)
+		s.graph = graph
 		s.DomainNow = clock
 		s.Observe = observe
 		scan = s.Scan

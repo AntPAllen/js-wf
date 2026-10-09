@@ -26,7 +26,7 @@ func TestWorkerGraphAdmissionRejectsIncompatibleCLI(t *testing.T) {
 	}{
 		{"partial", []string{"-graph-authority-stream", "AUTH"}, "requires graph-authority"},
 		{"namespace", []string{"-graph-authority-stream", "AUTH", "-graph-authority-prefix", "bad.*", "-graph-object-bucket", "OBJECTS", "-timer-backend", "native"}, "invalid native graph namespace"},
-		{"fallback", []string{"-graph-authority-stream", "AUTH", "-graph-authority-prefix", "wf.graph", "-graph-object-bucket", "OBJECTS", "-timer-backend", "fallback"}, "fallback timer migration"},
+		{"auto", []string{"-graph-authority-stream", "AUTH", "-graph-authority-prefix", "wf.graph", "-graph-object-bucket", "OBJECTS", "-timer-backend", "auto"}, "requires explicit"},
 		{"retention", []string{"-graph-authority-stream", "AUTH", "-graph-authority-prefix", "wf.graph", "-graph-object-bucket", "OBJECTS", "-timer-backend", "native", "-retention-type", "purge"}, "graph-aware retention"},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
@@ -39,6 +39,12 @@ func TestWorkerGraphAdmissionRejectsIncompatibleCLI(t *testing.T) {
 }
 
 func TestWorkerRunnerCanonicalGraphRepair(t *testing.T) {
+	testWorkerRunnerCanonicalGraphRepair(t, "native")
+}
+func TestWorkerRunnerCanonicalGraphFallbackRepair(t *testing.T) {
+	testWorkerRunnerCanonicalGraphRepair(t, "fallback")
+}
+func testWorkerRunnerCanonicalGraphRepair(t *testing.T, backend string) {
 	plugin := testWorkerPlugin(t)
 	for _, domain := range []string{"", "WFGRAPH"} {
 		name := "R1"
@@ -61,7 +67,12 @@ func TestWorkerRunnerCanonicalGraphRepair(t *testing.T) {
 				t.Fatal(err)
 			}
 			replicas := len(cluster.Servers)
-			if err = provision.Ensure(ctx, js, replicas); err != nil {
+			if backend == "fallback" {
+				err = provision.EnsureFallback(ctx, js, replicas)
+			} else {
+				err = provision.Ensure(ctx, js, replicas)
+			}
+			if err != nil {
 				t.Fatal(err)
 			}
 			cfg := journal.NativeGraphConfig{AuthorityStream: "CLI_GRAPH_AUTH", AuthorityPrefix: "wf.graph.cli", ObjectBucket: "CLI_GRAPH_OBJECTS", ExpectedReplicas: replicas, CanonicalStarts: true, CanonicalSignals: true, Encoding: journal.ProtobufV1}
@@ -104,7 +115,7 @@ func TestWorkerRunnerCanonicalGraphRepair(t *testing.T) {
 				t.Fatal(err)
 			}
 			events := filepath.Join(t.TempDir(), "events.jsonl")
-			args := append(workerDomainArgs(domain, replicas), []string{"-url", cluster.Servers[0].ClientURL(), "-id", "graph-cli", "-handler-plugin", plugin, "-metrics-addr", "127.0.0.1:0", "-graph-authority-stream", cfg.AuthorityStream, "-graph-authority-prefix", cfg.AuthorityPrefix, "-graph-object-bucket", cfg.ObjectBucket, "-journal-encoding", "protobuf-v1", "-timer-backend", "native", "-reconcile-interval", "100ms", "-events-file", events}...)
+			args := append(workerDomainArgs(domain, replicas), []string{"-url", cluster.Servers[0].ClientURL(), "-id", "graph-cli", "-handler-plugin", plugin, "-metrics-addr", "127.0.0.1:0", "-graph-authority-stream", cfg.AuthorityStream, "-graph-authority-prefix", cfg.AuthorityPrefix, "-graph-object-bucket", cfg.ObjectBucket, "-journal-encoding", "protobuf-v1", "-timer-backend", backend, "-reconcile-interval", "100ms", "-events-file", events}...)
 			runCtx, stop := context.WithCancel(ctx)
 			defer stop()
 			done := make(chan error, 1)

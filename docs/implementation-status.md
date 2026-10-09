@@ -1,5 +1,9 @@
 # Implementation status against the supplied plan
 
+## Canonical graph fallback timers — 2026-10-09
+
+Graph worker CLI now admits explicit fallback timers and routes the fallback repair loop to canonical Start status and pinned timer history. Hints cannot override generation, retirement, deadline or clock domain; live leases defer pins, uncertain decisions preserve hints, and publication precedes deletion. Native/fallback R1/R3-domain worker component race checks pass alongside nine modeled authority/lease/forgery/publication/deletion/terminal controls, dry-run and existing partial-cursor checks. A direct native scanner proves due wakeup despite forged legacy state and canonical terminal hint retirement. [Executed evidence and limits](scale/graph-fallback-timers-2026-10-09/README.md). These checks leave full/extended qualification and every original remaining continuation/snapshot/import/deployment/GC/runtime/native/scale/soak/drain/adoption/release requirement open.
+
 ## Canonical graph PostgreSQL visibility and CLI — 2026-10-09
 
 Canonical graph projection now selects an explicit isolated PostgreSQL namespace for background refresh, rebuild, status/attribute queries, seek pagination and lag. A successful bounded catalog scan prunes old SQL generations; uncertainty preserves prior rows. CLI project/list/lag admit explicit PostgreSQL namespace configuration before dialing and reject conflicting KV sinks. Native R1/R3-domain component race checks exercise the actual CLI projector with large Start/Signal ownership, queries, replay, repair, cancellation, purge and shutdown; modeled graph uncertainty/lease/retirement checks run against real PostgreSQL. [Executed scope and configuration](scale/graph-postgres-visibility-2026-10-09/README.md). Large-scale/event-consumer adoption and every original remaining full/extended/runtime/native/soak/drain/adoption/release requirement remain required.

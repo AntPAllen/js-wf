@@ -125,13 +125,16 @@ func NewSuspendedScanWithGraphJournalPort(port SuspendedScanPort, graph *journal
 }
 
 // RunRepairLoopWithGraphJournal runs the existing fenced leader/cursor loop with
-// graph history. Supported kinds are start, graph-start, graph-signal, graph-terminal, signal, timer and suspended; fallback
-// timer/tombstone state and purge coordination require separate migration.
+// graph history. Supported kinds are start, graph-start, graph-signal, graph-terminal, signal, timer, fallback-timer and suspended. Tombstone state and purge
+// coordination require separate migration.
 func RunRepairLoopWithGraphJournal(ctx context.Context, js jetstream.JetStream, workerID, kind string, interval time.Duration, budget int, graph *journal.GraphStore, observe func(RepairEvent), clock TimerDomainClock, progress func(ScanEvent)) error {
 	if graph == nil {
 		return fmt.Errorf("graph repair loop requires journal")
 	}
-	if kind != "start" && kind != "graph-start" && kind != "graph-signal" && kind != "graph-terminal" && kind != "signal" && kind != "timer" && kind != "suspended" {
+	if kind == "fallback-timer" && !graph.CanonicalStarts() {
+		return fmt.Errorf("graph fallback requires canonical Start store")
+	}
+	if kind != "start" && kind != "graph-start" && kind != "graph-signal" && kind != "graph-terminal" && kind != "signal" && kind != "timer" && kind != "fallback-timer" && kind != "suspended" {
 		return fmt.Errorf("unsupported graph repair kind %q", kind)
 	}
 	return runRepairLoopObserved(ctx, js, workerID, kind, interval, budget, observe, clock, progress, graph)

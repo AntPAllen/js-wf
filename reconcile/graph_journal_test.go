@@ -113,7 +113,7 @@ func TestGraphReconcileRejectsMissingConfiguration(t *testing.T) {
 	_, e = reconcile.NewSuspendedScanWithGraphJournalPort(nil, graph)
 	checks = append(checks, e)
 	checks = append(checks, reconcile.RunRepairLoopWithGraphJournal(context.Background(), nil, "test", "start", time.Second, 1, nil, nil, nil, nil))
-	checks = append(checks, reconcile.RunRepairLoopWithGraphJournal(context.Background(), nil, "test", "fallback-timer", time.Second, 1, graph, nil, nil, nil))
+	checks = append(checks, reconcile.RunRepairLoopWithGraphJournal(context.Background(), nil, "test", "tombstone", time.Second, 1, graph, nil, nil, nil))
 	for i, e := range checks {
 		if e == nil {
 			t.Fatalf("configuration%d accepted", i)

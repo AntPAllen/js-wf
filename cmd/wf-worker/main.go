@@ -240,6 +240,9 @@ func runWithJetStreamOptions(ctx context.Context, args []string, jsOptions ...je
 		}
 		if backend == provision.FallbackTimers {
 			start = append(start, func(c context.Context) error {
+				if graphSelection != nil {
+					return reconcile.RunRepairLoopWithGraphJournal(c, js, *id, "fallback-timer", *repairInterval, *repairBudget, graphSelection.store, observeRepair, domainNow, nil)
+				}
 				return reconcile.RunRepairLoopWithClock(c, js, *id, "fallback-timer", *repairInterval, *repairBudget, observeRepair, domainNow)
 			})
 		}

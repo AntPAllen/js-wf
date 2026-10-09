@@ -12,6 +12,7 @@ import (
 
 	"js-wf/identity"
 	"js-wf/internal/natsutil"
+	"js-wf/journal"
 	"js-wf/provision"
 	"js-wf/retention"
 
@@ -24,6 +25,7 @@ import (
 // of that boundary is safe because the wakeup has a stable message ID and the
 // worker treats duplicate wakeups as no-ops.
 type FallbackTimerScan struct {
+	graph     *journal.GraphStore
 	port      FallbackTimerScanPort
 	Now       func(context.Context) (time.Time, error)
 	DomainNow TimerDomainClock
@@ -207,9 +209,18 @@ func (s *FallbackTimerScan) Scan(ctx context.Context, next uint64, budget int, d
 		if json.Unmarshal(message.Data, &timer) != nil || timer.FireAt.IsZero() {
 			return result, fmt.Errorf("invalid fallback timer payload at %d", message.Sequence)
 		}
-		retired, err := fallbackTimerRetired(ctx, s.port, parts[2], parts[3], generation)
+		retired, ready := false, true
+		if s.graph != nil {
+			retired, ready, err = s.graphTimerDecision(ctx, parts[2], parts[3], generation, step, timer.FireAt, timer.ClockDomain)
+		} else {
+			retired, err = fallbackTimerRetired(ctx, s.port, parts[2], parts[3], generation)
+		}
 		if err != nil {
 			return result, err
+		}
+		if !ready && err == nil {
+			confirmed = next
+			continue
 		}
 		if retired {
 			result.Removed++

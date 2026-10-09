@@ -22,11 +22,8 @@ func selectWorkerGraph(authority, prefix, bucket string, replicas int, encoding 
 	if authority == "" || prefix == "" || bucket == "" {
 		return nil, fmt.Errorf("graph runtime requires graph-authority-stream, graph-authority-prefix and graph-object-bucket together")
 	}
-	if timerBackend == "fallback" {
-		return nil, fmt.Errorf("graph runtime fallback timer migration is incomplete; select native timers")
-	}
-	if timerBackend != "native" {
-		return nil, fmt.Errorf("graph runtime requires explicit -timer-backend native on a fully upgraded cluster")
+	if timerBackend != "native" && timerBackend != "fallback" {
+		return nil, fmt.Errorf("graph runtime requires explicit -timer-backend native or fallback")
 	}
 	if retentionType != "" {
 		return nil, fmt.Errorf("graph runtime requires graph-aware retention; retention-type selects the legacy handler")

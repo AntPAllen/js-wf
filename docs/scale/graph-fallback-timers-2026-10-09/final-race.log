@@ -1,0 +1,71 @@
+=== RUN   TestFallbackTimerScanRetriesCommittedWakeupBeforeDelete
+    fallback_timers_test.go:63: fallback repair events=[{"at":"2026-10-09T09:20:50.918929522Z","kind":"fallback-timer","type":"fallback","id":"lost-delete","reason":"due_fallback_timer","source_sequence":1,"invocation_sequence":42,"fire_at":"2026-10-09T09:20:49.911431679Z","timer_step":7,"outcome":"acknowledged"}]
+--- PASS: TestFallbackTimerScanRetriesCommittedWakeupBeforeDelete (0.12s)
+=== RUN   TestFallbackTimerScanRemovesRetiredGenerations
+--- PASS: TestFallbackTimerScanRemovesRetiredGenerations (0.12s)
+=== RUN   TestGraphFallbackTimerCanonicalDecisions
+=== RUN   TestGraphFallbackTimerCanonicalDecisions/due
+    graph_fallback_timers_test.go:149: mode=due publications=1 deletions=1 error=<nil>
+=== RUN   TestGraphFallbackTimerCanonicalDecisions/held
+    graph_fallback_timers_test.go:149: mode=held publications=0 deletions=0 error=<nil>
+=== RUN   TestGraphFallbackTimerCanonicalDecisions/lease-unknown
+    graph_fallback_timers_test.go:149: mode=lease-unknown publications=0 deletions=0 error=journal append outcome unknown: context deadline exceeded
+=== RUN   TestGraphFallbackTimerCanonicalDecisions/source-forged
+    graph_fallback_timers_test.go:149: mode=source-forged publications=0 deletions=0 error=journal gap or corrupt entry
+=== RUN   TestGraphFallbackTimerCanonicalDecisions/hint-forged
+    graph_fallback_timers_test.go:149: mode=hint-forged publications=0 deletions=0 error=journal gap or corrupt entry
+=== RUN   TestGraphFallbackTimerCanonicalDecisions/publish-unknown
+    graph_fallback_timers_test.go:149: mode=publish-unknown publications=1 deletions=0 error=context deadline exceeded
+=== RUN   TestGraphFallbackTimerCanonicalDecisions/delete-unknown
+    graph_fallback_timers_test.go:149: mode=delete-unknown publications=1 deletions=0 error=context deadline exceeded
+=== RUN   TestGraphFallbackTimerCanonicalDecisions/terminal
+    graph_fallback_timers_test.go:149: mode=terminal publications=0 deletions=1 error=<nil>
+--- PASS: TestGraphFallbackTimerCanonicalDecisions (0.22s)
+    --- PASS: TestGraphFallbackTimerCanonicalDecisions/due (0.03s)
+    --- PASS: TestGraphFallbackTimerCanonicalDecisions/held (0.03s)
+    --- PASS: TestGraphFallbackTimerCanonicalDecisions/lease-unknown (0.02s)
+    --- PASS: TestGraphFallbackTimerCanonicalDecisions/source-forged (0.03s)
+    --- PASS: TestGraphFallbackTimerCanonicalDecisions/hint-forged (0.03s)
+    --- PASS: TestGraphFallbackTimerCanonicalDecisions/publish-unknown (0.02s)
+    --- PASS: TestGraphFallbackTimerCanonicalDecisions/delete-unknown (0.03s)
+    --- PASS: TestGraphFallbackTimerCanonicalDecisions/terminal (0.03s)
+=== RUN   TestGraphReconcileRejectsMissingConfiguration
+--- PASS: TestGraphReconcileRejectsMissingConfiguration (0.00s)
+PASS
+ok  	js-wf/reconcile	1.475s
+=== RUN   TestWorkerGraphAdmissionRejectsIncompatibleCLI
+=== RUN   TestWorkerGraphAdmissionRejectsIncompatibleCLI/partial
+=== RUN   TestWorkerGraphAdmissionRejectsIncompatibleCLI/namespace
+=== RUN   TestWorkerGraphAdmissionRejectsIncompatibleCLI/auto
+=== RUN   TestWorkerGraphAdmissionRejectsIncompatibleCLI/retention
+--- PASS: TestWorkerGraphAdmissionRejectsIncompatibleCLI (0.00s)
+    --- PASS: TestWorkerGraphAdmissionRejectsIncompatibleCLI/partial (0.00s)
+    --- PASS: TestWorkerGraphAdmissionRejectsIncompatibleCLI/namespace (0.00s)
+    --- PASS: TestWorkerGraphAdmissionRejectsIncompatibleCLI/auto (0.00s)
+    --- PASS: TestWorkerGraphAdmissionRejectsIncompatibleCLI/retention (0.00s)
+=== RUN   TestWorkerRunnerCanonicalGraphRepair
+=== RUN   TestWorkerRunnerCanonicalGraphRepair/R1
+    graph_test.go:239: canonical CLI reserved Start/Signal recovery, native timer completion, two terminal restorations, unchanged journal, no legacy journal writes; replicas=1 domain=
+=== RUN   TestWorkerRunnerCanonicalGraphRepair/R3Domain
+    graph_test.go:63: worker domain admitted node=0 domain=WFGRAPH server_id=NA7UYRFENOBFCJIEV6FLMILQDJXLHKFQB55ZQCTFY6SWRAIXC4YXNN5R
+    graph_test.go:63: worker domain admitted node=1 domain=WFGRAPH server_id=NDQQQM5Z2AZSFPPFHZM6EULGJ7QUVWPPALWYOQQ7J2PVAXX5KYNYWDDQ
+    graph_test.go:63: worker domain admitted node=2 domain=WFGRAPH server_id=NAL5G3WNN6W3JZQ2C45CNZE4S4GJQY3FRAIMF35CECG6FSBVCGPPRYRV
+    domain_test.go:79: worker real domain=WFGRAPH domain_api_requests=14362 wrong_prefix_requests=0
+    graph_test.go:239: canonical CLI reserved Start/Signal recovery, native timer completion, two terminal restorations, unchanged journal, no legacy journal writes; replicas=3 domain=WFGRAPH
+--- PASS: TestWorkerRunnerCanonicalGraphRepair (40.86s)
+    --- PASS: TestWorkerRunnerCanonicalGraphRepair/R1 (13.59s)
+    --- PASS: TestWorkerRunnerCanonicalGraphRepair/R3Domain (25.77s)
+=== RUN   TestWorkerRunnerCanonicalGraphFallbackRepair
+=== RUN   TestWorkerRunnerCanonicalGraphFallbackRepair/R1
+    graph_test.go:239: canonical CLI reserved Start/Signal recovery, native timer completion, two terminal restorations, unchanged journal, no legacy journal writes; replicas=1 domain=
+=== RUN   TestWorkerRunnerCanonicalGraphFallbackRepair/R3Domain
+    graph_test.go:63: worker domain admitted node=0 domain=WFGRAPH server_id=NBGCNUFWXXBEYXMIURXFHFRLYOHMHLP44GP52AEMRSAFNDIHZNKTUOE3
+    graph_test.go:63: worker domain admitted node=1 domain=WFGRAPH server_id=NARCJUUM4CWOY3373MTYCDQJ6HXBD2YMD2ETL34DDHNE7A6IPVAZXK34
+    graph_test.go:63: worker domain admitted node=2 domain=WFGRAPH server_id=NCLJCNMSAWHIOQKRUYU6FW3JEGMANWFMKUXAVHPDR3JRAV322NIMRO5G
+    domain_test.go:79: worker real domain=WFGRAPH domain_api_requests=10818 wrong_prefix_requests=0
+    graph_test.go:239: canonical CLI reserved Start/Signal recovery, native timer completion, two terminal restorations, unchanged journal, no legacy journal writes; replicas=3 domain=WFGRAPH
+--- PASS: TestWorkerRunnerCanonicalGraphFallbackRepair (35.47s)
+    --- PASS: TestWorkerRunnerCanonicalGraphFallbackRepair/R1 (14.78s)
+    --- PASS: TestWorkerRunnerCanonicalGraphFallbackRepair/R3Domain (20.69s)
+PASS
+ok  	js-wf/cmd/wf-worker	77.431s
