@@ -1,0 +1,15 @@
+# Seeded reader maintenance
+
+The new `graph_reader_maintenance` workload executes `RunReaderExpiryWithPort` and the actual graph protocol against seeded graph authority, object storage, cursor KV, lease KV and virtual cadence models. Storage losses are translated to the timeout observed at the native SDK boundary; production loop code chooses renewal, checkpoint, retry and reacquisition behavior.
+
+Declared choices are eight fault modes (healthy, cursor drop/lost acknowledgment, catalog/watermark/read uncertainty, expiry drop/lost acknowledgment), save position 1–3, and batch size 1–2. The 48 declared tuples include redundant save-position choices outside cursor-loss modes. This is bounded sequential fault/restart coverage, not concurrent actor scheduling or exhaustive arbitrary operation interleaving.
+
+Every seed constructs five expired reader pins, including one holding a retired graph, plus a live reader. It runs a bounded first worker, reconstructs the protocol/checkpoint adapter with retained transport state, then runs a replacement worker. It requires every overdue pin removed, the live pin preserved, exact object population unchanged, independently checked graph references, every selected graph/cursor fault consumed, and recovery within 30 virtual seconds. Both workers execute actual system-lease decisions and cursor CAS through the production loop. Exact replay compares the entire generated trace, including transport events.
+
+The test uses the shared completed-body seed counter and requires all 48 declared tuples. Captures outside the repository preserve the first trace per tuple. Replay is registered in the shared regression harness and `ReaderMaintenance` is added to normal/race CI matrix selection. A focused result does not qualify all current families or all prior traces, native replication/route/storage faults, OS/VM kills, deployment/default adoption or the original release gates.
+
+## Focused results
+
+The accepted runs complete 1,000 contiguous bodies and exact replay in normal (2.701 seconds) and race (28.963 seconds), with all 48 declared tuples observed. `normal.log` and `race.log` retain progress, completed-body counts, coverage and terminal output; `result.json` records actual command exits and hashes of the five selected workload/runtime/CI inputs observed before and unchanged after each run. This is a focused input observation, not an independently verified full compiler-input manifest or retained-binary provenance claim. An earlier normal run passed in 2.678 seconds before the explicit pending cursor-fault assertion was added.
+
+Eight first-per-mode captures are registered; `pins.json` records seeds and hashes. All eight pass the shared regression harness in normal (0.039 seconds) and race (1.394 seconds); raw logs and actual exits are retained. Static inventory is now 154 seeded families and 824 traces. Earlier 816 traces were preserved. Complete current/all-trace/extended acceptance remains open; the live frozen151 and corrected actor campaigns exclude this new workload and scheduler.

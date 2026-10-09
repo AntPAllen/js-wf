@@ -1,5 +1,9 @@
 # JetStream Durable Workflow Runtime — Implementation Plan
 
+## Seeded reader maintenance qualified in normal/race — 2026-10-09
+
+The production reader-expiry loop/protocol now has a seeded in-memory workload spanning request/acknowledgment loss, catalog/watermark/read/expiry uncertainty, persisted restart and batch sizes. All 1,000 bodies and exact replays pass normal (2.701 seconds) and race (28.963 seconds), covering 48 declared choice tuples with explicit redundant save-position scope. Eight new traces pass normal/race shared corpus replay; inventory is 154 families and 824 traces. [Raw results, fault assertions and precise limitations](scale/graph-reader-maintenance-simulation-2026-10-09/README.md). This is sequential fault/restart simulation, not arbitrary operation interleaving. Complete current/all-pin/extended and all original native/runtime/fault/scale/soak/drain/migration/adoption/release gates remain open; the two supervised frozen race services are still active and exclude this work.
+
 ## Native reader-expiry restart/checkpoint integration verified — 2026-10-09
 
 The shared reader scheduler passes a focused race test against one- and three-replica JetStream file-backed authority, object storage, leases and cursor CAS (4.206 seconds). It hides a committed batch-checkpoint acknowledgment, restarts adapters/scheduler from native state, finishes the captured pass, removes expired pins, preserves a live pin and leaves objects intact. [Evidence and scope](scale/graph-reader-expiry-native-2026-10-09/README.md). This is controlled adapter restart, not process/VM kill or native route/storage fault qualification. Seeded maintenance campaigns, deployment/rollout and all original broader requirements remain open. Both supervised frozen race services are observed active; acceptance remains pending.

@@ -551,6 +551,8 @@ func replayTrace(loaded Trace) (Trace, error) {
 		replayed, err = runNativeAuthority(loaded.Seed, &loaded)
 	case "graph_await_contention":
 		replayed, err = runGraphAwaitContention(loaded.Seed, &loaded)
+	case "graph_reader_maintenance":
+		replayed, err = runGraphReaderMaintenance(loaded.Seed, &loaded)
 	case "graph_signal_expiry_actors":
 		replayed, err = runGraphSignalExpiryActors(loaded.Seed, &loaded)
 	case "graph_signal_operation_actors":

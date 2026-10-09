@@ -1,0 +1,40 @@
+{
+  "files_sha256": {
+    "sim/graph_reader_maintenance_test.go": "656064e1c0265235aff3c475f109902ac9e842c21118d59c9a9e75afce360b34",
+    "sim/journal_transport_test.go": "faa56aabd78afba8e184a48d8358f4bf32f2e04cd5685d48dfb45db06ad49145",
+    "reconcile/graph_readers.go": "7bb01835966573b2e5428afc7a8d189da059edb829431aebe83dd77375bf1409",
+    "internal/graphpublication/reader_sweep.go": "58510869bb3ef36dd933259a96c9b46be0a1ffbaf5a6d66baca2048e45e295a2",
+    ".github/workflows/graph-publication.yml": "aad0e7bb560a27e1327b7b45e1f387ba9452362e338ac0bc25f1ea580aed3089"
+  },
+  "commands": [
+    {
+      "mode": "normal",
+      "command": [
+        "go",
+        "test",
+        "./sim",
+        "-run",
+        "^TestSeededGraphReaderMaintenanceReplay$",
+        "-count=1",
+        "-timeout=5m",
+        "-v"
+      ],
+      "actual_exit_code": 0
+    },
+    {
+      "mode": "race",
+      "command": [
+        "go",
+        "test",
+        "-race",
+        "./sim",
+        "-run",
+        "^TestSeededGraphReaderMaintenanceReplay$",
+        "-count=1",
+        "-timeout=5m",
+        "-v"
+      ],
+      "actual_exit_code": 0
+    }
+  ]
+}
