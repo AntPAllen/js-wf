@@ -6,18 +6,17 @@ from pathlib import Path
 
 base = Path(__file__).resolve().parent
 repo = base.parents[2]
-command = json.loads((base / 'exact-command.json').read_text())
+command = json.loads((base / 'command.json').read_text())
 assert command['exit'] == 0 and '-race' in command['command']
-assert command['command'][command['command'].index('-run') + 1] == '^TestNativeGraphContinuationLimitSIGKILLRecovery$'
-fixture_revision = '3d2f889'
-fixture = subprocess.check_output(['git', 'show', fixture_revision + ':worker/graph_continuation_limit_kill_test.go'], cwd=repo)
+assert command['command'][command['command'].index('-run') + 1] == '^TestNativeGraphContinuationLimitSIGKILLAndStoreRestart$'
+fixture = (repo / 'worker/graph_continuation_limit_kill_test.go').read_bytes()
 assert hashlib.sha256(fixture).hexdigest() == command['test_sha256']
-log = (base / 'exact-delivery-race.log').read_text()
+log = (base / 'race.log').read_text()
 assert all(marker not in log for marker in ['--- FAIL:', 'WARNING: DATA RACE', 'panic:', 'context deadline exceeded'])
 summary = {}
 for cut, count, kind in [('after_signal', 14, 'SignalConsumed'), ('after_completion', 15, 'StepCompleted'), ('after_failed', 16, 'Failed')]:
-    assert '--- PASS: TestNativeGraphContinuationLimitSIGKILLRecovery/' + cut in log
-    directory = base / 'exact-cuts' / cut
+    assert '--- PASS: TestNativeGraphContinuationLimitSIGKILLAndStoreRestart/' + cut in log
+    directory = base / 'cuts' / cut
     read = lambda name: json.loads((directory / name).read_text())
     report, ack, event = read('recovery.json'), read('ack.json'), read('child.cut')
     prefix, records = read('prefix.json'), read('journal.json')
@@ -25,6 +24,8 @@ for cut, count, kind in [('after_signal', 14, 'SignalConsumed'), ('after_complet
     assert report['lease_ttl_ns'] == 12_000_000_000
     assert len(prefix) == count and len(records) == report['entries'] == 16
     assert prefix[-1]['kind'] == kind and prefix[-1]['index'] == count - 1
+    assert read('restored-prefix.json') == prefix
+    assert report['servers_gracefully_restarted']
     assert records[:count] == prefix and records[-1]['kind'] == 'Failed'
     assert records[-1]['payload']['error'] == 'journal exceeds 100000 entries'
     assert records[-1]['payload']['limit_request']['kind'] == 'run'
@@ -51,8 +52,8 @@ for cut, count, kind in [('after_signal', 14, 'SignalConsumed'), ('after_complet
     summary[cut] = dict(recovery_seconds=report['recovery_ns'] / 1e9,
                         exact_ack_sequence=ack['RunSequence'], exact_ack_delivery=ack['Delivery'],
                         terminal_epoch=report['terminal_epoch'], held_epoch=report['held_epoch'])
-result = dict(production_revision=command['head'], fixture_published_revision=fixture_revision, test_sha256=command['test_sha256'],
-              native_R3_domain_archive_SIGKILL_cases=summary,
-              scope='Three worker process SIGKILL cuts, native R3 domain, private 16-entry budget, real partition redelivery and strict <30s. Servers remained live; no server/VM/storage fault or actual 100000-entry boundary claim.')
+result = dict(production_revision=command['head'], test_sha256=command['test_sha256'],
+              native_R3_domain_archive_SIGKILL_and_store_restart_cases=summary,
+              scope='Three worker SIGKILL cuts plus all-three-server graceful persisted-store restarts; native R3 domain/archive, private16 budget, exact partition redelivery, strict <30s from worker kill. No abrupt server/VM/storage fault or actual100000 boundary claim.')
 (base / 'executed-review.json').write_text(json.dumps(result, indent=2) + '\n')
 print(json.dumps(result))

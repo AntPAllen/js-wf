@@ -95,8 +95,15 @@ func TestNativeGraphContinuationLimitSIGKILLRecovery(t *testing.T) {
 	}
 }
 
-func graphContinuationLimitKill(t *testing.T, cut string) {
+func TestNativeGraphContinuationLimitSIGKILLAndStoreRestart(t *testing.T) {
+	for _, cut := range []string{"after_signal", "after_completion", "after_failed"} {
+		t.Run(cut, func(t *testing.T) { graphContinuationLimitKill(t, cut, true) })
+	}
+}
+
+func graphContinuationLimitKill(t *testing.T, cut string, restartMode ...bool) {
 	t.Helper()
+	restart := len(restartMode) > 0 && restartMode[0]
 	root := t.TempDir()
 	if artifact := os.Getenv("GRAPH_LIMIT_KILL_ARTIFACT_ROOT"); artifact != "" {
 		root = filepath.Join(artifact, cut)
@@ -259,6 +266,66 @@ func graphContinuationLimitKill(t *testing.T, cut string) {
 	if _, err := lease.NewWithKeyValue(leaseKV).Acquire(ctx, h.Type, h.ID, "premature"); !errors.Is(err, lease.ErrHeld) {
 		t.Fatal("dead owner lease disappeared early", err)
 	}
+	if restart {
+		// KillNode performs graceful server shutdown. This verifies reopening
+		// persisted stores; it is not a server SIGKILL or storage power-loss cut.
+		for index := range cluster.Servers {
+			cluster.KillNode(index)
+		}
+		for _, server := range cluster.Servers {
+			if server.Running() {
+				t.Fatal("server survived full stop")
+			}
+		}
+		for index := range cluster.Servers {
+			if err := cluster.RestartNode(index); err != nil {
+				t.Fatal(err)
+			}
+		}
+		for ctx.Err() == nil {
+			ready := false
+			for _, server := range cluster.Servers {
+				ready = ready || server.JetStreamIsLeader() && len(server.JetStreamClusterPeers()) == 3
+			}
+			if ready {
+				break
+			}
+			time.Sleep(20 * time.Millisecond)
+		}
+		js, err = jetstream.NewWithDomain(cluster.Clients[0], "GRAPH_KILL")
+		if err != nil {
+			t.Fatal(err)
+		}
+		for ctx.Err() == nil {
+			attempt, stop := context.WithTimeout(ctx, 2*time.Second)
+			err = provision.Ensure(attempt, js, 3)
+			stop()
+			if err == nil {
+				break
+			}
+			time.Sleep(20 * time.Millisecond)
+		}
+		if err != nil || ctx.Err() != nil {
+			t.Fatal("restart admission failed", err, ctx.Err())
+		}
+		graph, err = journal.OpenNativeGraphStore(ctx, js, cfg)
+		if err != nil {
+			t.Fatal(err)
+		}
+		c, err = client.New(js).WithGraphJournal(graph)
+		if err != nil {
+			t.Fatal(err)
+		}
+		state, err = js.KeyValue(ctx, "WF_STATE")
+		if err != nil {
+			t.Fatal(err)
+		}
+		restored, _, err := graph.Read(ctx, h.Type, h.ID, h.InvSeq)
+		if err != nil || !reflect.DeepEqual(prefix, restored) {
+			t.Fatal("persisted cut changed on reopen", err)
+		}
+		save("restored-prefix", restored)
+	}
 	handlers, stages := limitKillHandlers(path+".handlers", 16, true)
 	matchedAck := make(chan DispatchEvent, 1)
 	w, err := New(ctx, js, "graph-limit-successor", handlers, WithGraphJournal(graph), WithDispatchObserver(func(event DispatchEvent) {
@@ -351,6 +418,6 @@ func graphContinuationLimitKill(t *testing.T, cut string) {
 	}
 	save("journal", records)
 	save("ack", ack)
-	save("recovery", map[string]any{"cut": cut, "sigkill": true, "recovery_ns": recovery.Nanoseconds(), "lease_ttl_ns": status.TTL().Nanoseconds(), "held_epoch": held.Epoch, "terminal_epoch": records[15].Epoch, "entries": len(records), "cut_run_sequence": cutEvent.RunSequence, "cut_delivery": cutEvent.Delivery, "ack_run_sequence": ack.RunSequence, "ack_delivery": ack.Delivery})
-	t.Logf("GRAPH_LIMIT_SIGKILL cut=%s recovery=%s lease_ttl=%s entries=%d old_epoch=%d terminal_epoch=%d effects=0 archive=true prefix_unchanged=true exact_delivery_ack=%d/%d", cut, recovery, status.TTL(), len(records), held.Epoch, records[15].Epoch, ack.RunSequence, ack.Delivery)
+	save("recovery", map[string]any{"cut": cut, "sigkill": true, "servers_gracefully_restarted": restart, "recovery_ns": recovery.Nanoseconds(), "lease_ttl_ns": status.TTL().Nanoseconds(), "held_epoch": held.Epoch, "terminal_epoch": records[15].Epoch, "entries": len(records), "cut_run_sequence": cutEvent.RunSequence, "cut_delivery": cutEvent.Delivery, "ack_run_sequence": ack.RunSequence, "ack_delivery": ack.Delivery})
+	t.Logf("GRAPH_LIMIT_SIGKILL cut=%s recovery=%s lease_ttl=%s entries=%d old_epoch=%d terminal_epoch=%d effects=0 archive=true prefix_unchanged=true exact_delivery_ack=%d/%d servers_gracefully_restarted=%t", cut, recovery, status.TTL(), len(records), held.Epoch, records[15].Epoch, ack.RunSequence, ack.Delivery, restart)
 }

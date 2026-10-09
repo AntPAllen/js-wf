@@ -1,0 +1,28 @@
+{
+  "production_revision": "5c30ebe493391ac50838544577c94b23add3c601",
+  "test_sha256": "531ad93dfa4f22dda6ae490a583eee97c491d6ea7e080b3c8096e79a10bc03ef",
+  "native_R3_domain_archive_SIGKILL_and_store_restart_cases": {
+    "after_signal": {
+      "recovery_seconds": 16.541698731,
+      "exact_ack_sequence": 4,
+      "exact_ack_delivery": 2,
+      "terminal_epoch": 33,
+      "held_epoch": 29
+    },
+    "after_completion": {
+      "recovery_seconds": 14.826041356,
+      "exact_ack_sequence": 4,
+      "exact_ack_delivery": 2,
+      "terminal_epoch": 34,
+      "held_epoch": 29
+    },
+    "after_failed": {
+      "recovery_seconds": 12.210201877,
+      "exact_ack_sequence": 4,
+      "exact_ack_delivery": 2,
+      "terminal_epoch": 30,
+      "held_epoch": 30
+    }
+  },
+  "scope": "Three worker SIGKILL cuts plus all-three-server graceful persisted-store restarts; native R3 domain/archive, private16 budget, exact partition redelivery, strict <30s from worker kill. No abrupt server/VM/storage fault or actual100000 boundary claim."
+}
