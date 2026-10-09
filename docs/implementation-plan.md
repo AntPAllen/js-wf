@@ -1,5 +1,11 @@
 # JetStream Durable Workflow Runtime — Implementation Plan
 
+## Canonical graph operator CLI integration — 2026-10-09
+
+The `wf` CLI now explicitly selects existing canonical graph stores for Start, Signal, result, cancellation, purge, describe/export-journal and five bounded manual repair scans. Start/Signal accept JSON literals or payload files. Journal inspection pins and validates the matching canonical generation; exported references remain references, so replay export is still incomplete. Graph visibility, legacy capacity and tombstone commands explicitly reject the incomplete migration.
+
+Native R1/R3 domain controls pass normal and race: roughly 5 MiB Start/Signal bodies, exact canonical result despite a forged compatibility mirror, terminal history, dry-run scans, cancellation, purge, one effect, no legacy journal writes and zero wrong-domain API requests. Existing default/domain operator commands pass normal and race. [Commands, executed component review and limitations](scale/graph-operator-cli-2026-10-09/README.md). The frozen `9a1ccdc` full suites exclude these operator changes; complete current/extended qualification, replay/visibility/deployment migrations and every original remaining runtime/native/scale/soak/drain/adoption/release requirement remain required.
+
 ## Complete current canonical worker qualification in progress — 2026-10-09
 
 The complete normal and race default suites now run from isolated frozen `9a1ccdc` at `/home/exedev/js-wf-worker-cli-qualification`, each requiring all 148 families × 1,000 contiguous seed bodies and all 748 pins. Retained roots are `/home/exedev/js-wf-tier1-full148-cli-normal1000-20261009` and `/home/exedev/js-wf-tier1-full148-cli-race1000-20261009`, with adjacent supervisor logs. Each runner has its own process session; source/binary/command/event capture is enabled. Terminal verdicts and separate executed reviews are pending. The accepted `5aafc29` normal suite keeps its earlier source scope. Complete extended qualification and every original remaining runtime/native/scale/matrix/actual24h/million physical-drain/default-adoption/release requirement remain required.

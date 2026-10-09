@@ -17,6 +17,7 @@ import (
 
 	"js-wf/assignment"
 	"js-wf/client"
+	"js-wf/journal"
 	"js-wf/provision"
 	"js-wf/reconcile"
 	"js-wf/retention"
@@ -44,6 +45,12 @@ func runWithJetStreamOptions(args []string, out io.Writer, options ...jetstream.
 	flags := flag.NewFlagSet("wf", flag.ContinueOnError)
 	flags.SetOutput(io.Discard)
 	url := flags.String("url", os.Getenv("NATS_URL"), "NATS server URL")
+	graphAuthority := flags.String("graph-authority-stream", "", "experimental canonical graph authority stream (pre-provisioned)")
+	graphPrefix := flags.String("graph-authority-prefix", "", "experimental canonical graph authority prefix")
+	graphBucket := flags.String("graph-object-bucket", "", "experimental canonical graph object bucket (pre-provisioned)")
+	graphReplicas := flags.Int("replicas", 3, "expected graph store replica count")
+	graphEncoding := flags.String("journal-encoding", "json", "graph journal encoding: json or protobuf-v1")
+	inputFile := flags.String("input-file", "", "JSON payload file for start or signal")
 	domain := flags.String("domain", "", "JetStream domain (empty uses the default API)")
 	timeout := flags.Duration("timeout", 2*time.Minute, "operation timeout")
 	grace := flags.Duration("grace", 24*time.Hour, "purge tombstone grace")
@@ -65,7 +72,17 @@ func runWithJetStreamOptions(args []string, out io.Writer, options ...jetstream.
 	}
 	command := flags.Args()
 	if len(command) == 0 {
-		return errors.New("usage: wf [-url nats://...] [-domain name] [-attribute key=value] {project|list [status]|describe type id|lag|export-journal type id|export-replay type id|replay type id|cancel type id|purge type id|sweep-tombstones|scan-tombstones|tombstone-loop|scan-suspended|journal-capacity|assignment-init worker...|assignment-get partition|assignment-move partition owner revision}")
+		return errors.New("usage: wf [-url nats://...] [-domain name] [-attribute key=value] {start type id json|signal type id name key json|result type id|project|list [status]|describe type id|lag|export-journal type id|export-replay type id|replay type id|cancel type id|purge type id|sweep-tombstones|scan-tombstones|tombstone-loop|scan-start|scan-signal|scan-terminal|scan-timer|scan-suspended|journal-capacity|assignment-init worker...|assignment-get partition|assignment-move partition owner revision}")
+	}
+	graphConfig, err := selectClientGraph(*graphAuthority, *graphPrefix, *graphBucket, *graphReplicas, journal.Encoding(*graphEncoding))
+	if err != nil {
+		return err
+	}
+	if graphConfig != nil {
+		switch command[0] {
+		case "project", "list", "lag", "journal-capacity", "export-replay", "replay", "sweep-tombstones", "scan-tombstones", "tombstone-loop":
+			return fmt.Errorf("graph runtime migration for %s is incomplete", command[0])
+		}
 	}
 	encode := func(value any) error {
 		writer := json.NewEncoder(out)
@@ -101,7 +118,6 @@ func runWithJetStreamOptions(args []string, out io.Writer, options ...jetstream.
 		*url = nats.DefaultURL
 	}
 	var nc *nats.Conn
-	var err error
 	if daemonCtx != nil {
 		nc, err = connectDaemon(daemonCtx, *url)
 	} else {
@@ -152,7 +168,95 @@ func runWithJetStreamOptions(args []string, out io.Writer, options ...jetstream.
 	}
 	ctx, cancel := context.WithTimeout(context.Background(), *timeout)
 	defer cancel()
+	var graph *journal.GraphStore
+	sdk := client.New(js)
+	if graphConfig != nil {
+		graph, err = journal.OpenNativeGraphStore(ctx, js, *graphConfig)
+		if err != nil {
+			return err
+		}
+		sdk, err = client.NewWithGraphJournal(js, graph)
+		if err != nil {
+			return err
+		}
+	}
 	switch command[0] {
+	case "start", "signal":
+		want := 4
+		if command[0] == "signal" {
+			want = 6
+		}
+		if *inputFile != "" {
+			want--
+		}
+		if len(command) != want {
+			return fmt.Errorf("usage: wf [-input-file FILE] %s type id %s", command[0], map[string]string{"start": "[json]", "signal": "name key [json]"}[command[0]])
+		}
+		var literal string
+		if *inputFile == "" {
+			literal = command[len(command)-1]
+		}
+		payload, err := readCLIPayload(literal, *inputFile)
+		if err != nil {
+			return err
+		}
+		if command[0] == "start" {
+			handle, err := sdk.Start(ctx, command[1], command[2], payload)
+			if err != nil {
+				return err
+			}
+			return encode(handle)
+		}
+		sequence, err := sdk.Signal(ctx, command[1], command[2], command[3], payload, command[4])
+		if err != nil {
+			return err
+		}
+		return encode(map[string]any{"signal_seq": sequence})
+	case "result":
+		if len(command) != 3 {
+			return errors.New("usage: wf result type id")
+		}
+		result, err := sdk.Await(ctx, command[1], command[2])
+		if err != nil {
+			return err
+		}
+		return encode(json.RawMessage(result))
+	case "scan-start", "scan-signal", "scan-terminal", "scan-timer":
+		if len(command) != 1 || graph == nil {
+			return fmt.Errorf("%s requires canonical graph configuration and no operands", command[0])
+		}
+		var scan func(context.Context, uint64, int, bool) (reconcile.ScanResult, error)
+		switch command[0] {
+		case "scan-start":
+			scanner, e := reconcile.NewCanonicalStartScan(js, graph)
+			if e != nil {
+				return e
+			}
+			scan = scanner.Scan
+		case "scan-signal":
+			scanner, e := reconcile.NewCanonicalSignalScan(js, graph)
+			if e != nil {
+				return e
+			}
+			scan = scanner.Scan
+		case "scan-terminal":
+			scanner, e := reconcile.NewCanonicalTerminalScan(ctx, js, graph)
+			if e != nil {
+				return e
+			}
+			scan = scanner.Scan
+		case "scan-timer":
+			scanner, e := reconcile.NewTimerScanWithGraphJournal(js, graph)
+			if e != nil {
+				return e
+			}
+			scan = scanner.Scan
+		}
+		result, err := scan(ctx, *cursor, *budget, !*apply)
+		if err != nil {
+			return err
+		}
+		return encode(result)
 	case "export-replay":
 		if len(command) != 3 {
 			return errors.New("usage: wf export-replay type id")
@@ -233,7 +337,7 @@ func runWithJetStreamOptions(args []string, out io.Writer, options ...jetstream.
 		if len(command) != 3 {
 			return errors.New("usage: wf cancel type id")
 		}
-		sequence, err := client.New(js).Cancel(ctx, command[1], command[2])
+		sequence, err := sdk.Cancel(ctx, command[1], command[2])
 		if err != nil {
 			return err
 		}
@@ -243,6 +347,12 @@ func runWithJetStreamOptions(args []string, out io.Writer, options ...jetstream.
 			return errors.New("usage: wf [-cursor n] [-budget n] [-scan-grace duration] [-apply] scan-suspended")
 		}
 		scan := reconcile.NewSuspendedScan(js)
+		if graph != nil {
+			scan, err = reconcile.NewSuspendedScanWithGraphJournal(js, graph)
+			if err != nil {
+				return err
+			}
+		}
 		scan.Grace = *scanGrace
 		result, err := scan.Scan(ctx, *cursor, *budget, !*apply)
 		if err != nil {
@@ -271,11 +381,29 @@ func runWithJetStreamOptions(args []string, out io.Writer, options ...jetstream.
 		if len(command) != 3 {
 			return errors.New("usage: wf purge type id")
 		}
-		if err := retention.Purge(ctx, js, command[1], command[2], *grace); err != nil {
+		if graph != nil {
+			err = retention.PurgeGraph(ctx, js, graph, command[1], command[2], *grace)
+		} else {
+			err = retention.Purge(ctx, js, command[1], command[2], *grace)
+		}
+		if err != nil {
 			return err
 		}
 		return encode(map[string]any{"purged": true, "type": command[1], "id": command[2]})
 	case "list", "describe", "lag", "export-journal":
+		if graph != nil {
+			if len(command) != 3 {
+				return fmt.Errorf("usage: wf %s type id", command[0])
+			}
+			invocation, records, err := readGraphCLIHistory(ctx, js, graph, command[1], command[2])
+			if err != nil {
+				return err
+			}
+			if command[0] == "export-journal" {
+				return encode(records)
+			}
+			return encode(map[string]any{"type": command[1], "id": command[2], "inv_seq": invocation, "journal": records})
+		}
 		projection, err := visibility.New(ctx, js, projectionOptions...)
 		if err != nil {
 			return err
