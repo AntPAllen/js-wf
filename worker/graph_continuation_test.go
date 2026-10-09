@@ -6,6 +6,7 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"errors"
+	"strings"
 	"testing"
 	"time"
 
@@ -22,22 +23,58 @@ import (
 // Admission remains closed; exercise the production handoff boundary directly
 // while compaction and full stage execution are still being migrated.
 func TestNativeGraphContinuationHandoff(t *testing.T) {
-	cluster, err := testcluster.Start(t.TempDir(), 1)
+	for _, domain := range []string{"", "WFCONTINUATION"} {
+		name := "R1"
+		if domain != "" {
+			name = "R3Domain"
+		}
+		t.Run(name, func(t *testing.T) { testNativeGraphContinuationHandoff(t, domain) })
+	}
+}
+func testNativeGraphContinuationHandoff(t *testing.T, domain string) {
+	replicas := 1
+	if domain != "" {
+		replicas = 3
+	}
+	var cluster *testcluster.Cluster
+	var err error
+	if domain == "" {
+		cluster, err = testcluster.Start(t.TempDir(), replicas)
+	} else {
+		cluster, err = testcluster.StartWithDomain(t.TempDir(), replicas, domain)
+	}
 	if err != nil {
 		t.Fatal(err)
 	}
 	defer cluster.Close()
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
-	js, err := jetstream.New(cluster.Clients[0])
+	if replicas > 1 {
+		for ctx.Err() == nil {
+			ready := false
+			for _, server := range cluster.Servers {
+				ready = ready || server.JetStreamIsLeader() && len(server.JetStreamClusterPeers()) == replicas
+			}
+			if ready {
+				break
+			}
+			time.Sleep(20 * time.Millisecond)
+		}
+	}
+	var js jetstream.JetStream
+	if domain == "" {
+		js, err = jetstream.New(cluster.Clients[0])
+	} else {
+		js, err = jetstream.NewWithDomain(cluster.Clients[0], domain)
+	}
 	if err != nil {
 		t.Fatal(err)
 	}
-	if err := provision.Ensure(ctx, js, 1); err != nil {
+	if err := provision.Ensure(ctx, js, replicas); err != nil {
 		t.Fatal(err)
 	}
-	cfg := journal.NativeGraphConfig{AuthorityStream: "CONTINUE_AUTH", AuthorityPrefix: "wf.graph.continue", ObjectBucket: "CONTINUE_OBJECTS", ExpectedReplicas: 1, CanonicalStarts: true, CanonicalSignals: true}
-	configs, err := journal.NativeGraphStreamConfigs(cfg, 1)
+	cfg := journal.NativeGraphConfig{AuthorityStream: "CONTINUE_AUTH", AuthorityPrefix: "wf.graph.continue", ObjectBucket: "CONTINUE_OBJECTS", ExpectedReplicas: replicas, CanonicalStarts: true, CanonicalSignals: true}
+	configs, err := journal.NativeGraphStreamConfigs(cfg, replicas)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -73,7 +110,7 @@ func TestNativeGraphContinuationHandoff(t *testing.T) {
 	}
 	locals := json.RawMessage(`{"count":1}`)
 	digest := sha256.Sum256(locals)
-	frame := checkpoint.Frame{Version: checkpoint.Version, Identity: checkpoint.Identity{Type: h.Type, ID: h.ID, InvSeq: h.InvSeq}, Stage: "next", Data: locals, Anchor: checkpoint.Anchor{Index: 2, Epoch: owner.Epoch()}, StepPosition: 2}
+	frame := checkpoint.Frame{Version: checkpoint.Version, Identity: checkpoint.Identity{Type: h.Type, ID: h.ID, InvSeq: h.InvSeq}, Stage: "next", Data: locals, Anchor: checkpoint.Anchor{Index: 2, Epoch: owner.Epoch()}, StepPosition: 2, State: map[string]json.RawMessage{"value": json.RawMessage(`42`)}}
 	encoded, hash, err := checkpoint.Encode(frame)
 	if err != nil {
 		t.Fatal(err)
@@ -159,6 +196,87 @@ func TestNativeGraphContinuationHandoff(t *testing.T) {
 	afterLoss, err := runs.Info(ctx)
 	if err != nil || afterLoss.State.Msgs != 2 || len(records) != 4 {
 		t.Fatal("lost lease mutated handoff", afterLoss, err)
+	}
+	// Construction admission remains closed. Internal migration tests attach
+	// stage registrations after constructing the ordinary graph worker.
+	effects, firstStage, finalStage := 0, 0, 0
+	large := strings.Repeat("owned", 16384)
+	initial := func(*wf.Context, json.RawMessage) (json.RawMessage, error) {
+		t.Error("initial handler replayed after checkpoint")
+		return nil, wf.ErrCorruptJournal
+	}
+	runner, err := New(ctx, js, "continuation-stage", map[string]Handler{h.Type: initial}, WithGraphJournal(graph))
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, reverse := range []bool{false, true} {
+		options := []Option{WithGraphJournal(graph), WithContinuations(h.Type, map[string]ContinuationHandler{"next": func(*wf.Context, json.RawMessage, json.RawMessage) (json.RawMessage, error) { return nil, nil }})}
+		if reverse {
+			options[0], options[1] = options[1], options[0]
+		}
+		if _, err := New(ctx, js, "admission-check", map[string]Handler{h.Type: initial}, options...); err == nil || !strings.Contains(err.Error(), "migration is incomplete") {
+			t.Fatal("continuation admission opened prematurely", err)
+		}
+	}
+	runner.continuations = map[string]map[string]ContinuationHandler{h.Type: {
+		"next": func(c *wf.Context, input, locals json.RawMessage) (json.RawMessage, error) {
+			firstStage++
+			if string(input) != "7" || string(locals) != `{"count":1}` {
+				return nil, wf.ErrCorruptJournal
+			}
+			var value int
+			ok, err := c.GetState("value", &value)
+			if err != nil || !ok || value != 42 {
+				return nil, wf.ErrCorruptJournal
+			}
+			got, err := wf.RunOnce(c, "once", nil, func(context.Context, string) (string, error) { effects++; return large, nil })
+			if err != nil || got != large {
+				return nil, err
+			}
+			if err := c.SetState("large", got); err != nil {
+				return nil, err
+			}
+			return nil, wf.Continue(c, "finish", map[string]int{"count": 2})
+		},
+		"finish": func(c *wf.Context, input, locals json.RawMessage) (json.RawMessage, error) {
+			finalStage++
+			if string(input) != "7" || string(locals) != `{"count":2}` {
+				return nil, wf.ErrCorruptJournal
+			}
+			var value string
+			ok, err := c.GetState("large", &value)
+			if err != nil || !ok || value != large {
+				return nil, wf.ErrCorruptJournal
+			}
+			return json.Marshal(value)
+		},
+	}}
+	execute := func() {
+		t.Helper()
+		lease, err := leases.Acquire(ctx, h.Type, h.ID, "continuation-stage")
+		if err != nil {
+			t.Fatal(err)
+		}
+		var noOp bool
+		err = runner.execute(ctx, h.Type, h.ID, lease, time.Time{}, timerWakeup{}, &noOp, nil)
+		if releaseErr := lease.Release(ctx); err == nil {
+			err = releaseErr
+		}
+		if err != nil {
+			t.Fatal("canonical stage execution", err)
+		}
+	}
+	execute()
+	// A new execution must read the newly owned frame and run only its stage.
+	execute()
+	execute() // Terminal duplicate must not reenter either stage or its effect.
+	result, err := c.Await(ctx, h.Type, h.ID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var decoded string
+	if err := json.Unmarshal(result, &decoded); err != nil || decoded != large || effects != 1 || firstStage != 1 || finalStage != 1 {
+		t.Fatal("stage replay/state/result mismatch", err, effects, firstStage, finalStage)
 	}
 	legacy, err := js.Stream(ctx, "WF_JRN")
 	if err != nil {

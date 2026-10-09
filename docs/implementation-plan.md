@@ -1,5 +1,9 @@
 # JetStream Durable Workflow Runtime — Implementation Plan
 
+## Canonical continuation stage execution component — 2026-10-09
+
+The worker delivery function now restores checkpoint contexts and dispatches stages from owned graph frames, preserving the anchored suffix and absolute append indices. Internal R1/R3-domain race tests resume two stages with large state/result bytes, one effect and no duplicate stage entry on terminal delivery; constructor admission remains rejected in both option orders. Existing legacy continuation limit/anchor checks pass. [Executed component scope](scale/graph-continuation-stages-2026-10-09/README.md). Public admission remains closed: archival prefix compaction, bounded/autonomous resume recovery, materialized payload retention through collection, audit/offline replay and native kill/limit integration remain incomplete. Every original broader full/extended/runtime/native/scale/soak/drain/adoption/release requirement remains open.
+
 ## Canonical continuation handoff boundary — 2026-10-09
 
 The worker publisher now has a graph branch that confirms the exact owned checkpoint and tail, including pin release, before suspension and fresh recovery dispatch. Model race checks reject pointer/tail changes and uncertain release; a direct native R1 publisher check verifies no dispatch from invalid metadata or a lost lease, no duplicate suspension on retry, fresh dispatch inside dedup, and no legacy journal writes. Existing legacy continuation limit/terminal-slot checks pass. [Component evidence and admission limits](scale/graph-continuation-handoff-2026-10-09/README.md). Continuation admission remains closed until full stage dispatch/recovery, archival prefix compaction, materialized payload retention and native kill/limit/audit integration are implemented. Every original remaining full/extended/runtime/native/scale/soak/drain/adoption/release requirement remains open.

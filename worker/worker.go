@@ -895,7 +895,16 @@ func (w *Worker) execute(ctx context.Context, typ, id string, l *lease.Lease, wa
 	if w.continuations[typ] != nil {
 		readStarted := ops.begin()
 		readCtx, stopRead := context.WithTimeout(ctx, 15*time.Second)
-		resumed, err = w.jrn.ReadCheckpoint(readCtx, typ, id, input.Sequence)
+		if graph != nil {
+			var checkpoint *journal.GraphCheckpointRead
+			checkpoint, err = graph.view.ReadCheckpoint(readCtx, typ, id)
+			if err == nil && checkpoint != nil {
+				runtime := checkpoint.Runtime
+				resumed = &journal.CheckpointRead{Snapshot: journal.Snapshot{Version: 2, Runtime: &runtime}, Frame: checkpoint.Frame, Anchor: checkpoint.Anchor, Records: checkpoint.Records, Tail: checkpoint.Tail}
+			}
+		} else {
+			resumed, err = w.jrn.ReadCheckpoint(readCtx, typ, id, input.Sequence)
+		}
 		if err == nil && resumed != nil {
 			r := resumed.Snapshot.Runtime
 			_, checkpointInfo, err = wf.NewCheckpointContext(ctx, nil, nil, resumed.Frame, wf.CheckpointLocation{Type: typ, ID: id, InvSeq: input.Sequence, Index: r.Index, Epoch: r.Epoch, Hash: r.SHA256})
@@ -905,7 +914,7 @@ func (w *Worker) execute(ctx context.Context, typ, id string, l *lease.Lease, wa
 			records = append([]journal.Record{resumed.Anchor}, resumed.Records...)
 			tail, baseIndex = resumed.Tail, resumed.Anchor.Index
 		}
-		if err == nil && resumed == nil {
+		if err == nil && resumed == nil && graph == nil {
 			records, tail, err = w.jrn.Read(readCtx, typ, id)
 		}
 		stopRead()
@@ -1028,7 +1037,7 @@ func (w *Worker) execute(ctx context.Context, typ, id string, l *lease.Lease, wa
 			return err
 		}
 		if graph != nil {
-			records = graph.records
+			records = graph.records[baseIndex:]
 		} else {
 			records = append(records, journal.Record{Entry: journal.Entry{Epoch: l.Epoch(), Index: nextIndex(), Kind: kind, Payload: payload, WorkerID: w.ID}, Sequence: seq})
 		}
