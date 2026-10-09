@@ -7,6 +7,7 @@ import (
 
 	"github.com/nats-io/nats.go/jetstream"
 	"js-wf/internal/graphcli"
+	"js-wf/internal/graphpublication"
 	"js-wf/journal"
 	"js-wf/reconcile"
 )
@@ -19,6 +20,27 @@ type workerGraphSelection struct {
 type terminalAuditConfig struct {
 	interval time.Duration
 	budget   int
+}
+
+type readerExpiryConfig struct {
+	interval time.Duration
+	budget   int
+}
+
+func selectReaderExpiry(enabled, repair bool, graph *workerGraphSelection, interval time.Duration, budget int) (*readerExpiryConfig, error) {
+	if !enabled {
+		if interval != 0 || budget != 0 {
+			return nil, fmt.Errorf("graph-reader-expiry settings require enabled graph-reader-expiry")
+		}
+		return nil, nil
+	}
+	if graph == nil || !repair {
+		return nil, fmt.Errorf("graph-reader-expiry requires a graph store and enabled repair loops")
+	}
+	if interval <= 0 || interval > 10*time.Second || budget < 1 || budget > graphpublication.MaxReaderSweepBatch {
+		return nil, fmt.Errorf("graph-reader-expiry requires explicit interval in (0,10s] and budget in [1,%d]", graphpublication.MaxReaderSweepBatch)
+	}
+	return &readerExpiryConfig{interval, budget}, nil
 }
 
 func selectTerminalAudit(enabled, repair bool, graph *workerGraphSelection, interval time.Duration, budget int) (*terminalAuditConfig, error) {

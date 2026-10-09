@@ -58,6 +58,9 @@ func runWithJetStreamOptions(ctx context.Context, args []string, jsOptions ...je
 	terminalAudit := flags.Bool("graph-terminal-audit", false, "enable experimental verification of present graph terminal projections")
 	terminalAuditInterval := flags.Duration("graph-terminal-audit-interval", 0, "explicit terminal audit cadence (up to 10s)")
 	terminalAuditBudget := flags.Int("graph-terminal-audit-budget", 0, "explicit terminal audit destinations per scan")
+	readerExpiry := flags.Bool("graph-reader-expiry", false, "enable experimental expiry of graph reader pins")
+	readerExpiryInterval := flags.Duration("graph-reader-expiry-interval", 0, "explicit reader expiry cadence (up to 10s)")
+	readerExpiryBudget := flags.Int("graph-reader-expiry-budget", 0, "explicit reader expiry roots per batch (1 to 256)")
 	timerBackend := flags.String("timer-backend", "auto", "timer storage mode: auto, native, or fallback")
 	mode := flags.String("mode", "static", "partition assignment mode: static, kv, or auto")
 	staticIndex := flags.Int("static-index", 0, "static worker index")
@@ -91,6 +94,10 @@ func runWithJetStreamOptions(ctx context.Context, args []string, jsOptions ...je
 		return err
 	}
 	auditSelection, err := selectTerminalAudit(*terminalAudit, *repair, graphSelection, *terminalAuditInterval, *terminalAuditBudget)
+	if err != nil {
+		return err
+	}
+	readerSelection, err := selectReaderExpiry(*readerExpiry, *repair, graphSelection, *readerExpiryInterval, *readerExpiryBudget)
 	if err != nil {
 		return err
 	}
@@ -245,6 +252,11 @@ func runWithJetStreamOptions(ctx context.Context, args []string, jsOptions ...je
 		}
 		if graphSelection != nil {
 			start = graphWorkerRepairLoopsWithAudit(js, *id, *repairInterval, *repairBudget, graphSelection.store, observeRepair, domainNow, auditSelection)
+			if readerSelection != nil {
+				start = append(start, func(c context.Context) error {
+					return reconcile.RunGraphReaderExpiryWithStore(c, js, graphSelection.store, *id, readerSelection.interval, readerSelection.budget)
+				})
+			}
 		}
 		if backend == provision.FallbackTimers {
 			start = append(start, func(c context.Context) error {

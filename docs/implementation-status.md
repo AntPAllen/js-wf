@@ -1,5 +1,9 @@
 # Implementation status against the supplied plan
 
+## Worker reader-expiry CLI verified — 2026-10-09
+
+The graph worker now accepts explicit reader-expiry enable/cadence/batch flags, validates them before plugin loading or connection, and runs the scoped leased scheduler through GraphStore. The real worker/plugin fixture passes race in 123.517 seconds across R1 and R3 WFGRAPH domain: expired pin removed, live pin/canonical data/object inventory preserved, version-2 scoped checkpoint present, and existing Start/Signal/timer/terminal repair controls remain green. Domain tracing reports zero wrong API prefixes. [Raw results, retained development failure and exact scope](scale/graph-reader-expiry-cli-2026-10-09/README.md); [configuration](graph-reader-expiry.md). The initial fixture pin-CAS conflict was corrected with fresh-witness definite-conflict-only setup retries; no runtime retry or deadline was relaxed. Collection stays off. Inventory remains 155 families/835 traces; frozen campaigns exclude this later work. Complete current qualification, reader clock/scale/kill/rollout and all original broader gates remain open.
+
 ## Scoped GraphStore reader maintenance facade verified — 2026-10-09
 
 GraphStore now exposes watermark capture and bounded expiry through a reader-maintenance facade, and the native scheduler accepts the store directly. The facade keeps its publication protocol private and validates capability/scope without storage operations. Race controls pass for the facade (1.017 seconds) and native R1/R3 restart, lost checkpoint acknowledgment, isolation and both admission paths (15.212 seconds). [Raw evidence and limitations](scale/graph-reader-maintenance-facade-2026-10-09/README.md). Worker CLI activation is next; collection remains off. Inventory stays 155/835. Live frozen campaigns exclude these changes; complete current qualification and all original broader gates remain open.

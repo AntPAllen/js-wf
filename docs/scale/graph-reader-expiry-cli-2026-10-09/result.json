@@ -1,0 +1,16 @@
+{
+  "command": "GOMAXPROCS=4 GOMEMLIMIT=512MiB go test -race ./cmd/wf-worker -run '^(TestReaderExpiryCLIAdmission|TestWorkerRunnerCanonicalGraphReaderExpiry)$' -count=1 -timeout=6m -v",
+  "actual_child_exit": 0,
+  "package_seconds": 123.517,
+  "R1_seconds": 25.52,
+  "R3Domain_seconds": 94.31,
+  "domain_api_requests": 25496,
+  "wrong_prefix_requests": 0,
+  "recorded_sources_unchanged": true,
+  "observed_utc": "2026-10-09T21:50:14.742432+00:00",
+  "previous_actual_exits": {
+    "development-build.log": 1,
+    "development-pin-conflict.log": 1
+  },
+  "scope": "Focused CLI/native fixture qualification only; no full current or production acceptance."
+}

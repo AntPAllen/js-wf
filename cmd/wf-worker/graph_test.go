@@ -60,6 +60,12 @@ func TestWorkerRunnerCanonicalGraphTerminalAudit(t *testing.T) {
 	testWorkerRunnerCanonicalGraphRepairWithAudit(t, "native", true)
 }
 func testWorkerRunnerCanonicalGraphRepairWithAudit(t *testing.T, backend string, audit bool, versions ...int) {
+	testWorkerRunnerCanonicalGraphMaintenance(t, backend, audit, false, versions...)
+}
+func TestWorkerRunnerCanonicalGraphReaderExpiry(t *testing.T) {
+	testWorkerRunnerCanonicalGraphMaintenance(t, "native", false, true)
+}
+func testWorkerRunnerCanonicalGraphMaintenance(t *testing.T, backend string, audit, readers bool, versions ...int) {
 	version := 4
 	if len(versions) > 0 {
 		version = versions[0]
@@ -144,6 +150,9 @@ func testWorkerRunnerCanonicalGraphRepairWithAudit(t *testing.T, backend string,
 			if audit {
 				args = append(args, "-graph-terminal-audit", "-graph-terminal-audit-interval", "500ms", "-graph-terminal-audit-budget", "1")
 			}
+			if readers {
+				args = append(args, "-graph-reader-expiry", "-graph-reader-expiry-interval", "100ms", "-graph-reader-expiry-budget", "1")
+			}
 			if len(versions) > 0 {
 				args = append(args, "-graph-cursor-version", strconv.Itoa(version))
 			}
@@ -185,6 +194,9 @@ func testWorkerRunnerCanonicalGraphRepairWithAudit(t *testing.T, backend string,
 				t.Fatal(err)
 			}
 			before, _ := json.Marshal(records)
+			if readers {
+				verifyWorkerReaderExpiry(t, ctx, js, cfg, graph, h.Type, h.ID)
+			}
 			state, err := js.KeyValue(ctx, "WF_STATE")
 			if err != nil {
 				t.Fatal(err)

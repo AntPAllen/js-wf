@@ -1,0 +1,18 @@
+=== RUN   TestReaderExpiryCLIAdmission
+--- PASS: TestReaderExpiryCLIAdmission (0.00s)
+=== RUN   TestWorkerRunnerCanonicalGraphReaderExpiry
+=== RUN   TestWorkerRunnerCanonicalGraphReaderExpiry/R1
+    graph_test.go:198: CLI reader expiry removed expired pin, preserved live pin/application/graph/objects and persisted scoped version-2 checkpoint
+    graph_test.go:328: canonical CLI reserved Start/Signal recovery, native timer completion, two terminal restorations, unchanged journal, no legacy journal writes; replicas=1 domain=
+=== RUN   TestWorkerRunnerCanonicalGraphReaderExpiry/R3Domain
+    graph_test.go:88: worker domain admitted node=0 domain=WFGRAPH server_id=NDE6T4PIMPBUPDV2M6NAEWI64554N7BAFIGLDLOB4ZJBSEB2NX3Y3MFZ
+    graph_test.go:88: worker domain admitted node=1 domain=WFGRAPH server_id=NCLXHYSSDDGVLHWMGJYY3DRYO7NE6ACUZOLV626DH5ZVSRXIWXXL7JND
+    graph_test.go:88: worker domain admitted node=2 domain=WFGRAPH server_id=NB2EBSJSXBOWTCS2YMARVILSMUAPVJNR3QEFISDY6MSG3ZZWILPKRG6J
+    graph_test.go:198: CLI reader expiry removed expired pin, preserved live pin/application/graph/objects and persisted scoped version-2 checkpoint
+    domain_test.go:79: worker real domain=WFGRAPH domain_api_requests=25496 wrong_prefix_requests=0
+    graph_test.go:328: canonical CLI reserved Start/Signal recovery, native timer completion, two terminal restorations, unchanged journal, no legacy journal writes; replicas=3 domain=WFGRAPH
+--- PASS: TestWorkerRunnerCanonicalGraphReaderExpiry (122.40s)
+    --- PASS: TestWorkerRunnerCanonicalGraphReaderExpiry/R1 (25.52s)
+    --- PASS: TestWorkerRunnerCanonicalGraphReaderExpiry/R3Domain (94.31s)
+PASS
+ok  	js-wf/cmd/wf-worker	123.517s
