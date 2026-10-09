@@ -1,0 +1,26 @@
+{
+  "command": [
+    "go",
+    "test",
+    "-race",
+    "./worker",
+    "-run",
+    "^(TestVerifiedGraphProjectionRepairCASAndUncertainty|TestNativeGraphWorkerReplayInputsSignalsAndResults)$",
+    "-count=1",
+    "-timeout=6m",
+    "-v"
+  ],
+  "actual_exit_code": 0,
+  "files_before": {
+    "worker/graph_outcome_repair.go": "43614152e6becd26cb6304b0ae0af0eb6acb32cc7581d80c9164a92a704ad6ac",
+    "worker/graph_outcome_repair_test.go": "2f83fc23ae0b97d2df791dddecc97cb83d3e7df6ef8773259b1207156549dbc0",
+    "worker/graph_terminal_delivery.go": "2f8bdffd6db7dd82b3997614d0990cc366561d5a014193bdbd74af8afb17a1e1",
+    "worker/graph_journal_test.go": "24cffd055cedbf156e2e7c9e9add38065944f86b85627ff4e6fb50b3fc6e9040"
+  },
+  "files_after": {
+    "worker/graph_outcome_repair.go": "43614152e6becd26cb6304b0ae0af0eb6acb32cc7581d80c9164a92a704ad6ac",
+    "worker/graph_outcome_repair_test.go": "2f83fc23ae0b97d2df791dddecc97cb83d3e7df6ef8773259b1207156549dbc0",
+    "worker/graph_terminal_delivery.go": "2f8bdffd6db7dd82b3997614d0990cc366561d5a014193bdbd74af8afb17a1e1",
+    "worker/graph_journal_test.go": "24cffd055cedbf156e2e7c9e9add38065944f86b85627ff4e6fb50b3fc6e9040"
+  }
+}

@@ -1,0 +1,17 @@
+# Verified canonical repair of present terminal projections
+
+Canonical duplicate delivery now compares the observed mirror with the verified terminal payload. A present mismatch triggers a fresh invocation check and one KV CAS using the latest observed revision. Healthy matching mirrors retain their existing read path, and the absent-key Create path remains unchanged. KV mirror bytes do not select the invocation, result, parent notification or ACK authority; owned canonical graph validation still does that work.
+
+The repair stops on unknown reads or malformed projection/purge bytes. A current/newer valid purge marker is never overwritten. A concurrent purge or projection update changes the revision and defeats the single CAS; the worker does not retry an uncertain mutation. A committed lost acknowledgment may be resolved by an exact-payload witness whose KV revision advances beyond the pre-mutation observation; a stale earlier canonical mirror is not sufficient. Native atomic graph lifecycle/state fencing and autonomous corruption discovery remain separate requirements; the terminal catalog scanner still only discovers absent projections.
+
+Focused controls include real R1/R3 worker duplicate delivery with an actual forged projection, exact canonical payload repair, no handler/effect execution and unchanged foreign lease. The helper covers conditional mutation, lost acknowledgment, drop, concurrent purge, unknown reads, malformed bytes, existing matching mirrors and absent keys.
+
+An initial unconditional repair attempt passed native controls but changed many healthy-path transport traces. Its executed result is retained under `initial-unconditional-attempt/`, and `old-pins.log` retains the detected trace divergences. The final design uses the mismatch branch. The original forged-state trace is retained as `original-forged-state-trace.json`; its registered seed-3 replacement records the added canonical repair operations. Other selected terminal/catalog/actor/parent traces are checked against the shared corpus. The directed seed-3 control checks the exact outcome digest written by projection CAS and exact replay.
+
+This work covers valid JSON mirror mismatches encountered by delivery. Malformed bytes, autonomous corrupt-present discovery, complete current-source qualification, broader operation interleavings and all original deployment/native-fault/scale/soak/drain/migration/adoption/release requirements remain open. Public default adoption and production collection are unchanged.
+
+## Focused results
+
+Final native R1/R3 worker and ten CAS/uncertainty controls pass race in 31.538 seconds. The directed seed-3 case and 53 selected terminal/catalog/actor/parent pins pass normal in 2.308 seconds. `final-results.json` records actual exits and unchanged before/after hashes for six selected inputs. This is a focused input observation, not independently retained full binary/compiler provenance. `pre-revision-witness/` preserves the earlier passing test phase before the stale canonical KV witness control was added. Registered trace inventory remains 824: only the forged-state trace changes, with hashes in `trace-change.json`; seeded inventory remains 154. Both supervised frozen race test processes are live and exclude this repair.
+
+The corrected seed-3 trace and directed exact-digest control pass race in 1.455 seconds (`direct-race.log`, actual exit zero). After testing, only the delivery header comment was clarified; `post-test-comment.json` records that source-byte difference. Executable code is unchanged.

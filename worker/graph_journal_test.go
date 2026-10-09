@@ -314,7 +314,7 @@ func TestNativeGraphWorkerReplayInputsSignalsAndResults(t *testing.T) {
 				if err = probe.RunPartition(probeCtx, identity.Partition("graph", "native", provision.Partitions)); err != nil {
 					t.Fatal(err)
 				}
-				if mirror == "absent" {
+				if mirror == "absent" || mirror == "forged" {
 					repaired, e := state.Get(ctx, identity.Key("graph", "native"))
 					if e != nil || !bytes.Equal(repaired.Value(), records[len(records)-1].Payload) {
 						t.Fatal("canonical terminal projection not repaired", e)

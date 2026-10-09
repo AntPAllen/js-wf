@@ -1,6 +1,7 @@
 package worker
 
 import (
+	"bytes"
 	"context"
 	"errors"
 	"fmt"
@@ -9,12 +10,13 @@ import (
 	"github.com/nats-io/nats.go/jetstream"
 	"js-wf/identity"
 	"js-wf/journal"
+	"js-wf/lease"
 	"js-wf/retention"
 	"js-wf/wf"
 )
 
 // Graph duplicates use the same canonical terminal validator as graph clients.
-// Legacy state is read only for purge markers; terminal mirror bytes cannot
+// Legacy state identifies purge markers and repair candidates; mirror bytes cannot
 // authorize an ACK or select the parent notification payload.
 func (w *Worker) graphTerminalHeldDelivery(ctx context.Context, typ, id string, timer timerWakeup, ops *deliveryOperations) (terminal, canceledTimer bool, err error) {
 	outcomePort := w.outcomePort
@@ -33,6 +35,7 @@ func (w *Worker) graphTerminalHeldDelivery(ctx context.Context, typ, id string, 
 	}
 	// Purge ordering is still legacy and must remain a separate lifecycle fence.
 	missingProjection := false
+	var initialProjection lease.KVEntry
 	purge := func(invocation uint64) (bool, error) {
 		started := ops.begin()
 		state, e := outcomePort.Get(ctx, identity.Key(typ, id))
@@ -44,6 +47,7 @@ func (w *Worker) graphTerminalHeldDelivery(ctx context.Context, typ, id string, 
 		if e != nil {
 			return false, e
 		}
+		initialProjection = state
 		marker, tomb, e := retention.Decode(state.Value)
 		return tomb && marker.InvSeq >= invocation, e
 	}
@@ -107,11 +111,22 @@ func (w *Worker) graphTerminalHeldDelivery(ctx context.Context, typ, id string, 
 	if e != nil {
 		return false, false, fmt.Errorf("terminal parent notification: %w", e)
 	}
-	// A crash after terminal journal publication can leave the projection
-	// absent. Rebuild only an absent key from verified canonical bytes. Create
-	// cannot overwrite a concurrent projection or purge marker; neither an
-	// existing mirror nor this write authorizes ACK without the checks below.
-	if missingProjection {
+	if !missingProjection && !bytes.Equal(initialProjection.Value, verified.Payload) {
+		// Check current source before repairing a present, untrusted mirror.
+		current, checkErr := invocationPort.LastInvocation(ctx, identity.InvocationSubject(typ, id))
+		if checkErr != nil {
+			return false, false, checkErr
+		}
+		if current == nil || current.Sequence != input.Sequence {
+			return false, false, nil
+		}
+		started = ops.begin()
+		e = repairVerifiedGraphOutcome(ctx, outcomePort, typ, id, input.Sequence, verified.Payload)
+		ops.finish(started, "terminal_state_repair", 0, "", e)
+		if e != nil {
+			return false, false, fmt.Errorf("terminal projection repair: %w", e)
+		}
+	} else if missingProjection {
 		started = ops.begin()
 		_, e = outcomePort.Create(ctx, identity.Key(typ, id), verified.Payload)
 		ops.finish(started, "terminal_state_repair", 0, "", e)

@@ -1,0 +1,49 @@
+{
+  "files_before": {
+    "worker/graph_outcome_repair.go": "131e4be929da555760d7816435a4d341f933c1c5a026acd3102beb38a8becba5",
+    "worker/graph_outcome_repair_test.go": "1fe92fbbaf68c87877a1532bedebba0530d59995fa939407bc5c2e2adc3d5501",
+    "worker/graph_terminal_delivery.go": "a163928ea650be8dcf246297cae61ed9382f40bdccf66a898c167d8296c18bdb",
+    "worker/graph_journal_test.go": "24cffd055cedbf156e2e7c9e9add38065944f86b85627ff4e6fb50b3fc6e9040",
+    "sim/graph_terminal_forged_projection_test.go": "73fde546135e36a455b7a513ddf74cdce29cc95eb6a7bd0555aef414e5bf6c4e",
+    "sim/testdata/regressions/graph-worker-terminal-forged_state.json": "3a9861f17b16a2fd03df703cdae966f42511307baaf725a4ff051a2a6e977861"
+  },
+  "files_after": {
+    "worker/graph_outcome_repair.go": "131e4be929da555760d7816435a4d341f933c1c5a026acd3102beb38a8becba5",
+    "worker/graph_outcome_repair_test.go": "1fe92fbbaf68c87877a1532bedebba0530d59995fa939407bc5c2e2adc3d5501",
+    "worker/graph_terminal_delivery.go": "a163928ea650be8dcf246297cae61ed9382f40bdccf66a898c167d8296c18bdb",
+    "worker/graph_journal_test.go": "24cffd055cedbf156e2e7c9e9add38065944f86b85627ff4e6fb50b3fc6e9040",
+    "sim/graph_terminal_forged_projection_test.go": "73fde546135e36a455b7a513ddf74cdce29cc95eb6a7bd0555aef414e5bf6c4e",
+    "sim/testdata/regressions/graph-worker-terminal-forged_state.json": "3a9861f17b16a2fd03df703cdae966f42511307baaf725a4ff051a2a6e977861"
+  },
+  "commands": [
+    {
+      "name": "native",
+      "command": [
+        "go",
+        "test",
+        "-race",
+        "./worker",
+        "-run",
+        "^(TestVerifiedGraphProjectionRepairCASAndUncertainty|TestNativeGraphWorkerReplayInputsSignalsAndResults)$",
+        "-count=1",
+        "-timeout=6m",
+        "-v"
+      ],
+      "actual_exit_code": 0
+    },
+    {
+      "name": "pins",
+      "command": [
+        "go",
+        "test",
+        "./sim",
+        "-run",
+        "^(TestGraphTerminalForgedProjectionCurrentReplay|TestPinnedRegressionCorpus)$/^graph-(terminal|worker-terminal|signal-actors|parent-worker).*",
+        "-count=1",
+        "-timeout=5m",
+        "-v"
+      ],
+      "actual_exit_code": 0
+    }
+  ]
+}
