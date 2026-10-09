@@ -1,0 +1,28 @@
+{
+  "production_revision": "45be9992c57a2d10df49b97f8d3ff762042047ff",
+  "test_sha256": "6cb2487b6890b48335607f2e691ca7dc66f3923b68c0460c711b3e21eed05494",
+  "native_R3_domain_all_server_SIGKILL_cases": {
+    "after_signal": {
+      "recovery_seconds": 17.00223495,
+      "exact_ack_sequence": 4,
+      "exact_ack_delivery": 2,
+      "terminal_epoch": 32,
+      "held_epoch": 28
+    },
+    "after_completion": {
+      "recovery_seconds": 15.766870925,
+      "exact_ack_sequence": 4,
+      "exact_ack_delivery": 2,
+      "terminal_epoch": 33,
+      "held_epoch": 28
+    },
+    "after_failed": {
+      "recovery_seconds": 13.394100969,
+      "exact_ack_sequence": 4,
+      "exact_ack_delivery": 2,
+      "terminal_epoch": 28,
+      "held_epoch": 28
+    }
+  },
+  "scope": "Three worker SIGKILL cuts plus verified SIGKILL of all three server processes, original-store reopen, native R3 domain/archive, private16 budget, exact redelivery and strict <30s. Host kernel/page cache stayed live; no power/storage/VM fault or actual100000 boundary claim."
+}

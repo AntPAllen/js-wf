@@ -101,9 +101,102 @@ func TestNativeGraphContinuationLimitSIGKILLAndStoreRestart(t *testing.T) {
 	}
 }
 
+func TestNativeGraphContinuationLimitAllServerSIGKILL(t *testing.T) {
+	for _, cut := range []string{"after_signal", "after_completion", "after_failed"} {
+		t.Run(cut, func(t *testing.T) { graphContinuationLimitKill(t, cut, true, true) })
+	}
+}
+
+type graphServerKillReceipt struct {
+	OldPID, NewPID int
+	Signal         int
+}
+
+// This adapter keeps the same workflow/controller assertions for graceful
+// library servers and abrupt OS-process servers.
+type graphLimitCluster struct {
+	clients func() []*nats.Conn
+	ready   func() bool
+	restart func() []graphServerKillReceipt
+	close   func()
+}
+
+func startGraphLimitCluster(t *testing.T, root string, abrupt bool) graphLimitCluster {
+	t.Helper()
+	if abrupt {
+		cluster, err := testcluster.StartProcessesWithDomain(root, 3, "GRAPH_KILL")
+		if err != nil {
+			t.Fatal(err)
+		}
+		return graphLimitCluster{
+			clients: func() []*nats.Conn { return cluster.Clients },
+			ready:   func() bool { return true }, // Replicated provisioning below waits for admission.
+			close:   cluster.Close,
+			restart: func() []graphServerKillReceipt {
+				receipts := make([]graphServerKillReceipt, 3)
+				for index, command := range cluster.Commands {
+					receipts[index].OldPID = command.Process.Pid
+					if err := cluster.KillNode(index); err != nil {
+						t.Fatal(err)
+					}
+					signal, ok := command.ProcessState.Sys().(syscall.WaitStatus)
+					if !ok || !signal.Signaled() || signal.Signal() != syscall.SIGKILL {
+						t.Fatal("server not SIGKILLed", command.ProcessState)
+					}
+					receipts[index].Signal = int(signal.Signal())
+				}
+				// Every old process has been waited before any replacement starts.
+				for index := range cluster.Commands {
+					if err := cluster.RestartNode(index); err != nil {
+						t.Fatal(err)
+					}
+					receipts[index].NewPID = cluster.Commands[index].Process.Pid
+					if receipts[index].NewPID == receipts[index].OldPID {
+						t.Fatal("server process did not change")
+					}
+				}
+				return receipts
+			},
+		}
+	}
+	cluster, err := testcluster.StartWithDomain(root, 3, "GRAPH_KILL")
+	if err != nil {
+		t.Fatal(err)
+	}
+	return graphLimitCluster{
+		clients: func() []*nats.Conn { return cluster.Clients },
+		ready: func() bool {
+			for _, server := range cluster.Servers {
+				if server.JetStreamIsLeader() && len(server.JetStreamClusterPeers()) == 3 {
+					return true
+				}
+			}
+			return false
+		},
+		close: cluster.Close,
+		restart: func() []graphServerKillReceipt {
+			for index := range cluster.Servers {
+				cluster.KillNode(index)
+			}
+			for _, server := range cluster.Servers {
+				if server.Running() {
+					t.Fatal("server survived full stop")
+				}
+			}
+			for index := range cluster.Servers {
+				if err := cluster.RestartNode(index); err != nil {
+					t.Fatal(err)
+				}
+			}
+			return nil
+		},
+	}
+}
+
 func graphContinuationLimitKill(t *testing.T, cut string, restartMode ...bool) {
 	t.Helper()
 	restart := len(restartMode) > 0 && restartMode[0]
+	abrupt := len(restartMode) > 1 && restartMode[1]
 	root := t.TempDir()
 	if artifact := os.Getenv("GRAPH_LIMIT_KILL_ARTIFACT_ROOT"); artifact != "" {
 		root = filepath.Join(artifact, cut)
@@ -120,29 +213,31 @@ func graphContinuationLimitKill(t *testing.T, cut string, restartMode ...bool) {
 			t.Fatal(err)
 		}
 	}
-	cluster, err := testcluster.StartWithDomain(filepath.Join(root, "cluster"), 3, "GRAPH_KILL")
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer cluster.Close()
+	cluster := startGraphLimitCluster(t, filepath.Join(root, "cluster"), abrupt)
+	defer cluster.close()
 	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Minute)
 	defer cancel()
 	for ctx.Err() == nil {
-		ready := false
-		for _, server := range cluster.Servers {
-			ready = ready || server.JetStreamIsLeader() && len(server.JetStreamClusterPeers()) == 3
-		}
-		if ready {
+		if cluster.ready() {
 			break
 		}
 		time.Sleep(20 * time.Millisecond)
 	}
-	js, err := jetstream.NewWithDomain(cluster.Clients[0], "GRAPH_KILL")
+	js, err := jetstream.NewWithDomain(cluster.clients()[0], "GRAPH_KILL")
 	if err != nil {
 		t.Fatal(err)
 	}
-	if err = provision.Ensure(ctx, js, 3); err != nil {
-		t.Fatal(err)
+	for ctx.Err() == nil {
+		attempt, stop := context.WithTimeout(ctx, 2*time.Second)
+		err = provision.Ensure(attempt, js, 3)
+		stop()
+		if err == nil {
+			break
+		}
+		time.Sleep(20 * time.Millisecond)
+	}
+	if err != nil || ctx.Err() != nil {
+		t.Fatal("initial admission failed", err, ctx.Err())
 	}
 	cfg := graphLimitKillConfig()
 	configs, err := journal.NativeGraphStreamConfigs(cfg, 3)
@@ -168,7 +263,7 @@ func graphContinuationLimitKill(t *testing.T, cut string, restartMode ...bool) {
 	}
 	path := filepath.Join(root, "child")
 	child := exec.Command(os.Args[0], "-test.run=^TestGraphContinuationLimitKillChild$", "-test.timeout=3m")
-	child.Env = append(os.Environ(), "WF_GRAPH_LIMIT_CHILD=1", "WF_GRAPH_LIMIT_URL="+cluster.Clients[1].ConnectedUrl(), "WF_GRAPH_LIMIT_PATH="+path, "WF_GRAPH_LIMIT_CUT="+cut)
+	child.Env = append(os.Environ(), "WF_GRAPH_LIMIT_CHILD=1", "WF_GRAPH_LIMIT_URL="+cluster.clients()[1].ConnectedUrl(), "WF_GRAPH_LIMIT_PATH="+path, "WF_GRAPH_LIMIT_CUT="+cut)
 	log, err := os.Create(path + ".log")
 	if err != nil {
 		t.Fatal(err)
@@ -267,32 +362,17 @@ func graphContinuationLimitKill(t *testing.T, cut string, restartMode ...bool) {
 		t.Fatal("dead owner lease disappeared early", err)
 	}
 	if restart {
-		// KillNode performs graceful server shutdown. This verifies reopening
-		// persisted stores; it is not a server SIGKILL or storage power-loss cut.
-		for index := range cluster.Servers {
-			cluster.KillNode(index)
-		}
-		for _, server := range cluster.Servers {
-			if server.Running() {
-				t.Fatal("server survived full stop")
-			}
-		}
-		for index := range cluster.Servers {
-			if err := cluster.RestartNode(index); err != nil {
-				t.Fatal(err)
-			}
+		serverReceipts := cluster.restart()
+		if abrupt {
+			save("server-kills", serverReceipts)
 		}
 		for ctx.Err() == nil {
-			ready := false
-			for _, server := range cluster.Servers {
-				ready = ready || server.JetStreamIsLeader() && len(server.JetStreamClusterPeers()) == 3
-			}
-			if ready {
+			if cluster.ready() {
 				break
 			}
 			time.Sleep(20 * time.Millisecond)
 		}
-		js, err = jetstream.NewWithDomain(cluster.Clients[0], "GRAPH_KILL")
+		js, err = jetstream.NewWithDomain(cluster.clients()[0], "GRAPH_KILL")
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -399,7 +479,7 @@ func graphContinuationLimitKill(t *testing.T, cut string, restartMode ...bool) {
 	if err != nil || !bytes.Equal(terminal.Value(), records[15].Payload) {
 		t.Fatal("projection differs from canonical failure", err)
 	}
-	for _, connection := range cluster.Clients {
+	for _, connection := range cluster.clients() {
 		peer, err := jetstream.NewWithDomain(connection, "GRAPH_KILL")
 		if err != nil {
 			t.Fatal(err)
@@ -418,6 +498,6 @@ func graphContinuationLimitKill(t *testing.T, cut string, restartMode ...bool) {
 	}
 	save("journal", records)
 	save("ack", ack)
-	save("recovery", map[string]any{"cut": cut, "sigkill": true, "servers_gracefully_restarted": restart, "recovery_ns": recovery.Nanoseconds(), "lease_ttl_ns": status.TTL().Nanoseconds(), "held_epoch": held.Epoch, "terminal_epoch": records[15].Epoch, "entries": len(records), "cut_run_sequence": cutEvent.RunSequence, "cut_delivery": cutEvent.Delivery, "ack_run_sequence": ack.RunSequence, "ack_delivery": ack.Delivery})
-	t.Logf("GRAPH_LIMIT_SIGKILL cut=%s recovery=%s lease_ttl=%s entries=%d old_epoch=%d terminal_epoch=%d effects=0 archive=true prefix_unchanged=true exact_delivery_ack=%d/%d servers_gracefully_restarted=%t", cut, recovery, status.TTL(), len(records), held.Epoch, records[15].Epoch, ack.RunSequence, ack.Delivery, restart)
+	save("recovery", map[string]any{"cut": cut, "sigkill": true, "servers_gracefully_restarted": restart && !abrupt, "servers_sigkilled": abrupt, "recovery_ns": recovery.Nanoseconds(), "lease_ttl_ns": status.TTL().Nanoseconds(), "held_epoch": held.Epoch, "terminal_epoch": records[15].Epoch, "entries": len(records), "cut_run_sequence": cutEvent.RunSequence, "cut_delivery": cutEvent.Delivery, "ack_run_sequence": ack.RunSequence, "ack_delivery": ack.Delivery})
+	t.Logf("GRAPH_LIMIT_SIGKILL cut=%s recovery=%s lease_ttl=%s entries=%d old_epoch=%d terminal_epoch=%d effects=0 archive=true prefix_unchanged=true exact_delivery_ack=%d/%d servers_gracefully_restarted=%t servers_sigkilled=%t", cut, recovery, status.TTL(), len(records), held.Epoch, records[15].Epoch, ack.RunSequence, ack.Delivery, restart && !abrupt, abrupt)
 }
