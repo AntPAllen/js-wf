@@ -1,5 +1,9 @@
 # Implementation status against the supplied plan
 
+## Frozen canonical worker complete race qualification — 2026-10-09
+
+The full default simulation race suite at frozen `9a1ccdc` passed 210 groups, 148 families × 1,000 contiguous completed seed bodies and all 748 pinned regressions in 7,988.653 seconds. Independent review confirms the unchanged selected input inventory and race binary, exact coverage and retained event hash. The matching complete normal campaign also passed at this revision. [Executed race evidence](scale/graph-worker-cli-2026-10-09/complete-race1000/README.md). Later operator/replay/visibility/fallback/continuation/v5 changes are excluded; current-source full/extended qualification and every original wider gate remain open.
+
 ## Versioned canonical checkpoint index — 2026-10-09
 
 Explicit library configuration now selects a v5 cursor with a checkpoint request/completion pointer published under the canonical generation/tail CAS. Indexed lookup validates its owned frame and scans only the suffix; it succeeds with 129 encoded prefix records made unreadable. Model race controls cover confirmed/unconfirmed lost acknowledgements, precommit failure, a racing append, forged metadata and version/configuration rejection; internal native R1/R3-domain stage controls pass with v5. [Executed evidence and versioning limits](scale/graph-checkpoint-index-2026-10-09/README.md). This indexes checkpoint lookup only: full worker reference-map loading, archival prefix compaction, collection-safe materialization, autonomous recovery, v5 CLI/deployment and full continuation qualification remain incomplete. Admission stays closed and every original broader full/extended/runtime/native/scale/soak/drain/adoption/release gate remains open.

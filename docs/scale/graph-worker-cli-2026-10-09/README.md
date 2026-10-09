@@ -40,6 +40,6 @@ These are component controls, not complete current qualification. The accepted f
 
 `executed-review.py` checks final native CLI controls in both modes (including R1/R3 domain routing, timer completion and repeated terminal restoration), deterministic graph repair controls, twelve graph journal race groups, both affected shared families with all 1,000 contiguous seed bodies and exact replay, and all 748 pins in normal/race. It checks ten pin lineages and the other 738 pins against Git. Selected Go/configuration input observations are unchanged during the final CLI race run; nine trace migrations occurred during that run and are explicitly recorded because CLI tests do not read the corpus. This is development evidence, not a pre-compilation frozen full-suite qualification.
 
-## Frozen full-suite qualification in progress
+## Frozen full-suite qualification
 
-The complete normal and race default suites run at frozen `9a1ccdc` in `/home/exedev/js-wf-worker-cli-qualification`. Roots: `/home/exedev/js-wf-tier1-full148-cli-normal1000-20261009` and `/home/exedev/js-wf-tier1-full148-cli-race1000-20261009`. Both require every current family/pin. Each supervisor starts in its own process session. Terminal evidence and independent review remain pending.
+The complete normal and race default suites run at frozen `9a1ccdc` in `/home/exedev/js-wf-worker-cli-qualification`. Roots: `/home/exedev/js-wf-tier1-full148-cli-normal1000-20261009` and `/home/exedev/js-wf-tier1-full148-cli-race1000-20261009`. Both complete default campaigns passed at this frozen revision, with independent source/binary/coverage review: [normal](complete-normal1000/README.md) and [race](complete-race1000/README.md). Later changes and all broader gates remain separate.
