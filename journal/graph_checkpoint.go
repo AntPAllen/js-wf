@@ -209,7 +209,7 @@ func (s *GraphStore) confirmCheckpoint(ctx context.Context, typ, id string, runt
 		cleanup, cancel := context.WithTimeout(context.WithoutCancel(ctx), 3*time.Second)
 		defer cancel()
 		if closeErr := view.Close(cleanup); err == nil && closeErr != nil {
-			verified, err = nil, closeErr
+			verified, err = nil, fmt.Errorf("%w: checkpoint reader release: %w", ErrUnknown, closeErr)
 		}
 	}()
 	verified, err = view.ReadCheckpoint(ctx, typ, id)

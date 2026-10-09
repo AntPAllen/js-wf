@@ -1,0 +1,46 @@
+{
+  "scope": "Development component; normal1000 and complete pinned corpus normal/race; new family race1000 remains running and unqualified",
+  "inputs_unchanged": true,
+  "workloads": 149,
+  "prior_pins_unchanged": 748,
+  "added_pins": 14,
+  "total_pins": 762,
+  "logs": {
+    "model-normal.log": {
+      "sha256": "b4b95ae86352c2810ca6cb0b7eb06ff35756135c260d55f2e4a429025d572331",
+      "top_level_passes": 1,
+      "terminal": "ok  \tjs-wf/sim\t45.174s"
+    },
+    "final-normal.log": {
+      "sha256": "7f130eddac768b6461b79e38894a719cbdbce80d85503a6ffbd3036eef1552df",
+      "top_level_passes": 1,
+      "terminal": "ok  \tjs-wf/sim\t91.930s"
+    },
+    "pins-normal.log": {
+      "sha256": "03dc70f816f146461a0cf731d89dbe4fb713b7dfd4b5745b4600fe6e79d923da",
+      "top_level_passes": 1,
+      "terminal": "ok  \tjs-wf/sim\t6.526s"
+    },
+    "pins-race.log": {
+      "sha256": "f6f31899ff778da52d3805073a36a68a1c19db10abf1f257c103ae38e993b06c",
+      "top_level_passes": 1,
+      "terminal": "ok  \tjs-wf/sim\t61.777s"
+    },
+    "journal-regressions-normal.log": {
+      "sha256": "ccb471b621bfcb311a958f6434b43c12604effcd5bace12174ea16c72b8908e8",
+      "top_level_passes": 4,
+      "terminal": "ok  \tjs-wf/journal\t3.378s"
+    },
+    "journal-regressions-race.log": {
+      "sha256": "1e59f7630c557e2459405f8233f464883a417a759461bf87b565f8c21ce6bc31",
+      "top_level_passes": 4,
+      "terminal": "ok  \tjs-wf/journal\t53.669s"
+    }
+  },
+  "pending_race": {
+    "session_id": 13282,
+    "command": "SIM_COVERAGE_SUMMARY=1 SIM_PROGRESS=1 go test -race ./sim -run ^TestSeededGraphCheckpointCompactionReplay$ -count=1 -timeout 30m -v",
+    "live_log": "final-race.log",
+    "status": "running; initial ten-minute watchdog failed after reporting completed900; not an invariant or race-detector verdict"
+  }
+}

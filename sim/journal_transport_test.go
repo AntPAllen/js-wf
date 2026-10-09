@@ -545,6 +545,8 @@ func replayTrace(loaded Trace) (Trace, error) {
 		replayed, err = runGraphWorker(loaded.Seed, &loaded)
 	case "graph_journal_generation":
 		replayed, err = runGraphJournal(loaded.Seed, &loaded)
+	case "graph_checkpoint_compaction":
+		replayed, err = runGraphCompaction(loaded.Seed, &loaded)
 	case "graph_canonical_signal_runtime_combined":
 		replayed, err = runGraphSignalRuntimeCombined(loaded.Seed, &loaded)
 	case "graph_canonical_signal_runtime":

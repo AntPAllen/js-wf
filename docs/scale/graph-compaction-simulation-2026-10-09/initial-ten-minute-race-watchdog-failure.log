@@ -1,0 +1,75 @@
+=== RUN   TestSeededGraphCheckpointCompactionReplay
+    seed_count_test.go:48: TIER1_PROGRESS test=TestSeededGraphCheckpointCompactionReplay completed=100 requested=1000
+    seed_count_test.go:48: TIER1_PROGRESS test=TestSeededGraphCheckpointCompactionReplay completed=200 requested=1000
+    seed_count_test.go:48: TIER1_PROGRESS test=TestSeededGraphCheckpointCompactionReplay completed=300 requested=1000
+    seed_count_test.go:48: TIER1_PROGRESS test=TestSeededGraphCheckpointCompactionReplay completed=400 requested=1000
+    seed_count_test.go:48: TIER1_PROGRESS test=TestSeededGraphCheckpointCompactionReplay completed=500 requested=1000
+    seed_count_test.go:48: TIER1_PROGRESS test=TestSeededGraphCheckpointCompactionReplay completed=600 requested=1000
+    seed_count_test.go:48: TIER1_PROGRESS test=TestSeededGraphCheckpointCompactionReplay completed=700 requested=1000
+    seed_count_test.go:48: TIER1_PROGRESS test=TestSeededGraphCheckpointCompactionReplay completed=800 requested=1000
+    seed_count_test.go:48: TIER1_PROGRESS test=TestSeededGraphCheckpointCompactionReplay completed=900 requested=1000
+panic: test timed out after 10m0s
+	running tests:
+		TestSeededGraphCheckpointCompactionReplay (10m0s)
+
+goroutine 18 [running]:
+testing.(*M).startAlarm.func1()
+	/usr/local/go/src/testing/testing.go:2959 +0x605
+created by time.goFunc
+	/usr/local/go/src/time/sleep.go:182 +0x45
+
+goroutine 1 [chan receive, 9 minutes]:
+testing.(*T).Run(0xc0000d4d88, {0x13c0fd0, 0x29}, 0x1cba8c0)
+	/usr/local/go/src/testing/testing.go:2266 +0xb3e
+testing.runTests.func1(0xc0000d4d88)
+	/usr/local/go/src/testing/testing.go:2742 +0x85
+testing.tRunner(0xc0000d4d88, 0xc0000dd890)
+	/usr/local/go/src/testing/testing.go:2193 +0x21d
+testing.runTests({0x138f84c, 0x5}, {0x139181b, 0x9}, 0xc000016450, {0x1d2d890, 0xd5, 0xd5}, {0xc2aa53449bc2277a, 0x8bb2f8c66b, ...})
+	/usr/local/go/src/testing/testing.go:2740 +0x9ea
+testing.(*M).Run(0xc000217400)
+	/usr/local/go/src/testing/testing.go:2600 +0xf45
+js-wf/sim.TestMain(0xc000217400)
+	/home/exedev/js-wf/sim/coverage_test.go:12 +0x5c
+main.main()
+	_testmain.go:472 +0x172
+
+goroutine 8 [runnable]:
+encoding/json/jsontext.Value.Kind({0xc0003cc30a, 0x1e, 0x1e})
+	/usr/local/go/src/encoding/json/jsontext/value.go:255 +0x1ac
+encoding/json/v2.makeStringArshaler.func2(0xc0003a8c80, {{0x1bfb6c8?, 0xc00047a5d0?, 0x0?}, 0x0?}, 0xc0003a8d40)
+	/usr/local/go/src/encoding/json/v2/arshal_default.go:274 +0x213
+encoding/json/v2.makeStructArshaler.func3(0xc0003a8c80, {{0x1c64118?, 0xc00047a5d0?, 0x1?}, 0x54?}, 0xc0003a8d40)
+	/usr/local/go/src/encoding/json/v2/arshal_default.go:1401 +0xda9
+encoding/json/v2.unmarshalDecode(0xc0003a8c80, {0x1b4eef8, 0xc00047a5d0}, 0xc0003a8d40, 0x1)
+	/usr/local/go/src/encoding/json/v2/arshal.go:471 +0x4a3
+encoding/json/v2.Unmarshal({0xc0003cc300, 0x97, 0x97}, {0x1b4eef8, 0xc00047a5d0}, {0xc000158a10, 0x1, 0x1})
+	/usr/local/go/src/encoding/json/v2/arshal.go:390 +0x138
+encoding/json.(*Decoder).Decode(0xc00047a630, {0x1b4eef8, 0xc00047a5d0})
+	/usr/local/go/src/encoding/json/v2_stream.go:90 +0x2c7
+js-wf/journal.graphDecode({0xc0000cf540, 0x97, 0xa0}, {0x1b4eef8, 0xc00047a5d0})
+	/home/exedev/js-wf/journal/graph.go:122 +0x10b
+js-wf/journal.(*GraphView).Read(0xc00031af00, {0x1cb57a8, 0x1d53040}, 0x6)
+	/home/exedev/js-wf/journal/graph.go:460 +0x610
+js-wf/journal.(*GraphStore).read(0xc0000ee2d0, {0x1cb57a8, 0x1d53040}, {0x138f508, 0x4}, {0x1390624, 0x7}, 0x1, 0x0)
+	/home/exedev/js-wf/journal/graph.go:608 +0x565
+js-wf/journal.(*GraphStore).Read(...)
+	/home/exedev/js-wf/journal/graph.go:579
+js-wf/sim.runGraphCompaction(0x38c, 0x0)
+	/home/exedev/js-wf/sim/graph_checkpoint_compaction_test.go:282 +0x4c55
+js-wf/sim.TestSeededGraphCheckpointCompactionReplay-range1(0x38c)
+	/home/exedev/js-wf/sim/graph_checkpoint_compaction_test.go:347 +0xee
+js-wf/sim.seededSchedules.func2.1(0x38c)
+	/home/exedev/js-wf/sim/seed_count_test.go:44 +0x59
+js-wf/sim.trackedSeeds.func1(0xc000159e38)
+	/home/exedev/js-wf/sim/seed_count_test.go:58 +0x89
+js-wf/sim.seededSchedules.func2(0xc0000f1890)
+	/home/exedev/js-wf/sim/seed_count_test.go:43 +0xa9
+js-wf/sim.TestSeededGraphCheckpointCompactionReplay(0xc0000d4fc8)
+	/home/exedev/js-wf/sim/graph_checkpoint_compaction_test.go:346 +0x1ea
+testing.tRunner(0xc0000d4fc8, 0x1cba8c0)
+	/usr/local/go/src/testing/testing.go:2193 +0x21d
+created by testing.(*T).Run in goroutine 1
+	/usr/local/go/src/testing/testing.go:2258 +0xb13
+FAIL	js-wf/sim	600.026s
+FAIL
