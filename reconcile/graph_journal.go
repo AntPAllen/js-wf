@@ -138,7 +138,7 @@ func RunRepairLoopWithGraphJournal(ctx context.Context, js jetstream.JetStream, 
 	if kind == "graph-continuation" && !graph.CheckpointIndex() {
 		return fmt.Errorf("continuation repair requires v5 checkpoint index")
 	}
-	if kind != "graph-continuation" && kind != "start" && kind != "graph-start" && kind != "graph-signal" && kind != "graph-terminal" && kind != "signal" && kind != "timer" && kind != "fallback-timer" && kind != "suspended" {
+	if kind != "graph-continuation" && kind != "start" && kind != "graph-start" && kind != "graph-signal" && kind != "graph-terminal" && kind != "graph-terminal-audit" && kind != "signal" && kind != "timer" && kind != "fallback-timer" && kind != "suspended" {
 		return fmt.Errorf("unsupported graph repair kind %q", kind)
 	}
 	return runRepairLoopObserved(ctx, js, workerID, kind, interval, budget, observe, clock, progress, graph)

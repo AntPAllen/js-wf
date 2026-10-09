@@ -1729,5 +1729,22 @@ func (w *Worker) persistOutcome(ctx context.Context, typ, id string, invSeq uint
 	if port == nil {
 		port = NewOutcomePort(w.state)
 	}
-	return PersistOutcomeWithPort(attemptCtx, port, typ, id, invSeq, payload)
+	err := PersistOutcomeWithPort(attemptCtx, port, typ, id, invSeq, payload)
+	if w.graphJournal == nil || !errors.Is(err, errTerminalProjectionChanged) {
+		return err
+	}
+	// Graph execution/replay has already validated or committed this terminal.
+	// Reconfirm its source generation before repairing the untrusted mirror.
+	invocations := w.invocationPort
+	if invocations == nil {
+		invocations = jetStreamInvocationPort{js: w.js}
+	}
+	current, checkErr := invocations.LastInvocation(attemptCtx, identity.InvocationSubject(typ, id))
+	if checkErr != nil {
+		return checkErr
+	}
+	if current == nil || current.Sequence != invSeq {
+		return journal.ErrStale
+	}
+	return repairVerifiedGraphOutcome(attemptCtx, port, typ, id, invSeq, payload)
 }

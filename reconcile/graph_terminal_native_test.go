@@ -5,6 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"os"
 	"sync/atomic"
 	"testing"
 	"time"
@@ -87,10 +88,22 @@ func TestNativeGraphReconcileTerminalProjection(t *testing.T) {
 				}
 				return json.Marshal(value)
 			}}
+			audit := false
 			run := func(repair bool) {
+				t.Logf("native terminal phase repair=%v audit=%v", repair, audit)
+				var naks atomic.Int64
 				runCtx, stop := context.WithCancel(ctx)
 				defer stop()
 				w, e := worker.New(ctx, js, "terminalcatalog", handlers, worker.WithGraphJournal(graph), worker.WithDispatchObserver(func(event worker.DispatchEvent) {
+					if event.Error != "" {
+						t.Logf("native terminal event stage=%s repair=%v audit=%v error=%s", event.Stage, repair, audit, event.Error)
+					}
+					if event.Stage == "nak" {
+						t.Logf("native terminal NAK repair=%v audit=%v error=%s", repair, audit, event.Error)
+						if os.Getenv("SIM_TERMINAL_AUDIT_DIAGNOSTIC") == "1" && naks.Add(1) >= 5 {
+							stop()
+						}
+					}
 					if event.Stage == "ack" {
 						stop()
 					}
@@ -101,7 +114,11 @@ func TestNativeGraphReconcileTerminalProjection(t *testing.T) {
 				done := make(chan error, 1)
 				if repair {
 					go func() {
-						done <- reconcile.RunRepairLoopWithGraphJournal(runCtx, js, "terminalcatalog", "graph-terminal", 10*time.Millisecond, 1, graph, nil, nil, nil)
+						kind := "graph-terminal"
+						if audit {
+							kind = "graph-terminal-audit"
+						}
+						done <- reconcile.RunRepairLoopWithGraphJournal(runCtx, js, "terminalcatalog", kind, 10*time.Millisecond, 1, graph, nil, nil, nil)
 					}()
 				}
 				if e = w.RunPartition(runCtx, 0); e != nil {
@@ -155,6 +172,33 @@ func TestNativeGraphReconcileTerminalProjection(t *testing.T) {
 				current, currentTail, e := graph.Read(ctx, h.Type, h.ID, h.InvSeq)
 				if e != nil || currentTail != tail || len(current) != len(records) || !bytes.Equal(current[len(current)-1].Payload, terminal) || effects.Load() != 1 {
 					t.Fatal("catalog recovery changed journal or repeated effect", pass, e, effects.Load())
+				}
+			}
+			audit = true
+			for pass := 0; pass < 2; pass++ {
+				old, e := state.Get(ctx, identity.Key(h.Type, h.ID))
+				if e != nil {
+					t.Fatal(e)
+				}
+				corrupt, _ := json.Marshal(wf.Outcome{InvSeq: h.InvSeq, Error: "corrupt cached outcome"})
+				if _, e = state.Update(ctx, identity.Key(h.Type, h.ID), corrupt, old.Revision()); e != nil {
+					t.Fatal(e)
+				}
+				if e = runs.Purge(ctx); e != nil {
+					t.Fatal(e)
+				}
+				graph, e = journal.OpenNativeGraphStore(ctx, js, cfg)
+				if e != nil {
+					t.Fatal(e)
+				}
+				run(true)
+				value, e := state.Get(ctx, identity.Key(h.Type, h.ID))
+				if e != nil || !bytes.Equal(value.Value(), terminal) {
+					t.Fatal("audit failed to repair present projection", e)
+				}
+				current, currentTail, e := graph.Read(ctx, h.Type, h.ID, h.InvSeq)
+				if e != nil || currentTail != tail || len(current) != len(records) || !bytes.Equal(current[len(current)-1].Payload, terminal) || effects.Load() != 1 {
+					t.Fatal("audit changed canonical journal or repeated effect", e)
 				}
 			}
 			t.Log("reopened fenced graph-terminal loop restored two deleted projections inside dedup window; exact terminal bytes, unchanged journal, effect one")

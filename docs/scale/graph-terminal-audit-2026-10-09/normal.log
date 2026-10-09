@@ -1,0 +1,20 @@
+=== RUN   TestSeededGraphTerminalAuditReplay
+    seed_count_test.go:48: TIER1_PROGRESS test=TestSeededGraphTerminalAuditReplay completed=100 requested=1000
+    seed_count_test.go:48: TIER1_PROGRESS test=TestSeededGraphTerminalAuditReplay completed=200 requested=1000
+    seed_count_test.go:48: TIER1_PROGRESS test=TestSeededGraphTerminalAuditReplay completed=300 requested=1000
+    seed_count_test.go:48: TIER1_PROGRESS test=TestSeededGraphTerminalAuditReplay completed=400 requested=1000
+    seed_count_test.go:48: TIER1_PROGRESS test=TestSeededGraphTerminalAuditReplay completed=500 requested=1000
+    seed_count_test.go:48: TIER1_PROGRESS test=TestSeededGraphTerminalAuditReplay completed=600 requested=1000
+    seed_count_test.go:48: TIER1_PROGRESS test=TestSeededGraphTerminalAuditReplay completed=700 requested=1000
+    seed_count_test.go:48: TIER1_PROGRESS test=TestSeededGraphTerminalAuditReplay completed=800 requested=1000
+    seed_count_test.go:48: TIER1_PROGRESS test=TestSeededGraphTerminalAuditReplay completed=900 requested=1000
+    seed_count_test.go:48: TIER1_PROGRESS test=TestSeededGraphTerminalAuditReplay completed=1000 requested=1000
+    graph_terminal_audit_test.go:36: terminal projection audit modes=map[corrupt_present:90 dry_run:77 enqueue_drop:64 enqueue_lost_ack:97 failed_terminal:90 lease_free_corrupt:86 lookup_unknown:88 present:98 purge_marker:110 repeat_corrupt:100 retired:100]; sole scanner dispatch, exact canonical repair, live purge suppression, no handlers/foreign lease changes, repeated corruption recovery and graph drain
+    seed_count_test.go:32: TIER1_SEEDS test=TestSeededGraphTerminalAuditReplay first=1 last=1000 completed=1000 requested=1000
+--- PASS: TestSeededGraphTerminalAuditReplay (8.25s)
+=== RUN   TestGraphTerminalAuditLeaseFreeReplay
+    graph_terminal_audit_test.go:67: lease-free canonical projection recovery seed=13
+--- PASS: TestGraphTerminalAuditLeaseFreeReplay (0.00s)
+PASS
+TIER1_COVERAGE model_version=3 seeds_per_workload=1000 generated_schedules=1001 scheduler_choices=1001 choices_per_second=121.3 transport_events=219691 virtual_ms_max=60000 virtual_buckets_zero=0 under_1s=0 under_1m=0 at_least_1m=1001 elapsed=8.249447354s
+ok  	js-wf/sim	8.294s

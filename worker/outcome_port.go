@@ -21,6 +21,8 @@ type OutcomePort interface {
 	Update(context.Context, string, []byte, uint64) (uint64, error)
 }
 
+var errTerminalProjectionChanged = errors.New("terminal result changed")
+
 type jetStreamOutcomePort struct{ kv jetstream.KeyValue }
 
 func NewOutcomePort(kv jetstream.KeyValue) OutcomePort { return jetStreamOutcomePort{kv: kv} }
@@ -81,7 +83,7 @@ func PersistOutcomeWithPort(ctx context.Context, port OutcomePort, typ, id strin
 		return err
 	}
 	if !bytes.Equal(previous.Value, payload) {
-		return fmt.Errorf("terminal result changed for %s", key)
+		return fmt.Errorf("%w for %s", errTerminalProjectionChanged, key)
 	}
 	return nil
 }

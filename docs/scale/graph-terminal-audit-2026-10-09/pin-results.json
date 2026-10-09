@@ -1,0 +1,31 @@
+[
+  {
+    "mode": "normal",
+    "command": [
+      "go",
+      "test",
+      "./sim",
+      "-run",
+      "^TestPinnedRegressionCorpus$/^graph-terminal-(audit|catalog)-.*[.]json$",
+      "-count=1",
+      "-timeout=5m",
+      "-v"
+    ],
+    "actual_exit_code": 0
+  },
+  {
+    "mode": "race",
+    "command": [
+      "go",
+      "test",
+      "-race",
+      "./sim",
+      "-run",
+      "^TestPinnedRegressionCorpus$/^graph-terminal-(audit|catalog)-.*[.]json$",
+      "-count=1",
+      "-timeout=5m",
+      "-v"
+    ],
+    "actual_exit_code": 0
+  }
+]

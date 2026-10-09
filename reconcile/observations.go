@@ -86,8 +86,12 @@ func runRepairLoopObserved(ctx context.Context, js jetstream.JetStream, workerID
 		}
 		s.Observe = observe
 		scan = s.Scan
-	case "graph-terminal":
-		s, err := NewCanonicalTerminalScan(ctx, js, graph)
+	case "graph-terminal", "graph-terminal-audit":
+		newScan := NewCanonicalTerminalScan
+		if kind == "graph-terminal-audit" {
+			newScan = NewCanonicalTerminalAuditScan
+		}
+		s, err := newScan(ctx, js, graph)
 		if err != nil {
 			return err
 		}

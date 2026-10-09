@@ -1,0 +1,41 @@
+{
+  "files_before": {
+    "reconcile/graph_terminal.go": "71083ca140ee184b7bd106f3ed68b0a48b30fb612263ee602ef63c5eda57e558",
+    "reconcile/graph_journal.go": "5ed3b0e799b273f92fd5967b926064da664b54a39e649df10d92f863ca5451c6",
+    "reconcile/observations.go": "dee3376bb1f6c8739412e3ba7ebd0847d55206018b14ed31f759fcfae7b93605",
+    "reconcile/graph_terminal_native_test.go": "a745c217467ec36186b7a472fe962929e94de021f5d33bc02a955696d1e2db9b",
+    "reconcile/graph_terminal_audit_test.go": "4ba5a4145e2a185677e979723d5dac76700cd8357c1178d4f286e16428068022",
+    "sim/graph_publication_terminal_catalog_test.go": "4bd0f825bac4a050aade8d5e94e79e834ec639458590043ff9d01e527ddcc128",
+    "sim/graph_terminal_audit_test.go": "115ff9b56efbac7c7374715bd543602c92fe998ccefe0175531e15c9f56c220b",
+    "sim/journal_transport_test.go": "f9e3c20096be5fcd81ca907de7ad34ac5e8ea4221442906387da9d96b936e855",
+    ".github/workflows/graph-publication.yml": "24ed4927889e9ede8b03c0589bee4b3d19568bc149e00971a0656ad8ec47aea0"
+  },
+  "files_after": {
+    "reconcile/graph_terminal.go": "71083ca140ee184b7bd106f3ed68b0a48b30fb612263ee602ef63c5eda57e558",
+    "reconcile/graph_journal.go": "5ed3b0e799b273f92fd5967b926064da664b54a39e649df10d92f863ca5451c6",
+    "reconcile/observations.go": "dee3376bb1f6c8739412e3ba7ebd0847d55206018b14ed31f759fcfae7b93605",
+    "reconcile/graph_terminal_native_test.go": "a745c217467ec36186b7a472fe962929e94de021f5d33bc02a955696d1e2db9b",
+    "reconcile/graph_terminal_audit_test.go": "4ba5a4145e2a185677e979723d5dac76700cd8357c1178d4f286e16428068022",
+    "sim/graph_publication_terminal_catalog_test.go": "4bd0f825bac4a050aade8d5e94e79e834ec639458590043ff9d01e527ddcc128",
+    "sim/graph_terminal_audit_test.go": "115ff9b56efbac7c7374715bd543602c92fe998ccefe0175531e15c9f56c220b",
+    "sim/journal_transport_test.go": "f9e3c20096be5fcd81ca907de7ad34ac5e8ea4221442906387da9d96b936e855",
+    ".github/workflows/graph-publication.yml": "24ed4927889e9ede8b03c0589bee4b3d19568bc149e00971a0656ad8ec47aea0"
+  },
+  "commands": [
+    {
+      "name": "native",
+      "command": [
+        "go",
+        "test",
+        "-race",
+        "./reconcile",
+        "-run",
+        "^(TestNativeGraphReconcileTerminalProjection|TestTerminalProjectionAuditPurgeAndMalformedBounds)$",
+        "-count=1",
+        "-timeout=5m",
+        "-v"
+      ],
+      "actual_exit_code": 1
+    }
+  ]
+}

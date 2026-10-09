@@ -1,0 +1,74 @@
+{
+  "files_before": {
+    "reconcile/graph_terminal.go": "71083ca140ee184b7bd106f3ed68b0a48b30fb612263ee602ef63c5eda57e558",
+    "reconcile/graph_journal.go": "5ed3b0e799b273f92fd5967b926064da664b54a39e649df10d92f863ca5451c6",
+    "reconcile/observations.go": "dee3376bb1f6c8739412e3ba7ebd0847d55206018b14ed31f759fcfae7b93605",
+    "reconcile/graph_terminal_native_test.go": "04f9126413fc35a55dae0e83f10dbddb8258b14fc935a2927e2598b12b4cf53d",
+    "reconcile/graph_terminal_audit_test.go": "4ba5a4145e2a185677e979723d5dac76700cd8357c1178d4f286e16428068022",
+    "worker/worker.go": "501ec485e23b9471af715ef9fe846c8bf1f7d4e6e38fcc2e87e37b880ad0cfa1",
+    "worker/outcome_port.go": "472fa86cff5d28e2786d76ed8d8a3b641faa7a68224db32cdd7cd6c89a4bd81d",
+    "sim/graph_publication_terminal_catalog_test.go": "ad49d143388ca2473497f886c64d021e71e225764000e9987b8db49b3fbecea2",
+    "sim/graph_terminal_audit_test.go": "bc08e1b0d0c152feb76a507b9fdbda75177c59dcde966a324c7ef6f738379004",
+    "sim/journal_transport_test.go": "f9e3c20096be5fcd81ca907de7ad34ac5e8ea4221442906387da9d96b936e855",
+    ".github/workflows/graph-publication.yml": "24ed4927889e9ede8b03c0589bee4b3d19568bc149e00971a0656ad8ec47aea0"
+  },
+  "files_after": {
+    "reconcile/graph_terminal.go": "71083ca140ee184b7bd106f3ed68b0a48b30fb612263ee602ef63c5eda57e558",
+    "reconcile/graph_journal.go": "5ed3b0e799b273f92fd5967b926064da664b54a39e649df10d92f863ca5451c6",
+    "reconcile/observations.go": "dee3376bb1f6c8739412e3ba7ebd0847d55206018b14ed31f759fcfae7b93605",
+    "reconcile/graph_terminal_native_test.go": "04f9126413fc35a55dae0e83f10dbddb8258b14fc935a2927e2598b12b4cf53d",
+    "reconcile/graph_terminal_audit_test.go": "4ba5a4145e2a185677e979723d5dac76700cd8357c1178d4f286e16428068022",
+    "worker/worker.go": "501ec485e23b9471af715ef9fe846c8bf1f7d4e6e38fcc2e87e37b880ad0cfa1",
+    "worker/outcome_port.go": "472fa86cff5d28e2786d76ed8d8a3b641faa7a68224db32cdd7cd6c89a4bd81d",
+    "sim/graph_publication_terminal_catalog_test.go": "ad49d143388ca2473497f886c64d021e71e225764000e9987b8db49b3fbecea2",
+    "sim/graph_terminal_audit_test.go": "bc08e1b0d0c152feb76a507b9fdbda75177c59dcde966a324c7ef6f738379004",
+    "sim/journal_transport_test.go": "f9e3c20096be5fcd81ca907de7ad34ac5e8ea4221442906387da9d96b936e855",
+    ".github/workflows/graph-publication.yml": "24ed4927889e9ede8b03c0589bee4b3d19568bc149e00971a0656ad8ec47aea0"
+  },
+  "commands": [
+    {
+      "name": "native",
+      "command": [
+        "go",
+        "test",
+        "-race",
+        "./reconcile",
+        "-run",
+        "^(TestNativeGraphReconcileTerminalProjection|TestTerminalProjectionAuditPurgeAndMalformedBounds)$",
+        "-count=1",
+        "-timeout=5m",
+        "-v"
+      ],
+      "actual_exit_code": 0
+    },
+    {
+      "name": "normal",
+      "command": [
+        "go",
+        "test",
+        "./sim",
+        "-run",
+        "^(TestSeededGraphTerminalAuditReplay|TestGraphTerminalAuditLeaseFreeReplay)$",
+        "-count=1",
+        "-timeout=5m",
+        "-v"
+      ],
+      "actual_exit_code": 0
+    },
+    {
+      "name": "race",
+      "command": [
+        "go",
+        "test",
+        "-race",
+        "./sim",
+        "-run",
+        "^(TestSeededGraphTerminalAuditReplay|TestGraphTerminalAuditLeaseFreeReplay)$",
+        "-count=1",
+        "-timeout=5m",
+        "-v"
+      ],
+      "actual_exit_code": 0
+    }
+  ]
+}

@@ -33,9 +33,28 @@ func (p terminalCatalogProjection) ProjectionPresent(ctx context.Context, typ, i
 	return e == nil, e
 }
 
+func (p terminalCatalogProjection) ProjectionAuditable(ctx context.Context, typ, id string, invocation uint64) (bool, error) {
+	entry, err := p.kv.Get(ctx, identity.Key(typ, id))
+	if errors.Is(err, jetstream.ErrKeyNotFound) {
+		return true, nil
+	}
+	if err != nil {
+		return false, err
+	}
+	return reconcile.TerminalProjectionAuditable(entry.Value, invocation)
+}
+
+var terminalAuditModes = []string{"corrupt_present", "present", "purge_marker", "lookup_unknown", "enqueue_drop", "enqueue_lost_ack", "dry_run", "repeat_corrupt", "lease_free_corrupt", "failed_terminal", "retired"}
+
 var terminalCatalogModes = []string{"healthy", "lookup_unknown", "catalog_unknown", "watermark_unknown", "enqueue_drop", "enqueue_lost_ack", "repeat_delete", "dry_run", "failed_terminal", "present", "purge_marker", "retired"}
 
-func runGraphTerminalCatalog(seed int64, replay *Trace) (trace Trace, runErr error) {
+func runGraphTerminalCatalog(seed int64, replay *Trace) (Trace, error) {
+	return runGraphTerminalCatalogSchedule(seed, replay, false)
+}
+func runGraphTerminalAudit(seed int64, replay *Trace) (Trace, error) {
+	return runGraphTerminalCatalogSchedule(seed, replay, true)
+}
+func runGraphTerminalCatalogSchedule(seed int64, replay *Trace, audit bool) (trace Trace, runErr error) {
 	schedule := NewScheduler(seed)
 	if replay != nil {
 		var e error
@@ -44,11 +63,17 @@ func runGraphTerminalCatalog(seed int64, replay *Trace) (trace Trace, runErr err
 			return trace, e
 		}
 	}
-	if e := schedule.SetWorkload("graph_terminal_catalog_recovery"); e != nil {
+	workload := "graph_terminal_catalog_recovery"
+	modes := terminalCatalogModes
+	if audit {
+		workload = "graph_terminal_projection_audit"
+		modes = terminalAuditModes
+	}
+	if e := schedule.SetWorkload(workload); e != nil {
 		return trace, e
 	}
 	defer func() { trace = schedule.Trace() }()
-	mode, e := schedule.Choose(terminalCatalogModes)
+	mode, e := schedule.Choose(modes)
 	if e != nil {
 		return trace, e
 	}
@@ -119,6 +144,12 @@ func runGraphTerminalCatalog(seed int64, replay *Trace) (trace Trace, runErr err
 		return trace, e
 	}
 	projection := NewKVTransport(schedule, 0)
+	if audit && mode != "present" && mode != "purge_marker" && mode != "retired" {
+		corrupt, _ := json.Marshal(wf.Outcome{InvSeq: h.InvSeq, Error: "corrupt projection"})
+		if _, e = projection.Create(ctx, identity.Key(typ, id), corrupt); e != nil {
+			return trace, e
+		}
+	}
 	if mode == "present" {
 		if _, e = projection.Create(ctx, identity.Key(typ, id), body); e != nil {
 			return trace, e
@@ -143,7 +174,11 @@ func runGraphTerminalCatalog(seed int64, replay *Trace) (trace Trace, runErr err
 	if e != nil {
 		return trace, e
 	}
-	scan, e := reconcile.NewCanonicalTerminalScanWithPort(graph, terminalCatalogProjection{projection}, c)
+	newScan := reconcile.NewCanonicalTerminalScanWithPort
+	if audit {
+		newScan = reconcile.NewCanonicalTerminalAuditScanWithPort
+	}
+	scan, e := newScan(graph, terminalCatalogProjection{projection}, c)
 	if e != nil {
 		return trace, e
 	}
@@ -186,13 +221,13 @@ func runGraphTerminalCatalog(seed int64, replay *Trace) (trace Trace, runErr err
 		if e != nil {
 			return trace, e
 		}
-		scan, e = reconcile.NewCanonicalTerminalScanWithPort(graph, terminalCatalogProjection{projection}, c)
+		scan, e = newScan(graph, terminalCatalogProjection{projection}, c)
 		if e != nil {
 			return trace, e
 		}
 	}
 	cursor := uint64(1)
-	if mode == "present" || mode == "purge_marker" || mode == "retired" {
+	if mode == "present" && !audit || mode == "purge_marker" || mode == "retired" {
 		for pass := 0; pass < 4; pass++ {
 			r, e := scan.Scan(ctx, cursor, 1, false)
 			if e != nil || r.Reenqueued != 0 || transport.Dispatch.Pending() != 0 {
@@ -203,13 +238,17 @@ func runGraphTerminalCatalog(seed int64, replay *Trace) (trace Trace, runErr err
 	} else {
 		leasesKV := NewKVTransport(schedule, 30*time.Second)
 		leasing := lease.NewWithKVPort(leasesKV)
-		owner, e := leasing.Acquire(ctx, typ, id, "healthy-owner")
-		if e != nil {
-			return trace, e
-		}
-		before, e := leasesKV.Get(ctx, identity.Key(typ, id))
-		if e != nil {
-			return trace, e
+		var owner *lease.Lease
+		var before lease.KVEntry
+		if mode != "lease_free_corrupt" {
+			owner, e = leasing.Acquire(ctx, typ, id, "healthy-owner")
+			if e != nil {
+				return trace, e
+			}
+			before, e = leasesKV.Get(ctx, identity.Key(typ, id))
+			if e != nil {
+				return trace, e
+			}
 		}
 		legacy := NewJournalTransport(schedule)
 		legacyStore := journal.NewWithPorts(legacy, legacy)
@@ -259,6 +298,19 @@ func runGraphTerminalCatalog(seed int64, replay *Trace) (trace Trace, runErr err
 		if e = recover(); e != nil {
 			return trace, e
 		}
+		if mode == "repeat_corrupt" {
+			cache, e := projection.Get(ctx, identity.Key(typ, id))
+			if e != nil {
+				return trace, e
+			}
+			corrupt, _ := json.Marshal(wf.Outcome{InvSeq: h.InvSeq, Error: "repeated corruption"})
+			if _, e = projection.Update(ctx, identity.Key(typ, id), corrupt, cache.Revision); e != nil {
+				return trace, e
+			}
+			if e = recover(); e != nil {
+				return trace, e
+			}
+		}
 		if mode == "repeat_delete" {
 			cache, e := projection.Get(ctx, identity.Key(typ, id))
 			if e != nil {
@@ -272,14 +324,20 @@ func runGraphTerminalCatalog(seed int64, replay *Trace) (trace Trace, runErr err
 			}
 		}
 		after, e := leasesKV.Get(ctx, identity.Key(typ, id))
-		if e != nil || before.Revision != after.Revision || !bytes.Equal(before.Value, after.Value) || handlers != 0 {
-			return trace, fmt.Errorf("catalog recovery changed foreign lease or entered handler: %v/%d", e, handlers)
-		}
-		if e = owner.Renew(ctx); e != nil {
-			return trace, e
-		}
-		if e = owner.Release(ctx); e != nil {
-			return trace, e
+		if mode == "lease_free_corrupt" {
+			if !errors.Is(e, jetstream.ErrKeyNotFound) || handlers != 0 {
+				return trace, fmt.Errorf("owned audit left a lease or ran handler: %v/%d", e, handlers)
+			}
+		} else {
+			if e != nil || before.Revision != after.Revision || !bytes.Equal(before.Value, after.Value) || handlers != 0 {
+				return trace, fmt.Errorf("catalog recovery changed foreign lease or entered handler: %v/%d", e, handlers)
+			}
+			if e = owner.Renew(ctx); e != nil {
+				return trace, e
+			}
+			if e = owner.Release(ctx); e != nil {
+				return trace, e
+			}
 		}
 		records, current, e := graph.Read(ctx, typ, id, h.InvSeq)
 		if e != nil || current != tail || len(records) != 2 || !bytes.Equal(records[1].Payload, body) {
