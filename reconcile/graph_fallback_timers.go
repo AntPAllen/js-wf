@@ -59,7 +59,14 @@ func (s *FallbackTimerScan) graphTimerDecision(ctx context.Context, typ, id stri
 	if err != nil {
 		return false, false, err
 	}
-	if status == nil || status.State.Pending {
+	if status == nil {
+		// A confirmed absent local reservation gives this store no authority
+		// to wake or delete a hint in the shared timer stream. Other namespaces
+		// may own it. Advance this pass while retaining the hint for its owner;
+		// an uncertain observation above still stops the scan.
+		return false, false, nil
+	}
+	if status.State.Pending {
 		return false, false, journal.ErrUnknown
 	}
 	if status.State.Invocation != generation {

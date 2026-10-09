@@ -1,0 +1,15 @@
+=== RUN   TestGraphFallbackTimerSkipsForeignNamespace
+=== RUN   TestGraphFallbackTimerSkipsForeignNamespace/healthy
+    graph_fallback_namespace_test.go:48: FAULT_SEED=17 mode=healthy
+    graph_fallback_namespace_test.go:125: FAULT_SEED=17 foreign hint blocked or mutated: {RetrySequence:0 NextSequence:2 Inspected:1 Reenqueued:0 Removed:0 Candidates:[]} journal append outcome unknown &{graphFallbackPort:{source:0x1dfd6ccaeb40 timer:<nil> held:false unknownLease:false forged:false publishUnknown:false deleteUnknown:false publications:0 deletions:0} timers:map[1:0x1dfd6ce69a40 2:0x1dfd6cf0c140] wakeups:[] deleted:[]}
+=== RUN   TestGraphFallbackTimerSkipsForeignNamespace/authority-unknown
+    graph_fallback_namespace_test.go:48: FAULT_SEED=17 mode=authority-unknown
+=== RUN   TestGraphFallbackTimerSkipsForeignNamespace/local-pending
+    graph_fallback_namespace_test.go:48: FAULT_SEED=17 mode=local-pending
+--- FAIL: TestGraphFallbackTimerSkipsForeignNamespace (0.01s)
+    --- FAIL: TestGraphFallbackTimerSkipsForeignNamespace/healthy (0.00s)
+    --- PASS: TestGraphFallbackTimerSkipsForeignNamespace/authority-unknown (0.00s)
+    --- PASS: TestGraphFallbackTimerSkipsForeignNamespace/local-pending (0.00s)
+FAIL
+FAIL	js-wf/reconcile	0.017s
+FAIL

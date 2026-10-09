@@ -1,0 +1,26 @@
+{
+  "before_fix": {
+    "production_revision": "f18a978",
+    "fixture": "new uncommitted directed model test",
+    "command": "GOMAXPROCS=1 GOMEMLIMIT=512MiB go test ./reconcile -run '^TestGraphFallbackTimerSkipsForeignNamespace$' -count=1 -timeout=1m -v",
+    "actual_child_exit": 1,
+    "package_seconds": 0.017,
+    "seed": 17,
+    "failure": "foreign hint produced ErrUnknown before owned second timer"
+  },
+  "final": {
+    "command": "GOMAXPROCS=1 GOMEMLIMIT=512MiB go test -race ./reconcile -run '^(TestGraphFallbackTimerSkipsForeignNamespace|TestGraphFallbackTimerCanonicalDecisions|TestNativeGraphFallbackTimerIgnoresForgedState)$' -count=1 -timeout=2m -v",
+    "actual_child_exit": 0,
+    "package_seconds": 2.94
+  },
+  "other_actual_exits": {
+    "development-build.log": 1,
+    "development-counter.log": 1,
+    "initial-race-pass.log": 0
+  },
+  "review_sources": {
+    "reconcile/graph_fallback_timers.go": "dcdbea3eab54b778ccb7b60034f936021543da0b0cf3953e2bec72fb9acb48f7",
+    "reconcile/graph_fallback_namespace_test.go": "b7b67302ae7439a7c65edb05593b49682a723932c9085f70b4052d722e76a162"
+  },
+  "scope": "Directed seed-17 in-memory bug reproduction/control, existing fallback decisions and native R1 forged-state fixture. No complete seeded-family/replay or full current qualification claim."
+}

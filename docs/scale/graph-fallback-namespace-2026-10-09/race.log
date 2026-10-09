@@ -1,0 +1,44 @@
+=== RUN   TestGraphFallbackTimerSkipsForeignNamespace
+=== RUN   TestGraphFallbackTimerSkipsForeignNamespace/healthy
+    graph_fallback_namespace_test.go:48: FAULT_SEED=17 mode=healthy
+=== RUN   TestGraphFallbackTimerSkipsForeignNamespace/authority-unknown
+    graph_fallback_namespace_test.go:48: FAULT_SEED=17 mode=authority-unknown
+=== RUN   TestGraphFallbackTimerSkipsForeignNamespace/local-pending
+    graph_fallback_namespace_test.go:48: FAULT_SEED=17 mode=local-pending
+--- PASS: TestGraphFallbackTimerSkipsForeignNamespace (0.29s)
+    --- PASS: TestGraphFallbackTimerSkipsForeignNamespace/healthy (0.10s)
+    --- PASS: TestGraphFallbackTimerSkipsForeignNamespace/authority-unknown (0.09s)
+    --- PASS: TestGraphFallbackTimerSkipsForeignNamespace/local-pending (0.09s)
+=== RUN   TestGraphFallbackTimerCanonicalDecisions
+=== RUN   TestGraphFallbackTimerCanonicalDecisions/due
+    graph_fallback_timers_test.go:161: mode=due publications=1 deletions=1 error=<nil>
+=== RUN   TestGraphFallbackTimerCanonicalDecisions/held
+    graph_fallback_timers_test.go:161: mode=held publications=0 deletions=0 error=<nil>
+=== RUN   TestGraphFallbackTimerCanonicalDecisions/lease-unknown
+    graph_fallback_timers_test.go:161: mode=lease-unknown publications=0 deletions=0 error=journal append outcome unknown: context deadline exceeded
+=== RUN   TestGraphFallbackTimerCanonicalDecisions/source-forged
+    graph_fallback_timers_test.go:161: mode=source-forged publications=0 deletions=0 error=journal gap or corrupt entry
+=== RUN   TestGraphFallbackTimerCanonicalDecisions/hint-forged
+    graph_fallback_timers_test.go:161: mode=hint-forged publications=0 deletions=0 error=journal gap or corrupt entry
+=== RUN   TestGraphFallbackTimerCanonicalDecisions/publish-unknown
+    graph_fallback_timers_test.go:161: mode=publish-unknown publications=1 deletions=0 error=context deadline exceeded
+=== RUN   TestGraphFallbackTimerCanonicalDecisions/delete-unknown
+    graph_fallback_timers_test.go:161: mode=delete-unknown publications=1 deletions=0 error=context deadline exceeded
+=== RUN   TestGraphFallbackTimerCanonicalDecisions/authority-unknown
+    graph_fallback_timers_test.go:161: mode=authority-unknown publications=0 deletions=0 error=journal append outcome unknown: simulated transport lost
+=== RUN   TestGraphFallbackTimerCanonicalDecisions/terminal
+    graph_fallback_timers_test.go:161: mode=terminal publications=0 deletions=1 error=<nil>
+--- PASS: TestGraphFallbackTimerCanonicalDecisions (0.42s)
+    --- PASS: TestGraphFallbackTimerCanonicalDecisions/due (0.08s)
+    --- PASS: TestGraphFallbackTimerCanonicalDecisions/held (0.02s)
+    --- PASS: TestGraphFallbackTimerCanonicalDecisions/lease-unknown (0.03s)
+    --- PASS: TestGraphFallbackTimerCanonicalDecisions/source-forged (0.06s)
+    --- PASS: TestGraphFallbackTimerCanonicalDecisions/hint-forged (0.03s)
+    --- PASS: TestGraphFallbackTimerCanonicalDecisions/publish-unknown (0.07s)
+    --- PASS: TestGraphFallbackTimerCanonicalDecisions/delete-unknown (0.03s)
+    --- PASS: TestGraphFallbackTimerCanonicalDecisions/authority-unknown (0.06s)
+    --- PASS: TestGraphFallbackTimerCanonicalDecisions/terminal (0.03s)
+=== RUN   TestNativeGraphFallbackTimerIgnoresForgedState
+--- PASS: TestNativeGraphFallbackTimerIgnoresForgedState (1.22s)
+PASS
+ok  	js-wf/reconcile	2.940s
