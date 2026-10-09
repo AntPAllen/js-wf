@@ -1,5 +1,9 @@
 # JetStream Durable Workflow Runtime — Implementation Plan
 
+## Retained expiry-family race independently accepted — 2026-10-09
+
+The focused retained expiry race completes all 1,000 bodies/exact replays in 3,915.68 seconds with actual child exit zero and all 30 publication/intent-expiry/root-reply combinations. [Independent executed review](scale/graph-signal-expiry-actors-2026-10-09/complete-race-systemd/README.md) verifies command/terminal counts, actual race binary/hash and 1,756 observed inputs against published e971d01 Git objects, while preserving the source snapshot's post-launch limitation. This qualifies only that retained family/cohort; it is not complete current 156-family/all-841-pin acceptance. Full frozen151 race and frozen full155 normal remain active and exclude later code. All original broader gates, native checkpoint R3 failure, public admission and production collection requirements remain open.
+
 ## Frozen full155 normal campaign started; expiry race terminal pending review — 2026-10-09
 
 The systemd queue released at 22:32:46 UTC after the focused chain became inactive. Its actual runner is live with the revalidated frozen 1f316a2 155-family/835-pin source; [launch controls and scope](scale/graph-current155-qualification-2026-10-09/README.md). The expiry family at retained e971d01 records raw PASS, 1,000 completed bodies and actual exit zero in 3,915.68 seconds, but independent acceptance review is pending. Full151 race is still active. These older source cuts exclude all later changes, including the current 156th family and envelope guard; complete current qualification and all original broader gates remain open.

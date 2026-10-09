@@ -1,0 +1,77 @@
+{
+  "source_cohort": "e971d01ca441bd9ddc32b2e6a56fb9bbc6fb4eac",
+  "git_matched_observed_inputs": 1756,
+  "actual_child_exit": 0,
+  "completed_bodies": 1000,
+  "exact_replays": 1000,
+  "elapsed_seconds": 3915.68,
+  "combinations": {
+    "enqueue_drop/expire_intents/drop_before_commit": 35,
+    "enqueue_drop/expire_intents/healthy": 34,
+    "enqueue_drop/expire_intents/lose_ack_after_commit": 23,
+    "enqueue_drop/live/drop_before_commit": 40,
+    "enqueue_drop/live/healthy": 30,
+    "enqueue_drop/live/lose_ack_after_commit": 43,
+    "enqueue_lost_ack/expire_intents/drop_before_commit": 39,
+    "enqueue_lost_ack/expire_intents/healthy": 36,
+    "enqueue_lost_ack/expire_intents/lose_ack_after_commit": 31,
+    "enqueue_lost_ack/live/drop_before_commit": 55,
+    "enqueue_lost_ack/live/healthy": 34,
+    "enqueue_lost_ack/live/lose_ack_after_commit": 29,
+    "healthy/expire_intents/drop_before_commit": 31,
+    "healthy/expire_intents/healthy": 36,
+    "healthy/expire_intents/lose_ack_after_commit": 40,
+    "healthy/live/drop_before_commit": 34,
+    "healthy/live/healthy": 23,
+    "healthy/live/lose_ack_after_commit": 29,
+    "source_drop/expire_intents/drop_before_commit": 29,
+    "source_drop/expire_intents/healthy": 38,
+    "source_drop/expire_intents/lose_ack_after_commit": 40,
+    "source_drop/live/drop_before_commit": 32,
+    "source_drop/live/healthy": 29,
+    "source_drop/live/lose_ack_after_commit": 37,
+    "source_lost_ack/expire_intents/drop_before_commit": 28,
+    "source_lost_ack/expire_intents/healthy": 27,
+    "source_lost_ack/expire_intents/lose_ack_after_commit": 33,
+    "source_lost_ack/live/drop_before_commit": 29,
+    "source_lost_ack/live/healthy": 31,
+    "source_lost_ack/live/lose_ack_after_commit": 25
+  },
+  "binary_sha256": "6e57a9602a1939abdf2d454bd4772ff2ebd77c5108cd049c55128cc2e5612154",
+  "actual_race_instrumentation": true,
+  "raw_log_sha256": "55c3bbd0b9f308518fe04cb2a740dd38561cb7339fe436b881999cec2126ff99",
+  "normal_captures": {
+    "expire_intents-drop_before_commit.json": {
+      "seed": 2,
+      "sha256": "28c2921b961b0c7eb2a3ffa88f4be63bf184dc1e5ae40cad3cef30efa4050b53",
+      "intent_expiry_cuts": 1
+    },
+    "expire_intents-healthy.json": {
+      "seed": 4,
+      "sha256": "55a6c9a4426c8fc942e23a8b72d0d342c40c6aa1721944518d0b8eca40e79a95",
+      "intent_expiry_cuts": 1
+    },
+    "expire_intents-lose_ack_after_commit.json": {
+      "seed": 8,
+      "sha256": "2263877fc8257e12aec4ddfcd687e2202cc349d45dbf23cc3b63839f5bbc80c9",
+      "intent_expiry_cuts": 1
+    },
+    "live-drop_before_commit.json": {
+      "seed": 3,
+      "sha256": "29474a283ff4c13223d504675423d57aee7400c4e65e0dc9d4083fb850acd4bb",
+      "intent_expiry_cuts": 0
+    },
+    "live-healthy.json": {
+      "seed": 12,
+      "sha256": "7042dae12a2f4392117ec2a468095d4af703320a98ea8e1fe7cf48dd3e561d62",
+      "intent_expiry_cuts": 0
+    },
+    "live-lose_ack_after_commit.json": {
+      "seed": 1,
+      "sha256": "af8f77135c33e18b98adb7c24f339e7da7456e3cd2ba90a9fced437cac8629fc",
+      "intent_expiry_cuts": 0
+    }
+  },
+  "source_snapshot_limitation": "Observed after launch, not pre-compilation; later five registered runtime traces excluded from original manifest. Current worktree has later changes and is not asserted unchanged. Race working directory was mutable main/sim; the selected compiled family uses in-memory fixtures, not current corpus replay.",
+  "scope": "Focused retained expiry-family normal/race cohort only; no full current/all-pin/extended/native or production acceptance."
+}

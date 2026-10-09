@@ -13,3 +13,7 @@ This covers all declared fault combinations and samples actor-operation permutat
 ## Race CPU budget and serialization
 
 The expiry workload takes 597.57 seconds normally, compared with 316.523 seconds for the preceding actor workload. That preceding live race campaign needed about nine minutes for its first 100 bodies while other jobs shared the VM. The expiry family therefore uses the existing full-suite 300-minute CPU watchdog rather than the initially configured 90 minutes; seed counts, per-schedule assertions and production/virtual deadlines are unchanged. The VM currently exposes four CPUs. The first new race attempt was deliberately stopped with SIGTERM (actual child exit -15) to avoid a third GOMAXPROCS=2 campaign. The replacement queue records both live test process identities and starts only after one becomes terminal; original race attempts remain intact. Queue time/intent is not race acceptance.
+
+## Focused race accepted with retained provenance limitation
+
+The supervised retained binary completes 1,000 bodies/exact replays in 3,915.68 seconds with actual exit zero. [Independent executed review](complete-race-systemd/README.md) checks 30 positive combination counts, 1,756 Git-matched observed inputs, race binary provenance and exact terminal output. The post-launch source snapshot limitation is retained; this is focused expiry-family evidence, not current full-suite/all-pin acceptance.
