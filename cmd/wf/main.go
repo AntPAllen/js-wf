@@ -47,6 +47,7 @@ func runWithJetStreamOptions(args []string, out io.Writer, options ...jetstream.
 	url := flags.String("url", os.Getenv("NATS_URL"), "NATS server URL")
 	graphAuthority := flags.String("graph-authority-stream", "", "experimental canonical graph authority stream (pre-provisioned)")
 	graphPrefix := flags.String("graph-authority-prefix", "", "experimental canonical graph authority prefix")
+	graphViewNamespace := flags.String("graph-view-namespace", "", "explicit PostgreSQL namespace for graph visibility")
 	graphViewBucket := flags.String("graph-view-bucket", "", "separately provisioned graph visibility query bucket")
 	graphBucket := flags.String("graph-object-bucket", "", "experimental canonical graph object bucket (pre-provisioned)")
 	graphReplicas := flags.Int("replicas", 3, "expected graph store replica count")
@@ -85,15 +86,21 @@ func runWithJetStreamOptions(args []string, out io.Writer, options ...jetstream.
 			return fmt.Errorf("graph runtime migration for %s is incomplete", command[0])
 		}
 	}
-	if graphConfig == nil && *graphViewBucket != "" {
-		return errors.New("graph-view-bucket requires graph runtime configuration")
+	if graphConfig == nil && (*graphViewBucket != "" || *graphViewNamespace != "") {
+		return errors.New("graph visibility sink requires graph runtime configuration")
 	}
+	graphViewSink := *graphViewBucket
 	if graphConfig != nil && (command[0] == "project" || command[0] == "list" || command[0] == "lag") {
-		if err := visibility.ValidateGraphViewBucket(*graphViewBucket); err != nil {
-			return err
-		}
 		if *postgresDSN != "" {
-			return errors.New("graph PostgreSQL visibility namespace migration is incomplete")
+			if *graphViewNamespace == "" || *graphViewBucket != "" {
+				return errors.New("graph PostgreSQL visibility requires graph-view-namespace and no graph-view-bucket")
+			}
+			graphViewSink = *graphViewNamespace
+		} else if *graphViewNamespace != "" {
+			return errors.New("graph-view-namespace requires PostgreSQL visibility")
+		}
+		if err := visibility.ValidateGraphViewBucket(graphViewSink); err != nil {
+			return err
 		}
 	}
 	encode := func(value any) error {
@@ -158,7 +165,7 @@ func runWithJetStreamOptions(args []string, out io.Writer, options ...jetstream.
 			return err
 		}
 		defer db.Close()
-		projectionOptions = append(projectionOptions, visibility.WithPostgres(&visibility.PostgresStore{DB: db}))
+		projectionOptions = append(projectionOptions, visibility.WithPostgres(&visibility.PostgresStore{DB: db, Namespace: *graphViewNamespace}))
 	}
 	if command[0] == "project" {
 		if graphConfig != nil {
@@ -166,7 +173,7 @@ func runWithJetStreamOptions(args []string, out io.Writer, options ...jetstream.
 			if err != nil {
 				return daemonExit(daemonCtx, err)
 			}
-			projectionOptions = append(projectionOptions, visibility.WithGraphJournal(graph, *graphViewBucket), visibility.WithGraphRefreshInterval(*interval))
+			projectionOptions = append(projectionOptions, visibility.WithGraphJournal(graph, graphViewSink), visibility.WithGraphRefreshInterval(*interval))
 		}
 		if len(command) != 1 {
 			return errors.New("usage: wf project")
@@ -440,7 +447,7 @@ func runWithJetStreamOptions(args []string, out io.Writer, options ...jetstream.
 			return encode(map[string]any{"type": command[1], "id": command[2], "inv_seq": invocation, "journal": records})
 		}
 		if graph != nil {
-			projectionOptions = append(projectionOptions, visibility.WithGraphJournal(graph, *graphViewBucket))
+			projectionOptions = append(projectionOptions, visibility.WithGraphJournal(graph, graphViewSink))
 		}
 		projection, err := visibility.New(ctx, js, projectionOptions...)
 		if err != nil {

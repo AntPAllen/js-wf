@@ -30,7 +30,7 @@ Supported commands:
 
 For Start and Signal, `-input-file FILE` replaces the final JSON operand. Files must contain valid JSON and are limited to 64 MiB. SDK/storage limits still apply. Canonical results and journal reads do not trust `WF_STATE` or fall back to `WF_JRN`. Exported journal payload references remain references; this export is not a self-contained replay bundle.
 
-Graph project/list/lag now accept a separately provisioned `-graph-view-bucket`; see [canonical KV visibility](../graph-visibility-2026-10-09/README.md). Legacy journal capacity and tombstone sweep/scan/loop commands report that their migration is incomplete. Assignment commands remain available. Legacy mode remains the default when graph flags are absent. Continuation, fallback timers, imports, production GC and complete deployment/adoption remain open.
+Graph project/list/lag now accept a separately provisioned `-graph-view-bucket`; see [canonical KV visibility](../graph-visibility-2026-10-09/README.md). Graph PostgreSQL queries select `-postgres-dsn` plus `-graph-view-namespace`; see [canonical PostgreSQL visibility](../graph-postgres-visibility-2026-10-09/README.md). Legacy journal capacity and tombstone sweep/scan/loop commands report that their migration is incomplete. Assignment commands remain available. Legacy mode remains the default when graph flags are absent. Continuation, fallback timers, imports, production GC and complete deployment/adoption remain open.
 
 ## Component evidence
 

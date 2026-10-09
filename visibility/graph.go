@@ -16,7 +16,7 @@ import (
 )
 
 // WithGraphJournal selects canonical history and a separately provisioned query
-// bucket. The bucket is a rebuildable projection, never workflow authority.
+// bucket or PostgreSQL namespace. The sink is rebuildable, never authority.
 // ValidateGraphViewBucket prevents selecting the runtime's standard state,
 // lease, assignment or legacy query buckets as a disposable projection sink.
 func ValidateGraphViewBucket(bucket string) error {
@@ -140,14 +140,24 @@ func (p *Projection) describeGraph(ctx context.Context, input *jetstream.RawStre
 }
 
 func newGraphProjection(ctx context.Context, p *Projection, inv jetstream.Stream) (*Projection, error) {
+	p.inv = inv
 	if p.postgres != nil {
-		return nil, fmt.Errorf("graph PostgreSQL visibility namespace migration is incomplete")
+		if p.postgres.Namespace == "" || p.postgres.Namespace != p.graphBucket {
+			return nil, fmt.Errorf("graph PostgreSQL visibility requires a matching explicit namespace")
+		}
+		if err := p.postgres.Init(ctx); err != nil {
+			return nil, err
+		}
+	} else {
+		if err := ValidateGraphViewBucket(p.graphBucket); err != nil {
+			return nil, err
+		}
+		view, err := p.js.KeyValue(ctx, p.graphBucket)
+		if err != nil {
+			return nil, err
+		}
+		p.view = view
 	}
-	view, err := p.js.KeyValue(ctx, p.graphBucket)
-	if err != nil {
-		return nil, err
-	}
-	p.inv, p.view = inv, view
 	p.graphLeaseCheck = func(ctx context.Context, typ, id string) (bool, error) {
 		kv, err := p.js.KeyValue(ctx, "WF_LEASE")
 		if err != nil {
@@ -182,6 +192,13 @@ func (p *Projection) refreshGraph(ctx context.Context, force bool) error {
 	through, err := p.graph.StartCatalogHighWater(ctx)
 	if err != nil {
 		return err
+	}
+	generation := ""
+	if p.postgres != nil {
+		generation, err = newGeneration()
+		if err != nil {
+			return err
+		}
 	}
 	wanted := map[string]bool{}
 	for next := uint64(1); next <= through; {
@@ -230,14 +247,20 @@ func (p *Projection) refreshGraph(ctx context.Context, force bool) error {
 		if err != nil {
 			return err
 		}
-		if err = p.putRow(ctx, row); err != nil {
+		if err = p.putRowGeneration(ctx, row, generation); err != nil {
 			return err
+		}
+		if p.postgres != nil {
+			continue
 		}
 		wanted[rowKey(row.Type, row.ID)] = true
 		wanted[indexKey(row)] = true
 		for _, key := range attributeIndexKeys(row) {
 			wanted[key] = true
 		}
+	}
+	if p.postgres != nil {
+		return p.postgres.DeleteOtherGenerations(ctx, generation)
 	}
 	keys, err := p.view.Keys(ctx)
 	if errors.Is(err, jetstream.ErrNoKeysFound) {

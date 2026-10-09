@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"context"
+	"database/sql"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -29,6 +30,11 @@ import (
 
 func TestGraphOperatorRejectsPartialOrLegacyOnlySelection(t *testing.T) {
 	for _, args := range [][]string{
+		{"-graph-view-namespace", "graph-test", "list"},
+		{"-graph-authority-stream", "AUTH", "-graph-authority-prefix", "wf.graph", "-graph-object-bucket", "OBJECTS", "-postgres-dsn", "postgres://invalid", "list"},
+		{"-graph-authority-stream", "AUTH", "-graph-authority-prefix", "wf.graph", "-graph-object-bucket", "OBJECTS", "-graph-view-namespace", "graph-test", "list"},
+		{"-graph-authority-stream", "AUTH", "-graph-authority-prefix", "wf.graph", "-graph-object-bucket", "OBJECTS", "-postgres-dsn", "postgres://invalid", "-graph-view-namespace", "graph-test", "-graph-view-bucket", "VIEW", "project"},
+
 		{"-graph-authority-stream", "AUTH", "result", "test", "id"},
 		{"-graph-authority-stream", "AUTH", "-graph-authority-prefix", "wf.graph", "-graph-object-bucket", "OBJECTS", "journal-capacity"},
 		{"-graph-authority-stream", "AUTH", "-graph-authority-prefix", "wf.graph", "-graph-object-bucket", "OBJECTS", "scan-tombstones"},
@@ -44,6 +50,15 @@ func TestGraphOperatorRejectsPartialOrLegacyOnlySelection(t *testing.T) {
 }
 
 func TestNativeCanonicalGraphOperatorCommands(t *testing.T) {
+	testNativeCanonicalGraphOperatorCommands(t, false)
+}
+func TestNativeCanonicalGraphPostgresOperatorCommands(t *testing.T) {
+	if os.Getenv("WF_TEST_POSTGRES_DSN") == "" {
+		t.Skip("set WF_TEST_POSTGRES_DSN")
+	}
+	testNativeCanonicalGraphOperatorCommands(t, true)
+}
+func testNativeCanonicalGraphOperatorCommands(t *testing.T, postgres bool) {
 	marker := filepath.Join(operatorTempDir(t), "replay-effect")
 	t.Setenv("WF_REPLAY_EFFECT_MARKER", marker)
 	for _, domain := range []string{"", "WFGRAPHOPS"} {
@@ -129,11 +144,24 @@ func TestNativeCanonicalGraphOperatorCommands(t *testing.T) {
 			if _, err = js.CreateKeyValue(ctx, jetstream.KeyValueConfig{Bucket: viewBucket, Replicas: count}); err != nil {
 				t.Fatal(err)
 			}
-			projection, err := visibility.New(ctx, js, visibility.WithGraphJournal(graph, viewBucket), visibility.WithGraphRefreshInterval(100*time.Millisecond))
+			viewArgs := []string{"-graph-view-bucket", viewBucket}
+			projectionOpts := []visibility.Option{visibility.WithGraphJournal(graph, viewBucket), visibility.WithGraphRefreshInterval(100 * time.Millisecond)}
+			if postgres {
+				dsn := os.Getenv("WF_TEST_POSTGRES_DSN")
+				db, err := sql.Open("pgx", dsn)
+				if err != nil {
+					t.Fatal(err)
+				}
+				defer db.Close()
+				namespace := t.Name()
+				viewArgs = []string{"-postgres-dsn", dsn, "-graph-view-namespace", namespace}
+				projectionOpts = []visibility.Option{visibility.WithGraphJournal(graph, namespace), visibility.WithPostgres(&visibility.PostgresStore{DB: db, Namespace: namespace})}
+			}
+			projection, err := visibility.New(ctx, js, projectionOpts...)
 			if err != nil {
 				t.Fatal(err)
 			}
-			projectArgs := append(append([]string(nil), base...), "-graph-view-bucket", viewBucket, "-interval", "100ms", "project")
+			projectArgs := append(append(append([]string(nil), base...), viewArgs...), "-interval", "100ms", "project")
 			encodedArgs, _ := json.Marshal(projectArgs)
 			projectRoot := operatorTempDir(t)
 			projectLog, err := os.Create(filepath.Join(projectRoot, "project.log"))
@@ -162,6 +190,14 @@ func TestNativeCanonicalGraphOperatorCommands(t *testing.T) {
 					}
 					if domain != "" && (!strings.Contains(string(trace), "request=$JS."+domain+".API.") || strings.Contains(string(trace), "request=$JS.API.")) {
 						t.Error("graph project domain API mismatch")
+					}
+					if postgres {
+						if err := projection.Rebuild(ctx); err != nil {
+							t.Error("graph PostgreSQL rebuild after projector shutdown", err)
+						}
+						if _, err := projection.Get(ctx, "graph-operator", "success"); !errors.Is(err, visibility.ErrNotFound) {
+							t.Error("purged PostgreSQL row retained after rebuild", err)
+						}
 					}
 					t.Log("graph project subprocess joined; legacy journal requests zero and domain API verified")
 				case <-time.After(5 * time.Second):
@@ -311,7 +347,11 @@ func TestNativeCanonicalGraphOperatorCommands(t *testing.T) {
 			if _, err = legacyView.Put(ctx, "row.foreign.legacy", foreign); err != nil {
 				t.Fatal(err)
 			}
-			listed, err := call("-graph-view-bucket", viewBucket, "-limit", "1", "-rebuild", "list", "completed")
+			listArgs := append(append([]string(nil), viewArgs...), "-limit", "1")
+			if !postgres {
+				listArgs = append(listArgs, "-rebuild")
+			}
+			listed, err := call(append(listArgs, "list", "completed")...)
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -319,7 +359,7 @@ func TestNativeCanonicalGraphOperatorCommands(t *testing.T) {
 			if err = json.Unmarshal(listed, &page); err != nil || len(page.Rows) != 1 || page.Rows[0].Type != typ || page.Rows[0].ID != "success" || page.Rows[0].Status != "completed" {
 				t.Fatal("graph view mixed sources", page, err)
 			}
-			if _, err = call("-graph-view-bucket", viewBucket, "lag"); err != nil {
+			if _, err = call(append(append([]string(nil), viewArgs...), "lag")...); err != nil {
 				t.Fatal(err)
 			}
 			if _, err = call("describe", typ, "success"); err != nil {

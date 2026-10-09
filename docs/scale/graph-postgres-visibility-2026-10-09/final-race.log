@@ -1,0 +1,62 @@
+=== RUN   TestGraphVisibilityCanonicalRowsAndUncertainty
+=== RUN   TestGraphVisibilityCanonicalRowsAndUncertainty/ordinary
+    graph_test.go:260: mode=ordinary canonical status/attributes, no input body reads, bounded catalog and lag
+=== RUN   TestGraphVisibilityCanonicalRowsAndUncertainty/catalog-unknown
+=== RUN   TestGraphVisibilityCanonicalRowsAndUncertainty/source-forged
+=== RUN   TestGraphVisibilityCanonicalRowsAndUncertainty/lease-held
+    graph_test.go:260: mode=lease-held canonical status/attributes, no input body reads, bounded catalog and lag
+=== RUN   TestGraphVisibilityCanonicalRowsAndUncertainty/lease-unknown
+=== RUN   TestGraphVisibilityCanonicalRowsAndUncertainty/retired
+    graph_test.go:260: mode=retired canonical status/attributes, no input body reads, bounded catalog and lag
+--- PASS: TestGraphVisibilityCanonicalRowsAndUncertainty (0.23s)
+    --- PASS: TestGraphVisibilityCanonicalRowsAndUncertainty/ordinary (0.04s)
+    --- PASS: TestGraphVisibilityCanonicalRowsAndUncertainty/catalog-unknown (0.03s)
+    --- PASS: TestGraphVisibilityCanonicalRowsAndUncertainty/source-forged (0.02s)
+    --- PASS: TestGraphVisibilityCanonicalRowsAndUncertainty/lease-held (0.05s)
+    --- PASS: TestGraphVisibilityCanonicalRowsAndUncertainty/lease-unknown (0.02s)
+    --- PASS: TestGraphVisibilityCanonicalRowsAndUncertainty/retired (0.05s)
+=== RUN   TestGraphPostgresVisibilityCanonicalRowsAndUncertainty
+=== RUN   TestGraphPostgresVisibilityCanonicalRowsAndUncertainty/ordinary
+    graph_test.go:260: mode=ordinary canonical status/attributes, no input body reads, bounded catalog and lag
+=== RUN   TestGraphPostgresVisibilityCanonicalRowsAndUncertainty/catalog-unknown
+=== RUN   TestGraphPostgresVisibilityCanonicalRowsAndUncertainty/source-forged
+=== RUN   TestGraphPostgresVisibilityCanonicalRowsAndUncertainty/lease-held
+    graph_test.go:260: mode=lease-held canonical status/attributes, no input body reads, bounded catalog and lag
+=== RUN   TestGraphPostgresVisibilityCanonicalRowsAndUncertainty/lease-unknown
+=== RUN   TestGraphPostgresVisibilityCanonicalRowsAndUncertainty/retired
+    graph_test.go:260: mode=retired canonical status/attributes, no input body reads, bounded catalog and lag
+--- PASS: TestGraphPostgresVisibilityCanonicalRowsAndUncertainty (0.55s)
+    --- PASS: TestGraphPostgresVisibilityCanonicalRowsAndUncertainty/ordinary (0.13s)
+    --- PASS: TestGraphPostgresVisibilityCanonicalRowsAndUncertainty/catalog-unknown (0.05s)
+    --- PASS: TestGraphPostgresVisibilityCanonicalRowsAndUncertainty/source-forged (0.05s)
+    --- PASS: TestGraphPostgresVisibilityCanonicalRowsAndUncertainty/lease-held (0.10s)
+    --- PASS: TestGraphPostgresVisibilityCanonicalRowsAndUncertainty/lease-unknown (0.07s)
+    --- PASS: TestGraphPostgresVisibilityCanonicalRowsAndUncertainty/retired (0.15s)
+=== RUN   TestGraphVisibilityConfiguration
+--- PASS: TestGraphVisibilityConfiguration (0.00s)
+PASS
+ok  	js-wf/visibility	1.798s
+=== RUN   TestGraphOperatorRejectsPartialOrLegacyOnlySelection
+--- PASS: TestGraphOperatorRejectsPartialOrLegacyOnlySelection (0.00s)
+=== RUN   TestNativeCanonicalGraphOperatorCommands
+=== RUN   TestNativeCanonicalGraphOperatorCommands/R1
+    graph_test.go:440: canonical CLI large Start/Signal/result, forged mirror ignored, canonical online/offline replay after source/blob deletion, canonical CLI project/list/lag and isolated page while worker active, history/scans, dry-run/apply terminal restoration, cancellation, purge and effect one; domain= requests=0 wrong=0
+    graph_test.go:202: graph project subprocess joined; legacy journal requests zero and domain API verified
+=== RUN   TestNativeCanonicalGraphOperatorCommands/R3Domain
+    graph_test.go:440: canonical CLI large Start/Signal/result, forged mirror ignored, canonical online/offline replay after source/blob deletion, canonical CLI project/list/lag and isolated page while worker active, history/scans, dry-run/apply terminal restoration, cancellation, purge and effect one; domain=WFGRAPHOPS requests=3890 wrong=0
+    graph_test.go:202: graph project subprocess joined; legacy journal requests zero and domain API verified
+--- PASS: TestNativeCanonicalGraphOperatorCommands (77.63s)
+    --- PASS: TestNativeCanonicalGraphOperatorCommands/R1 (35.05s)
+    --- PASS: TestNativeCanonicalGraphOperatorCommands/R3Domain (42.57s)
+=== RUN   TestNativeCanonicalGraphPostgresOperatorCommands
+=== RUN   TestNativeCanonicalGraphPostgresOperatorCommands/R1
+    graph_test.go:440: canonical CLI large Start/Signal/result, forged mirror ignored, canonical online/offline replay after source/blob deletion, canonical CLI project/list/lag and isolated page while worker active, history/scans, dry-run/apply terminal restoration, cancellation, purge and effect one; domain= requests=0 wrong=0
+    graph_test.go:202: graph project subprocess joined; legacy journal requests zero and domain API verified
+=== RUN   TestNativeCanonicalGraphPostgresOperatorCommands/R3Domain
+    graph_test.go:440: canonical CLI large Start/Signal/result, forged mirror ignored, canonical online/offline replay after source/blob deletion, canonical CLI project/list/lag and isolated page while worker active, history/scans, dry-run/apply terminal restoration, cancellation, purge and effect one; domain=WFGRAPHOPS requests=4302 wrong=0
+    graph_test.go:202: graph project subprocess joined; legacy journal requests zero and domain API verified
+--- PASS: TestNativeCanonicalGraphPostgresOperatorCommands (75.08s)
+    --- PASS: TestNativeCanonicalGraphPostgresOperatorCommands/R1 (34.56s)
+    --- PASS: TestNativeCanonicalGraphPostgresOperatorCommands/R3Domain (40.51s)
+PASS
+ok  	js-wf/cmd/wf	153.818s

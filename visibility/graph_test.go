@@ -2,9 +2,11 @@ package visibility
 
 import (
 	"context"
+	"database/sql"
 	"encoding/json"
 	"errors"
 	"fmt"
+	"os"
 	"testing"
 	"time"
 
@@ -84,6 +86,15 @@ func (p *graphViewPublication) Get(ctx context.Context, link retainedgraph.Link,
 }
 
 func TestGraphVisibilityCanonicalRowsAndUncertainty(t *testing.T) {
+	testGraphVisibilityCanonicalRowsAndUncertainty(t, false)
+}
+func TestGraphPostgresVisibilityCanonicalRowsAndUncertainty(t *testing.T) {
+	if os.Getenv("WF_TEST_POSTGRES_DSN") == "" {
+		t.Skip("set WF_TEST_POSTGRES_DSN")
+	}
+	testGraphVisibilityCanonicalRowsAndUncertainty(t, true)
+}
+func testGraphVisibilityCanonicalRowsAndUncertainty(t *testing.T, postgres bool) {
 	for _, mode := range []string{"ordinary", "catalog-unknown", "source-forged", "lease-held", "lease-unknown", "retired"} {
 		t.Run(mode, func(t *testing.T) {
 			ctx := context.Background()
@@ -136,9 +147,25 @@ func TestGraphVisibilityCanonicalRowsAndUncertainty(t *testing.T) {
 				}
 				return held, nil
 			}}
+			if postgres {
+				db, err := sql.Open("pgx", os.Getenv("WF_TEST_POSTGRES_DSN"))
+				if err != nil {
+					t.Fatal(err)
+				}
+				defer db.Close()
+				sink := &PostgresStore{DB: db, Namespace: t.Name()}
+				if err := sink.Init(ctx); err != nil {
+					t.Fatal(err)
+				}
+				defer db.ExecContext(context.Background(), "DROP TABLE "+sink.tableName())
+				p.postgres, p.view = sink, nil
+			}
 			// A failed scan cannot certify absence and prune a prior view.
 			prior := Row{SchemaVersion: 1, Type: h.Type, ID: h.ID, Status: "queued", InvSeq: h.InvSeq}
 			if e = p.putRow(ctx, prior); e != nil {
+				t.Fatal(e)
+			}
+			if e := p.putRow(ctx, Row{Type: "stale", ID: "prior", Status: "running"}); e != nil {
 				t.Fatal(e)
 			}
 			if mode == "catalog-unknown" {
@@ -156,10 +183,16 @@ func TestGraphVisibilityCanonicalRowsAndUncertainty(t *testing.T) {
 				if getErr != nil || row.Status != "queued" || port.pinWrites != 0 {
 					t.Fatal("failed scan mutated/pinned prior view", getErr, port.pinWrites)
 				}
+				if _, err := p.Get(ctx, "stale", "prior"); err != nil {
+					t.Fatal("uncertain scan pruned unrelated prior row", err)
+				}
 				return
 			}
 			if e != nil {
 				t.Fatal(e)
+			}
+			if _, err := p.Get(ctx, "stale", "prior"); !errors.Is(err, ErrNotFound) {
+				t.Fatal("successful scan retained stale row", err)
 			}
 			if mode == "lease-held" {
 				if port.pinWrites != 0 {
@@ -230,6 +263,13 @@ func TestGraphVisibilityCanonicalRowsAndUncertainty(t *testing.T) {
 }
 
 func TestGraphVisibilityConfiguration(t *testing.T) {
+	for _, namespace := range []string{"", "other"} {
+		p := &Projection{graphBucket: "GRAPH_VIEW", postgres: &PostgresStore{Namespace: namespace}}
+		if _, err := newGraphProjection(context.Background(), p, nil); err == nil {
+			t.Fatal("accepted missing/mismatched PostgreSQL namespace")
+		}
+	}
+
 	model := sim.NewGraphPublicationTransport(sim.NewScheduler(1))
 	store, err := journal.NewGraphStore(journal.GraphConfig{Protocol: model.Protocol(), CanonicalStarts: true, CanonicalSignals: true})
 	if err != nil {

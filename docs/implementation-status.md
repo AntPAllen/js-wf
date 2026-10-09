@@ -1,5 +1,9 @@
 # Implementation status against the supplied plan
 
+## Canonical graph PostgreSQL visibility and CLI — 2026-10-09
+
+Canonical graph projection now selects an explicit isolated PostgreSQL namespace for background refresh, rebuild, status/attribute queries, seek pagination and lag. A successful bounded catalog scan prunes old SQL generations; uncertainty preserves prior rows. CLI project/list/lag admit explicit PostgreSQL namespace configuration before dialing and reject conflicting KV sinks. Native R1/R3-domain component race checks exercise the actual CLI projector with large Start/Signal ownership, queries, replay, repair, cancellation, purge and shutdown; modeled graph uncertainty/lease/retirement checks run against real PostgreSQL. [Executed scope and configuration](scale/graph-postgres-visibility-2026-10-09/README.md). Large-scale/event-consumer adoption and every original remaining full/extended/runtime/native/soak/drain/adoption/release requirement remain required.
+
 ## PostgreSQL visibility namespace foundation — 2026-10-09
 
 The PostgreSQL sink now supports explicit namespaces with separate tables, indexes, generation cleanup and writer locks. Empty configuration retains the legacy table/lock. Component race checks exercise namespace isolation and existing native legacy projection/purge/rebuild/session-loss behavior. [Executed component scope](scale/postgres-namespace-2026-10-09/README.md). Canonical graph PostgreSQL projection and CLI integration remain incomplete; every original full/extended/native/scale/soak/drain/adoption/release requirement remains required.
