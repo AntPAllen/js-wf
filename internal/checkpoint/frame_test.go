@@ -7,8 +7,49 @@ import (
 	"encoding/json"
 	"errors"
 	"reflect"
+	"strings"
 	"testing"
 )
+
+func TestFrameRejectsAmbiguousEnvelopeWithMatchingHash(t *testing.T) {
+	f := fixture()
+	raw, _, err := Encode(f)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for name, value := range map[string]string{
+		"duplicate-version":   strings.Replace(string(raw), `"version":1`, `"version":0,"version":1`, 1),
+		"case-version":        strings.Replace(string(raw), `"version":1`, `"Version":1`, 1),
+		"case-anchor":         strings.Replace(string(raw), `"epoch":51`, `"Epoch":51`, 1),
+		"duplicate-state-key": strings.Replace(string(raw), `"state":{"total":23}`, `"state":{"total":22,"total":23}`, 1),
+		"escaped-state-key":   strings.Replace(string(raw), `"state":{"total":23}`, `"state":{"total":22,"\u0074otal":23}`, 1),
+	} {
+		t.Run(name, func(t *testing.T) {
+			candidate := []byte(value)
+			if bytes.Equal(candidate, raw) || !json.Valid(candidate) {
+				t.Fatal("invalid mutation fixture")
+			}
+			got, err := Decode(candidate, digest(candidate), f.Identity, f.Anchor)
+			if !errors.Is(err, ErrInvalid) || !reflect.DeepEqual(got, Frame{}) {
+				t.Fatal("noncanonical recovery returned state", got, err)
+			}
+		})
+	}
+}
+
+func TestFrameCanonicalEnvelopePreservesOpaqueLocals(t *testing.T) {
+	f := fixture()
+	f.Data = json.RawMessage(`{"z":1,"a":2,"a":3}`)
+	f.State["total"] = json.RawMessage(`{"z":1,"a":2}`)
+	raw, hash, err := Encode(f)
+	if err != nil {
+		t.Fatal(err)
+	}
+	got, err := Decode(raw, hash, f.Identity, f.Anchor)
+	if err != nil || !reflect.DeepEqual(got, f) {
+		t.Fatal("opaque JSON changed", got, err)
+	}
+}
 
 func fixture() Frame {
 	return Frame{

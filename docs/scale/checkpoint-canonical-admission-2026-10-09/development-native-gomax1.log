@@ -1,0 +1,19 @@
+=== RUN   TestNativeGraphCheckpointMaterializedReferences
+=== RUN   TestNativeGraphCheckpointMaterializedReferences/R1
+    graph_checkpoint_test.go:337: promise aliases=2 completion_payload_edges=3 materialized_index=132 blocked_prefix_reads=0
+=== RUN   TestNativeGraphCheckpointMaterializedReferences/R3Domain
+    graph_checkpoint_test.go:330: bounded stage execution context deadline exceeded context deadline exceeded
+--- FAIL: TestNativeGraphCheckpointMaterializedReferences (192.54s)
+    --- PASS: TestNativeGraphCheckpointMaterializedReferences/R1 (71.73s)
+    --- FAIL: TestNativeGraphCheckpointMaterializedReferences/R3Domain (120.81s)
+=== RUN   TestNativeGraphContinuationSDKFlow
+=== RUN   TestNativeGraphContinuationSDKFlow/R1
+    graph_continuation_sdk_test.go:516: SDK initial/next/finish=map[finish:1 initial:1 next:1] effects=2 records=20 result=43
+=== RUN   TestNativeGraphContinuationSDKFlow/R3Domain
+    graph_continuation_sdk_test.go:516: SDK initial/next/finish=map[finish:1 initial:1 next:1] effects=2 records=20 result=43
+--- PASS: TestNativeGraphContinuationSDKFlow (40.10s)
+    --- PASS: TestNativeGraphContinuationSDKFlow/R1 (10.78s)
+    --- PASS: TestNativeGraphContinuationSDKFlow/R3Domain (29.32s)
+FAIL
+FAIL	js-wf/worker	232.765s
+FAIL

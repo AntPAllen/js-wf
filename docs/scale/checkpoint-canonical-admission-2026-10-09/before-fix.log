@@ -1,0 +1,23 @@
+=== RUN   TestFrameRejectsNoncanonicalEnvelopeWithMatchingHash
+=== RUN   TestFrameRejectsNoncanonicalEnvelopeWithMatchingHash/duplicate-version
+    frame_test.go:35: noncanonical recovery returned state {1 {parent same-id 17} collect_v1 {"child":{"ChildType":"child","ChildID":"c-17","SignalName":"child_4"},"total":23} {16 51} 12 map[total:23] 0 [] [3 7] map[child_4:{"inv_seq":22,"result_ref":"result-object","result_hash":"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"}] [0 8] 1} <nil>
+=== RUN   TestFrameRejectsNoncanonicalEnvelopeWithMatchingHash/case-version
+    frame_test.go:35: noncanonical recovery returned state {1 {parent same-id 17} collect_v1 {"child":{"ChildType":"child","ChildID":"c-17","SignalName":"child_4"},"total":23} {16 51} 12 map[total:23] 0 [] [3 7] map[child_4:{"inv_seq":22,"result_ref":"result-object","result_hash":"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"}] [0 8] 1} <nil>
+=== RUN   TestFrameRejectsNoncanonicalEnvelopeWithMatchingHash/case-anchor
+    frame_test.go:35: noncanonical recovery returned state {1 {parent same-id 17} collect_v1 {"child":{"ChildType":"child","ChildID":"c-17","SignalName":"child_4"},"total":23} {16 51} 12 map[total:23] 0 [] [3 7] map[child_4:{"inv_seq":22,"result_ref":"result-object","result_hash":"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"}] [0 8] 1} <nil>
+=== RUN   TestFrameRejectsNoncanonicalEnvelopeWithMatchingHash/duplicate-state-key
+    frame_test.go:35: noncanonical recovery returned state {1 {parent same-id 17} collect_v1 {"child":{"ChildType":"child","ChildID":"c-17","SignalName":"child_4"},"total":23} {16 51} 12 map[total:23] 0 [] [3 7] map[child_4:{"inv_seq":22,"result_ref":"result-object","result_hash":"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"}] [0 8] 1} <nil>
+=== RUN   TestFrameRejectsNoncanonicalEnvelopeWithMatchingHash/escaped-state-key
+    frame_test.go:35: noncanonical recovery returned state {1 {parent same-id 17} collect_v1 {"child":{"ChildType":"child","ChildID":"c-17","SignalName":"child_4"},"total":23} {16 51} 12 map[total:23] 0 [] [3 7] map[child_4:{"inv_seq":22,"result_ref":"result-object","result_hash":"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"}] [0 8] 1} <nil>
+=== RUN   TestFrameRejectsNoncanonicalEnvelopeWithMatchingHash/envelope-whitespace
+    frame_test.go:35: noncanonical recovery returned state {1 {parent same-id 17} collect_v1 {"child":{"ChildType":"child","ChildID":"c-17","SignalName":"child_4"},"total":23} {16 51} 12 map[total:23] 0 [] [3 7] map[child_4:{"inv_seq":22,"result_ref":"result-object","result_hash":"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"}] [0 8] 1} <nil>
+--- FAIL: TestFrameRejectsNoncanonicalEnvelopeWithMatchingHash (0.00s)
+    --- FAIL: TestFrameRejectsNoncanonicalEnvelopeWithMatchingHash/duplicate-version (0.00s)
+    --- FAIL: TestFrameRejectsNoncanonicalEnvelopeWithMatchingHash/case-version (0.00s)
+    --- FAIL: TestFrameRejectsNoncanonicalEnvelopeWithMatchingHash/case-anchor (0.00s)
+    --- FAIL: TestFrameRejectsNoncanonicalEnvelopeWithMatchingHash/duplicate-state-key (0.00s)
+    --- FAIL: TestFrameRejectsNoncanonicalEnvelopeWithMatchingHash/escaped-state-key (0.00s)
+    --- FAIL: TestFrameRejectsNoncanonicalEnvelopeWithMatchingHash/envelope-whitespace (0.00s)
+FAIL
+FAIL	js-wf/internal/checkpoint	0.002s
+FAIL

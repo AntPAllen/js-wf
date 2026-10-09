@@ -1,5 +1,5 @@
-// Package checkpoint defines the durable continuation frame used by worker
-// publication, restoration and dispatch.
+// Package checkpoint defines the durable continuation frame. Worker publication
+// and dispatch are not yet wired to this format.
 package checkpoint
 
 import (
@@ -193,7 +193,7 @@ func Decode(raw []byte, hash string, expected Identity, anchor Anchor) (Frame, e
 		return empty, invalid("content hash mismatch")
 	}
 	var frame Frame
-	if err := DecodeUnambiguous(raw, &frame); err != nil {
+	if err := decodeStrict(raw, &frame); err != nil {
 		return empty, fmt.Errorf("%w: %v", ErrInvalid, err)
 	}
 	if err := frame.validate(); err != nil {

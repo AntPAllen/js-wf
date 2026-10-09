@@ -1,0 +1,39 @@
+{
+  "negative": {
+    "original_production_revision": "7a248da",
+    "command": "GOMAXPROCS=1 go test -overlay docs/scale/checkpoint-canonical-admission-2026-10-09/before-fix-overlay.json ./internal/checkpoint -run '^TestFrameRejectsAmbiguousEnvelopeWithMatchingHash$' -count=1 -v",
+    "actual_child_exit": 1,
+    "package_seconds": 0.002,
+    "matching_hash_ambiguity_cases_failed": 5
+  },
+  "format_sdk": {
+    "command": "GOMAXPROCS=1 GOMEMLIMIT=512MiB go test -race ./internal/checkpoint ./wf -run '^(TestFrame.*|TestCheckpoint.*)$' -count=1 -timeout=2m -v",
+    "actual_child_exit": 0,
+    "checkpoint_package_seconds": 2.976,
+    "sdk_package_seconds": 1.085
+  },
+  "metadata": {
+    "command": "GOMAXPROCS=1 GOMEMLIMIT=512MiB go test -race ./worker -run '^TestGraphCheckpointMetadataEnvelopeAdmission$' -count=1 -timeout=1m -v",
+    "actual_child_exit": 0,
+    "package_seconds": 1.085
+  },
+  "native_gomax1": {
+    "command": "GOMAXPROCS=1 GOMEMLIMIT=512MiB go test -race ./worker -run '^(TestNativeGraphCheckpointMaterializedReferences|TestNativeGraphContinuationSDKFlow)$' -count=1 -timeout=4m -v",
+    "actual_child_exit": 1,
+    "package_seconds": 232.765,
+    "materialized_R1": "PASS",
+    "materialized_R3": "FAIL: unchanged 2-minute fixture deadline during bounded stage",
+    "SDK_R1": "PASS",
+    "SDK_R3": "PASS"
+  },
+  "native_gomax4": {
+    "command": "GOMAXPROCS=4 GOMEMLIMIT=512MiB go test -race ./worker -run '^(TestNativeGraphCheckpointMaterializedReferences|TestNativeGraphContinuationSDKFlow)$' -count=1 -timeout=4m -v",
+    "actual_child_exit": 1,
+    "package_seconds": 240.096,
+    "materialized_R1": "PASS",
+    "materialized_R3": "FAIL: committed append reader refresh uncertain after fixture deadline",
+    "SDK_R1": "PASS",
+    "SDK_R3": "interrupted by package 4-minute watchdog; no verdict"
+  },
+  "scope": "Unambiguous recovery-envelope admission verified by focused format/SDK/metadata tests. Native R3 materialized-reference qualification remains failed; no complete native or current-suite acceptance."
+}

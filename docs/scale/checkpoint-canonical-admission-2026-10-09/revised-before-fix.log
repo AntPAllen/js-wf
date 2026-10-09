@@ -1,0 +1,20 @@
+=== RUN   TestFrameRejectsAmbiguousEnvelopeWithMatchingHash
+=== RUN   TestFrameRejectsAmbiguousEnvelopeWithMatchingHash/escaped-state-key
+    frame_test.go:34: noncanonical recovery returned state {1 {parent same-id 17} collect_v1 {"child":{"ChildType":"child","ChildID":"c-17","SignalName":"child_4"},"total":23} {16 51} 12 map[total:23] 0 [] [3 7] map[child_4:{"inv_seq":22,"result_ref":"result-object","result_hash":"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"}] [0 8] 1} <nil>
+=== RUN   TestFrameRejectsAmbiguousEnvelopeWithMatchingHash/duplicate-version
+    frame_test.go:34: noncanonical recovery returned state {1 {parent same-id 17} collect_v1 {"child":{"ChildType":"child","ChildID":"c-17","SignalName":"child_4"},"total":23} {16 51} 12 map[total:23] 0 [] [3 7] map[child_4:{"inv_seq":22,"result_ref":"result-object","result_hash":"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"}] [0 8] 1} <nil>
+=== RUN   TestFrameRejectsAmbiguousEnvelopeWithMatchingHash/case-version
+    frame_test.go:34: noncanonical recovery returned state {1 {parent same-id 17} collect_v1 {"child":{"ChildType":"child","ChildID":"c-17","SignalName":"child_4"},"total":23} {16 51} 12 map[total:23] 0 [] [3 7] map[child_4:{"inv_seq":22,"result_ref":"result-object","result_hash":"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"}] [0 8] 1} <nil>
+=== RUN   TestFrameRejectsAmbiguousEnvelopeWithMatchingHash/case-anchor
+    frame_test.go:34: noncanonical recovery returned state {1 {parent same-id 17} collect_v1 {"child":{"ChildType":"child","ChildID":"c-17","SignalName":"child_4"},"total":23} {16 51} 12 map[total:23] 0 [] [3 7] map[child_4:{"inv_seq":22,"result_ref":"result-object","result_hash":"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"}] [0 8] 1} <nil>
+=== RUN   TestFrameRejectsAmbiguousEnvelopeWithMatchingHash/duplicate-state-key
+    frame_test.go:34: noncanonical recovery returned state {1 {parent same-id 17} collect_v1 {"child":{"ChildType":"child","ChildID":"c-17","SignalName":"child_4"},"total":23} {16 51} 12 map[total:23] 0 [] [3 7] map[child_4:{"inv_seq":22,"result_ref":"result-object","result_hash":"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"}] [0 8] 1} <nil>
+--- FAIL: TestFrameRejectsAmbiguousEnvelopeWithMatchingHash (0.00s)
+    --- FAIL: TestFrameRejectsAmbiguousEnvelopeWithMatchingHash/escaped-state-key (0.00s)
+    --- FAIL: TestFrameRejectsAmbiguousEnvelopeWithMatchingHash/duplicate-version (0.00s)
+    --- FAIL: TestFrameRejectsAmbiguousEnvelopeWithMatchingHash/case-version (0.00s)
+    --- FAIL: TestFrameRejectsAmbiguousEnvelopeWithMatchingHash/case-anchor (0.00s)
+    --- FAIL: TestFrameRejectsAmbiguousEnvelopeWithMatchingHash/duplicate-state-key (0.00s)
+FAIL
+FAIL	js-wf/internal/checkpoint	0.002s
+FAIL

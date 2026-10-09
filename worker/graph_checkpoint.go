@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
-	"io"
 	"js-wf/identity"
 
 	"js-wf/internal/checkpoint"
@@ -174,9 +173,7 @@ func (g *graphDelivery) restoreCheckpointMetadata(ctx context.Context) error {
 		return journal.ErrGap
 	}
 	var meta graphCheckpointMetadata
-	decoder := json.NewDecoder(bytes.NewReader(raw))
-	decoder.DisallowUnknownFields()
-	if decoder.Decode(&meta) != nil || decoder.Decode(new(any)) != io.EOF || meta.Version != 1 || meta.Identity != (checkpoint.Identity{Type: g.typ, ID: g.id, InvSeq: g.invocation}) || meta.Anchor != (checkpoint.Anchor{Index: found.Runtime.Index, Epoch: found.Runtime.Epoch}) || meta.FrameHash != found.Runtime.SHA256 {
+	if checkpoint.DecodeUnambiguous(raw, &meta) != nil || meta.Version != 1 || meta.Identity != (checkpoint.Identity{Type: g.typ, ID: g.id, InvSeq: g.invocation}) || meta.Anchor != (checkpoint.Anchor{Index: found.Runtime.Index, Epoch: found.Runtime.Epoch}) || meta.FrameHash != found.Runtime.SHA256 {
 		return journal.ErrGap
 	}
 	frame, err := checkpoint.Decode(found.Frame, found.Runtime.SHA256, meta.Identity, meta.Anchor)
