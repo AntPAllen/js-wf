@@ -152,8 +152,18 @@ func (w *Worker) publishContinuation(ctx context.Context, typ, id string, invSeq
 		WaitingOn string `json:"waiting_on"`
 	}{"continuation:" + point.Stage})
 	last := records[len(records)-1]
+	tail := last.Sequence
 	if last.Kind != journal.Suspended || !bytes.Equal(last.Payload, payload) {
 		if err := appendEntry(journal.Suspended, payload); err != nil {
+			return err
+		}
+		tail++
+	}
+	// Complete the suspension before relocation. The current delivery still
+	// pins its original receipts and must not append through them afterward.
+	// The next delivery reconstructs references from the relocated checkpoint.
+	if w.graphJournal != nil && w.graphJournal.ArchiveCheckpoints() {
+		if err := w.graphJournal.CompactCheckpoint(ctx, typ, id, runtime, tail); err != nil {
 			return err
 		}
 	}

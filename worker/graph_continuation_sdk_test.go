@@ -11,6 +11,8 @@ import (
 	"github.com/nats-io/nats.go/jetstream"
 	"js-wf/client"
 	"js-wf/identity"
+	"js-wf/internal/graphpublication"
+	"js-wf/internal/retainedgraph"
 	"js-wf/journal"
 	"js-wf/lease"
 	"js-wf/provision"
@@ -66,7 +68,22 @@ func TestNativeGraphContinuationBufferedChildPromise(t *testing.T) {
 		t.Run(name, func(t *testing.T) { testNativeGraphContinuationSDKFlow(t, domain, false, false, true, true) })
 	}
 }
-func testNativeGraphContinuationSDKFlow(t *testing.T, domain string, partition, bufferedSignals, childPromiseFlow, bufferedChild bool) {
+
+func TestNativeGraphContinuationArchiveCollection(t *testing.T) {
+	for _, domain := range []string{"", "WFCONTINUATIONSDK"} {
+		for _, mode := range []string{"state", "signals", "child", "buffered-child"} {
+			name := "R1/" + mode
+			if domain != "" {
+				name = "R3Domain/" + mode
+			}
+			t.Run(name, func(t *testing.T) {
+				testNativeGraphContinuationSDKFlow(t, domain, false, mode == "signals", mode == "child" || mode == "buffered-child", mode == "buffered-child", true)
+			})
+		}
+	}
+}
+func testNativeGraphContinuationSDKFlow(t *testing.T, domain string, partition, bufferedSignals, childPromiseFlow, bufferedChild bool, archiveMode ...bool) {
+	archive := len(archiveMode) != 0 && archiveMode[0]
 	replicas := 1
 	if domain != "" {
 		replicas = 3
@@ -83,7 +100,7 @@ func testNativeGraphContinuationSDKFlow(t *testing.T, domain string, partition, 
 	}
 	defer cluster.Close()
 	timeout := 30 * time.Second
-	if childPromiseFlow {
+	if childPromiseFlow || archive {
 		timeout = time.Minute
 	}
 	ctx, cancel := context.WithTimeout(context.Background(), timeout)
@@ -112,7 +129,7 @@ func testNativeGraphContinuationSDKFlow(t *testing.T, domain string, partition, 
 	if err := provision.Ensure(ctx, js, replicas); err != nil {
 		t.Fatal(err)
 	}
-	cfg := journal.NativeGraphConfig{AuthorityStream: "SDKCONT_AUTH", AuthorityPrefix: "wf.graph.sdkcontinue", ObjectBucket: "SDKCONT_OBJECTS", ExpectedReplicas: replicas, CanonicalStarts: true, CanonicalSignals: true, CheckpointIndex: true}
+	cfg := journal.NativeGraphConfig{AuthorityStream: "SDKCONT_AUTH", AuthorityPrefix: "wf.graph.sdkcontinue", ObjectBucket: "SDKCONT_OBJECTS", ExpectedReplicas: replicas, CanonicalStarts: true, CanonicalSignals: true, CheckpointIndex: true, ArchiveCheckpoints: archive}
 	configs, err := journal.NativeGraphStreamConfigs(cfg, replicas)
 	if err != nil {
 		t.Fatal(err)
@@ -310,6 +327,84 @@ func testNativeGraphContinuationSDKFlow(t *testing.T, domain string, partition, 
 			if err != nil || status.Checkpoint == nil || status.Checkpoint.Stage != stage || !status.ContinuationReady() {
 				t.Fatal("SDK did not publish checkpoint", stage, status, err)
 			}
+			if archive {
+				// Collect after the worker closed its old pin, then resume from
+				// relocated owned receipts on the next independent delivery.
+				authority, err := graphpublication.OpenNativeAuthority(ctx, js, cfg.AuthorityStream, cfg.AuthorityPrefix)
+				if err != nil {
+					t.Fatal(err)
+				}
+				port, err := graphpublication.OpenNativePort(ctx, authority, cfg.ObjectBucket)
+				if err != nil {
+					t.Fatal(err)
+				}
+				protocol := graphpublication.Protocol{Port: port}
+				before, err := port.Objects(ctx)
+				if err != nil {
+					t.Fatal(err)
+				}
+				if _, err = protocol.SweepWithReaders(ctx, time.Now().Add(2*time.Minute)); err != nil {
+					t.Fatal(err)
+				}
+				view, err := graph.Open(ctx, h.Type, h.ID, h.InvSeq)
+				if err != nil {
+					t.Fatal(err)
+				}
+				found, err := view.ReadCheckpoint(ctx, h.Type, h.ID)
+				if err != nil || found == nil {
+					t.Fatal(found, err)
+				}
+				keys, err := port.RootKeys(ctx)
+				if err != nil {
+					t.Fatal(err)
+				}
+				matched := false
+				for _, key := range keys {
+					root, err := port.ReadRoot(ctx, key)
+					if err != nil {
+						t.Fatal(err)
+					}
+					var cursor struct {
+						Invocation   uint64              `json:"invocation"`
+						RetainedFrom uint64              `json:"retained_from"`
+						Start        *journal.GraphStart `json:"start"`
+					}
+					if json.Unmarshal(root.Application, &cursor) != nil || cursor.Start == nil || cursor.Start.Request.ID != h.ID || cursor.Start.Request.Type != h.Type {
+						continue
+					}
+					if cursor.Invocation != h.InvSeq || cursor.RetainedFrom != found.Request.Index || root.Graph.Count != view.Count()-found.Request.Index || len(root.Readers) != 1 {
+						t.Fatal("worker failed to compact or leaked reader", cursor, root)
+					}
+					matched = true
+				}
+				if !matched {
+					t.Fatal("compacted parent root absent")
+				}
+				entryHashes, currentObjects := map[string]bool{}, map[string]bool{}
+				for i := uint64(0); i < view.Count(); i++ {
+					record, err := view.Read(ctx, i)
+					if err != nil {
+						t.Fatal("audit after collection", i, err)
+					}
+					entryHashes[record.EntryBlob.Hash], currentObjects[record.EntryBlob.Reference.Object] = true, true
+				}
+				removedEntries := 0
+				for _, object := range before {
+					if entryHashes[object.Key] && !currentObjects[object.Reference.Object] {
+						if _, err = port.Get(ctx, retainedgraph.Link{Hash: object.Key, Reference: object.Reference}, journal.MaxGraphEntryBytes); err == nil {
+							t.Fatal("original entry receipt survived collection", object)
+						}
+						removedEntries++
+					}
+				}
+				if removedEntries == 0 {
+					t.Fatal("collection had no original entry receipts")
+				}
+				t.Logf("ARCHIVE_COLLECTION stage=%s original_entry_receipts_removed=%d live_records=%d logical_records=%d", stage, removedEntries, view.Count()-found.Request.Index, view.Count())
+				if err = view.Close(ctx); err != nil {
+					t.Fatal(err)
+				}
+			}
 			if err := runs.Purge(ctx); err != nil {
 				t.Fatal(err)
 			}
@@ -338,8 +433,43 @@ func testNativeGraphContinuationSDKFlow(t *testing.T, domain string, partition, 
 					if err != nil {
 						t.Fatal(err)
 					}
+					var childReceipts []journal.GraphPayloadLink
+					if archive {
+						childView, err := graph.Open(ctx, childPromise.ChildType, childPromise.ChildID, retired.Invocation)
+						if err != nil {
+							t.Fatal(err)
+						}
+						terminal, err := childView.Read(ctx, childView.Count()-1)
+						if err != nil {
+							t.Fatal(err)
+						}
+						childReceipts = append(terminal.Blobs, terminal.EntryBlob)
+						if err = childView.Close(ctx); err != nil {
+							t.Fatal(err)
+						}
+					}
 					if err := graph.Retire(ctx, childPromise.ChildType, childPromise.ChildID, retired.Invocation, retired.Tail); err != nil {
 						t.Fatal(err)
+					}
+					if archive {
+						authority, err := graphpublication.OpenNativeAuthority(ctx, js, cfg.AuthorityStream, cfg.AuthorityPrefix)
+						if err != nil {
+							t.Fatal(err)
+						}
+						port, err := graphpublication.OpenNativePort(ctx, authority, cfg.ObjectBucket)
+						if err != nil {
+							t.Fatal(err)
+						}
+						protocol := graphpublication.Protocol{Port: port}
+						if _, err = protocol.SweepWithReaders(ctx, time.Now().Add(2*time.Minute)); err != nil {
+							t.Fatal(err)
+						}
+						for _, receipt := range childReceipts {
+							if _, err = port.Get(ctx, receipt, journal.DefaultGraphPayloadLimit); err == nil {
+								t.Fatal("retired child receipt survived", receipt)
+							}
+						}
+						t.Logf("ARCHIVE_CHILD_RECLAIMED terminal_receipts=%d result_bytes=%d", len(childReceipts), len(childResult))
 					}
 				}
 			}

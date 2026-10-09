@@ -1,0 +1,48 @@
+=== RUN   TestNativeGraphContinuationArchiveCollection
+=== RUN   TestNativeGraphContinuationArchiveCollection/R1/state
+    graph_continuation_sdk_test.go:403: ARCHIVE_COLLECTION stage=next original_entry_receipts_removed=8 live_records=3 logical_records=8
+    graph_continuation_sdk_test.go:403: ARCHIVE_COLLECTION stage=finish original_entry_receipts_removed=12 live_records=3 logical_records=17
+    graph_continuation_sdk_test.go:516: SDK initial/next/finish=map[finish:1 initial:1 next:1] effects=2 records=20 result=43
+=== RUN   TestNativeGraphContinuationArchiveCollection/R1/signals
+    graph_continuation_sdk_test.go:403: ARCHIVE_COLLECTION stage=next original_entry_receipts_removed=9 live_records=3 logical_records=9
+    graph_continuation_sdk_test.go:403: ARCHIVE_COLLECTION stage=finish original_entry_receipts_removed=15 live_records=3 logical_records=21
+    graph_continuation_sdk_test.go:482: SDK stage delivery context deadline exceeded context deadline exceeded
+=== RUN   TestNativeGraphContinuationArchiveCollection/R1/child
+    graph_continuation_sdk_test.go:403: ARCHIVE_COLLECTION stage=next original_entry_receipts_removed=10 live_records=3 logical_records=10
+    graph_continuation_sdk_test.go:403: ARCHIVE_COLLECTION stage=finish original_entry_receipts_removed=15 live_records=3 logical_records=22
+    graph_continuation_sdk_test.go:472: ARCHIVE_CHILD_RECLAIMED terminal_receipts=2 result_bytes=700000
+    graph_continuation_sdk_test.go:516: SDK initial/next/finish=map[finish:1 initial:1 next:1] effects=2 records=25 result=43
+=== RUN   TestNativeGraphContinuationArchiveCollection/R1/buffered-child
+    graph_continuation_sdk_test.go:403: ARCHIVE_COLLECTION stage=next original_entry_receipts_removed=10 live_records=3 logical_records=10
+    graph_continuation_sdk_test.go:403: ARCHIVE_COLLECTION stage=finish original_entry_receipts_removed=13 live_records=3 logical_records=20
+    graph_continuation_sdk_test.go:472: ARCHIVE_CHILD_RECLAIMED terminal_receipts=2 result_bytes=700000
+    graph_continuation_sdk_test.go:516: SDK initial/next/finish=map[finish:1 initial:1 next:1] effects=2 records=25 result=43
+=== RUN   TestNativeGraphContinuationArchiveCollection/R3Domain/state
+    graph_continuation_sdk_test.go:403: ARCHIVE_COLLECTION stage=next original_entry_receipts_removed=8 live_records=3 logical_records=8
+    graph_continuation_sdk_test.go:403: ARCHIVE_COLLECTION stage=finish original_entry_receipts_removed=12 live_records=3 logical_records=17
+    graph_continuation_sdk_test.go:516: SDK initial/next/finish=map[finish:1 initial:1 next:1] effects=2 records=20 result=43
+=== RUN   TestNativeGraphContinuationArchiveCollection/R3Domain/signals
+    graph_continuation_sdk_test.go:403: ARCHIVE_COLLECTION stage=next original_entry_receipts_removed=9 live_records=3 logical_records=9
+    graph_continuation_sdk_test.go:347: context deadline exceeded
+=== RUN   TestNativeGraphContinuationArchiveCollection/R3Domain/child
+    graph_continuation_sdk_test.go:403: ARCHIVE_COLLECTION stage=next original_entry_receipts_removed=10 live_records=3 logical_records=10
+    graph_continuation_sdk_test.go:403: ARCHIVE_COLLECTION stage=finish original_entry_receipts_removed=15 live_records=3 logical_records=22
+    graph_continuation_sdk_test.go:472: ARCHIVE_CHILD_RECLAIMED terminal_receipts=2 result_bytes=700000
+    graph_continuation_sdk_test.go:516: SDK initial/next/finish=map[finish:1 initial:1 next:1] effects=2 records=25 result=43
+=== RUN   TestNativeGraphContinuationArchiveCollection/R3Domain/buffered-child
+    graph_continuation_sdk_test.go:403: ARCHIVE_COLLECTION stage=next original_entry_receipts_removed=10 live_records=3 logical_records=10
+    graph_continuation_sdk_test.go:403: ARCHIVE_COLLECTION stage=finish original_entry_receipts_removed=13 live_records=3 logical_records=20
+    graph_continuation_sdk_test.go:472: ARCHIVE_CHILD_RECLAIMED terminal_receipts=2 result_bytes=700000
+    graph_continuation_sdk_test.go:516: SDK initial/next/finish=map[finish:1 initial:1 next:1] effects=2 records=25 result=43
+--- FAIL: TestNativeGraphContinuationArchiveCollection (263.90s)
+    --- PASS: TestNativeGraphContinuationArchiveCollection/R1/state (20.83s)
+    --- FAIL: TestNativeGraphContinuationArchiveCollection/R1/signals (30.09s)
+    --- PASS: TestNativeGraphContinuationArchiveCollection/R1/child (32.52s)
+    --- PASS: TestNativeGraphContinuationArchiveCollection/R1/buffered-child (31.35s)
+    --- PASS: TestNativeGraphContinuationArchiveCollection/R3Domain/state (27.99s)
+    --- FAIL: TestNativeGraphContinuationArchiveCollection/R3Domain/signals (30.32s)
+    --- PASS: TestNativeGraphContinuationArchiveCollection/R3Domain/child (49.11s)
+    --- PASS: TestNativeGraphContinuationArchiveCollection/R3Domain/buffered-child (41.69s)
+FAIL
+FAIL	js-wf/worker	263.948s
+FAIL

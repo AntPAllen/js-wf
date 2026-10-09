@@ -1,5 +1,11 @@
 # Implementation status against the supplied plan
 
+## Worker checkpoint compaction and continued execution after collection — 2026-10-09
+
+Explicit v6 workers now compact after the continuation suspension is durably appended and before enqueue. The delivery retains its old pin until cleanup and performs no further append through its old receipts; the next delivery restores copied references from the owned checkpoint. Native R1/R3 domain state, buffered Signal, resolved child-promise and buffered-child flows each complete two compactions with a three-record live suffix. Collection removes original journal entry receipts between stages. Both child variants also reclaim the child's original terminal receipts before the parent successfully awaits its owned 700 KB result. Handler calls remain one per initial/next/finish, effects two, terminal result `43` and complete logical history remains auditable. [Executed component evidence and remaining limits](scale/graph-worker-archive-2026-10-09/README.md).
+
+Public continuation admission and production collection remain disabled. Compaction publication/lease/collector/retirement uncertainty and interleavings, seeded shared transport integration, full failure/limit/pending-child coverage, native autonomous collection/partition/crash/storage faults, scale/resource limits, offline/import/deployment and all original broader gates remain open. Existing full qualification for 148 families and 748 pinned regressions excludes this addition.
+
 ## Native journal checkpoint archive lifecycle — 2026-10-09
 
 The journal archive scenario now also runs against native R1/R3 domain stores. After the first compaction, all servers stop gracefully and reopen their original file stores; fresh native adapters recover the unchanged archive/live cursor and existing reader pins. Both compactions, full logical audit, live-owned append, collection of original receipts after old-view release and terminal retirement pass. A raw object subject census confirms zero remaining chunks. [Executed evidence and precise scope](scale/graph-native-archive-2026-10-09/README.md).

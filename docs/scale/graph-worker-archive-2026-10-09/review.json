@@ -1,0 +1,66 @@
+{
+  "scope": "Development component evidence across normal, original failed race campaign and targeted fixture correction; not a clean complete current-source race campaign",
+  "cases": {
+    "TestNativeGraphContinuationArchiveCollection/R1/state": {
+      "normal": "native-normal.log",
+      "race": "initial-30s-fixture-race-failure.log"
+    },
+    "TestNativeGraphContinuationArchiveCollection/R1/signals": {
+      "normal": "native-normal.log",
+      "race": "signals-race.log"
+    },
+    "TestNativeGraphContinuationArchiveCollection/R1/child": {
+      "normal": "native-normal.log",
+      "race": "initial-30s-fixture-race-failure.log"
+    },
+    "TestNativeGraphContinuationArchiveCollection/R1/buffered-child": {
+      "normal": "native-normal.log",
+      "race": "initial-30s-fixture-race-failure.log"
+    },
+    "TestNativeGraphContinuationArchiveCollection/R3Domain/state": {
+      "normal": "native-normal.log",
+      "race": "initial-30s-fixture-race-failure.log"
+    },
+    "TestNativeGraphContinuationArchiveCollection/R3Domain/signals": {
+      "normal": "native-normal.log",
+      "race": "signals-race.log"
+    },
+    "TestNativeGraphContinuationArchiveCollection/R3Domain/child": {
+      "normal": "native-normal.log",
+      "race": "initial-30s-fixture-race-failure.log"
+    },
+    "TestNativeGraphContinuationArchiveCollection/R3Domain/buffered-child": {
+      "normal": "native-normal.log",
+      "race": "initial-30s-fixture-race-failure.log"
+    }
+  },
+  "current_inputs_unchanged": true,
+  "only_source_change_between_race_campaigns": "worker/graph_continuation_sdk_test.go: archive outer context now shares child one-minute fixture timeout; production unchanged",
+  "production_publication_deadline_and_recovery_gates_unchanged": true,
+  "logs": {
+    "initial-30s-fixture-race-failure.log": {
+      "sha256": "0ef62b59596ba7af9d5c52278f79433f0adbf171e9d6b08f77d0a3e06968ac98",
+      "terminal": "FAIL"
+    },
+    "initial-child-invocation-field-compile-failure.log": {
+      "sha256": "d9f7794dc37669e21ccdd59b70047e7dbc3513ec2b454689e6b0cdc45f7daca4",
+      "terminal": "FAIL"
+    },
+    "initial-state-normal.log": {
+      "sha256": "975f93b85c3c052117d107ee4549aaf427e7cdc05567aa63e034132a7b74e75c",
+      "terminal": "ok  \tjs-wf/worker\t1.642s"
+    },
+    "native-normal.log": {
+      "sha256": "a3b98d110fae792f402a95557568a12765e07b4a77e8f3bbe4e6b2f6589387e1",
+      "terminal": "ok  \tjs-wf/worker\t40.928s"
+    },
+    "signals-race.log": {
+      "sha256": "b7ad46d1ffb3c7562ee62e873c3c5020dd0cf17415102ca7d4a9523bdb1ad9b6",
+      "terminal": "ok  \tjs-wf/worker\t59.753s"
+    },
+    "v5-sdk-regression-race.log": {
+      "sha256": "ac6ea88fea0b962928ac24964c0b052794a21546b90ff1838390981025e36730",
+      "terminal": "ok  \tjs-wf/worker\t50.529s"
+    }
+  }
+}
