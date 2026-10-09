@@ -1,0 +1,23 @@
+File: sim.test
+Build ID: f44288859cede220116c84695467854d018c63b3
+Type: cpu
+Time: 2026-10-09 15:19:21 UTC
+Duration: 13.26s, Total samples = 9640ms (72.69%)
+Showing nodes accounting for 7280ms, 75.52% of 9640ms total
+Dropped 225 nodes (cum <= 48.20ms)
+Showing top 14 nodes out of 172
+      flat  flat%   sum%        cum   cum%
+    2280ms 23.65% 23.65%     2280ms 23.65%  __tsan_read
+    1820ms 18.88% 42.53%     1820ms 18.88%  racecall
+     870ms  9.02% 51.56%      870ms  9.02%  __tsan::MemoryAccessRangeT
+     450ms  4.67% 56.22%      450ms  4.67%  __tsan_write
+     380ms  3.94% 60.17%      380ms  3.94%  runtime.raceread
+     300ms  3.11% 63.28%      560ms  5.81%  encoding/json/internal/jsonwire.AppendQuote
+     230ms  2.39% 65.66%      230ms  2.39%  runtime.findObject
+     170ms  1.76% 67.43%     1770ms 18.36%  encoding/json/v2.makeStructArshaler.func2
+     150ms  1.56% 68.98%      150ms  1.56%  racecalladdr
+     150ms  1.56% 70.54%      370ms  3.84%  runtime.checkptrBase
+     140ms  1.45% 71.99%      140ms  1.45%  runtime.tryDeferToSpanScan
+     130ms  1.35% 73.34%      130ms  1.35%  __tsan::ShadowSet
+     110ms  1.14% 74.48%      110ms  1.14%  __tsan_func_enter
+     100ms  1.04% 75.52%      100ms  1.04%  __tsan_read_range
