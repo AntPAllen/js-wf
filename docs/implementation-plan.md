@@ -1,5 +1,9 @@
 # JetStream Durable Workflow Runtime — Implementation Plan
 
+## Complete current canonical worker qualification in progress — 2026-10-09
+
+The complete normal and race default suites now run from isolated frozen `9a1ccdc` at `/home/exedev/js-wf-worker-cli-qualification`, each requiring all 148 families × 1,000 contiguous seed bodies and all 748 pins. Retained roots are `/home/exedev/js-wf-tier1-full148-cli-normal1000-20261009` and `/home/exedev/js-wf-tier1-full148-cli-race1000-20261009`, with adjacent supervisor logs. Each runner has its own process session; source/binary/command/event capture is enabled. Terminal verdicts and separate executed reviews are pending. The accepted `5aafc29` normal suite keeps its earlier source scope. Complete extended qualification and every original remaining runtime/native/scale/matrix/actual24h/million physical-drain/default-adoption/release requirement remain required.
+
 ## Canonical graph worker CLI and recovery integration — 2026-10-09
 
 The worker can now explicitly select pre-provisioned canonical Start/Signal graph stores, use the selected graph journal encoding and domain, and run canonical Start/Signal/terminal plus graph-aware timer/suspended repair loops. Fallback timers and legacy retention are rejected; continuation migration remains incomplete. Native R1 and R3 domain controls pass normal/race at 100 ms scan cadence, including reserved Start/Signal recovery, native timer completion after deletion of its initial wakeup, two terminal projection restorations, unchanged canonical journal and no legacy journal writes. Existing static/KV/auto assignment and independent native/fallback timer-clock controls pass normal/race.
