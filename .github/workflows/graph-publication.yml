@@ -28,11 +28,13 @@ on:
       - 'internal/retainedgraph/**'
       - 'internal/retainedindex/**'
       - 'sim/graph_publication*'
+      - 'sim/graph_checkpoint_compaction_test.go'
       - 'sim/journal_transport_test.go'
       - 'sim/purge_transport.go'
       - 'sim/blob_sweep_transport.go'
       - 'sim/testdata/regressions/graph-publication-*'
       - 'sim/testdata/regressions/graph-readers-*'
+      - 'sim/testdata/regressions/graph-compaction-*'
       - 'sim/testdata/regressions/graph-reader-resume-*'
       - 'sim/testdata/regressions/graph-catalog-*'
       - 'sim/testdata/regressions/graph-application-*'
@@ -50,6 +52,7 @@ on:
       - 'internal/blobpublication/**'
       - 'internal/natsstream/**'
       - 'testcluster/cluster.go'
+      - 'testcluster/process_cluster.go'
       - '.github/workflows/graph-publication.yml'
       - 'go.mod'
       - 'go.sum'
@@ -80,11 +83,13 @@ on:
       - 'internal/retainedgraph/**'
       - 'internal/retainedindex/**'
       - 'sim/graph_publication*'
+      - 'sim/graph_checkpoint_compaction_test.go'
       - 'sim/journal_transport_test.go'
       - 'sim/purge_transport.go'
       - 'sim/blob_sweep_transport.go'
       - 'sim/testdata/regressions/graph-publication-*'
       - 'sim/testdata/regressions/graph-readers-*'
+      - 'sim/testdata/regressions/graph-compaction-*'
       - 'sim/testdata/regressions/graph-reader-resume-*'
       - 'sim/testdata/regressions/graph-catalog-*'
       - 'sim/testdata/regressions/graph-application-*'
@@ -102,6 +107,7 @@ on:
       - 'internal/blobpublication/**'
       - 'internal/natsstream/**'
       - 'testcluster/cluster.go'
+      - 'testcluster/process_cluster.go'
       - '.github/workflows/graph-publication.yml'
       - 'go.mod'
       - 'go.sum'
@@ -205,14 +211,53 @@ jobs:
             graph-reconcile-events.jsonl
             graph-retention-events.jsonl
             graph-workflow-events.jsonl
-  transport:
+  checkpoint-archive:
     runs-on: ubuntu-latest
-    timeout-minutes: ${{ matrix.family == 'SignalRuntimeCombined' && 65 || matrix.family == 'SignalRuntime' && 45 || 10 }}
+    timeout-minutes: 10
     strategy:
       fail-fast: false
       matrix:
         mode: [normal, race]
-        family: [Publication, Readers, ReaderResume, Catalog, Application, Streams, Journal, Worker, Result, TerminalWorker, TerminalProjection, TerminalCatalog, Child, ChildSignal, Reconcile, Purge, SignalClient, ParentWorker, Start, StartRepair, SignalRuntime, SignalRuntimeCombined, Corpus]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - name: Checkpoint metadata ownership and malformed authority
+        env:
+          GOMAXPROCS: '2'
+          GOMEMLIMIT: 512MiB
+          GRAPH_MODE: ${{ matrix.mode }}
+        run: |
+          graph_flags=()
+          if [ "$GRAPH_MODE" = race ]; then graph_flags=(-race); fi
+          go test -p=1 "${graph_flags[@]}" ./journal -run '^(TestGraphCheckpoint|TestGraphArchiveDescriptor)' -count=1 -timeout=5m -json > graph-checkpoint-metadata-events.jsonl
+      - name: Native archive lifecycle and observed process kills
+        env:
+          GOMAXPROCS: '2'
+          GOMEMLIMIT: 512MiB
+          GRAPH_MODE: ${{ matrix.mode }}
+          ARCHIVE_PROCESS_EVIDENCE: ${{ github.workspace }}/archive-process-evidence
+        run: |
+          graph_flags=()
+          if [ "$GRAPH_MODE" = race ]; then graph_flags=(-race); fi
+          go test -p=1 "${graph_flags[@]}" ./journal -run '^(TestNativeGraphCheckpointArchive|TestProcessGraphCheckpointArchive)' -count=1 -timeout=5m -json > graph-checkpoint-archive-events.jsonl
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: graph-checkpoint-archive-${{ matrix.mode }}
+          path: |
+            graph-checkpoint-metadata-events.jsonl
+            graph-checkpoint-archive-events.jsonl
+            archive-process-evidence
+  transport:
+    runs-on: ubuntu-latest
+    timeout-minutes: ${{ matrix.family == 'SignalRuntimeCombined' && 65 || matrix.family == 'CheckpointCompaction' && 35 || matrix.family == 'SignalRuntime' && 45 || 10 }}
+    strategy:
+      fail-fast: false
+      matrix:
+        mode: [normal, race]
+        family: [Publication, Readers, ReaderResume, Catalog, Application, Streams, Journal, Worker, Result, TerminalWorker, TerminalProjection, TerminalCatalog, Child, ChildSignal, Reconcile, Purge, SignalClient, ParentWorker, Start, StartRepair, SignalRuntime, SignalRuntimeCombined, CheckpointCompaction, Corpus]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-go@v5
@@ -235,6 +280,7 @@ jobs:
             graph_pattern='^(TestPinnedRegressionCorpus|TestGraphPublicationTransportCopiesFaultsAndIndependentCensus|TestGraphChildSeedPipelineOrdersAndJoins|TestGraphWorkerCompletionAppendReaderInterleaving)$'
           fi
           graph_timeout=5m
+          if [ "$GRAPH_FAMILY" = CheckpointCompaction ]; then graph_timeout=30m; fi
           if [ "$GRAPH_FAMILY" = SignalRuntime ]; then graph_timeout=40m; fi
           if [ "$GRAPH_FAMILY" = SignalRuntimeCombined ]; then graph_timeout=60m; fi
           go test -p=1 "${graph_flags[@]}" ./sim -run "$graph_pattern" -count=1 -timeout="$graph_timeout" -json > graph-transport-events.jsonl

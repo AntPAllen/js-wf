@@ -1,5 +1,11 @@
 # Implementation status against the supplied plan
 
+## Checkpoint archive survives observed server process kills — 2026-10-09
+
+Native R1/R3 domain tests now verify `SIGKILL` wait statuses for every server, reopen the original stores with new PIDs and recover an exactly identical logical authority and persisted old reader. Both compactions, full history audit, old-reader survival, original-receipt collection and zero physical chunks after retirement pass across four graceful/process cases normally (72.198 s) and under race (179.322 s). Three failures remain preserved; read-only metadata/stream readiness checks address observed recovery-time request uncertainty and offline provisioning peers inside the unchanged fixture deadline. [Source verification, raw evidence, CI wiring and scope](scale/graph-process-archive-2026-10-09/README.md).
+
+No production Go code changed. Hosted CI acceptance, worker-process or uncertain-publication cuts, storage/power loss, autonomous recovery/collection, compound lifecycle faults, scale/migration/admission and all original broader qualification/release requirements remain open. The complete 149-family campaigns at frozen `fca8264` still require terminal verdicts and independent review.
+
 ## Complete current deterministic qualification started — 2026-10-09
 
 Full normal and race campaigns now run against isolated frozen `fca8264`, including checkpoint compaction and the authority guard. Each requires all 149 families × 1,000 contiguous completed bodies and all 762 pins. Terminal verdicts and independent review remain pending; a normal runner working-directory mistake was explicitly stopped and preserved before correction. [Retained jobs, exact scope and interrupted evidence](scale/graph-current-qualification-2026-10-09/README.md). Extended campaigns and every original remaining native/runtime/scale/actual24h/drain/adoption/release requirement remain open.

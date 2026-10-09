@@ -1,0 +1,51 @@
+{
+  "normal": {
+    "argv": [
+      "go",
+      "test",
+      "./journal",
+      "-run",
+      "^(TestNativeGraphCheckpointArchiveReopenAndCollection|TestProcessGraphCheckpointArchiveKillAndCollection)$",
+      "-count=1",
+      "-v"
+    ],
+    "env": {
+      "ARCHIVE_PROCESS_EVIDENCE": "/home/exedev/js-wf/docs/scale/graph-process-archive-2026-10-09/final-normal-native"
+    },
+    "cwd": "/home/exedev/js-wf",
+    "tool_session": 65229,
+    "exit_code": 0
+  },
+  "race": {
+    "argv": [
+      "go",
+      "test",
+      "-race",
+      "-p=1",
+      "./journal",
+      "-run",
+      "^(TestNativeGraphCheckpointArchiveReopenAndCollection|TestProcessGraphCheckpointArchiveKillAndCollection)$",
+      "-count=1",
+      "-timeout=5m",
+      "-v"
+    ],
+    "env": {
+      "GOMAXPROCS": "2",
+      "GOMEMLIMIT": "512MiB",
+      "ARCHIVE_PROCESS_EVIDENCE": "/home/exedev/js-wf/docs/scale/graph-process-archive-2026-10-09/final-race-native"
+    },
+    "cwd": "/home/exedev/js-wf",
+    "tool_session": 18389,
+    "exit_code": 0
+  },
+  "probe": {
+    "argv": [
+      "go",
+      "run",
+      "docs/scale/graph-process-archive-2026-10-09/probe.go",
+      "docs/scale/graph-process-archive-2026-10-09/probe-input.json"
+    ],
+    "cwd": "/home/exedev/js-wf",
+    "exit_code": 0
+  }
+}
