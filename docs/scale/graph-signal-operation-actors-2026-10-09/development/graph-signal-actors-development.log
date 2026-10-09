@@ -1,0 +1,49 @@
+panic: test timed out after 1m30s
+	running tests:
+		TestGraphSignalOperationActorsReplay (1m30s)
+
+goroutine 35 [running]:
+testing.(*M).startAlarm.func1()
+	/usr/local/go/src/testing/testing.go:2959 +0x34a
+created by time.goFunc
+	/usr/local/go/src/time/sleep.go:182 +0x2d
+
+goroutine 1 [chan receive, 1 minutes]:
+testing.(*T).Run(0x861d4534d88, {0xda9f2f?, 0x861d453d918?}, 0x1599fa8)
+	/usr/local/go/src/testing/testing.go:2266 +0x4f2
+testing.runTests.func1(0x861d4534d88)
+	/usr/local/go/src/testing/testing.go:2742 +0x37
+testing.tRunner(0x861d4534d88, 0x861d453da40)
+	/usr/local/go/src/testing/testing.go:2193 +0xea
+testing.runTests({0xd807a5, 0x5}, {0xd8263d, 0x9}, 0x861d43f2450, {0x1606c30, 0xd9, 0xd9}, {0xc2aa6d7719d12631, 0x14f475a276, ...})
+	/usr/local/go/src/testing/testing.go:2740 +0x510
+testing.(*M).Run(0x861d4551720)
+	/usr/local/go/src/testing/testing.go:2600 +0x6af
+js-wf/sim.TestMain(0x861d4551720)
+	/home/exedev/js-wf/sim/coverage_test.go:12 +0x4f
+main.main()
+	_testmain.go:480 +0xa5
+
+goroutine 8 [runnable]:
+runtime.Gosched(...)
+	/usr/local/go/src/runtime/proc.go:403
+fmt.Sprintf({0xd828f2, 0x9}, {0x861d44d74c0, 0x1, 0x1})
+	/usr/local/go/src/fmt/print.go:232 +0x66
+js-wf/identity.RunSubject({0xd804a1?, 0x1594e70?}, {0x861d43f4dc0?, 0x0?}, 0x1591748?)
+	/home/exedev/js-wf/identity/identity.go:46 +0x56
+js-wf/client.(*Client).Enqueue.func1({0x1594ee0, 0x861d45801c0})
+	/home/exedev/js-wf/client/client.go:307 +0x8e
+js-wf/client.enqueueRunWithRetry({0x1594ee0, 0x861d45801c0}, 0x861d44d7710, 0x861d44d76c8)
+	/home/exedev/js-wf/client/client.go:320 +0x76
+js-wf/client.(*Client).Enqueue(0x861d447ba40, {0x1594ee0, 0x861d45801c0}, {0xd804a1, 0x4}, {0x861d43f4dc0, 0xe}, {0xd890ea, 0x10})
+	/home/exedev/js-wf/client/client.go:306 +0x28e
+js-wf/sim.runGraphSignalActors(0x1?, 0x0)
+	/home/exedev/js-wf/sim/graph_publication_signal_actors_test.go:194 +0x11e5
+js-wf/sim.TestGraphSignalOperationActorsReplay(0x861d4534fc8)
+	/home/exedev/js-wf/sim/graph_publication_signal_actors_test.go:256 +0x90
+testing.tRunner(0x861d4534fc8, 0x1599fa8)
+	/usr/local/go/src/testing/testing.go:2193 +0xea
+created by testing.(*T).Run in goroutine 1
+	/usr/local/go/src/testing/testing.go:2258 +0x4d4
+FAIL	js-wf/sim	91.312s
+FAIL

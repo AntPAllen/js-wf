@@ -1,0 +1,3 @@
+# Development controls
+
+The initial wrapper omitted the optional canonical Signal source interface, so clients failed with “source-order reads are required”; these are harness failures. After adding that interface, a run hit its 90-second watchdog because the recovery fixture started a fresh worker without first creating a pending wakeup. The intermediate dispatch-yield run was intentionally terminated after diagnosis (exit 1 from go test); this was not an observation timeout. The corrected recovery wakeup passes 20 healthy generated schedules with exact replay in 4.892 seconds. The subsequent shared seeded family adds five publication modes and is separately qualified. No production defect is claimed from these development failures.

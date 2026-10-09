@@ -258,12 +258,12 @@ jobs:
             archive-process-evidence
   transport:
     runs-on: ubuntu-latest
-    timeout-minutes: ${{ matrix.family == 'SignalRuntimeCombined' && 65 || matrix.family == 'SignalRuntimeCartesian' && 35 || matrix.family == 'CheckpointCompaction' && 35 || matrix.family == 'SignalRuntime' && 45 || 10 }}
+    timeout-minutes: ${{ matrix.family == 'SignalOperationActors' && 95 || matrix.family == 'SignalRuntimeCombined' && 65 || matrix.family == 'SignalRuntimeCartesian' && 35 || matrix.family == 'CheckpointCompaction' && 35 || matrix.family == 'SignalRuntime' && 45 || 10 }}
     strategy:
       fail-fast: false
       matrix:
         mode: [normal, race]
-        family: [NativeAuthority, Publication, Readers, ReaderResume, Catalog, Application, Streams, Journal, Worker, Result, TerminalWorker, TerminalProjection, TerminalCatalog, Child, ChildSignal, Reconcile, Purge, SignalClient, ParentWorker, Start, StartRepair, SignalRuntime, SignalRuntimeCombined, SignalRuntimeCartesian, CheckpointCompaction, AwaitContention, Corpus]
+        family: [NativeAuthority, Publication, Readers, ReaderResume, Catalog, Application, Streams, Journal, Worker, Result, TerminalWorker, TerminalProjection, TerminalCatalog, Child, ChildSignal, Reconcile, Purge, SignalClient, ParentWorker, Start, StartRepair, SignalRuntime, SignalRuntimeCombined, SignalRuntimeCartesian, SignalOperationActors, CheckpointCompaction, AwaitContention, Corpus]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-go@v5
@@ -293,6 +293,7 @@ jobs:
           if [ "$GRAPH_FAMILY" = SignalRuntime ]; then graph_timeout=40m; fi
           if [ "$GRAPH_FAMILY" = SignalRuntimeCombined ]; then graph_timeout=60m; fi
           if [ "$GRAPH_FAMILY" = SignalRuntimeCartesian ]; then graph_timeout=30m; fi
+          if [ "$GRAPH_FAMILY" = SignalOperationActors ]; then graph_timeout=90m; fi
           go test -p=1 "${graph_flags[@]}" ./sim -run "$graph_pattern" -count=1 -timeout="$graph_timeout" -json > graph-transport-events.jsonl
       - uses: actions/upload-artifact@v4
         if: always()

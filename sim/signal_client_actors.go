@@ -118,3 +118,19 @@ func RunClientSignalActors(ctx context.Context, schedule *Scheduler, transport *
 	}
 	return RunCooperative(ctx, schedule, cooperative)
 }
+
+// Canonical discovery has its own yield points; embedding the legacy adapter
+// alone would hide source-order capabilities from the production client.
+type yieldingCanonicalSignalPort struct {
+	yieldingClientSignalPort
+	source client.CanonicalSignalPort
+}
+
+var _ client.CanonicalSignalPort = yieldingCanonicalSignalPort{}
+
+func (p yieldingCanonicalSignalPort) LastSignalSequence(ctx context.Context) (uint64, error) {
+	return graphActorCall(ctx, p.yield, "signal_high_water", func() (uint64, error) { return p.source.LastSignalSequence(ctx) })
+}
+func (p yieldingCanonicalSignalPort) NextSignal(ctx context.Context, from uint64, subject string) (*jetstream.RawStreamMsg, error) {
+	return graphActorCall(ctx, p.yield, "signal_next_source", func() (*jetstream.RawStreamMsg, error) { return p.source.NextSignal(ctx, from, subject) })
+}
