@@ -1,0 +1,40 @@
+{
+  "source": "cc8363da0f99dafbaff6eec454b85cc00fa62a63",
+  "working_directory": "/home/exedev/js-wf-signal-actors-qualification",
+  "root": "/home/exedev/js-wf-signal-actors-qualified-20261009",
+  "started_at": "2026-10-09T19:38:30.733596+00:00",
+  "scope": "focused 152nd family x1000 + directed contention regression; normal must pass before race starts; not complete suite/all pins",
+  "commands": [
+    {
+      "command": [
+        "go",
+        "test",
+        "-p=1",
+        "-c",
+        "-o",
+        "/home/exedev/js-wf-signal-actors-qualified-20261009/normal.test",
+        "./sim"
+      ],
+      "cwd": "/home/exedev/js-wf-signal-actors-qualification",
+      "log": "normal-compile.log"
+    },
+    {
+      "command": [
+        "go",
+        "tool",
+        "test2json",
+        "-t",
+        "-p",
+        "js-wf/sim",
+        "/home/exedev/js-wf-signal-actors-qualified-20261009/normal.test",
+        "-test.run=^(TestSeededGraphSignalOperationActorsReplay|TestGraphSignalCallerRetryAfterContention)$",
+        "-test.count=1",
+        "-test.timeout=90m",
+        "-test.v=test2json"
+      ],
+      "cwd": "/home/exedev/js-wf-signal-actors-qualification/sim",
+      "log": "normal-events.jsonl"
+    }
+  ],
+  "terminal_acceptance": false
+}
