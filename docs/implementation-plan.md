@@ -1,5 +1,11 @@
 # JetStream Durable Workflow Runtime — Implementation Plan
 
+## Native journal checkpoint archive lifecycle — 2026-10-09
+
+The journal archive scenario now also runs against native R1/R3 domain stores. After the first compaction, all servers stop gracefully and reopen their original file stores; fresh native adapters recover the unchanged archive/live cursor and existing reader pins. Both compactions, full logical audit, live-owned append, collection of original receipts after old-view release and terminal retirement pass. A raw object subject census confirms zero remaining chunks. [Executed evidence and precise scope](scale/graph-native-archive-2026-10-09/README.md).
+
+The client dispatch/source fixture remains modeled, so these results qualify the journal storage lifecycle rather than autonomous worker execution. Restart admission now waits for the metadata quorum within the unchanged fixture deadline; both earlier readiness failures remain preserved. OS/process/power-loss faults, native compaction contention/uncertainty, worker-triggered compaction and continuation after collection, scale/import/deployment/public admission and every original broader gate remain open.
+
 ## Journal checkpoint archive cursor — 2026-10-09
 
 An explicit new-store v6 cursor now tracks a logical retained offset independently of the live forest's physical index. Journal reads span archive and live forests at unchanged absolute indices/sequences, while appends translate verified live-owned references. `CompactCheckpoint` confirms the exact owned checkpoint and reader release, requires its published pointer and matching active tail, and archives only records before the checkpoint request. Sixteen seeded model cases exercise two successive compactions, unchanged complete history, old views, collection of original receipts, live-owned append, schema rejection and complete retirement. [Executed component evidence and limits](scale/graph-journal-archive-2026-10-09/README.md).

@@ -12,202 +12,216 @@ import (
 	"time"
 
 	"js-wf/client"
+	"js-wf/internal/blobpublication"
 	"js-wf/internal/checkpoint"
+	"js-wf/internal/graphpublication"
 	"js-wf/journal"
 	"js-wf/sim"
 )
 
+type archiveObjectPort interface {
+	graphpublication.Port
+	Objects(context.Context) ([]blobpublication.Object, error)
+}
+
 func TestGraphCheckpointArchiveLogicalHistoryAndCollection(t *testing.T) {
 	for seed := uint64(1); seed <= 16; seed++ {
 		t.Run(fmt.Sprint(seed), func(t *testing.T) {
-			ctx := context.Background()
-			scheduler := sim.NewScheduler(int64(seed))
-			model := sim.NewGraphPublicationTransport(scheduler)
-			protocol := model.Protocol()
+			model := sim.NewGraphPublicationTransport(sim.NewScheduler(int64(seed)))
 			now := time.Unix(1000, 0).UTC()
-			config := journal.GraphConfig{Protocol: protocol, Now: func() time.Time { return now }, PinTTL: 3 * time.Hour, IntentTTL: time.Second, CanonicalStarts: true, CanonicalSignals: true, CheckpointIndex: true, ArchiveCheckpoints: true}
-			store, err := journal.NewGraphStore(config)
-			if err != nil {
-				t.Fatal(err)
-			}
-			transport := sim.NewSignalTransport(scheduler)
-			c, err := client.NewWithSignalPorts(transport, transport).WithGraphJournal(store)
-			if err != nil {
-				t.Fatal(err)
-			}
-			h, err := c.Start(ctx, "flow", "archive", []byte(`7`))
-			if err != nil {
-				t.Fatal(err)
-			}
-			status, err := store.InspectStart(ctx, h.Type, h.ID)
-			if err != nil {
-				t.Fatal(err)
-			}
-			tail, err := store.Begin(ctx, h.Type, h.ID, h.InvSeq)
-			if err != nil {
-				t.Fatal(err)
-			}
-			index, position := uint64(0), uint64(0)
-			appendRecord := func(kind journal.Kind, payload []byte, objects ...[]byte) {
-				t.Helper()
-				var err error
-				tail, err = store.Append(ctx, h.Type, h.ID, h.InvSeq, journal.Entry{Kind: kind, Index: index, Epoch: 3, Payload: payload}, tail, objects, nil)
-				if err != nil {
-					t.Fatal(index, err)
-				}
-				index++
-				if kind == journal.StepRequested || kind == journal.StepCompleted {
-					position++
-				}
-			}
-			started, _ := json.Marshal(map[string]string{"input_sha256": status.State.Start.InputSHA256})
-			appendRecord(journal.Started, started, []byte(`7`))
-			for i := uint64(0); i < seed; i++ {
-				appendRecord(journal.StepRequested, []byte(fmt.Sprintf(`{"kind":"run","name":"padding%d"}`, i)))
-				appendRecord(journal.StepCompleted, []byte(`{"result":7}`))
-			}
-			makeCheckpoint := func(stage string) *journal.GraphCheckpointRead {
-				t.Helper()
-				locals := json.RawMessage(`{"value":42}`)
-				digest := sha256.Sum256(locals)
-				frame := checkpoint.Frame{Version: checkpoint.Version, Identity: checkpoint.Identity{Type: h.Type, ID: h.ID, InvSeq: h.InvSeq}, Stage: stage, Data: locals, Anchor: checkpoint.Anchor{Index: index + 1, Epoch: 3}, StepPosition: position + 2}
-				data, hash, err := checkpoint.Encode(frame)
-				if err != nil {
-					t.Fatal(err)
-				}
-				request, _ := json.Marshal(map[string]string{"kind": "checkpoint", "name": stage, "input_hash": hex.EncodeToString(digest[:])})
-				completion, _ := json.Marshal(map[string]string{"result_ref": "step-result-" + hash, "result_hash": hash})
-				appendRecord(journal.StepRequested, request)
-				appendRecord(journal.StepCompleted, completion, data)
-				appendRecord(journal.Suspended, []byte(fmt.Sprintf(`{"waiting_on":"continuation:%s"}`, stage)))
-				view, err := store.Open(ctx, h.Type, h.ID, h.InvSeq)
-				if err != nil {
-					t.Fatal(err)
-				}
-				found, err := view.ReadCheckpoint(ctx, h.Type, h.ID)
-				if err != nil || found == nil {
-					t.Fatal(found, err)
-				}
-				if err = view.Close(ctx); err != nil {
-					t.Fatal(err)
-				}
-				if err = store.PublishCheckpoint(ctx, h.Type, h.ID, found.Runtime, tail); err != nil {
-					t.Fatal(err)
-				}
-				return found
-			}
-			first := makeCheckpoint("next")
-			old, err := store.Open(ctx, h.Type, h.ID, h.InvSeq)
-			if err != nil {
-				t.Fatal(err)
-			}
-			var originals []journal.GraphRecord
-			for i := uint64(0); i < index; i++ {
-				r, err := old.Read(ctx, i)
-				if err != nil {
-					t.Fatal(err)
-				}
-				originals = append(originals, r)
-			}
-			if err = store.CompactCheckpoint(ctx, h.Type, h.ID, first.Runtime, tail+1); !errors.Is(err, journal.ErrStale) {
-				t.Fatal("wrong-tail compaction accepted", err)
-			}
-			if err = store.CompactCheckpoint(ctx, h.Type, h.ID, first.Runtime, tail); err != nil {
-				t.Fatal(err)
-			}
-			if err = store.CompactCheckpoint(ctx, h.Type, h.ID, first.Runtime, tail); err != nil {
-				t.Fatal("idempotent compact", err)
-			}
-			// Explicit schema selection prevents old readers adopting v6 state.
-			oldConfig := config
-			oldConfig.ArchiveCheckpoints = false
-			oldStore, _ := journal.NewGraphStore(oldConfig)
-			if _, err = oldStore.Open(ctx, h.Type, h.ID, h.InvSeq); !errors.Is(err, journal.ErrGap) {
-				t.Fatal("v5 adopted v6", err)
-			}
-			now = now.Add(time.Hour)
-			if _, err = protocol.SweepWithReaders(ctx, now); err != nil {
-				t.Fatal(err)
-			}
-			for i, original := range originals {
-				r, err := old.Read(ctx, uint64(i))
-				if err != nil || !reflect.DeepEqual(r, original) {
-					t.Fatal("old snapshot changed", i, err)
-				}
-			}
-			if err = old.Close(ctx); err != nil {
-				t.Fatal(err)
-			}
-			if _, err = protocol.SweepWithReaders(ctx, now); err != nil {
-				t.Fatal(err)
-			}
-			if _, err = model.Get(ctx, originals[0].EntryBlob, journal.MaxGraphEntryBytes); err == nil {
-				t.Fatal("unpinned original survived collection")
-			}
-			fresh, err := store.Open(ctx, h.Type, h.ID, h.InvSeq)
-			if err != nil {
-				t.Fatal(err)
-			}
-			if fresh.Count() != index || fresh.Tail() != tail {
-				t.Fatal("logical cursor changed")
-			}
-			for i, original := range originals {
-				r, err := fresh.Read(ctx, uint64(i))
-				if err != nil || !reflect.DeepEqual(r.Record, original.Record) || r.EntryBlob.Reference == original.EntryBlob.Reference {
-					t.Fatal("relocated logical history", i, err)
-				}
-			}
-			found, err := fresh.ReadCheckpoint(ctx, h.Type, h.ID)
-			if err != nil || found.Runtime != first.Runtime {
-				t.Fatal("relocated checkpoint", found, err)
-			}
-			// Reuse a live logical source; reject a receipt from archived history.
-			live, err := fresh.Read(ctx, first.Runtime.Index)
-			if err != nil {
-				t.Fatal(err)
-			}
-			archived, err := fresh.Read(ctx, 0)
-			if err != nil {
-				t.Fatal(err)
-			}
-			entry := journal.Entry{Kind: journal.StepRequested, Index: index, Epoch: 3, Payload: []byte(`{"kind":"run","name":"after"}`)}
-			if _, err = store.Append(ctx, h.Type, h.ID, h.InvSeq, entry, tail, nil, []journal.GraphOwnedPayload{{Index: 0, Link: archived.EntryBlob}}); !errors.Is(err, journal.ErrStale) {
-				t.Fatal("archived grant adopted", err)
-			}
-			tail, err = store.Append(ctx, h.Type, h.ID, h.InvSeq, entry, tail, nil, []journal.GraphOwnedPayload{{Index: first.Runtime.Index, Link: live.EntryBlob}})
-			if err != nil {
-				t.Fatal("logical owned append", err)
-			}
-			index++
-			position++
-			if err = fresh.Close(ctx); err != nil {
-				t.Fatal(err)
-			}
-			appendRecord(journal.StepCompleted, []byte(`{"result":42}`))
-			second := makeCheckpoint("finish")
-			if err = store.CompactCheckpoint(ctx, h.Type, h.ID, second.Runtime, tail); err != nil {
-				t.Fatal("successive compact", err)
-			}
-			appendRecord(journal.Completed, []byte(`{"result":42}`))
-			if err = store.CompactCheckpoint(ctx, h.Type, h.ID, second.Runtime, tail); !errors.Is(err, journal.ErrStale) {
-				t.Fatal("terminal compaction accepted", err)
-			}
-			records, readTail, err := store.Read(ctx, h.Type, h.ID, h.InvSeq)
-			if err != nil || len(records) != int(index) || readTail != tail {
-				t.Fatal("full audit after compaction", len(records), readTail, err)
-			}
-			if err = store.Retire(ctx, h.Type, h.ID, h.InvSeq, tail); err != nil {
-				t.Fatal(err)
-			}
-			now = now.Add(4 * time.Hour)
-			if _, err = protocol.SweepWithReaders(ctx, now); err != nil {
-				t.Fatal(err)
-			}
-			objects, err := model.Objects(ctx)
-			if err != nil || len(objects) != 0 {
-				t.Fatal("retired archive leaked", len(objects), err)
-			}
+			config := journal.GraphConfig{Protocol: model.Protocol(), Now: func() time.Time { return now }, PinTTL: 3 * time.Hour, IntentTTL: time.Second, CanonicalStarts: true, CanonicalSignals: true, CheckpointIndex: true, ArchiveCheckpoints: true}
+			checkpointArchiveScenario(t, context.Background(), seed, config, model, &now, nil)
 		})
+	}
+}
+
+func checkpointArchiveScenario(t *testing.T, ctx context.Context, seed uint64, config journal.GraphConfig, objectsPort archiveObjectPort, now *time.Time, reopen func() *journal.GraphStore) {
+	t.Helper()
+	protocol := config.Protocol
+	scheduler := sim.NewScheduler(int64(seed))
+	store, err := journal.NewGraphStore(config)
+	if err != nil {
+		t.Fatal(err)
+	}
+	transport := sim.NewSignalTransport(scheduler)
+	c, err := client.NewWithSignalPorts(transport, transport).WithGraphJournal(store)
+	if err != nil {
+		t.Fatal(err)
+	}
+	h, err := c.Start(ctx, "flow", "archive", []byte(`7`))
+	if err != nil {
+		t.Fatal(err)
+	}
+	status, err := store.InspectStart(ctx, h.Type, h.ID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	tail, err := store.Begin(ctx, h.Type, h.ID, h.InvSeq)
+	if err != nil {
+		t.Fatal(err)
+	}
+	index, position := uint64(0), uint64(0)
+	appendRecord := func(kind journal.Kind, payload []byte, objects ...[]byte) {
+		t.Helper()
+		var err error
+		tail, err = store.Append(ctx, h.Type, h.ID, h.InvSeq, journal.Entry{Kind: kind, Index: index, Epoch: 3, Payload: payload}, tail, objects, nil)
+		if err != nil {
+			t.Fatal(index, err)
+		}
+		index++
+		if kind == journal.StepRequested || kind == journal.StepCompleted {
+			position++
+		}
+	}
+	started, _ := json.Marshal(map[string]string{"input_sha256": status.State.Start.InputSHA256})
+	appendRecord(journal.Started, started, []byte(`7`))
+	for i := uint64(0); i < seed; i++ {
+		appendRecord(journal.StepRequested, []byte(fmt.Sprintf(`{"kind":"run","name":"padding%d"}`, i)))
+		appendRecord(journal.StepCompleted, []byte(`{"result":7}`))
+	}
+	makeCheckpoint := func(stage string) *journal.GraphCheckpointRead {
+		t.Helper()
+		locals := json.RawMessage(`{"value":42}`)
+		digest := sha256.Sum256(locals)
+		frame := checkpoint.Frame{Version: checkpoint.Version, Identity: checkpoint.Identity{Type: h.Type, ID: h.ID, InvSeq: h.InvSeq}, Stage: stage, Data: locals, Anchor: checkpoint.Anchor{Index: index + 1, Epoch: 3}, StepPosition: position + 2}
+		data, hash, err := checkpoint.Encode(frame)
+		if err != nil {
+			t.Fatal(err)
+		}
+		request, _ := json.Marshal(map[string]string{"kind": "checkpoint", "name": stage, "input_hash": hex.EncodeToString(digest[:])})
+		completion, _ := json.Marshal(map[string]string{"result_ref": "step-result-" + hash, "result_hash": hash})
+		appendRecord(journal.StepRequested, request)
+		appendRecord(journal.StepCompleted, completion, data)
+		appendRecord(journal.Suspended, []byte(fmt.Sprintf(`{"waiting_on":"continuation:%s"}`, stage)))
+		view, err := store.Open(ctx, h.Type, h.ID, h.InvSeq)
+		if err != nil {
+			t.Fatal(err)
+		}
+		found, err := view.ReadCheckpoint(ctx, h.Type, h.ID)
+		if err != nil || found == nil {
+			t.Fatal(found, err)
+		}
+		if err = view.Close(ctx); err != nil {
+			t.Fatal(err)
+		}
+		if err = store.PublishCheckpoint(ctx, h.Type, h.ID, found.Runtime, tail); err != nil {
+			t.Fatal(err)
+		}
+		return found
+	}
+	first := makeCheckpoint("next")
+	old, err := store.Open(ctx, h.Type, h.ID, h.InvSeq)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var originals []journal.GraphRecord
+	for i := uint64(0); i < index; i++ {
+		r, err := old.Read(ctx, i)
+		if err != nil {
+			t.Fatal(err)
+		}
+		originals = append(originals, r)
+	}
+	if err = store.CompactCheckpoint(ctx, h.Type, h.ID, first.Runtime, tail+1); !errors.Is(err, journal.ErrStale) {
+		t.Fatal("wrong-tail compaction accepted", err)
+	}
+	if err = store.CompactCheckpoint(ctx, h.Type, h.ID, first.Runtime, tail); err != nil {
+		t.Fatal(err)
+	}
+	if reopen != nil {
+		store = reopen()
+	}
+	if err = store.CompactCheckpoint(ctx, h.Type, h.ID, first.Runtime, tail); err != nil {
+		t.Fatal("idempotent compact", err)
+	}
+	// Explicit schema selection prevents old readers adopting v6 state.
+	oldConfig := config
+	oldConfig.ArchiveCheckpoints = false
+	oldStore, _ := journal.NewGraphStore(oldConfig)
+	if _, err = oldStore.Open(ctx, h.Type, h.ID, h.InvSeq); !errors.Is(err, journal.ErrGap) {
+		t.Fatal("v5 adopted v6", err)
+	}
+	*now = now.Add(time.Hour)
+	if _, err = protocol.SweepWithReaders(ctx, *now); err != nil {
+		t.Fatal(err)
+	}
+	for i, original := range originals {
+		r, err := old.Read(ctx, uint64(i))
+		if err != nil || !reflect.DeepEqual(r, original) {
+			t.Fatal("old snapshot changed", i, err)
+		}
+	}
+	if err = old.Close(ctx); err != nil {
+		t.Fatal(err)
+	}
+	if _, err = protocol.SweepWithReaders(ctx, *now); err != nil {
+		t.Fatal(err)
+	}
+	if _, err = objectsPort.Get(ctx, originals[0].EntryBlob, journal.MaxGraphEntryBytes); err == nil {
+		t.Fatal("unpinned original survived collection")
+	}
+	fresh, err := store.Open(ctx, h.Type, h.ID, h.InvSeq)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if fresh.Count() != index || fresh.Tail() != tail {
+		t.Fatal("logical cursor changed")
+	}
+	for i, original := range originals {
+		r, err := fresh.Read(ctx, uint64(i))
+		if err != nil || !reflect.DeepEqual(r.Record, original.Record) || r.EntryBlob.Reference == original.EntryBlob.Reference {
+			t.Fatal("relocated logical history", i, err)
+		}
+	}
+	found, err := fresh.ReadCheckpoint(ctx, h.Type, h.ID)
+	if err != nil || found.Runtime != first.Runtime {
+		t.Fatal("relocated checkpoint", found, err)
+	}
+	// Reuse a live logical source; reject a receipt from archived history.
+	live, err := fresh.Read(ctx, first.Runtime.Index)
+	if err != nil {
+		t.Fatal(err)
+	}
+	archived, err := fresh.Read(ctx, 0)
+	if err != nil {
+		t.Fatal(err)
+	}
+	entry := journal.Entry{Kind: journal.StepRequested, Index: index, Epoch: 3, Payload: []byte(`{"kind":"run","name":"after"}`)}
+	if _, err = store.Append(ctx, h.Type, h.ID, h.InvSeq, entry, tail, nil, []journal.GraphOwnedPayload{{Index: 0, Link: archived.EntryBlob}}); !errors.Is(err, journal.ErrStale) {
+		t.Fatal("archived grant adopted", err)
+	}
+	tail, err = store.Append(ctx, h.Type, h.ID, h.InvSeq, entry, tail, nil, []journal.GraphOwnedPayload{{Index: first.Runtime.Index, Link: live.EntryBlob}})
+	if err != nil {
+		t.Fatal("logical owned append", err)
+	}
+	index++
+	position++
+	if err = fresh.Close(ctx); err != nil {
+		t.Fatal(err)
+	}
+	appendRecord(journal.StepCompleted, []byte(`{"result":42}`))
+	second := makeCheckpoint("finish")
+	if err = store.CompactCheckpoint(ctx, h.Type, h.ID, second.Runtime, tail); err != nil {
+		t.Fatal("successive compact", err)
+	}
+	appendRecord(journal.Completed, []byte(`{"result":42}`))
+	if err = store.CompactCheckpoint(ctx, h.Type, h.ID, second.Runtime, tail); !errors.Is(err, journal.ErrStale) {
+		t.Fatal("terminal compaction accepted", err)
+	}
+	records, readTail, err := store.Read(ctx, h.Type, h.ID, h.InvSeq)
+	if err != nil || len(records) != int(index) || readTail != tail {
+		t.Fatal("full audit after compaction", len(records), readTail, err)
+	}
+	if err = store.Retire(ctx, h.Type, h.ID, h.InvSeq, tail); err != nil {
+		t.Fatal(err)
+	}
+	*now = now.Add(4 * time.Hour)
+	if _, err = protocol.SweepWithReaders(ctx, *now); err != nil {
+		t.Fatal(err)
+	}
+	objects, err := objectsPort.Objects(ctx)
+	if err != nil || len(objects) != 0 {
+		t.Fatal("retired archive leaked", len(objects), err)
 	}
 }
 
