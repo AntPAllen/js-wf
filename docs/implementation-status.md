@@ -1,5 +1,11 @@
 # Implementation status against the supplied plan
 
+## Full race CPU watchdog adjusted after terminal failure — 2026-10-09
+
+The full race test watchdog is now 300 minutes and its CI job budget 320 minutes, following the preserved 180-minute failure at 89/149 completed families. This provides CPU time for the complete current suite, including the newly accepted 1,336.887-second Cartesian race group. No seed count, compiled inventory, regression requirement, per-schedule/virtual deadline, production recovery target or property assertion changes. Actual child exits are retained before failure propagation, with successful/failed subprocess controls verified. [Evidence and precise scope](scale/tier1-race-budget-2026-10-09/README.md).
+
+The prior failed campaign remains unqualified. Current full normal remains live; full current race/extended and every original broader requirement remain open. Public continuation admission and production collection remain disabled.
+
 ## Full frozen race watchdog failure; current full normal started — 2026-10-09
 
 The older `fca8264` full race campaign terminated at its 180-minute watchdog after 89/149 families × 1,000 completed bodies and 126 top-level passes. No race warning or ordinary assertion failure preceded the panic; missing tests remain unqualified. [Raw terminal evidence and executed review](scale/graph-current-qualification-2026-10-09/complete-race1000-timeout/README.md) verify 3,106 unchanged Git inputs and the retained race binary. The complete normal result at that source remains separately accepted.

@@ -29,13 +29,18 @@ before = inventory()
 env = dict(os.environ, GOMEMLIMIT='512MiB', GOMAXPROCS='2', SIM_SEEDS=str(a.seeds), SIM_COVERAGE_SUMMARY='1', SIM_PROGRESS='1', FAULT_TRACE_OUT=str(root/'failure-trace.json'))
 commands = []
 execution_contexts = []
+command_results = []
 def call(command, **kwargs):
     cwd = kwargs.pop('cwd', REPO)
     commands.append(command)
     execution_contexts.append(dict(command=command, working_directory=str(cwd)))
     (root/'commands.json').write_text(json.dumps(commands, indent=2)+'\n')
     (root/'execution-contexts.json').write_text(json.dumps(execution_contexts, indent=2)+'\n')
-    return subprocess.run(command, cwd=cwd, env=env, check=True, **kwargs)
+    result = subprocess.run(command, cwd=cwd, env=env, **kwargs)
+    command_results.append(dict(command=command, working_directory=str(cwd), exit_code=result.returncode))
+    (root/'command-results.json').write_text(json.dumps(command_results, indent=2)+'\n')
+    result.check_returncode()
+    return result
 try:
     binary = root/'sim.test'
     call(['go', 'test', '-p=1', *([] if a.no_race else ['-race']), '-c', '-o', str(binary), './sim'])
@@ -53,7 +58,7 @@ try:
     with (root/'tier1-events.jsonl').open('w') as out, (root/'stderr.log').open('w') as err:
         call(['/usr/bin/time', '-o', str(root/'tier1-time.txt'), '-f', 'elapsed=%e user=%U system=%S',
               'go', 'tool', 'test2json', '-t', '-p', 'js-wf/sim', str(binary),
-              '-test.v=test2json', '-test.count=1', '-test.timeout='+('300m' if a.no_race else '180m')], cwd=REPO/'sim', stdout=out, stderr=err)
+              '-test.v=test2json', '-test.count=1', '-test.timeout=300m'], cwd=REPO/'sim', stdout=out, stderr=err)
     call(['python3', 'scripts/check-tier1-suite.py', '--events', str(root/'tier1-events.jsonl'),
           '--inventory', str(root/'tier1-inventory.txt'), '--regressions', str(root/'tier1-regression-inventory.txt'),
           '--source', str(root/'tier1-source.txt'), '--seeded-inventory', str(root/'tier1-seeded-inventory.txt'),
