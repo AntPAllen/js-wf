@@ -1,5 +1,11 @@
 # JetStream Durable Workflow Runtime — Implementation Plan
 
+## Complete normal deterministic qualification accepted — 2026-10-09
+
+Frozen `fca8264` passed all 149 families × 1,000 contiguous completed bodies, all 762 saved regressions and 211 top-level groups in 1,956.496 seconds. Independent executed review confirms 1,943 unchanged Git-matched inputs, binary provenance, exact coverage and terminal success. [Complete normal proof and remaining scope](scale/graph-current-qualification-2026-10-09/complete-normal1000/README.md).
+
+The full race campaign remains live. This normal acceptance excludes later process fixtures, CLI cursor selection and Await retry changes. Current-source/extended qualification and every original broader gate remain open; public continuation admission and production collection remain disabled. Earlier pending statements below describe their historical launch state.
+
 ## Checkpoint archive survives observed server process kills — 2026-10-09
 
 Native R1/R3 domain tests now verify `SIGKILL` wait statuses for every server, reopen the original stores with new PIDs and recover an exactly identical logical authority and persisted old reader. Both compactions, full history audit, old-reader survival, original-receipt collection and zero physical chunks after retirement pass across four graceful/process cases normally (72.198 s) and under race (179.322 s). Three failures remain preserved; read-only metadata/stream readiness checks address observed recovery-time request uncertainty and offline provisioning peers inside the unchanged fixture deadline. [Source verification, raw evidence, CI wiring and scope](scale/graph-process-archive-2026-10-09/README.md).

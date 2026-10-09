@@ -1,8 +1,8 @@
-# Complete current deterministic qualification — pending
+# Complete frozen deterministic qualification — normal passed, race pending
 
 Frozen source: `fca8264d2229144e9b3e6a70df747d1307666fe6`, checkout `/home/exedev/js-wf-compaction-qualification`. This includes checkpoint compaction and the later authority guard.
 
-The complete normal and race campaigns have been started, each requiring all 149 seeded families × 1,000 contiguous completed bodies and all 762 saved regressions. Terminal verdicts remain pending. The normal compiled inventory has 213 groups, with the two explicit trace replay/minimization utilities expected to skip. Running and partial evidence are not acceptance.
+The complete normal and race campaigns have been started, each requiring all 149 seeded families × 1,000 contiguous completed bodies and all 762 saved regressions. The complete normal campaign passed in 1,956.496 seconds, with independent source, binary, event and exact coverage verification. The race campaign remains live and has no terminal verdict. The normal compiled inventory has 213 groups, with the two explicit trace replay/minimization utilities expected to skip. Running and partial evidence are not acceptance.
 
 Retained run roots:
 
@@ -13,4 +13,4 @@ Retained run roots:
 
 The first normal attempt was explicitly interrupted after discovering that its runner used the repository directory rather than `sim`; its partial events, nonzero exit, binary/source provenance and interruption reason are preserved in `initial-wrong-cwd/`. It is not a runtime defect or a qualified campaign. A subsequent runner syntax error was corrected before another process started.
 
-Current full normal/race verdicts, independent executed review and extended 10,000/100,000-seed campaigns remain open. Full simulation qualification does not discharge original native fault matrices, actual 24-hour soak, physical drain, migration, admission or release requirements.
+The [complete normal evidence and executed review](complete-normal1000/README.md) qualify frozen `fca8264`, including compaction and the authority guard. They exclude later process fixtures, CLI cursor selection and Await retry changes. Full race acceptance, complete qualification of subsequent production changes and extended 10,000/100,000-seed campaigns remain open. Full simulation qualification does not discharge original native fault matrices, actual 24-hour soak, physical drain, migration, admission or release requirements.
