@@ -20,7 +20,7 @@ type repairJournalPort interface {
 // GraphRepairSchedulingPort provides a scheduling hint only. A live delivery
 // already owns recovery; postpone history pins which could starve its append.
 // Lease expiry/release makes a later scan eligible. This grants no write or
-// payload authority and is used only by timer/suspended discovery.
+// payload authority and is used by timer, suspended and continuation discovery.
 type GraphRepairSchedulingPort interface {
 	GraphRepairBlocked(context.Context, string, string) (bool, error)
 }
@@ -125,7 +125,8 @@ func NewSuspendedScanWithGraphJournalPort(port SuspendedScanPort, graph *journal
 }
 
 // RunRepairLoopWithGraphJournal runs the existing fenced leader/cursor loop with
-// graph history. Supported kinds are start, graph-start, graph-signal, graph-terminal, signal, timer, fallback-timer and suspended. Tombstone state and purge
+// graph history. Supported kinds are start, graph-start, graph-signal,
+// graph-terminal, graph-continuation, signal, timer, fallback-timer and suspended. Tombstone state and purge
 // coordination require separate migration.
 func RunRepairLoopWithGraphJournal(ctx context.Context, js jetstream.JetStream, workerID, kind string, interval time.Duration, budget int, graph *journal.GraphStore, observe func(RepairEvent), clock TimerDomainClock, progress func(ScanEvent)) error {
 	if graph == nil {
@@ -134,7 +135,10 @@ func RunRepairLoopWithGraphJournal(ctx context.Context, js jetstream.JetStream, 
 	if kind == "fallback-timer" && !graph.CanonicalStarts() {
 		return fmt.Errorf("graph fallback requires canonical Start store")
 	}
-	if kind != "start" && kind != "graph-start" && kind != "graph-signal" && kind != "graph-terminal" && kind != "signal" && kind != "timer" && kind != "fallback-timer" && kind != "suspended" {
+	if kind == "graph-continuation" && !graph.CheckpointIndex() {
+		return fmt.Errorf("continuation repair requires v5 checkpoint index")
+	}
+	if kind != "graph-continuation" && kind != "start" && kind != "graph-start" && kind != "graph-signal" && kind != "graph-terminal" && kind != "signal" && kind != "timer" && kind != "fallback-timer" && kind != "suspended" {
 		return fmt.Errorf("unsupported graph repair kind %q", kind)
 	}
 	return runRepairLoopObserved(ctx, js, workerID, kind, interval, budget, observe, clock, progress, graph)

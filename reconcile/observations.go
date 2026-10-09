@@ -79,6 +79,13 @@ func RunRepairLoopWithClock(ctx context.Context, js jetstream.JetStream, workerI
 func runRepairLoopObserved(ctx context.Context, js jetstream.JetStream, workerID, kind string, interval time.Duration, budget int, observe func(RepairEvent), clock TimerDomainClock, progress func(ScanEvent), graph *journal.GraphStore) error {
 	var scan scanFunc
 	switch kind {
+	case "graph-continuation":
+		s, err := NewCanonicalContinuationScan(js, graph)
+		if err != nil {
+			return err
+		}
+		s.Observe = observe
+		scan = s.Scan
 	case "graph-terminal":
 		s, err := NewCanonicalTerminalScan(ctx, js, graph)
 		if err != nil {

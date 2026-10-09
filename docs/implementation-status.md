@@ -1,5 +1,9 @@
 # Implementation status against the supplied plan
 
+## Canonical continuation recovery component — 2026-10-09
+
+The v5 continuation scanner now discovers published checkpoint resume hints through bounded canonical catalog cycles, defers held leases, validates the native source and captured checkpoint/generation twice, and dispatches fresh wakeups. Unknown decisions preserve the confirmed cursor prefix; changed waits are skipped only after a fresh witness. Discovery opens no payloads or reader pins. Fifteen modeled race cases, 64 catalog scanner/seed cases, shared helper regressions and native R1/R3-domain repeated wakeup loss plus the production fenced recovery loop pass. [Executed evidence and limits](scale/graph-continuation-recovery-2026-10-09/README.md). Recovery before the first pointer publication and complete autonomous worker/initial SDK flow remain unqualified; archival prefix compaction, bounded worker references, collection-safe materialization, audit/import/v5 CLI/deployment and public continuation admission remain open. The accepted frozen normal/race suite excludes this change; every original broader gate remains required.
+
 ## Frozen canonical worker complete race qualification — 2026-10-09
 
 The full default simulation race suite at frozen `9a1ccdc` passed 210 groups, 148 families × 1,000 contiguous completed seed bodies and all 748 pinned regressions in 7,988.653 seconds. Independent review confirms the unchanged selected input inventory and race binary, exact coverage and retained event hash. The matching complete normal campaign also passed at this revision. [Executed race evidence](scale/graph-worker-cli-2026-10-09/complete-race1000/README.md). Later operator/replay/visibility/fallback/continuation/v5 changes are excluded; current-source full/extended qualification and every original wider gate remain open.

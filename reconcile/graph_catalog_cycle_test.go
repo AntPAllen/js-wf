@@ -18,13 +18,13 @@ import (
 // two-destination cycle with one-record budgets, even when neither root needs
 // repair. This catches moving-watermark starvation without a real cluster.
 func TestGraphCanonicalCatalogCyclesWrapWithoutHeadMutation(t *testing.T) {
-	for _, kind := range []string{"start", "signal", "terminal"} {
+	for _, kind := range []string{"start", "signal", "terminal", "continuation"} {
 		for seed := int64(1); seed <= 16; seed++ {
 			t.Run(fmt.Sprintf("%s/%d", kind, seed), func(t *testing.T) {
 				ctx := context.Background()
 				schedule := sim.NewScheduler(seed)
 				model := sim.NewGraphPublicationTransport(schedule)
-				graph, e := journal.NewGraphStore(journal.GraphConfig{Protocol: model.Protocol(), CanonicalStarts: true, CanonicalSignals: true})
+				graph, e := journal.NewGraphStore(journal.GraphConfig{Protocol: model.Protocol(), CanonicalStarts: true, CanonicalSignals: true, CheckpointIndex: kind == "continuation"})
 				if e != nil {
 					t.Fatal(e)
 				}
@@ -64,6 +64,13 @@ func TestGraphCanonicalCatalogCyclesWrapWithoutHeadMutation(t *testing.T) {
 				}
 				var scan func(context.Context, uint64, int, bool) (reconcile.ScanResult, error)
 				switch kind {
+				case "continuation":
+					recovery := &continuationRecovery{c: c}
+					s, e := reconcile.NewCanonicalContinuationScanWithPort(graph, recovery, recovery)
+					if e != nil {
+						t.Fatal(e)
+					}
+					scan = s.Scan
 				case "start":
 					s, e := reconcile.NewCanonicalStartScanWithPort(graph, c)
 					if e != nil {

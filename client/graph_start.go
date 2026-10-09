@@ -170,6 +170,24 @@ func (c *Client) RepairTerminalProjectionAttempt(ctx context.Context, typ, id, t
 }
 
 func (c *Client) repairBoundGraphAttempt(ctx context.Context, typ, id, token string, invocation uint64, messageID string, terminal bool) (Handle, error) {
+	return c.repairBoundGraphGuard(ctx, typ, id, token, invocation, messageID, terminal, nil)
+}
+
+// RepairContinuationAttempt dispatches only the captured canonical checkpoint
+// generation after checking the native source and observing eligibility again.
+// It does not open a frame or authorize execution; workers own those checks.
+func (c *Client) RepairContinuationAttempt(ctx context.Context, typ, id, token string, invocation, checkpointSequence uint64) (bool, error) {
+	if c.graphJournal == nil || !c.graphJournal.CheckpointIndex() || checkpointSequence == 0 {
+		return false, journal.ErrGap
+	}
+	_, err := c.repairBoundGraphGuard(ctx, typ, id, token, invocation, "", false, func(status *journal.GraphStartStatus) bool {
+		return status.ContinuationReady() && status.Checkpoint.Sequence == checkpointSequence
+	})
+	return err == nil, err
+}
+
+func (c *Client) repairBoundGraphGuard(ctx context.Context, typ, id, token string, invocation uint64, messageID string, terminal bool, guard func(*journal.GraphStartStatus) bool) (Handle, error) {
+
 	h := Handle{Type: typ, ID: id, InvSeq: invocation}
 	if c.graphJournal == nil || !c.graphJournal.CanonicalStarts() || token == "" || invocation == 0 {
 		return h, journal.ErrGap
@@ -180,6 +198,9 @@ func (c *Client) repairBoundGraphAttempt(ctx context.Context, typ, id, token str
 			return nil, err
 		}
 		if status == nil || status.Retired || status.Purging || status.State.Pending || status.State.Invocation != invocation || status.State.Start.Token != token {
+			return nil, journal.ErrStale
+		}
+		if guard != nil && !guard(status) {
 			return nil, journal.ErrStale
 		}
 		if terminal && status.Kind != journal.Completed && status.Kind != journal.Failed {

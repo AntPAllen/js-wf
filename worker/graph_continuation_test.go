@@ -16,6 +16,7 @@ import (
 	"js-wf/journal"
 	"js-wf/lease"
 	"js-wf/provision"
+	"js-wf/reconcile"
 	"js-wf/testcluster"
 	"js-wf/wf"
 )
@@ -187,6 +188,14 @@ func testNativeGraphContinuationHandoff(t *testing.T, domain string) {
 	if err != nil || second.State.Msgs != 2 || len(records) != 4 {
 		t.Fatal("retry suppressed or appended duplicate suspension", second, err)
 	}
+	scan, err := reconcile.NewCanonicalContinuationScan(js, graph)
+	if err != nil {
+		t.Fatal(err)
+	}
+	held, err := scan.Scan(ctx, 1, 1, false)
+	if err != nil || held.Reenqueued != 0 {
+		t.Fatal("scanner dispatched while delivery held lease", held, err)
+	}
 	if err := owner.Release(ctx); err != nil {
 		t.Fatal(err)
 	}
@@ -196,6 +205,52 @@ func testNativeGraphContinuationHandoff(t *testing.T, domain string) {
 	afterLoss, err := runs.Info(ctx)
 	if err != nil || afterLoss.State.Msgs != 2 || len(records) != 4 {
 		t.Fatal("lost lease mutated handoff", afterLoss, err)
+	}
+	// Lose all wakeups twice within the native dedup window. Discovery must
+	// dispatch freshly each time using only the retained checkpoint metadata.
+	for attempt := 0; attempt < 2; attempt++ {
+		if err := runs.Purge(ctx); err != nil {
+			t.Fatal(err)
+		}
+		repaired, err := scan.Scan(ctx, 1, 1, false)
+		info, infoErr := runs.Info(ctx)
+		if err != nil || infoErr != nil || repaired.Reenqueued != 1 || info.State.Msgs != 1 {
+			t.Fatal("lost wakeup not recovered", attempt, repaired, info, err, infoErr)
+		}
+	}
+	// Exercise the production fenced leader/cursor loop too, with a joined
+	// shutdown before stage execution starts acquiring delivery leases.
+	if err := runs.Purge(ctx); err != nil {
+		t.Fatal(err)
+	}
+	loopCtx, stopLoop := context.WithCancel(ctx)
+	loopDone := make(chan error, 1)
+	recoveryEvents := make(chan reconcile.RepairEvent, 1)
+	go func() {
+		loopDone <- reconcile.RunRepairLoopWithGraphJournal(loopCtx, js, "continuation-recovery", "graph-continuation", 100*time.Millisecond, 1, graph, func(event reconcile.RepairEvent) {
+			select {
+			case recoveryEvents <- event:
+			default:
+			}
+		}, nil, nil)
+	}()
+	var event reconcile.RepairEvent
+	select {
+	case event = <-recoveryEvents:
+	case err := <-loopDone:
+		stopLoop()
+		t.Fatal("recovery loop ended before dispatch", err)
+	case <-ctx.Done():
+		stopLoop()
+		<-loopDone
+		t.Fatal("recovery loop did not dispatch", ctx.Err())
+	}
+	stopLoop()
+	if err := <-loopDone; err != nil && !errors.Is(err, context.Canceled) {
+		t.Fatal("recovery loop shutdown", err)
+	}
+	if event.Outcome != "acknowledged" || event.InvocationSequence != h.InvSeq || event.JournalSequence != records[2].Sequence {
+		t.Fatal("recovery loop source identity", event)
 	}
 	// Construction admission remains closed. Internal migration tests attach
 	// stage registrations after constructing the ordinary graph worker.
@@ -270,6 +325,10 @@ func testNativeGraphContinuationHandoff(t *testing.T, domain string) {
 	// A new execution must read the newly owned frame and run only its stage.
 	execute()
 	execute() // Terminal duplicate must not reenter either stage or its effect.
+	terminal, err := scan.Scan(ctx, 1, 1, false)
+	if err != nil || terminal.Reenqueued != 0 {
+		t.Fatal("terminal checkpoint redispatched", terminal, err)
+	}
 	result, err := c.Await(ctx, h.Type, h.ID)
 	if err != nil {
 		t.Fatal(err)

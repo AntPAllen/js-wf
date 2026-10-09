@@ -38,6 +38,9 @@ func selectWorkerGraph(authority, prefix, bucket string, replicas int, encoding 
 
 func graphWorkerRepairLoops(js jetstream.JetStream, id string, interval time.Duration, budget int, graph *journal.GraphStore, observe func(reconcile.RepairEvent), clock reconcile.TimerDomainClock) []func(context.Context) error {
 	kinds := []string{"graph-start", "graph-signal", "graph-terminal", "timer", "suspended"}
+	if graph.CheckpointIndex() {
+		kinds = append(kinds, "graph-continuation")
+	}
 	loops := make([]func(context.Context) error, 0, len(kinds))
 	for _, kind := range kinds {
 		loops = append(loops, func(ctx context.Context) error {

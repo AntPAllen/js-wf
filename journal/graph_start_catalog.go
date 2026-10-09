@@ -21,6 +21,17 @@ type GraphStartStatus struct {
 	SignalBindings uint64
 	SignalConsumed uint64
 	SignalRepair   uint64
+	Checkpoint     *RuntimeCheckpoint
+}
+
+// ContinuationReady is a scheduling hint for an interrupted delivery or a
+// freshly suspended checkpoint boundary. It grants no payload authority. A
+// later timer/signal suspension must be repaired through its own wait source.
+func (s *GraphStartStatus) ContinuationReady() bool {
+	if s == nil || s.Checkpoint == nil || s.Retired || s.Purging || s.State.Pending || s.Kind == Completed || s.Kind == Failed {
+		return false
+	}
+	return s.Kind != Suspended || s.JournalCount == s.Checkpoint.Index+2
 }
 
 // InspectStart observes lifecycle metadata without acquiring an input reader
@@ -58,7 +69,12 @@ func (s *GraphStore) InspectStartDestination(ctx context.Context, destination st
 	if err != nil || validated == nil {
 		return nil, ErrGap
 	}
-	return &GraphStartStatus{State: startState(validated), JournalCount: validated.Count, Retired: validated.Retired, Purging: validated.Purging, Kind: validated.Kind, SignalInputs: validated.SignalInputs, SignalBindings: validated.SignalBindings, SignalConsumed: validated.SignalConsumed, SignalRepair: validated.SignalRepair}, nil
+	var checkpoint *RuntimeCheckpoint
+	if validated.Checkpoint != nil {
+		runtime := validated.Checkpoint.Runtime
+		checkpoint = &runtime
+	}
+	return &GraphStartStatus{Checkpoint: checkpoint, State: startState(validated), JournalCount: validated.Count, Retired: validated.Retired, Purging: validated.Purging, Kind: validated.Kind, SignalInputs: validated.SignalInputs, SignalBindings: validated.SignalBindings, SignalConsumed: validated.SignalConsumed, SignalRepair: validated.SignalRepair}, nil
 }
 
 // NextStart discovers one retained authority root and confirms its current
