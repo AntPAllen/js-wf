@@ -1,0 +1,48 @@
+{
+  "normal": {
+    "command": "SIM_COVERAGE_SUMMARY=1 SIM_GRAPH_FALLBACK_NAMESPACE_ROOT=/home/exedev/js-wf-fallback-namespace-traces-confirmed-20261009 GOMAXPROCS=1 GOMEMLIMIT=512MiB go test ./sim -run '^TestSeededGraphFallbackNamespaceReplay$' -count=1 -timeout=3m -v",
+    "actual_child_exit": 0,
+    "package_seconds": 19.614
+  },
+  "race": {
+    "command": "SIM_COVERAGE_SUMMARY=1 GOMAXPROCS=1 GOMEMLIMIT=512MiB go test -race ./sim -run '^TestSeededGraphFallbackNamespaceReplay$' -count=1 -timeout=5m -v",
+    "actual_child_exit": 0,
+    "package_seconds": 207.676
+  },
+  "pins-normal": {
+    "command": "GOMAXPROCS=1 GOMEMLIMIT=512MiB go test ./sim -run '^TestPinnedRegressionCorpus/graph-fallback-namespace-' -count=1 -timeout=1m -v",
+    "actual_child_exit": 0,
+    "package_seconds": 0.104
+  },
+  "pins-race": {
+    "command": "GOMAXPROCS=1 GOMEMLIMIT=512MiB go test -race ./sim -run '^TestPinnedRegressionCorpus/graph-fallback-namespace-' -count=1 -timeout=1m -v",
+    "actual_child_exit": 0,
+    "package_seconds": 2.195
+  },
+  "prior_attempts": {
+    "development-clock.log": {
+      "actual_child_exit": 1
+    },
+    "development-output-directory.log": {
+      "actual_child_exit": 1,
+      "completed_bodies": 0
+    },
+    "initial-controller-normal.log": {
+      "actual_child_exit": 0,
+      "package_seconds": 16.103
+    },
+    "initial-controller-race.log": {
+      "actual_child_exit": 0,
+      "package_seconds": 205.546
+    },
+    "initial-controller-pins-normal.log": {
+      "actual_child_exit": 0,
+      "package_seconds": 0.088
+    },
+    "initial-controller-pins-race.log": {
+      "actual_child_exit": 0,
+      "package_seconds": 1.997
+    }
+  },
+  "scope": "Focused final scanner-replacement workload and six shared pins only. All complete current and original broader qualification gates remain open."
+}

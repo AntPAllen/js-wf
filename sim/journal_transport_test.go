@@ -555,6 +555,8 @@ func replayTrace(loaded Trace) (Trace, error) {
 		replayed, err = runGraphTerminalAudit(loaded.Seed, &loaded)
 	case "graph_reader_maintenance":
 		replayed, err = runGraphReaderMaintenance(loaded.Seed, &loaded)
+	case "graph_fallback_namespace":
+		replayed, err = runGraphFallbackNamespace(loaded.Seed, &loaded)
 	case "graph_signal_expiry_actors":
 		replayed, err = runGraphSignalExpiryActors(loaded.Seed, &loaded)
 	case "graph_signal_operation_actors":
