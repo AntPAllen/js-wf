@@ -1,5 +1,9 @@
 # JetStream Durable Workflow Runtime — Implementation Plan
 
+## Canonical continuation handoff boundary — 2026-10-09
+
+The worker publisher now has a graph branch that confirms the exact owned checkpoint and tail, including pin release, before suspension and fresh recovery dispatch. Model race checks reject pointer/tail changes and uncertain release; a direct native R1 publisher check verifies no dispatch from invalid metadata or a lost lease, no duplicate suspension on retry, fresh dispatch inside dedup, and no legacy journal writes. Existing legacy continuation limit/terminal-slot checks pass. [Component evidence and admission limits](scale/graph-continuation-handoff-2026-10-09/README.md). Continuation admission remains closed until full stage dispatch/recovery, archival prefix compaction, materialized payload retention and native kill/limit/audit integration are implemented. Every original remaining full/extended/runtime/native/scale/soak/drain/adoption/release requirement remains open.
+
 ## Canonical graph checkpoint reader foundation — 2026-10-09
 
 Pinned graph views now discover and validate completed continuation frames from their owned journal edges, returning a captured anchor/suffix/tail without trusting a legacy manifest. JSON/protobuf component race controls verify frame identity/hash/locals/SDK position, absent/pending boundaries, exact ownership, payload-read uncertainty, expiry and stable older pins. [Executed checks and limits](scale/graph-checkpoint-read-2026-10-09/README.md). Worker stage dispatch, publication/recovery, archival prefix compaction, materialized payload ownership, native kill/limit qualification and full audit/offline integration remain incomplete; continuation admission remains rejected. This foundation leaves every original broader runtime/full/extended/native/scale/soak/drain/adoption/release requirement open.

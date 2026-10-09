@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"js-wf/internal/checkpoint"
+	"js-wf/internal/graphpublication"
 	"js-wf/internal/retainedgraph"
 	"js-wf/journal"
 	"js-wf/sim"
@@ -18,7 +19,8 @@ import (
 
 type checkpointPayloadFaultPort struct {
 	*sim.GraphPublicationTransport
-	failHash string
+	failHash    string
+	failRelease bool
 }
 
 func (p *checkpointPayloadFaultPort) Get(ctx context.Context, link retainedgraph.Link, limit int) ([]byte, error) {
@@ -26,6 +28,13 @@ func (p *checkpointPayloadFaultPort) Get(ctx context.Context, link retainedgraph
 		return nil, context.DeadlineExceeded
 	}
 	return p.GraphPublicationTransport.Get(ctx, link, limit)
+}
+
+func (p *checkpointPayloadFaultPort) CASRoot(ctx context.Context, key string, head uint64, root graphpublication.Root) (graphpublication.Root, error) {
+	if p.failRelease && len(root.Readers) == 1 {
+		return graphpublication.Root{}, context.DeadlineExceeded
+	}
+	return p.GraphPublicationTransport.CASRoot(ctx, key, head, root)
 }
 
 func TestGraphCheckpointOwnedFrameAndSuffix(t *testing.T) {
@@ -112,6 +121,24 @@ func TestGraphCheckpointOwnedFrameAndSuffix(t *testing.T) {
 				}
 				if _, err := view.ReadCheckpoint(ctx, "other", "id"); !errors.Is(err, journal.ErrCheckpointGeneration) {
 					t.Fatal("foreign view identity accepted", err)
+				}
+				if mode == "valid" {
+					if err := store.ConfirmCheckpoint(ctx, "flow", "checkpoint", got.Runtime, got.Tail); err != nil {
+						t.Fatal("valid handoff confirmation", err)
+					}
+					if err := store.ConfirmCheckpoint(ctx, "flow", "checkpoint", got.Runtime, got.Tail+1); !errors.Is(err, journal.ErrStale) {
+						t.Fatal("changed tail accepted", err)
+					}
+					foreign := got.Runtime
+					foreign.Stage = "other"
+					if err := store.ConfirmCheckpoint(ctx, "flow", "checkpoint", foreign, got.Tail); !errors.Is(err, journal.ErrGap) {
+						t.Fatal("different checkpoint accepted", err)
+					}
+					port.failRelease = true
+					if err := store.ConfirmCheckpoint(ctx, "flow", "checkpoint", got.Runtime, got.Tail); err == nil {
+						t.Fatal("uncertain reader release confirmed handoff")
+					}
+					port.failRelease = false
 				}
 				if mode == "latest" {
 					frame.Data = json.RawMessage(`{"count":3}`)

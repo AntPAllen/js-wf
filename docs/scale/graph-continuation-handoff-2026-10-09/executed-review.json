@@ -1,0 +1,50 @@
+{
+  "scope": "development component boundary; continuation admission still closed",
+  "logs": {
+    "component-race.log": {
+      "required_passes": [
+        "TestContinuationAnchorUsesHistoricalRuntimeFacts",
+        "TestGraphCheckpointOwnedFrameAndSuffix/json/valid",
+        "TestGraphCheckpointOwnedFrameAndSuffix/json/absent",
+        "TestGraphCheckpointOwnedFrameAndSuffix/json/pending",
+        "TestGraphCheckpointOwnedFrameAndSuffix/json/wrong-generation",
+        "TestGraphCheckpointOwnedFrameAndSuffix/json/wrong-locals",
+        "TestGraphCheckpointOwnedFrameAndSuffix/json/missing-edge",
+        "TestGraphCheckpointOwnedFrameAndSuffix/json/borrowed-edge",
+        "TestGraphCheckpointOwnedFrameAndSuffix/json/unreadable",
+        "TestGraphCheckpointOwnedFrameAndSuffix/json/expired",
+        "TestGraphCheckpointOwnedFrameAndSuffix/json/latest",
+        "TestGraphCheckpointOwnedFrameAndSuffix/protobuf-v1/valid",
+        "TestGraphCheckpointOwnedFrameAndSuffix/protobuf-v1/absent",
+        "TestGraphCheckpointOwnedFrameAndSuffix/protobuf-v1/pending",
+        "TestGraphCheckpointOwnedFrameAndSuffix/protobuf-v1/wrong-generation",
+        "TestGraphCheckpointOwnedFrameAndSuffix/protobuf-v1/wrong-locals",
+        "TestGraphCheckpointOwnedFrameAndSuffix/protobuf-v1/missing-edge",
+        "TestGraphCheckpointOwnedFrameAndSuffix/protobuf-v1/borrowed-edge",
+        "TestGraphCheckpointOwnedFrameAndSuffix/protobuf-v1/unreadable",
+        "TestGraphCheckpointOwnedFrameAndSuffix/protobuf-v1/expired",
+        "TestGraphCheckpointOwnedFrameAndSuffix/protobuf-v1/latest"
+      ],
+      "sha256": "6eb474cb28ca125ea8ebf413a00e4b35a95d359bd57d926c45870c6ed84d34e4"
+    },
+    "final-handoff-race.log": {
+      "required_passes": [
+        "TestNativeGraphContinuationHandoff"
+      ],
+      "sha256": "a30821a9c37d723dc7a71067cc97b7da13de1dbb009f5d51559d04b41fd2c530"
+    },
+    "legacy-limit-race.log": {
+      "required_passes": [
+        "TestContinuationPreservesGlobalJournalLimitAndTerminalSlot"
+      ],
+      "sha256": "6d2f57cc8c1ac2c17755cbe32867f9280f7d8ab47d877576d6db66560fefb839"
+    }
+  },
+  "source_observed_at_review": {
+    "journal/graph_checkpoint.go": "61f16ab4f24fbf098a8a7f252754e2e595301a82c12e129918cb98383002355a",
+    "journal/graph_checkpoint_test.go": "313b6ed43e3869e12d9fed7ce7ba786c8ef77bb760cba90d2e921899f503cc7c",
+    "worker/continuation.go": "fea5fa233c38a04a81c813bf41ff4a1a968246385019525315b204e8fb764ba3",
+    "worker/graph_continuation_test.go": "37ce592cc3c7fe116d67f24529e4c2b9052c9dc85774ca35824d9d5acf9c2c2f",
+    "worker/graph_journal.go": "039fe7a2680001a3c9043562f3c78d08dc7948ba28c866f2be47e5abd9bd5711"
+  }
+}

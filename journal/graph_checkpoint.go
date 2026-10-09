@@ -6,6 +6,7 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
+	"time"
 
 	"js-wf/internal/checkpoint"
 )
@@ -139,4 +140,36 @@ func (v *GraphView) ReadCheckpoint(ctx context.Context, typ, id string) (*GraphC
 		return nil, err
 	}
 	return candidate, nil
+}
+
+// ConfirmCheckpoint verifies a handoff's exact frame and observed tail using a
+// newly acquired pin, then releases the pin before reporting confirmation.
+// It performs no archive or prefix compaction. An uncertain release fails the
+// confirmation, so callers cannot use a partial read to authorize handoff.
+func (s *GraphStore) ConfirmCheckpoint(ctx context.Context, typ, id string, runtime RuntimeCheckpoint, tail uint64) (err error) {
+	view, err := s.OpenExisting(ctx, typ, id, runtime.InvSeq)
+	if err != nil {
+		return err
+	}
+	if view == nil {
+		return ErrStale
+	}
+	defer func() {
+		cleanup, cancel := context.WithTimeout(context.WithoutCancel(ctx), 3*time.Second)
+		defer cancel()
+		if closeErr := view.Close(cleanup); err == nil && closeErr != nil {
+			err = closeErr
+		}
+	}()
+	verified, err := view.ReadCheckpoint(ctx, typ, id)
+	if err != nil {
+		return err
+	}
+	if verified == nil || verified.Runtime != runtime {
+		return ErrGap
+	}
+	if verified.Tail != tail {
+		return ErrStale
+	}
+	return nil
 }

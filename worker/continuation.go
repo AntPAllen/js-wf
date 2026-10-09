@@ -126,15 +126,21 @@ func (w *Worker) publishContinuation(ctx context.Context, typ, id string, invSeq
 	if err := owner.Renew(ctx); err != nil {
 		return err
 	}
-	snapshot, err := w.jrn.WriteCheckpointSnapshot(ctx, typ, id, runtime)
-	if err != nil {
-		return err
-	}
-	if err := owner.Renew(ctx); err != nil {
-		return err
-	}
-	if err := w.jrn.PurgeSnapshot(ctx, typ, id, snapshot); err != nil {
-		return err
+	if w.graphJournal != nil {
+		if err := w.graphJournal.ConfirmCheckpoint(ctx, typ, id, runtime, records[len(records)-1].Sequence); err != nil {
+			return err
+		}
+	} else {
+		snapshot, err := w.jrn.WriteCheckpointSnapshot(ctx, typ, id, runtime)
+		if err != nil {
+			return err
+		}
+		if err := owner.Renew(ctx); err != nil {
+			return err
+		}
+		if err := w.jrn.PurgeSnapshot(ctx, typ, id, snapshot); err != nil {
+			return err
+		}
 	}
 	payload, _ := json.Marshal(struct {
 		WaitingOn string `json:"waiting_on"`
@@ -148,7 +154,12 @@ func (w *Worker) publishContinuation(ctx context.Context, typ, id string, invSeq
 	if err := owner.Renew(ctx); err != nil {
 		return err
 	}
-	return w.client.Enqueue(ctx, typ, id, fmt.Sprintf("continuation:%d:%d", invSeq, sequence))
+	messageID := fmt.Sprintf("continuation:%d:%d", invSeq, sequence)
+	if w.graphJournal != nil {
+		// Recovery dispatch must survive a prior delivery inside the dedup window.
+		messageID = ""
+	}
+	return w.client.Enqueue(ctx, typ, id, messageID)
 }
 
 // WithJournalStore supplies the worker's journal transport, including snapshot
