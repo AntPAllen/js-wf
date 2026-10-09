@@ -1,0 +1,9 @@
+# Exhaustive declared Signal fault combinations — 2026-10-09
+
+`TestGraphSignalRuntimeCartesianReplay` supplements the existing contiguous seeded family by executing all 7 publication × 4 discovery × 3 enqueue × 4 consumption combinations. It discovers the first seed for each combination using only deterministic scheduler choices, then executes and exactly replays the existing production client/repair/worker/terminal/fixture collection workload. Actual trace domains and selected choices must equal the requested combination; selected fault injections, effect count, exact consumed prefix, terminal equality and complete fixture drain retain the existing workload assertions.
+
+Normal qualification passes all 336 combinations in 116.941 seconds. Sixteen first appear beyond seed 1,000; the maximum selected seed is 2,774. [Executed source and complete Cartesian coverage review](review.json) verifies all 1,777 observed Go/workflow/trace inputs, all 336 successful subtests and exact replay diagnostics. The existing 150 contiguous seeded families and all 786 saved regressions are unchanged. This adds one directed test group and no new seeded family or saved regression.
+
+The matching 336-combination race campaign is live; terminal acceptance is pending. CI now includes separate normal/race Cartesian jobs with 30-minute test/35-minute job CPU budgets. The original combined-family 1,000-seed gate and its runtime/fault assertions remain unchanged. The frozen full `fca8264` race campaign excludes this new test.
+
+Arbitrary operation permutations, full current-source and extended 10,000/100,000 qualification, original native process/storage/power-loss/concurrency/capacity/fault matrices, actual 24-hour soak, million-timer physical drain, import/deployment/default adoption and release requirements remain open. Public continuation admission and production collection remain disabled.

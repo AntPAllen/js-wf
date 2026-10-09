@@ -1,0 +1,19 @@
+{
+  "command": [
+    "go",
+    "test",
+    "-p=1",
+    "-race",
+    "./sim",
+    "-run",
+    "^TestGraphSignalRuntimeCartesianReplay$",
+    "-count=1",
+    "-timeout=30m",
+    "-v"
+  ],
+  "working_directory": "/home/exedev/js-wf",
+  "environment": {
+    "GOMAXPROCS": "2",
+    "GOMEMLIMIT": "512MiB"
+  }
+}

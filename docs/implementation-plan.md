@@ -1,5 +1,11 @@
 # JetStream Durable Workflow Runtime — Implementation Plan
 
+## Exhaustive declared Signal fault combinations — 2026-10-09
+
+A directed test now executes all 336 publication/discovery/enqueue/consumption combinations through the existing production runtime fixture and exactly replays each schedule. Seed discovery requires no runtime execution; actual executed trace domains and choices must match every selected combination. All 336 pass normally in 116.941 s, including the sixteen absent from seeds 1–1,000; the maximum selected seed is 2,774. [Executed Cartesian and source coverage review](scale/graph-signal-cartesian-2026-10-09/README.md) verifies 1,777 unchanged inputs. The 150 contiguous seeded families and 786 saved regressions are unchanged.
+
+The matching Cartesian race campaign is live and remains unqualified; CI includes separate normal/race jobs. Arbitrary operation permutations, complete current/extended qualification and all original runtime/native/fault/scale/soak/drain/migration/adoption/release gates remain open. The frozen full `fca8264` race job excludes this new directed group; public continuation admission and production collection remain disabled.
+
 ## Retry native mutations only across unchanged read witnesses — 2026-10-09
 
 A controlled real-server baseline reproduced four R1/R3 root/blob failures caused solely by intervening physical read witnesses. Native mutations now retry definite server CAS rejection only when fresh complete authority still equals the original image, including initial logical absence; peer mutation and unknown outcomes stop. The same prepared logical revision is retained, with at most sixteen publications and the original context. All twelve witness/replacement/absence cases and the complete authority package pass under race (66 groups, 205.507 s); separately appended exhaustion/uncertain-error controls pass in 1.286 s. [Baseline, observed source, raw evidence and executed review](scale/graph-native-mutation-witness-2026-10-09/README.md).
