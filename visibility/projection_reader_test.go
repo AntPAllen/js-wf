@@ -192,3 +192,18 @@ func TestProjectionReaderZeroPendingWithUnobservedDelivery(t *testing.T) {
 		t.Fatalf("confirmed empty source: %v", err)
 	}
 }
+
+func TestProjectionReaderMissingConsumerDoesNotCertifyEmptySource(t *testing.T) {
+	iterator := &projectionReaderIterator{quiet: true, messages: []jetstream.Msg{projectionReaderMessage{metadata: &jetstream.MsgMetadata{Sequence: jetstream.SequencePair{Stream: 41}}}}}
+	consumer := &projectionReaderConsumer{iterator: iterator, infoErr: jetstream.ErrConsumerNotFound}
+	jobs := make(chan uint64, 1)
+	if err := enqueueProjectionInvocations(context.Background(), consumer, 41, jobs); err != nil {
+		t.Fatal(err)
+	}
+	if seq := <-jobs; seq != 41 {
+		t.Fatal("missing consumer skipped retained source", seq)
+	}
+	if iterator.stopped.Load() != 1 {
+		t.Fatal("reader not joined")
+	}
+}

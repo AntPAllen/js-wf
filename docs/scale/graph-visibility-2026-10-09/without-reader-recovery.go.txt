@@ -584,11 +584,6 @@ func enqueueProjectionInvocations(ctx context.Context, consumer jetstream.Consum
 				return err
 			}
 			info, err := consumer.Info(ctx)
-			if errors.Is(err, jetstream.ErrConsumerNotFound) {
-				// Ordered Messages can recover a deleted consumer on a later
-				// heartbeat. This observation cannot prove source exhaustion.
-				continue
-			}
 			if err != nil {
 				return err
 			}

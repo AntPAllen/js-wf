@@ -47,6 +47,7 @@ func runWithJetStreamOptions(args []string, out io.Writer, options ...jetstream.
 	url := flags.String("url", os.Getenv("NATS_URL"), "NATS server URL")
 	graphAuthority := flags.String("graph-authority-stream", "", "experimental canonical graph authority stream (pre-provisioned)")
 	graphPrefix := flags.String("graph-authority-prefix", "", "experimental canonical graph authority prefix")
+	graphViewBucket := flags.String("graph-view-bucket", "", "separately provisioned graph visibility query bucket")
 	graphBucket := flags.String("graph-object-bucket", "", "experimental canonical graph object bucket (pre-provisioned)")
 	graphReplicas := flags.Int("replicas", 3, "expected graph store replica count")
 	graphEncoding := flags.String("journal-encoding", "json", "graph journal encoding: json or protobuf-v1")
@@ -80,8 +81,19 @@ func runWithJetStreamOptions(args []string, out io.Writer, options ...jetstream.
 	}
 	if graphConfig != nil {
 		switch command[0] {
-		case "project", "list", "lag", "journal-capacity", "sweep-tombstones", "scan-tombstones", "tombstone-loop":
+		case "journal-capacity", "sweep-tombstones", "scan-tombstones", "tombstone-loop":
 			return fmt.Errorf("graph runtime migration for %s is incomplete", command[0])
+		}
+	}
+	if graphConfig == nil && *graphViewBucket != "" {
+		return errors.New("graph-view-bucket requires graph runtime configuration")
+	}
+	if graphConfig != nil && (command[0] == "project" || command[0] == "list" || command[0] == "lag") {
+		if err := visibility.ValidateGraphViewBucket(*graphViewBucket); err != nil {
+			return err
+		}
+		if *postgresDSN != "" {
+			return errors.New("graph PostgreSQL visibility namespace migration is incomplete")
 		}
 	}
 	encode := func(value any) error {
@@ -149,6 +161,13 @@ func runWithJetStreamOptions(args []string, out io.Writer, options ...jetstream.
 		projectionOptions = append(projectionOptions, visibility.WithPostgres(&visibility.PostgresStore{DB: db}))
 	}
 	if command[0] == "project" {
+		if graphConfig != nil {
+			graph, err := journal.OpenNativeGraphStore(daemonCtx, js, *graphConfig)
+			if err != nil {
+				return daemonExit(daemonCtx, err)
+			}
+			projectionOptions = append(projectionOptions, visibility.WithGraphJournal(graph, *graphViewBucket), visibility.WithGraphRefreshInterval(*interval))
+		}
 		if len(command) != 1 {
 			return errors.New("usage: wf project")
 		}
@@ -407,7 +426,7 @@ func runWithJetStreamOptions(args []string, out io.Writer, options ...jetstream.
 		}
 		return encode(map[string]any{"purged": true, "type": command[1], "id": command[2]})
 	case "list", "describe", "lag", "export-journal":
-		if graph != nil {
+		if graph != nil && (command[0] == "describe" || command[0] == "export-journal") {
 			if len(command) != 3 {
 				return fmt.Errorf("usage: wf %s type id", command[0])
 			}
@@ -419,6 +438,9 @@ func runWithJetStreamOptions(args []string, out io.Writer, options ...jetstream.
 				return encode(records)
 			}
 			return encode(map[string]any{"type": command[1], "id": command[2], "inv_seq": invocation, "journal": records})
+		}
+		if graph != nil {
+			projectionOptions = append(projectionOptions, visibility.WithGraphJournal(graph, *graphViewBucket))
 		}
 		projection, err := visibility.New(ctx, js, projectionOptions...)
 		if err != nil {

@@ -7,10 +7,12 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"strconv"
 	"strings"
 	"sync/atomic"
+	"syscall"
 	"testing"
 	"time"
 
@@ -20,6 +22,7 @@ import (
 	"js-wf/journal"
 	"js-wf/provision"
 	"js-wf/testcluster"
+	"js-wf/visibility"
 	"js-wf/wf"
 	"js-wf/worker"
 )
@@ -27,11 +30,14 @@ import (
 func TestGraphOperatorRejectsPartialOrLegacyOnlySelection(t *testing.T) {
 	for _, args := range [][]string{
 		{"-graph-authority-stream", "AUTH", "result", "test", "id"},
-		{"-graph-authority-stream", "AUTH", "-graph-authority-prefix", "wf.graph", "-graph-object-bucket", "OBJECTS", "list"},
+		{"-graph-authority-stream", "AUTH", "-graph-authority-prefix", "wf.graph", "-graph-object-bucket", "OBJECTS", "journal-capacity"},
 		{"-graph-authority-stream", "AUTH", "-graph-authority-prefix", "wf.graph", "-graph-object-bucket", "OBJECTS", "scan-tombstones"},
+		{"-graph-authority-stream", "AUTH", "-graph-authority-prefix", "wf.graph", "-graph-object-bucket", "OBJECTS", "list"},
+		{"-graph-authority-stream", "AUTH", "-graph-authority-prefix", "wf.graph", "-graph-object-bucket", "OBJECTS", "-graph-view-bucket", "WF_VIEW", "list"},
+		{"-graph-authority-stream", "AUTH", "-graph-authority-prefix", "wf.graph", "-graph-object-bucket", "OBJECTS", "-graph-view-bucket", "WF_STATE", "project"},
 	} {
 		err := run(args, &bytes.Buffer{})
-		if err == nil || !(strings.Contains(err.Error(), "requires graph-authority") || strings.Contains(err.Error(), "migration")) {
+		if err == nil || !(strings.Contains(err.Error(), "requires") || strings.Contains(err.Error(), "migration")) {
 			t.Fatalf("args=%v err=%v", args, err)
 		}
 	}
@@ -119,6 +125,51 @@ func TestNativeCanonicalGraphOperatorCommands(t *testing.T) {
 				err := runWithJetStreamOptions(append(append([]string(nil), base...), args...), &out, opts...)
 				return out.Bytes(), err
 			}
+			const viewBucket = "OP_GRAPH_VIEW"
+			if _, err = js.CreateKeyValue(ctx, jetstream.KeyValueConfig{Bucket: viewBucket, Replicas: count}); err != nil {
+				t.Fatal(err)
+			}
+			projection, err := visibility.New(ctx, js, visibility.WithGraphJournal(graph, viewBucket), visibility.WithGraphRefreshInterval(100*time.Millisecond))
+			if err != nil {
+				t.Fatal(err)
+			}
+			projectArgs := append(append([]string(nil), base...), "-graph-view-bucket", viewBucket, "-interval", "100ms", "project")
+			encodedArgs, _ := json.Marshal(projectArgs)
+			projectRoot := operatorTempDir(t)
+			projectLog, err := os.Create(filepath.Join(projectRoot, "project.log"))
+			if err != nil {
+				t.Fatal(err)
+			}
+			defer projectLog.Close()
+			projectProcess := exec.CommandContext(ctx, os.Args[0], "-test.run=^TestOperatorDaemonProcessHelper$")
+			projectProcess.Env = append(os.Environ(), "WF_OPERATOR_DAEMON_ARGS="+string(encodedArgs), "WF_OPERATOR_DAEMON_READY="+filepath.Join(projectRoot, "ready"), "WF_OPERATOR_DAEMON_STAGE=running")
+			projectProcess.Stdout, projectProcess.Stderr = projectLog, projectLog
+			if err = projectProcess.Start(); err != nil {
+				t.Fatal(err)
+			}
+			projectDone := make(chan error, 1)
+			go func() { projectDone <- projectProcess.Wait() }()
+			defer func() {
+				_ = projectProcess.Process.Signal(syscall.SIGTERM)
+				select {
+				case e := <-projectDone:
+					if e != nil {
+						t.Error("graph project daemon", e)
+					}
+					trace, e := os.ReadFile(filepath.Join(projectRoot, "project.log"))
+					if e != nil || strings.Contains(string(trace), ".WF_JRN") {
+						t.Error("graph project used legacy journal", e)
+					}
+					if domain != "" && (!strings.Contains(string(trace), "request=$JS."+domain+".API.") || strings.Contains(string(trace), "request=$JS.API.")) {
+						t.Error("graph project domain API mismatch")
+					}
+					t.Log("graph project subprocess joined; legacy journal requests zero and domain API verified")
+				case <-time.After(5 * time.Second):
+					_ = projectProcess.Process.Kill()
+					<-projectDone
+					t.Error("graph project daemon did not stop")
+				}
+			}()
 			var effects atomic.Int64
 			const typ = "graph-operator"
 			handlers := map[string]worker.Handler{typ: func(c *wf.Context, _ json.RawMessage) (json.RawMessage, error) {
@@ -236,6 +287,41 @@ func TestNativeCanonicalGraphOperatorCommands(t *testing.T) {
 			if err = json.Unmarshal(offline.Bytes(), &replayed); err != nil || replayed.Status != "completed" || !bytes.Equal(replayed.Result, payload) {
 				t.Fatal("offline canonical replay differs", err)
 			}
+			for {
+				row, e := projection.Get(ctx, typ, "success")
+				if e == nil && row.Status == "completed" && row.InvSeq == handle.InvSeq {
+					break
+				}
+				if ctx.Err() != nil {
+					t.Fatal("graph projection failed to catch up", e, ctx.Err())
+				}
+				select {
+				case e := <-projectDone:
+					projectDone <- e
+					t.Fatal("graph projection stopped", e)
+				default:
+				}
+				time.Sleep(20 * time.Millisecond)
+			}
+			legacyView, err := js.KeyValue(ctx, "WF_VIEW")
+			if err != nil {
+				t.Fatal(err)
+			}
+			foreign, _ := json.Marshal(visibility.Row{SchemaVersion: 1, Type: "foreign", ID: "legacy", Status: "completed", InvSeq: 999})
+			if _, err = legacyView.Put(ctx, "row.foreign.legacy", foreign); err != nil {
+				t.Fatal(err)
+			}
+			listed, err := call("-graph-view-bucket", viewBucket, "-limit", "1", "-rebuild", "list", "completed")
+			if err != nil {
+				t.Fatal(err)
+			}
+			var page visibility.Page
+			if err = json.Unmarshal(listed, &page); err != nil || len(page.Rows) != 1 || page.Rows[0].Type != typ || page.Rows[0].ID != "success" || page.Rows[0].Status != "completed" {
+				t.Fatal("graph view mixed sources", page, err)
+			}
+			if _, err = call("-graph-view-bucket", viewBucket, "lag"); err != nil {
+				t.Fatal(err)
+			}
 			if _, err = call("describe", typ, "success"); err != nil {
 				t.Fatal(err)
 			}
@@ -311,7 +397,7 @@ func TestNativeCanonicalGraphOperatorCommands(t *testing.T) {
 			if domain != "" && (observed.Load() == 0 || wrong.Load() != 0) {
 				t.Fatal("domain routing", observed.Load(), wrong.Load())
 			}
-			t.Log(fmt.Sprintf("canonical CLI large Start/Signal/result, forged mirror ignored, canonical online/offline replay after source/blob deletion, history/scans, dry-run/apply terminal restoration, cancellation, purge and effect one; domain=%s requests=%d wrong=%d", domain, observed.Load(), wrong.Load()))
+			t.Log(fmt.Sprintf("canonical CLI large Start/Signal/result, forged mirror ignored, canonical online/offline replay after source/blob deletion, canonical CLI project/list/lag and isolated page while worker active, history/scans, dry-run/apply terminal restoration, cancellation, purge and effect one; domain=%s requests=%d wrong=%d", domain, observed.Load(), wrong.Load()))
 		})
 	}
 }

@@ -1,0 +1,353 @@
+package visibility
+
+import (
+	"context"
+	"encoding/json"
+	"errors"
+	"fmt"
+	"strings"
+	"time"
+
+	"github.com/nats-io/nats.go/jetstream"
+	"js-wf/identity"
+	"js-wf/journal"
+	"js-wf/lease"
+	"js-wf/wf"
+)
+
+// WithGraphJournal selects canonical history and a separately provisioned query
+// bucket. The bucket is a rebuildable projection, never workflow authority.
+func WithGraphJournal(graph *journal.GraphStore, bucket string) Option {
+	return func(p *Projection) error {
+		if graph == nil || !graph.CanonicalStarts() || !graph.CanonicalSignals() || bucket == "" || bucket == "WF_VIEW" {
+			return fmt.Errorf("graph visibility requires canonical Start/Signal stores and a separate query bucket")
+		}
+		p.graph, p.graphBucket = graph, bucket
+		return nil
+	}
+}
+
+func (p *Projection) describeGraph(ctx context.Context, input *jetstream.RawStreamMsg) (row Row, records []journal.Record, err error) {
+	parts := strings.Split(input.Subject, ".")
+	if len(parts) != 4 || parts[0] != "wf" || parts[1] != "inv" || identity.Validate(parts[2], parts[3]) != nil {
+		return row, nil, fmt.Errorf("invalid invocation subject %q", input.Subject)
+	}
+	typ, id := parts[2], parts[3]
+	status, e := p.graph.InspectStart(ctx, typ, id)
+	if e != nil {
+		return row, nil, e
+	}
+	if status != nil && status.State.Invocation == input.Sequence && (status.Retired || status.Purging) {
+		return row, nil, ErrNotFound
+	}
+	view, e := p.graph.OpenExisting(ctx, typ, id, input.Sequence)
+	if e != nil {
+		return row, nil, e
+	}
+	if view == nil {
+		return row, nil, journal.ErrStale
+	}
+	defer func() {
+		cleanup, cancel := context.WithTimeout(context.WithoutCancel(ctx), 3*time.Second)
+		defer cancel()
+		if e := view.Close(cleanup); err == nil && e != nil {
+			err = e
+		}
+		if err != nil {
+			row = Row{}
+			records = nil
+		}
+	}()
+	if err = view.ValidateStartInvocation(ctx, input); err != nil {
+		return
+	}
+	records = make([]journal.Record, 0, view.Count())
+	for i := uint64(0); i < view.Count(); i++ {
+		record, e := view.Read(ctx, i)
+		if e != nil {
+			return Row{}, nil, e
+		}
+		if i == 0 {
+			var started struct {
+				Hash string `json:"input_sha256"`
+			}
+			if record.Kind != journal.Started || json.Unmarshal(record.Payload, &started) != nil || started.Hash != input.Header.Get("Wf-Input-SHA256") {
+				return Row{}, nil, wf.ErrCorruptJournal
+			}
+		} else {
+			previous := records[len(records)-1]
+			if record.Sequence != previous.Sequence+1 || record.Epoch < previous.Epoch || record.Kind == journal.Started || previous.Kind == journal.Completed || previous.Kind == journal.Failed {
+				return Row{}, nil, wf.ErrCorruptJournal
+			}
+		}
+		records = append(records, record.Record)
+	}
+	row = Row{SchemaVersion: p.schemaVersion, Type: typ, ID: id, Status: "queued", Started: input.Time, Updated: input.Time, InvSeq: input.Sequence, JournalSeq: view.Tail()}
+	row.Attributes, err = projectedAttributes(records)
+	if err != nil {
+		return
+	}
+	if p.attributeMapper != nil {
+		row.Attributes, err = p.attributeMapper(row.Attributes)
+		if err != nil {
+			return
+		}
+		if err = wf.ValidateSearchAttributes(row.Attributes); err != nil {
+			return
+		}
+	}
+	if len(records) == 0 {
+		return
+	}
+	last := records[len(records)-1]
+	row.LastIndex = last.Index
+	switch last.Kind {
+	case journal.Completed, journal.Failed:
+		var outcome wf.Outcome
+		if json.Unmarshal(last.Payload, &outcome) != nil || outcome.InvSeq != input.Sequence || last.Kind == journal.Completed && outcome.Error != "" || last.Kind == journal.Failed && (outcome.Error == "" || len(outcome.Result) != 0 || outcome.ResultRef != "" || outcome.ResultHash != "") {
+			return Row{}, nil, wf.ErrCorruptJournal
+		}
+		row.Status = "completed"
+		if last.Kind == journal.Failed {
+			row.Status = "failed"
+		}
+	case journal.Suspended:
+		var wait struct {
+			WaitingOn string `json:"waiting_on"`
+		}
+		if err = json.Unmarshal(last.Payload, &wait); err != nil {
+			return
+		}
+		row.Status = "suspended"
+		row.WaitingOn = wait.WaitingOn
+	default:
+		row.Status = "running"
+	}
+	// Graph records have no commit timestamp. Updated is the pinned observation
+	// time, not a legacy-stream timestamp; cached rows retain that observation.
+	row.Updated = time.Now().UTC()
+	return
+}
+
+func newGraphProjection(ctx context.Context, p *Projection, inv jetstream.Stream) (*Projection, error) {
+	if p.postgres != nil {
+		return nil, fmt.Errorf("graph PostgreSQL visibility namespace migration is incomplete")
+	}
+	view, err := p.js.KeyValue(ctx, p.graphBucket)
+	if err != nil {
+		return nil, err
+	}
+	p.inv, p.view = inv, view
+	p.graphLeaseCheck = func(ctx context.Context, typ, id string) (bool, error) {
+		kv, err := p.js.KeyValue(ctx, "WF_LEASE")
+		if err != nil {
+			return false, err
+		}
+		entry, err := kv.Get(ctx, identity.Key(typ, id))
+		if errors.Is(err, jetstream.ErrKeyNotFound) || errors.Is(err, jetstream.ErrKeyDeleted) {
+			return false, nil
+		}
+		if err != nil {
+			return false, err
+		}
+		var value lease.Value
+		if json.Unmarshal(entry.Value(), &value) != nil || value.Worker == "" || value.Epoch == 0 {
+			return false, fmt.Errorf("invalid graph visibility lease scheduling observation")
+		}
+		return true, nil
+	}
+	return p, nil
+}
+
+// Rebuild enumerates a captured, bounded canonical root catalog. Native source
+// pointers are validated by describeGraph; no compatibility journal is read.
+func (p *Projection) rebuildGraph(ctx context.Context) error { return p.refreshGraph(ctx, true) }
+
+func (p *Projection) refreshGraph(ctx context.Context, force bool) error {
+	p.graphMu.Lock()
+	defer p.graphMu.Unlock()
+	if p.graphRows == nil {
+		p.graphRows = map[string]Row{}
+	}
+	through, err := p.graph.StartCatalogHighWater(ctx)
+	if err != nil {
+		return err
+	}
+	wanted := map[string]bool{}
+	for next := uint64(1); next <= through; {
+		entry, status, err := p.graph.NextStartThrough(ctx, next, through)
+		if err != nil {
+			return err
+		}
+		if entry == nil {
+			break
+		}
+		next = entry.Sequence + 1
+		if status == nil || status.State.Pending {
+			continue
+		}
+		if status.Retired || status.Purging {
+			delete(p.graphRows, rowKey(status.State.Start.Request.Type, status.State.Start.Request.ID))
+			continue
+		}
+		start := status.State.Start
+		input, err := p.inv.GetLastMsgForSubject(ctx, identity.InvocationSubject(start.Request.Type, start.Request.ID))
+		if err != nil {
+			return fmt.Errorf("%w: graph visibility source: %w", journal.ErrUnknown, err)
+		}
+		if input.Sequence != status.State.Invocation || !start.MatchesInvocation(input) {
+			return fmt.Errorf("%w: graph visibility source generation changed", journal.ErrUnknown)
+		}
+		blocked, err := p.graphLeaseCheck(ctx, start.Request.Type, start.Request.ID)
+		if err != nil {
+			return fmt.Errorf("%w: graph visibility scheduling hint: %w", journal.ErrUnknown, err)
+		}
+		cached, known := p.graphRows[rowKey(start.Request.Type, start.Request.ID)]
+		var row Row
+		if known && cached.InvSeq == input.Sequence && cached.SchemaVersion == p.schemaVersion && (blocked) {
+			row = cached
+		} else if blocked {
+			row = Row{SchemaVersion: p.schemaVersion, Type: start.Request.Type, ID: start.Request.ID, Status: "queued", Started: input.Time, Updated: input.Time, InvSeq: input.Sequence}
+		} else {
+			row, _, err = p.describeGraph(ctx, input)
+			if err == nil {
+				p.graphRows[rowKey(row.Type, row.ID)] = row
+			}
+		}
+		if errors.Is(err, ErrNotFound) {
+			continue
+		}
+		if err != nil {
+			return err
+		}
+		if err = p.putRow(ctx, row); err != nil {
+			return err
+		}
+		wanted[rowKey(row.Type, row.ID)] = true
+		wanted[indexKey(row)] = true
+		for _, key := range attributeIndexKeys(row) {
+			wanted[key] = true
+		}
+	}
+	keys, err := p.view.Keys(ctx)
+	if errors.Is(err, jetstream.ErrNoKeysFound) {
+		return nil
+	}
+	if err != nil {
+		return err
+	}
+	for _, key := range keys {
+		if !wanted[key] && (strings.HasPrefix(key, "row.") || strings.HasPrefix(key, "idx.") || strings.HasPrefix(key, "idxa.")) {
+			if err := p.view.Delete(ctx, key); err != nil && !errors.Is(err, jetstream.ErrKeyNotFound) {
+				return err
+			}
+		}
+	}
+	return nil
+}
+
+// Graph lag counts discovered bound workflows whose projected generation,
+// journal count or status is behind. Authority read witnesses and reader pins
+// do not count as pending workflow events.
+func (p *Projection) graphLag(ctx context.Context) (uint64, error) {
+	through, err := p.graph.StartCatalogHighWater(ctx)
+	if err != nil {
+		return 0, err
+	}
+	lag := uint64(0)
+	for next := uint64(1); next <= through; {
+		entry, status, err := p.graph.NextStartThrough(ctx, next, through)
+		if err != nil {
+			return 0, err
+		}
+		if entry == nil {
+			break
+		}
+		next = entry.Sequence + 1
+		if status == nil || status.State.Pending {
+			continue
+		}
+		request := status.State.Start.Request
+		row, err := p.Get(ctx, request.Type, request.ID)
+		if errors.Is(err, ErrNotFound) {
+			if !status.Retired && !status.Purging {
+				lag++
+			}
+			continue
+		}
+		if err != nil {
+			return 0, err
+		}
+		expected := "running"
+		if status.JournalCount == 0 {
+			expected = "queued"
+		} else {
+			switch status.Kind {
+			case journal.Completed:
+				expected = "completed"
+			case journal.Failed:
+				expected = "failed"
+			case journal.Suspended:
+				expected = "suspended"
+			}
+		}
+		if status.Retired || status.Purging || row.InvSeq != status.State.Invocation || row.SchemaVersion != p.schemaVersion || row.Status != expected || status.JournalCount > 0 && row.LastIndex+1 != status.JournalCount {
+			lag++
+		}
+	}
+	return lag, nil
+}
+
+func (p *Projection) runGraph(ctx context.Context) error {
+	interval := p.graphRefresh
+	if interval == 0 {
+		interval = time.Second
+	}
+	ticker := time.NewTicker(interval)
+	defer ticker.Stop()
+	for ctx.Err() == nil {
+		if err := p.refreshGraph(ctx, false); err != nil {
+			if ctx.Err() != nil {
+				return nil
+			}
+			// A generation moving during pin acquisition is scheduling uncertainty.
+			// Preserve existing rows and retry; it cannot certify an empty view.
+			if !errors.Is(err, journal.ErrUnknown) && !errors.Is(err, journal.ErrStale) {
+				return err
+			}
+		}
+		select {
+		case <-ctx.Done():
+			return nil
+		case <-ticker.C:
+		}
+	}
+	return nil
+}
+
+func WithGraphRefreshInterval(interval time.Duration) Option {
+	return func(p *Projection) error {
+		if interval <= 0 {
+			return fmt.Errorf("graph visibility refresh interval must be positive")
+		}
+		p.graphRefresh = interval
+		return nil
+	}
+}
+
+func graphRowCurrent(row Row, status *journal.GraphStartStatus) bool {
+	expected := "running"
+	if status.JournalCount == 0 {
+		expected = "queued"
+	} else {
+		switch status.Kind {
+		case journal.Completed:
+			expected = "completed"
+		case journal.Failed:
+			expected = "failed"
+		case journal.Suspended:
+			expected = "suspended"
+		}
+	}
+	return row.InvSeq == status.State.Invocation && row.Status == expected && (status.JournalCount == 0 || row.LastIndex+1 == status.JournalCount)
+}
