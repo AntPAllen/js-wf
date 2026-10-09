@@ -127,7 +127,13 @@ func (w *Worker) publishContinuation(ctx context.Context, typ, id string, invSeq
 		return err
 	}
 	if w.graphJournal != nil {
-		if err := w.graphJournal.ConfirmCheckpoint(ctx, typ, id, runtime, records[len(records)-1].Sequence); err != nil {
+		var err error
+		if w.graphJournal.CheckpointIndex() {
+			err = w.graphJournal.PublishCheckpoint(ctx, typ, id, runtime, records[len(records)-1].Sequence)
+		} else {
+			err = w.graphJournal.ConfirmCheckpoint(ctx, typ, id, runtime, records[len(records)-1].Sequence)
+		}
+		if err != nil {
 			return err
 		}
 	} else {

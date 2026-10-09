@@ -1,5 +1,9 @@
 # Implementation status against the supplied plan
 
+## Versioned canonical checkpoint index — 2026-10-09
+
+Explicit library configuration now selects a v5 cursor with a checkpoint request/completion pointer published under the canonical generation/tail CAS. Indexed lookup validates its owned frame and scans only the suffix; it succeeds with 129 encoded prefix records made unreadable. Model race controls cover confirmed/unconfirmed lost acknowledgements, precommit failure, a racing append, forged metadata and version/configuration rejection; internal native R1/R3-domain stage controls pass with v5. [Executed evidence and versioning limits](scale/graph-checkpoint-index-2026-10-09/README.md). This indexes checkpoint lookup only: full worker reference-map loading, archival prefix compaction, collection-safe materialization, autonomous recovery, v5 CLI/deployment and full continuation qualification remain incomplete. Admission stays closed and every original broader full/extended/runtime/native/scale/soak/drain/adoption/release gate remains open.
+
 ## Canonical continuation stage execution component — 2026-10-09
 
 The worker delivery function now restores checkpoint contexts and dispatches stages from owned graph frames, preserving the anchored suffix and absolute append indices. Internal R1/R3-domain race tests resume two stages with large state/result bytes, one effect and no duplicate stage entry on terminal delivery; constructor admission remains rejected in both option orders. Existing legacy continuation limit/anchor checks pass. [Executed component scope](scale/graph-continuation-stages-2026-10-09/README.md). Public admission remains closed: archival prefix compaction, bounded/autonomous resume recovery, materialized payload retention through collection, audit/offline replay and native kill/limit integration remain incomplete. Every original broader full/extended/runtime/native/scale/soak/drain/adoption/release requirement remains open.

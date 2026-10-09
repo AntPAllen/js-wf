@@ -1,0 +1,70 @@
+{
+  "scope": "development components; v5 explicit library selection; admission closed",
+  "logs": {
+    "final-model-race.log": {
+      "required_passes": [
+        "TestGraphCheckpointIndexRequiresCanonicalStores",
+        "TestGraphCheckpointIndexPublicationAndBoundedRead/normal",
+        "TestGraphCheckpointIndexPublicationAndBoundedRead/lost-ack",
+        "TestGraphCheckpointIndexPublicationAndBoundedRead/lost-ack-unconfirmed",
+        "TestGraphCheckpointIndexPublicationAndBoundedRead/lost-before",
+        "TestGraphCheckpointIndexPublicationAndBoundedRead/tail-race",
+        "TestGraphCheckpointOwnedFrameAndSuffix/json/valid",
+        "TestGraphCheckpointOwnedFrameAndSuffix/json/absent",
+        "TestGraphCheckpointOwnedFrameAndSuffix/json/pending",
+        "TestGraphCheckpointOwnedFrameAndSuffix/json/wrong-generation",
+        "TestGraphCheckpointOwnedFrameAndSuffix/json/wrong-locals",
+        "TestGraphCheckpointOwnedFrameAndSuffix/json/missing-edge",
+        "TestGraphCheckpointOwnedFrameAndSuffix/json/borrowed-edge",
+        "TestGraphCheckpointOwnedFrameAndSuffix/json/unreadable",
+        "TestGraphCheckpointOwnedFrameAndSuffix/json/expired",
+        "TestGraphCheckpointOwnedFrameAndSuffix/json/latest",
+        "TestGraphCheckpointOwnedFrameAndSuffix/protobuf-v1/valid",
+        "TestGraphCheckpointOwnedFrameAndSuffix/protobuf-v1/absent",
+        "TestGraphCheckpointOwnedFrameAndSuffix/protobuf-v1/pending",
+        "TestGraphCheckpointOwnedFrameAndSuffix/protobuf-v1/wrong-generation",
+        "TestGraphCheckpointOwnedFrameAndSuffix/protobuf-v1/wrong-locals",
+        "TestGraphCheckpointOwnedFrameAndSuffix/protobuf-v1/missing-edge",
+        "TestGraphCheckpointOwnedFrameAndSuffix/protobuf-v1/borrowed-edge",
+        "TestGraphCheckpointOwnedFrameAndSuffix/protobuf-v1/unreadable",
+        "TestGraphCheckpointOwnedFrameAndSuffix/protobuf-v1/expired",
+        "TestGraphCheckpointOwnedFrameAndSuffix/protobuf-v1/latest"
+      ],
+      "sha256": "b388f3ee98874715dfe981f1749f65a5ca32ed58a37c06e341786033cd857bc5"
+    },
+    "final-race.log": {
+      "required_passes": [
+        "TestNativeGraphContinuationHandoff/R1",
+        "TestNativeGraphContinuationHandoff/R3Domain",
+        "TestContinuationPreservesGlobalJournalLimitAndTerminalSlot"
+      ],
+      "sha256": "510df8e0d8b62a98b467dd06f80eedf31356c28280d5c5b5ebdf0c1474219ee5"
+    },
+    "legacy-cursor-race.log": {
+      "required_passes": [
+        "TestGraphCanonicalStartPendingBindingAndRetainedInput",
+        "TestGraphCanonicalStartRejectsLegacyAndBounds",
+        "TestGraphCanonicalSignalInputsIndexedIdentityAndReopen",
+        "TestGraphCanonicalSignalInputsRetirementAndReplacement",
+        "TestGraphCanonicalSignalInputsSchemaAndExpiry"
+      ],
+      "sha256": "a325100d98082fc11502e63093177de8f6d2f8e37895e17f1132f81a7f5f9638"
+    },
+    "final-allocation-race.log": {
+      "required_passes": [
+        "TestGraphCheckpointIndexPublicationAndBoundedRead/normal"
+      ],
+      "sha256": "9c6b07344d7bc71028684d676559bab2b6453b6260aa9cc78b9776defbf6340e"
+    }
+  },
+  "source_observed_at_review": {
+    "journal/graph.go": "516ccfa9fd31311c804700f1e09d1b712d7185e37b70cc722428289a3c6ef111",
+    "journal/graph_checkpoint.go": "88934e8b61d2061cbcedfeb8179329eb880c1835450b7ebe5a12ddca31047ad8",
+    "journal/graph_checkpoint_index_test.go": "889d3379e704a5452371928901b5819a5cc5720f5429b345117e0ef31dad7ec0",
+    "journal/graph_checkpoint_test.go": "313b6ed43e3869e12d9fed7ce7ba786c8ef77bb760cba90d2e921899f503cc7c",
+    "journal/graph_native.go": "cb752deb4b955fa99b4ac271d7c7acb85cde2b3d308f357d066cc8464dc99b42",
+    "journal/graph_start.go": "0c36910d46bb913db09755a0382b14762fdabcd62fd3eeeb6b48101bf754bbd3",
+    "worker/continuation.go": "eeeebee7aa4550e4bf7db8c74a7bb5412bec312cc592cc744d565422cb1f795c",
+    "worker/graph_continuation_test.go": "6c1b670871189a532219f06e7686b5df20313458c9469f985b9746805a45b1f4"
+  }
+}

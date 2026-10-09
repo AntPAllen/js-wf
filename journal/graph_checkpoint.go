@@ -11,12 +11,18 @@ import (
 	"js-wf/internal/checkpoint"
 )
 
+type graphCheckpointPointer struct {
+	Runtime      RuntimeCheckpoint `json:"runtime"`
+	RequestIndex uint64            `json:"request_index"`
+}
+
 // GraphCheckpointRead is a continuation frame and its anchored suffix from one
 // pinned generation. Keep the GraphView alive while resolving payload references
 // from the frame or suffix. The retained prefix remains available for audit.
 // This does not compact the graph or publish a mutable resume manifest.
 type GraphCheckpointRead struct {
 	Runtime RuntimeCheckpoint
+	Request Record
 	Frame   []byte
 	Anchor  Record
 	Records []Record
@@ -38,7 +44,8 @@ func (v *GraphView) ReadCheckpoint(ctx context.Context, typ, id string) (*GraphC
 	if destination != v.destination {
 		return nil, ErrCheckpointGeneration
 	}
-	records := make([]Record, 0, v.Count())
+	start := uint64(0)
+	var records []Record
 	var request Record
 	var declaration struct {
 		Kind      string `json:"kind"`
@@ -50,7 +57,37 @@ func (v *GraphView) ReadCheckpoint(ctx context.Context, typ, id string) (*GraphC
 	var candidate *GraphCheckpointRead
 	var receipt GraphRecord
 	var localsHash string
-	for i := uint64(0); i < v.Count(); i++ {
+	if pointer := v.cursor.Checkpoint; pointer != nil {
+		start = pointer.Runtime.Index
+		anchor, err := v.Read(ctx, start)
+		if err != nil {
+			return nil, err
+		}
+		declared, err := v.Read(ctx, pointer.RequestIndex)
+		if err != nil {
+			return nil, err
+		}
+		if declared.Kind != StepRequested || json.Unmarshal(declared.Payload, &declaration) != nil || declaration.Kind != "checkpoint" || declaration.Name != pointer.Runtime.Stage || declared.Sequence >= anchor.Sequence || declared.Epoch > anchor.Epoch || verifyCheckpointAnchor(anchor.Record, pointer.Runtime) != nil {
+			return nil, ErrGap
+		}
+		candidate = &GraphCheckpointRead{Runtime: pointer.Runtime, Request: declared.Record, Anchor: anchor.Record}
+		receipt = anchor
+		localsHash = declaration.InputHash
+		position = pointer.Runtime.StepPosition
+		if err := v.readCheckpointFrame(ctx, typ, id, candidate, receipt, localsHash); err != nil {
+			return nil, err
+		}
+		records = make([]Record, 0, v.Count()-start)
+		records = append(records, anchor.Record)
+	}
+	if records == nil {
+		records = make([]Record, 0, v.Count())
+	}
+	first := start
+	if candidate != nil {
+		first++
+	}
+	for i := first; i < v.Count(); i++ {
 		record, err := v.Read(ctx, i)
 		if err != nil {
 			return nil, err
@@ -100,7 +137,7 @@ func (v *GraphView) ReadCheckpoint(ctx context.Context, typ, id string) (*GraphC
 			if ValidateRuntimeSnapshot(Snapshot{Version: 2, Runtime: &runtime}) != nil || verifyCheckpointAnchor(record.Record, runtime) != nil || request.Index >= record.Index {
 				return nil, ErrGap
 			}
-			candidate = &GraphCheckpointRead{Runtime: runtime, Anchor: record.Record}
+			candidate = &GraphCheckpointRead{Runtime: runtime, Request: request, Anchor: record.Record}
 			receipt = record
 			localsHash = declaration.InputHash
 		}
@@ -108,6 +145,20 @@ func (v *GraphView) ReadCheckpoint(ctx context.Context, typ, id string) (*GraphC
 	if candidate == nil {
 		return nil, nil
 	}
+	if candidate.Frame == nil {
+		if err := v.readCheckpointFrame(ctx, typ, id, candidate, receipt, localsHash); err != nil {
+			return nil, err
+		}
+	}
+	candidate.Records = append([]Record(nil), records[candidate.Runtime.Index+1-start:]...)
+	candidate.Tail = v.Tail()
+	if err := v.alive(); err != nil {
+		return nil, err
+	}
+	return candidate, nil
+}
+
+func (v *GraphView) readCheckpointFrame(ctx context.Context, typ, id string, candidate *GraphCheckpointRead, receipt GraphRecord, localsHash string) error {
 	var link GraphPayloadLink
 	found := false
 	for _, edge := range append(append([]GraphPayloadLink(nil), receipt.Blobs...), receipt.EntryBlob) {
@@ -118,58 +169,97 @@ func (v *GraphView) ReadCheckpoint(ctx context.Context, typ, id string) (*GraphC
 		}
 	}
 	if !found {
-		return nil, ErrGap
+		return ErrGap
 	}
 	frameBytes, err := v.Payload(ctx, receipt.Index, link, checkpoint.MaxBytes)
 	if err != nil {
-		return nil, err
+		return err
 	}
 	runtime := candidate.Runtime
 	frame, err := checkpoint.Decode(frameBytes, runtime.SHA256, checkpoint.Identity{Type: typ, ID: id, InvSeq: runtime.InvSeq}, checkpoint.Anchor{Index: runtime.Index, Epoch: runtime.Epoch})
 	if err != nil {
-		return nil, fmt.Errorf("%w: graph continuation frame: %v", ErrGap, err)
+		return fmt.Errorf("%w: graph continuation frame: %v", ErrGap, err)
 	}
 	digest := sha256.Sum256(frame.Data)
 	if frame.Stage != runtime.Stage || frame.StepPosition != runtime.StepPosition || hex.EncodeToString(digest[:]) != localsHash {
-		return nil, ErrGap
+		return ErrGap
 	}
 	candidate.Frame = frameBytes
-	candidate.Records = append([]Record(nil), records[runtime.Index+1:]...)
-	candidate.Tail = v.Tail()
-	if err := v.alive(); err != nil {
-		return nil, err
-	}
-	return candidate, nil
+	return nil
 }
 
 // ConfirmCheckpoint verifies a handoff's exact frame and observed tail using a
 // newly acquired pin, then releases the pin before reporting confirmation.
 // It performs no archive or prefix compaction. An uncertain release fails the
 // confirmation, so callers cannot use a partial read to authorize handoff.
-func (s *GraphStore) ConfirmCheckpoint(ctx context.Context, typ, id string, runtime RuntimeCheckpoint, tail uint64) (err error) {
+func (s *GraphStore) ConfirmCheckpoint(ctx context.Context, typ, id string, runtime RuntimeCheckpoint, tail uint64) error {
+	_, err := s.confirmCheckpoint(ctx, typ, id, runtime, tail)
+	return err
+}
+
+func (s *GraphStore) confirmCheckpoint(ctx context.Context, typ, id string, runtime RuntimeCheckpoint, tail uint64) (verified *GraphCheckpointRead, err error) {
 	view, err := s.OpenExisting(ctx, typ, id, runtime.InvSeq)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	if view == nil {
-		return ErrStale
+		return nil, ErrStale
 	}
 	defer func() {
 		cleanup, cancel := context.WithTimeout(context.WithoutCancel(ctx), 3*time.Second)
 		defer cancel()
 		if closeErr := view.Close(cleanup); err == nil && closeErr != nil {
-			err = closeErr
+			verified, err = nil, closeErr
 		}
 	}()
-	verified, err := view.ReadCheckpoint(ctx, typ, id)
+	verified, err = view.ReadCheckpoint(ctx, typ, id)
+	if err != nil {
+		return nil, err
+	}
+	if verified == nil || verified.Runtime != runtime {
+		return nil, ErrGap
+	}
+	if verified.Tail != tail {
+		return nil, ErrStale
+	}
+	return verified, nil
+}
+
+// PublishCheckpoint publishes a v5 canonical resume pointer only after the
+// owned frame, exact boundary and reader release have been confirmed. The same
+// root CAS fences the generation, logical tail and pointer. Unknown CAS outcomes
+// require a fresh caller observation; matching retries are idempotent.
+// This retains full history and does not compact the graph or enable stages.
+func (s *GraphStore) PublishCheckpoint(ctx context.Context, typ, id string, runtime RuntimeCheckpoint, tail uint64) error {
+	if !s.cfg.CheckpointIndex {
+		return fmt.Errorf("checkpoint publication requires the explicit v5 checkpoint index")
+	}
+	verified, err := s.confirmCheckpoint(ctx, typ, id, runtime, tail)
 	if err != nil {
 		return err
 	}
-	if verified == nil || verified.Runtime != runtime {
-		return ErrGap
+	destination, root, cursor, err := s.observe(ctx, typ, id)
+	if err != nil {
+		return err
 	}
-	if verified.Tail != tail {
+	if cursor == nil || cursor.Invocation != runtime.InvSeq || cursor.Retired || cursor.Purging || cursor.Kind == Completed || cursor.Kind == Failed || cursor.Base+cursor.Count != tail {
 		return ErrStale
 	}
-	return nil
+	pointer := graphCheckpointPointer{Runtime: runtime, RequestIndex: verified.Request.Index}
+	if cursor.Checkpoint != nil {
+		if *cursor.Checkpoint == pointer {
+			return nil
+		}
+		if cursor.Checkpoint.Runtime.Index >= runtime.Index {
+			return ErrStale
+		}
+	}
+	next := *cursor
+	next.Checkpoint = &pointer
+	data, err := json.Marshal(next)
+	if err != nil {
+		return err
+	}
+	_, err = s.cfg.Protocol.UpdateApplication(ctx, destination, root.Head, data)
+	return graphMutationError(err)
 }

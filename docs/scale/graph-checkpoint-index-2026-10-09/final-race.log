@@ -1,0 +1,72 @@
+=== RUN   TestGraphCheckpointIndexPublicationAndBoundedRead
+=== RUN   TestGraphCheckpointIndexPublicationAndBoundedRead/normal
+    graph_checkpoint_index_test.go:219: mode=normal checkpoint=130 request=129 unreadable_prefix_records=129 suffix=1
+=== RUN   TestGraphCheckpointIndexPublicationAndBoundedRead/lost-ack
+    graph_checkpoint_index_test.go:219: mode=lost-ack checkpoint=130 request=129 unreadable_prefix_records=129 suffix=1
+=== RUN   TestGraphCheckpointIndexPublicationAndBoundedRead/lost-ack-unconfirmed
+    graph_checkpoint_index_test.go:219: mode=lost-ack-unconfirmed checkpoint=130 request=129 unreadable_prefix_records=129 suffix=1
+=== RUN   TestGraphCheckpointIndexPublicationAndBoundedRead/lost-before
+    graph_checkpoint_index_test.go:219: mode=lost-before checkpoint=130 request=129 unreadable_prefix_records=129 suffix=1
+=== RUN   TestGraphCheckpointIndexPublicationAndBoundedRead/tail-race
+    graph_checkpoint_index_test.go:219: mode=tail-race checkpoint=130 request=129 unreadable_prefix_records=129 suffix=2
+--- PASS: TestGraphCheckpointIndexPublicationAndBoundedRead (9.01s)
+    --- PASS: TestGraphCheckpointIndexPublicationAndBoundedRead/normal (1.49s)
+    --- PASS: TestGraphCheckpointIndexPublicationAndBoundedRead/lost-ack (1.61s)
+    --- PASS: TestGraphCheckpointIndexPublicationAndBoundedRead/lost-ack-unconfirmed (1.83s)
+    --- PASS: TestGraphCheckpointIndexPublicationAndBoundedRead/lost-before (2.14s)
+    --- PASS: TestGraphCheckpointIndexPublicationAndBoundedRead/tail-race (1.94s)
+=== RUN   TestGraphCheckpointOwnedFrameAndSuffix
+=== RUN   TestGraphCheckpointOwnedFrameAndSuffix/json/valid
+=== RUN   TestGraphCheckpointOwnedFrameAndSuffix/json/absent
+=== RUN   TestGraphCheckpointOwnedFrameAndSuffix/json/pending
+=== RUN   TestGraphCheckpointOwnedFrameAndSuffix/json/wrong-generation
+=== RUN   TestGraphCheckpointOwnedFrameAndSuffix/json/wrong-locals
+=== RUN   TestGraphCheckpointOwnedFrameAndSuffix/json/missing-edge
+=== RUN   TestGraphCheckpointOwnedFrameAndSuffix/json/borrowed-edge
+=== RUN   TestGraphCheckpointOwnedFrameAndSuffix/json/unreadable
+=== RUN   TestGraphCheckpointOwnedFrameAndSuffix/json/expired
+=== RUN   TestGraphCheckpointOwnedFrameAndSuffix/json/latest
+=== RUN   TestGraphCheckpointOwnedFrameAndSuffix/protobuf-v1/valid
+=== RUN   TestGraphCheckpointOwnedFrameAndSuffix/protobuf-v1/absent
+=== RUN   TestGraphCheckpointOwnedFrameAndSuffix/protobuf-v1/pending
+=== RUN   TestGraphCheckpointOwnedFrameAndSuffix/protobuf-v1/wrong-generation
+=== RUN   TestGraphCheckpointOwnedFrameAndSuffix/protobuf-v1/wrong-locals
+=== RUN   TestGraphCheckpointOwnedFrameAndSuffix/protobuf-v1/missing-edge
+=== RUN   TestGraphCheckpointOwnedFrameAndSuffix/protobuf-v1/borrowed-edge
+=== RUN   TestGraphCheckpointOwnedFrameAndSuffix/protobuf-v1/unreadable
+=== RUN   TestGraphCheckpointOwnedFrameAndSuffix/protobuf-v1/expired
+=== RUN   TestGraphCheckpointOwnedFrameAndSuffix/protobuf-v1/latest
+--- PASS: TestGraphCheckpointOwnedFrameAndSuffix (0.50s)
+    --- PASS: TestGraphCheckpointOwnedFrameAndSuffix/json/valid (0.06s)
+    --- PASS: TestGraphCheckpointOwnedFrameAndSuffix/json/absent (0.01s)
+    --- PASS: TestGraphCheckpointOwnedFrameAndSuffix/json/pending (0.01s)
+    --- PASS: TestGraphCheckpointOwnedFrameAndSuffix/json/wrong-generation (0.02s)
+    --- PASS: TestGraphCheckpointOwnedFrameAndSuffix/json/wrong-locals (0.02s)
+    --- PASS: TestGraphCheckpointOwnedFrameAndSuffix/json/missing-edge (0.03s)
+    --- PASS: TestGraphCheckpointOwnedFrameAndSuffix/json/borrowed-edge (0.03s)
+    --- PASS: TestGraphCheckpointOwnedFrameAndSuffix/json/unreadable (0.02s)
+    --- PASS: TestGraphCheckpointOwnedFrameAndSuffix/json/expired (0.01s)
+    --- PASS: TestGraphCheckpointOwnedFrameAndSuffix/json/latest (0.05s)
+    --- PASS: TestGraphCheckpointOwnedFrameAndSuffix/protobuf-v1/valid (0.05s)
+    --- PASS: TestGraphCheckpointOwnedFrameAndSuffix/protobuf-v1/absent (0.01s)
+    --- PASS: TestGraphCheckpointOwnedFrameAndSuffix/protobuf-v1/pending (0.01s)
+    --- PASS: TestGraphCheckpointOwnedFrameAndSuffix/protobuf-v1/wrong-generation (0.03s)
+    --- PASS: TestGraphCheckpointOwnedFrameAndSuffix/protobuf-v1/wrong-locals (0.03s)
+    --- PASS: TestGraphCheckpointOwnedFrameAndSuffix/protobuf-v1/missing-edge (0.02s)
+    --- PASS: TestGraphCheckpointOwnedFrameAndSuffix/protobuf-v1/borrowed-edge (0.02s)
+    --- PASS: TestGraphCheckpointOwnedFrameAndSuffix/protobuf-v1/unreadable (0.02s)
+    --- PASS: TestGraphCheckpointOwnedFrameAndSuffix/protobuf-v1/expired (0.01s)
+    --- PASS: TestGraphCheckpointOwnedFrameAndSuffix/protobuf-v1/latest (0.05s)
+PASS
+ok  	js-wf/journal	10.524s
+=== RUN   TestContinuationPreservesGlobalJournalLimitAndTerminalSlot
+    continuation_limit_test.go:41: continuation global limit: budget=16 logical_entries=16 anchor=9 sdk_offset=8 effects=0 archive_reads=0 frame_reads=1 offline_steps=11 continuations=2 initial_before=1 middle_before=1
+--- PASS: TestContinuationPreservesGlobalJournalLimitAndTerminalSlot (4.02s)
+=== RUN   TestNativeGraphContinuationHandoff
+=== RUN   TestNativeGraphContinuationHandoff/R1
+=== RUN   TestNativeGraphContinuationHandoff/R3Domain
+--- PASS: TestNativeGraphContinuationHandoff (16.16s)
+    --- PASS: TestNativeGraphContinuationHandoff/R1 (6.53s)
+    --- PASS: TestNativeGraphContinuationHandoff/R3Domain (9.63s)
+PASS
+ok  	js-wf/worker	21.219s

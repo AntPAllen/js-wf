@@ -28,6 +28,7 @@ type NativeGraphConfig struct {
 	PayloadReadLimit int
 	CanonicalStarts  bool
 	CanonicalSignals bool
+	CheckpointIndex  bool
 }
 
 var nativeGraphName = regexp.MustCompile(`^[A-Za-z0-9_-]+$`)
@@ -37,7 +38,7 @@ func (cfg NativeGraphConfig) validate() error {
 	if !nativeGraphName.MatchString(cfg.AuthorityStream) || !nativeGraphPrefix.MatchString(cfg.AuthorityPrefix) || !nativeGraphName.MatchString(cfg.ObjectBucket) || len(cfg.ObjectBucket) > 32 || cfg.AuthorityStream == "OBJ_"+cfg.ObjectBucket {
 		return fmt.Errorf("invalid native graph namespace")
 	}
-	if cfg.ExpectedReplicas < 0 || cfg.ExpectedReplicas > 5 || cfg.PinTTL < 0 || cfg.IntentTTL < 0 || cfg.PayloadReadLimit < 0 || int64(cfg.PayloadReadLimit) == math.MaxInt64 || validateEncoding(cfg.Encoding) != nil || cfg.CanonicalSignals && !cfg.CanonicalStarts {
+	if cfg.ExpectedReplicas < 0 || cfg.ExpectedReplicas > 5 || cfg.PinTTL < 0 || cfg.IntentTTL < 0 || cfg.PayloadReadLimit < 0 || int64(cfg.PayloadReadLimit) == math.MaxInt64 || validateEncoding(cfg.Encoding) != nil || cfg.CanonicalSignals && !cfg.CanonicalStarts || cfg.CheckpointIndex && !cfg.CanonicalSignals {
 		return fmt.Errorf("invalid native graph journal configuration")
 	}
 	return nil
@@ -96,5 +97,5 @@ func OpenNativeGraphStore(ctx context.Context, js jetstream.JetStream, cfg Nativ
 	if err != nil {
 		return nil, err
 	}
-	return NewGraphStore(GraphConfig{Protocol: graphpublication.Protocol{Port: port}, Now: cfg.Now, PinTTL: cfg.PinTTL, IntentTTL: cfg.IntentTTL, Encoding: cfg.Encoding, PayloadReadLimit: cfg.PayloadReadLimit, CanonicalStarts: cfg.CanonicalStarts, CanonicalSignals: cfg.CanonicalSignals})
+	return NewGraphStore(GraphConfig{Protocol: graphpublication.Protocol{Port: port}, Now: cfg.Now, PinTTL: cfg.PinTTL, IntentTTL: cfg.IntentTTL, Encoding: cfg.Encoding, PayloadReadLimit: cfg.PayloadReadLimit, CanonicalStarts: cfg.CanonicalStarts, CanonicalSignals: cfg.CanonicalSignals, CheckpointIndex: cfg.CheckpointIndex})
 }

@@ -73,7 +73,7 @@ func testNativeGraphContinuationHandoff(t *testing.T, domain string) {
 	if err := provision.Ensure(ctx, js, replicas); err != nil {
 		t.Fatal(err)
 	}
-	cfg := journal.NativeGraphConfig{AuthorityStream: "CONTINUE_AUTH", AuthorityPrefix: "wf.graph.continue", ObjectBucket: "CONTINUE_OBJECTS", ExpectedReplicas: replicas, CanonicalStarts: true, CanonicalSignals: true}
+	cfg := journal.NativeGraphConfig{AuthorityStream: "CONTINUE_AUTH", AuthorityPrefix: "wf.graph.continue", ObjectBucket: "CONTINUE_OBJECTS", ExpectedReplicas: replicas, CanonicalStarts: true, CanonicalSignals: true, CheckpointIndex: true}
 	configs, err := journal.NativeGraphStreamConfigs(cfg, replicas)
 	if err != nil {
 		t.Fatal(err)

@@ -19,6 +19,7 @@ import (
 
 const graphCursorSchema = "js-wf-graph-journal-cursor-v1"
 const graphStartCursorSchema = "js-wf-graph-runtime-cursor-v2"
+const graphCheckpointCursorSchema = "js-wf-graph-runtime-cursor-v5"
 const graphSignalCursorSchema = "js-wf-graph-runtime-cursor-v4"
 const graphEntrySchema = "js-wf-graph-journal-entry-v1"
 const MaxGraphEntryBytes = 1 << 20
@@ -41,26 +42,31 @@ type GraphConfig struct {
 	// CanonicalSignals selects owned reservations, ordered source bindings
 	// and canonical worker queue intake. Full deployment migration is separate.
 	CanonicalSignals bool
+	// CheckpointIndex selects the v5 canonical cursor with owned resume pointers.
+	// Use only new isolated stores; this does not import v4 histories or enable
+	// continuation registration or prefix compaction.
+	CheckpointIndex bool
 }
 
 type GraphStore struct{ cfg GraphConfig }
 
 type graphCursor struct {
-	Schema             string      `json:"schema"`
-	Invocation         uint64      `json:"invocation"`
-	Base               uint64      `json:"base"`
-	Count              uint64      `json:"count"`
-	Epoch              uint64      `json:"epoch"`
-	Kind               Kind        `json:"kind"`
-	Retired            bool        `json:"retired"`
-	Purging            bool        `json:"purging,omitempty"`
-	Start              *GraphStart `json:"start,omitempty"`
-	PreviousInvocation uint64      `json:"previous_invocation,omitempty"`
-	SignalInputs       uint64      `json:"signal_inputs,omitempty"`
-	SignalBindings     uint64      `json:"signal_bindings,omitempty"`
-	SignalSource       uint64      `json:"signal_source,omitempty"`
-	SignalConsumed     uint64      `json:"signal_consumed,omitempty"`
-	SignalRepair       uint64      `json:"signal_repair,omitempty"`
+	Schema             string                  `json:"schema"`
+	Invocation         uint64                  `json:"invocation"`
+	Base               uint64                  `json:"base"`
+	Count              uint64                  `json:"count"`
+	Epoch              uint64                  `json:"epoch"`
+	Kind               Kind                    `json:"kind"`
+	Retired            bool                    `json:"retired"`
+	Purging            bool                    `json:"purging,omitempty"`
+	Start              *GraphStart             `json:"start,omitempty"`
+	PreviousInvocation uint64                  `json:"previous_invocation,omitempty"`
+	SignalInputs       uint64                  `json:"signal_inputs,omitempty"`
+	SignalBindings     uint64                  `json:"signal_bindings,omitempty"`
+	SignalSource       uint64                  `json:"signal_source,omitempty"`
+	SignalConsumed     uint64                  `json:"signal_consumed,omitempty"`
+	SignalRepair       uint64                  `json:"signal_repair,omitempty"`
+	Checkpoint         *graphCheckpointPointer `json:"checkpoint,omitempty"`
 }
 
 type graphEntry struct {
@@ -71,7 +77,7 @@ type graphEntry struct {
 }
 
 func NewGraphStore(cfg GraphConfig) (*GraphStore, error) {
-	if cfg.Protocol.Port == nil || validateEncoding(cfg.Encoding) != nil || cfg.PinTTL < 0 || cfg.IntentTTL < 0 || cfg.PayloadReadLimit < 0 || int64(cfg.PayloadReadLimit) == math.MaxInt64 || cfg.CanonicalSignals && !cfg.CanonicalStarts {
+	if cfg.Protocol.Port == nil || validateEncoding(cfg.Encoding) != nil || cfg.PinTTL < 0 || cfg.IntentTTL < 0 || cfg.PayloadReadLimit < 0 || int64(cfg.PayloadReadLimit) == math.MaxInt64 || cfg.CanonicalSignals && !cfg.CanonicalStarts || cfg.CheckpointIndex && !cfg.CanonicalSignals {
 		return nil, fmt.Errorf("invalid graph journal configuration")
 	}
 	if cfg.Now == nil {
@@ -93,6 +99,7 @@ func NewGraphStore(cfg GraphConfig) (*GraphStore, error) {
 func (s *GraphStore) PayloadReadLimit() int  { return s.cfg.PayloadReadLimit }
 func (s *GraphStore) CanonicalStarts() bool  { return s.cfg.CanonicalStarts }
 func (s *GraphStore) CanonicalSignals() bool { return s.cfg.CanonicalSignals }
+func (s *GraphStore) CheckpointIndex() bool  { return s.cfg.CheckpointIndex }
 
 func graphDestination(typ, id string) (string, error) {
 	if err := identity.Validate(typ, id); err != nil {
@@ -148,6 +155,9 @@ func (s *GraphStore) validateRoot(root graphpublication.Root, typ, id string) (*
 		if s.cfg.CanonicalSignals {
 			cursorSchema = graphSignalCursorSchema
 		}
+		if s.cfg.CheckpointIndex {
+			cursorSchema = graphCheckpointCursorSchema
+		}
 	}
 	if root.Schema != rootSchema || root.Head == 0 || len(root.Application) == 0 || len(root.Application) > graphpublication.MaxApplicationBytes {
 		return nil, ErrGap
@@ -155,6 +165,13 @@ func (s *GraphStore) validateRoot(root graphpublication.Root, typ, id string) (*
 	var c graphCursor
 	if graphDecode(root.Application, &c) != nil || c.Schema != cursorSchema || !s.cfg.CanonicalStarts && (c.Invocation == 0 || c.Start != nil || c.PreviousInvocation != 0) || !s.cfg.CanonicalSignals && (c.SignalInputs != 0 || c.SignalBindings != 0 || c.SignalSource != 0 || c.SignalConsumed != 0 || c.SignalRepair != 0) || c.SignalInputs > math.MaxInt64 || c.SignalBindings > c.SignalInputs || c.SignalConsumed > c.SignalBindings || c.SignalRepair != 0 && c.SignalRepair >= c.SignalInputs || c.Count > MaxEntries || c.Base > math.MaxUint64-c.Count {
 		return nil, ErrGap
+	}
+	if c.Checkpoint != nil {
+		pointer := c.Checkpoint
+		runtime := pointer.Runtime
+		if !s.cfg.CheckpointIndex || ValidateRuntimeSnapshot(Snapshot{Version: 2, Runtime: &runtime}) != nil || runtime.InvSeq != c.Invocation || runtime.Index >= c.Count || runtime.Sequence != c.Base+runtime.Index+1 || runtime.Epoch > c.Epoch || pointer.RequestIndex == 0 || pointer.RequestIndex >= runtime.Index {
+			return nil, ErrGap
+		}
 	}
 	if s.cfg.CanonicalStarts {
 		if err := validateStartCursor(root, c, typ, id, s.cfg.PayloadReadLimit, s.cfg.CanonicalSignals); err != nil {

@@ -177,6 +177,9 @@ func (s *GraphStore) ReserveStart(ctx context.Context, r GraphStartRequest, inpu
 	if s.cfg.CanonicalSignals {
 		next.Schema = graphSignalCursorSchema
 	}
+	if s.cfg.CheckpointIndex {
+		next.Schema = graphCheckpointCursorSchema
+	}
 	if c != nil {
 		next.Base = c.Base + c.Count
 		next.PreviousInvocation = c.Invocation
