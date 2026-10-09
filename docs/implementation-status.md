@@ -1,5 +1,9 @@
 # Implementation status against the supplied plan
 
+## Intent-expiry/root-reply actor combinations added — 2026-10-09
+
+All 30 declared publication × actual uncommitted-intent expiry × root-reply combinations pass normal/race operation-level schedules and exact replay; race takes 160.433 seconds. A new shared seeded family is running its 1,000-body normal campaign, with complete family acceptance pending. Six existing/new actor pins pass normal/race against the refactored runner; previous 811 pins are byte-preserved and the corpus now has 816. Source inventory has 153 seeded families. [Executed controls, snapshot limitations and precise remaining scope](scale/graph-signal-expiry-actors-2026-10-09/README.md). Complete current/all-pin/extended, exhaustive permutations and every original broader requirement remain open.
+
 ## Corrected Signal actor normal family accepted; race running — 2026-10-09
 
 Frozen `cc8363d` passes 1,000 contiguous completed bodies and exact replays, the directed caller-retry control and its new registered pin. Package elapsed is 316.523 seconds. Independent executed review verifies actual child exits, raw body/pass events, retained binary provenance and 1,755 unchanged Git-matched non-documentation source inputs. [Focused normal proof and scope](scale/graph-signal-operation-actors-2026-10-09/fix/complete-normal/README.md). Focused race is running. Complete current suite/all-pin/extended and every original broader requirement remain open; the later expiry workload is excluded from this acceptance.

@@ -9,6 +9,7 @@ import (
 	"os"
 	"path/filepath"
 	"reflect"
+	"sort"
 	"strings"
 	"testing"
 	"time"
@@ -27,7 +28,13 @@ var graphSignalActorModes = []string{"healthy", "source_drop", "source_lost_ack"
 
 // Client publication, canonical discovery, execution and collection share a
 // scheduler, but hold independent adapter instances and process-local state.
-func runGraphSignalActors(seed int64, replay *Trace) (trace Trace, runErr error) {
+func runGraphSignalActors(seed int64, replay *Trace) (Trace, error) {
+	return runGraphSignalActorsSchedule(seed, replay, false)
+}
+func runGraphSignalExpiryActors(seed int64, replay *Trace) (Trace, error) {
+	return runGraphSignalActorsSchedule(seed, replay, true)
+}
+func runGraphSignalActorsSchedule(seed int64, replay *Trace, combined bool) (trace Trace, runErr error) {
 	s := NewScheduler(seed)
 	if replay != nil {
 		var e error
@@ -36,13 +43,30 @@ func runGraphSignalActors(seed int64, replay *Trace) (trace Trace, runErr error)
 			return trace, e
 		}
 	}
-	if e := s.SetWorkload("graph_signal_operation_actors"); e != nil {
+	workload := "graph_signal_operation_actors"
+	if combined {
+		workload = "graph_signal_expiry_actors"
+	}
+	if e := s.SetWorkload(workload); e != nil {
 		return trace, e
 	}
 	defer func() { trace = s.Trace() }()
 	mode, e := s.Choose(graphSignalActorModes)
 	if e != nil {
 		return trace, e
+	}
+	clockMode, rootMode := "live", "healthy"
+	decisionPrefix := 1
+	if combined {
+		clockMode, e = s.Choose([]string{"live", "expire_intents"})
+		if e != nil {
+			return trace, e
+		}
+		rootMode, e = s.Choose([]string{"healthy", "drop_before_commit", "lose_ack_after_commit"})
+		if e != nil {
+			return trace, e
+		}
+		decisionPrefix = 3
 	}
 	ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
 	defer cancel()
@@ -88,6 +112,15 @@ func runGraphSignalActors(seed int64, replay *Trace) (trace Trace, runErr error)
 	}
 	if e != nil {
 		return trace, e
+	}
+	if rootMode != "healthy" {
+		fault := DropBeforeCommit
+		if rootMode == "lose_ack_after_commit" {
+			fault = LoseAckAfterCommit
+		}
+		if e = model.QueueFault("cas_root", fault); e != nil {
+			return trace, e
+		}
 	}
 	legacy := NewJournalTransport(s)
 	legacyStore := journal.NewWithPorts(legacy, legacy)
@@ -197,6 +230,21 @@ func runGraphSignalActors(seed int64, replay *Trace) (trace Trace, runErr error)
 		return nil
 	}}, CooperativeActor{Name: "collector", Run: func(ctx context.Context, y YieldFunc) error {
 		p := GraphProtocolWithYield(model, y)
+		if clockMode == "expire_intents" {
+			reached := false
+			for attempt := 0; attempt < 128 && !reached; attempt++ {
+				var cutErr error
+				if e := y(ctx, "expire_pending_publication", func() { reached, cutErr = expirePendingGraphIntent(model) }); e != nil {
+					return e
+				}
+				if cutErr != nil {
+					return cutErr
+				}
+			}
+			if !reached {
+				return fmt.Errorf("pending publication expiry cut not reached")
+			}
+		}
 		for i := 0; i < 2; i++ {
 			if _, e := p.SweepWithReaders(ctx, now()); e != nil {
 				return e
@@ -322,13 +370,22 @@ func runGraphSignalActors(seed int64, replay *Trace) (trace Trace, runErr error)
 	transport.StartTransport.mu.Lock()
 	pendingEnqueue := len(transport.StartTransport.faults)
 	transport.StartTransport.mu.Unlock()
+	model.mu.Lock()
+	pendingRoot := 0
+	for _, faults := range model.faults {
+		pendingRoot += len(faults)
+	}
+	model.mu.Unlock()
+	if pendingRoot != 0 {
+		return trace, fmt.Errorf("unreached graph fault: %d", pendingRoot)
+	}
 	if pendingSignal+pendingEnqueue != 0 {
 		return trace, fmt.Errorf("unreached faults signal=%d enqueue=%d", pendingSignal, pendingEnqueue)
 	}
 	reached := map[string]bool{}
 	switches := 0
 	previous := ""
-	for _, decision := range s.Trace().Decisions[1:] {
+	for _, decision := range s.Trace().Decisions[decisionPrefix:] {
 		actor := strings.SplitN(decision.Chosen, ":", 2)[0]
 		reached[actor] = true
 		if previous != "" && previous != actor {
@@ -338,6 +395,9 @@ func runGraphSignalActors(seed int64, replay *Trace) (trace Trace, runErr error)
 	}
 	if len(reached) != 5 || switches < 4 {
 		return trace, fmt.Errorf("actor coverage=%v switches=%d", reached, switches)
+	}
+	if combined {
+		mode += "/" + clockMode + "/" + rootMode
 	}
 	s.RecordTransport(TransportEvent{Operation: "check_graph_signal_operation_actors", Outcome: mode})
 	return trace, s.Finish()
@@ -401,4 +461,37 @@ func TestGraphSignalCallerRetryAfterContention(t *testing.T) {
 			t.Fatal(e)
 		}
 	}
+}
+
+// Fault planning observes a still-current uncommitted intent and advances the
+// virtual clock in the same scheduler turn. The collector still performs all
+// real conditional fencing/deletion through the production graph protocol.
+func expirePendingGraphIntent(model *GraphPublicationTransport) (bool, error) {
+	model.mu.Lock()
+	defer model.mu.Unlock()
+	keys := make([]string, 0, len(model.blobs))
+	for key := range model.blobs {
+		keys = append(keys, key)
+	}
+	sort.Strings(keys)
+	for _, key := range keys {
+		fence := model.blobs[key].Fence
+		tokens := make([]string, 0, len(fence.Intents))
+		for token := range fence.Intents {
+			tokens = append(tokens, token)
+		}
+		sort.Strings(tokens)
+		for _, token := range tokens {
+			intent := fence.Intents[token]
+			if intent.Expected != model.roots[intent.Destination].Head || intent.Expires.UnixMilli() <= model.schedule.NowMillis() {
+				continue
+			}
+			if e := model.schedule.AdvanceMillis(intent.Expires.UnixMilli() - model.schedule.NowMillis() + 1); e != nil {
+				return false, e
+			}
+			model.event("intent_expiry_cut", key, intent.Expected, 0, nil, "current_uncommitted_intent")
+			return true, nil
+		}
+	}
+	return false, nil
 }
