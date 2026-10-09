@@ -1,0 +1,38 @@
+=== RUN   TestNativeGraphAuthorityPersistenceAndSchemaIsolation
+=== RUN   TestNativeGraphAuthorityPersistenceAndSchemaIsolation/R1
+=== RUN   TestNativeGraphAuthorityPersistenceAndSchemaIsolation/R3
+--- PASS: TestNativeGraphAuthorityPersistenceAndSchemaIsolation (2.93s)
+    --- PASS: TestNativeGraphAuthorityPersistenceAndSchemaIsolation/R1 (0.20s)
+    --- PASS: TestNativeGraphAuthorityPersistenceAndSchemaIsolation/R3 (2.72s)
+=== RUN   TestNativeGraphConcurrentPublishersAndCollectors
+=== RUN   TestNativeGraphConcurrentPublishersAndCollectors/R1/seed1
+    nats_concurrency_test.go:178: R1 seed1 attempts16 committed0 aborted16; all canonical values/receipts preserved and physical chunks retired
+=== RUN   TestNativeGraphConcurrentPublishersAndCollectors/R1/seed2
+    nats_concurrency_test.go:178: R1 seed2 attempts16 committed2 aborted14; all canonical values/receipts preserved and physical chunks retired
+=== RUN   TestNativeGraphConcurrentPublishersAndCollectors/R3/seed1
+    nats_concurrency_test.go:178: R3 seed1 attempts16 committed4 aborted12; all canonical values/receipts preserved and physical chunks retired
+=== RUN   TestNativeGraphConcurrentPublishersAndCollectors/R3/seed2
+    nats_concurrency_test.go:178: R3 seed2 attempts16 committed2 aborted14; all canonical values/receipts preserved and physical chunks retired
+--- PASS: TestNativeGraphConcurrentPublishersAndCollectors (26.06s)
+    --- PASS: TestNativeGraphConcurrentPublishersAndCollectors/R1/seed1 (4.88s)
+    --- PASS: TestNativeGraphConcurrentPublishersAndCollectors/R1/seed2 (4.61s)
+    --- PASS: TestNativeGraphConcurrentPublishersAndCollectors/R3/seed1 (9.27s)
+    --- PASS: TestNativeGraphConcurrentPublishersAndCollectors/R3/seed2 (7.31s)
+=== RUN   TestNativeGraphStableReadCohort
+=== RUN   TestNativeGraphStableReadCohort/R1
+    nats_read_cohort_test.go:57: stable readers=32 failed=0 acknowledged_physical_witnesses=32 logical_head=0
+=== RUN   TestNativeGraphStableReadCohort/R3
+    nats_read_cohort_test.go:57: stable readers=32 failed=0 acknowledged_physical_witnesses=32 logical_head=0
+--- PASS: TestNativeGraphStableReadCohort (0.92s)
+    --- PASS: TestNativeGraphStableReadCohort/R1 (0.20s)
+    --- PASS: TestNativeGraphStableReadCohort/R3 (0.72s)
+=== RUN   TestNativeGraphQueuedReadCancellationAndConcurrentMutation
+=== RUN   TestNativeGraphQueuedReadCancellationAndConcurrentMutation/R1
+    nats_read_cohort_test.go:171: queued cancellation isolated, mutation and other subject completed, stale witness reloaded, no coordination entries retained
+=== RUN   TestNativeGraphQueuedReadCancellationAndConcurrentMutation/R3
+    nats_read_cohort_test.go:171: queued cancellation isolated, mutation and other subject completed, stale witness reloaded, no coordination entries retained
+--- PASS: TestNativeGraphQueuedReadCancellationAndConcurrentMutation (0.77s)
+    --- PASS: TestNativeGraphQueuedReadCancellationAndConcurrentMutation/R1 (0.06s)
+    --- PASS: TestNativeGraphQueuedReadCancellationAndConcurrentMutation/R3 (0.72s)
+PASS
+ok  	js-wf/internal/graphpublication	31.709s

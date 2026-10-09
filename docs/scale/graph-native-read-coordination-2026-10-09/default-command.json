@@ -1,0 +1,19 @@
+{
+  "command": [
+    "go",
+    "test",
+    "-race",
+    "-p=1",
+    "./client",
+    "./cmd/wf",
+    "./cmd/wf-worker",
+    "-run",
+    "^(TestGraphAwaitContentionFreshReadAndGenerationFence|TestGraphAwaitOwnReadDeadline|TestNativeGraphCursorOperatorHistory|TestGraphOperatorCursorRejectsUnknownVersion|TestGraphOperatorRejectsPartialOrLegacyOnlySelection|TestWorkerRunnerCanonicalCheckpointGraphRepair|TestWorkerRunnerCanonicalGraphRepair|TestWorkerGraphAdmissionRejectsIncompatibleCLI)$",
+    "-count=1",
+    "-timeout=10m",
+    "-v"
+  ],
+  "working_directory": "/home/exedev/js-wf",
+  "GOMAXPROCS": null,
+  "GOMEMLIMIT": null
+}

@@ -35,6 +35,7 @@ type NativeAuthority struct {
 	js           jetstream.JetStream
 	stream       jetstream.Stream
 	name, prefix string
+	reads        *authorityReadCoordinator
 }
 
 // Authority is the metadata subset of Port. Reads conditionally reaffirm the
@@ -75,7 +76,7 @@ func OpenNativeAuthority(ctx context.Context, js jetstream.JetStream, name, pref
 		stream, err := js.Stream(lookup, name)
 		var p *NativeAuthority
 		if err == nil {
-			p = &NativeAuthority{js: js, stream: natsstream.Guard(stream), name: name, prefix: prefix}
+			p = &NativeAuthority{js: js, stream: natsstream.Guard(stream), name: name, prefix: prefix, reads: &authorityReadCoordinator{}}
 			err = p.validate(lookup)
 		}
 		stop()
@@ -149,6 +150,14 @@ func (p *NativeAuthority) readSnapshot(ctx context.Context, kind, identity strin
 // Reads require publish permission and perform a durable write, including for
 // absent identities. All authority users must tolerate physical sequence churn.
 func (p *NativeAuthority) read(ctx context.Context, kind, identity string) (authorityValue, uint64, error) {
+	// Witness reads write the physical subject sequence. Cooperating readers
+	// on this adapter must not repeatedly reject one another's snapshots.
+	// Mutations still arbitrate at the server and do not take this read gate.
+	release, err := p.reads.acquire(ctx, kind+":"+identity)
+	if err != nil {
+		return authorityValue{}, 0, err
+	}
+	defer release()
 	return blobpublication.ReadWithWitness(ctx, func(call context.Context) (authorityValue, uint64, error) {
 		v, seq, err := p.readSnapshot(call, kind, identity)
 		if err != nil {

@@ -1,5 +1,11 @@
 # Implementation status against the supplied plan
 
+## Coordinate native witness reads without weakening authority — 2026-10-09
+
+A 32-reader stable-authority control reproduced adapter self-contention in real R1/R3 stores, including 14 failed R3 readers with no logical writer. Native authority now serializes witness reads per kind/identity on one adapter while preserving fresh snapshots, quorum witnesses and server mutation CAS. Cancellation does not release another read's gate; mutations and independent subjects still complete while a witness is held, and inactive coordinator entries are removed. [Baseline, source observation, raw controls and executed scope review](scale/graph-native-read-coordination-2026-10-09/README.md).
+
+The complete authority package passes under race (64 top-level groups, 179.702 s). All six v4/v5/v6 × R1/R3 ordinary worker CLI cases pass normally and under race at two Go CPUs, inside the unchanged fixture deadlines. The earlier failed combined campaign used default four-CPU concurrency; its matching retest is live and remains unqualified. This demonstrates a concrete source of contention but does not attribute every earlier Start binding timeout exclusively to it. Full current/extended qualification and every original broader gate remain open; public continuation admission and production collection remain disabled.
+
 ## Shared Tier-1 Await contention replay and saved corpus — 2026-10-09
 
 The client contention harness now shares the production-path simulator fixture with the registered `graph_await_contention` family. Twenty-four v4/v5/v6 combinations cover read/release contention, source replacement, purge, cancellation, immediate unknown replies and corruption, with exact replay and complete physical drain. The complete 1,000-body family and all 786 pins pass normally and under race; all 762 prior saved traces remain byte-identical. Actual Go AST inventory now contains 150 seeded families. [Executed source/coverage review, old-code failure and minimizer proof](scale/graph-await-simulation-2026-10-09/README.md).

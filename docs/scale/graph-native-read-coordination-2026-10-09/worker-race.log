@@ -1,0 +1,54 @@
+=== RUN   TestWorkerGraphAdmissionRejectsIncompatibleCLI
+=== RUN   TestWorkerGraphAdmissionRejectsIncompatibleCLI/version-no-store
+=== RUN   TestWorkerGraphAdmissionRejectsIncompatibleCLI/version-invalid
+=== RUN   TestWorkerGraphAdmissionRejectsIncompatibleCLI/partial
+=== RUN   TestWorkerGraphAdmissionRejectsIncompatibleCLI/namespace
+=== RUN   TestWorkerGraphAdmissionRejectsIncompatibleCLI/auto
+=== RUN   TestWorkerGraphAdmissionRejectsIncompatibleCLI/retention
+--- PASS: TestWorkerGraphAdmissionRejectsIncompatibleCLI (0.00s)
+    --- PASS: TestWorkerGraphAdmissionRejectsIncompatibleCLI/version-no-store (0.00s)
+    --- PASS: TestWorkerGraphAdmissionRejectsIncompatibleCLI/version-invalid (0.00s)
+    --- PASS: TestWorkerGraphAdmissionRejectsIncompatibleCLI/partial (0.00s)
+    --- PASS: TestWorkerGraphAdmissionRejectsIncompatibleCLI/namespace (0.00s)
+    --- PASS: TestWorkerGraphAdmissionRejectsIncompatibleCLI/auto (0.00s)
+    --- PASS: TestWorkerGraphAdmissionRejectsIncompatibleCLI/retention (0.00s)
+=== RUN   TestWorkerRunnerCanonicalGraphRepair
+=== RUN   TestWorkerRunnerCanonicalGraphRepair/R1
+    graph_test.go:271: canonical CLI reserved Start/Signal recovery, native timer completion, two terminal restorations, unchanged journal, no legacy journal writes; replicas=1 domain=
+=== RUN   TestWorkerRunnerCanonicalGraphRepair/R3Domain
+    graph_test.go:76: worker domain admitted node=0 domain=WFGRAPH server_id=NAEVGFBM4GRYWLAQWO2SVEYYQVCAJTKR4ZVAH5F6PJ2QJSQKY4XYD4DR
+    graph_test.go:76: worker domain admitted node=1 domain=WFGRAPH server_id=NCWEHUHM7YFGBQVK4YFEYGF76HJFIUUN7FLBEK7QNI376Z3MGQB7TJNC
+    graph_test.go:76: worker domain admitted node=2 domain=WFGRAPH server_id=NDKM2ONMBWWE33VSCJXCEUWPFJBXR4MOYQRHHCUZF3YKLGVLUTCF64GN
+    domain_test.go:79: worker real domain=WFGRAPH domain_api_requests=15688 wrong_prefix_requests=0
+    graph_test.go:271: canonical CLI reserved Start/Signal recovery, native timer completion, two terminal restorations, unchanged journal, no legacy journal writes; replicas=3 domain=WFGRAPH
+--- PASS: TestWorkerRunnerCanonicalGraphRepair (78.12s)
+    --- PASS: TestWorkerRunnerCanonicalGraphRepair/R1 (17.29s)
+    --- PASS: TestWorkerRunnerCanonicalGraphRepair/R3Domain (52.41s)
+=== RUN   TestWorkerRunnerCanonicalCheckpointGraphRepair
+=== RUN   TestWorkerRunnerCanonicalCheckpointGraphRepair/v5
+=== RUN   TestWorkerRunnerCanonicalCheckpointGraphRepair/v5/R1
+    graph_test.go:271: canonical CLI reserved Start/Signal recovery, native timer completion, two terminal restorations, unchanged journal, no legacy journal writes; replicas=1 domain=
+=== RUN   TestWorkerRunnerCanonicalCheckpointGraphRepair/v5/R3Domain
+    graph_test.go:76: worker domain admitted node=0 domain=WFGRAPH server_id=NCTIQP5SQZ7U7ALAMJLYSINPGGNADMXRBLYIFT4QHX3XZB7C3PKS55DZ
+    graph_test.go:76: worker domain admitted node=1 domain=WFGRAPH server_id=NCFEQDRBSVVVEDSLUTXDOIUOEZHRIEPVZBEYQ7PHOG2HYOTZHYAM5KLX
+    graph_test.go:76: worker domain admitted node=2 domain=WFGRAPH server_id=NCWQ2JCMN5YCDRNKCPIBNBV3ZADGD3W7C62RNRUPE5UUNC2HQLPUQOGX
+    domain_test.go:79: worker real domain=WFGRAPH domain_api_requests=14325 wrong_prefix_requests=0
+    graph_test.go:271: canonical CLI reserved Start/Signal recovery, native timer completion, two terminal restorations, unchanged journal, no legacy journal writes; replicas=3 domain=WFGRAPH
+=== RUN   TestWorkerRunnerCanonicalCheckpointGraphRepair/v6
+=== RUN   TestWorkerRunnerCanonicalCheckpointGraphRepair/v6/R1
+    graph_test.go:271: canonical CLI reserved Start/Signal recovery, native timer completion, two terminal restorations, unchanged journal, no legacy journal writes; replicas=1 domain=
+=== RUN   TestWorkerRunnerCanonicalCheckpointGraphRepair/v6/R3Domain
+    graph_test.go:76: worker domain admitted node=0 domain=WFGRAPH server_id=NBU7JMP73BYS6A4IA2SMKJJF7AHP2C3MSBGKLUKNVYT6TNDYKA5F236A
+    graph_test.go:76: worker domain admitted node=1 domain=WFGRAPH server_id=ND6AHLRHW7ZJ2PRBXXGSGY33V6LHUEPAJZKPKJMQT7KPQVEQRPTZS4FJ
+    graph_test.go:76: worker domain admitted node=2 domain=WFGRAPH server_id=NBNPZYQP2HEVIL4IU5VKYLICJ7CJWYNZEXWMAXJZ4WDAGTRJJGNXRLKF
+    domain_test.go:79: worker real domain=WFGRAPH domain_api_requests=15148 wrong_prefix_requests=0
+    graph_test.go:271: canonical CLI reserved Start/Signal recovery, native timer completion, two terminal restorations, unchanged journal, no legacy journal writes; replicas=3 domain=WFGRAPH
+--- PASS: TestWorkerRunnerCanonicalCheckpointGraphRepair (164.18s)
+    --- PASS: TestWorkerRunnerCanonicalCheckpointGraphRepair/v5 (80.51s)
+        --- PASS: TestWorkerRunnerCanonicalCheckpointGraphRepair/v5/R1 (33.61s)
+        --- PASS: TestWorkerRunnerCanonicalCheckpointGraphRepair/v5/R3Domain (46.90s)
+    --- PASS: TestWorkerRunnerCanonicalCheckpointGraphRepair/v6 (83.67s)
+        --- PASS: TestWorkerRunnerCanonicalCheckpointGraphRepair/v6/R1 (32.38s)
+        --- PASS: TestWorkerRunnerCanonicalCheckpointGraphRepair/v6/R3Domain (51.29s)
+PASS
+ok  	js-wf/cmd/wf-worker	243.448s
