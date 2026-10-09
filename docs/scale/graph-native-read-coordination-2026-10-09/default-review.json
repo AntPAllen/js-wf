@@ -1,0 +1,18 @@
+{
+  "source": "6df82898e70c5cd2a71bea384910f4505df365f6",
+  "repository_inputs_git_verified": 936,
+  "verdict": "FAIL default-four-CPU combined CLI worker race gate",
+  "exit_code": 1,
+  "failing_cases": [
+    "TestWorkerRunnerCanonicalGraphRepair",
+    "TestWorkerRunnerCanonicalGraphRepair/R3Domain",
+    "TestWorkerRunnerCanonicalCheckpointGraphRepair",
+    "TestWorkerRunnerCanonicalCheckpointGraphRepair/v5",
+    "TestWorkerRunnerCanonicalCheckpointGraphRepair/v5/R3Domain",
+    "TestWorkerRunnerCanonicalCheckpointGraphRepair/v6",
+    "TestWorkerRunnerCanonicalCheckpointGraphRepair/v6/R1",
+    "TestWorkerRunnerCanonicalCheckpointGraphRepair/v6/R3Domain"
+  ],
+  "log_sha256": "68981051935537419ffa48c348432d7f6e2380b4b8f684a0902b3d1e72a70db9",
+  "scope": "Read coordination source; excludes subsequent physical mutation retry. Client/operator packages pass, but the default worker deadline gate remains unqualified."
+}
