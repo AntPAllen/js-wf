@@ -15,15 +15,8 @@ func TestSeededGraphSignalRuntimeCombinedReplay(t *testing.T) {
 	dimensions := []map[string]int{{}, {}, {}, {}}
 	captures := map[string]bool{}
 	fail := func(seed int64, trace Trace, err error) {
-		path := os.Getenv("FAULT_TRACE_OUT")
-		if path == "" {
-			dir, e := os.MkdirTemp("", "js-wf-signal-combined-failure-")
-			if e != nil {
-				t.Fatal(e)
-			}
-			path = filepath.Join(dir, "trace.json")
-		}
-		if e := trace.Save(path); e != nil {
+		path, e := saveSeedFailureTrace(t.Name(), seed, trace)
+		if e != nil {
 			t.Fatal(e)
 		}
 		t.Fatalf("FAULT_SEED=%d FAULT_TRACE=%s: %v", seed, path, err)

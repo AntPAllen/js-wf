@@ -1,0 +1,34 @@
+[
+  [
+    "go",
+    "test",
+    "-p=1",
+    "-c",
+    "-o",
+    "/home/exedev/js-wf-tier1-full148-cycles-normal1000-20261008/sim.test",
+    "./sim"
+  ],
+  [
+    "go",
+    "run",
+    "-p=1",
+    "./scripts/tier1-seed-inventory"
+  ],
+  [
+    "/usr/bin/time",
+    "-o",
+    "/home/exedev/js-wf-tier1-full148-cycles-normal1000-20261008/tier1-time.txt",
+    "-f",
+    "elapsed=%e user=%U system=%S",
+    "go",
+    "tool",
+    "test2json",
+    "-t",
+    "-p",
+    "js-wf/sim",
+    "/home/exedev/js-wf-tier1-full148-cycles-normal1000-20261008/sim.test",
+    "-test.v=test2json",
+    "-test.count=1",
+    "-test.timeout=300m"
+  ]
+]

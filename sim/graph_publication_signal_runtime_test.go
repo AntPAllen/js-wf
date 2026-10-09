@@ -484,15 +484,8 @@ func runGraphSignalRuntimeSchedule(seed int64, replay *Trace, combined bool) (tr
 func TestSeededGraphSignalRuntimeReplay(t *testing.T) {
 	observed := map[string]int{}
 	fail := func(seed int64, trace Trace, cause error) {
-		path := os.Getenv("FAULT_TRACE_OUT")
-		if path == "" {
-			dir, e := os.MkdirTemp("", "js-wf-canonical-signal-runtime-failure-")
-			if e != nil {
-				t.Fatal(e)
-			}
-			path = filepath.Join(dir, "trace.json")
-		}
-		if e := trace.Save(path); e != nil {
+		path, e := saveSeedFailureTrace(t.Name(), seed, trace)
+		if e != nil {
 			t.Fatal(e)
 		}
 		t.Fatalf("FAULT_SEED=%d FAULT_TRACE=%s: %v", seed, path, cause)

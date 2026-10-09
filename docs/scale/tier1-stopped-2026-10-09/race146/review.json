@@ -1,0 +1,43 @@
+{
+  "campaign": "race146",
+  "source": "2b71f1d61fea328482b6545d5fa80603ce1c23d0",
+  "verdict": "FAIL",
+  "selected_inputs": 3019,
+  "selected_inputs_match_git_and_observed_checkout": true,
+  "observed_at": "2026-10-09",
+  "supervisor_source_after_missing": true,
+  "binary_sha256": "c4485e4d6bc6f81fc88466e5847e6004c2e49d5662af0bf9fb6603db21be89f1",
+  "binary_retained_unchanged": true,
+  "events_sha256": "882c882b3586bdc43c0d9fb8494363781fa76e8a771236b37703590610ff2676",
+  "complete_seeded_families": 144,
+  "failures": [
+    "TestSeededGraphSignalRuntimeCombinedReplay",
+    "TestSeededGraphSignalRuntimeReplay"
+  ],
+  "error_diagnostics": [
+    "graph_publication_signal_combined_test.go:29: FAULT_SEED=645 FAULT_TRACE=/home/exedev/js-wf-tier1-full146-race1000-20261008/failure-trace.json: replay differs: worker failed to suspend: context deadline exceeded",
+    "graph_publication_signal_runtime_test.go:495: FAULT_SEED=971 FAULT_TRACE=/home/exedev/js-wf-tier1-full146-race1000-20261008/failure-trace.json: worker failed to suspend: context deadline exceeded"
+  ],
+  "last_event": {
+    "Time": "2026-10-08T21:11:10.720889857Z",
+    "Action": "fail",
+    "Package": "js-wf/sim",
+    "Elapsed": 6930.377
+  },
+  "qualification_accepted": false,
+  "retained_files_sha256": {
+    "tier1-source.txt": "29b03d2835fc7a5bef1272322fb1cc901d3110315752382607a368f06482cec1",
+    "commands.json": "441609fbf24b2010ec2a5cf0d3d929a095acf311ea33968e52b52672b7bbc8f4",
+    "source-before.json": "bc7feb57e7dd9c9c8a235b9c2125e9476a2f31859e942eaa6b65ed2c87fee477",
+    "execution-contexts.json": "6283439e5a781c42ae80d38ca92892c84b924e0f4b46be2f7ef2c43a825943ed",
+    "tier1-events.jsonl": "882c882b3586bdc43c0d9fb8494363781fa76e8a771236b37703590610ff2676",
+    "stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "tier1-time.txt": "db6a967b467d93b8105427d5eb9d041c492a79e96a57a6bf47ff36ee9d1be993",
+    "tier1-regression-inventory.txt": "0f4986f88466d253b9468a8992c2853c669fe2c80e6be17e9bf0f8079af9b801",
+    "tier1-inventory.txt": "ce9dceadf3cd034884f231a5ab3d3687f9a80c7eb68f58073ba4bd7a5e44e631",
+    "binary.json": "9e0b35dd5ed5667fa253846d44de4be7d96f0eb6ee4a5421cf59feff0f20f905",
+    "tier1-list.log": "ce9dceadf3cd034884f231a5ab3d3687f9a80c7eb68f58073ba4bd7a5e44e631",
+    "tier1-seeded-inventory.txt": "579699fd85a9cbecf866e5c9026575975466b86f3057dc3ab52c84f1fbff161c",
+    "failure-trace.json": "b74bf1e028d3da2ae65a5839296d81b544e5eea7383839cc56726c74350627e3"
+  }
+}

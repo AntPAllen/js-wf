@@ -1,5 +1,9 @@
 # Implementation status against the supplied plan
 
+## Stopped full simulation campaigns reviewed — 2026-10-09
+
+The frozen `2b71f1d` full race run ended FAIL in 6,930.377 s: 144/146 families completed 1,000 bodies, while combined Signal seed 645 and original Signal seed 971 stopped at the old ten-second per-schedule watchdog. No suite-timeout panic or data-race report appears; later watchdog changes remain independently unqualified. The frozen `55eeb77` normal run was interrupted after 39 complete families, without a terminal verdict; process and tool handles are gone, and interruption cause is unconfirmed. Both supervisor source-after records are absent; executed review verifies the retained binaries and current frozen files against Git without inventing historical completion evidence. The later failure overwrote the earlier trace, so Signal failure captures now retain distinct test/seed filenames. The new collision control passes under race detection. [Retained evidence and limits](scale/tier1-stopped-2026-10-09/). Complete current and extended qualification and every original runtime/native/scale/24h/million physical-drain/adoption/release gate remain required.
+
 ## Complete current shared-cycle qualification in progress — 2026-10-08
 
 The full normal default suite runs from isolated frozen `55eeb77`, requiring all 148 families × 1,000 contiguous seed bodies and all 748 pins. Binary/source/command/event evidence is retained under `/home/exedev/js-wf-tier1-full148-cycles-normal1000-20261008`; terminal evidence and separate executed review remain pending. The full 146-family race campaign continues unchanged at `2b71f1d` under its 180-minute CPU budget and does not qualify later changes. Accepted earlier normal results retain their exact source scope; all original remaining current/extended/runtime/native/scale/24h/million physical-drain/adoption/release requirements remain required.
