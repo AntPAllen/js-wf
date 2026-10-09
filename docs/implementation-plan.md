@@ -1,5 +1,11 @@
 # JetStream Durable Workflow Runtime — Implementation Plan
 
+## Current complete race queued behind normal success — 2026-10-09
+
+The full current race campaign is queued against clean isolated `fb4f086` using the updated CPU watchdog/child-exit harness. Its launcher waits on the observed normal supervisor identity, then requires actual normal exit zero, complete 151,000 body/810-pin verification, unchanged before/after source and byte-matched Go/module/trace inputs. Only then does it start the complete race suite once. [Exact launch controls and source scopes](scale/graph-current151-qualification-2026-10-09/README.md).
+
+Normal remains live; neither complete current result is accepted yet. Extended qualification, arbitrary operation permutations and every original runtime/native/fault/scale/soak/drain/migration/adoption/release requirement remain open; public continuation admission and production collection remain disabled.
+
 ## Full race CPU watchdog adjusted after terminal failure — 2026-10-09
 
 The full race test watchdog is now 300 minutes and its CI job budget 320 minutes, following the preserved 180-minute failure at 89/149 completed families. This provides CPU time for the complete current suite, including the newly accepted 1,336.887-second Cartesian race group. No seed count, compiled inventory, regression requirement, per-schedule/virtual deadline, production recovery target or property assertion changes. Actual child exits are retained before failure propagation, with successful/failed subprocess controls verified. [Evidence and precise scope](scale/tier1-race-budget-2026-10-09/README.md).
