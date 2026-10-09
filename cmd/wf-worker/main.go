@@ -55,6 +55,9 @@ func runWithJetStreamOptions(ctx context.Context, args []string, jsOptions ...je
 	graphPrefix := flags.String("graph-authority-prefix", "", "experimental canonical graph authority subject prefix")
 	graphBucket := flags.String("graph-object-bucket", "", "experimental canonical graph object bucket (pre-provisioned)")
 	graphCursorVersion := flags.Int("graph-cursor-version", 4, "experimental graph cursor schema: 4, 5 (checkpoint index), or 6 (new isolated archive stores)")
+	terminalAudit := flags.Bool("graph-terminal-audit", false, "enable experimental verification of present graph terminal projections")
+	terminalAuditInterval := flags.Duration("graph-terminal-audit-interval", 0, "explicit terminal audit cadence (up to 10s)")
+	terminalAuditBudget := flags.Int("graph-terminal-audit-budget", 0, "explicit terminal audit destinations per scan")
 	timerBackend := flags.String("timer-backend", "auto", "timer storage mode: auto, native, or fallback")
 	mode := flags.String("mode", "static", "partition assignment mode: static, kv, or auto")
 	staticIndex := flags.Int("static-index", 0, "static worker index")
@@ -84,6 +87,10 @@ func runWithJetStreamOptions(ctx context.Context, args []string, jsOptions ...je
 		return fmt.Errorf("invalid timer backend %q", *timerBackend)
 	}
 	graphSelection, err := selectWorkerGraph(*graphAuthority, *graphPrefix, *graphBucket, *replicas, journal.Encoding(*journalEncoding), *timerBackend, *retentionType, *graphCursorVersion)
+	if err != nil {
+		return err
+	}
+	auditSelection, err := selectTerminalAudit(*terminalAudit, *repair, graphSelection, *terminalAuditInterval, *terminalAuditBudget)
 	if err != nil {
 		return err
 	}
@@ -237,7 +244,7 @@ func runWithJetStreamOptions(ctx context.Context, args []string, jsOptions ...je
 			},
 		}
 		if graphSelection != nil {
-			start = graphWorkerRepairLoops(js, *id, *repairInterval, *repairBudget, graphSelection.store, observeRepair, domainNow)
+			start = graphWorkerRepairLoopsWithAudit(js, *id, *repairInterval, *repairBudget, graphSelection.store, observeRepair, domainNow, auditSelection)
 		}
 		if backend == provision.FallbackTimers {
 			start = append(start, func(c context.Context) error {

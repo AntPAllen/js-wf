@@ -16,6 +16,27 @@ type workerGraphSelection struct {
 	store  *journal.GraphStore
 }
 
+type terminalAuditConfig struct {
+	interval time.Duration
+	budget   int
+}
+
+func selectTerminalAudit(enabled, repair bool, graph *workerGraphSelection, interval time.Duration, budget int) (*terminalAuditConfig, error) {
+	if !enabled {
+		if interval != 0 || budget != 0 {
+			return nil, fmt.Errorf("graph-terminal-audit settings require enabled graph-terminal-audit")
+		}
+		return nil, nil
+	}
+	if graph == nil || !repair {
+		return nil, fmt.Errorf("graph-terminal-audit requires a graph store and enabled repair loops")
+	}
+	if interval <= 0 || interval > 10*time.Second || budget < 1 {
+		return nil, fmt.Errorf("graph-terminal-audit requires explicit interval in (0,10s] and positive budget")
+	}
+	return &terminalAuditConfig{interval, budget}, nil
+}
+
 func selectWorkerGraph(authority, prefix, bucket string, replicas int, encoding journal.Encoding, timerBackend, retentionType string, version int) (*workerGraphSelection, error) {
 	cfg, err := graphcli.Select(authority, prefix, bucket, replicas, encoding, version)
 	if err != nil || cfg == nil {
@@ -31,6 +52,10 @@ func selectWorkerGraph(authority, prefix, bucket string, replicas int, encoding 
 }
 
 func graphWorkerRepairLoops(js jetstream.JetStream, id string, interval time.Duration, budget int, graph *journal.GraphStore, observe func(reconcile.RepairEvent), clock reconcile.TimerDomainClock) []func(context.Context) error {
+	return graphWorkerRepairLoopsWithAudit(js, id, interval, budget, graph, observe, clock, nil)
+}
+
+func graphWorkerRepairLoopsWithAudit(js jetstream.JetStream, id string, interval time.Duration, budget int, graph *journal.GraphStore, observe func(reconcile.RepairEvent), clock reconcile.TimerDomainClock, audit *terminalAuditConfig) []func(context.Context) error {
 	kinds := []string{"graph-start", "graph-signal", "graph-terminal", "timer", "suspended"}
 	if graph.CheckpointIndex() {
 		kinds = append(kinds, "graph-continuation")
@@ -42,6 +67,11 @@ func graphWorkerRepairLoops(js jetstream.JetStream, id string, interval time.Dur
 				return fmt.Errorf("%s repair loop: %w", kind, err)
 			}
 			return nil
+		})
+	}
+	if audit != nil {
+		loops = append(loops, func(ctx context.Context) error {
+			return reconcile.RunRepairLoopWithGraphJournal(ctx, js, id, "graph-terminal-audit", audit.interval, audit.budget, graph, observe, clock, nil)
 		})
 	}
 	return loops

@@ -1,0 +1,26 @@
+{
+  "command": [
+    "go",
+    "test",
+    "-race",
+    "./cmd/wf-worker",
+    "-run",
+    "^(TestTerminalAuditCLIAdmission|TestWorkerRunnerCanonicalGraphTerminalAudit)$",
+    "-count=1",
+    "-timeout=6m",
+    "-v"
+  ],
+  "actual_exit_code": 1,
+  "files_before": {
+    "cmd/wf-worker/main.go": "90e6b349b26d145de41cbcba28e874005e402edd67c7c51ab45a509214fe87c9",
+    "cmd/wf-worker/graph.go": "e48d76bc8bab9343e1294e1ab374da0ff1756a9600df574ce7d44661044184a5",
+    "cmd/wf-worker/graph_test.go": "b95719e8951d00d836817a8a4bfe367e0eb6c6005a65dd9115b9795dbdaa47dd",
+    "cmd/wf-worker/graph_audit_test.go": "35c400ee7b319a3b9dd2ffeab978312f2a7e1a1d4f88a88a808a95eeb4f27a4e"
+  },
+  "files_after": {
+    "cmd/wf-worker/main.go": "90e6b349b26d145de41cbcba28e874005e402edd67c7c51ab45a509214fe87c9",
+    "cmd/wf-worker/graph.go": "e48d76bc8bab9343e1294e1ab374da0ff1756a9600df574ce7d44661044184a5",
+    "cmd/wf-worker/graph_test.go": "b95719e8951d00d836817a8a4bfe367e0eb6c6005a65dd9115b9795dbdaa47dd",
+    "cmd/wf-worker/graph_audit_test.go": "35c400ee7b319a3b9dd2ffeab978312f2a7e1a1d4f88a88a808a95eeb4f27a4e"
+  }
+}

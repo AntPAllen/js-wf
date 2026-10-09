@@ -54,6 +54,12 @@ func TestWorkerRunnerCanonicalCheckpointGraphRepair(t *testing.T) {
 }
 
 func testWorkerRunnerCanonicalGraphRepair(t *testing.T, backend string, versions ...int) {
+	testWorkerRunnerCanonicalGraphRepairWithAudit(t, backend, false, versions...)
+}
+func TestWorkerRunnerCanonicalGraphTerminalAudit(t *testing.T) {
+	testWorkerRunnerCanonicalGraphRepairWithAudit(t, "native", true)
+}
+func testWorkerRunnerCanonicalGraphRepairWithAudit(t *testing.T, backend string, audit bool, versions ...int) {
 	version := 4
 	if len(versions) > 0 {
 		version = versions[0]
@@ -135,6 +141,9 @@ func testWorkerRunnerCanonicalGraphRepair(t *testing.T, backend string, versions
 				}
 			})
 			args := append(workerDomainArgs(domain, replicas), []string{"-url", cluster.Servers[0].ClientURL(), "-id", "graph-cli", "-handler-plugin", plugin, "-metrics-addr", "127.0.0.1:0", "-graph-authority-stream", cfg.AuthorityStream, "-graph-authority-prefix", cfg.AuthorityPrefix, "-graph-object-bucket", cfg.ObjectBucket, "-journal-encoding", "protobuf-v1", "-timer-backend", backend, "-reconcile-interval", "100ms", "-events-file", events}...)
+			if audit {
+				args = append(args, "-graph-terminal-audit", "-graph-terminal-audit-interval", "500ms", "-graph-terminal-audit-budget", "1")
+			}
 			if len(versions) > 0 {
 				args = append(args, "-graph-cursor-version", strconv.Itoa(version))
 			}
@@ -182,10 +191,12 @@ func testWorkerRunnerCanonicalGraphRepair(t *testing.T, backend string, versions
 			}
 			key := identity.Key(h.Type, h.ID)
 			var original []byte
+			var observedRevision uint64
 			for ctx.Err() == nil {
 				entry, e := state.Get(ctx, key)
 				if e == nil {
 					original = entry.Value()
+					observedRevision = entry.Revision()
 					break
 				}
 				time.Sleep(20 * time.Millisecond)
@@ -196,13 +207,15 @@ func testWorkerRunnerCanonicalGraphRepair(t *testing.T, backend string, versions
 			// Delete twice inside the normal dispatch dedup window. Only the graph
 			// terminal loop can rediscover and enqueue either missing projection.
 			for deletion := 0; deletion < 2; deletion++ {
+				previousRevision := observedRevision
 				if err = state.Delete(ctx, key); err != nil {
 					t.Fatal(err)
 				}
 				restored := false
 				for ctx.Err() == nil {
 					entry, e := state.Get(ctx, key)
-					if e == nil {
+					if e == nil && entry.Revision() > previousRevision+1 {
+						observedRevision = entry.Revision()
 						if !bytes.Equal(entry.Value(), original) {
 							t.Fatal("projection bytes changed")
 						}
@@ -213,6 +226,38 @@ func testWorkerRunnerCanonicalGraphRepair(t *testing.T, backend string, versions
 				}
 				if !restored {
 					t.Fatal("terminal projection not restored", ctx.Err())
+				}
+			}
+			if audit {
+				for pass := 0; pass < 2; pass++ {
+					var corruptRevision uint64
+					for ctx.Err() == nil {
+						entry, e := state.Get(ctx, key)
+						if e == nil && entry.Revision() >= observedRevision && bytes.Equal(entry.Value(), original) {
+							next, updateErr := state.Update(ctx, key, []byte(`{"error":"corrupt projection"}`), entry.Revision())
+							if updateErr == nil {
+								corruptRevision = next
+								break
+							}
+						}
+						time.Sleep(20 * time.Millisecond)
+					}
+					if corruptRevision == 0 {
+						t.Fatal("could not conditionally seed corrupt projection", ctx.Err())
+					}
+					restored := false
+					for ctx.Err() == nil {
+						value, e := state.Get(ctx, key)
+						if e == nil && value.Revision() > corruptRevision && bytes.Equal(value.Value(), original) {
+							observedRevision = value.Revision()
+							restored = true
+							break
+						}
+						time.Sleep(20 * time.Millisecond)
+					}
+					if !restored {
+						t.Fatal("CLI audit did not restore corrupt projection", ctx.Err())
+					}
 				}
 			}
 			afterRecords, _, err := graph.ReadExisting(ctx, h.Type, h.ID, h.InvSeq)
