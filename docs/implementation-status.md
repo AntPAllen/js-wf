@@ -1,5 +1,11 @@
 # Implementation status against the supplied plan
 
+## Full frozen race watchdog failure; current full normal started — 2026-10-09
+
+The older `fca8264` full race campaign terminated at its 180-minute watchdog after 89/149 families × 1,000 completed bodies and 126 top-level passes. No race warning or ordinary assertion failure preceded the panic; missing tests remain unqualified. [Raw terminal evidence and executed review](scale/graph-current-qualification-2026-10-09/complete-race1000-timeout/README.md) verify 3,106 unchanged Git inputs and the retained race binary. The complete normal result at that source remains separately accepted.
+
+The queued current `e5018af` 151-family/all-810-pin normal campaign started at 15:14:46 UTC after those observed processes terminated. Terminal acceptance and independent review remain pending; no earlier job was restarted. Complete current race/extended qualification, arbitrary operation permutations and every original runtime/native/fault/scale/soak/drain/migration/adoption/release gate remain open. Public continuation admission and production collection remain disabled.
+
 ## Complete current 151-family qualification queued — 2026-10-09
 
 A clean isolated `e5018af` checkout contains all 3,180 qualification inputs, including the native adapter fixes/model, Await integration and directed Cartesian coverage. Its full normal campaign is queued behind the authoritatively observed older race processes and will start exactly once after they terminate. It requires all 151 families × 1,000 completed bodies, all 810 pins and the complete compiled test inventory under the unchanged standard normal watchdog. [Launch/process evidence and exact scope](scale/graph-current151-qualification-2026-10-09/README.md).

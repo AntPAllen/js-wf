@@ -1,0 +1,7 @@
+# Complete frozen race campaign fails the 180-minute watchdog
+
+Frozen `fca8264` terminates with supervisor/test2json exit 1 at 10,800.19 seconds. The test process panics with `test timed out after 3h0m0s` during `TestSeededSignalPipelineReplay`. Exactly 89 of the required 149 seeded families completed their 1,000 contiguous bodies; 126 top-level groups passed. The remaining tests and complete suite are unqualified.
+
+[Executed independent review](executed-review.py) verifies 3,106 unchanged inputs against exact Git blobs, the retained race binary SHA256/build metadata, actual nonzero exits, all 89 complete seed markers and the terminal panic/action. No race warning or ordinary assertion failure precedes the watchdog. This does not establish the cause of the longer campaign or excuse the incomplete qualification. Raw JSON events, commands, execution cwd, stderr, elapsed/CPU report, compiled inventories and source before/after are retained here; the binary remains in the original external run root.
+
+The earlier complete frozen normal result remains accepted separately. Later CLI/Await/native coordinator/mutation-model/Cartesian changes are excluded from this failed source. The complete current 151-family normal campaign started after these processes terminated; it has no terminal acceptance yet. No earlier job was restarted. Current full race/extended and every original native/runtime/scale/soak/drain/migration/adoption/release requirement remain open.

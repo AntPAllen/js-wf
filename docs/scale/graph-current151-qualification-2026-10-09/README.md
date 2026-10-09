@@ -1,4 +1,4 @@
-# Complete current 151-family qualification queued — 2026-10-09
+# Complete current 151-family normal qualification running — 2026-10-09
 
 Frozen source is `e5018af`, isolated at `/home/exedev/js-wf-current151-qualification`. All 3,180 selected Go/Python/workflow/regression inputs are materialized in a clean sparse checkout. This includes explicit CLI cursor/Await handling, the native witness read coordinator and physical mutation retry, all 336 directed Signal combinations, and the new native adapter model.
 
@@ -6,4 +6,4 @@ Frozen source is `e5018af`, isolated at `/home/exedev/js-wf-current151-qualifica
 
 The full runner requires all 151 seeded families × 1,000 contiguous completed bodies, every compiled ordinary test (including the directed Cartesian group), all 810 saved regressions and only the two documented trace-utility skips. The standard 300-minute normal CPU watchdog, transport virtual deadlines, faults, retries and assertions remain unchanged. Root: `/home/exedev/js-wf-tier1-full151-normal1000-20261009`.
 
-Normal terminal evidence and independent review remain pending. A complete current race campaign is not yet started; the older full 149-family race and already accepted Cartesian race retain separate earlier sources. Extended campaigns and all original native/runtime/fault/scale/actual-24-hour/physical-drain/migration/adoption/release requirements remain open. Public continuation admission and production collection remain disabled.
+The observed older processes terminated and this normal campaign started at 15:14:46 UTC. Its live test process is running; normal terminal evidence and independent review remain pending. A complete current race campaign is not yet started; the older full 149-family race and already accepted Cartesian race retain separate earlier sources. Extended campaigns and all original native/runtime/fault/scale/actual-24-hour/physical-drain/migration/adoption/release requirements remain open. Public continuation admission and production collection remain disabled.
