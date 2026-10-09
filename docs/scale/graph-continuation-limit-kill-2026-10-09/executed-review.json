@@ -1,0 +1,28 @@
+{
+  "production_revision": "d66f65e3159b78443a3a356029ce263bf700af67",
+  "test_sha256": "c78ed4ecb139507dcae4614ba2028fec4d1788e2f9c61d3b759b57769417da61",
+  "native_R3_domain_archive_SIGKILL_cases": {
+    "after_signal": {
+      "recovery_seconds": 16.541531554,
+      "exact_ack_sequence": 4,
+      "exact_ack_delivery": 2,
+      "terminal_epoch": 34,
+      "held_epoch": 30
+    },
+    "after_completion": {
+      "recovery_seconds": 15.119448514,
+      "exact_ack_sequence": 4,
+      "exact_ack_delivery": 2,
+      "terminal_epoch": 34,
+      "held_epoch": 29
+    },
+    "after_failed": {
+      "recovery_seconds": 12.564665784,
+      "exact_ack_sequence": 4,
+      "exact_ack_delivery": 2,
+      "terminal_epoch": 29,
+      "held_epoch": 29
+    }
+  },
+  "scope": "Three worker process SIGKILL cuts, native R3 domain, private 16-entry budget, real partition redelivery and strict <30s. Servers remained live; no server/VM/storage fault or actual 100000-entry boundary claim."
+}

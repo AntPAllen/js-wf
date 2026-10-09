@@ -1,0 +1,203 @@
+[
+  {
+    "epoch": 1,
+    "index": 0,
+    "kind": "Started",
+    "payload": {
+      "input_sha256": "74234e98afe7498fb5daf1f36ac2d78acc339464f950703b8c019892f982b90b"
+    },
+    "worker_id": "graph-limit-killed",
+    "sequence": 1
+  },
+  {
+    "epoch": 1,
+    "index": 1,
+    "kind": "StepRequested",
+    "payload": {
+      "kind": "state_set",
+      "name": "value",
+      "input_hash": "4a44dc15364204a80fe80e9039455cc1608281820fe2b24f1e5233ade6af1dd5",
+      "fire_at": "0001-01-01T00:00:00Z"
+    },
+    "worker_id": "graph-limit-killed",
+    "sequence": 2
+  },
+  {
+    "epoch": 1,
+    "index": 2,
+    "kind": "StepCompleted",
+    "payload": {
+      "result": {
+        "found": true,
+        "value": 10
+      }
+    },
+    "worker_id": "graph-limit-killed",
+    "sequence": 3
+  },
+  {
+    "epoch": 1,
+    "index": 3,
+    "kind": "StepRequested",
+    "payload": {
+      "kind": "checkpoint",
+      "name": "middle_v1",
+      "input_hash": "4a44dc15364204a80fe80e9039455cc1608281820fe2b24f1e5233ade6af1dd5",
+      "fire_at": "0001-01-01T00:00:00Z"
+    },
+    "worker_id": "graph-limit-killed",
+    "sequence": 4
+  },
+  {
+    "epoch": 1,
+    "index": 4,
+    "kind": "StepCompleted",
+    "payload": {
+      "checkpoint_metadata_hash": "b96198b350def71e29d3133a579949e27528b71e83875634916b5ba95879b0b2",
+      "checkpoint_metadata_ref": "step-result-b96198b350def71e29d3133a579949e27528b71e83875634916b5ba95879b0b2",
+      "result_hash": "f15f8a5478e7ac8d05cc31d4839772a5d48d10928a8cbcf725b03926dc9cc779",
+      "result_ref": "step-result-f15f8a5478e7ac8d05cc31d4839772a5d48d10928a8cbcf725b03926dc9cc779"
+    },
+    "worker_id": "graph-limit-killed",
+    "sequence": 5
+  },
+  {
+    "epoch": 1,
+    "index": 5,
+    "kind": "Suspended",
+    "payload": {
+      "waiting_on": "continuation:middle_v1"
+    },
+    "worker_id": "graph-limit-killed",
+    "sequence": 6
+  },
+  {
+    "epoch": 13,
+    "index": 6,
+    "kind": "StepRequested",
+    "payload": {
+      "kind": "state_get",
+      "name": "value",
+      "input_hash": "74234e98afe7498fb5daf1f36ac2d78acc339464f950703b8c019892f982b90b",
+      "fire_at": "0001-01-01T00:00:00Z"
+    },
+    "worker_id": "graph-limit-killed",
+    "sequence": 7
+  },
+  {
+    "epoch": 13,
+    "index": 7,
+    "kind": "StepCompleted",
+    "payload": {
+      "result": {
+        "found": true,
+        "value": 10
+      }
+    },
+    "worker_id": "graph-limit-killed",
+    "sequence": 8
+  },
+  {
+    "epoch": 13,
+    "index": 8,
+    "kind": "StepRequested",
+    "payload": {
+      "kind": "checkpoint",
+      "name": "finish_v1",
+      "input_hash": "4a44dc15364204a80fe80e9039455cc1608281820fe2b24f1e5233ade6af1dd5",
+      "fire_at": "0001-01-01T00:00:00Z"
+    },
+    "worker_id": "graph-limit-killed",
+    "sequence": 9
+  },
+  {
+    "epoch": 13,
+    "index": 9,
+    "kind": "StepCompleted",
+    "payload": {
+      "checkpoint_metadata_hash": "53984011702747c080606a64f7d3bfb2143b55cfc485b94168da6fe8ed167cad",
+      "checkpoint_metadata_ref": "step-result-53984011702747c080606a64f7d3bfb2143b55cfc485b94168da6fe8ed167cad",
+      "result_hash": "384b84ebf1bb56f9372da02a92e879f352cd668b07b2e24796c4d95aabe8fdc6",
+      "result_ref": "step-result-384b84ebf1bb56f9372da02a92e879f352cd668b07b2e24796c4d95aabe8fdc6"
+    },
+    "worker_id": "graph-limit-killed",
+    "sequence": 10
+  },
+  {
+    "epoch": 13,
+    "index": 10,
+    "kind": "Suspended",
+    "payload": {
+      "waiting_on": "continuation:finish_v1"
+    },
+    "worker_id": "graph-limit-killed",
+    "sequence": 11
+  },
+  {
+    "epoch": 25,
+    "index": 11,
+    "kind": "StepRequested",
+    "payload": {
+      "kind": "signal",
+      "name": "gate",
+      "input_hash": "",
+      "fire_at": "0001-01-01T00:00:00Z"
+    },
+    "worker_id": "graph-limit-killed",
+    "sequence": 12
+  },
+  {
+    "epoch": 25,
+    "index": 12,
+    "kind": "Suspended",
+    "payload": {
+      "waiting_on": "signal:gate"
+    },
+    "worker_id": "graph-limit-killed",
+    "sequence": 13
+  },
+  {
+    "epoch": 30,
+    "index": 13,
+    "kind": "SignalConsumed",
+    "payload": {
+      "sig_seq": 1,
+      "name": "gate",
+      "ref": "graph-signal-b5bea41b6c623f7c09f1bf24dcae58ebab3c0cdd90ad966bc43a45b44867e12b",
+      "hash": "b5bea41b6c623f7c09f1bf24dcae58ebab3c0cdd90ad966bc43a45b44867e12b",
+      "canonical_signal": {
+        "index": 0,
+        "token": "25556c0499229190726a69d166acafff"
+      }
+    },
+    "worker_id": "graph-limit-killed",
+    "sequence": 14
+  },
+  {
+    "epoch": 34,
+    "index": 14,
+    "kind": "StepCompleted",
+    "payload": {
+      "signal_seq": 1
+    },
+    "worker_id": "graph-limit-successor",
+    "sequence": 15
+  },
+  {
+    "epoch": 34,
+    "index": 15,
+    "kind": "Failed",
+    "payload": {
+      "inv_seq": 1,
+      "error": "journal exceeds 100000 entries",
+      "limit_request": {
+        "kind": "run",
+        "name": "must_not_run",
+        "input_hash": "4a44dc15364204a80fe80e9039455cc1608281820fe2b24f1e5233ade6af1dd5",
+        "fire_at": "0001-01-01T00:00:00Z"
+      }
+    },
+    "worker_id": "graph-limit-successor",
+    "sequence": 16
+  }
+]
