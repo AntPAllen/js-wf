@@ -1,5 +1,11 @@
 # Implementation status against the supplied plan
 
+## Graph prefix relocation primitive — 2026-10-09
+
+An original-head archive-and-relocate primitive now copies every live payload under fresh physical grants, appends the prefix to an `archive` forest and reindexes the suffix from zero. Commit validates record bytes, payload hashes, grants, inherited archive frontier, other forests and preserved reader snapshots before CAS. Seeded component controls cover successive compaction, old-reader survival, actual collection of original receipts, append afterward and complete retirement. Fault controls reject stale heads, uncertain uploads/readback and revoked grants. [Component evidence and limitations](scale/graph-prefix-relocation-2026-10-09/README.md).
+
+This is a protocol foundation. Journal logical-offset/cursor integration, checkpoint-triggered compaction, native compaction qualification, history/audit/offline/import/deployment compatibility and public continuation admission remain open. The existing 148-family/748-pin shared qualification excludes this new primitive; every original broader acceptance gate remains required.
+
 ## Bounded canonical continuation resume — 2026-10-09
 
 Continuation deliveries now rebuild records/references from the owned checkpoint and suffix, preserving absolute indices. A bounded, versioned completion-owned metadata object retains child identities, buffered child provenance and canonical consumption progress; restore validates its identity/hash, owned edges and queue bindings against the captured journal count. Native R1/R3-domain race tests complete a stage and terminal duplicate with 131 prefix bodies unreadable, reconstructing one record/three references at index 132 and making zero blocked-prefix reads. SDK partition/signal flows and both live async-child variants pass, including a 700 KB result awaited from a resolved frame or buffered signal after child retirement. [Executed evidence and format limits](scale/graph-bounded-continuation-2026-10-09/README.md). Initial unpublished-pointer discovery can still scan history. Physical prefix compaction, collection/retention migration, full failure/limit/audit/offline/import/v5 deployment and public admission remain open, alongside every original broader qualification gate.
