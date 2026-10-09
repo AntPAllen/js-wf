@@ -28,7 +28,7 @@ func TestGraphOperatorRejectsPartialOrLegacyOnlySelection(t *testing.T) {
 	for _, args := range [][]string{
 		{"-graph-authority-stream", "AUTH", "result", "test", "id"},
 		{"-graph-authority-stream", "AUTH", "-graph-authority-prefix", "wf.graph", "-graph-object-bucket", "OBJECTS", "list"},
-		{"-graph-authority-stream", "AUTH", "-graph-authority-prefix", "wf.graph", "-graph-object-bucket", "OBJECTS", "export-replay", "test", "id"},
+		{"-graph-authority-stream", "AUTH", "-graph-authority-prefix", "wf.graph", "-graph-object-bucket", "OBJECTS", "scan-tombstones"},
 	} {
 		err := run(args, &bytes.Buffer{})
 		if err == nil || !(strings.Contains(err.Error(), "requires graph-authority") || strings.Contains(err.Error(), "migration")) {
@@ -38,6 +38,8 @@ func TestGraphOperatorRejectsPartialOrLegacyOnlySelection(t *testing.T) {
 }
 
 func TestNativeCanonicalGraphOperatorCommands(t *testing.T) {
+	marker := filepath.Join(operatorTempDir(t), "replay-effect")
+	t.Setenv("WF_REPLAY_EFFECT_MARKER", marker)
 	for _, domain := range []string{"", "WFGRAPHOPS"} {
 		count := 1
 		name := "R1"
@@ -196,6 +198,44 @@ func TestNativeCanonicalGraphOperatorCommands(t *testing.T) {
 			if err = json.Unmarshal(journalBytes, &records); err != nil || len(records) == 0 || records[len(records)-1].Kind != journal.Completed {
 				t.Fatal("missing canonical journal", err)
 			}
+			// Replay export must survive source deletion and cannot use legacy blobs.
+			signals, err := js.Stream(ctx, "WF_SIG")
+			if err != nil {
+				t.Fatal(err)
+			}
+			if err = signals.Purge(ctx); err != nil {
+				t.Fatal(err)
+			}
+			if err = js.DeleteObjectStore(ctx, "WF_BLOB"); err != nil {
+				t.Fatal(err)
+			}
+			bundleBytes, err := call("export-replay", typ, "success")
+			if err != nil {
+				t.Fatal(err)
+			}
+			var bundle replayBundle
+			if err = json.Unmarshal(bundleBytes, &bundle); err != nil || !bytes.Equal(bundle.Input, payload) || len(bundle.Objects) == 0 {
+				t.Fatal("canonical replay bundle lost owned data", err)
+			}
+			pluginPath := buildReplayPlugin(t)
+			if _, err = call("-handler-plugin", pluginPath, "-handler-symbol", "GraphSignalWorkflow", "replay", typ, "success"); err != nil {
+				t.Fatal(err)
+			}
+			bundleFile := filepath.Join(operatorTempDir(t), "replay.json")
+			if err = os.WriteFile(bundleFile, bundleBytes, 0600); err != nil {
+				t.Fatal(err)
+			}
+			var offline bytes.Buffer
+			if err = run([]string{"-url", "nats://127.0.0.1:1", "-handler-plugin", pluginPath, "-handler-symbol", "GraphSignalWorkflow", "-replay-bundle", bundleFile, "replay"}, &offline); err != nil {
+				t.Fatal(err)
+			}
+			if _, err = os.Stat(marker); !os.IsNotExist(err) {
+				t.Fatal("offline replay executed an effect", err)
+			}
+			var replayed replayReport
+			if err = json.Unmarshal(offline.Bytes(), &replayed); err != nil || replayed.Status != "completed" || !bytes.Equal(replayed.Result, payload) {
+				t.Fatal("offline canonical replay differs", err)
+			}
 			if _, err = call("describe", typ, "success"); err != nil {
 				t.Fatal(err)
 			}
@@ -271,7 +311,7 @@ func TestNativeCanonicalGraphOperatorCommands(t *testing.T) {
 			if domain != "" && (observed.Load() == 0 || wrong.Load() != 0) {
 				t.Fatal("domain routing", observed.Load(), wrong.Load())
 			}
-			t.Log(fmt.Sprintf("canonical CLI large Start/Signal/result, forged mirror ignored, history/scans, dry-run/apply terminal restoration, cancellation, purge and effect one; domain=%s requests=%d wrong=%d", domain, observed.Load(), wrong.Load()))
+			t.Log(fmt.Sprintf("canonical CLI large Start/Signal/result, forged mirror ignored, canonical online/offline replay after source/blob deletion, history/scans, dry-run/apply terminal restoration, cancellation, purge and effect one; domain=%s requests=%d wrong=%d", domain, observed.Load(), wrong.Load()))
 		})
 	}
 }

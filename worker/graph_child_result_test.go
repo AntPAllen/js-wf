@@ -305,6 +305,25 @@ func testNativeGraphChildResultTransferAndReplay(t *testing.T, canonical bool) {
 				if effects.Load() != 1 {
 					t.Fatal("child reran", effects.Load())
 				}
+				if canonical {
+					parentInput, err := inv.GetLastMsgForSubject(ctx, identity.InvocationSubject("parent", "transfer"))
+					if err != nil {
+						t.Fatal(err)
+					}
+					snapshot, err := ReadGraphReplaySnapshot(ctx, graph, "parent", "transfer", parentInput)
+					if err != nil {
+						t.Fatal("export parent after child collection", err)
+					}
+					encoded, err := json.Marshal(snapshot.Records)
+					if err != nil {
+						t.Fatal(err)
+					}
+					replayed, err := wf.Replay(encoded, func(c *wf.Context) (json.RawMessage, error) { return handlers["parent"](c, snapshot.Input) }, wf.ReplayOptions{Type: "parent", ID: "transfer", InvSeq: handle.InvSeq, Objects: snapshot.Objects})
+					if err != nil || !bytes.Equal(replayed, []byte(`42`)) {
+						t.Fatal("offline parent replay after child collection", err)
+					}
+					t.Log("canonical snapshot and offline parent replay survived child/source collection")
+				}
 				legacy, err := js.Stream(ctx, "WF_JRN")
 				if err != nil {
 					t.Fatal(err)

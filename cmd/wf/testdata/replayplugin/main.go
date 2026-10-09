@@ -157,3 +157,17 @@ var ChangedContinuation = worker.WorkflowDefinition{Handler: testworkflow.Defini
 		return nil, err
 	},
 }}
+
+func GraphSignalWorkflow(c *wf.Context, _ json.RawMessage) (json.RawMessage, error) {
+	value, err := wf.AwaitSignal(c, "go")
+	if err != nil {
+		return nil, err
+	}
+	_, err = wf.Run(c, "once", 0, func(context.Context) (int, error) {
+		if marker := os.Getenv("WF_REPLAY_EFFECT_MARKER"); marker != "" {
+			_ = os.WriteFile(marker, []byte("effect ran"), 0600)
+		}
+		return -1, nil
+	})
+	return json.RawMessage(value), err
+}

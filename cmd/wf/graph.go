@@ -2,9 +2,15 @@ package main
 
 import (
 	"context"
+	"crypto/sha256"
+	"encoding/hex"
 	"encoding/json"
+	"strconv"
+
 	"fmt"
+	"github.com/nats-io/nats.go"
 	"io"
+	"js-wf/worker"
 	"os"
 
 	"github.com/nats-io/nats.go/jetstream"
@@ -95,4 +101,34 @@ func readGraphCLIHistory(ctx context.Context, js jetstream.JetStream, graph *jou
 		records = append(records, record.Record)
 	}
 	return
+}
+
+func fetchGraphReplayBundle(ctx context.Context, js jetstream.JetStream, graph *journal.GraphStore, typ, id string) (replayBundle, error) {
+	if err := identity.Validate(typ, id); err != nil {
+		return replayBundle{}, err
+	}
+	inv, err := js.Stream(ctx, "WF_INV")
+	if err != nil {
+		return replayBundle{}, err
+	}
+	source, err := inv.GetLastMsgForSubject(ctx, identity.InvocationSubject(typ, id))
+	if err != nil {
+		return replayBundle{}, err
+	}
+	snapshot, err := worker.ReadGraphReplaySnapshot(ctx, graph, typ, id, source)
+	if err != nil {
+		return replayBundle{}, err
+	}
+	digest := sha256.Sum256(snapshot.Input)
+	bundle := replayBundle{Type: typ, ID: id, InvSeq: source.Sequence, Input: snapshot.Input, InputHash: hex.EncodeToString(digest[:]), Journal: snapshot.Records, Objects: snapshot.Objects}
+	if pending := snapshot.PendingSignal; pending != nil {
+		// The graph queue and terminal ownership authorize these replay inputs;
+		// source headers are synthesized, not copied from a legacy stream.
+		header := nats.Header{}
+		header.Set("Wf-Inv-Seq", strconv.FormatUint(source.Sequence, 10))
+		header.Set("Wf-Signal-Ref", pending.Ref)
+		header.Set("Wf-Input-SHA256", pending.Hash)
+		bundle.PendingSignal = &replayPendingSignal{Sequence: pending.Sequence, Subject: "wf.sig." + typ + "." + id + "." + pending.Name, Header: header}
+	}
+	return bundle, nil
 }

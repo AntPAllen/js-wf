@@ -80,7 +80,7 @@ func runWithJetStreamOptions(args []string, out io.Writer, options ...jetstream.
 	}
 	if graphConfig != nil {
 		switch command[0] {
-		case "project", "list", "lag", "journal-capacity", "export-replay", "replay", "sweep-tombstones", "scan-tombstones", "tombstone-loop":
+		case "project", "list", "lag", "journal-capacity", "sweep-tombstones", "scan-tombstones", "tombstone-loop":
 			return fmt.Errorf("graph runtime migration for %s is incomplete", command[0])
 		}
 	}
@@ -261,7 +261,13 @@ func runWithJetStreamOptions(args []string, out io.Writer, options ...jetstream.
 		if len(command) != 3 {
 			return errors.New("usage: wf export-replay type id")
 		}
-		bundle, err := fetchReplayBundle(ctx, js, command[1], command[2])
+		var bundle replayBundle
+		var err error
+		if graph != nil {
+			bundle, err = fetchGraphReplayBundle(ctx, js, graph, command[1], command[2])
+		} else {
+			bundle, err = fetchReplayBundle(ctx, js, command[1], command[2])
+		}
 		if err != nil {
 			return err
 		}
@@ -270,7 +276,17 @@ func runWithJetStreamOptions(args []string, out io.Writer, options ...jetstream.
 		if len(command) != 3 || *replayPlugin == "" || *replaySymbol == "" {
 			return errors.New("usage: wf -handler-plugin path [-handler-symbol Workflow] replay type id")
 		}
-		report, err := replayInvocation(ctx, js, command[1], command[2], *replayPlugin, *replaySymbol)
+		var report replayReport
+		var err error
+		if graph != nil {
+			var bundle replayBundle
+			bundle, err = fetchGraphReplayBundle(ctx, js, graph, command[1], command[2])
+			if err == nil {
+				report, err = runReplayBundle(bundle, *replayPlugin, *replaySymbol)
+			}
+		} else {
+			report, err = replayInvocation(ctx, js, command[1], command[2], *replayPlugin, *replaySymbol)
+		}
 		if err != nil {
 			return err
 		}

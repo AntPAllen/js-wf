@@ -25,11 +25,12 @@ Supported commands:
 | `purge type id` | Graph-aware retention purge with `-grace`. |
 | `describe type id` | Return invocation sequence and a pinned canonical journal snapshot. |
 | `export-journal type id` | Export canonical journal records from that snapshot. |
+| `export-replay type id`, `replay type id` | Export owned replay inputs or verify a handler offline; see [canonical replay export](../graph-replay-export-2026-10-09/README.md). |
 | `scan-start`, `scan-signal`, `scan-terminal`, `scan-timer`, `scan-suspended` | One bounded manual repair scan; dry-run unless `-apply` is supplied. |
 
 For Start and Signal, `-input-file FILE` replaces the final JSON operand. Files must contain valid JSON and are limited to 64 MiB. SDK/storage limits still apply. Canonical results and journal reads do not trust `WF_STATE` or fall back to `WF_JRN`. Exported journal payload references remain references; this export is not a self-contained replay bundle.
 
-Graph visibility/project/list/lag, legacy journal capacity, replay/export-replay and tombstone sweep/scan/loop commands report that their migration is incomplete. Assignment commands remain available. Legacy mode remains the default when graph flags are absent. Continuation, fallback timers, imports, production GC and complete deployment/adoption remain open.
+Graph visibility/project/list/lag, legacy journal capacity and tombstone sweep/scan/loop commands report that their migration is incomplete. Assignment commands remain available. Legacy mode remains the default when graph flags are absent. Continuation, fallback timers, imports, production GC and complete deployment/adoption remain open.
 
 ## Component evidence
 

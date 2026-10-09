@@ -1,5 +1,11 @@
 # Implementation status against the supplied plan
 
+## Canonical graph replay export and offline verification — 2026-10-09
+
+Graph-configured `wf export-replay` and `replay` now copy verified Start input, canonical journal records and runtime-declared owned payloads from one pinned generation. Reads validate consumed queue bindings and parent-owned child provenance, terminal kind/generation/result integrity and alias hashes; unreadable/forged data or uncertain reader release returns no partial snapshot. Rejected Signal drains use canonical queue/terminal ownership rather than native source headers. Offline bundles need no server connection.
+
+Component normal/race controls cover native R1/R3 domain online/offline replay after Signal-source and legacy-blob deletion, a no-effect marker, six deterministic read/uncertainty/forgery cases, and eight native child-transfer variants exported/replayed after child/source collection and later physical drain. Existing operator default/domain and manual repair/cancellation/purge checks remain. [Executed component evidence and exact scope](scale/graph-replay-export-2026-10-09/README.md). These are development controls, not frozen complete or extended qualification. The accepted normal and still-running race suites at `9a1ccdc` exclude this exporter. Visibility, continuation/snapshot/import/deployment/production-GC adoption and every original remaining runtime/native/scale/actual24h/million physical-drain/default-adoption/release requirement remain required.
+
 ## Manual canonical terminal repair verified — 2026-10-09
 
 Native R1/R3 domain controls now also delete a terminal projection, require `scan-terminal` dry-run to leave it absent, then apply the scan and require exact canonical terminal metadata restoration, unchanged journal and one effect. Normal/race pass; the initial incorrect inline-result fixture assertion and its failure remain retained. [Component evidence](scale/graph-operator-cli-2026-10-09/README.md). This verifies the operator apply path without qualifying the complete current race/extended suites or any remaining original runtime/native/scale/soak/drain/adoption/release gate.
