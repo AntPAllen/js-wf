@@ -1,0 +1,120 @@
+{
+  "version": 3,
+  "seed": 2,
+  "workload": "native_authority_witness",
+  "step_limit": 100000,
+  "decisions": [
+    {
+      "at_ms": 0,
+      "enabled": [
+        "blob/absent/drop",
+        "blob/absent/exhaustion",
+        "blob/absent/healthy",
+        "blob/absent/lost",
+        "blob/absent/replacement",
+        "blob/absent/witness",
+        "blob/present/drop",
+        "blob/present/exhaustion",
+        "blob/present/healthy",
+        "blob/present/lost",
+        "blob/present/replacement",
+        "blob/present/witness",
+        "root/absent/drop",
+        "root/absent/exhaustion",
+        "root/absent/healthy",
+        "root/absent/lost",
+        "root/absent/replacement",
+        "root/absent/witness",
+        "root/present/drop",
+        "root/present/exhaustion",
+        "root/present/healthy",
+        "root/present/lost",
+        "root/present/replacement",
+        "root/present/witness"
+      ],
+      "chosen": "blob/present/replacement"
+    }
+  ],
+  "transport": [
+    {
+      "at_ms": 0,
+      "operation": "native_authority_get",
+      "subject": "model.authority.blob.6f06a6f35d77e0ca43cccbda11ac3b6d4c63887eabda54d9d77f31e4a3e0e722",
+      "outcome": "absent"
+    },
+    {
+      "at_ms": 0,
+      "operation": "native_authority_mutation",
+      "subject": "model.authority.blob.6f06a6f35d77e0ca43cccbda11ac3b6d4c63887eabda54d9d77f31e4a3e0e722",
+      "sequence": 1,
+      "data_sha256": "68560ce86c189a31232db84324f45bc1b9cdc45df5ce966b84c5bf6e60257b82",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "native_authority_get",
+      "subject": "model.authority.blob.6f06a6f35d77e0ca43cccbda11ac3b6d4c63887eabda54d9d77f31e4a3e0e722",
+      "sequence": 1,
+      "data_sha256": "68560ce86c189a31232db84324f45bc1b9cdc45df5ce966b84c5bf6e60257b82",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "native_authority_get",
+      "subject": "model.authority.blob.6f06a6f35d77e0ca43cccbda11ac3b6d4c63887eabda54d9d77f31e4a3e0e722",
+      "sequence": 1,
+      "data_sha256": "68560ce86c189a31232db84324f45bc1b9cdc45df5ce966b84c5bf6e60257b82",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "native_authority_mutation",
+      "subject": "model.authority.blob.6f06a6f35d77e0ca43cccbda11ac3b6d4c63887eabda54d9d77f31e4a3e0e722",
+      "expected": 1,
+      "sequence": 2,
+      "data_sha256": "1f96d90a2d3f4498a1d51c9b16e7d47e135da487c864953c6f3aefa83b11cc4f",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "native_authority_mutation",
+      "subject": "model.authority.blob.6f06a6f35d77e0ca43cccbda11ac3b6d4c63887eabda54d9d77f31e4a3e0e722",
+      "expected": 1,
+      "sequence": 2,
+      "data_sha256": "1f96d90a2d3f4498a1d51c9b16e7d47e135da487c864953c6f3aefa83b11cc4f",
+      "outcome": "conflict"
+    },
+    {
+      "at_ms": 0,
+      "operation": "native_authority_get",
+      "subject": "model.authority.blob.6f06a6f35d77e0ca43cccbda11ac3b6d4c63887eabda54d9d77f31e4a3e0e722",
+      "sequence": 2,
+      "data_sha256": "1f96d90a2d3f4498a1d51c9b16e7d47e135da487c864953c6f3aefa83b11cc4f",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "native_authority_get",
+      "subject": "model.authority.blob.6f06a6f35d77e0ca43cccbda11ac3b6d4c63887eabda54d9d77f31e4a3e0e722",
+      "sequence": 2,
+      "data_sha256": "1f96d90a2d3f4498a1d51c9b16e7d47e135da487c864953c6f3aefa83b11cc4f",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "native_authority_witness",
+      "subject": "model.authority.blob.6f06a6f35d77e0ca43cccbda11ac3b6d4c63887eabda54d9d77f31e4a3e0e722",
+      "expected": 2,
+      "sequence": 3,
+      "data_sha256": "1f96d90a2d3f4498a1d51c9b16e7d47e135da487c864953c6f3aefa83b11cc4f",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "check_native_authority_witness",
+      "expected": 1,
+      "sequence": 2,
+      "outcome": "blob/present/replacement/attempts=2/witnesses=0"
+    }
+  ]
+}

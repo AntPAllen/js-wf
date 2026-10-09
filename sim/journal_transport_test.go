@@ -547,6 +547,8 @@ func replayTrace(loaded Trace) (Trace, error) {
 		replayed, err = runGraphJournal(loaded.Seed, &loaded)
 	case "graph_checkpoint_compaction":
 		replayed, err = runGraphCompaction(loaded.Seed, &loaded)
+	case "native_authority_witness":
+		replayed, err = runNativeAuthority(loaded.Seed, &loaded)
 	case "graph_await_contention":
 		replayed, err = runGraphAwaitContention(loaded.Seed, &loaded)
 	case "graph_canonical_signal_runtime_combined":
