@@ -1,5 +1,9 @@
 # JetStream Durable Workflow Runtime — Implementation Plan
 
+## Complete current deterministic qualification started — 2026-10-09
+
+Full normal and race campaigns now run against isolated frozen `fca8264`, including checkpoint compaction and the authority guard. Each requires all 149 families × 1,000 contiguous completed bodies and all 762 pins. Terminal verdicts and independent review remain pending; a normal runner working-directory mistake was explicitly stopped and preserved before correction. [Retained jobs, exact scope and interrupted evidence](scale/graph-current-qualification-2026-10-09/README.md). Extended campaigns and every original remaining native/runtime/scale/actual24h/drain/adoption/release requirement remain open.
+
 ## Validate complete authority before metadata decisions — 2026-10-09
 
 New v6 malformed-authority controls exposed metadata-only acceptance of invalid publication tokens, archive structures and retained reader snapshots. Journal observation now validates the full authority image through the protocol snapshot codec before interpreting lifecycle/cursor hints. Seventeen malformed images across Inspect/Begin/Open/Append/Compact fail with `ErrGap` and zero reader CAS, grant reads or payload reads; positive controls still permit valid metadata and reach reader acquisition. [Original failures, executed tests and scope](scale/graph-archive-validation-2026-10-09/README.md).
