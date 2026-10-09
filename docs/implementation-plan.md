@@ -1,10 +1,16 @@
 # JetStream Durable Workflow Runtime — Implementation Plan
 
+## Retry native mutations only across unchanged read witnesses — 2026-10-09
+
+A controlled real-server baseline reproduced four R1/R3 root/blob failures caused solely by intervening physical read witnesses. Native mutations now retry definite server CAS rejection only when fresh complete authority still equals the original image, including initial logical absence; peer mutation and unknown outcomes stop. The same prepared logical revision is retained, with at most sixteen publications and the original context. All twelve witness/replacement/absence cases and the complete authority package pass under race (66 groups, 205.507 s); separately appended exhaustion/uncertain-error controls pass in 1.286 s. [Baseline, observed source, raw evidence and executed review](scale/graph-native-mutation-witness-2026-10-09/README.md).
+
+The matching default four-CPU client/operator/worker CLI retest is live against this fix. Its prior read-coordination-only retest failed; the worker deadline remains a qualification requirement. This does not attribute every earlier timeout to witness contention. Full current/extended simulation and all original native lifecycle/fault/scale/soak/drain/migration/adoption/release gates remain open; public continuation admission and production collection remain disabled.
+
 ## Coordinate native witness reads without weakening authority — 2026-10-09
 
 A 32-reader stable-authority control reproduced adapter self-contention in real R1/R3 stores, including 14 failed R3 readers with no logical writer. Native authority now serializes witness reads per kind/identity on one adapter while preserving fresh snapshots, quorum witnesses and server mutation CAS. Cancellation does not release another read's gate; mutations and independent subjects still complete while a witness is held, and inactive coordinator entries are removed. [Baseline, source observation, raw controls and executed scope review](scale/graph-native-read-coordination-2026-10-09/README.md).
 
-The complete authority package passes under race (64 top-level groups, 179.702 s). All six v4/v5/v6 × R1/R3 ordinary worker CLI cases pass normally and under race at two Go CPUs, inside the unchanged fixture deadlines. The earlier failed combined campaign used default four-CPU concurrency; its matching retest is live and remains unqualified. This demonstrates a concrete source of contention but does not attribute every earlier Start binding timeout exclusively to it. Full current/extended qualification and every original broader gate remain open; public continuation admission and production collection remain disabled.
+The complete authority package passes under race (64 top-level groups, 179.702 s). All six v4/v5/v6 × R1/R3 ordinary worker CLI cases pass normally and under race at two Go CPUs, inside the unchanged fixture deadlines. The matching default four-CPU read-coordination-only retest terminated with failure in v4 R3, v5 R3, v6 R1 and v6 R3 at unchanged worker deadlines. Its 936 repository inputs are verified against `6df8289`; subsequent physical mutation retry work is excluded. This demonstrates a concrete source of contention but does not attribute every earlier Start binding timeout exclusively to it. Full current/extended qualification and every original broader gate remain open; public continuation admission and production collection remain disabled.
 
 ## Shared Tier-1 Await contention replay and saved corpus — 2026-10-09
 

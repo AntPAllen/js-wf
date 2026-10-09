@@ -1,0 +1,26 @@
+{
+  "package_race": {
+    "command": [
+      "go",
+      "test",
+      "-race",
+      "./internal/graphpublication",
+      "-count=1",
+      "-timeout=10m",
+      "-v"
+    ],
+    "environment": {
+      "GOMAXPROCS": "2",
+      "GOMEMLIMIT": "512MiB"
+    },
+    "working_directory": "/home/exedev/js-wf"
+  },
+  "baseline": {
+    "production_file_revision": "6df82898e70c5cd2a71bea384910f4505df365f6",
+    "test": "TestNativeGraphMutationAcrossReadWitnesses",
+    "scope": "Corrected eight-case fixture before production mutation retry; no complete prelaunch baseline source manifest was captured."
+  },
+  "focused_race": {
+    "scope": "Eight mutation witness/replacement cases plus existing lost mutation reply, read witness and queued read cancellation controls. Precedes the four absence cases."
+  }
+}

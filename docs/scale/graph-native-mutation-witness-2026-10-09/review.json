@@ -1,0 +1,30 @@
+{
+  "verdict": "PASS native physical mutation retry controls and complete authority package race",
+  "compiled_package_repository_inputs_verified": 937,
+  "package_test_source": "Exact captured source; two subsequently appended retry-stop controls qualified separately under race.",
+  "later_cli_repository_inputs_unchanged": 937,
+  "logs": {
+    "focused-race": {
+      "sha256": "ac4fbd2594e906ddb514321232cb681c80eee0a0433bcc9078be67e73e93a1f4",
+      "top_level_passes": 4,
+      "duration": [
+        "8.292s"
+      ]
+    },
+    "package-race": {
+      "sha256": "e4079c5de85e703b09802914c73c163561eaf1092c8c7d00e8569396c543af7a",
+      "top_level_passes": 66,
+      "duration": [
+        "205.507s"
+      ]
+    },
+    "retry-stops-race": {
+      "sha256": "3bb28dfea5269434cb6e576a5b74e1e919437ae6134eab4de2243b91e1616266",
+      "top_level_passes": 1,
+      "duration": [
+        "1.286s"
+      ]
+    }
+  },
+  "scope": "Native adapter only. Matching default-four-CPU combined CLI gate remains pending separately; full current-source simulation and original broader gates remain open."
+}

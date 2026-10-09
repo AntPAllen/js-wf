@@ -272,6 +272,35 @@ func (p *NativeAuthority) publish(ctx context.Context, expected uint64, v author
 	return err
 }
 
+// A read witness advances the physical subject sequence without changing its
+// logical authority. Retry only a definite rejected publication while a fresh
+// snapshot still has the exact original image. A peer mutation or any unknown
+// publication outcome requires the caller to make a new protocol decision.
+func (p *NativeAuthority) publishMutation(ctx context.Context, kind, identity string, previous authorityValue, sequence uint64, next authorityValue) error {
+	canonicalAbsence := func(v authorityValue) authorityValue {
+		if v.Schema == "" {
+			return authorityValue{Schema: authoritySchema, Kind: kind, Identity: identity}
+		}
+		return v
+	}
+	previous = canonicalAbsence(previous)
+	for attempt := 0; attempt < 16; attempt++ {
+		err := p.publish(ctx, sequence, next)
+		if err != ErrConflict || attempt == 15 {
+			return err
+		}
+		fresh, physical, err := p.readSnapshot(ctx, kind, identity)
+		if err != nil {
+			return err
+		}
+		if !reflect.DeepEqual(canonicalAbsence(fresh), previous) {
+			return ErrConflict
+		}
+		sequence = physical
+	}
+	return ErrConflict
+}
+
 func (p *NativeAuthority) ReadRoot(ctx context.Context, destination string) (Root, error) {
 	v, _, err := p.read(ctx, "root", destination)
 	if err != nil {
@@ -310,7 +339,7 @@ func (p *NativeAuthority) CASRoot(ctx context.Context, destination string, head 
 		return Root{}, err
 	}
 	next = cloned
-	err = p.publish(ctx, seq, authorityValue{Schema: authoritySchema, Kind: "root", Identity: destination, Revision: next.Head, Root: &next})
+	err = p.publishMutation(ctx, "root", destination, v, seq, authorityValue{Schema: authoritySchema, Kind: "root", Identity: destination, Revision: next.Head, Root: &next})
 	if err != nil {
 		return Root{}, err
 	}
@@ -368,7 +397,7 @@ func (p *NativeAuthority) CASBlob(ctx context.Context, k string, revision uint64
 		return Record{}, err
 	}
 	next = cloned
-	err = p.publish(ctx, seq, authorityValue{Schema: authoritySchema, Kind: "blob", Identity: k, Revision: revision + 1, Fence: &next})
+	err = p.publishMutation(ctx, "blob", k, v, seq, authorityValue{Schema: authoritySchema, Kind: "blob", Identity: k, Revision: revision + 1, Fence: &next})
 	if err != nil {
 		return Record{}, err
 	}
