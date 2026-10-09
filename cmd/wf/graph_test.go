@@ -204,6 +204,38 @@ func TestNativeCanonicalGraphOperatorCommands(t *testing.T) {
 					t.Fatal(command, err)
 				}
 			}
+			if err = state.Delete(ctx, identity.Key(typ, "success")); err != nil {
+				t.Fatal(err)
+			}
+			if _, err = call("scan-terminal"); err != nil {
+				t.Fatal(err)
+			}
+			if _, err = state.Get(ctx, identity.Key(typ, "success")); !errors.Is(err, jetstream.ErrKeyNotFound) {
+				t.Fatal("dry-run changed absent terminal projection", err)
+			}
+			if _, err = call("-apply", "scan-terminal"); err != nil {
+				t.Fatal(err)
+			}
+			for {
+				entry, getErr := state.Get(ctx, identity.Key(typ, "success"))
+				if getErr == nil {
+					var expected, actual bytes.Buffer
+					if err = json.Compact(&expected, records[len(records)-1].Payload); err != nil {
+						t.Fatal(err)
+					}
+					if err = json.Compact(&actual, entry.Value()); err != nil || !bytes.Equal(actual.Bytes(), expected.Bytes()) {
+						t.Fatal("manual terminal repair differs from canonical outcome", err)
+					}
+					break
+				}
+				if ctx.Err() != nil || !errors.Is(getErr, jetstream.ErrKeyNotFound) {
+					t.Fatal("manual terminal repair failed", getErr, ctx.Err())
+				}
+				time.Sleep(20 * time.Millisecond)
+			}
+			if after, err := call("export-journal", typ, "success"); err != nil || !bytes.Equal(after, journalBytes) {
+				t.Fatal("manual repair changed canonical history", err)
+			}
 			if _, err = call("start", typ, "cancelled", "null"); err != nil {
 				t.Fatal(err)
 			}
@@ -239,7 +271,7 @@ func TestNativeCanonicalGraphOperatorCommands(t *testing.T) {
 			if domain != "" && (observed.Load() == 0 || wrong.Load() != 0) {
 				t.Fatal("domain routing", observed.Load(), wrong.Load())
 			}
-			t.Log(fmt.Sprintf("canonical CLI large Start/Signal/result, forged mirror ignored, history/scans, cancellation, purge and effect one; domain=%s requests=%d wrong=%d", domain, observed.Load(), wrong.Load()))
+			t.Log(fmt.Sprintf("canonical CLI large Start/Signal/result, forged mirror ignored, history/scans, dry-run/apply terminal restoration, cancellation, purge and effect one; domain=%s requests=%d wrong=%d", domain, observed.Load(), wrong.Load()))
 		})
 	}
 }

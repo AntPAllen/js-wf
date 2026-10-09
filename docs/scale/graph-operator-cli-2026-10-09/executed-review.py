@@ -3,6 +3,8 @@ base = pathlib.Path(__file__).resolve().parent
 expected = {
     'normal.jsonl': {'TestGraphOperatorRejectsPartialOrLegacyOnlySelection', 'TestNativeCanonicalGraphOperatorCommands'},
     'legacy-normal.jsonl': {'TestOperatorCommands', 'TestOperatorCommandsInJetStreamDomain'},
+    'manual-repair-corrected-normal.jsonl': {'TestNativeCanonicalGraphOperatorCommands'},
+    'manual-repair-race.jsonl': {'TestNativeCanonicalGraphOperatorCommands'},
     'race.jsonl': {'TestGraphOperatorRejectsPartialOrLegacyOnlySelection', 'TestNativeCanonicalGraphOperatorCommands', 'TestOperatorCommands', 'TestOperatorCommandsInJetStreamDomain'},
 }
 review = {}
@@ -19,6 +21,8 @@ for name, tests in expected.items():
             assert 'TestNativeCanonicalGraphOperatorCommands/' + case in passed
         diagnostics = [r.get('Output','') for r in rows if 'canonical CLI large Start/Signal/result' in r.get('Output','')]
         assert len(diagnostics) == 2 and all('wrong=0' in s for s in diagnostics), name
+        if name.startswith('manual-repair-'):
+            assert all('dry-run/apply terminal restoration' in s for s in diagnostics), name
     review[name] = {'sha256': hashlib.sha256(data).hexdigest(), 'elapsed': terminal[0]['Elapsed'], 'top_level_pass': sorted(tests)}
 review['scope'] = 'Development component checks; no frozen full-suite or extended qualification claim.'
 (base / 'review.json').write_text(json.dumps(review, indent=2) + '\n')

@@ -1,5 +1,9 @@
 # Implementation status against the supplied plan
 
+## Manual canonical terminal repair verified — 2026-10-09
+
+Native R1/R3 domain controls now also delete a terminal projection, require `scan-terminal` dry-run to leave it absent, then apply the scan and require exact canonical terminal metadata restoration, unchanged journal and one effect. Normal/race pass; the initial incorrect inline-result fixture assertion and its failure remain retained. [Component evidence](scale/graph-operator-cli-2026-10-09/README.md). This verifies the operator apply path without qualifying the complete current race/extended suites or any remaining original runtime/native/scale/soak/drain/adoption/release gate.
+
 ## Complete canonical worker normal suite accepted — 2026-10-09
 
 At frozen `9a1ccdc`, the full normal default suite passes 210 groups, all 148 families × 1,000 contiguous seed bodies and all 748 pins in 806.161 s. Executed review verifies 3,057 selected inputs against Git and unchanged before/after, exact coverage and retained binary/events. [Complete normal evidence](scale/graph-worker-cli-2026-10-09/complete-normal1000/). This includes worker CLI recovery changes and excludes subsequent operator CLI work. The separate frozen race suite remains live with terminal review pending. Complete current/extended qualification and all original remaining runtime/native/scale/actual24h/million physical-drain/adoption/release requirements remain required.
