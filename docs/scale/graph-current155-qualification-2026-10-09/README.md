@@ -7,3 +7,9 @@ A clean detached checkout at `1f316a2b0397db6ff84bebe984a4b1428e9c0770` retains 
 The complete normal runner compiles one retained binary, discovers the whole compiled test inventory and static seeded inventory, runs all 1,000 bodies per family/all 835 pins/ordinary groups, retains actual exits and before/after source observations, and invokes the full-suite coverage verifier. Queue acceptance also checks 155,000 completed bodies and all 835 pins. Its 300-minute CPU watchdog and per-workload assertions/domain deadlines are unchanged. This is queued work, not completed qualification. Terminal success plus evidence review remain required.
 
 Current full race/all-trace/extended qualification and all original lifecycle/native/fault/scale/soak/drain/import/migration/default-adoption/release requirements remain open. The existing full151 frozen race remains live; the corrected focused actor result is separately accepted and its supervisor now runs expiry race. No authoritative live attempt was replaced by this queue.
+
+## Queue released and normal campaign started
+
+At 2026-10-09 22:32:46 UTC, the supervisor revalidated the frozen 1f316a2 source/manifest after the focused service became inactive and launched the complete 155-family/835-pin normal campaign. `normal-launch.json` records the capacity and command. The actual runner process is observed live; the full151 race remains active. This is launch evidence, not acceptance, and excludes all later preflight/facade/CLI/scope/fallback/156th-family/envelope changes.
+
+The focused expiry family has raw terminal PASS, an actual exit-zero supervisor record and 1,000 completed bodies at frozen retained e971d01 in 3,915.68 seconds. Independent review of that expiry acceptance and its post-launch source-observation limitation is pending; the supervisor summary alone is not accepted as full qualification.

@@ -1,5 +1,9 @@
 # Implementation status against the supplied plan
 
+## Frozen full155 normal campaign started; expiry race terminal pending review — 2026-10-09
+
+The systemd queue released at 22:32:46 UTC after the focused chain became inactive. Its actual runner is live with the revalidated frozen 1f316a2 155-family/835-pin source; [launch controls and scope](scale/graph-current155-qualification-2026-10-09/README.md). The expiry family at retained e971d01 records raw PASS, 1,000 completed bodies and actual exit zero in 3,915.68 seconds, but independent acceptance review is pending. Full151 race is still active. These older source cuts exclude all later changes, including the current 156th family and envelope guard; complete current qualification and all original broader gates remain open.
+
 ## Checkpoint envelopes reject ambiguous typed fields; native qualification partial — 2026-10-09
 
 A read-only old-decoder overlay reproduces five matching-hash checkpoint ambiguity cases. Frame and worker provenance restore now reject duplicate decoded keys, numeric map-key aliases and case-aliased typed fields, preserving ordered/reordered JSON, whitespace, nullable state and opaque user values. Format/SDK controls pass race (2.976/1.085 seconds) and metadata controls pass (1.085 seconds). [Revised negative control, contract corrections and exact results](scale/checkpoint-canonical-admission-2026-10-09/README.md). Native R1 materialized-reference and SDK R1/R3 controls pass, but R3 materialized-reference recovery still misses its unchanged two-minute fixture deadline under GOMAXPROCS 1 and 4; the latter package watchdog also interrupts SDK R3. Those failures remain unqualified, with no sole CPU or NATS cause inferred. No further repeated native run or deadline relaxation was made. Inventory stays 156/841; public admission/collection remain off and all original broader/current-source gates stay open.
