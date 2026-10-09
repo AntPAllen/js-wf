@@ -1,0 +1,21 @@
+=== RUN   TestNativeGraphCheckpointMaterializedReferences
+=== RUN   TestNativeGraphCheckpointMaterializedReferences/R1
+    graph_checkpoint_test.go:81: CHECKPOINT_PHASE phase=cluster_admission elapsed_ms=0 duration_ms=0 sdk_requests=0 delta_sdk_requests=0 remaining_ms=119999
+    graph_checkpoint_test.go:81: CHECKPOINT_PHASE phase=provision_and_open elapsed_ms=494 duration_ms=494 sdk_requests=172 delta_sdk_requests=172 remaining_ms=119505
+    graph_checkpoint_test.go:81: CHECKPOINT_PHASE phase=initial_owned_result elapsed_ms=1335 duration_ms=840 sdk_requests=472 delta_sdk_requests=300 remaining_ms=118664
+    graph_checkpoint_test.go:81: CHECKPOINT_PHASE phase=prefix_padding_1_16 elapsed_ms=11592 duration_ms=10257 sdk_requests=3896 delta_sdk_requests=3424 remaining_ms=108407
+    graph_checkpoint_test.go:81: CHECKPOINT_PHASE phase=prefix_padding_after_16 elapsed_ms=21808 duration_ms=10215 sdk_requests=7352 delta_sdk_requests=3456 remaining_ms=98191
+    graph_checkpoint_test.go:81: CHECKPOINT_PHASE phase=prefix_padding_after_32 elapsed_ms=31906 duration_ms=10098 sdk_requests=10776 delta_sdk_requests=3424 remaining_ms=88093
+    graph_checkpoint_test.go:81: CHECKPOINT_PHASE phase=prefix_padding_after_48 elapsed_ms=42522 duration_ms=10615 sdk_requests=14264 delta_sdk_requests=3488 remaining_ms=77477
+    graph_checkpoint_test.go:81: CHECKPOINT_PHASE phase=prefix_padding_after_64 elapsed_ms=42522 duration_ms=0 sdk_requests=14264 delta_sdk_requests=0 remaining_ms=77477
+    graph_checkpoint_test.go:81: CHECKPOINT_PHASE phase=checkpoint_materialization elapsed_ms=54042 duration_ms=11519 sdk_requests=18630 delta_sdk_requests=4366 remaining_ms=65957
+    graph_checkpoint_test.go:81: CHECKPOINT_PHASE phase=prefix_block_and_read_controls elapsed_ms=60344 duration_ms=6301 sdk_requests=20889 delta_sdk_requests=2259 remaining_ms=59655
+    graph_checkpoint_test.go:81: CHECKPOINT_PHASE phase=bounded_delivery_restore elapsed_ms=60729 duration_ms=385 sdk_requests=20992 delta_sdk_requests=103 remaining_ms=59270
+    graph_checkpoint_test.go:81: CHECKPOINT_PHASE phase=worker_prepare elapsed_ms=60734 duration_ms=4 sdk_requests=20998 delta_sdk_requests=6 remaining_ms=59265
+    graph_checkpoint_test.go:81: CHECKPOINT_PHASE phase=worker_execute_0 elapsed_ms=62896 duration_ms=2162 sdk_requests=21517 delta_sdk_requests=519 remaining_ms=57103
+    graph_checkpoint_test.go:81: CHECKPOINT_PHASE phase=worker_execute_1 elapsed_ms=63827 duration_ms=930 sdk_requests=21828 delta_sdk_requests=311 remaining_ms=56172
+    graph_checkpoint_test.go:363: promise aliases=2 completion_payload_edges=3 materialized_index=132 blocked_prefix_reads=0
+    graph_checkpoint_test.go:81: CHECKPOINT_PHASE phase=await_and_final_assertions elapsed_ms=64126 duration_ms=299 sdk_requests=21904 delta_sdk_requests=76 remaining_ms=55873
+--- PASS: TestNativeGraphCheckpointMaterializedReferences (64.23s)
+    --- PASS: TestNativeGraphCheckpointMaterializedReferences/R1 (64.23s)
+PASS

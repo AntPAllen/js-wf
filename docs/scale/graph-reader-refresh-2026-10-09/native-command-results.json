@@ -1,0 +1,45 @@
+{
+  "revision": "9cbdfbcb89226d31219d526b185096ff69ecd5ad",
+  "checkout": "/home/exedev/js-wf-reader-refresh-qualification",
+  "artifact": "/home/exedev/js-wf-reader-refresh-native-20261009",
+  "started": "2026-10-09T23:03:17.825776+00:00",
+  "env": {
+    "GOMAXPROCS": "4",
+    "GOMEMLIMIT": "512MiB"
+  },
+  "commands": [
+    {
+      "command": [
+        "go",
+        "test",
+        "-race",
+        "-c",
+        "./worker",
+        "-o",
+        "/home/exedev/js-wf-reader-refresh-native-20261009/worker-race.test"
+      ],
+      "started": "2026-10-09T23:03:17.825824+00:00",
+      "working_directory": "/home/exedev/js-wf-reader-refresh-qualification",
+      "exit": 0,
+      "finished": "2026-10-09T23:03:42.562959+00:00"
+    },
+    {
+      "command": [
+        "/home/exedev/js-wf-reader-refresh-native-20261009/worker-race.test",
+        "-test.run=^TestNativeGraphCheckpointMaterializedReferences/R3Domain$",
+        "-test.count=1",
+        "-test.timeout=3m",
+        "-test.v"
+      ],
+      "started": "2026-10-09T23:03:43.250437+00:00",
+      "working_directory": "/home/exedev/js-wf-reader-refresh-qualification",
+      "exit": 0,
+      "finished": "2026-10-09T23:05:19.639898+00:00"
+    }
+  ],
+  "binary_sha256": "33090cf0a5feeea056699ad7bba271ebea2623a2b0ce2fd3df8916c94405bd73",
+  "binary_bytes": 48465506,
+  "finished": "2026-10-09T23:05:20.324562+00:00",
+  "actual_test_exit": 0,
+  "source_unchanged": true
+}
