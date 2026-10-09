@@ -2,7 +2,7 @@
 
 ## Canonical Signal operation-level actor simulation added — 2026-10-09
 
-A new shared workload interleaves two production Signal clients, canonical repair, the production worker and graph collection at authority/object/catalog/source/consumer operations. Five directed mode traces pass exact normal/race replay; complete new 1,000-body normal/race acceptance is pending. Source inventory now has 152 families. [Evidence, harness corrections and precise remaining scope](scale/graph-signal-operation-actors-2026-10-09/README.md). This samples operation permutations and does not close exhaustive permutations, current full-suite/extended or any original native/runtime/scale/retention/import/adoption/release gate. Frozen full-151 qualification excludes the new family.
+A new shared workload interleaves two production Signal clients, canonical repair, the production worker and graph collection at authority/object/catalog/source/consumer operations. Five directed mode traces pass exact normal/race replay. The new normal campaign failed at seed 926 after 925 completed bodies on client retry exhaustion under CAS contention; retained-binary replay reproduces the failure. Diagnosis/minimization is in progress, and focused race remains live. Neither complete new-family normal nor race is accepted. Source inventory now has 152 families. [Evidence, harness corrections and precise remaining scope](scale/graph-signal-operation-actors-2026-10-09/README.md). This samples operation permutations and does not close exhaustive permutations, current full-suite/extended or any original native/runtime/scale/retention/import/adoption/release gate. Frozen full-151 qualification excludes the new family.
 
 ## Current full race interrupted by VM restart — 2026-10-09
 
