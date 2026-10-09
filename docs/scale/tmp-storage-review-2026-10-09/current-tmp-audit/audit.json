@@ -1,0 +1,137 @@
+{
+  "utc": "2026-10-09T23:58:35.856968+00:00",
+  "tmp_before": "6880\t/tmp",
+  "tmp_after": "6860\t/tmp",
+  "empty_build_directories_removed": [
+    {
+      "path": "/tmp/go-build1734322555",
+      "allocated_bytes": 4096
+    },
+    {
+      "path": "/tmp/go-build2428745849",
+      "allocated_bytes": 4096
+    },
+    {
+      "path": "/tmp/go-build3893512151",
+      "allocated_bytes": 4096
+    },
+    {
+      "path": "/tmp/go-build4187813527",
+      "allocated_bytes": 4096
+    },
+    {
+      "path": "/tmp/go-build475003324",
+      "allocated_bytes": 4096
+    }
+  ],
+  "retained_build_directories": {},
+  "inactivity_check": {
+    "blocked": {},
+    "permission_limits": [],
+    "visible_descriptors": 3126,
+    "docker_ids_including_stopped": [
+      "54f78ad2debd",
+      "460dfd2edd04",
+      "c631ca1436e8",
+      "348f3a6edb32",
+      "27b94b5d0e96"
+    ],
+    "loopdevices": {
+      "loopdevices": []
+    },
+    "mounts": {
+      "filesystems": [
+        {
+          "target": "/",
+          "source": "/dev/vda",
+          "children": [
+            {
+              "target": "/dev",
+              "source": "devtmpfs",
+              "children": [
+                {
+                  "target": "/dev/pts",
+                  "source": "devpts"
+                },
+                {
+                  "target": "/dev/shm",
+                  "source": "shm"
+                },
+                {
+                  "target": "/dev/hugepages",
+                  "source": "hugetlbfs"
+                },
+                {
+                  "target": "/dev/mqueue",
+                  "source": "mqueue"
+                }
+              ]
+            },
+            {
+              "target": "/proc",
+              "source": "proc",
+              "children": [
+                {
+                  "target": "/proc/sys/fs/binfmt_misc",
+                  "source": "systemd-1",
+                  "children": [
+                    {
+                      "target": "/proc/sys/fs/binfmt_misc",
+                      "source": "binfmt_misc"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "target": "/sys",
+              "source": "none",
+              "children": [
+                {
+                  "target": "/sys/fs/cgroup",
+                  "source": "cgroup2"
+                },
+                {
+                  "target": "/sys/kernel/security",
+                  "source": "securityfs"
+                },
+                {
+                  "target": "/sys/fs/selinux",
+                  "source": "selinuxfs"
+                },
+                {
+                  "target": "/sys/fs/bpf",
+                  "source": "bpf"
+                },
+                {
+                  "target": "/sys/kernel/debug",
+                  "source": "debugfs"
+                },
+                {
+                  "target": "/sys/kernel/tracing",
+                  "source": "tracefs"
+                }
+              ]
+            },
+            {
+              "target": "/run",
+              "source": "tmpfs",
+              "children": [
+                {
+                  "target": "/run/lock",
+                  "source": "tmpfs"
+                },
+                {
+                  "target": "/run/user/1000",
+                  "source": "tmpfs"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "filesystem": "Filesystem      Size  Used Avail Use% Mounted on\n/dev/root       148G   95G   47G  68% /\n",
+  "scope": "Only empty, unreferenced Go build directories removed. No archive needed: removed directories contained no files. Agent state, historical reviewer sources, original user attachment, and live qualification outputs retained."
+}
