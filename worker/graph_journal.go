@@ -9,6 +9,7 @@ import (
 	"errors"
 	"fmt"
 	"sort"
+	"time"
 
 	"js-wf/internal/graphpublication"
 	"js-wf/internal/retainedgraph"
@@ -57,20 +58,26 @@ type graphPayload struct {
 	link  retainedgraph.Link
 }
 type graphDelivery struct {
-	store          *journal.GraphStore
-	typ, id        string
-	invocation     uint64
-	view           *journal.GraphView
-	records        []journal.Record
-	refs           map[string]graphPayload
-	pending        map[string][]byte
-	input          []byte
-	invocationPort InvocationPort
-	childSignals   map[uint64]signalRecord
-	children       map[string]graphChildResult
+	store                  *journal.GraphStore
+	typ, id                string
+	invocation             uint64
+	view                   *journal.GraphView
+	records                []journal.Record
+	baseIndex              uint64
+	checkpoint             *journal.GraphCheckpointRead
+	signalBase, signalLast uint64
+	refs                   map[string]graphPayload
+	pending                map[string][]byte
+	input                  []byte
+	invocationPort         InvocationPort
+	childSignals           map[uint64]signalRecord
+	children               map[string]graphChildResult
 }
 
-func openGraphDelivery(ctx context.Context, s *journal.GraphStore, typ, id string, invocation uint64) (g *graphDelivery, err error) {
+func openGraphDelivery(ctx context.Context, s *journal.GraphStore, typ, id string, invocation uint64) (*graphDelivery, error) {
+	return openGraphDeliveryMode(ctx, s, typ, id, invocation, false)
+}
+func openGraphDeliveryMode(ctx context.Context, s *journal.GraphStore, typ, id string, invocation uint64, resume bool) (g *graphDelivery, err error) {
 	if _, err = s.Begin(ctx, typ, id, invocation); err != nil {
 		return nil, err
 	}
@@ -81,10 +88,26 @@ func openGraphDelivery(ctx context.Context, s *journal.GraphStore, typ, id strin
 	g = &graphDelivery{store: s, typ: typ, id: id, invocation: invocation, view: view, refs: map[string]graphPayload{}, pending: map[string][]byte{}, childSignals: map[uint64]signalRecord{}, children: map[string]graphChildResult{}}
 	defer func() {
 		if err != nil {
-			_ = view.Close(ctx)
+			cleanup, cancel := context.WithTimeout(context.WithoutCancel(ctx), 3*time.Second)
+			defer cancel()
+			if closeErr := view.Close(cleanup); closeErr != nil {
+				err = fmt.Errorf("%w: graph delivery release: %w: read: %w", journal.ErrUnknown, closeErr, err)
+			}
 		}
 	}()
-	for i := uint64(0); i < view.Count(); i++ {
+	if resume {
+		g.checkpoint, err = view.ReadCheckpoint(ctx, typ, id)
+		if err != nil {
+			return nil, err
+		}
+		if g.checkpoint != nil {
+			g.baseIndex = g.checkpoint.Anchor.Index
+			if err = g.restoreCheckpointMetadata(ctx); err != nil {
+				return nil, err
+			}
+		}
+	}
+	for i := g.baseIndex; i < view.Count(); i++ {
 		record, e := view.Read(ctx, i)
 		if e != nil {
 			return nil, e
@@ -141,9 +164,11 @@ func graphReferences(entry journal.Entry) (map[string]string, error) {
 		refs["input:"+meta.InputSHA256] = meta.InputSHA256
 	case journal.StepCompleted, journal.Completed, journal.Failed:
 		var meta struct {
-			ResultRef  string `json:"result_ref"`
-			ResultHash string `json:"result_hash"`
-			LimitEntry *struct {
+			ResultRef    string `json:"result_ref"`
+			ResultHash   string `json:"result_hash"`
+			MetadataRef  string `json:"checkpoint_metadata_ref"`
+			MetadataHash string `json:"checkpoint_metadata_hash"`
+			LimitEntry   *struct {
 				Kind    string          `json:"kind"`
 				Payload json.RawMessage `json:"payload"`
 			} `json:"limit_entry"`
@@ -152,6 +177,9 @@ func graphReferences(entry journal.Entry) (map[string]string, error) {
 			return nil, journal.ErrGap
 		}
 		if err := add(meta.ResultRef, meta.ResultHash); err != nil {
+			return nil, err
+		}
+		if err := add(meta.MetadataRef, meta.MetadataHash); err != nil {
 			return nil, err
 		}
 		if meta.LimitEntry != nil && meta.LimitEntry.Kind == string(journal.SignalConsumed) {
@@ -271,7 +299,7 @@ func (g *graphDelivery) append(ctx context.Context, entry journal.Entry, tail ui
 	if err != nil {
 		return 0, err
 	}
-	if err = g.materializeCheckpointReferences(ctx, entry, refs); err != nil {
+	if err = g.materializeCheckpointReferences(ctx, &entry, refs); err != nil {
 		return 0, err
 	}
 	var payloads [][]byte

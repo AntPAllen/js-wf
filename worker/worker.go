@@ -879,7 +879,7 @@ func (w *Worker) execute(ctx context.Context, typ, id string, l *lease.Lease, wa
 			return wf.ErrCorruptJournal
 		}
 		readCtx, stopRead := context.WithTimeout(ctx, 15*time.Second)
-		graph, err = openGraphDelivery(readCtx, w.graphJournal, typ, id, input.Sequence)
+		graph, err = openGraphDeliveryMode(readCtx, w.graphJournal, typ, id, input.Sequence, w.continuations[typ] != nil)
 		stopRead()
 		if err != nil {
 			return err
@@ -897,7 +897,7 @@ func (w *Worker) execute(ctx context.Context, typ, id string, l *lease.Lease, wa
 		readCtx, stopRead := context.WithTimeout(ctx, 15*time.Second)
 		if graph != nil {
 			var checkpoint *journal.GraphCheckpointRead
-			checkpoint, err = graph.view.ReadCheckpoint(readCtx, typ, id)
+			checkpoint = graph.checkpoint
 			if err == nil && checkpoint != nil {
 				runtime := checkpoint.Runtime
 				resumed = &journal.CheckpointRead{Snapshot: journal.Snapshot{Version: 2, Runtime: &runtime}, Frame: checkpoint.Frame, Anchor: checkpoint.Anchor, Records: checkpoint.Records, Tail: checkpoint.Tail}
@@ -1037,7 +1037,7 @@ func (w *Worker) execute(ctx context.Context, typ, id string, l *lease.Lease, wa
 			return err
 		}
 		if graph != nil {
-			records = graph.records[baseIndex:]
+			records = graph.records[baseIndex-graph.baseIndex:]
 		} else {
 			records = append(records, journal.Record{Entry: journal.Entry{Epoch: l.Epoch(), Index: nextIndex(), Kind: kind, Payload: payload, WorkerID: w.ID}, Sequence: seq})
 		}

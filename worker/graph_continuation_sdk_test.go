@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"strings"
 	"testing"
 	"time"
 
@@ -26,7 +27,7 @@ func TestNativeGraphContinuationSDKFlow(t *testing.T) {
 		if domain != "" {
 			name = "R3Domain"
 		}
-		t.Run(name, func(t *testing.T) { testNativeGraphContinuationSDKFlow(t, domain, false) })
+		t.Run(name, func(t *testing.T) { testNativeGraphContinuationSDKFlow(t, domain, false, false, false, false) })
 	}
 }
 func TestNativeGraphContinuationSDKPartitionFlow(t *testing.T) {
@@ -35,10 +36,37 @@ func TestNativeGraphContinuationSDKPartitionFlow(t *testing.T) {
 		if domain != "" {
 			name = "R3Domain"
 		}
-		t.Run(name, func(t *testing.T) { testNativeGraphContinuationSDKFlow(t, domain, true) })
+		t.Run(name, func(t *testing.T) { testNativeGraphContinuationSDKFlow(t, domain, true, false, false, false) })
 	}
 }
-func testNativeGraphContinuationSDKFlow(t *testing.T, domain string, partition bool) {
+func TestNativeGraphContinuationBufferedSignals(t *testing.T) {
+	for _, domain := range []string{"", "WFCONTINUATIONSDK"} {
+		name := "R1"
+		if domain != "" {
+			name = "R3Domain"
+		}
+		t.Run(name, func(t *testing.T) { testNativeGraphContinuationSDKFlow(t, domain, false, true, false, false) })
+	}
+}
+func TestNativeGraphContinuationChildPromise(t *testing.T) {
+	for _, domain := range []string{"", "WFCONTINUATIONSDK"} {
+		name := "R1"
+		if domain != "" {
+			name = "R3Domain"
+		}
+		t.Run(name, func(t *testing.T) { testNativeGraphContinuationSDKFlow(t, domain, false, false, true, false) })
+	}
+}
+func TestNativeGraphContinuationBufferedChildPromise(t *testing.T) {
+	for _, domain := range []string{"", "WFCONTINUATIONSDK"} {
+		name := "R1"
+		if domain != "" {
+			name = "R3Domain"
+		}
+		t.Run(name, func(t *testing.T) { testNativeGraphContinuationSDKFlow(t, domain, false, false, true, true) })
+	}
+}
+func testNativeGraphContinuationSDKFlow(t *testing.T, domain string, partition, bufferedSignals, childPromiseFlow, bufferedChild bool) {
 	replicas := 1
 	if domain != "" {
 		replicas = 3
@@ -54,7 +82,11 @@ func testNativeGraphContinuationSDKFlow(t *testing.T, domain string, partition b
 		t.Fatal(err)
 	}
 	defer cluster.Close()
-	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	timeout := 30 * time.Second
+	if childPromiseFlow {
+		timeout = time.Minute
+	}
+	ctx, cancel := context.WithTimeout(context.Background(), timeout)
 	defer cancel()
 	if replicas > 1 {
 		for ctx.Err() == nil {
@@ -102,7 +134,33 @@ func testNativeGraphContinuationSDKFlow(t *testing.T, domain string, partition b
 	if err != nil {
 		t.Fatal(err)
 	}
+	if bufferedSignals {
+		if _, err := c.Signal(ctx, h.Type, h.ID, "go", []byte(`11`), "go"); err != nil {
+			t.Fatal(err)
+		}
+	}
 	calls, effects := map[string]int{}, 0
+	var childPromise wf.Promise
+	childCalls := 0
+	childResult := strings.Repeat("child", 140000)
+	checkPromise := func(c *wf.Context, locals json.RawMessage, count int) error {
+		var data struct {
+			Count   int        `json:"count"`
+			Promise wf.Promise `json:"promise"`
+		}
+		if json.Unmarshal(locals, &data) != nil || data.Count != count {
+			return wf.ErrCorruptJournal
+		}
+		raw, err := wf.AwaitPromise(c, data.Promise)
+		if err != nil {
+			return err
+		}
+		var result string
+		if json.Unmarshal(raw, &result) != nil || result != childResult {
+			return wf.ErrCorruptJournal
+		}
+		return nil
+	}
 	initial := func(c *wf.Context, input json.RawMessage) (json.RawMessage, error) {
 		calls["initial"]++
 		if string(input) != "7" {
@@ -115,9 +173,24 @@ func testNativeGraphContinuationSDKFlow(t *testing.T, domain string, partition b
 		if err := c.SetState("value", got); err != nil {
 			return nil, err
 		}
+		if childPromiseFlow {
+			var err error
+			childPromise, err = wf.CallAsync(c, "testchild", []byte(`7`))
+			if err != nil {
+				return nil, err
+			}
+			return nil, wf.Continue(c, "next", map[string]any{"count": 1, "promise": childPromise})
+		}
 		return nil, wf.Continue(c, "next", map[string]int{"count": 1})
 	}
-	runner, err := New(ctx, js, "sdkcontinue", map[string]Handler{h.Type: initial}, WithGraphJournal(graph))
+	handlers := map[string]Handler{h.Type: initial}
+	if childPromiseFlow {
+		handlers["testchild"] = func(*wf.Context, json.RawMessage) (json.RawMessage, error) {
+			childCalls++
+			return json.Marshal(childResult)
+		}
+	}
+	runner, err := New(ctx, js, "sdkcontinue", handlers, WithGraphJournal(graph))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -129,7 +202,29 @@ func testNativeGraphContinuationSDKFlow(t *testing.T, domain string, partition b
 	runner.continuations = map[string]map[string]ContinuationHandler{h.Type: {
 		"next": func(c *wf.Context, input, locals json.RawMessage) (json.RawMessage, error) {
 			calls["next"]++
-			if string(input) != "7" || string(locals) != `{"count":1}` {
+			var nextPromise wf.Promise
+			if childPromiseFlow {
+				var data struct {
+					Count   int        `json:"count"`
+					Promise wf.Promise `json:"promise"`
+				}
+				if json.Unmarshal(locals, &data) != nil || data.Count != 1 {
+					return nil, wf.ErrCorruptJournal
+				}
+				nextPromise = data.Promise
+			}
+			if childPromiseFlow && !bufferedChild {
+				if err := checkPromise(c, locals, 1); err != nil {
+					return nil, err
+				}
+			}
+			if bufferedSignals {
+				data, err := wf.AwaitSignal(c, "go")
+				if err != nil || string(data) != "11" {
+					return nil, wf.ErrCorruptJournal
+				}
+			}
+			if string(input) != "7" || !childPromiseFlow && string(locals) != `{"count":1}` {
 				return nil, wf.ErrCorruptJournal
 			}
 			var value int
@@ -144,11 +239,25 @@ func testNativeGraphContinuationSDKFlow(t *testing.T, domain string, partition b
 			if err := c.SetState("value", result); err != nil {
 				return nil, err
 			}
+			if childPromiseFlow {
+				return nil, wf.Continue(c, "finish", map[string]any{"count": 2, "promise": nextPromise})
+			}
 			return nil, wf.Continue(c, "finish", map[string]int{"count": 2})
 		},
 		"finish": func(c *wf.Context, input, locals json.RawMessage) (json.RawMessage, error) {
 			calls["finish"]++
-			if string(input) != "7" || string(locals) != `{"count":2}` {
+			if childPromiseFlow {
+				if err := checkPromise(c, locals, 2); err != nil {
+					return nil, err
+				}
+			}
+			if bufferedSignals {
+				data, err := wf.AwaitSignal(c, "later")
+				if err != nil || string(data) != "13" {
+					return nil, wf.ErrCorruptJournal
+				}
+			}
+			if string(input) != "7" || !childPromiseFlow && string(locals) != `{"count":2}` {
 				return nil, wf.ErrCorruptJournal
 			}
 			var value int
@@ -204,9 +313,40 @@ func testNativeGraphContinuationSDKFlow(t *testing.T, domain string, partition b
 			if err := runs.Purge(ctx); err != nil {
 				t.Fatal(err)
 			}
-			result, err := scan.Scan(ctx, 1, 1, false)
+			budget := 1
+			if childPromiseFlow {
+				budget = 4
+			}
+			result, err := scan.Scan(ctx, 1, budget, false)
 			if err != nil || result.Reenqueued != 1 {
 				t.Fatal("SDK boundary wakeup not recovered", stage, result, err)
+			}
+			if childPromiseFlow {
+				if stage == "next" {
+					owner, err := leases.Acquire(ctx, childPromise.ChildType, childPromise.ChildID, "sdkchild")
+					if err != nil {
+						t.Fatal(err)
+					}
+					var noOp bool
+					err = runner.execute(ctx, childPromise.ChildType, childPromise.ChildID, owner, time.Time{}, timerWakeup{}, &noOp, nil)
+					releaseErr := owner.Release(ctx)
+					if err != nil || releaseErr != nil {
+						t.Fatal("child delivery", err, releaseErr)
+					}
+				} else {
+					retired, err := graph.InspectRetirement(ctx, childPromise.ChildType, childPromise.ChildID)
+					if err != nil {
+						t.Fatal(err)
+					}
+					if err := graph.Retire(ctx, childPromise.ChildType, childPromise.ChildID, retired.Invocation, retired.Tail); err != nil {
+						t.Fatal(err)
+					}
+				}
+			}
+			if bufferedSignals && stage == "next" {
+				if _, err := c.Signal(ctx, h.Type, h.ID, "later", []byte(`13`), "later"); err != nil {
+					t.Fatal(err)
+				}
 			}
 		}
 		execute()
@@ -239,6 +379,9 @@ func testNativeGraphContinuationSDKFlow(t *testing.T, domain string, partition b
 	info, err := legacy.Info(ctx)
 	if err != nil || info.State.Msgs != 0 {
 		t.Fatal("SDK flow wrote legacy journal", info, err)
+	}
+	if childPromiseFlow && childCalls != 1 {
+		t.Fatal("child was replayed", childCalls)
 	}
 	t.Logf("SDK initial/next/finish=%v effects=%d records=%d result=%s", calls, effects, len(records), result)
 }

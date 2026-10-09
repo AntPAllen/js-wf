@@ -64,6 +64,10 @@ func (r signalQueueIndexReader) ReadIndex(ctx context.Context, index uint64) ([]
 func (v *GraphView) SignalQueueCount() uint64     { return v.cursor.SignalBindings }
 func (v *GraphView) SignalSourceSequence() uint64 { return v.cursor.SignalSource }
 
+// SignalConsumedCount is the canonical journal consumption count captured by
+// this pin. It does not include bound inputs that have not been consumed.
+func (v *GraphView) SignalConsumedCount() uint64 { return v.cursor.SignalConsumed }
+
 // SignalInputAt resolves a pointer's reservation index on this exact retained
 // generation. The descriptor and owned body are validated before use.
 func (v *GraphView) SignalInputAt(ctx context.Context, index uint64) (GraphSignalInput, []byte, error) {

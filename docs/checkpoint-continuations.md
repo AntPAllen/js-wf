@@ -8,6 +8,23 @@ stage replay is implemented with focused/model/real-journal checks below.
 This document preserves the plan's checkpoint requirement; it does not count
 as a completed checkpoint feature.
 
+## Bounded canonical resume component — 2026-10-09
+
+Internal graph continuation delivery now loads the validated checkpoint anchor
+and suffix, rebuilding references from their owned edges. A versioned object
+owned by the completion carries worker child provenance and canonical signal
+progress, with a 16 MiB limit and strict identity/anchor/frame-hash/schema checks.
+The captured canonical consumption count and queue bindings verify restored
+progress; buffered child payloads/provenance are checked before stage selection.
+Missing/corrupt metadata does not trigger prefix fallback.
+
+Native R1/R3-domain component race controls execute with 131 earlier encoded
+bodies unavailable, preserve absolute indices and terminal duplicate behavior,
+and restore live async children through resolved or buffered 700 KB results after
+child retirement. [Evidence and compatibility scope](scale/graph-bounded-continuation-2026-10-09/README.md).
+This does not remove any physical prefix or qualify collection/retention, full
+failure/limit/audit/offline/import/deployment or public continuation admission.
+
 ## Canonical materialized payload foundation — 2026-10-09
 
 Checkpoint completion copies each referenced promise result's already owned edge

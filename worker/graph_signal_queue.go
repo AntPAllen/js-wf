@@ -15,9 +15,9 @@ import (
 // Native source discovery may repair published-but-unbound cuts; consumption
 // and replay use the canonical queue and journal, never a source body/ref.
 func (w *Worker) drainCanonicalSignals(ctx context.Context, g *graphDelivery, cursor uint64, records []journal.Record, appendEntry func(journal.Kind, json.RawMessage) error, ops *deliveryOperations) (signals []wf.Signal, err error) {
-	if cursor != 0 {
+	if cursor != 0 && g.checkpoint == nil {
 		return nil, journal.ErrGap
-	} // Graph continuation import remains unsupported.
+	} // A saved cursor requires a verified materialized graph checkpoint.
 	port := w.signalDrainPort
 	if port == nil {
 		port = NewSignalDrainPort(w.js)
@@ -64,8 +64,8 @@ func (w *Worker) drainCanonicalSignals(ctx context.Context, g *graphDelivery, cu
 			signals = nil
 		}
 	}()
-	next := uint64(0)
-	lastSequence := uint64(0)
+	next := g.signalBase
+	lastSequence := g.signalLast
 	for _, record := range records {
 		if record.Kind != journal.SignalConsumed {
 			continue

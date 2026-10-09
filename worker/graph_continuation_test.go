@@ -139,7 +139,21 @@ func testNativeGraphContinuationHandoff(t *testing.T, domain string, unpublished
 		if i == 0 {
 			objects = [][]byte{[]byte(`7`)}
 		} else if i == 2 {
-			objects = [][]byte{encoded}
+			// Use production checkpoint publication so the completion owns its
+			// worker metadata as well as its SDK frame.
+			delivery, openErr := openGraphDelivery(ctx, graph, h.Type, h.ID, h.InvSeq)
+			if openErr != nil {
+				t.Fatal(openErr)
+			}
+			if err := delivery.PutBytes(ctx, "step-result-"+hash, encoded); err != nil {
+				t.Fatal(err)
+			}
+			tail, err = delivery.append(ctx, entry, tail)
+			closeErr := delivery.close(ctx)
+			if err != nil || closeErr != nil {
+				t.Fatal(err, closeErr)
+			}
+			continue
 		}
 		tail, err = graph.Append(ctx, h.Type, h.ID, h.InvSeq, entry, tail, objects, nil)
 		if err != nil {

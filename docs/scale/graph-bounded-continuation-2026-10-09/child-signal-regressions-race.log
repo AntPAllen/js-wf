@@ -1,0 +1,74 @@
+=== RUN   TestGraphChildReplayRejectsForgedProvenance
+=== RUN   TestGraphChildReplayRejectsForgedProvenance/limit=false/valid
+=== RUN   TestGraphChildReplayRejectsForgedProvenance/limit=false/missing
+=== RUN   TestGraphChildReplayRejectsForgedProvenance/limit=false/foreign_type
+=== RUN   TestGraphChildReplayRejectsForgedProvenance/limit=false/foreign_id
+=== RUN   TestGraphChildReplayRejectsForgedProvenance/limit=false/foreign_generation
+=== RUN   TestGraphChildReplayRejectsForgedProvenance/limit=false/foreign_reference
+=== RUN   TestGraphChildReplayRejectsForgedProvenance/limit=false/duplicate_request
+=== RUN   TestGraphChildReplayRejectsForgedProvenance/limit=false/ordinary_signal
+=== RUN   TestGraphChildReplayRejectsForgedProvenance/limit=false/ordinary_forged_declaration
+=== RUN   TestGraphChildReplayRejectsForgedProvenance/limit=true/valid
+=== RUN   TestGraphChildReplayRejectsForgedProvenance/limit=true/missing
+=== RUN   TestGraphChildReplayRejectsForgedProvenance/limit=true/foreign_type
+=== RUN   TestGraphChildReplayRejectsForgedProvenance/limit=true/foreign_id
+=== RUN   TestGraphChildReplayRejectsForgedProvenance/limit=true/foreign_generation
+=== RUN   TestGraphChildReplayRejectsForgedProvenance/limit=true/foreign_reference
+=== RUN   TestGraphChildReplayRejectsForgedProvenance/limit=true/duplicate_request
+=== RUN   TestGraphChildReplayRejectsForgedProvenance/limit=true/ordinary_signal
+=== RUN   TestGraphChildReplayRejectsForgedProvenance/limit=true/ordinary_forged_declaration
+--- PASS: TestGraphChildReplayRejectsForgedProvenance (0.00s)
+    --- PASS: TestGraphChildReplayRejectsForgedProvenance/limit=false/valid (0.00s)
+    --- PASS: TestGraphChildReplayRejectsForgedProvenance/limit=false/missing (0.00s)
+    --- PASS: TestGraphChildReplayRejectsForgedProvenance/limit=false/foreign_type (0.00s)
+    --- PASS: TestGraphChildReplayRejectsForgedProvenance/limit=false/foreign_id (0.00s)
+    --- PASS: TestGraphChildReplayRejectsForgedProvenance/limit=false/foreign_generation (0.00s)
+    --- PASS: TestGraphChildReplayRejectsForgedProvenance/limit=false/foreign_reference (0.00s)
+    --- PASS: TestGraphChildReplayRejectsForgedProvenance/limit=false/duplicate_request (0.00s)
+    --- PASS: TestGraphChildReplayRejectsForgedProvenance/limit=false/ordinary_signal (0.00s)
+    --- PASS: TestGraphChildReplayRejectsForgedProvenance/limit=false/ordinary_forged_declaration (0.00s)
+    --- PASS: TestGraphChildReplayRejectsForgedProvenance/limit=true/valid (0.00s)
+    --- PASS: TestGraphChildReplayRejectsForgedProvenance/limit=true/missing (0.00s)
+    --- PASS: TestGraphChildReplayRejectsForgedProvenance/limit=true/foreign_type (0.00s)
+    --- PASS: TestGraphChildReplayRejectsForgedProvenance/limit=true/foreign_id (0.00s)
+    --- PASS: TestGraphChildReplayRejectsForgedProvenance/limit=true/foreign_generation (0.00s)
+    --- PASS: TestGraphChildReplayRejectsForgedProvenance/limit=true/foreign_reference (0.00s)
+    --- PASS: TestGraphChildReplayRejectsForgedProvenance/limit=true/duplicate_request (0.00s)
+    --- PASS: TestGraphChildReplayRejectsForgedProvenance/limit=true/ordinary_signal (0.00s)
+    --- PASS: TestGraphChildReplayRejectsForgedProvenance/limit=true/ordinary_forged_declaration (0.00s)
+=== RUN   TestGraphSelectedChildRequiresExactRecordedSignal
+=== RUN   TestGraphSelectedChildRequiresExactRecordedSignal/external=false/valid
+=== RUN   TestGraphSelectedChildRequiresExactRecordedSignal/external=false/missing
+=== RUN   TestGraphSelectedChildRequiresExactRecordedSignal/external=false/foreign_sequence
+=== RUN   TestGraphSelectedChildRequiresExactRecordedSignal/external=false/foreign_name
+=== RUN   TestGraphSelectedChildRequiresExactRecordedSignal/external=false/foreign_bytes
+=== RUN   TestGraphSelectedChildRequiresExactRecordedSignal/external=false/ordinary_signal
+=== RUN   TestGraphSelectedChildRequiresExactRecordedSignal/external=true/valid
+=== RUN   TestGraphSelectedChildRequiresExactRecordedSignal/external=true/missing
+=== RUN   TestGraphSelectedChildRequiresExactRecordedSignal/external=true/foreign_sequence
+=== RUN   TestGraphSelectedChildRequiresExactRecordedSignal/external=true/foreign_name
+=== RUN   TestGraphSelectedChildRequiresExactRecordedSignal/external=true/foreign_bytes
+=== RUN   TestGraphSelectedChildRequiresExactRecordedSignal/external=true/ordinary_signal
+--- PASS: TestGraphSelectedChildRequiresExactRecordedSignal (0.00s)
+    --- PASS: TestGraphSelectedChildRequiresExactRecordedSignal/external=false/valid (0.00s)
+    --- PASS: TestGraphSelectedChildRequiresExactRecordedSignal/external=false/missing (0.00s)
+    --- PASS: TestGraphSelectedChildRequiresExactRecordedSignal/external=false/foreign_sequence (0.00s)
+    --- PASS: TestGraphSelectedChildRequiresExactRecordedSignal/external=false/foreign_name (0.00s)
+    --- PASS: TestGraphSelectedChildRequiresExactRecordedSignal/external=false/foreign_bytes (0.00s)
+    --- PASS: TestGraphSelectedChildRequiresExactRecordedSignal/external=false/ordinary_signal (0.00s)
+    --- PASS: TestGraphSelectedChildRequiresExactRecordedSignal/external=true/valid (0.00s)
+    --- PASS: TestGraphSelectedChildRequiresExactRecordedSignal/external=true/missing (0.00s)
+    --- PASS: TestGraphSelectedChildRequiresExactRecordedSignal/external=true/foreign_sequence (0.00s)
+    --- PASS: TestGraphSelectedChildRequiresExactRecordedSignal/external=true/foreign_name (0.00s)
+    --- PASS: TestGraphSelectedChildRequiresExactRecordedSignal/external=true/foreign_bytes (0.00s)
+    --- PASS: TestGraphSelectedChildRequiresExactRecordedSignal/external=true/ordinary_signal (0.00s)
+=== RUN   TestNativeCanonicalSignalQueueWorkerReplay
+=== RUN   TestNativeCanonicalSignalQueueWorkerReplay/R1
+    graph_signal_queue_native_test.go:261: R1: purged source consumed as owned 5MiB Signal; suspended worker reopened; exactly two consumptions, one effect and result 42
+=== RUN   TestNativeCanonicalSignalQueueWorkerReplay/R3
+    graph_signal_queue_native_test.go:261: R3: purged source consumed as owned 5MiB Signal; suspended worker reopened; exactly two consumptions, one effect and result 42
+--- PASS: TestNativeCanonicalSignalQueueWorkerReplay (58.25s)
+    --- PASS: TestNativeCanonicalSignalQueueWorkerReplay/R1 (25.99s)
+    --- PASS: TestNativeCanonicalSignalQueueWorkerReplay/R3 (32.25s)
+PASS
+ok  	js-wf/worker	59.319s
