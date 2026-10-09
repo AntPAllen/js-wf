@@ -1,5 +1,9 @@
 # Implementation status against the supplied plan
 
+## Complete shared-cycle normal suite accepted — 2026-10-09
+
+At isolated frozen `5aafc29`, the complete normal default suite passes 210 groups, all 148 families × 1,000 contiguous seed bodies and all 748 pins in 649.324 s. Executed review verifies 3,052 selected inputs against Git and unchanged before/after, exact coverage and the retained binary/event hashes. [Complete normal evidence](scale/graph-catalog-cycles-2026-10-08/complete-normal1000/). This qualifies the shared catalog cycles and distinct Signal failure capture, and excludes subsequent worker CLI integration and reconciliation/read changes. The older full race FAIL and interrupted normal evidence remain retained. Complete current race/extended qualification and every original remaining runtime/native/scale/24h/million physical-drain/adoption/release gate remain required.
+
 ## Fresh current complete normal qualification — 2026-10-09
 
 A fresh full normal run uses isolated frozen `5aafc29` at `/home/exedev/js-wf-failure-capture-qualification`, requiring all 148 families × 1,000 complete contiguous seed bodies and all 748 pins. Evidence is retained under `/home/exedev/js-wf-tier1-full148-normal1000-20261009`; supervisor output is in the adjacent `.supervisor.log`. The runner starts in its own process session so terminal disconnects do not send it a hangup. Terminal verdict, source-after and executed review are pending. The earlier interrupted normal and failed race evidence remains preserved; complete current race, extended qualification and all original remaining implementation/release gates stay required.

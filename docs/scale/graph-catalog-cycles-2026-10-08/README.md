@@ -29,3 +29,7 @@ python3 scripts/check-tier1-race.py --root /home/exedev/js-wf-tier1-full148-cycl
 ```
 
 Every current family and pin is required. Terminal evidence and independent review are pending. The existing complete race campaign remains at its original frozen source.
+
+## Frozen complete normal qualification accepted — 2026-10-09
+
+The fresh complete normal run at `5aafc29` passes 210 groups, all 148 families × 1,000 contiguous completed bodies and all 748 pins in 649.324 seconds. `complete-normal1000/executed-review.py` verifies 3,052 selected inputs against Git and unchanged before/after, and retained binary/event integrity. This includes shared cycles and the distinct Signal failure diagnostic. Later worker CLI/reconciliation/read changes are excluded; complete race/extended and all wider original gates remain required. The prior interrupted `55eeb77` run remains preserved separately.
