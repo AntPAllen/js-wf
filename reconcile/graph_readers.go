@@ -11,6 +11,7 @@ import (
 
 	"github.com/nats-io/nats.go/jetstream"
 	"js-wf/internal/graphpublication"
+	"js-wf/journal"
 	"js-wf/lease"
 )
 
@@ -129,6 +130,26 @@ func RunGraphReaderExpiry(ctx context.Context, js jetstream.JetStream, protocol 
 		return fmt.Errorf("reader maintenance requires root watermark")
 	}
 	scope := scoped.ReaderMaintenanceScope()
+	if _, err := (nativeReaderExpiryPort{scope: scope}).scopeKey(); err != nil {
+		return err
+	}
+	return runNativeReaderExpiry(ctx, js, protocol, scope, workerID, interval, budget)
+}
+
+// RunGraphReaderExpiryWithStore uses the store's reader-only facade. It never
+// opens the publication port to its caller or enables object collection.
+func RunGraphReaderExpiryWithStore(ctx context.Context, js jetstream.JetStream, store *journal.GraphStore, workerID string, interval time.Duration, budget int) error {
+	maintenance, err := store.ReaderMaintenance()
+	if err != nil {
+		return err
+	}
+	return runNativeReaderExpiry(ctx, js, maintenance, maintenance.ReaderMaintenanceScope(), workerID, interval, budget)
+}
+
+func runNativeReaderExpiry(ctx context.Context, js jetstream.JetStream, protocol ReaderExpiryProtocol, scope, workerID string, interval time.Duration, budget int) error {
+	if js == nil || workerID == "" || interval <= 0 || interval > 10*time.Second || budget < 1 || budget > graphpublication.MaxReaderSweepBatch {
+		return fmt.Errorf("invalid native reader expiry configuration")
+	}
 	if _, err := (nativeReaderExpiryPort{scope: scope}).scopeKey(); err != nil {
 		return err
 	}

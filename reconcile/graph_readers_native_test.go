@@ -11,6 +11,7 @@ import (
 	"github.com/nats-io/nats.go"
 	"github.com/nats-io/nats.go/jetstream"
 	"js-wf/internal/graphpublication"
+	"js-wf/journal"
 	"js-wf/provision"
 	"js-wf/testcluster"
 )
@@ -118,7 +119,15 @@ func TestNativeReaderExpiryRestartAndLostCheckpoint(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
-			scope := port.ReaderMaintenanceScope()
+			store, err := journal.NewGraphStore(journal.GraphConfig{Protocol: protocol})
+			if err != nil {
+				t.Fatal(err)
+			}
+			maintenance, err := store.ReaderMaintenance()
+			if err != nil {
+				t.Fatal(err)
+			}
+			scope := maintenance.ReaderMaintenanceScope()
 			firstCtx, stopFirst := context.WithCancel(ctx)
 			backend := &jetStreamLoopPort{js: js, ticker: time.NewTicker(time.Millisecond)}
 			defer backend.ticker.Stop()
@@ -130,7 +139,7 @@ func TestNativeReaderExpiryRestartAndLostCheckpoint(t *testing.T) {
 			// the actual SDK KV boundary without replacing lease decisions.
 			firstPort := preparedReaderCheckpointPort{stopReaderCheckpointPort: first, state: hidden}
 			clock := func() time.Time { return now.Add(2 * time.Minute) }
-			if err = RunReaderExpiryWithPort(firstCtx, firstPort, protocol, "first-reader", time.Millisecond, 1, clock); err != nil {
+			if err = RunReaderExpiryWithPort(firstCtx, firstPort, maintenance, "first-reader", time.Millisecond, 1, clock); err != nil {
 				t.Fatal(err)
 			}
 			checkpoint, _, err := nativeReaderExpiryPort{jetStreamLoopPort: &jetStreamLoopPort{state: state}, scope: scope}.LoadReaderCursor(ctx)
@@ -164,11 +173,19 @@ func TestNativeReaderExpiryRestartAndLostCheckpoint(t *testing.T) {
 				t.Fatal("scope changed on reopen")
 			}
 			protocol = graphpublication.Protocol{Port: port}
+			store, err = journal.NewGraphStore(journal.GraphConfig{Protocol: protocol})
+			if err != nil {
+				t.Fatal(err)
+			}
+			maintenance, err = store.ReaderMaintenance()
+			if err != nil {
+				t.Fatal(err)
+			}
 			secondCtx, stopSecond := context.WithCancel(ctx)
 			secondBackend := &jetStreamLoopPort{js: js, ticker: time.NewTicker(time.Millisecond)}
 			defer secondBackend.ticker.Stop()
 			second := &stopReaderCheckpointPort{nativeReaderExpiryPort: nativeReaderExpiryPort{jetStreamLoopPort: secondBackend, scope: scope}, stopAfter: 2, cancel: stopSecond}
-			if err = RunReaderExpiryWithPort(secondCtx, second, protocol, "second-reader", time.Millisecond, 1, clock); err != nil {
+			if err = RunReaderExpiryWithPort(secondCtx, second, maintenance, "second-reader", time.Millisecond, 1, clock); err != nil {
 				t.Fatal(err)
 			}
 			final, _, err := nativeReaderExpiryPort{jetStreamLoopPort: &jetStreamLoopPort{state: state}, scope: scope}.LoadReaderCursor(ctx)

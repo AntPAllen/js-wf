@@ -1,0 +1,7 @@
+{
+  "command": "GOMAXPROCS=1 GOMEMLIMIT=512MiB go test -race ./journal ./reconcile -run '^(TestGraphReaderMaintenanceFacadeBoundsAndScope|TestNativeReaderExpiryAdmissionPrecedesStorage|TestNativeReaderExpiryStoreAdmissionPrecedesStorage|TestNativeReaderExpiryRestartAndLostCheckpoint)$' -count=1 -timeout=4m",
+  "actual_child_exit": 0,
+  "journal_seconds": 1.017,
+  "reconcile_seconds": 15.212,
+  "scope": "Targeted facade/admission and native R1/R3 restart controls; not complete current qualification."
+}

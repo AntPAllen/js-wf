@@ -1,5 +1,9 @@
 # JetStream Durable Workflow Runtime — Implementation Plan
 
+## Scoped GraphStore reader maintenance facade verified — 2026-10-09
+
+GraphStore now exposes watermark capture and bounded expiry through a reader-maintenance facade, and the native scheduler accepts the store directly. The facade keeps its publication protocol private and validates capability/scope without storage operations. Race controls pass for the facade (1.017 seconds) and native R1/R3 restart, lost checkpoint acknowledgment, isolation and both admission paths (15.212 seconds). [Raw evidence and limitations](scale/graph-reader-maintenance-facade-2026-10-09/README.md). Worker CLI activation is next; collection remains off. Inventory stays 155/835. Live frozen campaigns exclude these changes; complete current qualification and all original broader gates remain open.
+
 ## Reader maintenance rejects invalid configuration before storage — 2026-10-09
 
 Native reader-expiry admission now checks scope, bounded scan/watermark support, non-empty worker identity and cadence/batch bounds before KV preparation. Instrumented negative cases prove zero JetStream calls; opaque worker identities remain compatible with the lease-store contract. Native/focused controls pass race in 4.610 seconds and all eight existing maintenance traces pass normal replay in 0.072 seconds. [Evidence and scope](scale/graph-reader-expiry-admission-2026-10-09/README.md). Inventory remains 155/835. The queued full normal source excludes this later preflight change; complete current qualification and all original broader gates remain open.
