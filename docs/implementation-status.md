@@ -1,5 +1,13 @@
 # Implementation status against the supplied plan
 
+## Bounded reader-expiry catalog batches — 2026-10-09
+
+Reader maintenance now has a persisted cursor API with a captured authority watermark and at most 256 destinations per batch. A batch advances only after confirmed reader fencing; uncertain scan/read/expiry replies preserve the last confirmed cursor for retry. Sparse catalog sequences, restart checkpoints, lost committed expiry replies, deferred new roots, invalid inputs and empty/cancelled scans pass focused race controls alongside the existing catalog tests (`GOMAXPROCS=1 GOMEMLIMIT=512MiB go test -race ./internal/graphpublication -run 'TestReaderSweep|TestGraphCatalog' -count=1`, exit 0, package 1.162 seconds). An initial malformed-entry test fixture incorrectly filtered out its injected invalid sequence; the corrected fixture returns it directly and verifies rejection.
+
+This API performs reader expiry only. Completion is a bounded catalog pass, not a coherent global object-collection barrier; production collection remains disabled and the existing combined sweep is unchanged. Autonomous scheduling and native batch integration remain open.
+
+Current inventory is 153 seeded families and 816 registered traces. The accepted full normal run covers the earlier 151-family/810-trace source; the corrected Signal actor and expiry actor normal campaigns have separate focused acceptance. The full frozen 151-family race replacement and corrected Signal actor race are observed live; expiry race is queued behind them. None qualifies current full-source race or the original broader runtime, fault, scale, soak, drain, migration, adoption and release requirements. See [implementation status](implementation-status.md) for detailed evidence and historical results below.
+
 ## Duplicate graph authority validation removed — 2026-10-09
 
 Authority normalization now relies on `Encode` for its existing structural validation and graph byte bound, removing the prior duplicate `Validate` pass. Benchmarks show 65 fewer allocations per call; shared-VM timing data does not establish latency improvement. Existing malformed-reader/stream/metadata/input/legacy-byte controls pass race in 1.820 seconds. [Focused evidence and limits](scale/graph-normalization-validation-2026-10-09/README.md). Full current-source qualification and all broader gates remain open; ongoing frozen campaigns exclude this change.

@@ -1,5 +1,13 @@
 # JetStream Durable Workflow Runtime — Implementation Plan
 
+## Bounded reader-expiry catalog batches — 2026-10-09
+
+Reader maintenance now has a persisted cursor API with a captured authority watermark and at most 256 destinations per batch. A batch advances only after confirmed reader fencing; uncertain scan/read/expiry replies preserve the last confirmed cursor for retry. Sparse catalog sequences, restart checkpoints, lost committed expiry replies, deferred new roots, invalid inputs and empty/cancelled scans pass focused race controls alongside the existing catalog tests (`GOMAXPROCS=1 GOMEMLIMIT=512MiB go test -race ./internal/graphpublication -run 'TestReaderSweep|TestGraphCatalog' -count=1`, exit 0, package 1.162 seconds). An initial malformed-entry test fixture incorrectly filtered out its injected invalid sequence; the corrected fixture returns it directly and verifies rejection.
+
+This API performs reader expiry only. Completion is a bounded catalog pass, not a coherent global object-collection barrier; production collection remains disabled and the existing combined sweep is unchanged. Autonomous scheduling and native batch integration remain open.
+
+Current inventory is 153 seeded families and 816 registered traces. The accepted full normal run covers the earlier 151-family/810-trace source; the corrected Signal actor and expiry actor normal campaigns have separate focused acceptance. The full frozen 151-family race replacement and corrected Signal actor race are observed live; expiry race is queued behind them. None qualifies current full-source race or the original broader runtime, fault, scale, soak, drain, migration, adoption and release requirements. See [implementation status](implementation-status.md) for detailed evidence and historical results below.
+
 ## Complete current normal qualification accepted; full race running — 2026-10-09
 
 Frozen `e5018af` passes all 151 families × 1,000 contiguous completed bodies, all 810 pins, all 336 directed Signal combinations and 214 ordinary top-level groups in 1,208.809 seconds. Independent executed review verifies 3,180 unchanged Git-matched inputs, retained binary/exit/cwd/event evidence, and exact reproduction of the full-suite coverage result. [Complete normal proof and precise remaining scope](scale/graph-current151-qualification-2026-10-09/complete-normal1000/README.md).
