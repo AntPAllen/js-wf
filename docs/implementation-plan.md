@@ -1,5 +1,9 @@
 # JetStream Durable Workflow Runtime — Implementation Plan
 
+## Fresh current complete normal qualification — 2026-10-09
+
+A fresh full normal run uses isolated frozen `5aafc29` at `/home/exedev/js-wf-failure-capture-qualification`, requiring all 148 families × 1,000 complete contiguous seed bodies and all 748 pins. Evidence is retained under `/home/exedev/js-wf-tier1-full148-normal1000-20261009`; supervisor output is in the adjacent `.supervisor.log`. The runner starts in its own process session so terminal disconnects do not send it a hangup. Terminal verdict, source-after and executed review are pending. The earlier interrupted normal and failed race evidence remains preserved; complete current race, extended qualification and all original remaining implementation/release gates stay required.
+
 ## Stopped full simulation campaigns reviewed — 2026-10-09
 
 The frozen `2b71f1d` full race run ended FAIL in 6,930.377 s: 144/146 families completed 1,000 bodies, while combined Signal seed 645 and original Signal seed 971 stopped at the old ten-second per-schedule watchdog. No suite-timeout panic or data-race report appears; later watchdog changes remain independently unqualified. The frozen `55eeb77` normal run was interrupted after 39 complete families, without a terminal verdict; process and tool handles are gone, and interruption cause is unconfirmed. Both supervisor source-after records are absent; executed review verifies the retained binaries and current frozen files against Git without inventing historical completion evidence. The later failure overwrote the earlier trace, so Signal failure captures now retain distinct test/seed filenames. The new collision control passes under race detection. [Retained evidence and limits](scale/tier1-stopped-2026-10-09/). Complete current and extended qualification and every original runtime/native/scale/24h/million physical-drain/adoption/release gate remain required.

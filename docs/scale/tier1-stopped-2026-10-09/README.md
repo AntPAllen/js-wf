@@ -19,3 +19,7 @@ Frozen `55eeb77` has 39 completed seeded families, followed by entry into `TestS
 `executed-review.py` verifies selected files against their exact Git commits and the separately retained source checkouts, checks retained binaries and event hashes, and copies available metadata/events/trace. Both supervisor `source-after.json` records are missing. The review records a fresh observation on October 9 rather than manufacturing a historical source-after record. It does not infer complete qualification from partial seed counts or the absence of race reports.
 
 The full current normal/race and extended suites, remaining canonical runtime/deployment migrations, native matrices, actual 24h soak, million physical drain and adoption/release requirements remain open.
+
+## Fresh current normal run
+
+Frozen `5aafc29` runs in a separate clean checkout, with a separate supervisor process session. Root: `/home/exedev/js-wf-tier1-full148-normal1000-20261009`. The command is `python3 scripts/check-tier1-race.py --root /home/exedev/js-wf-tier1-full148-normal1000-20261009 --seeds 1000 --no-race`. All 148 families and 748 pins are required. Terminal qualification remains pending; this run does not replace either stopped artifact set.
