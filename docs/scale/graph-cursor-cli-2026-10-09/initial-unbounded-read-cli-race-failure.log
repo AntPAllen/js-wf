@@ -1,0 +1,114 @@
+=== RUN   TestGraphOperatorCursorRejectsUnknownVersion
+--- PASS: TestGraphOperatorCursorRejectsUnknownVersion (0.00s)
+=== RUN   TestNativeGraphCursorOperatorHistory
+=== RUN   TestNativeGraphCursorOperatorHistory/v4/R1-domain
+    graph_cursor_test.go:257: NATIVE_CURSOR_OPERATOR version=4 records=8 retained_from=0 original_entry_collected=false incorrect_schemas_rejected=2 domain_errors=0 legacy_journal_requests=0 readers_after=0
+=== RUN   TestNativeGraphCursorOperatorHistory/v4/R3-domain
+    graph_cursor_test.go:257: NATIVE_CURSOR_OPERATOR version=4 records=8 retained_from=0 original_entry_collected=false incorrect_schemas_rejected=2 domain_errors=0 legacy_journal_requests=0 readers_after=0
+=== RUN   TestNativeGraphCursorOperatorHistory/v5/R1-domain
+    graph_cursor_test.go:257: NATIVE_CURSOR_OPERATOR version=5 records=8 retained_from=0 original_entry_collected=false incorrect_schemas_rejected=2 domain_errors=0 legacy_journal_requests=0 readers_after=0
+=== RUN   TestNativeGraphCursorOperatorHistory/v5/R3-domain
+    graph_cursor_test.go:257: NATIVE_CURSOR_OPERATOR version=5 records=8 retained_from=0 original_entry_collected=false incorrect_schemas_rejected=2 domain_errors=0 legacy_journal_requests=0 readers_after=0
+=== RUN   TestNativeGraphCursorOperatorHistory/v6/R1-domain
+    graph_cursor_test.go:257: NATIVE_CURSOR_OPERATOR version=6 records=8 retained_from=5 original_entry_collected=true incorrect_schemas_rejected=2 domain_errors=0 legacy_journal_requests=0 readers_after=0
+=== RUN   TestNativeGraphCursorOperatorHistory/v6/R3-domain
+    graph_cursor_test.go:257: NATIVE_CURSOR_OPERATOR version=6 records=8 retained_from=5 original_entry_collected=true incorrect_schemas_rejected=2 domain_errors=0 legacy_journal_requests=0 readers_after=0
+--- PASS: TestNativeGraphCursorOperatorHistory (51.70s)
+    --- PASS: TestNativeGraphCursorOperatorHistory/v4/R1-domain (4.61s)
+    --- PASS: TestNativeGraphCursorOperatorHistory/v4/R3-domain (9.48s)
+    --- PASS: TestNativeGraphCursorOperatorHistory/v5/R1-domain (3.30s)
+    --- PASS: TestNativeGraphCursorOperatorHistory/v5/R3-domain (11.02s)
+    --- PASS: TestNativeGraphCursorOperatorHistory/v6/R1-domain (7.90s)
+    --- PASS: TestNativeGraphCursorOperatorHistory/v6/R3-domain (15.39s)
+=== RUN   TestGraphOperatorRejectsPartialOrLegacyOnlySelection
+--- PASS: TestGraphOperatorRejectsPartialOrLegacyOnlySelection (0.00s)
+PASS
+ok  	js-wf/cmd/wf	52.743s
+=== RUN   TestWorkerGraphAdmissionRejectsIncompatibleCLI
+=== RUN   TestWorkerGraphAdmissionRejectsIncompatibleCLI/version-no-store
+=== RUN   TestWorkerGraphAdmissionRejectsIncompatibleCLI/version-invalid
+=== RUN   TestWorkerGraphAdmissionRejectsIncompatibleCLI/partial
+=== RUN   TestWorkerGraphAdmissionRejectsIncompatibleCLI/namespace
+=== RUN   TestWorkerGraphAdmissionRejectsIncompatibleCLI/auto
+=== RUN   TestWorkerGraphAdmissionRejectsIncompatibleCLI/retention
+--- PASS: TestWorkerGraphAdmissionRejectsIncompatibleCLI (0.00s)
+    --- PASS: TestWorkerGraphAdmissionRejectsIncompatibleCLI/version-no-store (0.00s)
+    --- PASS: TestWorkerGraphAdmissionRejectsIncompatibleCLI/version-invalid (0.00s)
+    --- PASS: TestWorkerGraphAdmissionRejectsIncompatibleCLI/partial (0.00s)
+    --- PASS: TestWorkerGraphAdmissionRejectsIncompatibleCLI/namespace (0.00s)
+    --- PASS: TestWorkerGraphAdmissionRejectsIncompatibleCLI/auto (0.00s)
+    --- PASS: TestWorkerGraphAdmissionRejectsIncompatibleCLI/retention (0.00s)
+=== RUN   TestWorkerRunnerCanonicalGraphRepair
+=== RUN   TestWorkerRunnerCanonicalGraphRepair/R1
+    graph_test.go:255: canonical CLI reserved Start/Signal recovery, native timer completion, two terminal restorations, unchanged journal, no legacy journal writes; replicas=1 domain=
+=== RUN   TestWorkerRunnerCanonicalGraphRepair/R3Domain
+    graph_test.go:76: worker domain admitted node=0 domain=WFGRAPH server_id=NCGWRK4NS7XHPYGU25GWPF2LMSR3JXIPQPAWNRAEYXSHDNAMTW5CN5N7
+    graph_test.go:76: worker domain admitted node=1 domain=WFGRAPH server_id=NCNMUUEQSQJSJU5YI6ZCWKEYL3IQ2R5SCX7ZIXJETBNGEL5MPLN6P562
+    graph_test.go:76: worker domain admitted node=2 domain=WFGRAPH server_id=NBIL6IXT4T2HUCKHPMLFNWYDOXD4S6OHNEPV2EEG3E6IA57HP3GIVT7E
+    domain_test.go:79: worker real domain=WFGRAPH domain_api_requests=34796 wrong_prefix_requests=0
+    graph_test.go:255: canonical CLI reserved Start/Signal recovery, native timer completion, two terminal restorations, unchanged journal, no legacy journal writes; replicas=3 domain=WFGRAPH
+--- PASS: TestWorkerRunnerCanonicalGraphRepair (130.52s)
+    --- PASS: TestWorkerRunnerCanonicalGraphRepair/R1 (21.02s)
+    --- PASS: TestWorkerRunnerCanonicalGraphRepair/R3Domain (102.90s)
+=== RUN   TestWorkerRunnerCanonicalCheckpointGraphRepair
+=== RUN   TestWorkerRunnerCanonicalCheckpointGraphRepair/v5
+=== RUN   TestWorkerRunnerCanonicalCheckpointGraphRepair/v5/R1
+    graph_test.go:255: canonical CLI reserved Start/Signal recovery, native timer completion, two terminal restorations, unchanged journal, no legacy journal writes; replicas=1 domain=
+=== RUN   TestWorkerRunnerCanonicalCheckpointGraphRepair/v5/R3Domain
+    graph_test.go:76: worker domain admitted node=0 domain=WFGRAPH server_id=NB27SGGYQMVBJMQWLVCUVCGZUIFFAVPQKJHX4GMM4JZ4FTNZIKHVHRJJ
+    graph_test.go:76: worker domain admitted node=1 domain=WFGRAPH server_id=NBNZ7C7W4DI7R3RKCZ3OKBCRYCGV2Y5F3BS2E4DOSDIL4JPSTJZYWQYV
+    graph_test.go:76: worker domain admitted node=2 domain=WFGRAPH server_id=NBOHLVOZ2645W7X6S34RRGISFDR34DZ2FWQIS3CFSPJA32NDMRIPU6HO
+    graph_test.go:165: worker-smoke result= err=journal append outcome unknown: context deadline exceeded
+    domain_test.go:79: worker real domain=WFGRAPH domain_api_requests=40305 wrong_prefix_requests=0
+    graph_test.go:146: nats: invalid jetstream option: context deadline already exceeded
+=== RUN   TestWorkerRunnerCanonicalCheckpointGraphRepair/v6
+=== RUN   TestWorkerRunnerCanonicalCheckpointGraphRepair/v6/R1
+    graph_test.go:255: canonical CLI reserved Start/Signal recovery, native timer completion, two terminal restorations, unchanged journal, no legacy journal writes; replicas=1 domain=
+=== RUN   TestWorkerRunnerCanonicalCheckpointGraphRepair/v6/R3Domain
+    graph_test.go:76: worker domain admitted node=0 domain=WFGRAPH server_id=NAKTJJY3N6ZMZRBPFKB2JMVVOMRL7LJSDWQTF7PZAKZDZ5GDMF5HYKLQ
+    graph_test.go:76: worker domain admitted node=1 domain=WFGRAPH server_id=NC4WSTMIOWHHIBXXYXIOIIHII5BM3WV4MB6SXPLEU3ILYT56HHL5FZ4R
+    graph_test.go:76: worker domain admitted node=2 domain=WFGRAPH server_id=NBGOVJ224MAJKSCZS456N7T6GQSDT3WK2UFXPVZ5R5AMNZGJXCEWJEH3
+    domain_test.go:79: worker real domain=WFGRAPH domain_api_requests=40641 wrong_prefix_requests=0
+    graph_test.go:255: canonical CLI reserved Start/Signal recovery, native timer completion, two terminal restorations, unchanged journal, no legacy journal writes; replicas=3 domain=WFGRAPH
+--- FAIL: TestWorkerRunnerCanonicalCheckpointGraphRepair (307.78s)
+    --- FAIL: TestWorkerRunnerCanonicalCheckpointGraphRepair/v5 (148.19s)
+        --- PASS: TestWorkerRunnerCanonicalCheckpointGraphRepair/v5/R1 (27.39s)
+        --- FAIL: TestWorkerRunnerCanonicalCheckpointGraphRepair/v5/R3Domain (120.80s)
+    --- PASS: TestWorkerRunnerCanonicalCheckpointGraphRepair/v6 (159.59s)
+        --- PASS: TestWorkerRunnerCanonicalCheckpointGraphRepair/v6/R1 (39.10s)
+        --- PASS: TestWorkerRunnerCanonicalCheckpointGraphRepair/v6/R3Domain (120.49s)
+FAIL
+FAIL	js-wf/cmd/wf-worker	438.442s
+=== RUN   TestGraphAwaitContentionFreshReadAndGenerationFence
+=== RUN   TestGraphAwaitContentionFreshReadAndGenerationFence/v4/observe
+=== RUN   TestGraphAwaitContentionFreshReadAndGenerationFence/v4/pinned
+=== RUN   TestGraphAwaitContentionFreshReadAndGenerationFence/v4/release
+=== RUN   TestGraphAwaitContentionFreshReadAndGenerationFence/v4/generation
+=== RUN   TestGraphAwaitContentionFreshReadAndGenerationFence/v4/purge
+=== RUN   TestGraphAwaitContentionFreshReadAndGenerationFence/v4/cancel
+=== RUN   TestGraphAwaitContentionFreshReadAndGenerationFence/v4/unknown
+=== RUN   TestGraphAwaitContentionFreshReadAndGenerationFence/v6/observe
+=== RUN   TestGraphAwaitContentionFreshReadAndGenerationFence/v6/pinned
+=== RUN   TestGraphAwaitContentionFreshReadAndGenerationFence/v6/release
+=== RUN   TestGraphAwaitContentionFreshReadAndGenerationFence/v6/generation
+=== RUN   TestGraphAwaitContentionFreshReadAndGenerationFence/v6/purge
+=== RUN   TestGraphAwaitContentionFreshReadAndGenerationFence/v6/cancel
+=== RUN   TestGraphAwaitContentionFreshReadAndGenerationFence/v6/unknown
+--- PASS: TestGraphAwaitContentionFreshReadAndGenerationFence (20.51s)
+    --- PASS: TestGraphAwaitContentionFreshReadAndGenerationFence/v4/observe (1.23s)
+    --- PASS: TestGraphAwaitContentionFreshReadAndGenerationFence/v4/pinned (1.42s)
+    --- PASS: TestGraphAwaitContentionFreshReadAndGenerationFence/v4/release (2.29s)
+    --- PASS: TestGraphAwaitContentionFreshReadAndGenerationFence/v4/generation (2.25s)
+    --- PASS: TestGraphAwaitContentionFreshReadAndGenerationFence/v4/purge (1.02s)
+    --- PASS: TestGraphAwaitContentionFreshReadAndGenerationFence/v4/cancel (1.01s)
+    --- PASS: TestGraphAwaitContentionFreshReadAndGenerationFence/v4/unknown (1.07s)
+    --- PASS: TestGraphAwaitContentionFreshReadAndGenerationFence/v6/observe (1.24s)
+    --- PASS: TestGraphAwaitContentionFreshReadAndGenerationFence/v6/pinned (1.49s)
+    --- PASS: TestGraphAwaitContentionFreshReadAndGenerationFence/v6/release (2.09s)
+    --- PASS: TestGraphAwaitContentionFreshReadAndGenerationFence/v6/generation (2.18s)
+    --- PASS: TestGraphAwaitContentionFreshReadAndGenerationFence/v6/purge (1.11s)
+    --- PASS: TestGraphAwaitContentionFreshReadAndGenerationFence/v6/cancel (1.04s)
+    --- PASS: TestGraphAwaitContentionFreshReadAndGenerationFence/v6/unknown (1.06s)
+PASS
+ok  	js-wf/client	21.531s
+FAIL

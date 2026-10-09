@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"fmt"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -24,6 +25,8 @@ func TestWorkerGraphAdmissionRejectsIncompatibleCLI(t *testing.T) {
 		args []string
 		want string
 	}{
+		{"version-no-store", []string{"-graph-cursor-version", "6"}, "requires graph-authority"},
+		{"version-invalid", []string{"-graph-cursor-version", "7"}, "must be 4, 5 or 6"},
 		{"partial", []string{"-graph-authority-stream", "AUTH"}, "requires graph-authority"},
 		{"namespace", []string{"-graph-authority-stream", "AUTH", "-graph-authority-prefix", "bad.*", "-graph-object-bucket", "OBJECTS", "-timer-backend", "native"}, "invalid native graph namespace"},
 		{"auto", []string{"-graph-authority-stream", "AUTH", "-graph-authority-prefix", "wf.graph", "-graph-object-bucket", "OBJECTS", "-timer-backend", "auto"}, "requires explicit"},
@@ -44,7 +47,17 @@ func TestWorkerRunnerCanonicalGraphRepair(t *testing.T) {
 func TestWorkerRunnerCanonicalGraphFallbackRepair(t *testing.T) {
 	testWorkerRunnerCanonicalGraphRepair(t, "fallback")
 }
-func testWorkerRunnerCanonicalGraphRepair(t *testing.T, backend string) {
+func TestWorkerRunnerCanonicalCheckpointGraphRepair(t *testing.T) {
+	for _, version := range []int{5, 6} {
+		t.Run(fmt.Sprint("v", version), func(t *testing.T) { testWorkerRunnerCanonicalGraphRepair(t, "native", version) })
+	}
+}
+
+func testWorkerRunnerCanonicalGraphRepair(t *testing.T, backend string, versions ...int) {
+	version := 4
+	if len(versions) > 0 {
+		version = versions[0]
+	}
 	plugin := testWorkerPlugin(t)
 	for _, domain := range []string{"", "WFGRAPH"} {
 		name := "R1"
@@ -75,7 +88,7 @@ func testWorkerRunnerCanonicalGraphRepair(t *testing.T, backend string) {
 			if err != nil {
 				t.Fatal(err)
 			}
-			cfg := journal.NativeGraphConfig{AuthorityStream: "CLI_GRAPH_AUTH", AuthorityPrefix: "wf.graph.cli", ObjectBucket: "CLI_GRAPH_OBJECTS", ExpectedReplicas: replicas, CanonicalStarts: true, CanonicalSignals: true, Encoding: journal.ProtobufV1}
+			cfg := journal.NativeGraphConfig{AuthorityStream: "CLI_GRAPH_AUTH", AuthorityPrefix: "wf.graph.cli", ObjectBucket: "CLI_GRAPH_OBJECTS", ExpectedReplicas: replicas, CanonicalStarts: true, CanonicalSignals: true, Encoding: journal.ProtobufV1, CheckpointIndex: version >= 5, ArchiveCheckpoints: version == 6}
 			configs, err := journal.NativeGraphStreamConfigs(cfg, replicas)
 			if err != nil {
 				t.Fatal(err)
@@ -115,7 +128,16 @@ func testWorkerRunnerCanonicalGraphRepair(t *testing.T, backend string) {
 				t.Fatal(err)
 			}
 			events := filepath.Join(t.TempDir(), "events.jsonl")
+			t.Cleanup(func() {
+				if t.Failed() {
+					data, readErr := os.ReadFile(events)
+					t.Logf("terminal worker repair evidence (read error %v):\n%s", readErr, data)
+				}
+			})
 			args := append(workerDomainArgs(domain, replicas), []string{"-url", cluster.Servers[0].ClientURL(), "-id", "graph-cli", "-handler-plugin", plugin, "-metrics-addr", "127.0.0.1:0", "-graph-authority-stream", cfg.AuthorityStream, "-graph-authority-prefix", cfg.AuthorityPrefix, "-graph-object-bucket", cfg.ObjectBucket, "-journal-encoding", "protobuf-v1", "-timer-backend", backend, "-reconcile-interval", "100ms", "-events-file", events}...)
+			if len(versions) > 0 {
+				args = append(args, "-graph-cursor-version", strconv.Itoa(version))
+			}
 			runCtx, stop := context.WithCancel(ctx)
 			defer stop()
 			done := make(chan error, 1)
@@ -209,6 +231,25 @@ func testWorkerRunnerCanonicalGraphRepair(t *testing.T, backend string) {
 			if err != nil || info.State.Msgs != 0 {
 				t.Fatal("graph CLI wrote legacy journal", err)
 			}
+			// A repaired projection can become visible before the publishing
+			// scanner receives its acknowledgement and reports the event. Wait
+			// for that acknowledgement inside the original fixture deadline;
+			// cancellation at the first visible projection can cut it off.
+			for {
+				data, readErr := os.ReadFile(events)
+				observed := acknowledgedGraphRepairs(data)
+				if readErr == nil && observed["graph-start"] && observed["graph-signal"] && observed["graph-terminal"] {
+					break
+				}
+				select {
+				case <-ctx.Done():
+					t.Fatalf("repair acknowledgements not observed: %v (read error %v): %v", observed, readErr, ctx.Err())
+				case err := <-done:
+					joined = true
+					t.Fatalf("graph runner exited before repair acknowledgements: %v", err)
+				case <-time.After(20 * time.Millisecond):
+				}
+			}
 			stop()
 			shutdownErr := <-done
 			joined = true
@@ -221,16 +262,7 @@ func testWorkerRunnerCanonicalGraphRepair(t *testing.T, backend string) {
 			if err != nil {
 				t.Fatal(err)
 			}
-			observed := map[string]bool{}
-			for _, line := range bytes.Split(data, []byte("\n")) {
-				var row struct {
-					Kind  string                         `json:"kind"`
-					Event struct{ Kind, Outcome string } `json:"event"`
-				}
-				if json.Unmarshal(line, &row) == nil && row.Kind == "repair" && row.Event.Outcome == "acknowledged" {
-					observed[row.Event.Kind] = true
-				}
-			}
+			observed := acknowledgedGraphRepairs(data)
 			for _, kind := range []string{"graph-start", "graph-signal", "graph-terminal"} {
 				if !observed[kind] {
 					t.Fatalf("missing %s repair evidence: %v", kind, observed)
@@ -239,4 +271,18 @@ func testWorkerRunnerCanonicalGraphRepair(t *testing.T, backend string) {
 			t.Log("canonical CLI reserved Start/Signal recovery, native timer completion, two terminal restorations, unchanged journal, no legacy journal writes; replicas=" + strconv.Itoa(replicas) + " domain=" + domain)
 		})
 	}
+}
+
+func acknowledgedGraphRepairs(data []byte) map[string]bool {
+	observed := map[string]bool{}
+	for _, line := range bytes.Split(data, []byte("\n")) {
+		var row struct {
+			Kind  string                         `json:"kind"`
+			Event struct{ Kind, Outcome string } `json:"event"`
+		}
+		if json.Unmarshal(line, &row) == nil && row.Kind == "repair" && row.Event.Outcome == "acknowledged" {
+			observed[row.Event.Kind] = true
+		}
+	}
+	return observed
 }

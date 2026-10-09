@@ -50,6 +50,7 @@ func runWithJetStreamOptions(args []string, out io.Writer, options ...jetstream.
 	graphViewNamespace := flags.String("graph-view-namespace", "", "explicit PostgreSQL namespace for graph visibility")
 	graphViewBucket := flags.String("graph-view-bucket", "", "separately provisioned graph visibility query bucket")
 	graphBucket := flags.String("graph-object-bucket", "", "experimental canonical graph object bucket (pre-provisioned)")
+	graphCursorVersion := flags.Int("graph-cursor-version", 4, "experimental graph cursor schema: 4, 5 (checkpoint index), or 6 (new isolated archive stores)")
 	graphReplicas := flags.Int("replicas", 3, "expected graph store replica count")
 	graphEncoding := flags.String("journal-encoding", "json", "graph journal encoding: json or protobuf-v1")
 	inputFile := flags.String("input-file", "", "JSON payload file for start or signal")
@@ -76,7 +77,7 @@ func runWithJetStreamOptions(args []string, out io.Writer, options ...jetstream.
 	if len(command) == 0 {
 		return errors.New("usage: wf [-url nats://...] [-domain name] [-attribute key=value] {start type id json|signal type id name key json|result type id|project|list [status]|describe type id|lag|export-journal type id|export-replay type id|replay type id|cancel type id|purge type id|sweep-tombstones|scan-tombstones|tombstone-loop|scan-start|scan-signal|scan-terminal|scan-timer|scan-suspended|journal-capacity|assignment-init worker...|assignment-get partition|assignment-move partition owner revision}")
 	}
-	graphConfig, err := selectClientGraph(*graphAuthority, *graphPrefix, *graphBucket, *graphReplicas, journal.Encoding(*graphEncoding))
+	graphConfig, err := selectClientGraph(*graphAuthority, *graphPrefix, *graphBucket, *graphReplicas, journal.Encoding(*graphEncoding), *graphCursorVersion)
 	if err != nil {
 		return err
 	}

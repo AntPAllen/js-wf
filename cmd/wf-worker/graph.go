@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/nats-io/nats.go/jetstream"
+	"js-wf/internal/graphcli"
 	"js-wf/journal"
 	"js-wf/reconcile"
 )
@@ -15,12 +16,10 @@ type workerGraphSelection struct {
 	store  *journal.GraphStore
 }
 
-func selectWorkerGraph(authority, prefix, bucket string, replicas int, encoding journal.Encoding, timerBackend, retentionType string) (*workerGraphSelection, error) {
-	if authority == "" && prefix == "" && bucket == "" {
-		return nil, nil
-	}
-	if authority == "" || prefix == "" || bucket == "" {
-		return nil, fmt.Errorf("graph runtime requires graph-authority-stream, graph-authority-prefix and graph-object-bucket together")
+func selectWorkerGraph(authority, prefix, bucket string, replicas int, encoding journal.Encoding, timerBackend, retentionType string, version int) (*workerGraphSelection, error) {
+	cfg, err := graphcli.Select(authority, prefix, bucket, replicas, encoding, version)
+	if err != nil || cfg == nil {
+		return nil, err
 	}
 	if timerBackend != "native" && timerBackend != "fallback" {
 		return nil, fmt.Errorf("graph runtime requires explicit -timer-backend native or fallback")
@@ -28,12 +27,7 @@ func selectWorkerGraph(authority, prefix, bucket string, replicas int, encoding 
 	if retentionType != "" {
 		return nil, fmt.Errorf("graph runtime requires graph-aware retention; retention-type selects the legacy handler")
 	}
-	cfg := journal.NativeGraphConfig{AuthorityStream: authority, AuthorityPrefix: prefix, ObjectBucket: bucket, ExpectedReplicas: replicas, Encoding: encoding, CanonicalStarts: true, CanonicalSignals: true}
-	// Reuse namespace/config validation without provisioning either graph store.
-	if _, err := journal.NativeGraphStreamConfigs(cfg, replicas); err != nil {
-		return nil, err
-	}
-	return &workerGraphSelection{config: cfg}, nil
+	return &workerGraphSelection{config: *cfg}, nil
 }
 
 func graphWorkerRepairLoops(js jetstream.JetStream, id string, interval time.Duration, budget int, graph *journal.GraphStore, observe func(reconcile.RepairEvent), clock reconcile.TimerDomainClock) []func(context.Context) error {

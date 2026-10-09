@@ -1,0 +1,7 @@
+{
+  "normal": "go test ./client ./cmd/wf ./cmd/wf-worker -run '^(TestGraphAwaitContentionFreshReadAndGenerationFence|TestGraphAwaitOwnReadDeadline|TestNativeGraphCursorOperatorHistory|TestGraphOperatorCursorRejectsUnknownVersion|TestGraphOperatorRejectsPartialOrLegacyOnlySelection|TestWorkerRunnerCanonicalCheckpointGraphRepair|TestWorkerRunnerCanonicalGraphRepair|TestWorkerGraphAdmissionRejectsIncompatibleCLI)$' -count=1 -timeout=10m -v",
+  "race": "go test -race -p=1 ./client ./cmd/wf ./cmd/wf-worker -run '^(TestGraphAwaitContentionFreshReadAndGenerationFence|TestGraphAwaitOwnReadDeadline|TestNativeGraphCursorOperatorHistory|TestGraphOperatorCursorRejectsUnknownVersion|TestGraphOperatorRejectsPartialOrLegacyOnlySelection|TestWorkerRunnerCanonicalCheckpointGraphRepair|TestWorkerRunnerCanonicalGraphRepair|TestWorkerGraphAdmissionRejectsIncompatibleCLI)$' -count=1 -timeout=10m -v",
+  "working_directory": "/home/exedev/js-wf",
+  "diagnostic_race": "go test -race ./cmd/wf-worker -run '^TestWorkerRunnerCanonicalCheckpointGraphRepair/v5/R3Domain$' -count=1 -timeout=5m -v",
+  "result_and_pins": "go test ./sim -run '^(TestSeededGraphResultReplay|TestPinnedRegressionCorpus)$' -count=1 -timeout=10m -v"
+}

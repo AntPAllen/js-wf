@@ -1,0 +1,45 @@
+{
+  "verdict": "FAIL focused native worker race qualification; normal and client/operator race passed",
+  "repository_inputs_unchanged": 932,
+  "logs": {
+    "normal": {
+      "exit_code": 0,
+      "sha256": "ad41636f1a321161042d79f20dd0c5eaee4d95de6402e4d07eb4130cd9cee430",
+      "package_times": [
+        [
+          "js-wf/client",
+          "12.860s"
+        ],
+        [
+          "js-wf/cmd/wf",
+          "17.767s"
+        ],
+        [
+          "js-wf/cmd/wf-worker",
+          "48.972s"
+        ]
+      ]
+    },
+    "race": {
+      "exit_code": 1,
+      "sha256": "b3e3b46aa92b574e7d142de38d4b52b925a5c2fdfc2188e2def81a2f43745489",
+      "package_times": [
+        [
+          "js-wf/client",
+          "30.647s"
+        ],
+        [
+          "js-wf/cmd/wf",
+          "45.216s"
+        ]
+      ]
+    }
+  },
+  "directed_cases_per_seed": 14,
+  "directed_seeds": 16,
+  "directed_bodies": 224,
+  "exact_replays": 224,
+  "native_operator_cases": 6,
+  "native_worker_cases": 6,
+  "scope": "All native worker R3 race cases miss the unchanged two-minute deadline. Their cause remains unconfirmed; no complete current qualification or deployment admission. Explicit operator/ordinary-worker cursor selection, owned archive history and Await contention/deadline decisions only. Shared Tier-1 integration, full current qualification, continuation CLI execution/public admission, import/deployment migration, original native matrices and every broader release gate remain open."
+}

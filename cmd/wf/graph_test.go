@@ -30,6 +30,7 @@ import (
 
 func TestGraphOperatorRejectsPartialOrLegacyOnlySelection(t *testing.T) {
 	for _, args := range [][]string{
+		{"-graph-cursor-version", "6", "export-journal", "test", "id"},
 		{"-graph-view-namespace", "graph-test", "list"},
 		{"-graph-authority-stream", "AUTH", "-graph-authority-prefix", "wf.graph", "-graph-object-bucket", "OBJECTS", "-postgres-dsn", "postgres://invalid", "list"},
 		{"-graph-authority-stream", "AUTH", "-graph-authority-prefix", "wf.graph", "-graph-object-bucket", "OBJECTS", "-graph-view-namespace", "graph-test", "list"},

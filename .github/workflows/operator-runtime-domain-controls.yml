@@ -57,6 +57,35 @@ on:
 permissions:
   contents: read
 jobs:
+  graph-cursor-controls:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - package: client
+            tests: 'TestGraphAwaitContentionFreshReadAndGenerationFence|TestGraphAwaitOwnReadDeadline'
+          - package: cmd/wf
+            tests: 'TestNativeGraphCursorOperatorHistory|TestGraphOperatorCursorRejectsUnknownVersion|TestGraphOperatorRejectsPartialOrLegacyOnlySelection'
+          - package: cmd/wf-worker
+            tests: 'TestWorkerRunnerCanonicalCheckpointGraphRepair|TestWorkerRunnerCanonicalGraphRepair|TestWorkerGraphAdmissionRejectsIncompatibleCLI'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - name: Require explicit cursor selection and owned result controls under race
+        shell: bash
+        run: |
+          set -o pipefail
+          go test -race './${{ matrix.package }}' -run '^(${{ matrix.tests }})$' -count=1 -timeout=10m -v 2>&1 | tee graph-cursor-race.log
+      - if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: graph-cursor-${{ strategy.job-index }}
+          path: graph-cursor-race.log
+          if-no-files-found: error
   command-domain-controls:
     runs-on: ubuntu-latest
     timeout-minutes: 10

@@ -15,21 +15,12 @@ import (
 
 	"github.com/nats-io/nats.go/jetstream"
 	"js-wf/identity"
+	"js-wf/internal/graphcli"
 	"js-wf/journal"
 )
 
-func selectClientGraph(authority, prefix, bucket string, replicas int, encoding journal.Encoding) (*journal.NativeGraphConfig, error) {
-	if authority == "" && prefix == "" && bucket == "" {
-		return nil, nil
-	}
-	if authority == "" || prefix == "" || bucket == "" {
-		return nil, fmt.Errorf("graph runtime requires graph-authority-stream, graph-authority-prefix and graph-object-bucket together")
-	}
-	cfg := journal.NativeGraphConfig{AuthorityStream: authority, AuthorityPrefix: prefix, ObjectBucket: bucket, ExpectedReplicas: replicas, Encoding: encoding, CanonicalStarts: true, CanonicalSignals: true}
-	if _, err := journal.NativeGraphStreamConfigs(cfg, replicas); err != nil {
-		return nil, err
-	}
-	return &cfg, nil
+func selectClientGraph(authority, prefix, bucket string, replicas int, encoding journal.Encoding, version int) (*journal.NativeGraphConfig, error) {
+	return graphcli.Select(authority, prefix, bucket, replicas, encoding, version)
 }
 
 func readCLIPayload(literal, file string) ([]byte, error) {

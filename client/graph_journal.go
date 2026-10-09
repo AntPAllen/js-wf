@@ -8,6 +8,7 @@ import (
 
 	"github.com/nats-io/nats.go/jetstream"
 	"js-wf/identity"
+	"js-wf/internal/graphpublication"
 	"js-wf/journal"
 	"js-wf/retention"
 	"js-wf/wf"
@@ -142,8 +143,22 @@ func (c *Client) awaitGraph(ctx context.Context, typ, id string, observed *uint6
 		if tomb && marker.InvSeq >= input.Sequence {
 			return nil, ErrPurged
 		}
-		data, terminal, ready, err := c.graphTerminalResult(ctx, typ, id, input.Sequence)
+		attempt, stop := context.WithTimeout(ctx, 5*time.Second)
+		data, terminal, ready, err := c.graphTerminalResult(attempt, typ, id, input.Sequence)
+		ownDeadline := errors.Is(attempt.Err(), context.DeadlineExceeded) && ctx.Err() == nil
+		stop()
 		if err != nil {
+			// A rejected read witness or reader-release CAS certifies no result.
+			// Reopen the same captured invocation after bounded backoff; never
+			// turn contention into purge proof or adopt a replacement source.
+			// An expired local read deadline also requires a fresh attempt.
+			// Other unknown failures and malformed data still fail closed.
+			if (errors.Is(err, graphpublication.ErrConflict) || ownDeadline && errors.Is(err, context.DeadlineExceeded)) && ctx.Err() == nil {
+				if waitErr := port.Wait(ctx, 100*time.Millisecond); waitErr != nil {
+					return nil, waitErr
+				}
+				continue
+			}
 			// Bare ErrStale is generation rejection; wrapped CAS contention
 			// must not be reported as a purge.
 			if err == journal.ErrStale {

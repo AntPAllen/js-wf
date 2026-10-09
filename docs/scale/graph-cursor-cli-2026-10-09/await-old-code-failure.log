@@ -1,0 +1,45 @@
+=== RUN   TestGraphAwaitContentionFreshReadAndGenerationFence
+=== RUN   TestGraphAwaitContentionFreshReadAndGenerationFence/v4/observe
+    graph_await_contention_test.go:239: seed=1 observe did not freshly await: value= error=journal append outcome unknown: read witness rejected: blob publication CAS conflict waits=0
+=== RUN   TestGraphAwaitContentionFreshReadAndGenerationFence/v4/pinned
+    graph_await_contention_test.go:239: seed=1 pinned did not freshly await: value= error=read witness rejected: blob publication CAS conflict waits=0
+=== RUN   TestGraphAwaitContentionFreshReadAndGenerationFence/v4/release
+    graph_await_contention_test.go:239: seed=1 release did not freshly await: value= error=blob publication CAS conflict waits=0
+=== RUN   TestGraphAwaitContentionFreshReadAndGenerationFence/v4/generation
+    graph_await_contention_test.go:239: seed=1 generation transferred/returned result: value= error=journal append outcome unknown: read witness rejected: blob publication CAS conflict
+=== RUN   TestGraphAwaitContentionFreshReadAndGenerationFence/v4/purge
+    graph_await_contention_test.go:239: seed=1 purge transferred/returned result: value= error=journal append outcome unknown: read witness rejected: blob publication CAS conflict
+=== RUN   TestGraphAwaitContentionFreshReadAndGenerationFence/v4/cancel
+    graph_await_contention_test.go:239: seed=1 cancel returned value= error=journal append outcome unknown: read witness rejected: blob publication CAS conflict
+=== RUN   TestGraphAwaitContentionFreshReadAndGenerationFence/v4/unknown
+=== RUN   TestGraphAwaitContentionFreshReadAndGenerationFence/v6/observe
+    graph_await_contention_test.go:239: seed=1 observe did not freshly await: value= error=journal append outcome unknown: read witness rejected: blob publication CAS conflict waits=0
+=== RUN   TestGraphAwaitContentionFreshReadAndGenerationFence/v6/pinned
+    graph_await_contention_test.go:239: seed=1 pinned did not freshly await: value= error=read witness rejected: blob publication CAS conflict waits=0
+=== RUN   TestGraphAwaitContentionFreshReadAndGenerationFence/v6/release
+    graph_await_contention_test.go:239: seed=1 release did not freshly await: value= error=blob publication CAS conflict waits=0
+=== RUN   TestGraphAwaitContentionFreshReadAndGenerationFence/v6/generation
+    graph_await_contention_test.go:239: seed=1 generation transferred/returned result: value= error=journal append outcome unknown: read witness rejected: blob publication CAS conflict
+=== RUN   TestGraphAwaitContentionFreshReadAndGenerationFence/v6/purge
+    graph_await_contention_test.go:239: seed=1 purge transferred/returned result: value= error=journal append outcome unknown: read witness rejected: blob publication CAS conflict
+=== RUN   TestGraphAwaitContentionFreshReadAndGenerationFence/v6/cancel
+    graph_await_contention_test.go:239: seed=1 cancel returned value= error=journal append outcome unknown: read witness rejected: blob publication CAS conflict
+=== RUN   TestGraphAwaitContentionFreshReadAndGenerationFence/v6/unknown
+--- FAIL: TestGraphAwaitContentionFreshReadAndGenerationFence (0.17s)
+    --- FAIL: TestGraphAwaitContentionFreshReadAndGenerationFence/v4/observe (0.00s)
+    --- FAIL: TestGraphAwaitContentionFreshReadAndGenerationFence/v4/pinned (0.00s)
+    --- FAIL: TestGraphAwaitContentionFreshReadAndGenerationFence/v4/release (0.00s)
+    --- FAIL: TestGraphAwaitContentionFreshReadAndGenerationFence/v4/generation (0.00s)
+    --- FAIL: TestGraphAwaitContentionFreshReadAndGenerationFence/v4/purge (0.00s)
+    --- FAIL: TestGraphAwaitContentionFreshReadAndGenerationFence/v4/cancel (0.00s)
+    --- PASS: TestGraphAwaitContentionFreshReadAndGenerationFence/v4/unknown (0.07s)
+    --- FAIL: TestGraphAwaitContentionFreshReadAndGenerationFence/v6/observe (0.00s)
+    --- FAIL: TestGraphAwaitContentionFreshReadAndGenerationFence/v6/pinned (0.00s)
+    --- FAIL: TestGraphAwaitContentionFreshReadAndGenerationFence/v6/release (0.00s)
+    --- FAIL: TestGraphAwaitContentionFreshReadAndGenerationFence/v6/generation (0.00s)
+    --- FAIL: TestGraphAwaitContentionFreshReadAndGenerationFence/v6/purge (0.00s)
+    --- FAIL: TestGraphAwaitContentionFreshReadAndGenerationFence/v6/cancel (0.00s)
+    --- PASS: TestGraphAwaitContentionFreshReadAndGenerationFence/v6/unknown (0.08s)
+FAIL
+FAIL	js-wf/client	0.173s
+FAIL

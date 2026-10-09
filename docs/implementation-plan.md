@@ -1,5 +1,11 @@
 # JetStream Durable Workflow Runtime — Implementation Plan
 
+## Explicit command cursor selection and Await contention recovery — 2026-10-09
+
+Worker/operator commands now share explicit v4/v5/v6 selection; v4 remains the default and v6 requires new isolated stores. Native describe/export tests inspect full owned archive history after original receipt collection and reject both incorrect schemas. Await retries typed read/release CAS contention and actual local terminal-read deadline errors against the captured invocation; replacement, purge, cancellation, immediate unknown errors and corruption remain fail-closed. Fourteen directed seeded modes and two real deadline controls pass normally and under race. [Source observations, failed attempts, raw evidence, executed verdict and CI wiring](scale/graph-cursor-cli-2026-10-09/README.md).
+
+All six operator and six ordinary worker version/replication cases pass normally. Operator/client race packages pass; the complete worker race campaign **fails all v4/v5/v6 R3 cases at the unchanged two-minute deadline**, with repeated uncertain pending Start binding visible in retained events. A focused v5 R3 retest passed but does not establish the timeout cause. This native liveness gate remains open. Shared Tier-1 integration of Await contention, full current/race/extended qualification, continuation CLI execution/admission, import/deployment and every original broader gate remain open. Public continuation admission and production collection remain disabled.
+
 ## Complete normal deterministic qualification accepted — 2026-10-09
 
 Frozen `fca8264` passed all 149 families × 1,000 contiguous completed bodies, all 762 saved regressions and 211 top-level groups in 1,956.496 seconds. Independent executed review confirms 1,943 unchanged Git-matched inputs, binary provenance, exact coverage and terminal success. [Complete normal proof and remaining scope](scale/graph-current-qualification-2026-10-09/complete-normal1000/README.md).

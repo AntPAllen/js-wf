@@ -54,6 +54,7 @@ func runWithJetStreamOptions(ctx context.Context, args []string, jsOptions ...je
 	graphAuthority := flags.String("graph-authority-stream", "", "experimental canonical graph authority stream (pre-provisioned)")
 	graphPrefix := flags.String("graph-authority-prefix", "", "experimental canonical graph authority subject prefix")
 	graphBucket := flags.String("graph-object-bucket", "", "experimental canonical graph object bucket (pre-provisioned)")
+	graphCursorVersion := flags.Int("graph-cursor-version", 4, "experimental graph cursor schema: 4, 5 (checkpoint index), or 6 (new isolated archive stores)")
 	timerBackend := flags.String("timer-backend", "auto", "timer storage mode: auto, native, or fallback")
 	mode := flags.String("mode", "static", "partition assignment mode: static, kv, or auto")
 	staticIndex := flags.Int("static-index", 0, "static worker index")
@@ -82,7 +83,7 @@ func runWithJetStreamOptions(ctx context.Context, args []string, jsOptions ...je
 	if *timerBackend != "auto" && *timerBackend != "native" && *timerBackend != "fallback" {
 		return fmt.Errorf("invalid timer backend %q", *timerBackend)
 	}
-	graphSelection, err := selectWorkerGraph(*graphAuthority, *graphPrefix, *graphBucket, *replicas, journal.Encoding(*journalEncoding), *timerBackend, *retentionType)
+	graphSelection, err := selectWorkerGraph(*graphAuthority, *graphPrefix, *graphBucket, *replicas, journal.Encoding(*journalEncoding), *timerBackend, *retentionType, *graphCursorVersion)
 	if err != nil {
 		return err
 	}
