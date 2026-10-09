@@ -1,5 +1,9 @@
 # JetStream Durable Workflow Runtime — Implementation Plan
 
+## Native reader-expiry restart/checkpoint integration verified — 2026-10-09
+
+The shared reader scheduler passes a focused race test against one- and three-replica JetStream file-backed authority, object storage, leases and cursor CAS (4.206 seconds). It hides a committed batch-checkpoint acknowledgment, restarts adapters/scheduler from native state, finishes the captured pass, removes expired pins, preserves a live pin and leaves objects intact. [Evidence and scope](scale/graph-reader-expiry-native-2026-10-09/README.md). This is controlled adapter restart, not process/VM kill or native route/storage fault qualification. Seeded maintenance campaigns, deployment/rollout and all original broader requirements remain open. Both supervised frozen race services are observed active; acceptance remains pending.
+
 ## Persisted reader-expiry maintenance loop added — 2026-10-09
 
 Explicit experimental reader maintenance now captures and persists the watermark before batch work, resumes it across restarts, renews leases before batches/saves, reloads uncertain checkpoint replies, and saves only confirmed partial progress. A versioned atomic `WF_STATE` checkpoint uses cursor CAS. Five focused deterministic scheduler/KV-boundary groups pass race in 1.015 seconds. [Evidence and limitations](scale/graph-reader-expiry-loop-2026-10-09/README.md). Native cluster integration and broader qualification remain open; the loop does not delete objects and is not installed in the default runtime. Both supervised frozen race test processes are observed live, with terminal acceptance pending. Full current-source and every original broader gate remain open.
