@@ -1,5 +1,9 @@
 # Implementation status against the supplied plan
 
+## Duplicate graph authority validation removed — 2026-10-09
+
+Authority normalization now relies on `Encode` for its existing structural validation and graph byte bound, removing the prior duplicate `Validate` pass. Benchmarks show 65 fewer allocations per call; shared-VM timing data does not establish latency improvement. Existing malformed-reader/stream/metadata/input/legacy-byte controls pass race in 1.820 seconds. [Focused evidence and limits](scale/graph-normalization-validation-2026-10-09/README.md). Full current-source qualification and all broader gates remain open; ongoing frozen campaigns exclude this change.
+
 ## Expiry actor normal1000 accepted; race serialized behind live campaigns — 2026-10-09
 
 The new expiry/root-reply workload passes all 1,000 contiguous bodies and exact replays in 597.57 seconds, observing all 30 combinations and actual expiry cuts. [Independent executed review](scale/graph-signal-expiry-actors-2026-10-09/normal1000/README.md) verifies retained binary/actual exit/body counts and the published `e971d01` Go/module/original-trace cohort, with its explicit post-launch snapshot limitation. Race uses a 300-minute CPU watchdog and 305-minute CI budget; domain/seed/per-schedule targets are unchanged. Its first attempt was intentionally stopped (actual exit -15) after observing four CPUs; replacement is queued until one of two observed live race test processes exits. Complete current 153-family/all-816-pin/extended/exhaustive and all original broader gates remain open.

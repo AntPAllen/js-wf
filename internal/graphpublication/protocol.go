@@ -181,9 +181,8 @@ func normalizeRoot(root Root) (Root, error) {
 	if schemaRank(root.Schema) == 0 || (root.Schema == Schema && len(root.Readers) != 0) || (schemaRank(root.Schema) < 3 && len(root.Application) != 0) || len(root.Application) > MaxApplicationBytes || (schemaRank(root.Schema) >= 3 && root.Head == 0) || len(root.Readers) > MaxReaders || (root.Graph.Count > 0 && (root.Head == 0 || !validID(root.Token))) || (root.Token != "" && !validID(root.Token)) {
 		return Root{}, errors.New("invalid graph authority root")
 	}
-	if err := root.Graph.Validate(); err != nil {
-		return Root{}, err
-	}
+	// Encode checks both structure and the graph's independent byte limit.
+	// A separate Validate call would repeat the same frontier/receipt walk.
 	if _, err := root.Graph.Encode(); err != nil {
 		return Root{}, err
 	}

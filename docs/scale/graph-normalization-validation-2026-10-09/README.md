@@ -1,0 +1,7 @@
+# Remove duplicate authority structural validation
+
+`normalizeRoot` previously called `Root.Validate` and then `Root.Encode`, which calls the same pure `Validate` before enforcing the graph byte bound. It now calls `Encode` once. Named-stream/reader validation, individual graph byte limits, authority byte limits, canonical encoding and all malformed-root checks remain in place. No runtime deadline, admission or ownership rule changes.
+
+A repeatable benchmark constructs structurally valid 13-tree frontiers with four named streams and either zero or eight retained readers. It supplies no stored nodes and makes no ownership/native-conformance claim. Three baseline/candidate repetitions under GOMAXPROCS=1 show 65 fewer allocations and about 3.5 KiB fewer allocated bytes per normalization call (414→349 allocations without readers; 3142→3077 with eight). Timings are noisy and mostly slower in the candidate run while other race work shares the four-CPU VM; no latency or end-to-end campaign-speed improvement is claimed.
+
+Existing metadata/generation bounds, invalid acknowledgments/input bounds, malformed reader/frontier checks, named-stream ordering/schema/token checks, and legacy canonical-byte controls pass under race in 1.820 seconds. Raw logs, observed actual exits and input hashes are retained. This is focused verification of redundant work removal; complete current source/suite/all-pin/extended/native/runtime/scale/retention/import/adoption/release qualification remains open. The ongoing frozen campaigns and queued expiry binary exclude this change.

@@ -1,0 +1,96 @@
+{
+  "executed_control_exits": {
+    "baseline": {
+      "session": 34945,
+      "exit_code": 0
+    },
+    "candidate": {
+      "session": 54745,
+      "exit_code": 0
+    },
+    "guards_race": {
+      "session": 86428,
+      "exit_code": 0
+    }
+  },
+  "results": {
+    "baseline": {
+      "readers-0": [
+        {
+          "ns_per_op": 245617,
+          "bytes_per_op": 108933,
+          "allocs_per_op": 414
+        },
+        {
+          "ns_per_op": 238860,
+          "bytes_per_op": 108936,
+          "allocs_per_op": 414
+        },
+        {
+          "ns_per_op": 210817,
+          "bytes_per_op": 108933,
+          "allocs_per_op": 414
+        }
+      ],
+      "readers-8": [
+        {
+          "ns_per_op": 2233265,
+          "bytes_per_op": 1137209,
+          "allocs_per_op": 3142
+        },
+        {
+          "ns_per_op": 2184434,
+          "bytes_per_op": 1137227,
+          "allocs_per_op": 3142
+        },
+        {
+          "ns_per_op": 2231909,
+          "bytes_per_op": 1137208,
+          "allocs_per_op": 3142
+        }
+      ]
+    },
+    "candidate": {
+      "readers-0": [
+        {
+          "ns_per_op": 360109,
+          "bytes_per_op": 105397,
+          "allocs_per_op": 349
+        },
+        {
+          "ns_per_op": 333821,
+          "bytes_per_op": 105398,
+          "allocs_per_op": 349
+        },
+        {
+          "ns_per_op": 312606,
+          "bytes_per_op": 105399,
+          "allocs_per_op": 349
+        }
+      ],
+      "readers-8": [
+        {
+          "ns_per_op": 3141367,
+          "bytes_per_op": 1133673,
+          "allocs_per_op": 3077
+        },
+        {
+          "ns_per_op": 3269712,
+          "bytes_per_op": 1133698,
+          "allocs_per_op": 3077
+        },
+        {
+          "ns_per_op": 2214217,
+          "bytes_per_op": 1133673,
+          "allocs_per_op": 3077
+        }
+      ]
+    }
+  },
+  "inputs": {
+    "internal/graphpublication/protocol.go": "4dd61c94cf708a279a20b04382c948319dad8c10b4172d492fab93c5995cf061",
+    "internal/graphpublication/protocol_benchmark_test.go": "728fce9d4720570d8bed563a408f1a0ec203c3c277cf6b5ba686766607e44ac1",
+    "internal/retainedgraph/graph.go": "8d3c29dc32b1b0fb22335d13dfd0191646320ed3810848cf2a5caa0561a622f4"
+  },
+  "note": "Tool-observed terminal exits; normal benchmark timings confounded by concurrent race campaigns. No latency/suite-speed claim."
+}
