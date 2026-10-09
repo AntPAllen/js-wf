@@ -48,7 +48,7 @@ Precompile and post-execution inventories match all 1,819 retained repository
 Go/module/trace inputs; the executed review also compares those hashes to
 the frozen Git objects and verifies the checkout and binary remain unchanged.
 The sparse checkout excludes repository documentation to avoid duplicating
-32 GiB of unrelated artifacts; all selected test/compiler inputs are retained.
+unrelated artifacts; all selected test/compiler inputs are retained.
 This records repository-source provenance, not an independent attestation of
 every external module/toolchain byte.
 
