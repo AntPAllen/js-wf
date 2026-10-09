@@ -1,0 +1,49 @@
+{
+  "verdict": "PASS native adapter seeded family normal/race and all 24 new regression traces normal/race",
+  "source_revision": "13a0fd6ce226d906ce9e60c515222f07b49e4123",
+  "repository_inputs_git_verified": 1803,
+  "canonical_seeded_families": 151,
+  "saved_regressions": 810,
+  "prior_pins_git_verified_unchanged": 786,
+  "mode_combinations": 24,
+  "baseline": {
+    "source_file_revision": "6df82898e70c5cd2a71bea384910f4505df365f6",
+    "seed": 1,
+    "go_test_seconds": 0.007,
+    "minimizer_reproductions": 4,
+    "scope": "One-file old-production overlay against current model; invalid generation fixture and invalid pin output path are development harness failures, not runtime evidence."
+  },
+  "logs": {
+    "development/generated-pins-normal1000": {
+      "sha256": "0cfe045ac0749c3b503a5b38c294758810b7937d7238d1a7da5db328d8355d6e",
+      "duration": [
+        "0.883s"
+      ]
+    },
+    "race1000": {
+      "sha256": "e896c9aeb6377ab7d0bebc30f8b4ca87dcfbdc39f8e7201261acb237dcab5506",
+      "duration": [
+        "9.326s"
+      ]
+    },
+    "pins-normal": {
+      "sha256": "729e991e403e3344c19c1fef134b067873010c48d2cdc05147b36ad157550409",
+      "duration": [
+        "0.030s"
+      ]
+    },
+    "pins-race": {
+      "sha256": "ca93067a5099a49415734183c9c3fe56b47206330761d67ac319f16f68dd55fd",
+      "duration": [
+        "1.294s"
+      ]
+    },
+    "baseline-minimize": {
+      "sha256": "ee2000bd2f308d63ef283323edc133a368e381d6fa441f96e75f506dc2e5e387",
+      "duration": [
+        "0.004s"
+      ]
+    }
+  },
+  "scope": "Single durable SDK-boundary store model, not NATS replication/routing/fsync conformance. No all-810-pin/current-full/extended/native fault/scale/soak/drain/migration/adoption/release acceptance is inferred. The earlier race1000 command exercised the seeded family only; new pin checks use separate exact subtest filters."
+}

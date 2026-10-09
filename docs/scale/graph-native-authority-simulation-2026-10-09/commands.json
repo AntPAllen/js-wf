@@ -1,0 +1,125 @@
+[
+  {
+    "command": [
+      "go",
+      "test",
+      "-p=1",
+      "./sim",
+      "-run",
+      "^TestSeededGraphNativeAuthorityReplay$",
+      "-count=1",
+      "-timeout=2m",
+      "-v"
+    ],
+    "working_directory": "/home/exedev/js-wf-native-authority-model",
+    "environment": {
+      "GOMAXPROCS": "1",
+      "SIM_COVERAGE_SUMMARY": "1",
+      "SIM_PROGRESS": "1",
+      "SIM_NATIVE_AUTHORITY_ROOT": "/home/exedev/js-wf-native-authority-model/sim/testdata/regressions"
+    },
+    "scope": "1,000 generated/replayed bodies and initial capture of all 24 positive traces."
+  },
+  {
+    "command": [
+      "go",
+      "test",
+      "-p=1",
+      "-race",
+      "./sim",
+      "-run",
+      "^(TestSeededGraphNativeAuthorityReplay|TestPinnedRegressionCorpus/native-authority-)",
+      "-count=1",
+      "-timeout=3m",
+      "-v"
+    ],
+    "working_directory": "/home/exedev/js-wf-native-authority-model",
+    "environment": {
+      "GOMAXPROCS": "1",
+      "SIM_COVERAGE_SUMMARY": "1",
+      "SIM_PROGRESS": "1"
+    },
+    "scope": "Actual regex selects the seeded family only; all 24 positive traces are independently checked in the separate pin runs."
+  },
+  {
+    "command": [
+      "go",
+      "test",
+      "-p=1",
+      "-overlay",
+      "/home/exedev/js-wf/docs/scale/graph-native-authority-simulation-2026-10-09/baseline-overlay.json",
+      "./sim",
+      "-run",
+      "^TestSeededGraphNativeAuthorityReplay$",
+      "-count=1",
+      "-timeout=2m",
+      "-v"
+    ],
+    "working_directory": "/home/exedev/js-wf-native-authority-model",
+    "environment": {
+      "GOMAXPROCS": "1",
+      "FAULT_TRACE_OUT": "/home/exedev/js-wf/docs/scale/graph-native-authority-simulation-2026-10-09/baseline-failure.json"
+    },
+    "scope": "Old 6df8289 production authority file overlay, current model and shared replay registry; expected failure at seed 1."
+  },
+  {
+    "command": [
+      "go",
+      "test",
+      "-p=1",
+      "./sim",
+      "-run",
+      "^TestPinnedRegressionCorpus$/^native-authority-",
+      "-count=1",
+      "-timeout=2m",
+      "-v"
+    ],
+    "working_directory": "/home/exedev/js-wf-native-authority-model",
+    "environment": {
+      "GOMAXPROCS": "1",
+      "GOMEMLIMIT": "512MiB"
+    },
+    "scope": "Exactly 24 newly saved native-authority traces; earlier race1000 command exercised the seeded family only."
+  },
+  {
+    "command": [
+      "go",
+      "test",
+      "-p=1",
+      "-race",
+      "./sim",
+      "-run",
+      "^TestPinnedRegressionCorpus$/^native-authority-",
+      "-count=1",
+      "-timeout=2m",
+      "-v"
+    ],
+    "working_directory": "/home/exedev/js-wf-native-authority-model",
+    "environment": {
+      "GOMAXPROCS": "1",
+      "GOMEMLIMIT": "512MiB"
+    },
+    "scope": "Exactly 24 newly saved native-authority traces; earlier race1000 command exercised the seeded family only."
+  },
+  {
+    "command": [
+      "go",
+      "test",
+      "-p=1",
+      "-overlay",
+      "/home/exedev/js-wf/docs/scale/graph-native-authority-simulation-2026-10-09/baseline-overlay.json",
+      "./sim",
+      "-run",
+      "^TestMinimizeFaultTrace$",
+      "-count=1",
+      "-timeout=2m",
+      "-v"
+    ],
+    "working_directory": "/home/exedev/js-wf-native-authority-model",
+    "environment": {
+      "GOMAXPROCS": "1",
+      "FAULT_TRACE": "/home/exedev/js-wf/docs/scale/graph-native-authority-simulation-2026-10-09/baseline-failure.TestSeededGraphNativeAuthorityReplay.seed-1-4002827707.json",
+      "FAULT_TRACE_MIN_OUT": "/home/exedev/js-wf/docs/scale/graph-native-authority-simulation-2026-10-09/baseline-minimized.json"
+    }
+  }
+]

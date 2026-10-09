@@ -7,3 +7,7 @@ Normal qualification passes all 336 combinations in 116.941 seconds. Sixteen fir
 The matching 336-combination race campaign is live; terminal acceptance is pending. CI now includes separate normal/race Cartesian jobs with 30-minute test/35-minute job CPU budgets. The original combined-family 1,000-seed gate and its runtime/fault assertions remain unchanged. The frozen full `fca8264` race campaign excludes this new test.
 
 Arbitrary operation permutations, full current-source and extended 10,000/100,000 qualification, original native process/storage/power-loss/concurrency/capacity/fault matrices, actual 24-hour soak, million-timer physical drain, import/deployment/default adoption and release requirements remain open. Public continuation admission and production collection remain disabled.
+
+## Frozen source and live binary retention
+
+All 1,777 observed inputs independently match committed `4f1f2b2` through Git blob readback. The still-live race binary was copied to an external evidence directory and its SHA256, actual process arguments/cwd and `-race=true` build metadata recorded in `race-binary.json`. This keeps both Cartesian results bound to their earlier 150-family/786-pin source while the later native model increases the current inventory to 151/810. Terminal race acceptance remains pending.

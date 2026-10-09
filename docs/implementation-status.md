@@ -1,5 +1,11 @@
 # Implementation status against the supplied plan
 
+## Seeded native authority witness and uncertain-reply model — 2026-10-09
+
+The actual native adapter now has a shared Tier-1 SDK-boundary store model that separates physical subject sequences from logical root/blob revisions. Twenty-four absent/present root/blob combinations cover witnesses, peer replacement, retry exhaustion and dropped/committed-but-lost replies, with fresh readback and no uncertain republication. All 1,000 completed bodies replay exactly in normal (0.883 s) and race (9.326 s); all 24 new positive traces pass in both modes. A one-file pre-fix production overlay reproduces witness contention at seed 1 in 0.007 s and minimizes/replays it in four reproductions. [Executed scope and source/corpus proof](scale/graph-native-authority-simulation-2026-10-09/README.md) verifies 1,803 committed inputs, 151 seeded families/810 pins and unchanged preceding 786 pins.
+
+This models one durable conditional store and does not establish NATS replication/routing/fsync conformance. Earlier full-149 and Cartesian race campaigns keep their independently frozen source scopes. Complete current 151-family/all-810-pin normal/race/extended qualification, arbitrary operation permutations and every original runtime/native/fault/scale/soak/drain/import/adoption/release gate remain open; public continuation admission and production collection remain disabled.
+
 ## Exhaustive declared Signal fault combinations — 2026-10-09
 
 A directed test now executes all 336 publication/discovery/enqueue/consumption combinations through the existing production runtime fixture and exactly replays each schedule. Seed discovery requires no runtime execution; actual executed trace domains and choices must match every selected combination. All 336 pass normally in 116.941 s, including the sixteen absent from seeds 1–1,000; the maximum selected seed is 2,774. [Executed Cartesian and source coverage review](scale/graph-signal-cartesian-2026-10-09/README.md) verifies 1,777 unchanged inputs. The 150 contiguous seeded families and 786 saved regressions are unchanged.

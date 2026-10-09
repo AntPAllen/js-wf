@@ -1,0 +1,77 @@
+{
+  "version": 3,
+  "seed": 1,
+  "workload": "native_authority_witness",
+  "step_limit": 100000,
+  "decisions": [
+    {
+      "at_ms": 0,
+      "enabled": [
+        "blob/absent/drop",
+        "blob/absent/exhaustion",
+        "blob/absent/healthy",
+        "blob/absent/lost",
+        "blob/absent/replacement",
+        "blob/absent/witness",
+        "blob/present/drop",
+        "blob/present/exhaustion",
+        "blob/present/healthy",
+        "blob/present/lost",
+        "blob/present/replacement",
+        "blob/present/witness",
+        "root/absent/drop",
+        "root/absent/exhaustion",
+        "root/absent/healthy",
+        "root/absent/lost",
+        "root/absent/replacement",
+        "root/absent/witness",
+        "root/present/drop",
+        "root/present/exhaustion",
+        "root/present/healthy",
+        "root/present/lost",
+        "root/present/replacement",
+        "root/present/witness"
+      ],
+      "chosen": "root/absent/witness"
+    },
+    {
+      "at_ms": 0,
+      "enabled": [
+        "1",
+        "3",
+        "7"
+      ],
+      "chosen": "1"
+    }
+  ],
+  "transport": [
+    {
+      "at_ms": 0,
+      "operation": "native_authority_get",
+      "subject": "model.authority.root.e4fd91547079989b6a67428a53bc457ed6801e8af6c778b8ab81eeb4d211ccd6",
+      "outcome": "absent"
+    },
+    {
+      "at_ms": 0,
+      "operation": "native_authority_get",
+      "subject": "model.authority.root.e4fd91547079989b6a67428a53bc457ed6801e8af6c778b8ab81eeb4d211ccd6",
+      "outcome": "absent"
+    },
+    {
+      "at_ms": 0,
+      "operation": "native_authority_witness",
+      "subject": "model.authority.root.e4fd91547079989b6a67428a53bc457ed6801e8af6c778b8ab81eeb4d211ccd6",
+      "sequence": 1,
+      "data_sha256": "8dcb8058a0db411fe6c1ff87f465700ce267dc4c8fc1a22d71acb2dedd8be09f",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "native_authority_mutation",
+      "subject": "model.authority.root.e4fd91547079989b6a67428a53bc457ed6801e8af6c778b8ab81eeb4d211ccd6",
+      "sequence": 1,
+      "data_sha256": "96ddd00864141f24a4c08472a9e386ede549183d05ca025d133ffeaf2584b261",
+      "outcome": "conflict"
+    }
+  ]
+}
