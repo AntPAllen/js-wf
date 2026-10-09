@@ -1,0 +1,41 @@
+{
+  "files_before": {
+    "reconcile/graph_readers.go": "54de37edbb684081a8e15ed4a440a06b41397d9aa1eb75b280887f9b50fea661",
+    "reconcile/graph_readers_admission_test.go": "4064a33975864bb78339dc740d49be01dd4c463b4ec4d2d3ac38b12e6dee52b5"
+  },
+  "files_after": {
+    "reconcile/graph_readers.go": "54de37edbb684081a8e15ed4a440a06b41397d9aa1eb75b280887f9b50fea661",
+    "reconcile/graph_readers_admission_test.go": "4064a33975864bb78339dc740d49be01dd4c463b4ec4d2d3ac38b12e6dee52b5"
+  },
+  "commands": [
+    {
+      "name": "native",
+      "command": [
+        "go",
+        "test",
+        "-race",
+        "./reconcile",
+        "-run",
+        "^(TestNativeReaderExpiryAdmissionPrecedesStorage|TestReaderExpiry|TestNativeReaderExpiryRestartAndLostCheckpoint)",
+        "-count=1",
+        "-timeout=4m",
+        "-v"
+      ],
+      "actual_exit_code": 0
+    },
+    {
+      "name": "pins",
+      "command": [
+        "go",
+        "test",
+        "./sim",
+        "-run",
+        "^TestPinnedRegressionCorpus$/^graph-reader-maintenance-.*[.]json$",
+        "-count=1",
+        "-timeout=5m",
+        "-v"
+      ],
+      "actual_exit_code": 0
+    }
+  ]
+}

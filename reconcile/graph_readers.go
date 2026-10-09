@@ -115,16 +115,26 @@ func (p nativeReaderExpiryPort) SaveReaderCursor(ctx context.Context, cursor gra
 // RunGraphReaderExpiry is explicitly enabled experimental reader maintenance.
 // It never collects objects and is not installed in the default runtime.
 func RunGraphReaderExpiry(ctx context.Context, js jetstream.JetStream, protocol graphpublication.Protocol, workerID string, interval time.Duration, budget int) error {
+	if js == nil || workerID == "" || interval <= 0 || interval > 10*time.Second || budget < 1 || budget > graphpublication.MaxReaderSweepBatch {
+		return fmt.Errorf("invalid native reader expiry configuration")
+	}
 	scoped, ok := protocol.Port.(interface{ ReaderMaintenanceScope() string })
 	if !ok {
 		return fmt.Errorf("reader maintenance requires an isolated namespace scope")
 	}
-	if interval <= 0 || interval > 10*time.Second {
-		return fmt.Errorf("invalid reader expiry cadence")
+	if _, ok := protocol.Port.(graphpublication.RootScanPort); !ok {
+		return fmt.Errorf("reader maintenance requires bounded root scan")
+	}
+	if _, ok := protocol.Port.(graphpublication.RootCatalogWatermarkPort); !ok {
+		return fmt.Errorf("reader maintenance requires root watermark")
+	}
+	scope := scoped.ReaderMaintenanceScope()
+	if _, err := (nativeReaderExpiryPort{scope: scope}).scopeKey(); err != nil {
+		return err
 	}
 	p := &jetStreamLoopPort{js: js, ticker: time.NewTicker(interval)}
 	defer p.ticker.Stop()
-	return RunReaderExpiryWithPort(ctx, nativeReaderExpiryPort{jetStreamLoopPort: p, scope: scoped.ReaderMaintenanceScope()}, protocol, workerID, interval, budget, time.Now)
+	return RunReaderExpiryWithPort(ctx, nativeReaderExpiryPort{jetStreamLoopPort: p, scope: scope}, protocol, workerID, interval, budget, time.Now)
 }
 
 // RunReaderExpiryWithPort shares the production scheduler with deterministic

@@ -1,5 +1,9 @@
 # JetStream Durable Workflow Runtime — Implementation Plan
 
+## Reader maintenance rejects invalid configuration before storage — 2026-10-09
+
+Native reader-expiry admission now checks scope, bounded scan/watermark support, non-empty worker identity and cadence/batch bounds before KV preparation. Instrumented negative cases prove zero JetStream calls; opaque worker identities remain compatible with the lease-store contract. Native/focused controls pass race in 4.610 seconds and all eight existing maintenance traces pass normal replay in 0.072 seconds. [Evidence and scope](scale/graph-reader-expiry-admission-2026-10-09/README.md). Inventory remains 155/835. The queued full normal source excludes this later preflight change; complete current qualification and all original broader gates remain open.
+
 ## Corrected Signal actor race accepted; complete current155 normal queued — 2026-10-09
 
 Frozen corrected `cc8363d` completes 1,000 actor bodies/exact replays, directed seed 926 and its caller-retry pin with actual exits zero (package 3,768.886 seconds). [Executed independent review](scale/graph-signal-operation-actors-2026-10-09/fix/complete-race-systemd/README.md) matches 1,755 unchanged Git inputs and retained race binary provenance. It excludes later code. The supervisor has started expiry race, which remains pending; full frozen151 race is still live.
