@@ -1,6 +1,5 @@
 {
-  "scope": "Development component; normal1000 and complete pinned corpus normal/race; new family race1000 remains running and unqualified",
-  "inputs_unchanged": true,
+  "scope": "Development compaction family normal1000/race1000 plus complete corpus; qualifies compiled d48fd94 inputs, excluding later full-authority guard",
   "workloads": 149,
   "prior_pins_unchanged": 748,
   "added_pins": 14,
@@ -35,12 +34,22 @@
       "sha256": "1e59f7630c557e2459405f8233f464883a417a759461bf87b565f8c21ce6bc31",
       "top_level_passes": 4,
       "terminal": "ok  \tjs-wf/journal\t53.669s"
+    },
+    "final-race.log": {
+      "sha256": "a9fcb7c20d715b66991bd99895b10fe38cec5834cbce2ebdfda5a0f764d615ce",
+      "top_level_passes": 1,
+      "terminal": "ok  \tjs-wf/sim\t635.596s"
     }
   },
   "pending_race": {
     "session_id": 13282,
     "command": "SIM_COVERAGE_SUMMARY=1 SIM_PROGRESS=1 go test -race ./sim -run ^TestSeededGraphCheckpointCompactionReplay$ -count=1 -timeout 30m -v",
     "live_log": "final-race.log",
-    "status": "running; initial ten-minute watchdog failed after reporting completed900; not an invariant or race-detector verdict"
-  }
+    "status": "PASS terminal",
+    "terminal": "ok  \tjs-wf/sim\t635.596s",
+    "source": "d48fd94",
+    "later_guard_excluded": true
+  },
+  "compiled_inputs_match_d48fd94": true,
+  "later_guard_excluded": true
 }

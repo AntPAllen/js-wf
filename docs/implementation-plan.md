@@ -1,5 +1,11 @@
 # JetStream Durable Workflow Runtime — Implementation Plan
 
+## Validate complete authority before metadata decisions — 2026-10-09
+
+New v6 malformed-authority controls exposed metadata-only acceptance of invalid publication tokens, archive structures and retained reader snapshots. Journal observation now validates the full authority image through the protocol snapshot codec before interpreting lifecycle/cursor hints. Seventeen malformed images across Inspect/Begin/Open/Append/Compact fail with `ErrGap` and zero reader CAS, grant reads or payload reads; positive controls still permit valid metadata and reach reader acquisition. [Original failures, executed tests and scope](scale/graph-archive-validation-2026-10-09/README.md).
+
+This structural validation grants no payload ownership. Broader current-source simulation/native verification, malformed logical history and owned frame bodies, import/deployment compatibility, worker/lease/lifecycle uncertainty and all original qualification/release requirements remain open. The completed compaction race result is bound to compiled d48fd94 inputs and excludes this later guard; it does not qualify the complete current source.
+
 ## Deterministic checkpoint compaction fault model — 2026-10-09
 
 Added the shared Tier-1 `graph_checkpoint_compaction` family with 14 modes: JSON/protobuf, definite/confirmed/unconfirmed compaction CAS replies, concurrent append/reader/collector/retirement, uncertain payload uploads and checkpoint reader-release replies. Each generated schedule replays exactly, checks the actual published offset separately from the returned result, retries from fresh authority, preserves logical records/checkpoint reads through collection and reclaims all physical objects after retirement. Fourteen new pins raise the current inventory to 149 families/762 pins; all 748 previous pins remain byte-identical. [Executed scope, traces and qualification status](scale/graph-compaction-simulation-2026-10-09/README.md).

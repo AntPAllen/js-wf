@@ -149,7 +149,10 @@ func (s *GraphStore) observe(ctx context.Context, typ, id string) (string, graph
 }
 
 func (s *GraphStore) validateRoot(root graphpublication.Root, typ, id string) (*graphCursor, error) {
-	if root.Graph.Validate() != nil {
+	// Metadata-only lifecycle observations must validate the entire authority
+	// image, including named forests, publication token and reader snapshots.
+	// Deferring this to reader acquisition permits malformed scheduling hints.
+	if _, err := root.StreamSnapshot(""); err != nil {
 		return nil, ErrGap
 	}
 	if (root.Head == 0 || s.cfg.CanonicalStarts) && root.Schema == graphpublication.Schema && root.Graph.Count == 0 && root.Token == "" && len(root.Readers) == 0 && len(root.Application) == 0 && len(root.Streams) == 0 {
