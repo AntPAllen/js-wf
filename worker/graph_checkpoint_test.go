@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"strings"
+	"sync/atomic"
 	"testing"
 	"time"
 
@@ -68,6 +69,19 @@ func TestNativeGraphCheckpointMaterializedReferences(t *testing.T) {
 			// testing resume. This bounds the fixture, not a recovery latency gate.
 			ctx, cancel := context.WithTimeout(context.Background(), 2*time.Minute)
 			defer cancel()
+			// Record fixture preparation separately from the bounded recovery
+			// assertions, without changing their shared original deadline.
+			startedAt, phaseAt := time.Now(), time.Now()
+			phase, phaseRequests := "cluster_admission", int64(0)
+			var requests atomic.Int64
+			markPhase := func(next string) {
+				now := time.Now()
+				deadline, _ := ctx.Deadline()
+				current := requests.Load()
+				t.Logf("CHECKPOINT_PHASE phase=%s elapsed_ms=%d duration_ms=%d sdk_requests=%d delta_sdk_requests=%d remaining_ms=%d", phase, now.Sub(startedAt).Milliseconds(), now.Sub(phaseAt).Milliseconds(), current, current-phaseRequests, deadline.Sub(now).Milliseconds())
+				phase, phaseAt, phaseRequests = next, now, current
+			}
+			defer func() { markPhase("finished") }()
 			if replicas > 1 {
 				for ctx.Err() == nil {
 					ready := false
@@ -80,11 +94,13 @@ func TestNativeGraphCheckpointMaterializedReferences(t *testing.T) {
 					time.Sleep(20 * time.Millisecond)
 				}
 			}
+			markPhase("provision_and_open")
 			var js jetstream.JetStream
+			trace := jetstream.WithClientTrace(&jetstream.ClientTrace{RequestSent: func(string, []byte) { requests.Add(1) }})
 			if domain == "" {
-				js, err = jetstream.New(cluster.Clients[0])
+				js, err = jetstream.New(cluster.Clients[0], trace)
 			} else {
-				js, err = jetstream.NewWithDomain(cluster.Clients[0], domain)
+				js, err = jetstream.NewWithDomain(cluster.Clients[0], domain, trace)
 			}
 			if err != nil {
 				t.Fatal(err)
@@ -128,6 +144,7 @@ func TestNativeGraphCheckpointMaterializedReferences(t *testing.T) {
 				t.Fatal(err)
 			}
 			defer g.close(context.Background())
+			markPhase("initial_owned_result")
 			tail := g.view.Tail()
 			appendEntry := func(kind journal.Kind, payload []byte) error {
 				var err error
@@ -153,6 +170,7 @@ func TestNativeGraphCheckpointMaterializedReferences(t *testing.T) {
 				t.Fatal(err)
 			}
 			oldSource := g.refs[sourceRef]
+			markPhase("prefix_padding_1_16")
 			for padding := 0; padding < 64; padding++ {
 				if err := appendEntry(journal.StepRequested, []byte(fmt.Sprintf(`{"kind":"run","name":"padding%d"}`, padding))); err != nil {
 					t.Fatal(err)
@@ -160,7 +178,11 @@ func TestNativeGraphCheckpointMaterializedReferences(t *testing.T) {
 				if err := appendEntry(journal.StepCompleted, []byte(`{"result":7}`)); err != nil {
 					t.Fatal(err)
 				}
+				if (padding+1)%16 == 0 {
+					markPhase(fmt.Sprintf("prefix_padding_after_%d", padding+1))
+				}
 			}
+			markPhase("checkpoint_materialization")
 			locals := json.RawMessage(`{"count":1}`)
 			request, _ := json.Marshal(map[string]string{"kind": "checkpoint", "name": "next", "input_hash": graphHash(locals)})
 			if err := appendEntry(journal.StepRequested, request); err != nil {
@@ -230,12 +252,12 @@ func TestNativeGraphCheckpointMaterializedReferences(t *testing.T) {
 			if err := store.PublishCheckpoint(ctx, h.Type, h.ID, found.Runtime, tail); err != nil {
 				t.Fatal(err)
 			}
-			for i := uint64(0); i < anchorIndex-1; i++ {
-				record, err := g.view.Read(ctx, i)
-				if err != nil {
-					t.Fatal(err)
-				}
+			markPhase("prefix_block_and_read_controls")
+			if err := g.view.ReadRange(ctx, 0, anchorIndex-1, func(record journal.GraphRecord) error {
 				port.blocked[record.EntryBlob.Hash] = true
+				return nil
+			}); err != nil {
+				t.Fatal(err)
 			}
 			if _, err := g.view.Payload(ctx, oldSource.index, oldSource.link, store.PayloadReadLimit()); err == nil {
 				t.Fatal("negative prefix control did not fail")
@@ -274,6 +296,7 @@ func TestNativeGraphCheckpointMaterializedReferences(t *testing.T) {
 				t.Fatal("corrupt metadata authorized prefix fallback", invalid, err, port.blockedReads)
 			}
 			port.corruptMetadata = ""
+			markPhase("bounded_delivery_restore")
 			bounded, err := openGraphDeliveryMode(ctx, store, h.Type, h.ID, h.InvSeq, true)
 			if err != nil {
 				t.Fatal("bounded delivery read prefix", err)
@@ -287,6 +310,7 @@ func TestNativeGraphCheckpointMaterializedReferences(t *testing.T) {
 			if err := bounded.close(ctx); err != nil {
 				t.Fatal(err)
 			}
+			markPhase("worker_prepare")
 			calls := 0
 			runner, err := New(ctx, js, "bounded", map[string]Handler{h.Type: func(*wf.Context, json.RawMessage) (json.RawMessage, error) {
 				t.Error("prefix handler executed")
@@ -310,6 +334,7 @@ func TestNativeGraphCheckpointMaterializedReferences(t *testing.T) {
 				t.Fatal(err)
 			}
 			for attempt := 0; attempt < 2; attempt++ {
+				markPhase(fmt.Sprintf("worker_execute_%d", attempt))
 				owner, err := leases.Acquire(ctx, h.Type, h.ID, "bounded")
 				if err != nil {
 					t.Fatal(err)
@@ -330,6 +355,7 @@ func TestNativeGraphCheckpointMaterializedReferences(t *testing.T) {
 					t.Fatal("bounded stage execution", err, releaseErr)
 				}
 			}
+			markPhase("await_and_final_assertions")
 			result, err = c.Await(ctx, h.Type, h.ID)
 			if err != nil || string(result) != "42" || calls != 1 || port.blockedReads != 0 {
 				t.Fatal("bounded stage/result/duplicate", string(result), err, calls, port.blockedReads)

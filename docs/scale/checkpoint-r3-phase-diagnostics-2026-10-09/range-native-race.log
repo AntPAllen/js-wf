@@ -1,0 +1,18 @@
+=== RUN   TestNativeGraphCheckpointMaterializedReferences
+=== RUN   TestNativeGraphCheckpointMaterializedReferences/R3Domain
+    graph_checkpoint_test.go:81: CHECKPOINT_PHASE phase=cluster_admission elapsed_ms=1192 duration_ms=1192 sdk_requests=0 delta_sdk_requests=0 remaining_ms=118807
+    graph_checkpoint_test.go:81: CHECKPOINT_PHASE phase=provision_and_open elapsed_ms=4672 duration_ms=3480 sdk_requests=172 delta_sdk_requests=172 remaining_ms=115327
+    graph_checkpoint_test.go:81: CHECKPOINT_PHASE phase=initial_owned_result elapsed_ms=7298 duration_ms=2626 sdk_requests=499 delta_sdk_requests=327 remaining_ms=112701
+    graph_checkpoint_test.go:81: CHECKPOINT_PHASE phase=prefix_padding_1_16 elapsed_ms=32806 duration_ms=25507 sdk_requests=4211 delta_sdk_requests=3712 remaining_ms=87193
+    graph_checkpoint_test.go:81: CHECKPOINT_PHASE phase=prefix_padding_after_16 elapsed_ms=54185 duration_ms=21379 sdk_requests=7955 delta_sdk_requests=3744 remaining_ms=65814
+    graph_checkpoint_test.go:81: CHECKPOINT_PHASE phase=prefix_padding_after_32 elapsed_ms=80608 duration_ms=26422 sdk_requests=11667 delta_sdk_requests=3712 remaining_ms=39391
+    graph_checkpoint_test.go:81: CHECKPOINT_PHASE phase=prefix_padding_after_48 elapsed_ms=100787 duration_ms=20178 sdk_requests=15443 delta_sdk_requests=3776 remaining_ms=19212
+    graph_checkpoint_test.go:81: CHECKPOINT_PHASE phase=prefix_padding_after_64 elapsed_ms=100787 duration_ms=0 sdk_requests=15443 delta_sdk_requests=0 remaining_ms=19212
+    graph_checkpoint_test.go:81: CHECKPOINT_PHASE phase=checkpoint_materialization elapsed_ms=119409 duration_ms=18622 sdk_requests=19827 delta_sdk_requests=4384 remaining_ms=590
+    graph_checkpoint_test.go:260: context deadline exceeded
+    graph_checkpoint_test.go:81: CHECKPOINT_PHASE phase=prefix_block_and_read_controls elapsed_ms=120083 duration_ms=673 sdk_requests=19967 delta_sdk_requests=140 remaining_ms=-83
+--- FAIL: TestNativeGraphCheckpointMaterializedReferences (120.78s)
+    --- FAIL: TestNativeGraphCheckpointMaterializedReferences/R3Domain (120.78s)
+FAIL
+FAIL	js-wf/worker	120.915s
+FAIL

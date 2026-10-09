@@ -87,22 +87,18 @@ func (v *GraphView) ReadCheckpoint(ctx context.Context, typ, id string) (*GraphC
 	if candidate != nil {
 		first++
 	}
-	for i := first; i < v.Count(); i++ {
-		record, err := v.Read(ctx, i)
-		if err != nil {
-			return nil, err
-		}
+	err = v.ReadRange(ctx, first, v.Count(), func(record GraphRecord) error {
 		if len(records) > 0 {
 			previous := records[len(records)-1]
 			if record.Sequence != previous.Sequence+1 || record.Epoch < previous.Epoch {
-				return nil, ErrGap
+				return ErrGap
 			}
 		}
 		records = append(records, record.Record)
 		switch record.Kind {
 		case StepRequested:
 			if pending {
-				return nil, ErrGap
+				return ErrGap
 			}
 			declaration = struct {
 				Kind      string `json:"kind"`
@@ -110,37 +106,41 @@ func (v *GraphView) ReadCheckpoint(ctx context.Context, typ, id string) (*GraphC
 				InputHash string `json:"input_hash"`
 			}{}
 			if json.Unmarshal(record.Payload, &declaration) != nil {
-				return nil, ErrGap
+				return ErrGap
 			}
 			request = record.Record
 			pending = true
 			position++
 		case StepCompleted:
 			if !pending {
-				return nil, ErrGap
+				return ErrGap
 			}
 			pending = false
 			position++
 			if declaration.Kind != "checkpoint" {
-				continue
+				return nil
 			}
 			var completion struct {
 				ResultRef  string `json:"result_ref"`
 				ResultHash string `json:"result_hash"`
 			}
 			if json.Unmarshal(record.Payload, &completion) != nil {
-				return nil, ErrGap
+				return ErrGap
 			}
 			runtime := RuntimeCheckpoint{InvSeq: v.cursor.Invocation, Stage: declaration.Name, Sequence: record.Sequence, Index: record.Index, Epoch: record.Epoch, StepPosition: position, Object: completion.ResultRef, SHA256: completion.ResultHash}
 			// Reuse the existing checkpoint contract without introducing an archive
 			// identity into the graph. Started guarantees the anchor is not index zero.
 			if ValidateRuntimeSnapshot(Snapshot{Version: 2, Runtime: &runtime}) != nil || verifyCheckpointAnchor(record.Record, runtime) != nil || request.Index >= record.Index {
-				return nil, ErrGap
+				return ErrGap
 			}
 			candidate = &GraphCheckpointRead{Runtime: runtime, Request: request, Anchor: record.Record}
 			receipt = record
 			localsHash = declaration.InputHash
 		}
+		return nil
+	})
+	if err != nil {
+		return nil, err
 	}
 	if candidate == nil {
 		return nil, nil

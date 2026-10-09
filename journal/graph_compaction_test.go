@@ -173,6 +173,28 @@ func checkpointArchiveScenario(t *testing.T, ctx context.Context, seed uint64, c
 			t.Fatal("relocated logical history", i, err)
 		}
 	}
+	// Ordered ranges must preserve logical indexes across the archive/live
+	// boundary, including ranges wholly in either forest and empty ranges.
+	for _, bounds := range [][2]uint64{{0, index}, {0, 1}, {first.Runtime.Index, index}, {index, index}} {
+		next := bounds[0]
+		if err := fresh.ReadRange(ctx, bounds[0], bounds[1], func(r journal.GraphRecord) error {
+			if next >= bounds[1] || !reflect.DeepEqual(r.Record, originals[next].Record) {
+				t.Fatal("range changed archived logical history", bounds, next, r)
+			}
+			next++
+			return nil
+		}); err != nil || next != bounds[1] {
+			t.Fatal("archive range", bounds, next, err)
+		}
+	}
+	canceled, cancelRange := context.WithCancel(ctx)
+	cancelRange()
+	if err := fresh.ReadRange(canceled, index, index, func(journal.GraphRecord) error {
+		t.Fatal("canceled empty range invoked visitor")
+		return nil
+	}); !errors.Is(err, context.Canceled) {
+		t.Fatal("canceled empty range accepted", err)
+	}
 	found, err := fresh.ReadCheckpoint(ctx, h.Type, h.ID)
 	if err != nil || found.Runtime != first.Runtime {
 		t.Fatal("relocated checkpoint", found, err)

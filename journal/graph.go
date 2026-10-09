@@ -459,6 +459,10 @@ func (v *GraphView) Read(ctx context.Context, index uint64) (GraphRecord, error)
 	if err != nil {
 		return GraphRecord{}, err
 	}
+	return v.decodeRecord(ctx, index, raw)
+}
+
+func (v *GraphView) decodeRecord(ctx context.Context, index uint64, raw retainedgraph.Record) (GraphRecord, error) {
 	var envelope graphEntry
 	if graphDecode(raw.Data, &envelope) != nil || envelope.Schema != graphEntrySchema || envelope.Invocation != v.cursor.Invocation || envelope.Sequence != v.cursor.Base+index+1 {
 		return GraphRecord{}, ErrGap
@@ -487,14 +491,14 @@ func (v *GraphView) Read(ctx context.Context, index uint64) (GraphRecord, error)
 	if !found || result.Index != index || result.Epoch > v.cursor.Epoch {
 		return GraphRecord{}, ErrGap
 	}
-	if _, err = RecordToProto(Record{Entry: result.Entry}); err != nil {
+	if _, err := RecordToProto(Record{Entry: result.Entry}); err != nil {
 		return GraphRecord{}, ErrGap
 	}
 	if index == 0 && result.Kind != Started || index > 0 && result.Kind == Started || index+1 < v.cursor.Count && (result.Kind == Completed || result.Kind == Failed) || index+1 == v.cursor.Count && (result.Epoch != v.cursor.Epoch || result.Kind != v.cursor.Kind) {
 		return GraphRecord{}, ErrGap
 	}
 	result.Sequence = envelope.Sequence
-	if err = v.alive(); err != nil {
+	if err := v.alive(); err != nil {
 		return GraphRecord{}, err
 	}
 	return result, nil
