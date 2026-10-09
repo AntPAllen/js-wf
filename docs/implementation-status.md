@@ -1,5 +1,9 @@
 # Implementation status against the supplied plan
 
+## Expiry actor normal1000 accepted; race serialized behind live campaigns — 2026-10-09
+
+The new expiry/root-reply workload passes all 1,000 contiguous bodies and exact replays in 597.57 seconds, observing all 30 combinations and actual expiry cuts. [Independent executed review](scale/graph-signal-expiry-actors-2026-10-09/normal1000/README.md) verifies retained binary/actual exit/body counts and the published `e971d01` Go/module/original-trace cohort, with its explicit post-launch snapshot limitation. Race uses a 300-minute CPU watchdog and 305-minute CI budget; domain/seed/per-schedule targets are unchanged. Its first attempt was intentionally stopped (actual exit -15) after observing four CPUs; replacement is queued until one of two observed live race test processes exits. Complete current 153-family/all-816-pin/extended/exhaustive and all original broader gates remain open.
+
 ## Intent-expiry/root-reply actor combinations added — 2026-10-09
 
 All 30 declared publication × actual uncommitted-intent expiry × root-reply combinations pass normal/race operation-level schedules and exact replay; race takes 160.433 seconds. A new shared seeded family is running its 1,000-body normal campaign, with complete family acceptance pending. Six existing/new actor pins pass normal/race against the refactored runner; previous 811 pins are byte-preserved and the corpus now has 816. Source inventory has 153 seeded families. [Executed controls, snapshot limitations and precise remaining scope](scale/graph-signal-expiry-actors-2026-10-09/README.md). Complete current/all-pin/extended, exhaustive permutations and every original broader requirement remain open.

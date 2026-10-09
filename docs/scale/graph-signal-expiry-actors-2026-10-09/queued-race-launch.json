@@ -1,0 +1,32 @@
+{
+  "source_go_and_original_trace_byte_matched_to": "e971d01",
+  "binary_sha256": "6e57a9602a1939abdf2d454bd4772ff2ebd77c5108cd049c55128cc2e5612154",
+  "queued_at": "2026-10-09T20:05:50.862027+00:00",
+  "wait_until_one_observed_process_is_terminal": [
+    {
+      "pid": 1856,
+      "start_ticks": "12984",
+      "arguments": [
+        "/home/exedev/js-wf-tier1-full151-race1000-after-reboot-20261009/sim.test",
+        "-test.v=test2json",
+        "-test.count=1",
+        "-test.timeout=300m"
+      ]
+    },
+    {
+      "pid": 5619,
+      "start_ticks": "165755",
+      "arguments": [
+        "/home/exedev/js-wf-signal-actors-qualified-20261009/race.test",
+        "-test.run=^(TestSeededGraphSignalOperationActorsReplay|TestGraphSignalCallerRetryAfterContention)$",
+        "-test.count=1",
+        "-test.timeout=90m",
+        "-test.v=test2json"
+      ]
+    }
+  ],
+  "observed_cpu_count": 4,
+  "watchdog_minutes": 300,
+  "root": "/home/exedev/js-wf-signal-expiry-race1000-20261009",
+  "scope": "focused expiry actor family x1000; no current whole-suite/all-pin acceptance"
+}

@@ -1,0 +1,80 @@
+{
+  "source_go_and_original_trace_byte_matched_to": "e971d01",
+  "source_inputs": 1756,
+  "completed_bodies": 1000,
+  "exact_replays": 1000,
+  "elapsed_seconds": 597.57,
+  "combinations": {
+    "enqueue_drop/expire_intents/drop_before_commit": 35,
+    "enqueue_drop/expire_intents/healthy": 34,
+    "enqueue_drop/expire_intents/lose_ack_after_commit": 23,
+    "enqueue_drop/live/drop_before_commit": 40,
+    "enqueue_drop/live/healthy": 30,
+    "enqueue_drop/live/lose_ack_after_commit": 43,
+    "enqueue_lost_ack/expire_intents/drop_before_commit": 39,
+    "enqueue_lost_ack/expire_intents/healthy": 36,
+    "enqueue_lost_ack/expire_intents/lose_ack_after_commit": 31,
+    "enqueue_lost_ack/live/drop_before_commit": 55,
+    "enqueue_lost_ack/live/healthy": 34,
+    "enqueue_lost_ack/live/lose_ack_after_commit": 29,
+    "healthy/expire_intents/drop_before_commit": 31,
+    "healthy/expire_intents/healthy": 36,
+    "healthy/expire_intents/lose_ack_after_commit": 40,
+    "healthy/live/drop_before_commit": 34,
+    "healthy/live/healthy": 23,
+    "healthy/live/lose_ack_after_commit": 29,
+    "source_drop/expire_intents/drop_before_commit": 29,
+    "source_drop/expire_intents/healthy": 38,
+    "source_drop/expire_intents/lose_ack_after_commit": 40,
+    "source_drop/live/drop_before_commit": 32,
+    "source_drop/live/healthy": 29,
+    "source_drop/live/lose_ack_after_commit": 37,
+    "source_lost_ack/expire_intents/drop_before_commit": 28,
+    "source_lost_ack/expire_intents/healthy": 27,
+    "source_lost_ack/expire_intents/lose_ack_after_commit": 33,
+    "source_lost_ack/live/drop_before_commit": 29,
+    "source_lost_ack/live/healthy": 31,
+    "source_lost_ack/live/lose_ack_after_commit": 25
+  },
+  "captures": {
+    "expire_intents-drop_before_commit.json": {
+      "seed": 2,
+      "sha256": "28c2921b961b0c7eb2a3ffa88f4be63bf184dc1e5ae40cad3cef30efa4050b53",
+      "intent_expiry_cuts": 1,
+      "choices": 1842
+    },
+    "expire_intents-healthy.json": {
+      "seed": 4,
+      "sha256": "55a6c9a4426c8fc942e23a8b72d0d342c40c6aa1721944518d0b8eca40e79a95",
+      "intent_expiry_cuts": 1,
+      "choices": 1501
+    },
+    "expire_intents-lose_ack_after_commit.json": {
+      "seed": 8,
+      "sha256": "2263877fc8257e12aec4ddfcd687e2202cc349d45dbf23cc3b63839f5bbc80c9",
+      "intent_expiry_cuts": 1,
+      "choices": 2546
+    },
+    "live-drop_before_commit.json": {
+      "seed": 3,
+      "sha256": "29474a283ff4c13223d504675423d57aee7400c4e65e0dc9d4083fb850acd4bb",
+      "intent_expiry_cuts": 0,
+      "choices": 1551
+    },
+    "live-healthy.json": {
+      "seed": 12,
+      "sha256": "7042dae12a2f4392117ec2a468095d4af703320a98ea8e1fe7cf48dd3e561d62",
+      "intent_expiry_cuts": 0,
+      "choices": 2003
+    },
+    "live-lose_ack_after_commit.json": {
+      "seed": 1,
+      "sha256": "af8f77135c33e18b98adb7c24f339e7da7456e3cd2ba90a9fced437cac8629fc",
+      "intent_expiry_cuts": 0,
+      "choices": 2224
+    }
+  },
+  "source_snapshot_limitation": "captured after launch during live jobs, excludes subsequently added five runtime regression files",
+  "race_acceptance": "pending; first attempt intentionally stopped for CPU serialization",
+  "scope": "focused new family only; current whole-suite/all-pin/extended and broader original gates remain open"
+}
