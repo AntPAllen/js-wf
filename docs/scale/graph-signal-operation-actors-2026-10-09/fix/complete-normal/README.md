@@ -1,0 +1,7 @@
+# Corrected operation-level Signal family — normal qualification
+
+Frozen `cc8363da0f99dafbaff6eec454b85cc00fa62a63` passes all 1,000 contiguous completed bodies and exact replays of the corrected operation-level actor family. The directed caller-contention control also generates/replays seed 926 successfully. Package elapsed is 316.523 seconds. A separate retained-binary command passes the new registered contention regression; these are actual child exit-zero results.
+
+Executed independent review verifies raw JSON pass/body events, the retained non-race binary SHA/build provenance, and all 1,755 non-documentation Go/module/regression inputs against Git and their still-unchanged frozen checkout. Six captured traces cover five publication modes and the directed caller-resubmission branch. The source manifest was recorded before compilation; a separately observed post-normal snapshot is preserved. The launcher remains live in the subsequent race phase, so its overall source-after/terminal record is not yet available or accepted.
+
+This accepts the focused family and its one new registered pin at the stated source. It does not qualify all 152 families/all 811 pins, the later expiry workload, extended campaigns, arbitrary exhaustive permutations, native transport/runtime/scale/retention/import/deployment/adoption/24-hour/physical-drain/release requirements. The earlier failed seed-926 campaign remains failed. Race acceptance remains pending.

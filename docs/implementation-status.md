@@ -1,5 +1,9 @@
 # Implementation status against the supplied plan
 
+## Corrected Signal actor normal family accepted; race running — 2026-10-09
+
+Frozen `cc8363d` passes 1,000 contiguous completed bodies and exact replays, the directed caller-retry control and its new registered pin. Package elapsed is 316.523 seconds. Independent executed review verifies actual child exits, raw body/pass events, retained binary provenance and 1,755 unchanged Git-matched non-documentation source inputs. [Focused normal proof and scope](scale/graph-signal-operation-actors-2026-10-09/fix/complete-normal/README.md). Focused race is running. Complete current suite/all-pin/extended and every original broader requirement remain open; the later expiry workload is excluded from this acceptance.
+
 ## Signal contention diagnosis and corrected recovery — 2026-10-09
 
 Seed 926 shows an active suspended invocation with only the first Signal reserved; the second never committed. The fixture now explicitly resubmits unreserved caller input after contention and requires recovery within 30 virtual seconds, preserving all ownership/effect/consumption/drain assertions. Client CAS-conflict errors now preserve unknown outcome instead of falsely reporting generation replacement; real stale-generation errors retain their classification. The directed seed passes normal/race exact replay and is pinned, bringing the corpus to 811 pins. Focused client recovery/error controls pass race in 19.188 seconds. [Diagnosis and retained controls](scale/graph-signal-operation-actors-2026-10-09/fix/README.md). The original failed campaign remains unqualified. Replacement focused normal-then-race qualification is running from clean frozen `cc8363d`, with actual-exit/source/binary/body checks; terminal acceptance is pending. Complete 152-family/full-pin/extended and all original broader gates remain open.

@@ -34,7 +34,51 @@
       ],
       "cwd": "/home/exedev/js-wf-signal-actors-qualification/sim",
       "log": "normal-events.jsonl"
+    },
+    {
+      "command": [
+        "/home/exedev/js-wf-signal-actors-qualified-20261009/normal.test",
+        "-test.run=^TestPinnedRegressionCorpus$/^graph-signal-actors-caller-retry[.]json$",
+        "-test.count=1",
+        "-test.timeout=5m",
+        "-test.v"
+      ],
+      "cwd": "/home/exedev/js-wf-signal-actors-qualification/sim",
+      "log": "normal-pin.log"
+    },
+    {
+      "command": [
+        "go",
+        "test",
+        "-p=1",
+        "-race",
+        "-c",
+        "-o",
+        "/home/exedev/js-wf-signal-actors-qualified-20261009/race.test",
+        "./sim"
+      ],
+      "cwd": "/home/exedev/js-wf-signal-actors-qualification",
+      "log": "race-compile.log"
+    },
+    {
+      "command": [
+        "go",
+        "tool",
+        "test2json",
+        "-t",
+        "-p",
+        "js-wf/sim",
+        "/home/exedev/js-wf-signal-actors-qualified-20261009/race.test",
+        "-test.run=^(TestSeededGraphSignalOperationActorsReplay|TestGraphSignalCallerRetryAfterContention)$",
+        "-test.count=1",
+        "-test.timeout=90m",
+        "-test.v=test2json"
+      ],
+      "cwd": "/home/exedev/js-wf-signal-actors-qualification/sim",
+      "log": "race-events.jsonl"
     }
   ],
-  "terminal_acceptance": false
+  "terminal_acceptance": false,
+  "normal_completed_bodies": 1000,
+  "normal_actual_exit_code": 0
 }
