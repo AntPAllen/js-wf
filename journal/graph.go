@@ -19,6 +19,7 @@ import (
 
 const graphCursorSchema = "js-wf-graph-journal-cursor-v1"
 const graphStartCursorSchema = "js-wf-graph-runtime-cursor-v2"
+const graphArchiveCursorSchema = "js-wf-graph-runtime-cursor-v6"
 const graphCheckpointCursorSchema = "js-wf-graph-runtime-cursor-v5"
 const graphSignalCursorSchema = "js-wf-graph-runtime-cursor-v4"
 const graphEntrySchema = "js-wf-graph-journal-entry-v1"
@@ -46,6 +47,9 @@ type GraphConfig struct {
 	// Use only new isolated stores; this does not import v4 histories or enable
 	// continuation registration or prefix compaction.
 	CheckpointIndex bool
+	// ArchiveCheckpoints selects a new isolated v6 cursor with logical archive
+	// offsets. It requires CheckpointIndex and does not import existing stores.
+	ArchiveCheckpoints bool
 }
 
 type GraphStore struct{ cfg GraphConfig }
@@ -66,6 +70,7 @@ type graphCursor struct {
 	SignalSource       uint64                  `json:"signal_source,omitempty"`
 	SignalConsumed     uint64                  `json:"signal_consumed,omitempty"`
 	SignalRepair       uint64                  `json:"signal_repair,omitempty"`
+	RetainedFrom       uint64                  `json:"retained_from,omitempty"`
 	Checkpoint         *graphCheckpointPointer `json:"checkpoint,omitempty"`
 }
 
@@ -77,7 +82,7 @@ type graphEntry struct {
 }
 
 func NewGraphStore(cfg GraphConfig) (*GraphStore, error) {
-	if cfg.Protocol.Port == nil || validateEncoding(cfg.Encoding) != nil || cfg.PinTTL < 0 || cfg.IntentTTL < 0 || cfg.PayloadReadLimit < 0 || int64(cfg.PayloadReadLimit) == math.MaxInt64 || cfg.CanonicalSignals && !cfg.CanonicalStarts || cfg.CheckpointIndex && !cfg.CanonicalSignals {
+	if cfg.Protocol.Port == nil || validateEncoding(cfg.Encoding) != nil || cfg.PinTTL < 0 || cfg.IntentTTL < 0 || cfg.PayloadReadLimit < 0 || int64(cfg.PayloadReadLimit) == math.MaxInt64 || cfg.CanonicalSignals && !cfg.CanonicalStarts || cfg.CheckpointIndex && !cfg.CanonicalSignals || cfg.ArchiveCheckpoints && !cfg.CheckpointIndex {
 		return nil, fmt.Errorf("invalid graph journal configuration")
 	}
 	if cfg.Now == nil {
@@ -96,10 +101,11 @@ func NewGraphStore(cfg GraphConfig) (*GraphStore, error) {
 }
 
 // PayloadReadLimit is the explicit byte budget for configured runtime reads.
-func (s *GraphStore) PayloadReadLimit() int  { return s.cfg.PayloadReadLimit }
-func (s *GraphStore) CanonicalStarts() bool  { return s.cfg.CanonicalStarts }
-func (s *GraphStore) CanonicalSignals() bool { return s.cfg.CanonicalSignals }
-func (s *GraphStore) CheckpointIndex() bool  { return s.cfg.CheckpointIndex }
+func (s *GraphStore) PayloadReadLimit() int    { return s.cfg.PayloadReadLimit }
+func (s *GraphStore) CanonicalStarts() bool    { return s.cfg.CanonicalStarts }
+func (s *GraphStore) CanonicalSignals() bool   { return s.cfg.CanonicalSignals }
+func (s *GraphStore) CheckpointIndex() bool    { return s.cfg.CheckpointIndex }
+func (s *GraphStore) ArchiveCheckpoints() bool { return s.cfg.ArchiveCheckpoints }
 
 func graphDestination(typ, id string) (string, error) {
 	if err := identity.Validate(typ, id); err != nil {
@@ -158,6 +164,9 @@ func (s *GraphStore) validateRoot(root graphpublication.Root, typ, id string) (*
 		if s.cfg.CheckpointIndex {
 			cursorSchema = graphCheckpointCursorSchema
 		}
+		if s.cfg.ArchiveCheckpoints {
+			cursorSchema = graphArchiveCursorSchema
+		}
 	}
 	if root.Schema != rootSchema || root.Head == 0 || len(root.Application) == 0 || len(root.Application) > graphpublication.MaxApplicationBytes {
 		return nil, ErrGap
@@ -166,15 +175,18 @@ func (s *GraphStore) validateRoot(root graphpublication.Root, typ, id string) (*
 	if graphDecode(root.Application, &c) != nil || c.Schema != cursorSchema || !s.cfg.CanonicalStarts && (c.Invocation == 0 || c.Start != nil || c.PreviousInvocation != 0) || !s.cfg.CanonicalSignals && (c.SignalInputs != 0 || c.SignalBindings != 0 || c.SignalSource != 0 || c.SignalConsumed != 0 || c.SignalRepair != 0) || c.SignalInputs > math.MaxInt64 || c.SignalBindings > c.SignalInputs || c.SignalConsumed > c.SignalBindings || c.SignalRepair != 0 && c.SignalRepair >= c.SignalInputs || c.Count > MaxEntries || c.Base > math.MaxUint64-c.Count {
 		return nil, ErrGap
 	}
+	if c.RetainedFrom > c.Count || c.RetainedFrom != 0 && (!s.cfg.ArchiveCheckpoints || c.Checkpoint == nil) {
+		return nil, ErrGap
+	}
 	if c.Checkpoint != nil {
 		pointer := c.Checkpoint
 		runtime := pointer.Runtime
-		if !s.cfg.CheckpointIndex || ValidateRuntimeSnapshot(Snapshot{Version: 2, Runtime: &runtime}) != nil || runtime.InvSeq != c.Invocation || runtime.Index >= c.Count || runtime.Sequence != c.Base+runtime.Index+1 || runtime.Epoch > c.Epoch || pointer.RequestIndex == 0 || pointer.RequestIndex >= runtime.Index {
+		if !s.cfg.CheckpointIndex || ValidateRuntimeSnapshot(Snapshot{Version: 2, Runtime: &runtime}) != nil || runtime.InvSeq != c.Invocation || runtime.Index >= c.Count || runtime.Sequence != c.Base+runtime.Index+1 || runtime.Epoch > c.Epoch || pointer.RequestIndex == 0 || pointer.RequestIndex >= runtime.Index || pointer.RequestIndex < c.RetainedFrom {
 			return nil, ErrGap
 		}
 	}
 	if s.cfg.CanonicalStarts {
-		if err := validateStartCursor(root, c, typ, id, s.cfg.PayloadReadLimit, s.cfg.CanonicalSignals); err != nil {
+		if err := validateStartCursor(root, c, typ, id, s.cfg.PayloadReadLimit, s.cfg.CanonicalSignals, s.cfg.ArchiveCheckpoints); err != nil {
 			return nil, err
 		}
 	}
@@ -192,7 +204,7 @@ func (s *GraphStore) validateRoot(root graphpublication.Root, typ, id string) (*
 		if c.Kind != Completed && c.Kind != Failed || root.Graph.Count != 0 || root.Token != "" {
 			return nil, ErrGap
 		}
-	} else if root.Graph.Count != c.Count {
+	} else if root.Graph.Count != c.Count-c.RetainedFrom {
 		return nil, ErrGap
 	}
 	return &c, nil
@@ -290,7 +302,15 @@ func (s *GraphStore) Append(ctx context.Context, typ, id string, invocation uint
 	objects := make([][]byte, 0, len(payloads)+1)
 	objects = append(objects, data)
 	objects = append(objects, payloads...)
-	prepared, err := s.cfg.Protocol.PrepareAppendWithApplication(ctx, destination, root.Head, envelope, objects, owned, s.cfg.Now().Add(s.cfg.IntentTTL), app)
+	physicalOwned := make([]GraphOwnedPayload, len(owned))
+	for i, receipt := range owned {
+		if receipt.Stream != "" || receipt.Index < c.RetainedFrom || receipt.Index >= c.Count {
+			return 0, ErrStale
+		}
+		physicalOwned[i] = receipt
+		physicalOwned[i].Index -= c.RetainedFrom
+	}
+	prepared, err := s.cfg.Protocol.PrepareAppendWithApplication(ctx, destination, root.Head, envelope, objects, physicalOwned, s.cfg.Now().Add(s.cfg.IntentTTL), app)
 	if err != nil {
 		return 0, graphMutationError(err)
 	}
@@ -426,7 +446,13 @@ func (v *GraphView) Read(ctx context.Context, index uint64) (GraphRecord, error)
 	if index >= v.cursor.Count {
 		return GraphRecord{}, ErrGap
 	}
-	raw, err := v.store.cfg.Protocol.ReadRetained(ctx, v.reader, index, v.store.cfg.Now())
+	var raw retainedgraph.Record
+	var err error
+	if index < v.cursor.RetainedFrom {
+		raw, err = v.store.cfg.Protocol.ReadRetainedStream(ctx, v.reader, graphpublication.PrefixArchiveStream, index, v.store.cfg.Now())
+	} else {
+		raw, err = v.store.cfg.Protocol.ReadRetained(ctx, v.reader, index-v.cursor.RetainedFrom, v.store.cfg.Now())
+	}
 	if err != nil {
 		return GraphRecord{}, err
 	}

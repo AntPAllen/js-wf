@@ -1,5 +1,11 @@
 # JetStream Durable Workflow Runtime — Implementation Plan
 
+## Journal checkpoint archive cursor — 2026-10-09
+
+An explicit new-store v6 cursor now tracks a logical retained offset independently of the live forest's physical index. Journal reads span archive and live forests at unchanged absolute indices/sequences, while appends translate verified live-owned references. `CompactCheckpoint` confirms the exact owned checkpoint and reader release, requires its published pointer and matching active tail, and archives only records before the checkpoint request. Sixteen seeded model cases exercise two successive compactions, unchanged complete history, old views, collection of original receipts, live-owned append, schema rejection and complete retirement. [Executed component evidence and limits](scale/graph-journal-archive-2026-10-09/README.md).
+
+Native compaction/fault qualification, worker-triggered compaction and collection-safe continuation execution, retained child provenance, scale/resource limits, import/old deployment/offline/audit adoption and public continuation admission remain open. Default configurations are unchanged. The full shared 148-family/748-pin qualification excludes this addition, and all original broader gates remain required.
+
 ## Graph prefix relocation primitive — 2026-10-09
 
 An original-head archive-and-relocate primitive now copies every live payload under fresh physical grants, appends the prefix to an `archive` forest and reindexes the suffix from zero. Commit validates record bytes, payload hashes, grants, inherited archive frontier, other forests and preserved reader snapshots before CAS. Seeded component controls cover successive compaction, old-reader survival, actual collection of original receipts, append afterward and complete retirement. Fault controls reject stale heads, uncertain uploads/readback and revoked grants. [Component evidence and limitations](scale/graph-prefix-relocation-2026-10-09/README.md).

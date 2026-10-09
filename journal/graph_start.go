@@ -81,7 +81,7 @@ func validateStartRequest(r GraphStartRequest) error {
 	}
 	return nil
 }
-func validateStartCursor(root graphpublication.Root, c graphCursor, typ, id string, limit int, signals bool) error {
+func validateStartCursor(root graphpublication.Root, c graphCursor, typ, id string, limit int, signals, archives bool) error {
 	if c.Start == nil || c.Start.Schema != graphStartSchema || !validStartToken(c.Start.Token) || !startHex(c.Start.InputSHA256, 32) || c.Start.InputSize < 0 || c.Start.InputSize > limit || validateStartRequest(c.Start.Request) != nil || c.Start.Request.Type != typ || c.Start.Request.ID != id {
 		return ErrGap
 	}
@@ -92,14 +92,36 @@ func validateStartCursor(root graphpublication.Root, c graphCursor, typ, id stri
 	} else if c.Invocation <= c.PreviousInvocation {
 		return ErrGap
 	}
-	if len(root.Streams) == 0 || root.Streams[0].Name != "input" || !signals && len(root.Streams) != 1 {
-		return ErrGap
-	}
-	want := uint64(1)
+	want, inputCount, archiveCount := uint64(1), uint64(0), uint64(0)
+	foundInput, foundArchive := false, false
 	if c.Retired {
 		want = 0
 	}
-	if root.Streams[0].Graph.Count != want {
+	for i, stream := range root.Streams {
+		if i > 0 && root.Streams[i-1].Name >= stream.Name {
+			return ErrGap
+		}
+		switch stream.Name {
+		case "input":
+			inputCount, foundInput = stream.Graph.Count, true
+		case graphpublication.PrefixArchiveStream:
+			if !archives {
+				return ErrGap
+			}
+			archiveCount, foundArchive = stream.Graph.Count, true
+		case graphSignalInputForest, graphSignalQueueForest:
+			if !signals {
+				return ErrGap
+			}
+		default:
+			return ErrGap
+		}
+	}
+	wantArchive := c.RetainedFrom
+	if c.Retired {
+		wantArchive = 0
+	}
+	if !foundInput || inputCount != want || archiveCount != wantArchive || c.RetainedFrom > 0 && !foundArchive {
 		return ErrGap
 	}
 	if signals {
@@ -107,8 +129,10 @@ func validateStartCursor(root graphpublication.Root, c graphCursor, typ, id stri
 			return ErrGap
 		}
 		inputs, bindings := uint64(0), uint64(0)
-		for _, stream := range root.Streams[1:] {
+		for _, stream := range root.Streams {
 			switch stream.Name {
+			case "input", graphpublication.PrefixArchiveStream:
+				continue
 			case graphSignalInputForest:
 				inputs = stream.Graph.Count
 			case graphSignalQueueForest:
@@ -179,6 +203,9 @@ func (s *GraphStore) ReserveStart(ctx context.Context, r GraphStartRequest, inpu
 	}
 	if s.cfg.CheckpointIndex {
 		next.Schema = graphCheckpointCursorSchema
+	}
+	if s.cfg.ArchiveCheckpoints {
+		next.Schema = graphArchiveCursorSchema
 	}
 	if c != nil {
 		next.Base = c.Base + c.Count

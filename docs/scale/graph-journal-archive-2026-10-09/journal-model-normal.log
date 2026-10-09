@@ -1,0 +1,385 @@
+=== RUN   TestGraphCheckpointIndexPublicationAndBoundedRead
+=== RUN   TestGraphCheckpointIndexPublicationAndBoundedRead/normal
+    graph_checkpoint_index_test.go:261: mode=normal checkpoint=130 request=129 unreadable_prefix_records=129 suffix=1
+=== RUN   TestGraphCheckpointIndexPublicationAndBoundedRead/lost-ack
+    graph_checkpoint_index_test.go:261: mode=lost-ack checkpoint=130 request=129 unreadable_prefix_records=129 suffix=1
+=== RUN   TestGraphCheckpointIndexPublicationAndBoundedRead/lost-ack-unconfirmed
+    graph_checkpoint_index_test.go:261: mode=lost-ack-unconfirmed checkpoint=130 request=129 unreadable_prefix_records=129 suffix=1
+=== RUN   TestGraphCheckpointIndexPublicationAndBoundedRead/lost-before
+    graph_checkpoint_index_test.go:261: mode=lost-before checkpoint=130 request=129 unreadable_prefix_records=129 suffix=1
+=== RUN   TestGraphCheckpointIndexPublicationAndBoundedRead/tail-race
+    graph_checkpoint_index_test.go:261: mode=tail-race checkpoint=130 request=129 unreadable_prefix_records=129 suffix=2
+--- PASS: TestGraphCheckpointIndexPublicationAndBoundedRead (0.53s)
+    --- PASS: TestGraphCheckpointIndexPublicationAndBoundedRead/normal (0.09s)
+    --- PASS: TestGraphCheckpointIndexPublicationAndBoundedRead/lost-ack (0.09s)
+    --- PASS: TestGraphCheckpointIndexPublicationAndBoundedRead/lost-ack-unconfirmed (0.08s)
+    --- PASS: TestGraphCheckpointIndexPublicationAndBoundedRead/lost-before (0.11s)
+    --- PASS: TestGraphCheckpointIndexPublicationAndBoundedRead/tail-race (0.16s)
+=== RUN   TestGraphCheckpointIndexRequiresCanonicalStores
+--- PASS: TestGraphCheckpointIndexRequiresCanonicalStores (0.00s)
+=== RUN   TestGraphCheckpointOwnedFrameAndSuffix
+=== RUN   TestGraphCheckpointOwnedFrameAndSuffix/json/valid
+=== RUN   TestGraphCheckpointOwnedFrameAndSuffix/json/absent
+=== RUN   TestGraphCheckpointOwnedFrameAndSuffix/json/pending
+=== RUN   TestGraphCheckpointOwnedFrameAndSuffix/json/wrong-generation
+=== RUN   TestGraphCheckpointOwnedFrameAndSuffix/json/wrong-locals
+=== RUN   TestGraphCheckpointOwnedFrameAndSuffix/json/missing-edge
+=== RUN   TestGraphCheckpointOwnedFrameAndSuffix/json/borrowed-edge
+=== RUN   TestGraphCheckpointOwnedFrameAndSuffix/json/unreadable
+=== RUN   TestGraphCheckpointOwnedFrameAndSuffix/json/expired
+=== RUN   TestGraphCheckpointOwnedFrameAndSuffix/json/latest
+=== RUN   TestGraphCheckpointOwnedFrameAndSuffix/protobuf-v1/valid
+=== RUN   TestGraphCheckpointOwnedFrameAndSuffix/protobuf-v1/absent
+=== RUN   TestGraphCheckpointOwnedFrameAndSuffix/protobuf-v1/pending
+=== RUN   TestGraphCheckpointOwnedFrameAndSuffix/protobuf-v1/wrong-generation
+=== RUN   TestGraphCheckpointOwnedFrameAndSuffix/protobuf-v1/wrong-locals
+=== RUN   TestGraphCheckpointOwnedFrameAndSuffix/protobuf-v1/missing-edge
+=== RUN   TestGraphCheckpointOwnedFrameAndSuffix/protobuf-v1/borrowed-edge
+=== RUN   TestGraphCheckpointOwnedFrameAndSuffix/protobuf-v1/unreadable
+=== RUN   TestGraphCheckpointOwnedFrameAndSuffix/protobuf-v1/expired
+=== RUN   TestGraphCheckpointOwnedFrameAndSuffix/protobuf-v1/latest
+--- PASS: TestGraphCheckpointOwnedFrameAndSuffix (0.05s)
+    --- PASS: TestGraphCheckpointOwnedFrameAndSuffix/json/valid (0.00s)
+    --- PASS: TestGraphCheckpointOwnedFrameAndSuffix/json/absent (0.00s)
+    --- PASS: TestGraphCheckpointOwnedFrameAndSuffix/json/pending (0.00s)
+    --- PASS: TestGraphCheckpointOwnedFrameAndSuffix/json/wrong-generation (0.00s)
+    --- PASS: TestGraphCheckpointOwnedFrameAndSuffix/json/wrong-locals (0.00s)
+    --- PASS: TestGraphCheckpointOwnedFrameAndSuffix/json/missing-edge (0.00s)
+    --- PASS: TestGraphCheckpointOwnedFrameAndSuffix/json/borrowed-edge (0.00s)
+    --- PASS: TestGraphCheckpointOwnedFrameAndSuffix/json/unreadable (0.01s)
+    --- PASS: TestGraphCheckpointOwnedFrameAndSuffix/json/expired (0.00s)
+    --- PASS: TestGraphCheckpointOwnedFrameAndSuffix/json/latest (0.00s)
+    --- PASS: TestGraphCheckpointOwnedFrameAndSuffix/protobuf-v1/valid (0.00s)
+    --- PASS: TestGraphCheckpointOwnedFrameAndSuffix/protobuf-v1/absent (0.00s)
+    --- PASS: TestGraphCheckpointOwnedFrameAndSuffix/protobuf-v1/pending (0.00s)
+    --- PASS: TestGraphCheckpointOwnedFrameAndSuffix/protobuf-v1/wrong-generation (0.01s)
+    --- PASS: TestGraphCheckpointOwnedFrameAndSuffix/protobuf-v1/wrong-locals (0.01s)
+    --- PASS: TestGraphCheckpointOwnedFrameAndSuffix/protobuf-v1/missing-edge (0.00s)
+    --- PASS: TestGraphCheckpointOwnedFrameAndSuffix/protobuf-v1/borrowed-edge (0.00s)
+    --- PASS: TestGraphCheckpointOwnedFrameAndSuffix/protobuf-v1/unreadable (0.00s)
+    --- PASS: TestGraphCheckpointOwnedFrameAndSuffix/protobuf-v1/expired (0.00s)
+    --- PASS: TestGraphCheckpointOwnedFrameAndSuffix/protobuf-v1/latest (0.01s)
+=== RUN   TestGraphCheckpointArchiveLogicalHistoryAndCollection
+=== RUN   TestGraphCheckpointArchiveLogicalHistoryAndCollection/1
+=== RUN   TestGraphCheckpointArchiveLogicalHistoryAndCollection/2
+=== RUN   TestGraphCheckpointArchiveLogicalHistoryAndCollection/3
+=== RUN   TestGraphCheckpointArchiveLogicalHistoryAndCollection/4
+=== RUN   TestGraphCheckpointArchiveLogicalHistoryAndCollection/5
+=== RUN   TestGraphCheckpointArchiveLogicalHistoryAndCollection/6
+=== RUN   TestGraphCheckpointArchiveLogicalHistoryAndCollection/7
+=== RUN   TestGraphCheckpointArchiveLogicalHistoryAndCollection/8
+=== RUN   TestGraphCheckpointArchiveLogicalHistoryAndCollection/9
+=== RUN   TestGraphCheckpointArchiveLogicalHistoryAndCollection/10
+=== RUN   TestGraphCheckpointArchiveLogicalHistoryAndCollection/11
+=== RUN   TestGraphCheckpointArchiveLogicalHistoryAndCollection/12
+=== RUN   TestGraphCheckpointArchiveLogicalHistoryAndCollection/13
+=== RUN   TestGraphCheckpointArchiveLogicalHistoryAndCollection/14
+=== RUN   TestGraphCheckpointArchiveLogicalHistoryAndCollection/15
+=== RUN   TestGraphCheckpointArchiveLogicalHistoryAndCollection/16
+--- PASS: TestGraphCheckpointArchiveLogicalHistoryAndCollection (1.51s)
+    --- PASS: TestGraphCheckpointArchiveLogicalHistoryAndCollection/1 (0.05s)
+    --- PASS: TestGraphCheckpointArchiveLogicalHistoryAndCollection/2 (0.05s)
+    --- PASS: TestGraphCheckpointArchiveLogicalHistoryAndCollection/3 (0.06s)
+    --- PASS: TestGraphCheckpointArchiveLogicalHistoryAndCollection/4 (0.05s)
+    --- PASS: TestGraphCheckpointArchiveLogicalHistoryAndCollection/5 (0.06s)
+    --- PASS: TestGraphCheckpointArchiveLogicalHistoryAndCollection/6 (0.07s)
+    --- PASS: TestGraphCheckpointArchiveLogicalHistoryAndCollection/7 (0.09s)
+    --- PASS: TestGraphCheckpointArchiveLogicalHistoryAndCollection/8 (0.09s)
+    --- PASS: TestGraphCheckpointArchiveLogicalHistoryAndCollection/9 (0.12s)
+    --- PASS: TestGraphCheckpointArchiveLogicalHistoryAndCollection/10 (0.11s)
+    --- PASS: TestGraphCheckpointArchiveLogicalHistoryAndCollection/11 (0.09s)
+    --- PASS: TestGraphCheckpointArchiveLogicalHistoryAndCollection/12 (0.12s)
+    --- PASS: TestGraphCheckpointArchiveLogicalHistoryAndCollection/13 (0.14s)
+    --- PASS: TestGraphCheckpointArchiveLogicalHistoryAndCollection/14 (0.16s)
+    --- PASS: TestGraphCheckpointArchiveLogicalHistoryAndCollection/15 (0.14s)
+    --- PASS: TestGraphCheckpointArchiveLogicalHistoryAndCollection/16 (0.12s)
+=== RUN   TestGraphCheckpointArchiveConfiguration
+--- PASS: TestGraphCheckpointArchiveConfiguration (0.00s)
+=== RUN   TestGraphEmptyHistoryInspectionDoesNotPublishReader
+--- PASS: TestGraphEmptyHistoryInspectionDoesNotPublishReader (0.00s)
+=== RUN   TestGraphJournalPublicConfiguration
+--- PASS: TestGraphJournalPublicConfiguration (0.00s)
+=== RUN   TestGraphCanonicalSignalInputsIndexedIdentityAndReopen
+=== RUN   TestGraphCanonicalSignalInputsIndexedIdentityAndReopen/seed1
+=== RUN   TestGraphCanonicalSignalInputsIndexedIdentityAndReopen/seed2
+=== RUN   TestGraphCanonicalSignalInputsIndexedIdentityAndReopen/seed3
+=== RUN   TestGraphCanonicalSignalInputsIndexedIdentityAndReopen/seed4
+=== RUN   TestGraphCanonicalSignalInputsIndexedIdentityAndReopen/seed5
+=== RUN   TestGraphCanonicalSignalInputsIndexedIdentityAndReopen/seed6
+=== RUN   TestGraphCanonicalSignalInputsIndexedIdentityAndReopen/seed7
+=== RUN   TestGraphCanonicalSignalInputsIndexedIdentityAndReopen/seed8
+=== RUN   TestGraphCanonicalSignalInputsIndexedIdentityAndReopen/seed9
+=== RUN   TestGraphCanonicalSignalInputsIndexedIdentityAndReopen/seed10
+=== RUN   TestGraphCanonicalSignalInputsIndexedIdentityAndReopen/seed11
+=== RUN   TestGraphCanonicalSignalInputsIndexedIdentityAndReopen/seed12
+=== RUN   TestGraphCanonicalSignalInputsIndexedIdentityAndReopen/seed13
+=== RUN   TestGraphCanonicalSignalInputsIndexedIdentityAndReopen/seed14
+=== RUN   TestGraphCanonicalSignalInputsIndexedIdentityAndReopen/seed15
+=== RUN   TestGraphCanonicalSignalInputsIndexedIdentityAndReopen/seed16
+--- PASS: TestGraphCanonicalSignalInputsIndexedIdentityAndReopen (3.81s)
+    --- PASS: TestGraphCanonicalSignalInputsIndexedIdentityAndReopen/seed1 (0.25s)
+    --- PASS: TestGraphCanonicalSignalInputsIndexedIdentityAndReopen/seed2 (0.23s)
+    --- PASS: TestGraphCanonicalSignalInputsIndexedIdentityAndReopen/seed3 (0.21s)
+    --- PASS: TestGraphCanonicalSignalInputsIndexedIdentityAndReopen/seed4 (0.26s)
+    --- PASS: TestGraphCanonicalSignalInputsIndexedIdentityAndReopen/seed5 (0.22s)
+    --- PASS: TestGraphCanonicalSignalInputsIndexedIdentityAndReopen/seed6 (0.23s)
+    --- PASS: TestGraphCanonicalSignalInputsIndexedIdentityAndReopen/seed7 (0.22s)
+    --- PASS: TestGraphCanonicalSignalInputsIndexedIdentityAndReopen/seed8 (0.22s)
+    --- PASS: TestGraphCanonicalSignalInputsIndexedIdentityAndReopen/seed9 (0.20s)
+    --- PASS: TestGraphCanonicalSignalInputsIndexedIdentityAndReopen/seed10 (0.23s)
+    --- PASS: TestGraphCanonicalSignalInputsIndexedIdentityAndReopen/seed11 (0.24s)
+    --- PASS: TestGraphCanonicalSignalInputsIndexedIdentityAndReopen/seed12 (0.29s)
+    --- PASS: TestGraphCanonicalSignalInputsIndexedIdentityAndReopen/seed13 (0.27s)
+    --- PASS: TestGraphCanonicalSignalInputsIndexedIdentityAndReopen/seed14 (0.23s)
+    --- PASS: TestGraphCanonicalSignalInputsIndexedIdentityAndReopen/seed15 (0.23s)
+    --- PASS: TestGraphCanonicalSignalInputsIndexedIdentityAndReopen/seed16 (0.28s)
+=== RUN   TestGraphCanonicalSignalInputsRetirementAndReplacement
+--- PASS: TestGraphCanonicalSignalInputsRetirementAndReplacement (0.00s)
+=== RUN   TestGraphCanonicalSignalInputsUnknownAndReadFailures
+=== RUN   TestGraphCanonicalSignalInputsUnknownAndReadFailures/drop
+=== RUN   TestGraphCanonicalSignalInputsUnknownAndReadFailures/lost_readback
+--- PASS: TestGraphCanonicalSignalInputsUnknownAndReadFailures (0.00s)
+    --- PASS: TestGraphCanonicalSignalInputsUnknownAndReadFailures/drop (0.00s)
+    --- PASS: TestGraphCanonicalSignalInputsUnknownAndReadFailures/lost_readback (0.00s)
+=== RUN   TestGraphCanonicalSignalInputsPublicationInterleavings
+=== RUN   TestGraphCanonicalSignalInputsPublicationInterleavings/same_key/seed1
+=== RUN   TestGraphCanonicalSignalInputsPublicationInterleavings/same_key/seed2
+=== RUN   TestGraphCanonicalSignalInputsPublicationInterleavings/same_key/seed3
+=== RUN   TestGraphCanonicalSignalInputsPublicationInterleavings/same_key/seed4
+=== RUN   TestGraphCanonicalSignalInputsPublicationInterleavings/same_key/seed5
+=== RUN   TestGraphCanonicalSignalInputsPublicationInterleavings/same_key/seed6
+=== RUN   TestGraphCanonicalSignalInputsPublicationInterleavings/same_key/seed7
+=== RUN   TestGraphCanonicalSignalInputsPublicationInterleavings/same_key/seed8
+=== RUN   TestGraphCanonicalSignalInputsPublicationInterleavings/same_key/seed9
+=== RUN   TestGraphCanonicalSignalInputsPublicationInterleavings/same_key/seed10
+=== RUN   TestGraphCanonicalSignalInputsPublicationInterleavings/same_key/seed11
+=== RUN   TestGraphCanonicalSignalInputsPublicationInterleavings/same_key/seed12
+=== RUN   TestGraphCanonicalSignalInputsPublicationInterleavings/same_key/seed13
+=== RUN   TestGraphCanonicalSignalInputsPublicationInterleavings/same_key/seed14
+=== RUN   TestGraphCanonicalSignalInputsPublicationInterleavings/same_key/seed15
+=== RUN   TestGraphCanonicalSignalInputsPublicationInterleavings/same_key/seed16
+=== RUN   TestGraphCanonicalSignalInputsPublicationInterleavings/different_key/seed1
+=== RUN   TestGraphCanonicalSignalInputsPublicationInterleavings/different_key/seed2
+=== RUN   TestGraphCanonicalSignalInputsPublicationInterleavings/different_key/seed3
+=== RUN   TestGraphCanonicalSignalInputsPublicationInterleavings/different_key/seed4
+=== RUN   TestGraphCanonicalSignalInputsPublicationInterleavings/different_key/seed5
+=== RUN   TestGraphCanonicalSignalInputsPublicationInterleavings/different_key/seed6
+=== RUN   TestGraphCanonicalSignalInputsPublicationInterleavings/different_key/seed7
+=== RUN   TestGraphCanonicalSignalInputsPublicationInterleavings/different_key/seed8
+=== RUN   TestGraphCanonicalSignalInputsPublicationInterleavings/different_key/seed9
+=== RUN   TestGraphCanonicalSignalInputsPublicationInterleavings/different_key/seed10
+=== RUN   TestGraphCanonicalSignalInputsPublicationInterleavings/different_key/seed11
+=== RUN   TestGraphCanonicalSignalInputsPublicationInterleavings/different_key/seed12
+=== RUN   TestGraphCanonicalSignalInputsPublicationInterleavings/different_key/seed13
+=== RUN   TestGraphCanonicalSignalInputsPublicationInterleavings/different_key/seed14
+=== RUN   TestGraphCanonicalSignalInputsPublicationInterleavings/different_key/seed15
+=== RUN   TestGraphCanonicalSignalInputsPublicationInterleavings/different_key/seed16
+=== RUN   TestGraphCanonicalSignalInputsPublicationInterleavings/retire/seed1
+=== RUN   TestGraphCanonicalSignalInputsPublicationInterleavings/retire/seed2
+=== RUN   TestGraphCanonicalSignalInputsPublicationInterleavings/retire/seed3
+=== RUN   TestGraphCanonicalSignalInputsPublicationInterleavings/retire/seed4
+=== RUN   TestGraphCanonicalSignalInputsPublicationInterleavings/retire/seed5
+=== RUN   TestGraphCanonicalSignalInputsPublicationInterleavings/retire/seed6
+=== RUN   TestGraphCanonicalSignalInputsPublicationInterleavings/retire/seed7
+=== RUN   TestGraphCanonicalSignalInputsPublicationInterleavings/retire/seed8
+=== RUN   TestGraphCanonicalSignalInputsPublicationInterleavings/retire/seed9
+=== RUN   TestGraphCanonicalSignalInputsPublicationInterleavings/retire/seed10
+=== RUN   TestGraphCanonicalSignalInputsPublicationInterleavings/retire/seed11
+=== RUN   TestGraphCanonicalSignalInputsPublicationInterleavings/retire/seed12
+=== RUN   TestGraphCanonicalSignalInputsPublicationInterleavings/retire/seed13
+=== RUN   TestGraphCanonicalSignalInputsPublicationInterleavings/retire/seed14
+=== RUN   TestGraphCanonicalSignalInputsPublicationInterleavings/retire/seed15
+=== RUN   TestGraphCanonicalSignalInputsPublicationInterleavings/retire/seed16
+--- PASS: TestGraphCanonicalSignalInputsPublicationInterleavings (0.10s)
+    --- PASS: TestGraphCanonicalSignalInputsPublicationInterleavings/same_key/seed1 (0.00s)
+    --- PASS: TestGraphCanonicalSignalInputsPublicationInterleavings/same_key/seed2 (0.00s)
+    --- PASS: TestGraphCanonicalSignalInputsPublicationInterleavings/same_key/seed3 (0.00s)
+    --- PASS: TestGraphCanonicalSignalInputsPublicationInterleavings/same_key/seed4 (0.00s)
+    --- PASS: TestGraphCanonicalSignalInputsPublicationInterleavings/same_key/seed5 (0.00s)
+    --- PASS: TestGraphCanonicalSignalInputsPublicationInterleavings/same_key/seed6 (0.00s)
+    --- PASS: TestGraphCanonicalSignalInputsPublicationInterleavings/same_key/seed7 (0.00s)
+    --- PASS: TestGraphCanonicalSignalInputsPublicationInterleavings/same_key/seed8 (0.00s)
+    --- PASS: TestGraphCanonicalSignalInputsPublicationInterleavings/same_key/seed9 (0.00s)
+    --- PASS: TestGraphCanonicalSignalInputsPublicationInterleavings/same_key/seed10 (0.00s)
+    --- PASS: TestGraphCanonicalSignalInputsPublicationInterleavings/same_key/seed11 (0.00s)
+    --- PASS: TestGraphCanonicalSignalInputsPublicationInterleavings/same_key/seed12 (0.00s)
+    --- PASS: TestGraphCanonicalSignalInputsPublicationInterleavings/same_key/seed13 (0.00s)
+    --- PASS: TestGraphCanonicalSignalInputsPublicationInterleavings/same_key/seed14 (0.00s)
+    --- PASS: TestGraphCanonicalSignalInputsPublicationInterleavings/same_key/seed15 (0.00s)
+    --- PASS: TestGraphCanonicalSignalInputsPublicationInterleavings/same_key/seed16 (0.00s)
+    --- PASS: TestGraphCanonicalSignalInputsPublicationInterleavings/different_key/seed1 (0.00s)
+    --- PASS: TestGraphCanonicalSignalInputsPublicationInterleavings/different_key/seed2 (0.00s)
+    --- PASS: TestGraphCanonicalSignalInputsPublicationInterleavings/different_key/seed3 (0.00s)
+    --- PASS: TestGraphCanonicalSignalInputsPublicationInterleavings/different_key/seed4 (0.00s)
+    --- PASS: TestGraphCanonicalSignalInputsPublicationInterleavings/different_key/seed5 (0.00s)
+    --- PASS: TestGraphCanonicalSignalInputsPublicationInterleavings/different_key/seed6 (0.00s)
+    --- PASS: TestGraphCanonicalSignalInputsPublicationInterleavings/different_key/seed7 (0.00s)
+    --- PASS: TestGraphCanonicalSignalInputsPublicationInterleavings/different_key/seed8 (0.00s)
+    --- PASS: TestGraphCanonicalSignalInputsPublicationInterleavings/different_key/seed9 (0.00s)
+    --- PASS: TestGraphCanonicalSignalInputsPublicationInterleavings/different_key/seed10 (0.00s)
+    --- PASS: TestGraphCanonicalSignalInputsPublicationInterleavings/different_key/seed11 (0.00s)
+    --- PASS: TestGraphCanonicalSignalInputsPublicationInterleavings/different_key/seed12 (0.00s)
+    --- PASS: TestGraphCanonicalSignalInputsPublicationInterleavings/different_key/seed13 (0.00s)
+    --- PASS: TestGraphCanonicalSignalInputsPublicationInterleavings/different_key/seed14 (0.00s)
+    --- PASS: TestGraphCanonicalSignalInputsPublicationInterleavings/different_key/seed15 (0.00s)
+    --- PASS: TestGraphCanonicalSignalInputsPublicationInterleavings/different_key/seed16 (0.00s)
+    --- PASS: TestGraphCanonicalSignalInputsPublicationInterleavings/retire/seed1 (0.00s)
+    --- PASS: TestGraphCanonicalSignalInputsPublicationInterleavings/retire/seed2 (0.00s)
+    --- PASS: TestGraphCanonicalSignalInputsPublicationInterleavings/retire/seed3 (0.00s)
+    --- PASS: TestGraphCanonicalSignalInputsPublicationInterleavings/retire/seed4 (0.00s)
+    --- PASS: TestGraphCanonicalSignalInputsPublicationInterleavings/retire/seed5 (0.00s)
+    --- PASS: TestGraphCanonicalSignalInputsPublicationInterleavings/retire/seed6 (0.00s)
+    --- PASS: TestGraphCanonicalSignalInputsPublicationInterleavings/retire/seed7 (0.00s)
+    --- PASS: TestGraphCanonicalSignalInputsPublicationInterleavings/retire/seed8 (0.00s)
+    --- PASS: TestGraphCanonicalSignalInputsPublicationInterleavings/retire/seed9 (0.00s)
+    --- PASS: TestGraphCanonicalSignalInputsPublicationInterleavings/retire/seed10 (0.00s)
+    --- PASS: TestGraphCanonicalSignalInputsPublicationInterleavings/retire/seed11 (0.00s)
+    --- PASS: TestGraphCanonicalSignalInputsPublicationInterleavings/retire/seed12 (0.00s)
+    --- PASS: TestGraphCanonicalSignalInputsPublicationInterleavings/retire/seed13 (0.00s)
+    --- PASS: TestGraphCanonicalSignalInputsPublicationInterleavings/retire/seed14 (0.00s)
+    --- PASS: TestGraphCanonicalSignalInputsPublicationInterleavings/retire/seed15 (0.00s)
+    --- PASS: TestGraphCanonicalSignalInputsPublicationInterleavings/retire/seed16 (0.00s)
+=== RUN   TestGraphCanonicalSignalInputsSchemaAndExpiry
+--- PASS: TestGraphCanonicalSignalInputsSchemaAndExpiry (0.00s)
+=== RUN   TestGraphCanonicalSignalInputsNamesPointersAndReadExpiry
+--- PASS: TestGraphCanonicalSignalInputsNamesPointersAndReadExpiry (0.00s)
+=== RUN   TestGraphCanonicalSignalQueueOrderAndPersistentDuplicates
+=== RUN   TestGraphCanonicalSignalQueueOrderAndPersistentDuplicates/1
+=== RUN   TestGraphCanonicalSignalQueueOrderAndPersistentDuplicates/2
+=== RUN   TestGraphCanonicalSignalQueueOrderAndPersistentDuplicates/3
+=== RUN   TestGraphCanonicalSignalQueueOrderAndPersistentDuplicates/4
+=== RUN   TestGraphCanonicalSignalQueueOrderAndPersistentDuplicates/5
+=== RUN   TestGraphCanonicalSignalQueueOrderAndPersistentDuplicates/6
+=== RUN   TestGraphCanonicalSignalQueueOrderAndPersistentDuplicates/7
+=== RUN   TestGraphCanonicalSignalQueueOrderAndPersistentDuplicates/8
+=== RUN   TestGraphCanonicalSignalQueueOrderAndPersistentDuplicates/9
+=== RUN   TestGraphCanonicalSignalQueueOrderAndPersistentDuplicates/10
+=== RUN   TestGraphCanonicalSignalQueueOrderAndPersistentDuplicates/11
+=== RUN   TestGraphCanonicalSignalQueueOrderAndPersistentDuplicates/12
+=== RUN   TestGraphCanonicalSignalQueueOrderAndPersistentDuplicates/13
+=== RUN   TestGraphCanonicalSignalQueueOrderAndPersistentDuplicates/14
+=== RUN   TestGraphCanonicalSignalQueueOrderAndPersistentDuplicates/15
+=== RUN   TestGraphCanonicalSignalQueueOrderAndPersistentDuplicates/16
+--- PASS: TestGraphCanonicalSignalQueueOrderAndPersistentDuplicates (2.17s)
+    --- PASS: TestGraphCanonicalSignalQueueOrderAndPersistentDuplicates/1 (0.15s)
+    --- PASS: TestGraphCanonicalSignalQueueOrderAndPersistentDuplicates/2 (0.14s)
+    --- PASS: TestGraphCanonicalSignalQueueOrderAndPersistentDuplicates/3 (0.14s)
+    --- PASS: TestGraphCanonicalSignalQueueOrderAndPersistentDuplicates/4 (0.13s)
+    --- PASS: TestGraphCanonicalSignalQueueOrderAndPersistentDuplicates/5 (0.14s)
+    --- PASS: TestGraphCanonicalSignalQueueOrderAndPersistentDuplicates/6 (0.13s)
+    --- PASS: TestGraphCanonicalSignalQueueOrderAndPersistentDuplicates/7 (0.17s)
+    --- PASS: TestGraphCanonicalSignalQueueOrderAndPersistentDuplicates/8 (0.12s)
+    --- PASS: TestGraphCanonicalSignalQueueOrderAndPersistentDuplicates/9 (0.12s)
+    --- PASS: TestGraphCanonicalSignalQueueOrderAndPersistentDuplicates/10 (0.14s)
+    --- PASS: TestGraphCanonicalSignalQueueOrderAndPersistentDuplicates/11 (0.13s)
+    --- PASS: TestGraphCanonicalSignalQueueOrderAndPersistentDuplicates/12 (0.12s)
+    --- PASS: TestGraphCanonicalSignalQueueOrderAndPersistentDuplicates/13 (0.14s)
+    --- PASS: TestGraphCanonicalSignalQueueOrderAndPersistentDuplicates/14 (0.12s)
+    --- PASS: TestGraphCanonicalSignalQueueOrderAndPersistentDuplicates/15 (0.12s)
+    --- PASS: TestGraphCanonicalSignalQueueOrderAndPersistentDuplicates/16 (0.15s)
+=== RUN   TestGraphCanonicalSignalQueueNeverSkipsUnknownOrForgedSource
+--- PASS: TestGraphCanonicalSignalQueueNeverSkipsUnknownOrForgedSource (0.00s)
+=== RUN   TestGraphCanonicalSignalQueueConcurrentBindingAndRetirement
+=== RUN   TestGraphCanonicalSignalQueueConcurrentBindingAndRetirement/concurrent
+=== RUN   TestGraphCanonicalSignalQueueConcurrentBindingAndRetirement/retire
+--- PASS: TestGraphCanonicalSignalQueueConcurrentBindingAndRetirement (0.01s)
+    --- PASS: TestGraphCanonicalSignalQueueConcurrentBindingAndRetirement/concurrent (0.00s)
+    --- PASS: TestGraphCanonicalSignalQueueConcurrentBindingAndRetirement/retire (0.00s)
+=== RUN   TestGraphCanonicalSignalQueueReplacementAndFutureFence
+--- PASS: TestGraphCanonicalSignalQueueReplacementAndFutureFence (0.01s)
+=== RUN   TestGraphCanonicalSignalConsumptionProgressRequiresOwnedInput
+=== RUN   TestGraphCanonicalSignalConsumptionProgressRequiresOwnedInput/index
+=== RUN   TestGraphCanonicalSignalConsumptionProgressRequiresOwnedInput/token
+=== RUN   TestGraphCanonicalSignalConsumptionProgressRequiresOwnedInput/name
+=== RUN   TestGraphCanonicalSignalConsumptionProgressRequiresOwnedInput/hash
+=== RUN   TestGraphCanonicalSignalConsumptionProgressRequiresOwnedInput/reference
+=== RUN   TestGraphCanonicalSignalConsumptionProgressRequiresOwnedInput/missing_body
+=== RUN   TestGraphCanonicalSignalConsumptionProgressRequiresOwnedInput/unknown_metadata
+=== RUN   TestGraphCanonicalSignalConsumptionProgressRequiresOwnedInput/healthy
+--- PASS: TestGraphCanonicalSignalConsumptionProgressRequiresOwnedInput (0.01s)
+    --- PASS: TestGraphCanonicalSignalConsumptionProgressRequiresOwnedInput/index (0.00s)
+    --- PASS: TestGraphCanonicalSignalConsumptionProgressRequiresOwnedInput/token (0.00s)
+    --- PASS: TestGraphCanonicalSignalConsumptionProgressRequiresOwnedInput/name (0.00s)
+    --- PASS: TestGraphCanonicalSignalConsumptionProgressRequiresOwnedInput/hash (0.00s)
+    --- PASS: TestGraphCanonicalSignalConsumptionProgressRequiresOwnedInput/reference (0.00s)
+    --- PASS: TestGraphCanonicalSignalConsumptionProgressRequiresOwnedInput/missing_body (0.00s)
+    --- PASS: TestGraphCanonicalSignalConsumptionProgressRequiresOwnedInput/unknown_metadata (0.00s)
+    --- PASS: TestGraphCanonicalSignalConsumptionProgressRequiresOwnedInput/healthy (0.00s)
+=== RUN   TestGraphCanonicalStartPendingBindingAndRetainedInput
+--- PASS: TestGraphCanonicalStartPendingBindingAndRetainedInput (0.00s)
+=== RUN   TestGraphCanonicalStartRejectsLegacyAndBounds
+--- PASS: TestGraphCanonicalStartRejectsLegacyAndBounds (0.00s)
+=== RUN   TestGraphJournalGenerationRetainedReaderAndDrain
+=== RUN   TestGraphJournalGenerationRetainedReaderAndDrain/json
+=== RUN   TestGraphJournalGenerationRetainedReaderAndDrain/protobuf-v1
+--- PASS: TestGraphJournalGenerationRetainedReaderAndDrain (0.01s)
+    --- PASS: TestGraphJournalGenerationRetainedReaderAndDrain/json (0.00s)
+    --- PASS: TestGraphJournalGenerationRetainedReaderAndDrain/protobuf-v1 (0.00s)
+=== RUN   TestGraphJournalStaleAndUnknownAppends
+=== RUN   TestGraphJournalStaleAndUnknownAppends/lost
+=== RUN   TestGraphJournalStaleAndUnknownAppends/drop
+=== RUN   TestGraphJournalStaleAndUnknownAppends/readback
+=== RUN   TestGraphJournalStaleAndUnknownAppends/competitor
+=== RUN   TestGraphJournalStaleAndUnknownAppends/retirement-lost
+=== RUN   TestGraphJournalStaleAndUnknownAppends/begin-lost
+--- PASS: TestGraphJournalStaleAndUnknownAppends (0.01s)
+    --- PASS: TestGraphJournalStaleAndUnknownAppends/lost (0.00s)
+    --- PASS: TestGraphJournalStaleAndUnknownAppends/drop (0.00s)
+    --- PASS: TestGraphJournalStaleAndUnknownAppends/readback (0.00s)
+    --- PASS: TestGraphJournalStaleAndUnknownAppends/competitor (0.00s)
+    --- PASS: TestGraphJournalStaleAndUnknownAppends/retirement-lost (0.00s)
+    --- PASS: TestGraphJournalStaleAndUnknownAppends/begin-lost (0.00s)
+=== RUN   TestGraphJournalCorruptCursorAndLeaseBoundary
+=== RUN   TestGraphJournalCorruptCursorAndLeaseBoundary/unknown
+=== RUN   TestGraphJournalCorruptCursorAndLeaseBoundary/duplicate
+=== RUN   TestGraphJournalCorruptCursorAndLeaseBoundary/alias
+=== RUN   TestGraphJournalCorruptCursorAndLeaseBoundary/overflow
+=== RUN   TestGraphJournalCorruptCursorAndLeaseBoundary/count
+=== RUN   TestGraphJournalCorruptCursorAndLeaseBoundary/retired
+=== RUN   TestGraphJournalCorruptCursorAndLeaseBoundary/schema
+=== RUN   TestGraphJournalCorruptCursorAndLeaseBoundary/expired
+=== RUN   TestGraphJournalCorruptCursorAndLeaseBoundary/expires-during-read
+--- PASS: TestGraphJournalCorruptCursorAndLeaseBoundary (0.00s)
+    --- PASS: TestGraphJournalCorruptCursorAndLeaseBoundary/unknown (0.00s)
+    --- PASS: TestGraphJournalCorruptCursorAndLeaseBoundary/duplicate (0.00s)
+    --- PASS: TestGraphJournalCorruptCursorAndLeaseBoundary/alias (0.00s)
+    --- PASS: TestGraphJournalCorruptCursorAndLeaseBoundary/overflow (0.00s)
+    --- PASS: TestGraphJournalCorruptCursorAndLeaseBoundary/count (0.00s)
+    --- PASS: TestGraphJournalCorruptCursorAndLeaseBoundary/retired (0.00s)
+    --- PASS: TestGraphJournalCorruptCursorAndLeaseBoundary/schema (0.00s)
+    --- PASS: TestGraphJournalCorruptCursorAndLeaseBoundary/expired (0.00s)
+    --- PASS: TestGraphJournalCorruptCursorAndLeaseBoundary/expires-during-read (0.00s)
+=== RUN   TestGraphJournalLimitsAndForeignRoot
+--- PASS: TestGraphJournalLimitsAndForeignRoot (0.00s)
+=== RUN   TestGraphJournalEntryPayloadAlias
+--- PASS: TestGraphJournalEntryPayloadAlias (0.00s)
+=== RUN   TestGraphJournalCloseContentionAndAmbiguousRelease
+=== RUN   TestGraphJournalCloseContentionAndAmbiguousRelease/competitor
+=== RUN   TestGraphJournalCloseContentionAndAmbiguousRelease/lost
+=== RUN   TestGraphJournalCloseContentionAndAmbiguousRelease/readback
+--- PASS: TestGraphJournalCloseContentionAndAmbiguousRelease (0.00s)
+    --- PASS: TestGraphJournalCloseContentionAndAmbiguousRelease/competitor (0.00s)
+    --- PASS: TestGraphJournalCloseContentionAndAmbiguousRelease/lost (0.00s)
+    --- PASS: TestGraphJournalCloseContentionAndAmbiguousRelease/readback (0.00s)
+=== RUN   TestGraphJournalAcquireRenewContention
+=== RUN   TestGraphJournalAcquireRenewContention/open
+=== RUN   TestGraphJournalAcquireRenewContention/renew
+=== RUN   TestGraphJournalAcquireRenewContention/open-replaced
+=== RUN   TestGraphJournalAcquireRenewContention/renew-expired
+=== RUN   TestGraphJournalAcquireRenewContention/open-unknown
+=== RUN   TestGraphJournalAcquireRenewContention/renew-unknown
+--- PASS: TestGraphJournalAcquireRenewContention (0.00s)
+    --- PASS: TestGraphJournalAcquireRenewContention/open (0.00s)
+    --- PASS: TestGraphJournalAcquireRenewContention/renew (0.00s)
+    --- PASS: TestGraphJournalAcquireRenewContention/open-replaced (0.00s)
+    --- PASS: TestGraphJournalAcquireRenewContention/renew-expired (0.00s)
+    --- PASS: TestGraphJournalAcquireRenewContention/open-unknown (0.00s)
+    --- PASS: TestGraphJournalAcquireRenewContention/renew-unknown (0.00s)
+=== RUN   TestGraphJournalTerminalSnapshotAdmission
+--- PASS: TestGraphJournalTerminalSnapshotAdmission (0.00s)
+=== RUN   TestGraphJournalExistingHistoryIsNotStaleAbsence
+--- PASS: TestGraphJournalExistingHistoryIsNotStaleAbsence (0.00s)
+=== RUN   TestGraphJournalPurgeFenceRetainsReadersAndGeneration
+--- PASS: TestGraphJournalPurgeFenceRetainsReadersAndGeneration (0.00s)
+PASS
+ok  	js-wf/journal	8.249s
