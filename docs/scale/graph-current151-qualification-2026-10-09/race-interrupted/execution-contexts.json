@@ -1,0 +1,44 @@
+[
+  {
+    "command": [
+      "go",
+      "test",
+      "-p=1",
+      "-race",
+      "-c",
+      "-o",
+      "/home/exedev/js-wf-tier1-full151-race1000-20261009/sim.test",
+      "./sim"
+    ],
+    "working_directory": "/home/exedev/js-wf-current151-race-qualification"
+  },
+  {
+    "command": [
+      "go",
+      "run",
+      "-p=1",
+      "./scripts/tier1-seed-inventory"
+    ],
+    "working_directory": "/home/exedev/js-wf-current151-race-qualification"
+  },
+  {
+    "command": [
+      "/usr/bin/time",
+      "-o",
+      "/home/exedev/js-wf-tier1-full151-race1000-20261009/tier1-time.txt",
+      "-f",
+      "elapsed=%e user=%U system=%S",
+      "go",
+      "tool",
+      "test2json",
+      "-t",
+      "-p",
+      "js-wf/sim",
+      "/home/exedev/js-wf-tier1-full151-race1000-20261009/sim.test",
+      "-test.v=test2json",
+      "-test.count=1",
+      "-test.timeout=300m"
+    ],
+    "working_directory": "/home/exedev/js-wf-current151-race-qualification/sim"
+  }
+]

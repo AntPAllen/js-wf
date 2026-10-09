@@ -1,5 +1,9 @@
 # Implementation status against the supplied plan
 
+## Current full race interrupted by VM restart — 2026-10-09
+
+At 19:18 UTC the VM was newly booted and the prior race supervisor/test processes were absent. The retained attempt has no terminal test verdict or child exit. It remains unqualified, with source/binary/output preserved. [Observed interruption](scale/graph-current151-qualification-2026-10-09/race-interrupted/README.md). Complete normal qualification remains accepted at its frozen source; all broader gates remain open.
+
 ## Complete current normal qualification accepted; full race running — 2026-10-09
 
 Frozen `e5018af` passes all 151 families × 1,000 contiguous completed bodies, all 810 pins, all 336 directed Signal combinations and 214 ordinary top-level groups in 1,208.809 seconds. Independent executed review verifies 3,180 unchanged Git-matched inputs, retained binary/exit/cwd/event evidence, and exact reproduction of the full-suite coverage result. [Complete normal proof and precise remaining scope](scale/graph-current151-qualification-2026-10-09/complete-normal1000/README.md).
