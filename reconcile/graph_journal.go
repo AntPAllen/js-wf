@@ -126,8 +126,10 @@ func NewSuspendedScanWithGraphJournalPort(port SuspendedScanPort, graph *journal
 
 // RunRepairLoopWithGraphJournal runs the existing fenced leader/cursor loop with
 // graph history. Supported kinds are start, graph-start, graph-signal,
-// graph-terminal, graph-continuation, signal, timer, fallback-timer and suspended. Tombstone state and purge
-// coordination require separate migration.
+// graph-terminal, graph-terminal-audit, graph-continuation, signal, timer,
+// fallback-timer and suspended. Leases/checkpoints are namespace scoped;
+// unscoped checkpoints are not imported. Tombstone state and purge coordination
+// require separate migration.
 func RunRepairLoopWithGraphJournal(ctx context.Context, js jetstream.JetStream, workerID, kind string, interval time.Duration, budget int, graph *journal.GraphStore, observe func(RepairEvent), clock TimerDomainClock, progress func(ScanEvent)) error {
 	if graph == nil {
 		return fmt.Errorf("graph repair loop requires journal")

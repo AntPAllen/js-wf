@@ -77,6 +77,20 @@ func RunRepairLoopWithClock(ctx context.Context, js jetstream.JetStream, workerI
 }
 
 func runRepairLoopObserved(ctx context.Context, js jetstream.JetStream, workerID, kind string, interval time.Duration, budget int, observe func(RepairEvent), clock TimerDomainClock, progress func(ScanEvent), graph *journal.GraphStore) error {
+	var graphScope string
+	if graph != nil {
+		if js == nil || workerID == "" || interval <= 0 || interval > 10*time.Second || budget < 1 {
+			return fmt.Errorf("invalid graph repair loop configuration")
+		}
+		maintenance, err := graph.ReaderMaintenance()
+		if err != nil {
+			return err
+		}
+		graphScope = maintenance.ReaderMaintenanceScope()
+		if _, err := (graphRepairLoopPort{scope: graphScope}).key(kind); err != nil {
+			return err
+		}
+	}
 	var scan scanFunc
 	switch kind {
 	case "graph-continuation":
@@ -155,6 +169,11 @@ func runRepairLoopObserved(ctx context.Context, js jetstream.JetStream, workerID
 			progress(event)
 			return result, err
 		}
+	}
+	if graph != nil {
+		backend := &jetStreamLoopPort{js: js, ticker: time.NewTicker(interval)}
+		defer backend.ticker.Stop()
+		return RunLoopWithPort(ctx, graphRepairLoopPort{jetStreamLoopPort: backend, scope: graphScope}, workerID, kind, interval, budget, scan)
 	}
 	return runLoop(ctx, js, workerID, kind, interval, budget, scan)
 }

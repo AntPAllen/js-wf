@@ -1,0 +1,21 @@
+{
+  "observed_utc": "2026-10-09T21:54:26.854632+00:00",
+  "runs": [
+    {
+      "command": "GOMAXPROCS=1 GOMEMLIMIT=512MiB go test -race ./reconcile -run '^(TestGraphRepairScopedCheckpointBoundary|TestNativeGraphRepairNamespaceIsolation)$' -count=1 -timeout=4m -v",
+      "actual_child_exit": 0,
+      "package_seconds": 3.665
+    },
+    {
+      "command": "GOMAXPROCS=1 GOMEMLIMIT=512MiB go test -race ./reconcile -run '^TestGraphRepairScopedAdmissionBeforeStorage$' -count=1 -timeout=1m",
+      "actual_child_exit": 0,
+      "package_seconds": 1.013
+    },
+    {
+      "command": "GOMAXPROCS=1 GOMEMLIMIT=512MiB go test -race ./reconcile -run '^(TestNativeGraphReconcileCanonicalPendingStarts|TestNativeGraphReconcileTerminalProjection)$' -count=1 -timeout=4m -v",
+      "actual_child_exit": 0,
+      "package_seconds": 51.339
+    }
+  ],
+  "scope": "Focused scoped cursor/lease boundary and native production-loop integration. No full current qualification or complete multi-namespace adoption."
+}

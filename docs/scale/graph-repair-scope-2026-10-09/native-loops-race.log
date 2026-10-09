@@ -1,0 +1,28 @@
+=== RUN   TestNativeGraphReconcileCanonicalPendingStarts
+=== RUN   TestNativeGraphReconcileCanonicalPendingStarts/R1
+    graph_start_native_test.go:247: reopened graph-start loop recovered 3 durable cuts without caller input; effects=3
+=== RUN   TestNativeGraphReconcileCanonicalPendingStarts/R3
+    graph_start_native_test.go:247: reopened graph-start loop recovered 3 durable cuts without caller input; effects=3
+--- PASS: TestNativeGraphReconcileCanonicalPendingStarts (34.42s)
+    --- PASS: TestNativeGraphReconcileCanonicalPendingStarts/R1 (9.58s)
+    --- PASS: TestNativeGraphReconcileCanonicalPendingStarts/R3 (24.84s)
+=== RUN   TestNativeGraphReconcileTerminalProjection
+=== RUN   TestNativeGraphReconcileTerminalProjection/R1
+    graph_terminal_native_test.go:93: native terminal phase repair=false audit=false
+    graph_terminal_native_test.go:93: native terminal phase repair=true audit=false
+    graph_terminal_native_test.go:93: native terminal phase repair=true audit=false
+    graph_terminal_native_test.go:93: native terminal phase repair=true audit=true
+    graph_terminal_native_test.go:93: native terminal phase repair=true audit=true
+    graph_terminal_native_test.go:204: reopened fenced graph-terminal loop restored two deleted projections inside dedup window; exact terminal bytes, unchanged journal, effect one
+=== RUN   TestNativeGraphReconcileTerminalProjection/R3
+    graph_terminal_native_test.go:93: native terminal phase repair=false audit=false
+    graph_terminal_native_test.go:93: native terminal phase repair=true audit=false
+    graph_terminal_native_test.go:93: native terminal phase repair=true audit=false
+    graph_terminal_native_test.go:93: native terminal phase repair=true audit=true
+    graph_terminal_native_test.go:93: native terminal phase repair=true audit=true
+    graph_terminal_native_test.go:204: reopened fenced graph-terminal loop restored two deleted projections inside dedup window; exact terminal bytes, unchanged journal, effect one
+--- PASS: TestNativeGraphReconcileTerminalProjection (15.88s)
+    --- PASS: TestNativeGraphReconcileTerminalProjection/R1 (4.69s)
+    --- PASS: TestNativeGraphReconcileTerminalProjection/R3 (11.18s)
+PASS
+ok  	js-wf/reconcile	51.339s
