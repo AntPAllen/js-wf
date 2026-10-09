@@ -1,5 +1,9 @@
 # Implementation status against the supplied plan
 
+## Native reader maintenance bound to its graph namespace — 2026-10-09
+
+Native maintenance now hashes the authority stream/prefix/object bucket into separate lease/checkpoint identities and embeds that scope in a version-2 checkpoint. A copied or mismatched checkpoint fails validation; legacy unscoped checkpoints are not automatically imported. R1/R3 native restart/lost-ack and separate-scope lease/cursor controls pass race in 4.679 seconds; scope controls pass in 1.015 seconds; all eight existing maintenance traces pass race replay in 1.425 seconds. [Initial naming failure, correction and focused evidence](scale/graph-reader-maintenance-scope-2026-10-09/README.md). Inventory remains 154 families/824 traces. Live frozen race campaigns exclude this change; all current full-suite, extended, native fault/rollout and original broader gates remain open.
+
 ## Seeded reader maintenance qualified in normal/race — 2026-10-09
 
 The production reader-expiry loop/protocol now has a seeded in-memory workload spanning request/acknowledgment loss, catalog/watermark/read/expiry uncertainty, persisted restart and batch sizes. All 1,000 bodies and exact replays pass normal (2.701 seconds) and race (28.963 seconds), covering 48 declared choice tuples with explicit redundant save-position scope. Eight new traces pass normal/race shared corpus replay; inventory is 154 families and 824 traces. [Raw results, fault assertions and precise limitations](scale/graph-reader-maintenance-simulation-2026-10-09/README.md). This is sequential fault/restart simulation, not arbitrary operation interleaving. Complete current/all-pin/extended and all original native/runtime/fault/scale/soak/drain/migration/adoption/release gates remain open; the two supervised frozen race services are still active and exclude this work.

@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"strings"
 	"testing"
 	"time"
 
@@ -117,13 +118,14 @@ func TestNativeReaderExpiryRestartAndLostCheckpoint(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
+			scope := port.ReaderMaintenanceScope()
 			firstCtx, stopFirst := context.WithCancel(ctx)
 			backend := &jetStreamLoopPort{js: js, ticker: time.NewTicker(time.Millisecond)}
 			defer backend.ticker.Stop()
 			// Hide the committed batch checkpoint update, then stop the first
 			// worker. Its watermark create was acknowledged normally.
-			hidden := hiddenCursorAckKV{KeyValue: state, key: "scan." + readerExpiryKind, operation: "update"}
-			first := &stopReaderCheckpointPort{nativeReaderExpiryPort: nativeReaderExpiryPort{backend}, stopAfter: 2, cancel: stopFirst}
+			hidden := hiddenCursorAckKV{KeyValue: state, key: "scan." + readerExpiryKind + "." + scope, operation: "update"}
+			first := &stopReaderCheckpointPort{nativeReaderExpiryPort: nativeReaderExpiryPort{jetStreamLoopPort: backend, scope: scope}, stopAfter: 2, cancel: stopFirst}
 			// Prepare reopens state; override it after preparation to inject at
 			// the actual SDK KV boundary without replacing lease decisions.
 			firstPort := preparedReaderCheckpointPort{stopReaderCheckpointPort: first, state: hidden}
@@ -131,21 +133,45 @@ func TestNativeReaderExpiryRestartAndLostCheckpoint(t *testing.T) {
 			if err = RunReaderExpiryWithPort(firstCtx, firstPort, protocol, "first-reader", time.Millisecond, 1, clock); err != nil {
 				t.Fatal(err)
 			}
-			checkpoint, _, err := nativeReaderExpiryPort{&jetStreamLoopPort{state: state}}.LoadReaderCursor(ctx)
+			checkpoint, _, err := nativeReaderExpiryPort{jetStreamLoopPort: &jetStreamLoopPort{state: state}, scope: scope}.LoadReaderCursor(ctx)
 			if err != nil || checkpoint.Next <= 1 || checkpoint.Next > checkpoint.Through || first.saves != 2 {
 				t.Fatal(checkpoint, err, first.saves)
 			}
+			// Another namespace in the same account sees no checkpoint and uses
+			// a separate actual lease, even while this scope has an owner.
+			other := nativeReaderExpiryPort{jetStreamLoopPort: &jetStreamLoopPort{state: state, leasing: backend.leasing}, scope: strings.Repeat("b", 64)}
+			otherCursor, otherRev, e := other.LoadReaderCursor(ctx)
+			if e != nil || otherRev != 0 || otherCursor != (graphpublication.ReaderSweepCursor{}) {
+				t.Fatal(otherCursor, otherRev, e)
+			}
+			owner, e := first.nativeReaderExpiryPort.Acquire(ctx, readerExpiryKind, "scope-owner")
+			if e != nil {
+				t.Fatal(e)
+			}
+			otherOwner, e := other.Acquire(ctx, readerExpiryKind, "other-owner")
+			if e != nil {
+				t.Fatal("namespace lease collision", e)
+			}
+			if e = otherOwner.Release(ctx); e != nil {
+				t.Fatal(e)
+			}
+			if e = owner.Release(ctx); e != nil {
+				t.Fatal(e)
+			}
 			// Restart adapters and scheduler with only persisted native state.
 			port = open()
+			if port.ReaderMaintenanceScope() != scope {
+				t.Fatal("scope changed on reopen")
+			}
 			protocol = graphpublication.Protocol{Port: port}
 			secondCtx, stopSecond := context.WithCancel(ctx)
 			secondBackend := &jetStreamLoopPort{js: js, ticker: time.NewTicker(time.Millisecond)}
 			defer secondBackend.ticker.Stop()
-			second := &stopReaderCheckpointPort{nativeReaderExpiryPort: nativeReaderExpiryPort{secondBackend}, stopAfter: 2, cancel: stopSecond}
+			second := &stopReaderCheckpointPort{nativeReaderExpiryPort: nativeReaderExpiryPort{jetStreamLoopPort: secondBackend, scope: scope}, stopAfter: 2, cancel: stopSecond}
 			if err = RunReaderExpiryWithPort(secondCtx, second, protocol, "second-reader", time.Millisecond, 1, clock); err != nil {
 				t.Fatal(err)
 			}
-			final, _, err := nativeReaderExpiryPort{&jetStreamLoopPort{state: state}}.LoadReaderCursor(ctx)
+			final, _, err := nativeReaderExpiryPort{jetStreamLoopPort: &jetStreamLoopPort{state: state}, scope: scope}.LoadReaderCursor(ctx)
 			if err != nil || final != (graphpublication.ReaderSweepCursor{}) {
 				t.Fatal(final, err)
 			}

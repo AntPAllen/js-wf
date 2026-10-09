@@ -1,0 +1,26 @@
+{
+  "files_sha256": {
+    "internal/graphpublication/nats_objects.go": "89265dbd4ec621505d23b83be17973653182786b20c9f46395f33a4711cf8952",
+    "internal/graphpublication/nats_reader_scope_test.go": "d7efe5b316a5b2a7eb865bb1cd93e84cca679269334771ea49af9d272fcf9bf4",
+    "reconcile/graph_readers.go": "c30f1b1da19ce6cd6d66c36e987d1b9c900d515061ff8053f720200df39915ba",
+    "reconcile/graph_readers_test.go": "07b7760bd2410774734fa5a9c503c44ba906ff9027b5d5cc95823b1ddd80c540",
+    "reconcile/graph_readers_native_test.go": "774662a9232e745dcea10efa299e80aecdb030db009f9544860de8b5c9928882"
+  },
+  "commands": [
+    {
+      "name": "native",
+      "command": [
+        "go",
+        "test",
+        "-race",
+        "./reconcile",
+        "-run",
+        "^(TestReaderExpiry|TestNativeReaderExpiryRestartAndLostCheckpoint)",
+        "-count=1",
+        "-timeout=4m",
+        "-v"
+      ],
+      "actual_exit_code": 1
+    }
+  ]
+}

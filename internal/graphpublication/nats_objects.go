@@ -47,6 +47,17 @@ var _ RootCatalogPort = (*NativePort)(nil)
 var _ RootScanPort = (*NativePort)(nil)
 var _ RootCatalogWatermarkPort = (*NativePort)(nil)
 
+// ReaderMaintenanceScope binds maintenance leases/checkpoints to this isolated
+// authority and object namespace. It is stable across adapter restarts.
+func (p *NativePort) ReaderMaintenanceScope() string {
+	if p == nil || p.NativeAuthority == nil {
+		return ""
+	}
+	encoded, _ := json.Marshal([]string{p.name, p.prefix, p.bucket})
+	digest := sha256.Sum256(encoded)
+	return hex.EncodeToString(digest[:])
+}
+
 // NativeObjectStreamConfig provisions a NEW isolated protocol bucket. Metadata
 // uses standard ObjectStore rollups; chunk subjects retain all their messages.
 // Administrators must not relax retention or destroy/recreate its authority.

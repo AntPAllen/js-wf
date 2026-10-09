@@ -2,6 +2,7 @@ package reconcile
 
 import (
 	"context"
+	"encoding/hex"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -30,14 +31,40 @@ type ReaderExpiryProtocol interface {
 	ExpireReaderBatch(context.Context, graphpublication.ReaderSweepCursor, int, time.Time) (graphpublication.ReaderSweepResult, error)
 }
 
-type nativeReaderExpiryPort struct{ *jetStreamLoopPort }
+type nativeReaderExpiryPort struct {
+	*jetStreamLoopPort
+	scope string
+}
+
+func (p nativeReaderExpiryPort) scopeKey() (string, error) {
+	decoded, err := hex.DecodeString(p.scope)
+	if err != nil || len(decoded) != 32 || hex.EncodeToString(decoded) != p.scope {
+		return "", fmt.Errorf("invalid reader maintenance scope")
+	}
+	return readerExpiryKind + "." + p.scope, nil
+}
+
+func (p nativeReaderExpiryPort) Acquire(ctx context.Context, kind, workerID string) (LoopLease, error) {
+	_, err := p.scopeKey()
+	if err != nil {
+		return nil, err
+	}
+	if kind != readerExpiryKind {
+		return nil, fmt.Errorf("invalid reader maintenance lease kind")
+	}
+	return p.jetStreamLoopPort.Acquire(ctx, readerExpiryKind+"-"+p.scope, workerID)
+}
 
 func validReaderCursor(c graphpublication.ReaderSweepCursor) bool {
 	return c == (graphpublication.ReaderSweepCursor{}) || c.Through != math.MaxUint64 && c.Next > 0 && c.Next <= c.Through+1
 }
 
 func (p nativeReaderExpiryPort) LoadReaderCursor(ctx context.Context) (graphpublication.ReaderSweepCursor, uint64, error) {
-	entry, err := p.state.Get(ctx, "scan."+readerExpiryKind)
+	key, err := p.scopeKey()
+	if err != nil {
+		return graphpublication.ReaderSweepCursor{}, 0, err
+	}
+	entry, err := p.state.Get(ctx, "scan."+key)
 	if errors.Is(err, jetstream.ErrKeyNotFound) {
 		return graphpublication.ReaderSweepCursor{}, 0, nil
 	}
@@ -46,9 +73,10 @@ func (p nativeReaderExpiryPort) LoadReaderCursor(ctx context.Context) (graphpubl
 	}
 	var stored struct {
 		Version int
+		Scope   string
 		Cursor  *graphpublication.ReaderSweepCursor
 	}
-	if err := json.Unmarshal(entry.Value(), &stored); err != nil || stored.Version != 1 || stored.Cursor == nil || !validReaderCursor(*stored.Cursor) {
+	if err := json.Unmarshal(entry.Value(), &stored); err != nil || stored.Version != 2 || stored.Scope != p.scope || stored.Cursor == nil || !validReaderCursor(*stored.Cursor) {
 		return graphpublication.ReaderSweepCursor{}, 0, fmt.Errorf("invalid reader expiry checkpoint")
 	}
 	cursor := *stored.Cursor
@@ -56,21 +84,26 @@ func (p nativeReaderExpiryPort) LoadReaderCursor(ctx context.Context) (graphpubl
 }
 
 func (p nativeReaderExpiryPort) SaveReaderCursor(ctx context.Context, cursor graphpublication.ReaderSweepCursor, revision uint64) (uint64, error) {
+	key, err := p.scopeKey()
+	if err != nil {
+		return 0, err
+	}
 	if !validReaderCursor(cursor) {
 		return 0, fmt.Errorf("invalid reader expiry checkpoint")
 	}
 	data, err := json.Marshal(struct {
 		Version int
+		Scope   string
 		Cursor  graphpublication.ReaderSweepCursor
-	}{1, cursor})
+	}{2, p.scope, cursor})
 	if err != nil {
 		return 0, err
 	}
 	var next uint64
 	if revision == 0 {
-		next, err = p.state.Create(ctx, "scan."+readerExpiryKind, data)
+		next, err = p.state.Create(ctx, "scan."+key, data)
 	} else {
-		next, err = p.state.Update(ctx, "scan."+readerExpiryKind, data, revision)
+		next, err = p.state.Update(ctx, "scan."+key, data, revision)
 	}
 	var api *jetstream.APIError
 	if errors.Is(err, jetstream.ErrKeyExists) || errors.Is(err, jetstream.ErrKeyRevisionMismatch) || errors.As(err, &api) && api.ErrorCode == 10164 {
@@ -82,12 +115,16 @@ func (p nativeReaderExpiryPort) SaveReaderCursor(ctx context.Context, cursor gra
 // RunGraphReaderExpiry is explicitly enabled experimental reader maintenance.
 // It never collects objects and is not installed in the default runtime.
 func RunGraphReaderExpiry(ctx context.Context, js jetstream.JetStream, protocol graphpublication.Protocol, workerID string, interval time.Duration, budget int) error {
+	scoped, ok := protocol.Port.(interface{ ReaderMaintenanceScope() string })
+	if !ok {
+		return fmt.Errorf("reader maintenance requires an isolated namespace scope")
+	}
 	if interval <= 0 || interval > 10*time.Second {
 		return fmt.Errorf("invalid reader expiry cadence")
 	}
 	p := &jetStreamLoopPort{js: js, ticker: time.NewTicker(interval)}
 	defer p.ticker.Stop()
-	return RunReaderExpiryWithPort(ctx, nativeReaderExpiryPort{p}, protocol, workerID, interval, budget, time.Now)
+	return RunReaderExpiryWithPort(ctx, nativeReaderExpiryPort{jetStreamLoopPort: p, scope: scoped.ReaderMaintenanceScope()}, protocol, workerID, interval, budget, time.Now)
 }
 
 // RunReaderExpiryWithPort shares the production scheduler with deterministic

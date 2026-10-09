@@ -3,6 +3,7 @@ package reconcile
 import (
 	"context"
 	"reflect"
+	"strings"
 	"testing"
 	"time"
 
@@ -69,12 +70,19 @@ func (m *readerCheckpointKV) store(data []byte) (uint64, error) {
 func TestReaderExpiryNativeCheckpointBoundary(t *testing.T) {
 	ctx := context.Background()
 	m := &readerCheckpointKV{}
-	p := nativeReaderExpiryPort{&jetStreamLoopPort{state: m}}
+	p := nativeReaderExpiryPort{jetStreamLoopPort: &jetStreamLoopPort{state: m}, scope: strings.Repeat("a", 64)}
 	c, r, err := p.LoadReaderCursor(ctx)
 	if err != nil || r != 0 || c != (graphpublication.ReaderSweepCursor{}) {
 		t.Fatal(c, r, err)
 	}
 	want := graphpublication.ReaderSweepCursor{3, 7}
+	other := p
+	other.scope = strings.Repeat("b", 64)
+	k1, _ := p.scopeKey()
+	k2, _ := other.scopeKey()
+	if k1 == k2 {
+		t.Fatal("namespace keys collide")
+	}
 	m.lost = true
 	if _, err = p.SaveReaderCursor(ctx, want, 0); err != nats.ErrTimeout {
 		t.Fatal(err)
@@ -82,6 +90,9 @@ func TestReaderExpiryNativeCheckpointBoundary(t *testing.T) {
 	c, r, err = p.LoadReaderCursor(ctx)
 	if err != nil || c != want || r != 1 {
 		t.Fatal(c, r, err)
+	}
+	if _, _, err = other.LoadReaderCursor(ctx); err == nil {
+		t.Fatal("copied checkpoint accepted in wrong namespace")
 	}
 	if _, err = p.SaveReaderCursor(ctx, graphpublication.ReaderSweepCursor{5, 7}, 0); err != ErrCursorStale {
 		t.Fatal(err)
