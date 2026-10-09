@@ -8,6 +8,16 @@ stage replay is implemented with focused/model/real-journal checks below.
 This document preserves the plan's checkpoint requirement; it does not count
 as a completed checkpoint feature.
 
+## Canonical materialized payload foundation — 2026-10-09
+
+Checkpoint completion copies each referenced promise result's already owned edge
+into the same append as the frame. The worker resolver moves the reference to that
+completion index. Native R1/R3-domain race controls reject unowned/staged/forged
+sources and read copied bytes from fresh completion pins with earlier encoded
+bodies unavailable. [Evidence and remaining materialization scope](scale/graph-checkpoint-materialization-2026-10-09/README.md).
+The full worker prefix/reference loading, pending-child provenance, actual archival
+compaction and survival through physical prefix collection still require migration.
+
 ## Canonical graph migration status — 2026-10-09
 
 Public graph continuation admission remains closed. Internal migration controls

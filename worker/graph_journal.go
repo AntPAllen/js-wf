@@ -195,6 +195,10 @@ func (g *graphDelivery) register(record journal.GraphRecord) error {
 	if err != nil {
 		return err
 	}
+	return g.registerReferences(record, refs)
+}
+
+func (g *graphDelivery) registerReferences(record journal.GraphRecord, refs map[string]string) error {
 	for name, hash := range refs {
 		found := false
 		for _, link := range append(record.Blobs, record.EntryBlob) {
@@ -267,6 +271,9 @@ func (g *graphDelivery) append(ctx context.Context, entry journal.Entry, tail ui
 	if err != nil {
 		return 0, err
 	}
+	if err = g.materializeCheckpointReferences(ctx, entry, refs); err != nil {
+		return 0, err
+	}
 	var payloads [][]byte
 	var owned []graphpublication.OwnedPayload
 	// Stable ordering keeps seeded transport traces reproducible.
@@ -306,6 +313,9 @@ func (g *graphDelivery) append(ctx context.Context, entry journal.Entry, tail ui
 		return 0, fmt.Errorf("%w: committed graph entry: %w", journal.ErrUnknown, err)
 	}
 	if err = g.register(record); err != nil {
+		return 0, err
+	}
+	if err = g.registerReferences(record, refs); err != nil {
 		return 0, err
 	}
 	for _, name := range names {

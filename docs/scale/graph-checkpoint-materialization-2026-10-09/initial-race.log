@@ -1,0 +1,26 @@
+=== RUN   TestNativeGraphCheckpointMaterializedReferences
+=== RUN   TestNativeGraphCheckpointMaterializedReferences/R1
+    graph_checkpoint_test.go:235: promise aliases=2 completion_payload_edges=2 materialized_index=4 blocked_prefix_reads=0
+=== RUN   TestNativeGraphCheckpointMaterializedReferences/R3Domain
+    graph_checkpoint_test.go:235: promise aliases=2 completion_payload_edges=2 materialized_index=4 blocked_prefix_reads=0
+--- PASS: TestNativeGraphCheckpointMaterializedReferences (6.13s)
+    --- PASS: TestNativeGraphCheckpointMaterializedReferences/R1 (2.15s)
+    --- PASS: TestNativeGraphCheckpointMaterializedReferences/R3Domain (3.98s)
+=== RUN   TestNativeGraphContinuationSDKFlow
+=== RUN   TestNativeGraphContinuationSDKFlow/R1
+    graph_continuation_sdk_test.go:243: SDK initial/next/finish=map[finish:1 initial:1 next:1] effects=2 records=20 result=43
+=== RUN   TestNativeGraphContinuationSDKFlow/R3Domain
+    graph_continuation_sdk_test.go:243: SDK initial/next/finish=map[finish:1 initial:1 next:1] effects=2 records=20 result=43
+--- PASS: TestNativeGraphContinuationSDKFlow (19.89s)
+    --- PASS: TestNativeGraphContinuationSDKFlow/R1 (7.66s)
+    --- PASS: TestNativeGraphContinuationSDKFlow/R3Domain (12.23s)
+=== RUN   TestNativeGraphContinuationSDKPartitionFlow
+=== RUN   TestNativeGraphContinuationSDKPartitionFlow/R1
+    graph_continuation_sdk_test.go:243: SDK initial/next/finish=map[finish:1 initial:1 next:1] effects=2 records=20 result=43
+=== RUN   TestNativeGraphContinuationSDKPartitionFlow/R3Domain
+    graph_continuation_sdk_test.go:243: SDK initial/next/finish=map[finish:1 initial:1 next:1] effects=2 records=20 result=43
+--- PASS: TestNativeGraphContinuationSDKPartitionFlow (27.24s)
+    --- PASS: TestNativeGraphContinuationSDKPartitionFlow/R1 (8.93s)
+    --- PASS: TestNativeGraphContinuationSDKPartitionFlow/R3Domain (18.31s)
+PASS
+ok  	js-wf/worker	54.314s
