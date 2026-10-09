@@ -133,6 +133,7 @@ func runGraphSignalActors(seed int64, replay *Trace) (trace Trace, runErr error)
 		}
 		return w.RunPartitionWithTransport(runCtx, 0, dispatch)
 	}
+	pendingRequests := map[string]bool{}
 	actors := []CooperativeActor{}
 	for _, name := range []string{"first", "second"} {
 		name := name
@@ -156,7 +157,22 @@ func runGraphSignalActors(seed int64, replay *Trace) (trace Trace, runErr error)
 					return e
 				}
 			}
-			return fmt.Errorf("Signal retry budget exhausted: %w", last)
+			// A finite attempt budget under contention is not a promise of
+			// admission. Reobserve the generation before retaining a caller retry.
+			g, e := store(y)
+			if e != nil {
+				return e
+			}
+			state, e := g.InspectStart(ctx, typ, id)
+			if e != nil {
+				return e
+			}
+			if state == nil || state.State.Pending || state.State.Invocation != h.InvSeq || state.Retired || state.Purging {
+				return fmt.Errorf("Signal retry stopped at changed generation: %w", last)
+			}
+			pendingRequests[name] = true
+			s.RecordTransport(TransportEvent{Operation: "signal_caller_retry_pending", Subject: name, Outcome: "same_active_generation"})
+			return nil
 		}})
 	}
 	actors = append(actors, CooperativeActor{Name: "repair", Run: func(ctx context.Context, y YieldFunc) error {
@@ -207,6 +223,27 @@ func runGraphSignalActors(seed int64, replay *Trace) (trace Trace, runErr error)
 	if e != nil {
 		return trace, e
 	}
+	// Caller input may only be retried when no durable reservation exists.
+	// Reserved input recovery below uses canonical discovery and owned bytes.
+	for _, name := range []string{"first", "second"} {
+		if !pendingRequests[name] {
+			continue
+		}
+		_, _, found, e := g.ReadSignalInput(ctx, journal.GraphSignalRequest{Type: typ, ID: id, Invocation: h.InvSeq, Name: name, Key: name})
+		if e != nil {
+			return trace, e
+		}
+		if !found {
+			if _, e = c.Signal(ctx, typ, id, name, []byte(`true`), name); e != nil {
+				return trace, e
+			}
+		}
+		outcome := "owned_input"
+		if !found {
+			outcome = "caller_resubmitted"
+		}
+		s.RecordTransport(TransportEvent{Operation: "signal_caller_retry_recovered", Subject: name, Outcome: outcome})
+	}
 	scan, e := reconcile.NewCanonicalSignalScanWithPort(g, c)
 	if e != nil {
 		return trace, e
@@ -255,6 +292,9 @@ func runGraphSignalActors(seed int64, replay *Trace) (trace Trace, runErr error)
 	}
 	if e = model.CheckReferences(); e != nil {
 		return trace, e
+	}
+	if s.NowMillis() > 30000 {
+		return trace, fmt.Errorf("recovery exceeded 30s virtual target: %dms", s.NowMillis())
 	}
 	if e = g.Retire(ctx, typ, id, h.InvSeq, tail); e != nil {
 		return trace, e
@@ -328,4 +368,37 @@ func TestSeededGraphSignalOperationActorsReplay(t *testing.T) {
 		t.Fatalf("mode coverage=%v", observed)
 	}
 	t.Logf("operation-level actors: %v; five actors reached per schedule, all selected faults consumed, effect one, two bindings/consumptions, terminal equality and graph/dispatch drain", observed)
+}
+
+// Seed 926 exhausted all in-contention attempts without reserving the second
+// input. The generation remains active: a fresh caller retry must admit it,
+// while canonical repair handles any already reserved inputs without the caller.
+func TestGraphSignalCallerRetryAfterContention(t *testing.T) {
+	const seed int64 = 926
+	generated, e := runGraphSignalActors(seed, nil)
+	if e != nil {
+		path, _ := saveSeedFailureTrace(t.Name(), seed, generated)
+		t.Fatalf("FAULT_TRACE=%s: %v", path, e)
+	}
+	pending, recovered := false, false
+	for _, event := range generated.Transport {
+		if event.Operation == "signal_caller_retry_pending" && event.Subject == "second" {
+			pending = true
+		}
+		if event.Operation == "signal_caller_retry_recovered" && event.Subject == "second" && event.Outcome == "caller_resubmitted" {
+			recovered = true
+		}
+	}
+	if !pending || !recovered {
+		t.Fatalf("contention branch not reached: pending=%v recovered=%v", pending, recovered)
+	}
+	replayed, e := runGraphSignalActors(seed, &generated)
+	if e != nil || !reflect.DeepEqual(generated, replayed) {
+		t.Fatalf("contention recovery replay differs: %v", e)
+	}
+	if dir := os.Getenv("SIM_GRAPH_SIGNAL_ACTORS_ROOT"); dir != "" {
+		if e = generated.Save(filepath.Join(dir, "caller-retry-contention.json")); e != nil {
+			t.Fatal(e)
+		}
+	}
 }

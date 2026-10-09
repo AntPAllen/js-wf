@@ -12,6 +12,8 @@ import (
 
 	"github.com/nats-io/nats.go"
 	"github.com/nats-io/nats.go/jetstream"
+	"js-wf/internal/blobpublication"
+	"js-wf/internal/graphpublication"
 	"js-wf/journal"
 )
 
@@ -23,7 +25,7 @@ func canonicalSignalError(err error) error {
 		return fmt.Errorf("%w: %w", ErrSignalMismatch, err)
 	case errors.Is(err, journal.ErrSignalNotRunning):
 		return fmt.Errorf("%w: %w", ErrNotRunning, err)
-	case errors.Is(err, journal.ErrStale):
+	case errors.Is(err, journal.ErrStale) && !errors.Is(err, graphpublication.ErrConflict) && !errors.Is(err, blobpublication.ErrConflict):
 		return fmt.Errorf("%w: %w", ErrStaleGeneration, err)
 	default:
 		return fmt.Errorf("%w: %w", ErrSignalUnknown, err)
