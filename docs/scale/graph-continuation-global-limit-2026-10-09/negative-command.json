@@ -1,0 +1,25 @@
+{
+  "command": [
+    "go",
+    "test",
+    "-overlay",
+    "/home/exedev/js-wf-graph-limit-negative-20261009/overlay.json",
+    "-race",
+    "./worker",
+    "-run",
+    "^TestNativeGraphContinuationGlobalLimitAndTerminalSlot/R1/archive=true$",
+    "-count=1",
+    "-timeout=3m",
+    "-v"
+  ],
+  "started": "2026-10-09T23:14:31.924814+00:00",
+  "source_sha256": "501ec485e23b9471af715ef9fe846c8bf1f7d4e6e38fcc2e87e37b880ad0cfa1",
+  "replacement_sha256": "4a702e8c882da7e38bdc4a112b804db32650aca8153b51bce3c0c6daac912912",
+  "mutations": {
+    "if nextIndex() >= w.maxEntries {": "if uint64(len(records)) >= w.maxEntries {",
+    "(nextIndex() >= w.maxEntries-1 || kind == journal.StepRequested && nextIndex() >= w.maxEntries-2)": "(uint64(len(records)) >= w.maxEntries-1 || kind == journal.StepRequested && uint64(len(records)) >= w.maxEntries-2)"
+  },
+  "scope": "Read-only production guard overlay counts resumed suffix entries instead of absolute logical indexes; append indexes stay unchanged.",
+  "exit": 1,
+  "finished": "2026-10-09T23:15:05.712206+00:00"
+}
