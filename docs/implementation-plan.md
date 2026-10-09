@@ -1,5 +1,11 @@
 # JetStream Durable Workflow Runtime — Implementation Plan
 
+## Complete current 151-family qualification queued — 2026-10-09
+
+A clean isolated `e5018af` checkout contains all 3,180 qualification inputs, including the native adapter fixes/model, Await integration and directed Cartesian coverage. Its full normal campaign is queued behind the authoritatively observed older race processes and will start exactly once after they terminate. It requires all 151 families × 1,000 completed bodies, all 810 pins and the complete compiled test inventory under the unchanged standard normal watchdog. [Launch/process evidence and exact scope](scale/graph-current151-qualification-2026-10-09/README.md).
+
+Terminal normal acceptance and independent review remain pending. Full current race/extended campaigns, arbitrary operation permutations and every original runtime/native/fault/scale/soak/drain/migration/adoption/release gate remain open; the older full race and accepted 336-combination Cartesian race retain independent source scopes. Public continuation admission and production collection remain disabled.
+
 ## Seeded native authority witness and uncertain-reply model — 2026-10-09
 
 The actual native adapter now has a shared Tier-1 SDK-boundary store model that separates physical subject sequences from logical root/blob revisions. Twenty-four absent/present root/blob combinations cover witnesses, peer replacement, retry exhaustion and dropped/committed-but-lost replies, with fresh readback and no uncertain republication. All 1,000 completed bodies replay exactly in normal (0.883 s) and race (9.326 s); all 24 new positive traces pass in both modes. A one-file pre-fix production overlay reproduces witness contention at seed 1 in 0.007 s and minimizes/replays it in four reproductions. [Executed scope and source/corpus proof](scale/graph-native-authority-simulation-2026-10-09/README.md) verifies 1,803 committed inputs, 151 seeded families/810 pins and unchanged preceding 786 pins.
@@ -10,7 +16,7 @@ This models one durable conditional store and does not establish NATS replicatio
 
 A directed test now executes all 336 publication/discovery/enqueue/consumption combinations through the existing production runtime fixture and exactly replays each schedule. Seed discovery requires no runtime execution; actual executed trace domains and choices must match every selected combination. All 336 pass normally in 116.941 s, including the sixteen absent from seeds 1–1,000; the maximum selected seed is 2,774. [Executed Cartesian and source coverage review](scale/graph-signal-cartesian-2026-10-09/README.md) verifies 1,777 unchanged inputs. The 150 contiguous seeded families and 786 saved regressions are unchanged.
 
-The matching Cartesian race campaign is live and remains unqualified; CI includes separate normal/race jobs. Arbitrary operation permutations, complete current/extended qualification and all original runtime/native/fault/scale/soak/drain/migration/adoption/release gates remain open. The frozen full `fca8264` race job excludes this new directed group; public continuation admission and production collection remain disabled.
+The matching Cartesian race campaign passes all 336 combinations with exact replay in 1,336.887 s. Both results are bound to frozen `4f1f2b2` by independent Git input verification and retained race binary/process provenance; later native model additions are excluded. CI includes separate normal/race jobs. Arbitrary operation permutations, complete current/extended qualification and all original runtime/native/fault/scale/soak/drain/migration/adoption/release gates remain open. The frozen full `fca8264` race job excludes this new directed group; public continuation admission and production collection remain disabled.
 
 ## Retry native mutations only across unchanged read witnesses — 2026-10-09
 

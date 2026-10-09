@@ -1,0 +1,40 @@
+{
+  "source": "e5018af37cc85185b331c1aa4936d0c2cf4c74c3",
+  "command": [
+    "python3",
+    "scripts/check-tier1-race.py",
+    "--root",
+    "/home/exedev/js-wf-tier1-full151-normal1000-20261009",
+    "--seeds",
+    "1000",
+    "--no-race"
+  ],
+  "working_directory": "/home/exedev/js-wf-current151-qualification",
+  "root": "/home/exedev/js-wf-tier1-full151-normal1000-20261009",
+  "queued_at": "2026-10-09T15:11:20.998170+00:00",
+  "wait_for_observed_processes": [
+    {
+      "pid": 3229620,
+      "start_ticks": "36180343",
+      "arguments": [
+        "/home/exedev/js-wf-tier1-full149-race1000-20261009/sim.test",
+        "-test.v=test2json",
+        "-test.count=1",
+        "-test.timeout=180m"
+      ]
+    },
+    {
+      "pid": 3229051,
+      "start_ticks": "36177117",
+      "arguments": [
+        "python3",
+        "scripts/check-tier1-race.py",
+        "--root",
+        "/home/exedev/js-wf-tier1-full149-race1000-20261009",
+        "--seeds",
+        "1000"
+      ]
+    }
+  ],
+  "scope": "Full current 151-family/810-pin normal qualification; prior frozen race campaigns are independent."
+}
