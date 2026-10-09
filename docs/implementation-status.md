@@ -1,5 +1,9 @@
 # Implementation status against the supplied plan
 
+## Complete canonical worker normal suite accepted — 2026-10-09
+
+At frozen `9a1ccdc`, the full normal default suite passes 210 groups, all 148 families × 1,000 contiguous seed bodies and all 748 pins in 806.161 s. Executed review verifies 3,057 selected inputs against Git and unchanged before/after, exact coverage and retained binary/events. [Complete normal evidence](scale/graph-worker-cli-2026-10-09/complete-normal1000/). This includes worker CLI recovery changes and excludes subsequent operator CLI work. The separate frozen race suite remains live with terminal review pending. Complete current/extended qualification and all original remaining runtime/native/scale/actual24h/million physical-drain/adoption/release requirements remain required.
+
 ## Canonical graph operator CLI integration — 2026-10-09
 
 The `wf` CLI now explicitly selects existing canonical graph stores for Start, Signal, result, cancellation, purge, describe/export-journal and five bounded manual repair scans. Start/Signal accept JSON literals or payload files. Journal inspection pins and validates the matching canonical generation; exported references remain references, so replay export is still incomplete. Graph visibility, legacy capacity and tombstone commands explicitly reject the incomplete migration.
