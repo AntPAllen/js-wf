@@ -10,6 +10,10 @@ import (
 )
 
 var Handlers = map[string]worker.Handler{
+	"worker-graph-signal": func(c *wf.Context, _ json.RawMessage) (json.RawMessage, error) {
+		value, err := wf.AwaitSignal(c, "go")
+		return json.RawMessage(value), err
+	},
 	"worker-smoke": func(_ *wf.Context, input json.RawMessage) (json.RawMessage, error) {
 		return input, nil
 	},

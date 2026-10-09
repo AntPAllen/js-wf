@@ -2,22 +2,69 @@ package reconcile
 
 import (
 	"context"
+	"encoding/json"
+	"errors"
 	"fmt"
 	"time"
 
 	"github.com/nats-io/nats.go/jetstream"
+	"js-wf/identity"
 	"js-wf/journal"
+	"js-wf/lease"
 )
 
 type repairJournalPort interface {
 	ReadJournal(context.Context, string, string) ([]journal.Record, error)
 }
 
+// GraphRepairSchedulingPort provides a scheduling hint only. A live delivery
+// already owns recovery; postpone history pins which could starve its append.
+// Lease expiry/release makes a later scan eligible. This grants no write or
+// payload authority and is used only by timer/suspended discovery.
+type GraphRepairSchedulingPort interface {
+	GraphRepairBlocked(context.Context, string, string) (bool, error)
+}
+
+func graphRepairBlocked(ctx context.Context, js jetstream.JetStream, typ, id string) (bool, error) {
+	kv, err := js.KeyValue(ctx, "WF_LEASE")
+	if err != nil {
+		return false, err
+	}
+	entry, err := kv.Get(ctx, identity.Key(typ, id))
+	if errors.Is(err, jetstream.ErrKeyNotFound) || errors.Is(err, jetstream.ErrKeyDeleted) {
+		return false, nil
+	}
+	if err != nil {
+		return false, err
+	}
+	var value lease.Value
+	if err = json.Unmarshal(entry.Value(), &value); err != nil || value.Worker == "" || value.Epoch == 0 {
+		return false, fmt.Errorf("invalid lease scheduling observation")
+	}
+	return true, nil
+}
+
 func readRepairJournal(ctx context.Context, graph *journal.GraphStore, legacy repairJournalPort, typ, id string, invocation uint64) ([]journal.Record, error) {
 	if graph == nil {
 		return legacy.ReadJournal(ctx, typ, id)
 	}
+	if scheduling, ok := legacy.(GraphRepairSchedulingPort); ok {
+		blocked, err := scheduling.GraphRepairBlocked(ctx, typ, id)
+		if err != nil {
+			return nil, fmt.Errorf("%w: graph repair scheduling observation: %w", journal.ErrUnknown, err)
+		}
+		if blocked {
+			return nil, nil
+		}
+	}
 	records, _, err := graph.ReadExisting(ctx, typ, id, invocation)
+	if errors.Is(err, journal.ErrStale) {
+		// WF_INV can become visible before canonical Start binding, or the
+		// generation can change while a reader acquires its pin. Neither
+		// permits a legacy fallback or an empty-history repair decision.
+		// Preserve the scanner's confirmed prefix and retry a fresh read.
+		return nil, fmt.Errorf("%w: graph repair history generation changed: %w", journal.ErrUnknown, err)
+	}
 	return records, err
 }
 

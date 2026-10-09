@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"strings"
 	"testing"
 	"time"
 
@@ -248,4 +249,135 @@ func (p *faultRootPort) protocol(m *sim.GraphPublicationTransport) graphpublicat
 	q := m.Protocol()
 	q.Port = p
 	return q
+}
+
+func TestGraphReconcileRetriesPublishedUnboundStart(t *testing.T) {
+	for _, kind := range []string{"timer", "suspended"} {
+		t.Run(kind, func(t *testing.T) {
+			ctx := context.Background()
+			schedule := sim.NewScheduler(17)
+			model := sim.NewGraphPublicationTransport(schedule)
+			graph, err := journal.NewGraphStore(journal.GraphConfig{Protocol: model.Protocol(), CanonicalStarts: true, CanonicalSignals: true})
+			if err != nil {
+				t.Fatal(err)
+			}
+			pending, err := graph.ReserveStart(ctx, journal.GraphStartRequest{Type: "test", ID: "pending"}, []byte(`7`))
+			if err != nil {
+				t.Fatal(err)
+			}
+			transport := sim.NewSignalTransport(schedule)
+			seq, err := transport.PublishInvocation(ctx, &nats.Msg{Subject: identity.InvocationSubject("test", "pending"), Data: pending.Start.PointerBytes(), Header: nats.Header{journal.GraphStartTokenHeader: {pending.Start.Token}}})
+			if err != nil {
+				t.Fatal(err)
+			}
+			port := forbiddenGraphLegacyPort{transport}
+			var scan func(context.Context, uint64, int, bool) (reconcile.ScanResult, error)
+			if kind == "timer" {
+				scanner, e := reconcile.NewTimerScanWithGraphJournalPort(port, graph)
+				if e != nil {
+					t.Fatal(e)
+				}
+				scan = scanner.Scan
+			} else {
+				scanner, e := reconcile.NewSuspendedScanWithGraphJournalPort(port, graph)
+				if e != nil {
+					t.Fatal(e)
+				}
+				scan = scanner.Scan
+			}
+			result, err := scan(ctx, 1, 2, false)
+			if !errors.Is(err, journal.ErrUnknown) || !errors.Is(err, journal.ErrStale) || result.RetrySequence != 0 || len(transport.Runs()) != 0 {
+				t.Fatalf("unbound generation certified or treated as fatal: %+v %v", result, err)
+			}
+			// A fresh binding makes the same source readable, with no legacy fallback,
+			// journal initialization, wakeup or test-local suppression of the race.
+			if err = graph.BindStart(ctx, "test", "pending", pending.Start.Token, seq); err != nil {
+				t.Fatal(err)
+			}
+			result, err = scan(ctx, 1, 2, false)
+			if err != nil || result.Inspected != 1 || result.NextSequence != 1 || len(transport.Runs()) != 0 {
+				t.Fatalf("bound retry failed: %+v %v", result, err)
+			}
+		})
+	}
+}
+
+type graphSchedulingProbe struct {
+	forbiddenGraphLegacyPort
+	blocked bool
+	err     error
+}
+
+func (p *graphSchedulingProbe) GraphRepairBlocked(context.Context, string, string) (bool, error) {
+	return p.blocked, p.err
+}
+
+func TestGraphReconcileDefersHistoryPinsWhileDeliveryOwnsLease(t *testing.T) {
+	for _, kind := range []string{"timer", "suspended"} {
+		t.Run(kind, func(t *testing.T) {
+			ctx := context.Background()
+			scheduler := sim.NewScheduler(23)
+			model := sim.NewGraphPublicationTransport(scheduler)
+			graph, err := journal.NewGraphStore(journal.GraphConfig{Protocol: model.Protocol()})
+			if err != nil {
+				t.Fatal(err)
+			}
+			transport := sim.NewSignalTransport(scheduler)
+			seq, err := transport.PublishInvocation(ctx, &nats.Msg{Subject: identity.InvocationSubject("test", "held")})
+			if err != nil {
+				t.Fatal(err)
+			}
+			tail, err := graph.Begin(ctx, "test", "held", seq)
+			if err != nil {
+				t.Fatal(err)
+			}
+			if _, err = graph.Append(ctx, "test", "held", seq, journal.Entry{Kind: journal.Started}, tail, nil, nil); err != nil {
+				t.Fatal(err)
+			}
+			probe := &graphSchedulingProbe{forbiddenGraphLegacyPort: forbiddenGraphLegacyPort{transport}, blocked: true}
+			var scan func(context.Context, uint64, int, bool) (reconcile.ScanResult, error)
+			if kind == "timer" {
+				scanner, e := reconcile.NewTimerScanWithGraphJournalPort(probe, graph)
+				if e != nil {
+					t.Fatal(e)
+				}
+				scan = scanner.Scan
+			} else {
+				scanner, e := reconcile.NewSuspendedScanWithGraphJournalPort(probe, graph)
+				if e != nil {
+					t.Fatal(e)
+				}
+				scan = scanner.Scan
+			}
+			before := len(scheduler.Trace().Transport)
+			if _, err = scan(ctx, 1, 2, false); err != nil {
+				t.Fatal(err)
+			}
+			for _, event := range scheduler.Trace().Transport[before:] {
+				if strings.HasPrefix(event.Operation, "graph_publication_") {
+					t.Fatalf("held delivery caused graph read/pin: %s", event.Operation)
+				}
+			}
+			probe.blocked = false
+			probe.err = context.DeadlineExceeded
+			result, err := scan(ctx, 1, 2, false)
+			if !errors.Is(err, journal.ErrUnknown) || result.RetrySequence != 0 || len(transport.Runs()) != 0 {
+				t.Fatalf("uncertain scheduling advanced or repaired: %+v %v", result, err)
+			}
+			probe.err = nil
+			before = len(scheduler.Trace().Transport)
+			if _, err = scan(ctx, 1, 2, false); err != nil {
+				t.Fatal(err)
+			}
+			pinned := false
+			for _, event := range scheduler.Trace().Transport[before:] {
+				if event.Operation == "graph_publication_cas_root" {
+					pinned = true
+				}
+			}
+			if !pinned {
+				t.Fatal("released delivery did not resume retained history inspection")
+			}
+		})
+	}
 }

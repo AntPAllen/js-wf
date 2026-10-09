@@ -340,21 +340,21 @@ func (s *GraphStore) OpenTerminal(ctx context.Context, typ, id string, invocatio
 	if invocation == 0 {
 		return nil, ErrStale
 	}
-	return s.open(ctx, typ, id, invocation, true, true)
+	return s.open(ctx, typ, id, invocation, true, true, false)
 }
 
 func (s *GraphStore) Open(ctx context.Context, typ, id string, invocation uint64) (*GraphView, error) {
-	return s.open(ctx, typ, id, invocation, false, false)
+	return s.open(ctx, typ, id, invocation, false, false, false)
 }
 
 // OpenExisting pins matching initialized history. A nil view means no graph
 // has been initialized for this identity; retired or different generations are
 // ErrStale, never absence. It does not initialize or import a journal.
 func (s *GraphStore) OpenExisting(ctx context.Context, typ, id string, invocation uint64) (*GraphView, error) {
-	return s.open(ctx, typ, id, invocation, false, true)
+	return s.open(ctx, typ, id, invocation, false, true, false)
 }
 
-func (s *GraphStore) open(ctx context.Context, typ, id string, invocation uint64, terminalOnly, allowMissing bool) (*GraphView, error) {
+func (s *GraphStore) open(ctx context.Context, typ, id string, invocation uint64, terminalOnly, allowMissing, metadataOnlyEmpty bool) (*GraphView, error) {
 	if invocation == 0 {
 		return nil, ErrStale
 	}
@@ -374,6 +374,13 @@ func (s *GraphStore) open(ctx context.Context, typ, id string, invocation uint64
 		}
 		if terminalOnly && c.Kind != Completed && c.Kind != Failed {
 			return nil, nil
+		}
+		if metadataOnlyEmpty && c.Count == 0 {
+			// Record-only inspection of an empty journal accesses no graph
+			// objects. The validated quorum cursor supplies its sequence base;
+			// acquiring a reader would needlessly compete with the first append.
+			// Public views still pin owned Start/Signal inputs even at Count 0.
+			return &GraphView{store: s, destination: destination, cursor: *c, closed: true}, nil
 		}
 		expires := s.cfg.Now().Add(s.cfg.PinTTL)
 		reader, _, err := s.cfg.Protocol.AcquireReader(ctx, destination, root.Head, expires)
@@ -537,7 +544,7 @@ func (s *GraphStore) ReadExisting(ctx context.Context, typ, id string, invocatio
 }
 
 func (s *GraphStore) read(ctx context.Context, typ, id string, invocation uint64, allowMissing bool) (records []Record, tail uint64, err error) {
-	view, err := s.open(ctx, typ, id, invocation, false, allowMissing)
+	view, err := s.open(ctx, typ, id, invocation, false, allowMissing, true)
 	if err != nil || view == nil {
 		return nil, 0, err
 	}

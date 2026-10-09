@@ -3,6 +3,7 @@ package sim
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -211,7 +212,7 @@ func runGraphReconcile(seed int64, replay *Trace) (trace Trace, runErr error) {
 	result, scanErr := scan(ctx, 1, 1, dry)
 	stale := mode == "stale_generation" || mode == "retired_generation"
 	if stale {
-		if scanErr != journal.ErrStale || len(port.Runs()) != 0 || result.RetrySequence != 0 {
+		if !errors.Is(scanErr, journal.ErrStale) || !errors.Is(scanErr, journal.ErrUnknown) || len(port.Runs()) != 0 || result.RetrySequence != 0 {
 			return trace, fmt.Errorf("stale history authorized repair: %+v %v", result, scanErr)
 		}
 	} else if fault {

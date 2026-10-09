@@ -277,3 +277,40 @@ func TestCanonicalBoundStartRepairRequiresExactSourceAndGeneration(t *testing.T)
 		t.Fatal(err)
 	}
 }
+
+func TestCanonicalBoundStartRepairDoesNotDeduplicateRecovery(t *testing.T) {
+	ctx := context.Background()
+	scheduler := sim.NewScheduler(37)
+	model := sim.NewGraphPublicationTransport(scheduler)
+	graph, err := journal.NewGraphStore(journal.GraphConfig{Protocol: model.Protocol(), CanonicalStarts: true})
+	if err != nil {
+		t.Fatal(err)
+	}
+	source := sim.NewSignalTransport(scheduler)
+	c, err := client.NewWithSignalPorts(source, source).WithGraphJournal(graph)
+	if err != nil {
+		t.Fatal(err)
+	}
+	h, err := c.Start(ctx, "flow", "lost_dispatch", []byte(`7`))
+	if err != nil {
+		t.Fatal(err)
+	}
+	status, err := graph.InspectStart(ctx, h.Type, h.ID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	before := len(scheduler.Trace().Transport)
+	for attempt := 0; attempt < 2; attempt++ {
+		if _, err = c.RepairBoundStartAttempt(ctx, h.Type, h.ID, status.State.Start.Token, h.InvSeq); err != nil {
+			t.Fatal(err)
+		}
+		if len(source.Runs()) != attempt+2 {
+			t.Fatalf("acknowledged repair was deduplicated inside original window: runs=%d want=%d", len(source.Runs()), attempt+2)
+		}
+	}
+	for _, event := range scheduler.Trace().Transport[before:] {
+		if event.Operation == "graph_publication_cas_root" || event.Operation == "graph_publication_get" {
+			t.Fatalf("metadata-only recovery performed %s", event.Operation)
+		}
+	}
+}

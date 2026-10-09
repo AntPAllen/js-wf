@@ -154,8 +154,10 @@ func (c *Client) RecoverStartAttempt(ctx context.Context, typ, id, token string)
 // logical head and can starve a worker's prepared Started append. Execution
 // still requires the worker's exact binding and owned-input validation.
 func (c *Client) RepairBoundStartAttempt(ctx context.Context, typ, id, token string, invocation uint64) (Handle, error) {
-	messageID := "start:" + identity.Key(typ, id) + ":" + strconv.FormatUint(invocation, 10)
-	return c.repairBoundGraphAttempt(ctx, typ, id, token, invocation, messageID, false)
+	// An acknowledged wakeup can disappear before execution starts. Reusing
+	// its message ID would suppress a fresh repair inside the dedup window.
+	// Captured binding/source validation and worker fencing make duplicates safe.
+	return c.repairBoundGraphAttempt(ctx, typ, id, token, invocation, "", false)
 }
 
 // RepairTerminalProjectionAttempt repairs a captured terminal generation's

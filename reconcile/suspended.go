@@ -537,3 +537,7 @@ func RunSuspendedLoopWithClockAndObservers(ctx context.Context, js jetstream.Jet
 		return result, err
 	})
 }
+
+func (p *jetStreamSuspendedScanPort) GraphRepairBlocked(ctx context.Context, typ, id string) (bool, error) {
+	return graphRepairBlocked(ctx, p.js, typ, id)
+}

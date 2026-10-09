@@ -1,0 +1,120 @@
+{
+  "version": 3,
+  "seed": 26,
+  "workload": "graph_reconciler_history",
+  "step_limit": 100000,
+  "decisions": [
+    {
+      "at_ms": 0,
+      "enabled": [
+        "dry_signal",
+        "dry_start",
+        "dry_suspended",
+        "dry_timer",
+        "enqueue_unknown",
+        "payload_unknown",
+        "pin_lost_known",
+        "pin_unknown",
+        "read_unknown",
+        "release_lost_known",
+        "release_unknown",
+        "retired_generation",
+        "signal_consumed",
+        "signal_pending",
+        "signal_terminal",
+        "stale_generation",
+        "start_existing",
+        "start_initialized",
+        "start_missing",
+        "suspended_no_signal",
+        "suspended_signal",
+        "suspended_terminal",
+        "suspended_timer",
+        "timer_due",
+        "timer_future",
+        "timer_terminal"
+      ],
+      "chosen": "dry_start"
+    }
+  ],
+  "transport": [
+    {
+      "at_ms": 0,
+      "operation": "publish_invocation",
+      "subject": "wf.inv.test.graph-reconcile",
+      "sequence": 1,
+      "data_sha256": "7902699be42c8a8e46fbbb4501726517e86b22c56a189f7625a6da49081b2451",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "mark_journal",
+      "subject": "wf.jrn.test.graph-reconcile",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "set_journal",
+      "subject": "wf.jrn.test.graph-reconcile",
+      "sequence": 1,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "get_invocation",
+      "subject": "wf.inv.test.graph-reconcile",
+      "sequence": 1,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "graph_publication_read_root",
+      "subject": "journal/ad535a17b48f340e544fe8aaab394c76c5f058dbae1f1c5fef4af193039a3c56",
+      "data_sha256": "a783c2092db369aee83d9a37ee90da7a173390a0b3efb6e25341f7a4e4827180",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "graph_publication_root_keys",
+      "sequence": 1,
+      "data_sha256": "2b7fed515faf9251c1c0067d1934c6039a6cb91bf696a1ac1c7391292b1d5191",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "graph_publication_read_root",
+      "subject": "journal/ad535a17b48f340e544fe8aaab394c76c5f058dbae1f1c5fef4af193039a3c56",
+      "data_sha256": "a783c2092db369aee83d9a37ee90da7a173390a0b3efb6e25341f7a4e4827180",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "graph_publication_blob_keys",
+      "data_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "graph_publication_objects",
+      "data_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "graph_publication_objects",
+      "data_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "graph_publication_check_references",
+      "data_sha256": "74234e98afe7498fb5daf1f36ac2d78acc339464f950703b8c019892f982b90b",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "check_graph_reconcile",
+      "outcome": "dry_start"
+    }
+  ]
+}

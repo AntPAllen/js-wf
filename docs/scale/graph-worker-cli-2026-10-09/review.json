@@ -1,0 +1,124 @@
+{
+  "verdict": "PASS for final component controls",
+  "scope": "Development evidence; complete current frozen suite and wider original gates remain separate",
+  "results": [
+    {
+      "log": "final-cli-normal.jsonl",
+      "sha256": "501c92a898480b9603f484c16578385a15e71e8f42474297f686463e88c95c01",
+      "seconds": 38.079,
+      "groups": [
+        "TestWorkerGraphAdmissionRejectsIncompatibleCLI",
+        "TestWorkerRunnerCanonicalGraphRepair",
+        "TestWorkerRunnerCompletesWorkflowAndServesMetrics",
+        "TestWorkerRunnerUsesIndependentClockForNativeAndFallbackTimers"
+      ]
+    },
+    {
+      "log": "final-cli-race.jsonl",
+      "sha256": "10bbe9a17ea2305fcce4e5d9cbbcda3be26bb03823e7ef32d1717ba2403dde2d",
+      "seconds": 77.162,
+      "groups": [
+        "TestWorkerGraphAdmissionRejectsIncompatibleCLI",
+        "TestWorkerRunnerCanonicalGraphRepair",
+        "TestWorkerRunnerCompletesWorkflowAndServesMetrics",
+        "TestWorkerRunnerUsesIndependentClockForNativeAndFallbackTimers"
+      ]
+    },
+    {
+      "log": "final-model-normal.jsonl",
+      "sha256": "51e89c92520d62a6113e97bf12174143bedb98e83b07577b680c209e0144dcfa",
+      "seconds": 0.014,
+      "groups": [
+        "TestGraphReconcileDefersHistoryPinsWhileDeliveryOwnsLease",
+        "TestGraphReconcileFailedReadCannotCertifyCursorPrefix",
+        "TestGraphReconcileLoopRetriesUncertaintyWithoutSkippingBoundary",
+        "TestGraphReconcileRejectsMissingConfiguration",
+        "TestGraphReconcileRetriesPublishedUnboundStart",
+        "TestGraphReconcileSignalCacheBindsInvocationGeneration"
+      ]
+    },
+    {
+      "log": "final-model-race.jsonl",
+      "sha256": "18a2c7ca235f12117fb084e1b0a3ec30c4e41c0a87b088b22562be273b04256c",
+      "seconds": 1.1360000000000001,
+      "groups": [
+        "TestGraphReconcileDefersHistoryPinsWhileDeliveryOwnsLease",
+        "TestGraphReconcileFailedReadCannotCertifyCursorPrefix",
+        "TestGraphReconcileLoopRetriesUncertaintyWithoutSkippingBoundary",
+        "TestGraphReconcileRejectsMissingConfiguration",
+        "TestGraphReconcileRetriesPublishedUnboundStart",
+        "TestGraphReconcileSignalCacheBindsInvocationGeneration"
+      ]
+    },
+    {
+      "log": "final-journal-race.jsonl",
+      "sha256": "d7e9a77d864cbbe44cb3de390c580c6e3374a2525ccefd066f658decde828fe1",
+      "seconds": 1.307,
+      "groups": [
+        "TestGraphEmptyHistoryInspectionDoesNotPublishReader",
+        "TestGraphJournalAcquireRenewContention",
+        "TestGraphJournalCloseContentionAndAmbiguousRelease",
+        "TestGraphJournalCorruptCursorAndLeaseBoundary",
+        "TestGraphJournalEntryPayloadAlias",
+        "TestGraphJournalExistingHistoryIsNotStaleAbsence",
+        "TestGraphJournalGenerationRetainedReaderAndDrain",
+        "TestGraphJournalLimitsAndForeignRoot",
+        "TestGraphJournalPublicConfiguration",
+        "TestGraphJournalPurgeFenceRetainsReadersAndGeneration",
+        "TestGraphJournalStaleAndUnknownAppends",
+        "TestGraphJournalTerminalSnapshotAdmission"
+      ]
+    },
+    {
+      "log": "family-normal1000.jsonl",
+      "sha256": "3d50a96082bd190e7317bd4d21d1b8ae39f405d3d120117bc679cbf6080c40bc",
+      "seconds": 2.163,
+      "groups": [
+        "TestSeededGraphReconcileReplay"
+      ]
+    },
+    {
+      "log": "start-family-normal1000.jsonl",
+      "sha256": "214b101bf5b8eb4204008fdf1210e57b9681e6e04223c124b31a11937267b906",
+      "seconds": 16.752,
+      "groups": [
+        "TestSeededGraphStartRepairReplay"
+      ]
+    },
+    {
+      "log": "final-all-sim-race.jsonl",
+      "sha256": "67cb531d6f869c2648279692d2994e611e2d9bf4cffe034b0ceb0a090d6c66e0",
+      "seconds": 216.148,
+      "groups": [
+        "TestPinnedRegressionCorpus",
+        "TestSeededGraphReconcileReplay",
+        "TestSeededGraphStartRepairReplay"
+      ]
+    },
+    {
+      "log": "final-pins-after-start-normal.jsonl",
+      "sha256": "1e71f9eb45dadaeb0f93c5f719cf93c19e3d5f4892438467a9ff729e6bd3508f",
+      "seconds": 3.204,
+      "groups": [
+        "TestPinnedRegressionCorpus"
+      ]
+    },
+    {
+      "log": "start-repair-race.jsonl",
+      "sha256": "47b9884a37cf43e5018517ce4002308d528019f9a66468103bf195dc85536650",
+      "seconds": 1.045,
+      "groups": [
+        "TestCanonicalBoundStartRepairDoesNotDeduplicateRecovery",
+        "TestCanonicalBoundStartRepairRequiresExactSourceAndGeneration"
+      ]
+    }
+  ],
+  "selected_go_config_inputs_unchanged": true,
+  "corpus_changes_during_final_cli_run": "Nine trace migrations only; CLI does not consume trace files",
+  "migrated_pins": 10,
+  "unchanged_pins": 738,
+  "total_pins": 748,
+  "source_observation_before_compilation": false,
+  "preserved_failed_native_runs": 6,
+  "counterfactuals": "Expected FAIL for original stale classification and deduplicated recovery"
+}

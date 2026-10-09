@@ -51,6 +51,9 @@ func runWithJetStreamOptions(ctx context.Context, args []string, jsOptions ...je
 	replicas := flags.Int("replicas", 3, "JetStream stream replica count")
 	journalMaxBytes := flags.Int64("journal-max-bytes", 0, "exact WF_JRN byte cap; zero adopts an uncapped stream")
 	journalEncoding := flags.String("journal-encoding", "json", "new journal entry encoding: json or protobuf-v1; requires upgraded readers")
+	graphAuthority := flags.String("graph-authority-stream", "", "experimental canonical graph authority stream (pre-provisioned)")
+	graphPrefix := flags.String("graph-authority-prefix", "", "experimental canonical graph authority subject prefix")
+	graphBucket := flags.String("graph-object-bucket", "", "experimental canonical graph object bucket (pre-provisioned)")
 	timerBackend := flags.String("timer-backend", "auto", "timer storage mode: auto, native, or fallback")
 	mode := flags.String("mode", "static", "partition assignment mode: static, kv, or auto")
 	staticIndex := flags.Int("static-index", 0, "static worker index")
@@ -78,6 +81,10 @@ func runWithJetStreamOptions(ctx context.Context, args []string, jsOptions ...je
 	}
 	if *timerBackend != "auto" && *timerBackend != "native" && *timerBackend != "fallback" {
 		return fmt.Errorf("invalid timer backend %q", *timerBackend)
+	}
+	graphSelection, err := selectWorkerGraph(*graphAuthority, *graphPrefix, *graphBucket, *replicas, journal.Encoding(*journalEncoding), *timerBackend, *retentionType)
+	if err != nil {
+		return err
 	}
 	if *mode == "static" {
 		if _, err := worker.StaticPartitions(*staticIndex, *staticCount); err != nil {
@@ -121,7 +128,9 @@ func runWithJetStreamOptions(ctx context.Context, args []string, jsOptions ...je
 	if err != nil {
 		return err
 	}
-	continuationOptions = append(continuationOptions, worker.WithJournalEncoding(journal.Encoding(*journalEncoding)))
+	if graphSelection == nil {
+		continuationOptions = append(continuationOptions, worker.WithJournalEncoding(journal.Encoding(*journalEncoding)))
+	}
 	if *retentionType != "" {
 		if _, exists := handlers[*retentionType]; exists {
 			return fmt.Errorf("retention workflow type %q collides with plugin handler", *retentionType)
@@ -143,7 +152,7 @@ func runWithJetStreamOptions(ctx context.Context, args []string, jsOptions ...je
 		observeRepair = events.repair
 		eventErrors = events.errors
 	}
-	nc, js, backend, w, clock, err := startWorkerWithClock(ctx, *url, *domain, *id, *replicas, *journalMaxBytes, *concurrency, *timerBackend, handlers, *retentionType, *retentionGrace, clockConfig, *bootstrapClock, jsOptions, continuationOptions...)
+	nc, js, backend, w, clock, err := startWorkerWithClockAndGraph(ctx, *url, *domain, *id, *replicas, *journalMaxBytes, *concurrency, *timerBackend, handlers, *retentionType, *retentionGrace, clockConfig, *bootstrapClock, jsOptions, graphSelection, continuationOptions...)
 	if err != nil {
 		if ctx.Err() != nil {
 			return nil
@@ -226,6 +235,9 @@ func runWithJetStreamOptions(ctx context.Context, args []string, jsOptions ...je
 				return reconcile.RunTombstoneLoop(c, js, *id, *repairInterval, *repairBudget)
 			},
 		}
+		if graphSelection != nil {
+			start = graphWorkerRepairLoops(js, *id, *repairInterval, *repairBudget, graphSelection.store, observeRepair, domainNow)
+		}
 		if backend == provision.FallbackTimers {
 			start = append(start, func(c context.Context) error {
 				return reconcile.RunRepairLoopWithClock(c, js, *id, "fallback-timer", *repairInterval, *repairBudget, observeRepair, domainNow)
@@ -275,6 +287,10 @@ func startWorker(ctx context.Context, url, id string, replicas int, journalMaxBy
 }
 
 func startWorkerWithClock(ctx context.Context, url, domain, id string, replicas int, journalMaxBytes int64, concurrency int, timerBackend string, handlers map[string]worker.Handler, retentionType string, retentionGrace time.Duration, clockConfig *runtimeclock.Config, bootstrapClock bool, jsOptions []jetstream.JetStreamOpt, options ...worker.Option) (*nats.Conn, jetstream.JetStream, provision.TimerBackend, *worker.Worker, *runtimeclock.Clock, error) {
+	return startWorkerWithClockAndGraph(ctx, url, domain, id, replicas, journalMaxBytes, concurrency, timerBackend, handlers, retentionType, retentionGrace, clockConfig, bootstrapClock, jsOptions, nil, options...)
+}
+
+func startWorkerWithClockAndGraph(ctx context.Context, url, domain, id string, replicas int, journalMaxBytes int64, concurrency int, timerBackend string, handlers map[string]worker.Handler, retentionType string, retentionGrace time.Duration, clockConfig *runtimeclock.Config, bootstrapClock bool, jsOptions []jetstream.JetStreamOpt, graph *workerGraphSelection, options ...worker.Option) (*nats.Conn, jetstream.JetStream, provision.TimerBackend, *worker.Worker, *runtimeclock.Clock, error) {
 	startupCtx, stopStartup := context.WithTimeout(ctx, 30*time.Second)
 	defer stopStartup()
 	var lastErr error
@@ -302,8 +318,14 @@ func startWorkerWithClock(ctx context.Context, url, domain, id string, replicas 
 						workerHandlers[retentionType] = retention.Handler(js, retentionGrace)
 					}
 					workerOptions := append(append([]worker.Option(nil), options...), worker.WithPartitionConcurrency(concurrency))
+					if graph != nil {
+						graph.store, err = journal.OpenNativeGraphStore(startupCtx, js, graph.config)
+						if err == nil {
+							workerOptions = append(workerOptions, worker.WithGraphJournal(graph.store))
+						}
+					}
 					clock = nil
-					if clockConfig != nil {
+					if clockConfig != nil && err == nil {
 						if bootstrapClock {
 							err = runtimeclock.EnsureProbes(startupCtx, js, *clockConfig)
 						}

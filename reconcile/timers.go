@@ -206,3 +206,7 @@ func (s *TimerScan) Scan(ctx context.Context, next uint64, budget int, dryRun bo
 func RunTimerLoop(ctx context.Context, js jetstream.JetStream, workerID string, interval time.Duration, budget int) error {
 	return runLoop(ctx, js, workerID, "timer", interval, budget, NewTimerScan(js).Scan)
 }
+
+func (p *jetStreamTimerScanPort) GraphRepairBlocked(ctx context.Context, typ, id string) (bool, error) {
+	return graphRepairBlocked(ctx, p.js, typ, id)
+}
