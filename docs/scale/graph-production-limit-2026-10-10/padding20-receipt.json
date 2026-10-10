@@ -1,0 +1,22 @@
+{
+  "command": [
+    "go",
+    "test",
+    "-race",
+    "./worker",
+    "-run",
+    "^TestNativeGraphContinuationGlobalLimitAndTerminalSlot$/R1/archive=true$",
+    "-count=1",
+    "-timeout=5m",
+    "-v"
+  ],
+  "environment": {
+    "WF_GRAPH_CONTINUATION_LIMIT_BUDGET": "20",
+    "GOMAXPROCS": "2",
+    "GOMEMLIMIT": "768MiB"
+  },
+  "actual_exit": 0,
+  "fixture_sha256": "0acbd97cf24bce150f4ce5f805e9005b6e2050ceaa74629b94cd1116434eb13c",
+  "log_sha256": "a2094e49ed2cf8c58974d2f97d046839ba7dbcacc432493ddebcefe1e213281f",
+  "scope": "Development padding/heartbeat check only; budget20 is not the actual production cap."
+}

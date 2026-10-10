@@ -67,4 +67,3 @@ actual 100,000-entry boundary, public canonical continuation admission,
 production collection and all broader original requirements remain open.
 The existing frozen `d504a33` full race campaign is still live and excludes
 these later production fixes.
-

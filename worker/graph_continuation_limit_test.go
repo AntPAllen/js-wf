@@ -4,7 +4,10 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
+	"os"
+	"strconv"
 	"testing"
 	"time"
 
@@ -19,19 +22,34 @@ import (
 	"js-wf/wf"
 )
 
-// Test-only continuation registration and a lowered private worker budget.
-// Public admission stays closed and the production 100,000-entry cap is unchanged.
+// Test-only continuation registration. Default runs use a private budget of 16.
+// WF_GRAPH_CONTINUATION_LIMIT_BUDGET=100000 exercises the unchanged production
+// cap through real SDK appends; 20 verifies padding without a long campaign.
+// Public admission remains closed.
 func TestNativeGraphContinuationGlobalLimitAndTerminalSlot(t *testing.T) {
+	budget := uint64(16)
+	if value := os.Getenv("WF_GRAPH_CONTINUATION_LIMIT_BUDGET"); value != "" {
+		parsed, err := strconv.ParseUint(value, 10, 64)
+		if err != nil || parsed != 16 && parsed != 20 && parsed != journal.MaxEntries {
+			t.Fatal("WF_GRAPH_CONTINUATION_LIMIT_BUDGET must be 16, 20 or 100000")
+		}
+		budget = parsed
+	}
+	padding := int((budget - 16) / 2)
+	paddingFirst := padding / 2
 	for _, replicas := range []int{1, 3} {
 		for _, archive := range []bool{false, true} {
 			t.Run(fmt.Sprintf("R%d/archive=%t", replicas, archive), func(t *testing.T) {
-				const budget = uint64(16)
 				cluster, err := testcluster.StartWithDomain(t.TempDir(), replicas, "GRAPH_LIMIT")
 				if err != nil {
 					t.Fatal(err)
 				}
 				defer cluster.Close()
-				ctx, cancel := context.WithTimeout(context.Background(), 2*time.Minute)
+				timeout := 2 * time.Minute
+				if budget == journal.MaxEntries {
+					timeout = 300 * time.Minute
+				}
+				ctx, cancel := context.WithTimeout(context.Background(), timeout)
 				defer cancel()
 				if replicas > 1 {
 					for ctx.Err() == nil {
@@ -84,9 +102,23 @@ func TestNativeGraphContinuationGlobalLimitAndTerminalSlot(t *testing.T) {
 					t.Fatal(err)
 				}
 				calls, effects := map[string]int{}, 0
+				pad := func(c *wf.Context, from, to int) error {
+					for i := from; i < to; i++ {
+						if err := c.SetState("padding", i); err != nil {
+							return err
+						}
+						if (i+1)%1000 == 0 || i+1 == to {
+							t.Logf("GRAPH_LIMIT_PADDING completed=%d requested=%d budget=%d", i+1, padding, budget)
+						}
+					}
+					return nil
+				}
 				handlers := map[string]Handler{h.Type: func(c *wf.Context, _ json.RawMessage) (json.RawMessage, error) {
 					calls["initial"]++
 					if err := c.SetState("value", 10); err != nil {
+						return nil, err
+					}
+					if err := pad(c, 0, paddingFirst); err != nil {
 						return nil, err
 					}
 					return nil, wf.Continue(c, "middle", 10)
@@ -97,6 +129,9 @@ func TestNativeGraphContinuationGlobalLimitAndTerminalSlot(t *testing.T) {
 						var value int
 						if found, err := c.GetState("value", &value); err != nil || !found || value != 10 || string(locals) != "10" {
 							return nil, wf.ErrCorruptJournal
+						}
+						if err := pad(c, paddingFirst, padding); err != nil {
+							return nil, err
 						}
 						return nil, wf.Continue(c, "finish", 10)
 					},
@@ -127,17 +162,42 @@ func TestNativeGraphContinuationGlobalLimitAndTerminalSlot(t *testing.T) {
 					if w.maxEntries != journal.MaxEntries {
 						t.Fatal("production default cap changed", w.maxEntries)
 					}
-					w.maxEntries = budget
+					if budget != journal.MaxEntries {
+						w.maxEntries = budget
+					}
 					w.continuations = map[string]map[string]ContinuationHandler{h.Type: stages}
 					owner, err := leases.Acquire(ctx, h.Type, h.ID, "graph-limit")
 					if err != nil {
 						t.Fatal(err)
 					}
+					stageCtx, stop := context.WithCancel(ctx)
+					heartbeat := make(chan error, 1)
+					go func() {
+						ticker := time.NewTicker(w.heartbeatInterval)
+						defer ticker.Stop()
+						for {
+							select {
+							case <-stageCtx.Done():
+								heartbeat <- nil
+								return
+							case <-ticker.C:
+								renewCtx, stopRenew := context.WithTimeout(stageCtx, 3*time.Second)
+								_, err := owner.RenewIfIdle(renewCtx, w.heartbeatInterval)
+								stopRenew()
+								if err != nil {
+									stop()
+									heartbeat <- err
+									return
+								}
+							}
+						}
+					}()
 					var noOp bool
-					err = w.execute(ctx, h.Type, h.ID, owner, time.Time{}, timerWakeup{}, &noOp, nil)
-					releaseErr := owner.Release(ctx)
-					if err != nil || releaseErr != nil {
-						t.Fatal("delivery failed", err, releaseErr)
+					err = w.execute(stageCtx, h.Type, h.ID, owner, time.Time{}, timerWakeup{}, &noOp, nil)
+					stop()
+					heartbeatErr, releaseErr := <-heartbeat, owner.Release(ctx)
+					if err != nil || releaseErr != nil || heartbeatErr != nil && !errors.Is(heartbeatErr, context.Canceled) {
+						t.Fatal("delivery failed", err, heartbeatErr, releaseErr)
 					}
 				}
 				for _, stage := range []string{"middle", "finish"} {
@@ -247,7 +307,7 @@ func TestNativeGraphContinuationGlobalLimitAndTerminalSlot(t *testing.T) {
 				if err != nil || info.State.Msgs != 0 {
 					t.Fatal("graph fixture wrote legacy journal", info, err)
 				}
-				t.Logf("GRAPH_CONTINUATION_LIMIT budget=%d entries=%d archive=%t checkpoints=2 effects=%d rejected_request=%s terminal_slot=%d prefix_stage_calls=%d/%d", budget, len(records), archive, effects, rejected.Name, records[budget-1].Index, initial, middle)
+				t.Logf("GRAPH_CONTINUATION_LIMIT budget=%d entries=%d archive=%t checkpoints=2 effects=%d rejected_request=%s terminal_slot=%d prefix_stage_calls=%d/%d production_cap=%t padding_operations=%d", budget, len(records), archive, effects, rejected.Name, records[budget-1].Index, initial, middle, budget == journal.MaxEntries, padding)
 			})
 		}
 	}
