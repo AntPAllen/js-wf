@@ -1,5 +1,24 @@
 # JetStream Durable Workflow Runtime — Implementation Plan
 
+## Full latest158 normal accepted; race started — 2026-10-10
+
+Frozen `0404fc0` full normal is independently accepted: 3406 exact Git inputs,
+one retained binary, eight disjoint real package passes, 225 top-level passes,
+158000 seed bodies and all 853 saved regressions. The matching loaded supervisor
+actually closed with exit0. [Accepted review](scale/graph-current158-sharded-2026-10-10/normal-review.json).
+Full race is now live on that same frozen source, original PID128899,
+invocation `fe0c32a5ba8c4c1898430cf89518c940`. It is not accepted yet.
+
+A directed in-memory checkpoint diagnostic passes under race and exposes
+prefix-dependent first publication and larger archive transport work. Injected
+read-budget failure preserves the cursor/checkpoint state and releases its pin;
+retry succeeds. [Cost evidence](scale/graph-checkpoint-prefix-cost-2026-10-10/README.md).
+New continuation phase observations will locate future failures without changing
+the 15-second deadline. The actual100000 native failure remains failed and its
+exact subphase remains unconfirmed; no multi-hour rerun has been started.
+All original native, extended simulation, scale, soak, retention/import,
+collector/admission and rollout requirements remain in scope.
+
 ## Actual-cap publication follow-through required — 2026-10-10
 
 The unchanged100000-entry native run now fails at its first continuation

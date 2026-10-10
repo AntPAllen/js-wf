@@ -215,14 +215,14 @@ func testNativeGraphContinuationHandoff(t *testing.T, domain string, unpublished
 		wrong := point
 		wrong.SHA256 = hex.EncodeToString(digest[:])
 		wrong.Object = "step-result-" + wrong.SHA256
-		if err := worker.publishContinuation(ctx, h.Type, h.ID, h.InvSeq, owner, records, wrong, appendEntry); !errors.Is(err, journal.ErrGap) {
+		if err := worker.publishContinuation(ctx, h.Type, h.ID, h.InvSeq, owner, records, wrong, appendEntry, nil); !errors.Is(err, journal.ErrGap) {
 			t.Fatal("unconfirmed checkpoint dispatched", err)
 		}
 		info, err := runs.Info(ctx)
 		if err != nil || info.State.Msgs != 0 {
 			t.Fatal("invalid handoff published", info, err)
 		}
-		if err := worker.publishContinuation(ctx, h.Type, h.ID, h.InvSeq, owner, records, point, appendEntry); err != nil {
+		if err := worker.publishContinuation(ctx, h.Type, h.ID, h.InvSeq, owner, records, point, appendEntry, nil); err != nil {
 			t.Fatal(err)
 		}
 		if len(records) != 4 || records[3].Kind != journal.Suspended {
@@ -232,7 +232,7 @@ func testNativeGraphContinuationHandoff(t *testing.T, domain string, unpublished
 		if err != nil || first.State.Msgs != 1 {
 			t.Fatal(first, err)
 		}
-		if err := worker.publishContinuation(ctx, h.Type, h.ID, h.InvSeq, owner, records, point, appendEntry); err != nil {
+		if err := worker.publishContinuation(ctx, h.Type, h.ID, h.InvSeq, owner, records, point, appendEntry, nil); err != nil {
 			t.Fatal(err)
 		}
 		second, err := runs.Info(ctx)
@@ -246,7 +246,7 @@ func testNativeGraphContinuationHandoff(t *testing.T, domain string, unpublished
 		if err := owner.Release(ctx); err != nil {
 			t.Fatal(err)
 		}
-		if err := worker.publishContinuation(ctx, h.Type, h.ID, h.InvSeq, owner, records, point, appendEntry); !errors.Is(err, lease.ErrLost) {
+		if err := worker.publishContinuation(ctx, h.Type, h.ID, h.InvSeq, owner, records, point, appendEntry, nil); !errors.Is(err, lease.ErrLost) {
 			t.Fatal("lost lease authorized handoff", err)
 		}
 		afterLoss, err := runs.Info(ctx)

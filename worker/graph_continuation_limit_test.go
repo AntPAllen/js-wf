@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"os"
 	"strconv"
+	"strings"
 	"testing"
 	"time"
 
@@ -178,7 +179,11 @@ func TestNativeGraphContinuationGlobalLimitAndTerminalSlot(t *testing.T) {
 				execute := func() {
 					t.Helper()
 					// Each delivery reconstructs the worker and all reader/runtime state.
-					w, err := New(ctx, js, "graph-limit", handlers, WithGraphJournal(graph))
+					w, err := New(ctx, js, "graph-limit", handlers, WithGraphJournal(graph), WithOperationObserver(func(event OperationEvent) {
+						if strings.HasPrefix(event.Operation, "continuation_") {
+							t.Logf("CONTINUATION_PHASE operation=%s index=%d duration=%s error=%q", event.Operation, event.JournalIndex, event.Duration, event.Error)
+						}
+					}))
 					if err != nil {
 						t.Fatal(err)
 					}
@@ -217,10 +222,25 @@ func TestNativeGraphContinuationGlobalLimitAndTerminalSlot(t *testing.T) {
 						}
 					}()
 					var noOp bool
-					err = w.execute(stageCtx, h.Type, h.ID, owner, time.Time{}, timerWakeup{}, &noOp, nil)
+					err = w.execute(stageCtx, h.Type, h.ID, owner, time.Time{}, timerWakeup{}, &noOp, w.deliveryOperations(h.Type, h.ID, h.InvSeq, 0))
 					stop()
 					heartbeatErr, releaseErr := <-heartbeat, owner.Release(ctx)
 					if err != nil || releaseErr != nil || heartbeatErr != nil && !errors.Is(heartbeatErr, context.Canceled) {
+						inspectCtx, stopInspect := context.WithTimeout(context.WithoutCancel(ctx), 3*time.Second)
+						status, inspectErr := graph.InspectStart(inspectCtx, h.Type, h.ID)
+						if status != nil {
+							t.Logf("CONTINUATION_FAILURE_STATUS count=%d tail=%d kind=%s checkpoint=%+v error=%v", status.JournalCount, status.JournalTail, status.Kind, status.Checkpoint, inspectErr)
+						} else {
+							t.Logf("CONTINUATION_FAILURE_STATUS error=%v", inspectErr)
+						}
+						keys, keysErr := authority.RootKeys(inspectCtx)
+						if keysErr == nil && len(keys) == 1 {
+							root, rootErr := authority.ReadRoot(inspectCtx, keys[0])
+							t.Logf("CONTINUATION_FAILURE_ROOT head=%d graph_count=%d readers=%d streams=%d application=%s error=%v", root.Head, root.Graph.Count, len(root.Readers), len(root.Streams), root.Application, rootErr)
+						} else {
+							t.Logf("CONTINUATION_FAILURE_ROOT_KEYS count=%d error=%v", len(keys), keysErr)
+						}
+						stopInspect()
 						t.Fatal("delivery failed", err, heartbeatErr, releaseErr)
 					}
 				}

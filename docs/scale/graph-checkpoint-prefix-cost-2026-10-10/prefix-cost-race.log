@@ -1,0 +1,13 @@
+=== RUN   TestGraphCheckpointPublicationPrefixCostAndReadBudget
+=== RUN   TestGraphCheckpointPublicationPrefixCostAndReadBudget/padding=16
+    graph_checkpoint_cost_test.go:141: CHECKPOINT_PREFIX_COST padding=16 entries=36 first_entry_reads=37 first_gets=111 indexed_entry_reads=4 indexed_gets=17 compaction_entry_reads=40 compaction_gets=1599 injected_budget_entry_reads=16
+=== RUN   TestGraphCheckpointPublicationPrefixCostAndReadBudget/padding=128
+    graph_checkpoint_cost_test.go:141: CHECKPOINT_PREFIX_COST padding=128 entries=260 first_entry_reads=261 first_gets=783 indexed_entry_reads=4 indexed_gets=17 compaction_entry_reads=264 compaction_gets=17291 injected_budget_entry_reads=16
+=== RUN   TestGraphCheckpointPublicationPrefixCostAndReadBudget/padding=512
+    graph_checkpoint_cost_test.go:141: CHECKPOINT_PREFIX_COST padding=512 entries=1028 first_entry_reads=1029 first_gets=3087 indexed_entry_reads=4 indexed_gets=17 compaction_entry_reads=1032 compaction_gets=83091 injected_budget_entry_reads=16
+--- PASS: TestGraphCheckpointPublicationPrefixCostAndReadBudget (35.80s)
+    --- PASS: TestGraphCheckpointPublicationPrefixCostAndReadBudget/padding=16 (0.74s)
+    --- PASS: TestGraphCheckpointPublicationPrefixCostAndReadBudget/padding=128 (6.65s)
+    --- PASS: TestGraphCheckpointPublicationPrefixCostAndReadBudget/padding=512 (28.41s)
+PASS
+ok  	js-wf/journal	36.858s

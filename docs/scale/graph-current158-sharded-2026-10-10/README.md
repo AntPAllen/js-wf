@@ -34,7 +34,10 @@ every source input to Git, enumerates the retained binary again, regenerates
 the eight selectors, requires all11 runner/checker command exits0 and
 rechecks all158000 bodies/853 pins.
 
-Full normal and race are prepared, not accepted. Extended10000/100000,
+Full normal is independently accepted at frozen `0404fc0`: 3406 exact Git inputs,
+225 top-level passes, 158000 seed bodies, all 853 pins, eight actual package
+passes and matching loaded terminal supervisor exit0. [Review](normal-review.json)
+and [retained evidence](qualified-normal/). Full race is live, not accepted. Extended10000/100000,
 original native matrices, actual100000-entry cap, majority raw-p99 failure,
 24h/million drain, lifecycle/retention/import/admission/collector/rollout
 remain separate open requirements. Production collection is off; canonical
@@ -47,4 +50,10 @@ Frozen `0404fc0` is running under
 invocation `fea4ed5e835c4f2f8065c0ca0ce732ea`. [Launch identity](normal-launch.json)
 records the loaded live service. Normal state/logs are operational; no stage
 acceptance is inferred until it actually stops and independent review passes.
-Race has not started and requires accepted full normal from this same source.
+Race subsequently started after independent normal acceptance, as recorded below.
+
+## Full race live launch
+
+Same frozen source, original PID128899, invocation
+`fe0c32a5ba8c4c1898430cf89518c940`. [Launch](race-launch.json).
+Independent race review must follow actual terminal completion.

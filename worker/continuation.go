@@ -111,7 +111,7 @@ func continuationAnchor(records []journal.Record, next, epoch uint64, info wf.Ch
 	return anchor, nil
 }
 
-func (w *Worker) publishContinuation(ctx context.Context, typ, id string, invSeq uint64, owner *lease.Lease, records []journal.Record, point wf.ContinuationCheckpoint, appendEntry func(journal.Kind, json.RawMessage) error) error {
+func (w *Worker) publishContinuation(ctx context.Context, typ, id string, invSeq uint64, owner *lease.Lease, records []journal.Record, point wf.ContinuationCheckpoint, appendEntry func(journal.Kind, json.RawMessage) error, ops *deliveryOperations) error {
 	var sequence uint64
 	for _, record := range records {
 		if record.Index == point.Index {
@@ -128,23 +128,32 @@ func (w *Worker) publishContinuation(ctx context.Context, typ, id string, invSeq
 	}
 	if w.graphJournal != nil {
 		var err error
+		started := ops.begin()
+		operation := "continuation_checkpoint_confirm"
 		if w.graphJournal.CheckpointIndex() {
+			operation = "continuation_checkpoint_publish"
 			err = w.graphJournal.PublishCheckpoint(ctx, typ, id, runtime, records[len(records)-1].Sequence)
 		} else {
 			err = w.graphJournal.ConfirmCheckpoint(ctx, typ, id, runtime, records[len(records)-1].Sequence)
 		}
+		ops.finish(started, operation, point.Index, journal.StepCompleted, err)
 		if err != nil {
 			return err
 		}
 	} else {
+		started := ops.begin()
 		snapshot, err := w.jrn.WriteCheckpointSnapshot(ctx, typ, id, runtime)
+		ops.finish(started, "continuation_snapshot_write", point.Index, journal.StepCompleted, err)
 		if err != nil {
 			return err
 		}
 		if err := owner.Renew(ctx); err != nil {
 			return err
 		}
-		if err := w.jrn.PurgeSnapshot(ctx, typ, id, snapshot); err != nil {
+		started = ops.begin()
+		err = w.jrn.PurgeSnapshot(ctx, typ, id, snapshot)
+		ops.finish(started, "continuation_snapshot_purge", point.Index, journal.StepCompleted, err)
+		if err != nil {
 			return err
 		}
 	}
@@ -163,7 +172,10 @@ func (w *Worker) publishContinuation(ctx context.Context, typ, id string, invSeq
 	// pins its original receipts and must not append through them afterward.
 	// The next delivery reconstructs references from the relocated checkpoint.
 	if w.graphJournal != nil && w.graphJournal.ArchiveCheckpoints() {
-		if err := w.graphJournal.CompactCheckpoint(ctx, typ, id, runtime, tail); err != nil {
+		started := ops.begin()
+		err := w.graphJournal.CompactCheckpoint(ctx, typ, id, runtime, tail)
+		ops.finish(started, "continuation_archive", point.Index, journal.StepCompleted, err)
+		if err != nil {
 			return err
 		}
 	}

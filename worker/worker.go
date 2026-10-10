@@ -1333,7 +1333,7 @@ func (w *Worker) execute(ctx context.Context, typ, id string, l *lease.Lease, wa
 		ctx, stopPublication = context.WithTimeout(ctx, 15*time.Second)
 		defer stopPublication()
 		started := ops.begin()
-		err := w.publishContinuation(ctx, typ, id, input.Sequence, l, records, point, appendEntry)
+		err := w.publishContinuation(ctx, typ, id, input.Sequence, l, records, point, appendEntry, ops)
 		ops.finish(started, "continuation_publish", 0, "", err)
 		return err
 	}
