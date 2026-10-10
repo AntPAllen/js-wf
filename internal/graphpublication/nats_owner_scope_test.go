@@ -256,14 +256,19 @@ func TestNativeGraphOwnerScopeIndexRecovery(t *testing.T) {
 			if keys, e := a.RootKeys(c); e != nil || !reflect.DeepEqual(keys, []string{"history"}) {
 				t.Fatal("root census rejected index subjects", keys, e)
 			}
-			// Enumeration must return no partial list after a lost marker witness.
+			// A lost deferred marker witness must stop its batch before scope I/O.
 			base := a.js
 			fault := &ownerIndexReplyFault{JetStream: base, subject: a.ownerSubject(token, after[0]), commit: true}
 			a.js = fault
-			keys, e := port.BlobKeysForOwner(c, token)
+			failed, e := p.BeginCompactionIntentRenewal(c, plan, func() time.Time { return time.Now().UTC() }, next.expires)
+			if e != nil {
+				t.Fatal(e)
+			}
+			beforeReads := counted.reads
+			_, done, e := failed.Advance(c, 1)
 			a.js = base
-			if keys != nil || !errors.Is(e, lostReply) || fault.calls != 1 {
-				t.Fatal("unknown census witness retried/accepted", keys, e, fault.calls)
+			if done || !errors.Is(e, lostReply) || fault.calls != 1 || counted.reads != beforeReads {
+				t.Fatal("unknown marker witness retried/accepted", done, e, fault.calls, counted.reads)
 			}
 			// Index discovery is not a content certificate. The ordinary commit
 			// independently verifies the renewed target and its original head.

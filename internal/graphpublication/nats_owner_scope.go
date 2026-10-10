@@ -40,6 +40,7 @@ func OpenOwnerIndexedNativeAuthority(ctx context.Context, js jetstream.JetStream
 type OwnerIndexedNativePort struct{ *NativePort }
 
 var _ OwnerScopePort = (*OwnerIndexedNativePort)(nil)
+var _ OwnerScopeWitnessPort = (*OwnerIndexedNativePort)(nil)
 
 func OpenOwnerIndexedNativePort(ctx context.Context, a *NativeAuthority, bucket string) (*OwnerIndexedNativePort, error) {
 	if a == nil || !a.ownerIndexed {
@@ -131,6 +132,9 @@ func (p *NativeAuthority) witnessOwnerScope(ctx context.Context, owner, scope st
 func (p *OwnerIndexedNativePort) BlobKeysForOwner(ctx context.Context, owner string) ([]string, error) {
 	return p.NativeAuthority.ownerScopeKeys(ctx, owner)
 }
+func (p *OwnerIndexedNativePort) ValidateOwnerScope(ctx context.Context, owner, scope string) error {
+	return p.NativeAuthority.witnessOwnerScope(ctx, owner, scope, false)
+}
 func (p *NativeAuthority) ownerScopeKeys(ctx context.Context, owner string) ([]string, error) {
 	if !p.ownerIndexed || !validID(owner) {
 		return nil, errors.New("invalid owner scope discovery")
@@ -155,10 +159,7 @@ func (p *NativeAuthority) ownerScopeKeys(ctx context.Context, owner string) ([]s
 		keys = append(keys, k)
 	}
 	sort.Strings(keys)
-	for _, k := range keys {
-		if err := p.witnessOwnerScope(ctx, owner, k, false); err != nil {
-			return nil, err
-		}
-	}
+	// Registration bytes are witnessed in bounded renewal batches, not here.
+	// Discovery is not a certificate; every returned scope is checked afresh.
 	return keys, nil
 }

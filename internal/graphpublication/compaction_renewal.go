@@ -117,6 +117,14 @@ func (r *CompactionIntentRenewal) Advance(ctx context.Context, maxScopes uint64)
 			return plan, false, err
 		}
 		k := r.keys[r.next]
+		if witness, ok := r.protocol.Port.(OwnerScopeWitnessPort); r.ownerScoped && ok {
+			if err = witness.ValidateOwnerScope(ctx, r.prepared.publication.Token, k); err != nil {
+				return plan, false, err
+			}
+			if err = r.check(ctx); err != nil {
+				return plan, false, err
+			}
+		}
 		record, readErr := r.protocol.Port.ReadBlob(ctx, k)
 		if readErr != nil {
 			return plan, false, readErr

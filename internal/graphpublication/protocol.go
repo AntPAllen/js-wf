@@ -133,6 +133,17 @@ type OwnerScopePort interface {
 	BlobKeysForOwner(context.Context, string) ([]string, error)
 }
 
+// OwnerScopeWitnessPort validates an index registration separately from its
+// complete discovery census. Compaction renewal calls it once per examined
+// scope within Advance's scope budget, before reading or mutating that scope.
+// Failure supplies no authority and must not be retried by the same operation.
+// Storage completeness is still required by OwnerScopePort; deferred validation
+// cannot make a partial/client-provided list complete.
+type OwnerScopeWitnessPort interface {
+	OwnerScopePort
+	ValidateOwnerScope(context.Context, string, string) error
+}
+
 // RootCatalogPort enumerates every retained destination in this isolated
 // authority namespace, including empty roots and witnessed absences. The
 // catalog is permanent under ordinary operations; enumeration returns no

@@ -1,5 +1,32 @@
 # Implementation status against the supplied plan
 
+## Owner marker validation is batched; census timing still open — 2026-10-10
+
+OwnerScopeWitnessPort now separates marker validation from complete discovery.
+Native renewal setup performs zero per-key witnesses; Advance validates each
+marker within its scope budget and rechecks original source/time before blob
+I/O. Failures are sticky and publish no plan. Registration before native blob
+mutation, original expiry checks and independent final verification remain.
+[Evidence](scale/graph-owner-witness-batches-2026-10-10/README.md).
+
+Seven witness controls plus eleven owner and seventeen safety controls pass race
+5.327 seconds; skipping witnessing fails six controls. Native R1/R3 recovery
+passes 14.626 seconds, indexed worker recovery 20.895 seconds, and all 853 common
+pins 8.083 seconds. A native R1 census with 100,001 acknowledged reservations and
+six real grants discovers 100,007 keys across two pages, then validates only two
+markers for budget two. The final race run passes setup in 2.926577205 seconds
+(package 16.648 seconds), while prior runs miss its unchanged three-second
+context. Failures and a separate 15-second pagination diagnostic are retained.
+
+Stable large-census timing is unqualified. Test PASS can reproduce deadline
+failure and separately inspect pagination; it is not scale acceptance. These
+are index keys, not 100,000 journal entries, and only two scopes advance in the
+large fixture. Setup still materializes/sorts the full owner list, and complete
+large renewal before original expiry remains open. Next: complete bounded
+owner discovery that handles marker sequence churn and uncertainty; then total
+owned-grant cost before another multi-hour full-entry run. Production deadlines,
+TTL, collection and admission are unchanged; original broad gates remain open.
+
 ## Indexed native journal configuration and worker recovery — 2026-10-10
 
 NativeGraphConfig.OwnerScopeIndex now explicitly provisions/selects the indexed

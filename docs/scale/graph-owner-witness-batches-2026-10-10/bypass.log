@@ -1,0 +1,26 @@
+=== RUN   TestGraphCompactionOwnerWitnessScopeBudget
+=== RUN   TestGraphCompactionOwnerWitnessScopeBudget/normal
+    compaction_owner_witness_test.go:94: healthy witness scan true <nil> 0
+=== RUN   TestGraphCompactionOwnerWitnessScopeBudget/reservations100000
+    compaction_owner_witness_test.go:98: large census batch not bounded false <nil> 0
+=== RUN   TestGraphCompactionOwnerWitnessScopeBudget/lost-later
+    compaction_owner_witness_test.go:109: failed witness used true <nil> 0 20 20
+=== RUN   TestGraphCompactionOwnerWitnessScopeBudget/expired-during-witness
+    compaction_owner_witness_test.go:109: failed witness used true <nil> 0 20 20
+=== RUN   TestGraphCompactionOwnerWitnessScopeBudget/source-change
+    compaction_owner_witness_test.go:109: failed witness used true <nil> 0 20 20
+=== RUN   TestGraphCompactionOwnerWitnessScopeBudget/corrupt-marker
+    compaction_owner_witness_test.go:109: failed witness used true <nil> 0 20 20
+=== RUN   TestGraphCompactionOwnerWitnessScopeBudget/cancel
+    compaction_owner_witness_test.go:119: OWNER_WITNESS mode=cancel census=20 setup_witnesses=0 validated=0 examined=2 blobs=2 complete=false err=<nil>
+--- FAIL: TestGraphCompactionOwnerWitnessScopeBudget (0.19s)
+    --- FAIL: TestGraphCompactionOwnerWitnessScopeBudget/normal (0.00s)
+    --- FAIL: TestGraphCompactionOwnerWitnessScopeBudget/reservations100000 (0.14s)
+    --- FAIL: TestGraphCompactionOwnerWitnessScopeBudget/lost-later (0.02s)
+    --- FAIL: TestGraphCompactionOwnerWitnessScopeBudget/expired-during-witness (0.00s)
+    --- FAIL: TestGraphCompactionOwnerWitnessScopeBudget/source-change (0.00s)
+    --- FAIL: TestGraphCompactionOwnerWitnessScopeBudget/corrupt-marker (0.01s)
+    --- PASS: TestGraphCompactionOwnerWitnessScopeBudget/cancel (0.00s)
+FAIL
+FAIL	js-wf/internal/graphpublication	0.191s
+FAIL
