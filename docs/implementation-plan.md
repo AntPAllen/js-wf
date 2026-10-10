@@ -1,5 +1,33 @@
 # JetStream Durable Workflow Runtime — Implementation Plan
 
+## Offline checkpoint metadata defect fixed; individual source-bound results verified — 2026-10-10
+
+A retained real native export proves that the old offline reader accepts six
+invalid checkpoint metadata variants, including absent bytes and independently
+rehashed foreign identity/anchor/version. Frozen `c6063ab` now validates hashes,
+unambiguous envelopes, identity/anchor/frame binding, exact prior child requests,
+canonical progress and buffered child signals in shared SDK replay and before
+CLI plugin loading. Independent review verifies 3,331 unchanged Git inputs,
+63 SDK race top tests (62 metadata controls), all 841 normal saved traces,
+20 CLI provenance controls/legacy plugin and 110 offline CLI command outcomes.
+The six new mutations reject; all 48 retained healthy native replays pass. Two
+required disabled-validator failures establish the controls' sensitivity.
+[Raw evidence and scope](scale/graph-offline-checkpoint-metadata-2026-10-10/README.md).
+
+The review also corrects an evidence issue: successful transient services were
+unloaded, and default zero status on a not-found unit is not an actual supervisor
+exit receipt. Current metadata and earlier selected-child results retain their
+source-bound child command evidence but mark original supervisor exits unknown.
+Other affected transient-service supervisor claims are identified in the
+correction receipt. Neither an absent unit nor those default values establish
+whole-runner success. Both live broad campaigns now retain exit status via
+RemainAfterExit without restarting their existing processes. Actual 100,000-
+entry R1/archive and the older frozen156 race campaign remain live/unaccepted.
+
+Full missing-marker/import, native fault/retention/admission, latest-source
+seeded/race/extended, remaining cap variants, public admission, production
+collection and every broader original requirement remain open.
+
 ## Actual graph production-cap campaign launched — 2026-10-10
 
 Frozen `42058f2` extends the existing native graph continuation fixture to build

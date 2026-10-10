@@ -51,8 +51,10 @@ names containing `.json`, causing actual **supervisor exit one**. The
 [corrected read-only review](corpus-correction-review.json) verifies exact full
 filenames, source and binary hashes without repeating tests. Both as-executed
 runners, original receipts and actual supervisor statuses are preserved.
-The main qualification supervisor exits zero; the supplemental supervisor's
-exit one remains visible and is not presented as a successful runner.
+The original main supervisor exit is unproven after systemd unloaded its
+transient unit; its displayed default zero is corrected in the review. All
+recorded child command exits remain verified. The supplemental supervisor's
+actual exit one remains visible and is not presented as a successful runner.
 
 [Raw closed evidence](qualified/), [main runner](run.py),
 [supplemental runner as executed](run-corpus-correction.py) and

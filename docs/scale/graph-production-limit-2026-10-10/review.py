@@ -5,7 +5,8 @@ base=Path(__file__).resolve().parent
 state=json.loads((base/'state.json').read_text())
 root,checkout=Path(state['root']),Path(state['checkout'])
 assert state['phase']=='closed' and state['finished'] and state['exit']==0
-properties=subprocess.check_output(['systemctl','--user','show','js-wf-graph-production-limit-20261010.service','-p','MainPID','-p','ExecMainStatus','-p','ActiveState','-p','InvocationID'],text=True)
+properties=subprocess.check_output(['systemctl','--user','show','js-wf-graph-production-limit-20261010.service','-p','MainPID','-p','ExecMainStatus','-p','ActiveState','-p','InvocationID','-p','LoadState'],text=True)
+assert 'LoadState=loaded\n' in properties
 assert 'MainPID=0\n' in properties and 'ExecMainStatus=0\n' in properties
 assert 'InvocationID='+state['invocation']+'\n' in properties
 (root/'supervisor-exit.txt').write_text(properties)

@@ -16,8 +16,14 @@ assert state['commands'][6]['command'] == ['go','test','-race','-c','-o',str(roo
 assert '-test.run=^(TestReplayGraphChildProvenance|TestReplayContinuationPlugin)$' in state['commands'][7]['command']
 assert state['commands'][8]['command'] == ['go','build','-race','-o',str(root/'wf'),'./cmd/wf']
 assert state['commands'][9]['command'] == ['go','build','-race','-buildmode=plugin','-o',str(root/'handler.so'),'./worker/testdata/graphreplayplugin']
-properties=subprocess.check_output(['systemctl','--user','show','js-wf-selected-child-20261010.service','-p','MainPID','-p','ExecMainStatus','-p','ActiveState'],text=True)
-assert 'MainPID=0\n' in properties and 'ExecMainStatus=0\n' in properties
+properties=subprocess.check_output(['systemctl','--user','show','js-wf-selected-child-20261010.service','-p','MainPID','-p','ExecMainStatus','-p','ActiveState','-p','InvocationID','-p','LoadState'],text=True)
+assert 'MainPID=0\n' in properties
+loaded='LoadState=loaded\n' in properties
+if loaded:
+ assert 'ExecMainStatus=0\n' in properties and 'InvocationID='+state['invocation']+'\n' in properties
+else:
+ assert 'LoadState=not-found\n' in properties
+supervisor_exit=0 if loaded else None
 (root/'supervisor-exit.txt').write_text(properties)
 before, after = [json.loads((root / name).read_text()) for name in ['source-before.json', 'source-after.json']]
 assert before == after and before['source'] == state['source']
@@ -129,7 +135,7 @@ supplement_review=json.loads((base/'corpus-correction-review.json').read_text())
 assert supplement_review['accepted'] and supplement_review['actual_supervisor_exit']==1
 assert supplement_review['passed_cases']==841 and supplement_review['expected_cases']==expected
 assert supplement_review['actual_corpus_exit']==0 and supplement_review['binary_sha256']==supplement['binary_sha256']
-result=dict(accepted=True,source=state['source'],git_verified_inputs=len(before['files']),native_source=state['native_source'],native_git_verified_inputs=3312,full_sdk_top_tests=len(tops),selected_signal_controls=10,required_negative_failures=3,directed_cli_controls=20,legacy_continuation_plugin_pass=True,offline_cli_runs=106,positive_native_replays=48,negative_native_objects=28,negative_native_stages=20,malformed_new_rejections=4,malformed_old_acceptances=4,corpus_passed=841,initial_corpus_selector_valid=False,supplemental_corpus_go_exit=0,supplemental_corpus_supervisor_exit=1,supervisor_exit=0,reviewed=datetime.datetime.now(datetime.timezone.utc).isoformat(),scope='Shared SDK child selection and structural provenance; full SDK race suite, corrected source-bound corpus, retained healthy native bundles. Full latest-source seeded/fault/import/rollout and broader original requirements remain open.')
+result=dict(accepted=True,source=state['source'],git_verified_inputs=len(before['files']),native_source=state['native_source'],native_git_verified_inputs=3312,full_sdk_top_tests=len(tops),selected_signal_controls=10,required_negative_failures=3,directed_cli_controls=20,legacy_continuation_plugin_pass=True,offline_cli_runs=106,positive_native_replays=48,negative_native_objects=28,negative_native_stages=20,malformed_new_rejections=4,malformed_old_acceptances=4,corpus_passed=841,initial_corpus_selector_valid=False,supplemental_corpus_go_exit=0,supplemental_corpus_supervisor_exit=1,supervisor_exit=supervisor_exit,supervisor_exit_proven=loaded,reviewed=datetime.datetime.now(datetime.timezone.utc).isoformat(),scope='Individual source-qualified child command results; original unloaded supervisor exit unproven. Shared SDK child selection and structural provenance; full SDK race suite, corrected source-bound corpus, retained healthy native bundles. Full latest-source seeded/fault/import/rollout and broader original requirements remain open.')
 result['evidence_sha256']={n:hashlib.sha256((root/n).read_bytes()).hexdigest() for n in ('wf-events.jsonl','events.jsonl','selector-disabled.log','corpus-events.jsonl','corpus-corrected-events.jsonl')}
 (base/'review.json').write_text(json.dumps(result,indent=2)+'\n')
 print(json.dumps(result,indent=2))
