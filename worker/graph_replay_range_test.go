@@ -133,7 +133,7 @@ func TestGraphReplaySnapshotRangeAndSlowAcquisition(t *testing.T) {
 			}
 			start := now
 			snapshot, err := worker.ReadGraphReplaySnapshot(ctx, store, h.Type, h.ID, source)
-			if err != nil || snapshot.Format != wf.ReplayFormatGraphV1 || !reflect.DeepEqual(snapshot.Records, records) || string(snapshot.Input) != string(input) || string(snapshot.Objects["input:"+status.State.Start.InputSHA256]) != "7" {
+			if err != nil || snapshot.Format != wf.ReplayFormatGraphV1 || snapshot.InputHash != status.State.Start.InputSHA256 || !reflect.DeepEqual(snapshot.Records, records) || string(snapshot.Input) != string(input) || string(snapshot.Objects["input:"+status.State.Start.InputSHA256]) != "7" {
 				t.Fatal("range export differs from point history or owned payload", err, len(snapshot.Records))
 			}
 			if port.gets*3 >= pointGets*2 {

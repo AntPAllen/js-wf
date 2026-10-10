@@ -1,0 +1,28 @@
+{
+  "actual_exit": 0,
+  "command": [
+    "go",
+    "test",
+    "-race",
+    "./wf",
+    "./cmd/wf",
+    "-run",
+    "^TestReplayInputBind",
+    "-count=1",
+    "-timeout=2m",
+    "-v"
+  ],
+  "environment": {
+    "GOMAXPROCS": "2",
+    "GOMEMLIMIT": "768MiB"
+  },
+  "source_files_sha256": {
+    "wf/replay_graph_format.go": "3a64ce47cf557357e09cd28ad4c7a121ddefad30069437e064fd432ece96a8a1",
+    "wf/replay.go": "909eff7165510e706c00d89acd3714ebb1f906c92be8149400a77ef5fabfa6b3",
+    "wf/replay_input_binding_test.go": "4afccde4b62e94b228358dde3248b2d4abc417e28466a8cfa0f663f1dc0b6d48",
+    "cmd/wf/replay.go": "aa10886106b0613d71787e2eb32a8c745c6fa15a5203f03ceb16f2e37286a972",
+    "cmd/wf/replay_input_binding_test.go": "857fb980517de7d9a9bc5f0162872422bfb58caedec0e8e9db39be1c37adaa5f"
+  },
+  "log_sha256": "e572512c096bf9a63b83b4c5e4e4db069ee17bd16bb74ff55cdec75ed29c8fd0",
+  "scope": "Development directed controls only; frozen full SDK/corpus/export/CLI follows."
+}

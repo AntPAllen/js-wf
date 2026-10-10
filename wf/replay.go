@@ -21,7 +21,9 @@ var ErrReplayPendingStep = errors.New("offline replay reached an incomplete step
 
 type ReplayOptions struct {
 	// Format declares the export contract; graph-v1 requires canonical markers.
-	Format      string
+	Format string
+	// InputHash binds the supplied invocation input to its Started record.
+	InputHash   string
 	Type        string
 	ID          string
 	InvSeq      uint64
@@ -125,6 +127,9 @@ func replayWithStages[T any](journalBytes []byte, fn func(*Context) (T, error), 
 		}
 	}
 	if err := validateReplayGraphFormat(records, opts.Objects, opts.Format); err != nil {
+		return result, err
+	}
+	if err := validateReplayInputBinding(records, opts.Format, opts.InputHash); err != nil {
 		return result, err
 	}
 	if err := ValidateReplayGraphCheckpoints(records, opts.Objects, opts.Type, opts.ID, opts.InvSeq); err != nil {

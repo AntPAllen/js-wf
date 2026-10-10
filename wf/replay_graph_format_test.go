@@ -12,10 +12,11 @@ import (
 
 func TestReplayDeclaredGraphFormat(t *testing.T) {
 	hash := func(raw []byte) string { sum := sha256.Sum256(raw); return hex.EncodeToString(sum[:]) }
+	inputHash := hash([]byte(`null`))
 	makeRecords := func() ([]journal.Record, map[string][]byte) {
 		signal, _ := json.Marshal(map[string]any{"sig_seq": 1, "name": "gate", "ref": "signal", "hash": hash([]byte(`true`)), "canonical_signal": map[string]any{"index": 0, "token": "owned"}})
 		terminal, _ := json.Marshal(Outcome{InvSeq: 1, Result: []byte(`42`)})
-		records := []journal.Record{{Entry: journal.Entry{Kind: journal.Started}}, {Entry: journal.Entry{Kind: journal.SignalConsumed, Payload: signal}}, {Entry: journal.Entry{Kind: journal.Completed, Payload: terminal}}}
+		records := []journal.Record{{Entry: journal.Entry{Kind: journal.Started, Payload: json.RawMessage(`{"input_sha256":"` + inputHash + `"}`)}}, {Entry: journal.Entry{Kind: journal.SignalConsumed, Payload: signal}}, {Entry: journal.Entry{Kind: journal.Completed, Payload: terminal}}}
 		for i := range records {
 			records[i].Index = uint64(i)
 			records[i].Epoch = 1
@@ -68,20 +69,20 @@ func TestReplayDeclaredGraphFormat(t *testing.T) {
 		t.Run(test.name, func(t *testing.T) {
 			r, o := makeRecords()
 			test.change(r, o)
-			err := ValidateReplayGraphHistory(r, o, "parent", "id", 1, test.format)
+			err := ValidateReplayGraphHistory(r, o, "parent", "id", 1, test.format, inputHash)
 			if !errors.Is(err, test.want) {
 				t.Fatalf("validation=%v want=%v", err, test.want)
 			}
 			raw, _ := json.Marshal(r)
 			calls := 0
-			result, err := Replay(raw, func(*Context) (int, error) { calls++; return 42, nil }, ReplayOptions{Type: "parent", ID: "id", InvSeq: 1, Objects: o, Format: test.format})
+			result, err := Replay(raw, func(*Context) (int, error) { calls++; return 42, nil }, ReplayOptions{Type: "parent", ID: "id", InvSeq: 1, Objects: o, Format: test.format, InputHash: inputHash})
 			if !errors.Is(err, test.want) || test.want != nil && calls != 0 || test.want == nil && (calls != 1 || result != 42) {
 				t.Fatalf("SDK result=%d calls=%d err=%v", result, calls, err)
 			}
 		})
 	}
 	t.Run("checkpoint_metadata_removed", func(t *testing.T) {
-		r := []journal.Record{{Entry: journal.Entry{Kind: journal.Started}}, {Entry: journal.Entry{Kind: journal.StepRequested, Payload: json.RawMessage(`{"kind":"checkpoint"}`)}}, {Entry: journal.Entry{Kind: journal.StepCompleted, Payload: json.RawMessage(`{"result_ref":"frame"}`)}}}
+		r := []journal.Record{{Entry: journal.Entry{Kind: journal.Started, Payload: json.RawMessage(`{"input_sha256":"` + inputHash + `"}`)}}, {Entry: journal.Entry{Kind: journal.StepRequested, Payload: json.RawMessage(`{"kind":"checkpoint"}`)}}, {Entry: journal.Entry{Kind: journal.StepCompleted, Payload: json.RawMessage(`{"result_ref":"frame"}`)}}}
 		if err := ValidateReplayGraphHistory(r, nil, "parent", "id", 1, ReplayFormatGraphV1); !errors.Is(err, ErrCorruptJournal) {
 			t.Fatal(err)
 		}

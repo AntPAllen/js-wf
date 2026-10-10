@@ -106,7 +106,7 @@ func TestGraphReplaySnapshotOwnsInputsAndRejectedSignals(t *testing.T) {
 			port.denyRelease = mode == "release-unknown"
 			snapshot, err := worker.ReadGraphReplaySnapshot(ctx, store, h.Type, h.ID, source)
 			if mode == "unreadable" || mode == "forged-source" || mode == "release-unknown" || mode == "forged-terminal" {
-				if err == nil || snapshot.Format != "" || snapshot.Input != nil || snapshot.Records != nil || snapshot.Objects != nil {
+				if err == nil || snapshot.Format != "" || snapshot.InputHash != "" || snapshot.Input != nil || snapshot.Records != nil || snapshot.Objects != nil {
 					t.Fatal("uncertain/forged export leaked successful snapshot", err)
 				}
 				if mode == "unreadable" && !errors.Is(err, context.DeadlineExceeded) {

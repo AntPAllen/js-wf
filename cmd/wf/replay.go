@@ -211,7 +211,7 @@ type replayWorkflow struct {
 }
 
 func (h replayWorkflow) replay(raw []byte, bundle replayBundle, observation *wf.ReplayObservation) (json.RawMessage, error) {
-	opts := wf.ReplayOptions{Format: bundle.Format, Type: bundle.Type, ID: bundle.ID, InvSeq: bundle.InvSeq, Objects: bundle.Objects, Observation: observation}
+	opts := wf.ReplayOptions{Format: bundle.Format, InputHash: bundle.InputHash, Type: bundle.Type, ID: bundle.ID, InvSeq: bundle.InvSeq, Objects: bundle.Objects, Observation: observation}
 	initial := func(c *wf.Context) (json.RawMessage, error) { return h.initial(c, bundle.Input) }
 	if len(h.stages) == 0 {
 		return wf.Replay(raw, initial, opts)
@@ -233,7 +233,7 @@ func runReplayBundle(bundle replayBundle, pluginPath, symbolName string) (replay
 	if len(bundle.Journal) == 0 {
 		return report, fmt.Errorf("replay journal is empty")
 	}
-	if err := wf.ValidateReplayGraphHistory(bundle.Journal, bundle.Objects, bundle.Type, bundle.ID, bundle.InvSeq, bundle.Format); err != nil {
+	if err := wf.ValidateReplayGraphHistory(bundle.Journal, bundle.Objects, bundle.Type, bundle.ID, bundle.InvSeq, bundle.Format, bundle.InputHash); err != nil {
 		return report, err
 	}
 	tail := bundle.Journal[len(bundle.Journal)-1]
@@ -392,7 +392,7 @@ func replayNonStepJournalLimit(bundle replayBundle, handler replayWorkflow, outc
 		return replayReport{}, err
 	}
 	validationStop := errors.New("journal validated")
-	_, err = wf.Replay(full, func(*wf.Context) (json.RawMessage, error) { return nil, validationStop }, wf.ReplayOptions{Format: bundle.Format, Type: bundle.Type, ID: bundle.ID, InvSeq: bundle.InvSeq, Objects: bundle.Objects})
+	_, err = wf.Replay(full, func(*wf.Context) (json.RawMessage, error) { return nil, validationStop }, wf.ReplayOptions{Format: bundle.Format, InputHash: bundle.InputHash, Type: bundle.Type, ID: bundle.ID, InvSeq: bundle.InvSeq, Objects: bundle.Objects})
 	if !errors.Is(err, validationStop) {
 		return replayReport{}, fmt.Errorf("invalid journal-limit history: %w", err)
 	}
@@ -525,7 +525,7 @@ func replayCancellation(bundle replayBundle, handler replayWorkflow) (replayRepo
 		return replayReport{}, err
 	}
 	validationStop := errors.New("cancellation journal validated")
-	_, err = wf.Replay(full, func(*wf.Context) (json.RawMessage, error) { return nil, validationStop }, wf.ReplayOptions{Format: bundle.Format, Type: bundle.Type, ID: bundle.ID, InvSeq: bundle.InvSeq, Objects: bundle.Objects})
+	_, err = wf.Replay(full, func(*wf.Context) (json.RawMessage, error) { return nil, validationStop }, wf.ReplayOptions{Format: bundle.Format, InputHash: bundle.InputHash, Type: bundle.Type, ID: bundle.ID, InvSeq: bundle.InvSeq, Objects: bundle.Objects})
 	if !errors.Is(err, validationStop) {
 		return replayReport{}, fmt.Errorf("invalid cancellation journal: %w", err)
 	}

@@ -16,6 +16,7 @@ import (
 // generation. It never begins a generation, repairs a source or reads WF_BLOB.
 type GraphReplaySnapshot struct {
 	Format        string
+	InputHash     string
 	Input         []byte
 	Records       []journal.Record
 	Objects       map[string][]byte
@@ -176,7 +177,8 @@ func ReadGraphReplaySnapshot(ctx context.Context, store *journal.GraphStore, typ
 	if err != nil {
 		return snapshot, err
 	}
-	if err = wf.ValidateReplayGraphHistory(snapshot.Records, snapshot.Objects, typ, id, invocation.Sequence, wf.ReplayFormatGraphV1); err != nil {
+	snapshot.InputHash = graphHash(snapshot.Input)
+	if err = wf.ValidateReplayGraphHistory(snapshot.Records, snapshot.Objects, typ, id, invocation.Sequence, wf.ReplayFormatGraphV1, snapshot.InputHash); err != nil {
 		return snapshot, err
 	}
 	snapshot.Format = wf.ReplayFormatGraphV1

@@ -1,0 +1,49 @@
+{
+  "source": "04f542bcf8ec9099feb07e509db97361c504a633",
+  "cli": "/home/exedev/js-wf-replay-format-20261010/wf",
+  "cli_sha256": "43f3530365d4210ff54136c80651905b18f5088f77aaa083984900279fb4a9a7",
+  "plugin": "/home/exedev/js-wf-replay-format-20261010/handler.so",
+  "plugin_sha256": "1740821bb8894d772c066a63ecceebe5fea0a2aa0341ffb1108682357fc70d80",
+  "source_bundle": "/home/exedev/js-wf-child-offline-20261010/artifacts/offline-2667111011/completed.json",
+  "source_bundle_sha256": "d2aaff2775e931703b138fe5e306a1b93d5994d1ca0872b93bfd704196dea9d0",
+  "rows": [
+    {
+      "name": "control",
+      "input": "/home/exedev/js-wf-replay-start-input-diagnostic-20261010/control.json",
+      "input_sha256": "a4b972b90bcc1ecaa84b27951fec6ab702eb290d670271289285dc465e06a912",
+      "command": [
+        "/home/exedev/js-wf-replay-format-20261010/wf",
+        "-url",
+        "nats://127.0.0.1:1",
+        "-handler-plugin",
+        "/home/exedev/js-wf-replay-format-20261010/handler.so",
+        "-handler-symbol",
+        "ChildWorkflow",
+        "-replay-bundle",
+        "/home/exedev/js-wf-replay-start-input-diagnostic-20261010/control.json",
+        "replay"
+      ],
+      "exit": 0,
+      "output": "{\n  \"type\": \"continued\",\n  \"id\": \"offline\",\n  \"inv_seq\": 1,\n  \"journal_entries\": 26,\n  \"status\": \"completed\",\n  \"result\": 60\n}\n"
+    },
+    {
+      "name": "rehashed-ignored-input-field",
+      "input": "/home/exedev/js-wf-replay-start-input-diagnostic-20261010/rehashed-ignored-input-field.json",
+      "input_sha256": "359ef7e9c17561bfd3cf66202c8695ef4f156662407f6bff083bf1f924abd41c",
+      "command": [
+        "/home/exedev/js-wf-replay-format-20261010/wf",
+        "-url",
+        "nats://127.0.0.1:1",
+        "-handler-plugin",
+        "/home/exedev/js-wf-replay-format-20261010/handler.so",
+        "-handler-symbol",
+        "ChildWorkflow",
+        "-replay-bundle",
+        "/home/exedev/js-wf-replay-start-input-diagnostic-20261010/rehashed-ignored-input-field.json",
+        "replay"
+      ],
+      "exit": 0,
+      "output": "{\n  \"type\": \"continued\",\n  \"id\": \"offline\",\n  \"inv_seq\": 1,\n  \"journal_entries\": 26,\n  \"status\": \"completed\",\n  \"result\": 60\n}\n"
+    }
+  ]
+}

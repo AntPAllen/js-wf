@@ -16,13 +16,25 @@ import (
 // format retains compatibility with previously exported and legacy histories.
 const ReplayFormatGraphV1 = "graph-v1"
 
+var ErrReplayInputMismatch = errors.New("offline replay input differs from journal start")
+
 var ErrReplayFormatUnsupported = errors.New("unsupported offline replay format")
 
 // ValidateReplayGraphHistory validates the declared format and graph provenance
 // without invoking workflow code. A graph-v1 history cannot omit canonical
 // consumption annotations or worker metadata on checkpoint completions.
-func ValidateReplayGraphHistory(records []journal.Record, objects map[string][]byte, typ, id string, invocation uint64, format string) error {
+func ValidateReplayGraphHistory(records []journal.Record, objects map[string][]byte, typ, id string, invocation uint64, format string, inputHashes ...string) error {
 	if err := validateReplayGraphFormat(records, objects, format); err != nil {
+		return err
+	}
+	if len(inputHashes) > 1 {
+		return ErrReplayInputMismatch
+	}
+	var inputHash string
+	if len(inputHashes) == 1 {
+		inputHash = inputHashes[0]
+	}
+	if err := validateReplayInputBinding(records, format, inputHash); err != nil {
 		return err
 	}
 	if err := ValidateReplayGraphCheckpoints(records, objects, typ, id, invocation); err != nil {
@@ -100,6 +112,38 @@ func validateReplayGraphFormat(records []journal.Record, objects map[string][]by
 				}
 			}
 		}
+	}
+	return nil
+}
+
+// Supplied input must match the durable Start declaration, even if a handler
+// ignores the changed field and would reproduce the same SDK requests.
+func validateReplayInputBinding(records []journal.Record, format, inputHash string) error {
+	if format != ReplayFormatGraphV1 && inputHash == "" {
+		return nil
+	}
+	if len(records) == 0 || records[0].Kind != journal.Started {
+		return ErrCorruptJournal
+	}
+	var start struct {
+		Hash string `json:"input_sha256"`
+	}
+	if format == ReplayFormatGraphV1 {
+		if checkpoint.DecodeUnambiguous(records[0].Payload, &start) != nil {
+			return ErrCorruptJournal
+		}
+	} else if json.Unmarshal(records[0].Payload, &start) != nil {
+		return ErrCorruptJournal
+	}
+	if start.Hash == "" && format != ReplayFormatGraphV1 {
+		return nil
+	}
+	valid := func(hash string) bool {
+		raw, err := hex.DecodeString(hash)
+		return err == nil && len(raw) == sha256.Size && hex.EncodeToString(raw) == hash
+	}
+	if !valid(inputHash) || !valid(start.Hash) || start.Hash != inputHash {
+		return ErrReplayInputMismatch
 	}
 	return nil
 }
