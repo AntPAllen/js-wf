@@ -16,7 +16,19 @@ props = dict(line.split("=", 1) for line in subprocess.check_output(
      "-p", "ActiveState", "-p", "SubState", "-p", "MainPID", "-p",
      "InvocationID", "-p", "ExecMainStatus", "-p", "ExecMainExitTimestamp"],
     text=True).splitlines())
-assert props["LoadState"] == "loaded", "missing service is not terminal acceptance"
+if props["LoadState"] != "loaded":
+    data = (here / launch["log"]).read_text()
+    state = dict(observed_utc=datetime.datetime.now(datetime.timezone.utc).isoformat(),
+                 source_commit=launch["source_commit"], properties=props,
+                 terminal=None, accepted=False,
+                 reason="transient unit unloaded before terminal exit capture",
+                 log_terminal_pass=bool(re.search(r"^ok\s+js-wf/internal/graphpublication\s+", data, re.M)),
+                 log_sha256=hashlib.sha256(data.encode()).hexdigest(),
+                 native_100000_grants_qualified=False,
+                 actual_100000_entries_qualified=False)
+    (here / "owned10000-state.json").write_text(json.dumps(state, indent=2) + "\n")
+    print(json.dumps(state))
+    raise SystemExit(2)
 assert props["InvocationID"] == launch["launch_properties"]["InvocationID"], "service was replaced"
 state = dict(observed_utc=datetime.datetime.now(datetime.timezone.utc).isoformat(),
              source_commit=launch["source_commit"], properties=props,

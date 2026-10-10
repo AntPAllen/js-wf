@@ -62,6 +62,14 @@ func (p *ownedRenewalLostBlobJS) PublishMsg(c context.Context, m *nats.Msg, opts
 // Large opt-in runs retain the same 3s setup and 15s batch contexts.
 func TestNativeGraphOwnedGrantRenewalCostAndRecovery(t *testing.T) {
 	count := 1000
+	lifetime := time.Hour
+	if raw := os.Getenv("WF_GRAPH_NATIVE_COMPACTION_LIFETIME"); raw != "" {
+		var err error
+		lifetime, err = time.ParseDuration(raw)
+		if err != nil || lifetime < time.Hour || lifetime > 6*time.Hour {
+			t.Fatal("native fixture lifetime must be 1h..6h")
+		}
+	}
 	if raw := os.Getenv("WF_GRAPH_NATIVE_OWNED_GRANTS"); raw != "" {
 		n, err := strconv.Atoi(raw)
 		if err != nil || n < 1000 || n > 100000 {
@@ -72,7 +80,7 @@ func TestNativeGraphOwnedGrantRenewalCostAndRecovery(t *testing.T) {
 	for _, replicas := range []int{1, 3} {
 		t.Run(fmt.Sprintf("R%d", replicas), func(t *testing.T) {
 			cluster, legacy, _ := nativeGraphFixture(t, replicas)
-			c, cancel := context.WithTimeout(context.Background(), 20*time.Minute)
+			c, cancel := context.WithTimeout(context.Background(), max(20*time.Minute, lifetime/2))
 			defer cancel()
 			js := legacy.js
 			if _, err := js.CreateStream(c, OwnerIndexedAuthorityStreamConfig("COST_AUTH", "wf.cost", replicas)); err != nil {
@@ -106,7 +114,7 @@ func TestNativeGraphOwnedGrantRenewalCostAndRecovery(t *testing.T) {
 					t.Fatal(err)
 				}
 			}
-			expires := time.Now().UTC().Add(time.Hour)
+			expires := time.Now().UTC().Add(lifetime)
 			stage, err := p.BeginPrefixCompaction(c, "history", root.Head, 2, 1024, expires, nil)
 			if err != nil {
 				t.Fatal(err)
@@ -145,7 +153,7 @@ func TestNativeGraphOwnedGrantRenewalCostAndRecovery(t *testing.T) {
 			if err = os.WriteFile(path, saved, 0600); err != nil {
 				t.Fatal(err)
 			}
-			target := expires.Add(time.Hour)
+			target := expires.Add(lifetime)
 			measured := &ownedRenewalNativePort{OwnerIndexedNativePort: port}
 			stage.protocol.Port = measured
 			start := time.Now()
@@ -245,7 +253,7 @@ func TestNativeGraphOwnedGrantRenewalCostAndRecovery(t *testing.T) {
 			elapsed := time.Since(start)
 			roots, reads := measured.roots+fresh.roots, measured.blobs+fresh.blobs
 			writes, witnesses := measured.writes+fresh.writes, measured.witnesses+fresh.witnesses
-			if elapsed >= min(remaining, 20*time.Minute) || renew.RenewedScopes() != uint64(len(keys)) || renew.ExaminedScopes() != uint64(len(keys)+1) {
+			if elapsed >= min(remaining, lifetime/3) || renew.RenewedScopes() != uint64(len(keys)) || renew.ExaminedScopes() != uint64(len(keys)+1) {
 				t.Fatal("incomplete renewal", elapsed, remaining, renew.RenewedScopes(), len(keys))
 			}
 			for _, k := range keys {

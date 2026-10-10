@@ -65,3 +65,14 @@ loaded invocation, actual exit status zero, terminal package PASS, unchanged
 frozen package sources, all 10,006 grants renewed across 79 fresh batches, and
 the existing batch/renewal budgets. Missing or replaced services never count as
 successful completion. Live ExecMainStatus=0 is not an acceptance signal.
+
+## Completed 10,000-grant diagnostic
+
+The log records full renewal and audit of 10,006 grants, 10,007 scopes, 79 fresh
+batches, recovery plus renewal 4m46.723596664s, maximum batch 4.391456815s and
+package PASS in race 393.559 seconds. Systemd automatically unloaded this
+transient unit before terminal status capture. The original invocation journal
+records start and resource use but has no explicit exit record. Consequently
+owned10000-state.json retains accepted=false with terminal status unverified.
+The result informs capacity planning; it is not service acceptance. The next
+large run saves actual child exit status and retains its terminal service.

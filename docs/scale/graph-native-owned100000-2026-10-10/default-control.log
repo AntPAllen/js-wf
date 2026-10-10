@@ -1,0 +1,12 @@
+=== RUN   TestNativeGraphOwnedGrantRenewalCostAndRecovery
+=== RUN   TestNativeGraphOwnedGrantRenewalCostAndRecovery/R1
+    nats_owned_renewal_cost_test.go:144: NATIVE_OWNED_INPUT replicas=1 grants=1000 elapsed=808.22189ms
+    nats_owned_renewal_cost_test.go:279: NATIVE_OWNED_COST replicas=1 orphan_grants=1000 initial_grants=6 total_grants=1006 examined=1007 renewed=1006 partial=128 batches=8 provision_wall=808.364917ms recovery_renewal_wall=2.89993739s original_remaining=59m59.15651688s max_batch=361.513884ms roots=3302 blob_reads=1136 blob_writes=1006 marker_witnesses=1136 restarted=all_peers lost_ack=committed portable_input=true actual_100000_entries=false
+=== RUN   TestNativeGraphOwnedGrantRenewalCostAndRecovery/R3
+    nats_owned_renewal_cost_test.go:144: NATIVE_OWNED_INPUT replicas=3 grants=1000 elapsed=1.630600131s
+    nats_owned_renewal_cost_test.go:279: NATIVE_OWNED_COST replicas=3 orphan_grants=1000 initial_grants=6 total_grants=1006 examined=1007 renewed=1006 partial=128 batches=8 provision_wall=1.630644629s recovery_renewal_wall=16.224353634s original_remaining=59m58.311264291s max_batch=973.301855ms roots=3302 blob_reads=1136 blob_writes=1006 marker_witnesses=1136 restarted=all_peers lost_ack=committed portable_input=true actual_100000_entries=false
+--- PASS: TestNativeGraphOwnedGrantRenewalCostAndRecovery (23.90s)
+    --- PASS: TestNativeGraphOwnedGrantRenewalCostAndRecovery/R1 (4.19s)
+    --- PASS: TestNativeGraphOwnedGrantRenewalCostAndRecovery/R3 (19.71s)
+PASS
+ok  	js-wf/internal/graphpublication	23.919s

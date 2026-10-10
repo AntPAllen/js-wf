@@ -1,5 +1,29 @@
 # Implementation status against the supplied plan
 
+## Native 10,000-grant diagnostic; durable terminal capture — 2026-10-10
+
+The R1 10,000-orphan test logs PASS, full audit/renewal of 10,006 grants, 10,007
+examined scopes and 79 fresh batches. Interrupted recovery plus renewal takes
+4m46.723596664s; maximum batch 4.391456815s. Original setup/batch bounds hold.
+Its transient service unloaded before terminal exit capture; service acceptance
+is unverified and remains false. Logs, original invocation journal, read-only
+progress snapshot and explicit missing-status result are retained. The progress
+snapshot is diagnostic only and provides no quorum authority or acceptance.
+[Evidence](scale/graph-native-owned-renewal-2026-10-10/README.md).
+
+A bounded next diagnostic targets 100,000 native orphan grants with an explicit
+three-hour fixture lifetime and one-hour renewal window. A rough 48-minute
+linear estimate from the race 10,000-grant cost informs this budget, not
+acceptance. Race overhead is included; production latency is not inferred.
+The default one-hour R1/R3 control passes normal 23.919 seconds. The new
+supervisor persists the actual Go exit, and RemainAfterExit preserves terminal
+service identity. Setup remains 3 seconds; 128-scope batches remain 15 seconds.
+[Preparation](scale/graph-native-owned100000-2026-10-10/README.md).
+
+The source remains four records. Complete large renewal and actual 100,000-entry
+qualification remain open, along with all broad original gates. No production
+lifetime defaults, collection or admission change is made.
+
 ## Native owned-grant renewal and uncertain-update recovery — 2026-10-10
 
 A new native fixture creates 1,000 real abandoned uploading grants plus six
