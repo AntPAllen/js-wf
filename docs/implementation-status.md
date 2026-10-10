@@ -1,5 +1,23 @@
 # Implementation status against the supplied plan
 
+## Compiled default/domain/leaf operator opt-ins pass — 2026-10-10
+
+Clean frozen73d1dfa passes all five standalone operator groups under race
+108.639 seconds, with actual child and retained service exits0. Review verifies
+1,924 Git/source inputs, clean race CLI binary,81 actual CLI processes,
+2 real reaped leaf brokers and1,614 retained files (162,223,022 bytes).
+Framing-aware raw-wire validators verify domain selection, missing-domain
+rejection, two offline commands with zero connections, held handshake/daemon
+startup shutdown, running shutdown and fatal daemon rejection.
+[Evidence](scale/graph-operator-standalone-current-2026-10-10/README.md).
+
+These are the existing legacy compiled command fixtures. Canonical graph CLI
+has separate current in-process race acceptance; compiled graph-specific
+coverage remains next. PostgreSQL, natural faults, matrices, actual100,000
+entries, full current simulation/soak/retention/rollout remain open. The grant
+benchmark remains live under its original invocation. Admission and collection
+remain off.
+
 ## Actual-entry supervision verified; full launch remains pending — 2026-10-10
 
 A new supervisor executes the prepared frozen6408a5e normal worker's indexed,

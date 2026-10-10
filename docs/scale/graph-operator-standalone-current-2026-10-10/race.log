@@ -1,0 +1,154 @@
+=== RUN   TestOperatorStandaloneConnectionSignals
+=== RUN   TestOperatorStandaloneConnectionSignals/project/INFO/terminated
+    daemon_connect_standalone_test.go:30: operator connection signal command=project stage=INFO signal=terminated exit=0 elapsed=1.0025848s pid=181285
+=== RUN   TestOperatorStandaloneConnectionSignals/project/INFO/interrupt
+    daemon_connect_standalone_test.go:30: operator connection signal command=project stage=INFO signal=interrupt exit=0 elapsed=1.003017948s pid=181294
+=== RUN   TestOperatorStandaloneConnectionSignals/project/PONG/terminated
+    daemon_connect_standalone_test.go:30: operator connection signal command=project stage=PONG signal=terminated exit=0 elapsed=1.00334267s pid=181302
+=== RUN   TestOperatorStandaloneConnectionSignals/project/PONG/interrupt
+    daemon_connect_standalone_test.go:30: operator connection signal command=project stage=PONG signal=interrupt exit=0 elapsed=1.004766553s pid=181310
+=== RUN   TestOperatorStandaloneConnectionSignals/tombstone-loop/INFO/terminated
+    daemon_connect_standalone_test.go:30: operator connection signal command=tombstone-loop stage=INFO signal=terminated exit=0 elapsed=1.002476283s pid=181318
+=== RUN   TestOperatorStandaloneConnectionSignals/tombstone-loop/INFO/interrupt
+    daemon_connect_standalone_test.go:30: operator connection signal command=tombstone-loop stage=INFO signal=interrupt exit=0 elapsed=1.007261214s pid=181328
+=== RUN   TestOperatorStandaloneConnectionSignals/tombstone-loop/PONG/terminated
+    daemon_connect_standalone_test.go:30: operator connection signal command=tombstone-loop stage=PONG signal=terminated exit=0 elapsed=1.003503214s pid=181337
+=== RUN   TestOperatorStandaloneConnectionSignals/tombstone-loop/PONG/interrupt
+    daemon_connect_standalone_test.go:30: operator connection signal command=tombstone-loop stage=PONG signal=interrupt exit=0 elapsed=1.004003063s pid=181360
+--- PASS: TestOperatorStandaloneConnectionSignals (11.59s)
+    --- PASS: TestOperatorStandaloneConnectionSignals/project/INFO/terminated (1.09s)
+    --- PASS: TestOperatorStandaloneConnectionSignals/project/INFO/interrupt (1.11s)
+    --- PASS: TestOperatorStandaloneConnectionSignals/project/PONG/terminated (1.12s)
+    --- PASS: TestOperatorStandaloneConnectionSignals/project/PONG/interrupt (1.10s)
+    --- PASS: TestOperatorStandaloneConnectionSignals/tombstone-loop/INFO/terminated (1.10s)
+    --- PASS: TestOperatorStandaloneConnectionSignals/tombstone-loop/INFO/interrupt (1.09s)
+    --- PASS: TestOperatorStandaloneConnectionSignals/tombstone-loop/PONG/terminated (1.11s)
+    --- PASS: TestOperatorStandaloneConnectionSignals/tombstone-loop/PONG/interrupt (1.09s)
+=== RUN   TestOperatorStandaloneDaemonSignalsThroughLeaf
+=== RUN   TestOperatorStandaloneDaemonSignalsThroughLeaf/project/startup
+    leaf_daemon_standalone_test.go:82: packaged leaf daemon: command=project stage=startup pid=181434 exit=0 root=/home/exedev/js-wf-operator-standalone-artifacts-20261010/TestOperatorStandaloneDaemonSignalsThroughLeaf_project_startup-2213612892 client_bytes=213 server_bytes=846
+=== RUN   TestOperatorStandaloneDaemonSignalsThroughLeaf/project/running
+    leaf_daemon_standalone_test.go:82: packaged leaf daemon: command=project stage=running pid=181442 exit=0 root=/home/exedev/js-wf-operator-standalone-artifacts-20261010/TestOperatorStandaloneDaemonSignalsThroughLeaf_project_running-3808972040 client_bytes=1766 server_bytes=9335
+=== RUN   TestOperatorStandaloneDaemonSignalsThroughLeaf/tombstone-loop/startup
+    leaf_daemon_standalone_test.go:82: packaged leaf daemon: command=tombstone-loop stage=startup pid=181451 exit=0 root=/home/exedev/js-wf-operator-standalone-artifacts-20261010/TestOperatorStandaloneDaemonSignalsThroughLeaf_tombstone-loop_startup-221317767 client_bytes=213 server_bytes=848
+=== RUN   TestOperatorStandaloneDaemonSignalsThroughLeaf/tombstone-loop/running
+    leaf_daemon_standalone_test.go:82: packaged leaf daemon: command=tombstone-loop stage=running pid=181472 exit=0 root=/home/exedev/js-wf-operator-standalone-artifacts-20261010/TestOperatorStandaloneDaemonSignalsThroughLeaf_tombstone-loop_running-2596379566 client_bytes=3550 server_bytes=15944
+=== RUN   TestOperatorStandaloneDaemonSignalsThroughLeaf/project/fatal
+    leaf_daemon_standalone_test.go:89: packaged leaf daemon: command=project stage=fatal pid=181480 exit=1 root=/home/exedev/js-wf-operator-standalone-artifacts-20261010/TestOperatorStandaloneDaemonSignalsThroughLeaf_project_fatal-2930545899 client_bytes=294 server_bytes=1058
+=== NAME  TestOperatorStandaloneDaemonSignalsThroughLeaf
+    leaf_standalone_test.go:172: operator leaf: test=TestOperatorStandaloneDaemonSignalsThroughLeaf local=WFEDGE remote=WFOPS leaf_pid=181418 local_streams=0
+--- PASS: TestOperatorStandaloneDaemonSignalsThroughLeaf (11.63s)
+    --- PASS: TestOperatorStandaloneDaemonSignalsThroughLeaf/project/startup (1.06s)
+    --- PASS: TestOperatorStandaloneDaemonSignalsThroughLeaf/project/running (2.14s)
+    --- PASS: TestOperatorStandaloneDaemonSignalsThroughLeaf/tombstone-loop/startup (1.05s)
+    --- PASS: TestOperatorStandaloneDaemonSignalsThroughLeaf/tombstone-loop/running (1.15s)
+    --- PASS: TestOperatorStandaloneDaemonSignalsThroughLeaf/project/fatal (0.04s)
+=== RUN   TestOperatorStandaloneCommandsThroughLeaf
+    main_test.go:166: operator domain admitted node=0 domain=WFOPS server_id=NABV4W7N2CKTQUQLPXWJQU323H6TVEYOUPTJYWRKC5NLXVCJ7DX44RN6
+    main_test.go:166: operator domain admitted node=1 domain=WFOPS server_id=NAM66FXTXWB6BL7I6CSGFYXN4BAGZIT5A22FKOLFLBUA5OBIDZFHJCXO
+    main_test.go:166: operator domain admitted node=2 domain=WFOPS server_id=NDFC2OAYFSXGTGSHZRVYRRGTEQNTDVHNIFPPDLZQJ7WLYAH2WPAXJQXH
+    main_test.go:189: operator child wire: pid=181548 offline=false connections=1 truncated=false client_bytes=296 server_bytes=967
+    main_test.go:189: operator standalone process domain="WFOPS" pid=181548 exit=1
+    main_test.go:189: operator child wire: pid=181555 offline=false connections=1 truncated=false client_bytes=9516 server_bytes=8616
+    main_test.go:189: operator standalone process domain="WFOPS" pid=181555 exit=0
+    main_test.go:189: operator child wire: pid=181561 offline=false connections=1 truncated=false client_bytes=404 server_bytes=2387
+    main_test.go:189: operator standalone process domain="WFOPS" pid=181561 exit=0
+    main_test.go:189: operator child wire: pid=181577 offline=false connections=1 truncated=false client_bytes=444 server_bytes=2244
+    main_test.go:189: operator standalone process domain="WFOPS" pid=181577 exit=0
+    main_test.go:189: operator child wire: pid=181583 offline=false connections=1 truncated=false client_bytes=444 server_bytes=2307
+    main_test.go:189: operator standalone process domain="WFOPS" pid=181583 exit=1
+    main_test.go:189: operator child wire: pid=181589 offline=false connections=1 truncated=false client_bytes=3770 server_bytes=14779
+    main_test.go:189: operator standalone process domain="WFOPS" pid=181589 exit=0
+    main_test.go:189: operator child wire: pid=181597 offline=false connections=1 truncated=false client_bytes=1550 server_bytes=7507
+    main_test.go:189: operator standalone process domain="WFOPS" pid=181597 exit=0
+    main_test.go:189: operator child wire: pid=181603 offline=false connections=1 truncated=false client_bytes=912 server_bytes=6835
+    main_test.go:189: operator standalone process domain="WFOPS" pid=181603 exit=0
+    main_test.go:189: operator child wire: pid=181609 offline=false connections=1 truncated=false client_bytes=1394 server_bytes=9935
+    main_test.go:189: operator standalone process domain="WFOPS" pid=181609 exit=0
+    main_test.go:189: operator child wire: pid=181616 offline=false connections=1 truncated=false client_bytes=1741 server_bytes=10081
+    main_test.go:189: operator standalone process domain="WFOPS" pid=181616 exit=0
+    main_test.go:189: operator child wire: pid=181623 offline=false connections=1 truncated=false client_bytes=1741 server_bytes=10080
+    main_test.go:189: operator standalone process domain="WFOPS" pid=181623 exit=0
+    main_test.go:189: operator child wire: pid=181832 offline=false connections=1 truncated=false client_bytes=1420 server_bytes=7423
+    main_test.go:189: operator standalone process domain="WFOPS" pid=181832 exit=0
+    main_test.go:189: operator child wire: pid=181838 offline=false connections=1 truncated=false client_bytes=1420 server_bytes=7425
+    main_test.go:189: operator standalone process domain="WFOPS" pid=181838 exit=1
+    main_test.go:189: operator child wire: pid=181844 offline=false connections=1 truncated=false client_bytes=1420 server_bytes=7427
+    main_test.go:189: operator standalone process domain="WFOPS" pid=181844 exit=1
+    main_test.go:189: operator child wire: pid=181851 offline=false connections=1 truncated=false client_bytes=3147 server_bytes=1857309
+    main_test.go:189: operator standalone process domain="WFOPS" pid=181851 exit=0
+    main_test.go:189: operator child wire: pid=181858 offline=false connections=1 truncated=false client_bytes=3147 server_bytes=1857306
+    main_test.go:189: operator standalone process domain="WFOPS" pid=181858 exit=0
+    main_test.go:189: operator child wire: pid=181866 offline=true connections=0 truncated=false client_bytes=0 server_bytes=0
+    main_test.go:189: operator standalone process domain="WFOPS" pid=181866 exit=0
+    main_test.go:189: operator child wire: pid=181873 offline=true connections=0 truncated=false client_bytes=0 server_bytes=0
+    main_test.go:189: operator standalone process domain="WFOPS" pid=181873 exit=1
+    main_test.go:189: operator child wire: pid=181890 offline=false connections=1 truncated=false client_bytes=1011 server_bytes=4138
+    main_test.go:189: operator standalone process domain="WFOPS" pid=181890 exit=0
+    main_test.go:189: operator child wire: pid=181897 offline=false connections=1 truncated=false client_bytes=4453 server_bytes=13700
+    main_test.go:189: operator standalone process domain="WFOPS" pid=181897 exit=0
+    main_test.go:189: operator child wire: pid=181904 offline=false connections=1 truncated=false client_bytes=7477 server_bytes=28852
+    main_test.go:189: operator standalone process domain="WFOPS" pid=181904 exit=0
+    main_test.go:189: operator child wire: pid=181911 offline=false connections=1 truncated=false client_bytes=1585 server_bytes=8547
+    main_test.go:189: operator standalone process domain="WFOPS" pid=181911 exit=0
+    main_test.go:189: operator child wire: pid=181918 offline=false connections=1 truncated=false client_bytes=1634 server_bytes=6435
+    main_test.go:189: operator standalone process domain="WFOPS" pid=181918 exit=0
+    leaf_standalone_test.go:172: operator leaf: test=TestOperatorStandaloneCommandsThroughLeaf local=WFEDGE remote=WFOPS leaf_pid=181532 local_streams=0
+    standalone_test.go:225: operator standalone commands domain="WFOPS" processes=23 exe_sha256=f15603379a9aff2abfd6629f2520275af4343b689ad575103a7facfa1e82eb20
+--- PASS: TestOperatorStandaloneCommandsThroughLeaf (35.82s)
+=== RUN   TestOperatorStandaloneCommands
+    main_test.go:189: operator standalone process domain="" pid=181932 exit=0
+    main_test.go:189: operator standalone process domain="" pid=181939 exit=0
+    main_test.go:189: operator standalone process domain="" pid=181946 exit=0
+    main_test.go:189: operator standalone process domain="" pid=181953 exit=1
+    main_test.go:189: operator standalone process domain="" pid=181959 exit=0
+    main_test.go:189: operator standalone process domain="" pid=181966 exit=0
+    main_test.go:189: operator standalone process domain="" pid=181973 exit=0
+    main_test.go:189: operator standalone process domain="" pid=181980 exit=0
+    main_test.go:189: operator standalone process domain="" pid=181986 exit=0
+    main_test.go:189: operator standalone process domain="" pid=181992 exit=0
+    main_test.go:189: operator standalone process domain="" pid=181998 exit=0
+    main_test.go:189: operator standalone process domain="" pid=182005 exit=1
+    main_test.go:189: operator standalone process domain="" pid=182012 exit=1
+    main_test.go:189: operator standalone process domain="" pid=182018 exit=0
+    main_test.go:189: operator standalone process domain="" pid=182026 exit=0
+    main_test.go:189: operator standalone process domain="" pid=182033 exit=0
+    main_test.go:189: operator standalone process domain="" pid=182040 exit=1
+    main_test.go:189: operator standalone process domain="" pid=182048 exit=0
+    main_test.go:189: operator standalone process domain="" pid=182055 exit=0
+    main_test.go:189: operator standalone process domain="" pid=182062 exit=0
+    main_test.go:189: operator standalone process domain="" pid=182069 exit=0
+    main_test.go:189: operator standalone process domain="" pid=182075 exit=0
+    standalone_test.go:225: operator standalone commands domain="" processes=22 exe_sha256=f15603379a9aff2abfd6629f2520275af4343b689ad575103a7facfa1e82eb20
+--- PASS: TestOperatorStandaloneCommands (21.42s)
+=== RUN   TestOperatorStandaloneCommandsInJetStreamDomain
+    main_test.go:166: operator domain admitted node=0 domain=WFOPS server_id=NBM57Y7QUEB7QY5ASH42ZSP64UMYZHMXY5UHLSYNEQNTIM3JD5GXVOKY
+    main_test.go:166: operator domain admitted node=1 domain=WFOPS server_id=NCSJEUIFXLPSL36GIXKH3KX5FGBA6ZNULTHRUT37LTRJ7RVALP73ZKIS
+    main_test.go:166: operator domain admitted node=2 domain=WFOPS server_id=NCSBRYI42VG7SYCWRMR44EDJNDV3COEGNBTJE5ONCUEXAVZPQAMUQP4W
+    main_test.go:189: operator standalone process domain="WFOPS" pid=182091 exit=1
+    main_test.go:189: operator standalone process domain="WFOPS" pid=182098 exit=0
+    main_test.go:189: operator standalone process domain="WFOPS" pid=182104 exit=0
+    main_test.go:189: operator standalone process domain="WFOPS" pid=182111 exit=0
+    main_test.go:189: operator standalone process domain="WFOPS" pid=182117 exit=1
+    main_test.go:189: operator standalone process domain="WFOPS" pid=182124 exit=0
+    main_test.go:189: operator standalone process domain="WFOPS" pid=182131 exit=0
+    main_test.go:189: operator standalone process domain="WFOPS" pid=182142 exit=0
+    main_test.go:189: operator standalone process domain="WFOPS" pid=182149 exit=0
+    main_test.go:189: operator standalone process domain="WFOPS" pid=182155 exit=0
+    main_test.go:189: operator standalone process domain="WFOPS" pid=182162 exit=0
+    main_test.go:189: operator standalone process domain="WFOPS" pid=182169 exit=0
+    main_test.go:189: operator standalone process domain="WFOPS" pid=182176 exit=1
+    main_test.go:189: operator standalone process domain="WFOPS" pid=182183 exit=1
+    main_test.go:189: operator standalone process domain="WFOPS" pid=182190 exit=0
+    main_test.go:189: operator standalone process domain="WFOPS" pid=182198 exit=0
+    main_test.go:189: operator standalone process domain="WFOPS" pid=182206 exit=0
+    main_test.go:189: operator standalone process domain="WFOPS" pid=182213 exit=1
+    main_test.go:189: operator standalone process domain="WFOPS" pid=182220 exit=0
+    main_test.go:189: operator standalone process domain="WFOPS" pid=182227 exit=0
+    main_test.go:189: operator standalone process domain="WFOPS" pid=182233 exit=0
+    main_test.go:189: operator standalone process domain="WFOPS" pid=182240 exit=0
+    main_test.go:189: operator standalone process domain="WFOPS" pid=182246 exit=0
+    standalone_test.go:225: operator standalone commands domain="WFOPS" processes=23 exe_sha256=f15603379a9aff2abfd6629f2520275af4343b689ad575103a7facfa1e82eb20
+--- PASS: TestOperatorStandaloneCommandsInJetStreamDomain (27.12s)
+PASS
+ok  	js-wf/cmd/wf	108.639s
