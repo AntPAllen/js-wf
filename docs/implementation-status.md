@@ -12,7 +12,7 @@ wall4.921s/5.356s and no port errors. This is call amplification evidence,
 not a production-cap gate or a broker-cause attribution. [Diagnostic](scale/graph-limit-port-profile-2026-10-10/review.json).
 
 Legacy-format signal runtime headers now reject ambiguity before replay code;
-full SDK race and853 normal pins pass, with18 SDK/seven CLI required decoder
+full SDK/CLI race and853 normal pins pass, with18 SDK/seven CLI required decoder
 mutant failures. Encoded user payloads stay opaque. [Development scope](scale/graph-replay-signal-envelope-2026-10-10/README.md).
 Full latest158 qualification, original matrices/majority raw-p99 failure,
 actual100000 cap,24h/million drain and retention/import/admission/collection/

@@ -19,6 +19,7 @@ failures of this decoder mutant. [Negative review](development/negative-review.j
 
 The first CLI development fixture omitted its mandatory input hash and failed
 with an input-hash mismatch before exercising this boundary. Its log is
-preserved; the corrected fixture supplies the actual hash. Full CLI package
-race verification is still running independently. Development checks are
+preserved; the corrected fixture supplies the actual hash. The corrected targeted race suite passes all20 SDK/eight CLI ambiguity
+controls, the opaque-payload control and three missing/null controls. Full CLI
+package race passes191.841s, with actual process exit0. Development checks are
 not frozen qualification or completion of the full original plan.
