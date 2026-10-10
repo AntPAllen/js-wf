@@ -1,5 +1,24 @@
 # Implementation status against the supplied plan
 
+## Complete current Tier 1 normal qualification launched — 2026-10-10
+
+Frozen `b3d0cb1` is running the complete normal suite: 227 compiled tests,
+158 seeded families at 1,000 seeds each, and 853 saved regressions. Eight
+sequential package processes use one retained binary and the original
+300-minute per-process watchdog. The service has an explicit one-core CPU
+quota alongside the native entry campaign; GOMAXPROCS=2/GOMEMLIMIT=512MiB
+and workflow targets are unchanged. This resource condition is recorded.
+[Source, launch and independent review](scale/graph-current-tier1-2026-10-10/README.md).
+
+The first launch stopped on a mistyped source SHA before any test child ran;
+its terminal failure is preserved. The corrected invocation is live, not
+accepted. Review requires actual matching service/child exit zero and full
+source/binary/inventory/seed/pin evidence. Current race and extended seeds
+remain separate. The actual 100,000-entry normal campaign also continues its
+original invocation; neither launch satisfies its gate until reviewed terminal
+evidence is available. Original fault/scale/soak/retention/security/rollout
+requirements remain open; admission and collection remain off.
+
 ## Compiled canonical CLI and native grant cost accepted; actual-entry normal live — 2026-10-10
 
 Frozen5e2d5ac complete CLI race with standalone opt-ins passes412.333 seconds,

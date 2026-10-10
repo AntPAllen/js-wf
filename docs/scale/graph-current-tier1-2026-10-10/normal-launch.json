@@ -1,0 +1,30 @@
+{
+  "observed_utc": "2026-10-10T23:06:10.828646+00:00",
+  "unit": "js-wf-current-tier1-normal-20261010-qualified.service",
+  "source": "b3d0cb16ff3350db298336e22bf87c5aadf46439",
+  "supervisor_pid": 186329,
+  "child_pid": 186354,
+  "invocation": "de9a8f97ce404748afed1113ae183aa5",
+  "service": {
+    "RuntimeMaxUSec": "1d 16h 20min",
+    "RemainAfterExit": "yes",
+    "MainPID": "186329",
+    "CPUQuotaPerSecUSec": "1s",
+    "LoadState": "loaded",
+    "InvocationID": "de9a8f97ce404748afed1113ae183aa5"
+  },
+  "command": [
+    "python3",
+    "scripts/check-tier1-race.py",
+    "--root",
+    "/home/exedev/js-wf-current-tier1-20261010/normal1000",
+    "--seeds",
+    "1000",
+    "--shards",
+    "8",
+    "--no-race"
+  ],
+  "accepted": false,
+  "scope": "Launch receipt only; one-core service CPU quota, GOMAXPROCS=2/GOMEMLIMIT=512MiB, full normal1000 inventory. Actual terminal child/service and independent review required.",
+  "supervisor_sha256": "64efee83a9a2061849e791459e5e6a1279cdc7bcab9ba1e23e22662b041d667d"
+}
