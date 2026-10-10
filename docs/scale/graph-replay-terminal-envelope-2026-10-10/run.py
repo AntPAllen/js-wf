@@ -113,6 +113,7 @@ body=header.read_text()
 import re
 mutant_body,n=re.subn(r'Journal\s+\[\]journalwire\.Record', 'Journal json.RawMessage',body)
 assert n==1
+mutant_body=mutant_body.replace('"js-wf/internal/journalwire"','_ "js-wf/internal/journalwire"')
 header_mutant=root/'journal-header-disabled.go';header_mutant.write_text(mutant_body)
 header_overlay=root/'header-overlay.json';header_overlay.write_text(json.dumps(dict(Replace={str(header):str(header_mutant)})))
 run(['go','test','-race','-overlay='+str(header_overlay),'./cmd/wf','-run','^TestReplayJournalHeaderAmbiguity$/(duplicate_|alias_|escaped_)','-count=1'],'journal-header-disabled.log',expected=1)

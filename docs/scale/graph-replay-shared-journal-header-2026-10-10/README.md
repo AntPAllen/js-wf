@@ -1,5 +1,19 @@
 # Shared SDK and CLI journal header admission
 
+## Frozen review rejected
+
+The frozen `3c9ba8b` supervisor closes with actual exit0, but independent review
+rejects acceptance: the CLI header-disabled mutant exits1 from an unused
+`internal/journalwire` import, not the required13 test failures. The
+[failed negative log](failed-negative-proof/journal-header-disabled.log) and
+[exact mutant](failed-negative-proof/journal-header-disabled.go.txt) are preserved.
+No acceptance is inferred from supervisor exit0 or that child exit1. The separate
+ordinary SDK decoder mutant does fail all14 intended leaves; full SDK/848 saved
+trace/native/export/209 replay command outcomes remain individually recorded.
+The subsequent terminal-envelope qualifier fixes the mutant import and includes
+the complete shared-header requirements. Earlier preparation notes below refer
+to this original source and do not establish acceptance.
+
 Both raw SDK replay and CLI import now use the same explicit flat record wire
 schema in `internal/journalwire`. The SDK decodes the full array unambiguously
 before checking ordering or entering user code. Unknown headers, duplicate

@@ -99,6 +99,7 @@ header_modes={'valid_opaque_payload','record_wire_shape','duplicate_epoch','alia
 assert {n.split('/',1)[1] for n in cp if n.startswith('TestReplayJournalHeaderAmbiguity/')}==header_modes
 header=checkout/'cmd/wf/replay.go'
 mutant_body,n=re.subn(r'Journal\s+\[\]journalwire\.Record','Journal json.RawMessage',header.read_text());assert n==1
+mutant_body=mutant_body.replace('"js-wf/internal/journalwire"','_ "js-wf/internal/journalwire"')
 assert (root/'journal-header-disabled.go').read_text()==mutant_body
 assert json.loads((root/'header-overlay.json').read_text())=={'Replace':{str(header):str(root/'journal-header-disabled.go')}}
 failed=set(re.findall(r'^\s+--- FAIL: (TestReplayJournalHeaderAmbiguity\S+) ',(root/'journal-header-disabled.log').read_text(),re.M))

@@ -1,5 +1,15 @@
 # Implementation status against the supplied plan
 
+## Shared-header qualification review rejected; terminal mutant corrected — 2026-10-10
+
+The `3c9ba8b` retained supervisor closes exit0, but independent review rejects
+qualification: its CLI header-disabled child exits1 from an unused import, not
+the required13 rejection leaves. [Failure preserved](scale/graph-replay-shared-journal-header-2026-10-10/README.md#frozen-review-rejected).
+No acceptance is claimed. The terminal-envelope qualifier now retains the
+import as blank in that mutant, and its reviewer checks the exact corrected
+body. It includes all shared-header requirements and53 terminal controls. No
+original native workload is repeated merely to fix the earlier proof.
+
 ## Present terminal envelopes checked before replay code — 2026-10-10
 
 Shared SDK/CLI/export admission now rejects ambiguous terminal identity,
