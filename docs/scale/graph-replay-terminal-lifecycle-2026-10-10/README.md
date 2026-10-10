@@ -1,5 +1,19 @@
 # Terminal replay fixture correction and lifecycle cuts
 
+## Frozen retry accepted
+
+Frozen `14a35523fc63a2b5dff53dc67f554e8ce2baa60d` passes independent
+[review](review.json):3387 exact Git inputs, six binary identities,70 full SDK
+race roots,848 normal saved traces, all prior replay/header/terminal controls,
+six native exports,12 worker export/lifecycle controls,117 required mutant
+failures and209 offline CLI outcomes. The loaded retained supervisor matches
+invocation `9f0f33a3289942de9736e6a962d2e5fe`, PID0 and actual exit0.
+[Compressed original evidence](qualified/) preserves full events, all mutants
+and negative logs, source inventories, replay state and supervisor exit. Both
+earlier failed sources remain failed. The later158-family/853-pin lifecycle
+model is a separate source and is not qualified by this retry. Preparation
+notes below describe the earlier launch.
+
 The original terminal qualifier at `c57dffa` is failed, not accepted:
 [preserved failure](../graph-replay-terminal-envelope-2026-10-10/failed-c57dffa/review.json).
 Its70 SDK race roots pass;847 saved traces pass and `workflow-determinism.json`

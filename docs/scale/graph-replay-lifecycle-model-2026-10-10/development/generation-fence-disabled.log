@@ -1,0 +1,12 @@
+--- FAIL: TestPinnedRegressionCorpus (0.33s)
+    --- FAIL: TestPinnedRegressionCorpus/graph-replay-lifecycle-after_pin_replace.json (0.08s)
+        journal_transport_test.go:790: pinned trace testdata/regressions/graph-replay-lifecycle-after_pin_replace.json seed=11: mode=after_pin_replace stale reacquisition err=journal gap or corrupt entry
+    --- FAIL: TestPinnedRegressionCorpus/graph-replay-lifecycle-after_pin_retire.json (0.03s)
+        journal_transport_test.go:790: pinned trace testdata/regressions/graph-replay-lifecycle-after_pin_retire.json seed=1: mode=after_pin_retire stale reacquisition err=retained graph index outside population
+    --- FAIL: TestPinnedRegressionCorpus/graph-replay-lifecycle-before_pin_replace.json (0.04s)
+        journal_transport_test.go:790: pinned trace testdata/regressions/graph-replay-lifecycle-before_pin_replace.json seed=13: mode=before_pin_replace old admission err=journal gap or corrupt entry empty=true
+    --- FAIL: TestPinnedRegressionCorpus/graph-replay-lifecycle-before_pin_retire.json (0.03s)
+        journal_transport_test.go:790: pinned trace testdata/regressions/graph-replay-lifecycle-before_pin_retire.json seed=3: mode=before_pin_retire old admission err=retained graph index outside population empty=true
+FAIL
+FAIL	js-wf/sim	0.347s
+FAIL

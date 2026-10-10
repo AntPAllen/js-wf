@@ -1,5 +1,21 @@
 # Implementation status against the supplied plan
 
+## Terminal replay retry accepted; seeded lifecycle model added — 2026-10-10
+
+Frozen `14a3552` passes independent review:3387 exact Git inputs,70 full SDK race
+roots,848 normal traces, six native exports,12 worker export/lifecycle controls,
+117 required mutant failures and209 offline CLI outcomes; loaded matching
+supervisor exit0. [Accepted qualification](scale/graph-replay-terminal-lifecycle-2026-10-10/review.json).
+Earlier shared-header and terminal-source failures remain preserved.
+
+A new production export lifecycle model adds five modes and two input sizes,
+exact replay for every seed, five pins and four required generation-gate mutant
+failures. Development1000 race and current1000 normal/full853 corpus pass.
+Authoritative inventory is158 families/853 pins. [Model and prepared extended qualification](scale/graph-replay-lifecycle-model-2026-10-10/README.md).
+Full latest158 qualification, original matrices, majority raw-p99 failure,
+actual100000 cap,24h/million drain, retention/import/admission/collector/rollout
+remain open. The two older broad jobs remain independently live.
+
 ## Terminal qualifier failed fixture schema; lifecycle cuts verified — 2026-10-10
 
 Frozen `c57dffa` closes exit1:70 SDK race roots pass, but its normal848 corpus
