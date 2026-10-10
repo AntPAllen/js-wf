@@ -1,0 +1,15 @@
+=== RUN   TestNativeGraphContinuationGlobalLimitAndTerminalSlot
+=== RUN   TestNativeGraphContinuationGlobalLimitAndTerminalSlot/R1/archive=true
+    graph_continuation_limit_test.go:136: GRAPH_LIMIT_PADDING completed=12 requested=24 budget=64
+    graph_continuation_limit_test.go:184: CONTINUATION_PHASE operation=continuation_checkpoint_publish index=28 duration=1.146017609s error=""
+    graph_continuation_limit_test.go:184: CONTINUATION_PHASE operation=continuation_archive index=28 duration=9.436065493s error=""
+    graph_continuation_limit_test.go:184: CONTINUATION_PHASE operation=continuation_publish index=0 duration=10.94058882s error=""
+    graph_continuation_limit_test.go:136: GRAPH_LIMIT_PADDING completed=24 requested=24 budget=64
+    graph_continuation_limit_test.go:184: CONTINUATION_PHASE operation=continuation_checkpoint_publish index=57 duration=1.816682138s error=""
+    graph_continuation_limit_test.go:184: CONTINUATION_PHASE operation=continuation_archive index=57 duration=11.296834228s error=""
+    graph_continuation_limit_test.go:184: CONTINUATION_PHASE operation=continuation_publish index=0 duration=13.78250966s error=""
+    graph_continuation_limit_test.go:354: GRAPH_CONTINUATION_LIMIT budget=64 entries=64 archive=true checkpoints=2 effects=0 rejected_request=must_not_run terminal_slot=63 prefix_stage_calls=1/1 production_cap=false padding_operations=24
+--- PASS: TestNativeGraphContinuationGlobalLimitAndTerminalSlot (55.94s)
+    --- PASS: TestNativeGraphContinuationGlobalLimitAndTerminalSlot/R1/archive=true (55.94s)
+PASS
+ok  	js-wf/worker	57.058s

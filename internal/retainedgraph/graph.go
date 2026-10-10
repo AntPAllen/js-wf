@@ -306,7 +306,8 @@ func Read(ctx context.Context, store Store, root Root, index uint64) (Record, er
 }
 
 // Walk streams every node and external payload edge using O(log n) traversal
-// space. A caller must not treat a successful traversal as a collection fence.
+// space. The callback flag is true for tree nodes and false for payload edges.
+// A caller must not treat a successful traversal as a collection fence.
 // The callback may stop the walk; errors and missing/corrupt nodes fail closed.
 func Walk(ctx context.Context, store Store, root Root, visit func(Link, bool) error) error {
 	if err := ctx.Err(); err != nil {

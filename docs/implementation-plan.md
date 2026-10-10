@@ -1,5 +1,22 @@
 # JetStream Durable Workflow Runtime — Implementation Plan
 
+## Relocated compaction node grants corrected — 2026-10-10
+
+Compaction commit had interpreted the graph visitor flag backwards, skipping
+relocated tree-node grants. The corrected code rejects16 live/archive leaf/branch
+revocation cases that the original source incorrectly accepts, with no root CAS.
+Existing compaction race controls, checkpoint cost/renewal race controls, bounded
+native R1/archive64 and all853 simulations pass. Only14 compaction read traces
+changed; seeds, decisions and every non-read trace field remain unchanged.
+[Development evidence](scale/graph-compaction-node-grants-2026-10-10/README.md).
+Mandatory node checks increase measured compaction work; unsafe baseline costs
+are not a target. Both older frozen campaigns contain this omission. Their
+execution evidence remains separate and cannot qualify the corrected grants;
+the compaction reviewer now explicitly rejects acceptance of that known source.
+The actual100000 gate remains failed. Bounded/resumable bulk publication, original
+extended/native/fault/scale/soak/retention/import and rollout gates remain open.
+Public continuation admission stays closed and production collection stays off.
+
 ## Checkpoint reader lifetime fixed; bulk transition still required — 2026-10-10
 
 Checkpoint scans now renew their exact reader before indexed reads/frame loads

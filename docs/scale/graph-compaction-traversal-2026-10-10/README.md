@@ -23,3 +23,7 @@ No qualification result exists yet. Full original source-wide extended campaigns
 ## Development race timeout retained
 
 The earlier unfrozen compaction1000 race attempt closes nonzero at600.085s under the default10-minute Go package watchdog. It is failed development evidence, not a completed seed proof or a model defect finding. It is not restarted. The already-running frozen component qualifier uses an explicit300-minute watchdog and must still complete; do not infer acceptance from that configuration. The separate full158 race supervisor is live.
+
+## Confirmed node-grant defect in this frozen source
+
+The graph Walk callback flag is true for nodes. Compaction interprets it as payload and skips every relocated node grant check, instead redundantly checking payload grants. Sixteen new directed controls fail at this source by committing readable nodes whose ready/origin/destination/location grant has been revoked, across live/archive leaves/branches. The production correction is later and outside this immutable qualifier. Its execution may finish, but the independent review now reports execution evidence separately and `accepted=false` because the source has this confirmed defect. No existing successful test proves the omitted node-grant invariant. The qualifier remains running unchanged; its original source/commands/events are still useful evidence and cannot qualify the corrected code. [Counterexample evidence](../graph-compaction-node-grants-2026-10-10/original-node-grant-failures.log).

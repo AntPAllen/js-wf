@@ -3,6 +3,7 @@ package graphpublication
 import (
 	"bytes"
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"math/rand"
@@ -370,6 +371,81 @@ func TestGraphPrefixCompactionRechecksOriginalGrant(t *testing.T) {
 					t.Fatal("revoked compaction published")
 				}
 			})
+		}
+	}
+}
+
+func TestGraphPrefixCompactionRejectsRevokedNodeGrants(t *testing.T) {
+	for _, stream := range []string{"", PrefixArchiveStream} {
+		for _, height := range []uint8{0, 1} {
+			for _, fault := range []string{"missing", "destination", "location", "closed"} {
+				t.Run(fmt.Sprintf("stream=%s/height=%d/%s", stream, height, fault), func(t *testing.T) {
+					m, p := newModel("node-revoke")
+					var root Root
+					for i := 0; i < 4; i++ {
+						root = appendOne(t, m, p, "owner", []byte(fmt.Sprint(i)), [][]byte{[]byte("shared")})
+					}
+					plan, err := p.PreparePrefixCompaction(ctx, "owner", root.Head, 2, 1024, epoch.Add(time.Second), nil)
+					if err != nil {
+						t.Fatal(err)
+					}
+					var selected retainedgraph.Link
+					err = retainedgraph.Walk(ctx, stageStore{protocol: p}, selectGraph(plan.publication.Graph, plan.publication.Streams, stream), func(link retainedgraph.Link, isNode bool) error {
+						if !isNode || selected.Hash != "" {
+							return nil
+						}
+						raw, err := m.Get(ctx, link, retainedgraph.MaxNodeBytes)
+						if err != nil {
+							return err
+						}
+						var node struct {
+							Height uint8 `json:"height"`
+						}
+						if err = json.Unmarshal(raw, &node); err != nil {
+							return err
+						}
+						if node.Height == height {
+							selected = link
+						}
+						return nil
+					})
+					if err != nil || selected.Hash == "" {
+						t.Fatal(selected, err)
+					}
+					scope, owner, err := objectAuthority(blobpublication.Object{Key: selected.Hash, Reference: selected.Reference})
+					if err != nil {
+						t.Fatal(err)
+					}
+					if owner != plan.publication.Token {
+						t.Fatal("not a relocated node", owner)
+					}
+					record := m.blobs[scope]
+					fence := cloneFence(record.Fence)
+					intent := fence.Intents[owner]
+					switch fault {
+					case "missing":
+						delete(fence.Intents, owner)
+					case "destination":
+						intent.Destination = "foreign"
+						fence.Intents[owner] = intent
+					case "location":
+						intent.Locations = []Location{{Kind: "node", First: 100, Height: height, Stream: stream}}
+						fence.Intents[owner] = intent
+					case "closed":
+						fence.Phase = "closed"
+						fence.Intents = map[string]Intent{}
+					}
+					record.Fence = fence
+					m.blobs[scope] = record
+					before := cloneRoot(m.roots["owner"])
+					if _, err = p.CommitPrefixCompaction(ctx, plan); err == nil {
+						t.Fatal("revoked relocated node grant accepted", selected)
+					}
+					if !reflect.DeepEqual(before, m.roots["owner"]) {
+						t.Fatal("rejected node grant changed canonical root")
+					}
+				})
+			}
 		}
 	}
 }

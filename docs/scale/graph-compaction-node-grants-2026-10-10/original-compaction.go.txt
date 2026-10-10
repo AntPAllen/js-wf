@@ -240,8 +240,8 @@ func (p Protocol) CommitPrefixCompaction(ctx context.Context, prepared PreparedC
 	}
 	for _, stream := range []string{"", PrefixArchiveStream} {
 		graph := selectGraph(prepared.publication.Graph, prepared.publication.Streams, stream)
-		if err := retainedgraph.Walk(ctx, stageStore{protocol: p}, graph, func(link retainedgraph.Link, isNode bool) error {
-			if !isNode {
+		if err := retainedgraph.Walk(ctx, stageStore{protocol: p}, graph, func(link retainedgraph.Link, payload bool) error {
+			if payload {
 				return nil
 			}
 			_, owner, err := objectAuthority(blobpublication.Object{Key: link.Hash, Reference: link.Reference})

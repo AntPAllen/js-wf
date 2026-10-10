@@ -95,10 +95,10 @@ for filename, count in [('race1000-events.jsonl', 1000), ('normal100000-events.j
     assert tests == {'TestSeededGraphCheckpointCompactionReplay'}
     proof = f'TIER1_SEEDS test=TestSeededGraphCheckpointCompactionReplay first=1 last={count} completed={count} requested={count}'
     assert output.count(proof) == 1
-result = dict(accepted=True, source=state['source'], git_verified_inputs=len(names), actual_supervisor_exit=0,
+result = dict(accepted=False, execution_evidence_verified=True, known_relocated_node_grant_validation_bug=True, source=state['source'], git_verified_inputs=len(names), actual_supervisor_exit=0,
     race_seed_bodies=1000, normal_seed_bodies=100000, saved_pins=853, required_negative_failures=6,
     bounded_native=dict(replicas=1, archive=True, budget=64, entries=64, checkpoints=2, terminal_slot=63, forbidden_effects=0),
     binaries={k:v['sha256'] for k,v in state['binaries'].items()},
-    scope='Frozen compaction component only. Full latest source simulation suites, actual100000-entry gate, native fault/scale/soak/retention/import/admission/rollout remain open.')
+    scope='Old frozen source has a confirmed relocated-node grant validation bug; successful commands do not qualify corrected grant safety. Frozen execution evidence only. Full latest source simulation suites, actual100000-entry gate, native fault/scale/soak/retention/import/admission/rollout remain open.')
 (base/'qualification-review.json').write_text(json.dumps(result, indent=2)+'\n')
 print(json.dumps(result, indent=2))
