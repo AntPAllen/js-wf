@@ -24,3 +24,6 @@ requires retained terminal supervisor exit0 and exact source/binary/event/input
 identities. This qualification is pending. Full latest157 seeded/extended,
 original faults, retention, import, public admission, production collection and
 rollout remain open. Existing long campaigns are independent and unmodified.
+
+Frozen source `7d1a1deee88fe71a85f21be93bdd9db8d7bf2083` is confirmed live under `js-wf-replay-record-order-20261010.service`.
+[Launch identity](launch.json) records its process and retained invocation.
