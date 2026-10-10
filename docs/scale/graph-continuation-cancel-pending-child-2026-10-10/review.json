@@ -1,0 +1,60 @@
+{
+  "verdict": "PASS eight native pending-parent cancellation cases",
+  "source": "57ee0b7187252a6a88b24ef655798cdfe3cf4b33",
+  "repository_inputs_git_verified_unchanged": 3297,
+  "production_and_simulation_inputs_unchanged_from": "d504a33",
+  "elapsed_seconds": 296.8,
+  "cases": {
+    "R1/archive=false/failed=false": 17.81,
+    "R1/archive=false/failed=true": 17.6,
+    "R1/archive=true/failed=false": 40.59,
+    "R1/archive=true/failed=true": 39.86,
+    "R3Domain/archive=false/failed=false": 27.7,
+    "R3Domain/archive=false/failed=true": 27.39,
+    "R3Domain/archive=true/failed=false": 63.12,
+    "R3Domain/archive=true/failed=true": 62.73
+  },
+  "binary_sha256": "8e9763dcd9dd347f0226d4fd72e9d8b7ba55a1f5b64d524efafe0408b246e2a3",
+  "log_sha256": "7245e4dfee966db35c3350e63f064da24fa106b129d1e22cf38c722200a14785",
+  "command_receipts": [
+    {
+      "command": [
+        "go",
+        "test",
+        "-c",
+        "-race",
+        "./worker",
+        "-o",
+        "/home/exedev/js-wf-cancel-pending-child-20261010/worker-race.test"
+      ],
+      "working_directory": "/home/exedev/js-wf-cancel-pending-child-qualification",
+      "started": "2026-10-10T08:30:37.571003+00:00",
+      "env": {
+        "GOMAXPROCS": "2",
+        "GOMEMLIMIT": "512MiB"
+      },
+      "pid": 55155,
+      "actual_exit_code": 0,
+      "finished": "2026-10-10T08:31:03.452107+00:00"
+    },
+    {
+      "command": [
+        "/home/exedev/js-wf-cancel-pending-child-20261010/worker-race.test",
+        "-test.run=^TestNativeGraphContinuationCancelPendingChild$",
+        "-test.count=1",
+        "-test.timeout=10m",
+        "-test.v=true"
+      ],
+      "working_directory": "/home/exedev/js-wf-cancel-pending-child-qualification",
+      "started": "2026-10-10T08:31:03.569047+00:00",
+      "env": {
+        "GOMAXPROCS": "2",
+        "GOMEMLIMIT": "512MiB"
+      },
+      "pid": 55398,
+      "actual_exit_code": 0,
+      "finished": "2026-10-10T08:36:01.455831+00:00"
+    }
+  ],
+  "scope": "Two unresolved SDK promise checkpoints; live/archive boundaries; parent suspension then canonical cancellation-wakeup repair; immutable21-record prefix and23-record cancelled history; v1 independent success700KB/failure child; late notification/duplicate isolation; post-cancellation collection and fresh terminal reads. No running-effect cancellation, arbitrary faults, child terminal reclamation, VM/storage loss, broad scale/soak, actual100000-entry cap, public/default admission or full goal acceptance."
+}

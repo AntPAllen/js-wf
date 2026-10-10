@@ -1,0 +1,54 @@
+{
+  "source": "57ee0b7187252a6a88b24ef655798cdfe3cf4b33",
+  "working_directory": "/home/exedev/js-wf-cancel-pending-child-qualification",
+  "root": "/home/exedev/js-wf-cancel-pending-child-20261010",
+  "started": "2026-10-10T08:30:37.570789+00:00",
+  "supervisor_pid": 55131,
+  "systemd_invocation": "aef5da527c3b4e85a66eacf4fc8eafa2",
+  "phase": "terminal",
+  "commands": [
+    {
+      "command": [
+        "go",
+        "test",
+        "-c",
+        "-race",
+        "./worker",
+        "-o",
+        "/home/exedev/js-wf-cancel-pending-child-20261010/worker-race.test"
+      ],
+      "working_directory": "/home/exedev/js-wf-cancel-pending-child-qualification",
+      "started": "2026-10-10T08:30:37.571003+00:00",
+      "env": {
+        "GOMAXPROCS": "2",
+        "GOMEMLIMIT": "512MiB"
+      },
+      "pid": 55155,
+      "actual_exit_code": 0,
+      "finished": "2026-10-10T08:31:03.452107+00:00"
+    },
+    {
+      "command": [
+        "/home/exedev/js-wf-cancel-pending-child-20261010/worker-race.test",
+        "-test.run=^TestNativeGraphContinuationCancelPendingChild$",
+        "-test.count=1",
+        "-test.timeout=10m",
+        "-test.v=true"
+      ],
+      "working_directory": "/home/exedev/js-wf-cancel-pending-child-qualification",
+      "started": "2026-10-10T08:31:03.569047+00:00",
+      "env": {
+        "GOMAXPROCS": "2",
+        "GOMEMLIMIT": "512MiB"
+      },
+      "pid": 55398,
+      "actual_exit_code": 0,
+      "finished": "2026-10-10T08:36:01.455831+00:00"
+    }
+  ],
+  "accepted": false,
+  "test_exit": 0,
+  "complete_eight_cases": true,
+  "source_unchanged": true,
+  "finished": "2026-10-10T08:36:01.646328+00:00"
+}
