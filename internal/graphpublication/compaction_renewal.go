@@ -11,9 +11,10 @@ import (
 // CompactionIntentRenewal extends every scope owned by a frozen publication,
 // including intermediate and abandoned uploads absent from its final forests.
 // Use from one goroutine, with no concurrent staging under the same token.
-// OwnerScopePort bounds discovery to this owner; other ports retain the full
-// namespace scan. Enumeration is context-bound but retains the key list in memory.
-// Batches bound examined scopes, not enumeration, source reads or wall time.
+// OwnerScopeScanPort discovers keys within the scope budget. It retains seen
+// identities to reject duplicates, but materializes no full list at setup.
+// Other owner ports census their keys; legacy ports scan the full namespace.
+// Batches bound examined scopes, not source reads or total wall time.
 // The clock must be the caller's current authority clock, not a saved timestamp.
 type CompactionIntentRenewal struct {
 	protocol      Protocol
@@ -22,6 +23,8 @@ type CompactionIntentRenewal struct {
 	expires       time.Time
 	keys          []string
 	ownerScoped   bool
+	scan          OwnerScopeScan
+	seen          map[string]bool
 	next, renewed uint64
 	done          bool
 	err           error
@@ -42,7 +45,14 @@ func (p Protocol) BeginCompactionIntentRenewal(ctx context.Context, prepared Pre
 	}
 	var keys []string
 	var err error
-	if indexed, ok := p.Port.(OwnerScopePort); ok {
+	if incremental, ok := p.Port.(OwnerScopeScanPort); ok {
+		r.ownerScoped = true
+		r.scan, err = incremental.BeginOwnerScopeScan(ctx, prepared.publication.Token)
+		if err == nil && r.scan == nil {
+			err = errors.New("nil owner scope scan")
+		}
+		r.seen = map[string]bool{}
+	} else if indexed, ok := p.Port.(OwnerScopePort); ok {
 		r.ownerScoped = true
 		keys, err = indexed.BlobKeysForOwner(ctx, prepared.publication.Token)
 	} else {
@@ -111,12 +121,31 @@ func (r *CompactionIntentRenewal) Advance(ctx context.Context, maxScopes uint64)
 	if err = r.check(ctx); err != nil {
 		return plan, false, err
 	}
-	end := r.next + min(maxScopes, uint64(len(r.keys))-r.next)
-	for r.next < end {
+	var batch []string
+	var exhausted bool
+	if r.scan != nil {
+		batch, exhausted, err = r.scan.Advance(ctx, maxScopes)
+		if err != nil {
+			return plan, false, err
+		}
+		if uint64(len(batch)) > maxScopes || len(batch) == 0 && !exhausted {
+			return plan, false, errors.New("invalid owner scope scan budget/progress")
+		}
+		for _, k := range batch {
+			if !validHash(k) || r.seen[k] {
+				return plan, false, errors.New("invalid or duplicate owner scope scan key")
+			}
+			r.seen[k] = true
+		}
+	} else {
+		end := r.next + min(maxScopes, uint64(len(r.keys))-r.next)
+		batch = r.keys[r.next:end]
+		exhausted = end == uint64(len(r.keys))
+	}
+	for _, k := range batch {
 		if err = r.check(ctx); err != nil {
 			return plan, false, err
 		}
-		k := r.keys[r.next]
 		if witness, ok := r.protocol.Port.(OwnerScopeWitnessPort); r.ownerScoped && ok {
 			if err = witness.ValidateOwnerScope(ctx, r.prepared.publication.Token, k); err != nil {
 				return plan, false, err
@@ -158,7 +187,7 @@ func (r *CompactionIntentRenewal) Advance(ctx context.Context, maxScopes uint64)
 	if err = r.check(ctx); err != nil {
 		return plan, false, err
 	}
-	if r.next != uint64(len(r.keys)) {
+	if !exhausted {
 		return plan, false, nil
 	}
 	r.done = true

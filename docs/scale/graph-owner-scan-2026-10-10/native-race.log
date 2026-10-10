@@ -1,0 +1,34 @@
+=== RUN   TestNativeGraphOwnerScopeIncrementalSetupAt100000
+    nats_owner_scope_pagination_test.go:147: OWNER_CENSUS_INPUT reservations=25000
+    nats_owner_scope_pagination_test.go:147: OWNER_CENSUS_INPUT reservations=50000
+    nats_owner_scope_pagination_test.go:147: OWNER_CENSUS_INPUT reservations=75000
+    nats_owner_scope_pagination_test.go:147: OWNER_CENSUS_INPUT reservations=100000
+    nats_owner_scope_pagination_test.go:179: NATIVE_OWNER_INCREMENTAL reservations=100001 owned_grants=6 expected=100008 setup_keys=0 count_requests=1 setup_barrier_witnesses=1 setup_wall=275.172398ms batch_budget=2 batch_scopes=2 full_renewal_qualified=false
+--- PASS: TestNativeGraphOwnerScopeIncrementalSetupAt100000 (10.34s)
+=== RUN   TestNativeGraphOwnerScanSequenceChurnCompleteness
+=== RUN   TestNativeGraphOwnerScanSequenceChurnCompleteness/healthy-churn
+    nats_owner_scope_scan_test.go:114: NATIVE_OWNER_SCAN mode=healthy-churn seen=4 expected=4 complete=true err=<nil>
+=== RUN   TestNativeGraphOwnerScanSequenceChurnCompleteness/undiscovered-churn
+    nats_owner_scope_scan_test.go:114: NATIVE_OWNER_SCAN mode=undiscovered-churn seen=2 expected=4 complete=false err=incomplete owner scope scan: found 3 expected 4
+=== RUN   TestNativeGraphOwnerScanSequenceChurnCompleteness/barrier-churn
+    nats_owner_scope_scan_test.go:114: NATIVE_OWNER_SCAN mode=barrier-churn seen=3 expected=4 complete=false err=invalid or incomplete owner scope scan
+=== RUN   TestNativeGraphOwnerScanSequenceChurnCompleteness/malformed
+    nats_owner_scope_scan_test.go:114: NATIVE_OWNER_SCAN mode=malformed seen=2 expected=4 complete=false err=invalid owner scan marker
+=== RUN   TestNativeGraphOwnerScanSequenceChurnCompleteness/lost-read
+    nats_owner_scope_scan_test.go:114: NATIVE_OWNER_SCAN mode=lost-read seen=1 expected=4 complete=false err=committed reply lost
+--- PASS: TestNativeGraphOwnerScanSequenceChurnCompleteness (0.36s)
+    --- PASS: TestNativeGraphOwnerScanSequenceChurnCompleteness/healthy-churn (0.07s)
+    --- PASS: TestNativeGraphOwnerScanSequenceChurnCompleteness/undiscovered-churn (0.09s)
+    --- PASS: TestNativeGraphOwnerScanSequenceChurnCompleteness/barrier-churn (0.07s)
+    --- PASS: TestNativeGraphOwnerScanSequenceChurnCompleteness/malformed (0.06s)
+    --- PASS: TestNativeGraphOwnerScanSequenceChurnCompleteness/lost-read (0.07s)
+=== RUN   TestNativeGraphOwnerScopeIndexRecovery
+=== RUN   TestNativeGraphOwnerScopeIndexRecovery/R1
+    nats_owner_scope_test.go:285: NATIVE_OWNER_INDEX replicas=1 discovered=10 barrier_reservations=1 blob_reads=10 full_census=0 orphan_uploads=2 absent_reservations=1 restart=all_peers
+=== RUN   TestNativeGraphOwnerScopeIndexRecovery/R3
+    nats_owner_scope_test.go:285: NATIVE_OWNER_INDEX replicas=3 discovered=10 barrier_reservations=1 blob_reads=10 full_census=0 orphan_uploads=2 absent_reservations=1 restart=all_peers
+--- PASS: TestNativeGraphOwnerScopeIndexRecovery (10.85s)
+    --- PASS: TestNativeGraphOwnerScopeIndexRecovery/R1 (1.23s)
+    --- PASS: TestNativeGraphOwnerScopeIndexRecovery/R3 (9.62s)
+PASS
+ok  	js-wf/internal/graphpublication	22.591s

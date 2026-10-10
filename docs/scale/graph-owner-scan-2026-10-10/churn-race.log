@@ -1,0 +1,19 @@
+=== RUN   TestNativeGraphOwnerScanSequenceChurnCompleteness
+=== RUN   TestNativeGraphOwnerScanSequenceChurnCompleteness/healthy-churn
+    nats_owner_scope_scan_test.go:113: NATIVE_OWNER_SCAN mode=healthy-churn seen=4 expected=4 complete=true err=<nil>
+=== RUN   TestNativeGraphOwnerScanSequenceChurnCompleteness/undiscovered-churn
+    nats_owner_scope_scan_test.go:113: NATIVE_OWNER_SCAN mode=undiscovered-churn seen=2 expected=4 complete=false err=incomplete owner scope scan: found 3 expected 4
+=== RUN   TestNativeGraphOwnerScanSequenceChurnCompleteness/barrier-churn
+    nats_owner_scope_scan_test.go:113: NATIVE_OWNER_SCAN mode=barrier-churn seen=3 expected=4 complete=false err=invalid or incomplete owner scope scan
+=== RUN   TestNativeGraphOwnerScanSequenceChurnCompleteness/malformed
+    nats_owner_scope_scan_test.go:113: NATIVE_OWNER_SCAN mode=malformed seen=2 expected=4 complete=false err=incomplete owner scope scan: found 3 expected 4
+=== RUN   TestNativeGraphOwnerScanSequenceChurnCompleteness/lost-read
+    nats_owner_scope_scan_test.go:113: NATIVE_OWNER_SCAN mode=lost-read seen=1 expected=4 complete=false err=committed reply lost
+--- PASS: TestNativeGraphOwnerScanSequenceChurnCompleteness (0.43s)
+    --- PASS: TestNativeGraphOwnerScanSequenceChurnCompleteness/healthy-churn (0.12s)
+    --- PASS: TestNativeGraphOwnerScanSequenceChurnCompleteness/undiscovered-churn (0.10s)
+    --- PASS: TestNativeGraphOwnerScanSequenceChurnCompleteness/barrier-churn (0.08s)
+    --- PASS: TestNativeGraphOwnerScanSequenceChurnCompleteness/malformed (0.08s)
+    --- PASS: TestNativeGraphOwnerScanSequenceChurnCompleteness/lost-read (0.05s)
+PASS
+ok  	js-wf/internal/graphpublication	1.456s

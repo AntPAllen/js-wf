@@ -36,6 +36,16 @@ func (p *ownerWitnessCountJS) PublishMsg(c context.Context, msg *nats.Msg, opts 
 }
 
 func TestNativeGraphOwnerScopeCensusPaginationAndDeferredWitnesses(t *testing.T) {
+	testNativeGraphOwnerScopeLargeDiscovery(t, false)
+}
+
+func TestNativeGraphOwnerScopeIncrementalSetupAt100000(t *testing.T) {
+	testNativeGraphOwnerScopeLargeDiscovery(t, true)
+}
+
+type ownerCensusOnlyPort struct{ OwnerScopeWitnessPort }
+
+func testNativeGraphOwnerScopeLargeDiscovery(t *testing.T, incremental bool) {
 	cluster, _, _ := nativeGraphFixture(t, 1)
 	c, cancel := context.WithTimeout(context.Background(), 2*time.Minute)
 	defer cancel()
@@ -141,7 +151,11 @@ func TestNativeGraphOwnerScopeCensusPaginationAndDeferredWitnesses(t *testing.T)
 	counted := &ownerWitnessCountJS{JetStream: js}
 	a.js = counted
 	budgeted := &ownerWitnessBudgetPort{OwnerIndexedNativePort: port}
-	p.Port = budgeted
+	if incremental {
+		p.Port = budgeted
+	} else {
+		p.Port = &ownerCensusOnlyPort{OwnerScopeWitnessPort: budgeted}
+	}
 	pages.Store(0)
 	laterPages.Store(0)
 	setup, stopSetup := context.WithTimeout(c, 3*time.Second)
@@ -149,6 +163,22 @@ func TestNativeGraphOwnerScopeCensusPaginationAndDeferredWitnesses(t *testing.T)
 	renewal, err := p.BeginCompactionIntentRenewal(setup, plan, func() time.Time { return time.Now().UTC() }, expires.Add(time.Hour))
 	elapsed := time.Since(started)
 	stopSetup()
+	if incremental {
+		if err != nil {
+			t.Fatal("incremental three-second setup", err, elapsed)
+		}
+		scan, ok := renewal.scan.(*nativeOwnerScopeScan)
+		if !ok || len(renewal.keys) != 0 || len(renewal.seen) != 0 || scan.expected != uint64(len(want)+1) || counted.witnesses != 1 || pages.Load() != 1 || laterPages.Load() != 1 {
+			t.Fatal("incremental setup materialized keys or lacked count/barrier", ok, scan, len(renewal.keys), counted.witnesses, pages.Load())
+		}
+		before := counted.witnesses
+		_, done, e := renewal.Advance(c, 2)
+		if e != nil || done || renewal.ExaminedScopes() != 2 || budgeted.validated != 2 || counted.witnesses-before < 2 || counted.witnesses-before > 4 {
+			t.Fatal("incremental batch budget", done, e, renewal.ExaminedScopes(), budgeted.validated)
+		}
+		t.Logf("NATIVE_OWNER_INCREMENTAL reservations=100001 owned_grants=%d expected=%d setup_keys=0 count_requests=1 setup_barrier_witnesses=1 setup_wall=%s batch_budget=2 batch_scopes=2 full_renewal_qualified=false", len(initial), scan.expected, elapsed)
+		return
+	}
 	threeSecond := err == nil
 	if err != nil && !errors.Is(err, context.DeadlineExceeded) {
 		t.Fatal("unexpected census failure", err)

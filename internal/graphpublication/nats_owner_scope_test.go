@@ -233,7 +233,7 @@ func TestNativeGraphOwnerScopeIndexRecovery(t *testing.T) {
 					t.Fatal(err)
 				}
 			}
-			if counted.full != 0 || counted.reads != len(after) {
+			if counted.full != 0 || counted.reads != len(after)+1 {
 				t.Fatal("namespace scanned", counted.full, counted.reads, len(after))
 			}
 			for _, k := range uploading {
@@ -258,12 +258,17 @@ func TestNativeGraphOwnerScopeIndexRecovery(t *testing.T) {
 			}
 			// A lost deferred marker witness must stop its batch before scope I/O.
 			base := a.js
-			fault := &ownerIndexReplyFault{JetStream: base, subject: a.ownerSubject(token, after[0]), commit: true}
-			a.js = fault
+			fault := &ownerIndexReplyFault{JetStream: base, commit: true}
 			failed, e := p.BeginCompactionIntentRenewal(c, plan, func() time.Time { return time.Now().UTC() }, next.expires)
 			if e != nil {
 				t.Fatal(e)
 			}
+			first, e := a.stream.GetMsg(c, 1, jetstream.WithGetMsgSubject(a.prefix+".owner."+key([]byte(token))+".>"))
+			if e != nil {
+				t.Fatal(e)
+			}
+			fault.subject = first.Subject
+			a.js = fault
 			beforeReads := counted.reads
 			_, done, e := failed.Advance(c, 1)
 			a.js = base
@@ -277,7 +282,7 @@ func TestNativeGraphOwnerScopeIndexRecovery(t *testing.T) {
 			if e != nil || published.Head != root.Head+1 || published.Graph.Count != 2 || selectGraph(published.Graph, published.Streams, PrefixArchiveStream).Count != 2 {
 				t.Fatal("renewed plan did not independently commit", published, e)
 			}
-			t.Logf("NATIVE_OWNER_INDEX replicas=%d discovered=%d blob_reads=%d full_census=%d orphan_uploads=%d absent_reservations=%d restart=all_peers", replicas, len(after), renewalReads, counted.full, len(uploading), len(absent))
+			t.Logf("NATIVE_OWNER_INDEX replicas=%d discovered=%d barrier_reservations=1 blob_reads=%d full_census=%d orphan_uploads=%d absent_reservations=%d restart=all_peers", replicas, len(after)+1, renewalReads, counted.full, len(uploading), len(absent))
 		})
 	}
 }

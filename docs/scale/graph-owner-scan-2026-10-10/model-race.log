@@ -1,0 +1,139 @@
+=== RUN   TestGraphCompactionOwnerScanCompletenessAndBounds
+=== RUN   TestGraphCompactionOwnerScanCompletenessAndBounds/normal
+    compaction_owner_scan_test.go:152: OWNER_SCAN mode=normal fallback_census=0 examined=20 renewed=20 marker_validations=20 complete=true err=<nil>
+=== RUN   TestGraphCompactionOwnerScanCompletenessAndBounds/fresh-cursor
+    compaction_owner_scan_test.go:152: OWNER_SCAN mode=fresh-cursor fallback_census=0 examined=20 renewed=20 marker_validations=22 complete=true err=<nil>
+=== RUN   TestGraphCompactionOwnerScanCompletenessAndBounds/unknown-begin
+=== RUN   TestGraphCompactionOwnerScanCompletenessAndBounds/nil-scan
+=== RUN   TestGraphCompactionOwnerScanCompletenessAndBounds/unknown-batch
+    compaction_owner_scan_test.go:152: OWNER_SCAN mode=unknown-batch fallback_census=0 examined=0 renewed=0 marker_validations=0 complete=false err=committed reply lost
+=== RUN   TestGraphCompactionOwnerScanCompletenessAndBounds/duplicate
+    compaction_owner_scan_test.go:152: OWNER_SCAN mode=duplicate fallback_census=0 examined=0 renewed=0 marker_validations=0 complete=false err=invalid or duplicate owner scope scan key
+=== RUN   TestGraphCompactionOwnerScanCompletenessAndBounds/duplicate-later
+    compaction_owner_scan_test.go:152: OWNER_SCAN mode=duplicate-later fallback_census=0 examined=2 renewed=2 marker_validations=2 complete=false err=invalid or duplicate owner scope scan key
+=== RUN   TestGraphCompactionOwnerScanCompletenessAndBounds/oversize
+    compaction_owner_scan_test.go:152: OWNER_SCAN mode=oversize fallback_census=0 examined=0 renewed=0 marker_validations=0 complete=false err=invalid owner scope scan budget/progress
+=== RUN   TestGraphCompactionOwnerScanCompletenessAndBounds/no-progress
+    compaction_owner_scan_test.go:152: OWNER_SCAN mode=no-progress fallback_census=0 examined=0 renewed=0 marker_validations=0 complete=false err=invalid owner scope scan budget/progress
+=== RUN   TestGraphCompactionOwnerScanCompletenessAndBounds/invalid-key
+    compaction_owner_scan_test.go:152: OWNER_SCAN mode=invalid-key fallback_census=0 examined=0 renewed=0 marker_validations=0 complete=false err=invalid or duplicate owner scope scan key
+=== RUN   TestGraphCompactionOwnerScanCompletenessAndBounds/source-change
+    compaction_owner_scan_test.go:152: OWNER_SCAN mode=source-change fallback_census=0 examined=0 renewed=0 marker_validations=0 complete=false err=blob publication CAS conflict
+=== RUN   TestGraphCompactionOwnerScanCompletenessAndBounds/expired
+    compaction_owner_scan_test.go:152: OWNER_SCAN mode=expired fallback_census=0 examined=0 renewed=0 marker_validations=0 complete=false err=blob publication revoked
+--- PASS: TestGraphCompactionOwnerScanCompletenessAndBounds (0.47s)
+    --- PASS: TestGraphCompactionOwnerScanCompletenessAndBounds/normal (0.05s)
+    --- PASS: TestGraphCompactionOwnerScanCompletenessAndBounds/fresh-cursor (0.04s)
+    --- PASS: TestGraphCompactionOwnerScanCompletenessAndBounds/unknown-begin (0.04s)
+    --- PASS: TestGraphCompactionOwnerScanCompletenessAndBounds/nil-scan (0.04s)
+    --- PASS: TestGraphCompactionOwnerScanCompletenessAndBounds/unknown-batch (0.04s)
+    --- PASS: TestGraphCompactionOwnerScanCompletenessAndBounds/duplicate (0.03s)
+    --- PASS: TestGraphCompactionOwnerScanCompletenessAndBounds/duplicate-later (0.04s)
+    --- PASS: TestGraphCompactionOwnerScanCompletenessAndBounds/oversize (0.03s)
+    --- PASS: TestGraphCompactionOwnerScanCompletenessAndBounds/no-progress (0.04s)
+    --- PASS: TestGraphCompactionOwnerScanCompletenessAndBounds/invalid-key (0.03s)
+    --- PASS: TestGraphCompactionOwnerScanCompletenessAndBounds/source-change (0.05s)
+    --- PASS: TestGraphCompactionOwnerScanCompletenessAndBounds/expired (0.03s)
+=== RUN   TestGraphCompactionOwnerScopeDiscovery
+=== RUN   TestGraphCompactionOwnerScopeDiscovery/normal
+    compaction_owner_scope_test.go:165: OWNER_DISCOVERY mode=normal namespace=54 indexed=20 blobs=20 writes=20 elapsed=95.309753ms complete=true err=<nil>
+=== RUN   TestGraphCompactionOwnerScopeDiscovery/foreign100000
+    compaction_owner_scope_test.go:165: OWNER_DISCOVERY mode=foreign100000 namespace=100054 indexed=20 blobs=20 writes=20 elapsed=95.309753ms complete=true err=<nil>
+=== RUN   TestGraphCompactionOwnerScopeDiscovery/abandoned
+    compaction_owner_scope_test.go:165: OWNER_DISCOVERY mode=abandoned namespace=55 indexed=21 blobs=21 writes=21 elapsed=99.223964ms complete=true err=<nil>
+=== RUN   TestGraphCompactionOwnerScopeDiscovery/unknown-create
+    compaction_owner_scope_test.go:165: OWNER_DISCOVERY mode=unknown-create namespace=55 indexed=21 blobs=21 writes=21 elapsed=99.223964ms complete=true err=<nil>
+=== RUN   TestGraphCompactionOwnerScopeDiscovery/absent-reservation
+    compaction_owner_scope_test.go:165: OWNER_DISCOVERY mode=absent-reservation namespace=54 indexed=21 blobs=21 writes=20 elapsed=97.336269ms complete=true err=<nil>
+=== RUN   TestGraphCompactionOwnerScopeDiscovery/fresh-adapter
+    compaction_owner_scope_test.go:165: OWNER_DISCOVERY mode=fresh-adapter namespace=54 indexed=20 blobs=20 writes=20 elapsed=95.309753ms complete=true err=<nil>
+=== RUN   TestGraphCompactionOwnerScopeDiscovery/unknown-enumeration
+    compaction_owner_scope_test.go:165: OWNER_DISCOVERY mode=unknown-enumeration namespace=54 indexed=20 blobs=0 writes=0 elapsed=1.693634ms complete=false err=committed reply lost
+=== RUN   TestGraphCompactionOwnerScopeDiscovery/duplicate
+    compaction_owner_scope_test.go:165: OWNER_DISCOVERY mode=duplicate namespace=54 indexed=20 blobs=0 writes=0 elapsed=1.693634ms complete=false err=duplicate graph scope enumeration
+=== RUN   TestGraphCompactionOwnerScopeDiscovery/foreign-entry
+    compaction_owner_scope_test.go:165: OWNER_DISCOVERY mode=foreign-entry namespace=54 indexed=20 blobs=2 writes=1 elapsed=8.856371ms complete=false err=foreign scope in owner enumeration
+=== RUN   TestGraphCompactionOwnerScopeDiscovery/invalid-key
+    compaction_owner_scope_test.go:165: OWNER_DISCOVERY mode=invalid-key namespace=54 indexed=20 blobs=21 writes=20 elapsed=96.43843ms complete=false err=invalid graph object key
+=== RUN   TestGraphCompactionOwnerScopeDiscovery/source-change
+    compaction_owner_scope_test.go:165: OWNER_DISCOVERY mode=source-change namespace=54 indexed=20 blobs=0 writes=0 elapsed=2.306069ms complete=false err=blob publication CAS conflict
+--- PASS: TestGraphCompactionOwnerScopeDiscovery (1.28s)
+    --- PASS: TestGraphCompactionOwnerScopeDiscovery/normal (0.06s)
+    --- PASS: TestGraphCompactionOwnerScopeDiscovery/foreign100000 (0.82s)
+    --- PASS: TestGraphCompactionOwnerScopeDiscovery/abandoned (0.05s)
+    --- PASS: TestGraphCompactionOwnerScopeDiscovery/unknown-create (0.05s)
+    --- PASS: TestGraphCompactionOwnerScopeDiscovery/absent-reservation (0.07s)
+    --- PASS: TestGraphCompactionOwnerScopeDiscovery/fresh-adapter (0.05s)
+    --- PASS: TestGraphCompactionOwnerScopeDiscovery/unknown-enumeration (0.04s)
+    --- PASS: TestGraphCompactionOwnerScopeDiscovery/duplicate (0.04s)
+    --- PASS: TestGraphCompactionOwnerScopeDiscovery/foreign-entry (0.04s)
+    --- PASS: TestGraphCompactionOwnerScopeDiscovery/invalid-key (0.05s)
+    --- PASS: TestGraphCompactionOwnerScopeDiscovery/source-change (0.04s)
+=== RUN   TestGraphCompactionOwnerWitnessScopeBudget
+=== RUN   TestGraphCompactionOwnerWitnessScopeBudget/normal
+    compaction_owner_witness_test.go:119: OWNER_WITNESS mode=normal census=20 setup_witnesses=0 validated=20 examined=20 blobs=20 complete=true err=<nil>
+=== RUN   TestGraphCompactionOwnerWitnessScopeBudget/reservations100000
+    compaction_owner_witness_test.go:119: OWNER_WITNESS mode=reservations100000 census=100020 setup_witnesses=0 validated=2 examined=2 blobs=2 complete=false err=<nil>
+=== RUN   TestGraphCompactionOwnerWitnessScopeBudget/lost-later
+    compaction_owner_witness_test.go:119: OWNER_WITNESS mode=lost-later census=20 setup_witnesses=0 validated=4 examined=3 blobs=3 complete=false err=committed reply lost
+=== RUN   TestGraphCompactionOwnerWitnessScopeBudget/expired-during-witness
+    compaction_owner_witness_test.go:119: OWNER_WITNESS mode=expired-during-witness census=20 setup_witnesses=0 validated=4 examined=3 blobs=3 complete=false err=blob publication revoked
+=== RUN   TestGraphCompactionOwnerWitnessScopeBudget/source-change
+    compaction_owner_witness_test.go:119: OWNER_WITNESS mode=source-change census=20 setup_witnesses=0 validated=4 examined=3 blobs=3 complete=false err=blob publication CAS conflict
+=== RUN   TestGraphCompactionOwnerWitnessScopeBudget/corrupt-marker
+    compaction_owner_witness_test.go:119: OWNER_WITNESS mode=corrupt-marker census=20 setup_witnesses=0 validated=4 examined=3 blobs=3 complete=false err=noncanonical marker
+=== RUN   TestGraphCompactionOwnerWitnessScopeBudget/cancel
+    compaction_owner_witness_test.go:119: OWNER_WITNESS mode=cancel census=20 setup_witnesses=0 validated=2 examined=2 blobs=2 complete=false err=<nil>
+--- PASS: TestGraphCompactionOwnerWitnessScopeBudget (0.94s)
+    --- PASS: TestGraphCompactionOwnerWitnessScopeBudget/normal (0.05s)
+    --- PASS: TestGraphCompactionOwnerWitnessScopeBudget/reservations100000 (0.68s)
+    --- PASS: TestGraphCompactionOwnerWitnessScopeBudget/lost-later (0.04s)
+    --- PASS: TestGraphCompactionOwnerWitnessScopeBudget/expired-during-witness (0.05s)
+    --- PASS: TestGraphCompactionOwnerWitnessScopeBudget/source-change (0.04s)
+    --- PASS: TestGraphCompactionOwnerWitnessScopeBudget/corrupt-marker (0.04s)
+    --- PASS: TestGraphCompactionOwnerWitnessScopeBudget/cancel (0.04s)
+=== RUN   TestGraphCompactionIntentRenewalScopesAndFences
+=== RUN   TestGraphCompactionIntentRenewalScopesAndFences/normal
+    compaction_renewal_test.go:239: COMPACTION_RENEWAL mode=normal examined=55 renewed=21 scope_budget=3 root_unchanged_after_old_expiry=true
+=== RUN   TestGraphCompactionIntentRenewalScopesAndFences/inherited
+    compaction_renewal_test.go:239: COMPACTION_RENEWAL mode=inherited examined=74 renewed=18 scope_budget=3 root_unchanged_after_old_expiry=true
+=== RUN   TestGraphCompactionIntentRenewalScopesAndFences/drop
+    compaction_renewal_test.go:239: COMPACTION_RENEWAL mode=drop examined=55 renewed=21 scope_budget=3 root_unchanged_after_old_expiry=true
+=== RUN   TestGraphCompactionIntentRenewalScopesAndFences/lost
+    compaction_renewal_test.go:239: COMPACTION_RENEWAL mode=lost examined=55 renewed=21 scope_budget=3 root_unchanged_after_old_expiry=true
+=== RUN   TestGraphCompactionIntentRenewalScopesAndFences/cancel
+    compaction_renewal_test.go:239: COMPACTION_RENEWAL mode=cancel examined=55 renewed=21 scope_budget=3 root_unchanged_after_old_expiry=true
+=== RUN   TestGraphCompactionIntentRenewalScopesAndFences/expired
+=== RUN   TestGraphCompactionIntentRenewalScopesAndFences/expiry-read
+=== RUN   TestGraphCompactionIntentRenewalScopesAndFences/expiry-after-cas
+=== RUN   TestGraphCompactionIntentRenewalScopesAndFences/append
+=== RUN   TestGraphCompactionIntentRenewalScopesAndFences/append-during-cas
+=== RUN   TestGraphCompactionIntentRenewalScopesAndFences/reader
+=== RUN   TestGraphCompactionIntentRenewalScopesAndFences/collector
+=== RUN   TestGraphCompactionIntentRenewalScopesAndFences/collector-during-cas
+=== RUN   TestGraphCompactionIntentRenewalScopesAndFences/revoked
+=== RUN   TestGraphCompactionIntentRenewalScopesAndFences/wrong-expiry
+=== RUN   TestGraphCompactionIntentRenewalScopesAndFences/input-ownership
+    compaction_renewal_test.go:239: COMPACTION_RENEWAL mode=input-ownership examined=55 renewed=21 scope_budget=3 root_unchanged_after_old_expiry=true
+=== RUN   TestGraphCompactionIntentRenewalScopesAndFences/result-ownership
+    compaction_renewal_test.go:239: COMPACTION_RENEWAL mode=result-ownership examined=55 renewed=21 scope_budget=3 root_unchanged_after_old_expiry=true
+--- PASS: TestGraphCompactionIntentRenewalScopesAndFences (1.34s)
+    --- PASS: TestGraphCompactionIntentRenewalScopesAndFences/normal (0.11s)
+    --- PASS: TestGraphCompactionIntentRenewalScopesAndFences/inherited (0.20s)
+    --- PASS: TestGraphCompactionIntentRenewalScopesAndFences/drop (0.11s)
+    --- PASS: TestGraphCompactionIntentRenewalScopesAndFences/lost (0.11s)
+    --- PASS: TestGraphCompactionIntentRenewalScopesAndFences/cancel (0.11s)
+    --- PASS: TestGraphCompactionIntentRenewalScopesAndFences/expired (0.04s)
+    --- PASS: TestGraphCompactionIntentRenewalScopesAndFences/expiry-read (0.04s)
+    --- PASS: TestGraphCompactionIntentRenewalScopesAndFences/expiry-after-cas (0.04s)
+    --- PASS: TestGraphCompactionIntentRenewalScopesAndFences/append (0.05s)
+    --- PASS: TestGraphCompactionIntentRenewalScopesAndFences/append-during-cas (0.04s)
+    --- PASS: TestGraphCompactionIntentRenewalScopesAndFences/reader (0.04s)
+    --- PASS: TestGraphCompactionIntentRenewalScopesAndFences/collector (0.08s)
+    --- PASS: TestGraphCompactionIntentRenewalScopesAndFences/collector-during-cas (0.06s)
+    --- PASS: TestGraphCompactionIntentRenewalScopesAndFences/revoked (0.05s)
+    --- PASS: TestGraphCompactionIntentRenewalScopesAndFences/wrong-expiry (0.04s)
+    --- PASS: TestGraphCompactionIntentRenewalScopesAndFences/input-ownership (0.11s)
+    --- PASS: TestGraphCompactionIntentRenewalScopesAndFences/result-ownership (0.12s)
+PASS
+ok  	js-wf/internal/graphpublication	5.065s

@@ -1,0 +1,28 @@
+[
+  {
+    "name": "omit-count",
+    "command": [
+      "go",
+      "test",
+      "./internal/graphpublication",
+      "-run",
+      "^TestNativeGraphOwnerScanSequenceChurnCompleteness$/^undiscovered-churn$",
+      "-count=1",
+      "-v"
+    ],
+    "exit": 1
+  },
+  {
+    "name": "omit-duplicates",
+    "command": [
+      "go",
+      "test",
+      "./internal/graphpublication",
+      "-run",
+      "^TestGraphCompactionOwnerScanCompletenessAndBounds$/^duplicate",
+      "-count=1",
+      "-v"
+    ],
+    "exit": 1
+  }
+]

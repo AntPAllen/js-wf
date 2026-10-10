@@ -77,23 +77,28 @@ func (p *NativeAuthority) ensureOwnerScope(ctx context.Context, owner, scope str
 	return p.witnessOwnerScope(ctx, owner, scope, true)
 }
 func (p *NativeAuthority) witnessOwnerScope(ctx context.Context, owner, scope string, create bool) error {
+	_, err := p.ownerScopeWitnessSequence(ctx, owner, scope, create)
+	return err
+}
+
+func (p *NativeAuthority) ownerScopeWitnessSequence(ctx context.Context, owner, scope string, create bool) (uint64, error) {
 	if !p.ownerIndexed || !validID(owner) || !validHash(scope) {
-		return errors.New("invalid indexed graph scope")
+		return 0, errors.New("invalid indexed graph scope")
 	}
 	if err := p.validate(ctx); err != nil {
-		return err
+		return 0, err
 	}
 	subject := p.ownerSubject(owner, scope)
 	data, err := json.Marshal(ownerScopeValue{ownerIndexSchema, owner, scope})
 	if err != nil {
-		return err
+		return 0, err
 	}
 	release, err := p.reads.acquire(ctx, "owner:"+subject)
 	if err != nil {
-		return err
+		return 0, err
 	}
 	defer release()
-	_, _, err = blobpublication.ReadWithWitness(ctx, func(c context.Context) ([]byte, uint64, error) {
+	_, confirmed, err := blobpublication.ReadWithWitness(ctx, func(c context.Context) ([]byte, uint64, error) {
 		msg, e := p.stream.GetLastMsgForSubject(c, subject)
 		if errors.Is(e, jetstream.ErrMsgNotFound) && create {
 			return data, 0, nil
@@ -126,7 +131,7 @@ func (p *NativeAuthority) witnessOwnerScope(ctx context.Context, owner, scope st
 		}
 		return ack.Sequence, nil
 	})
-	return err
+	return confirmed, err
 }
 
 func (p *OwnerIndexedNativePort) BlobKeysForOwner(ctx context.Context, owner string) ([]string, error) {

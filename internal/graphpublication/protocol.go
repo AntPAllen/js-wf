@@ -144,6 +144,21 @@ type OwnerScopeWitnessPort interface {
 	ValidateOwnerScope(context.Context, string, string) error
 }
 
+// OwnerScopeScanPort discovers a complete frozen owner set incrementally.
+// Begin must not fetch/retain the full client key list. Each Advance returns at most maxScopes
+// keys; done certifies exhaustive discovery, never scope ownership or content.
+// The adapter must detect omissions caused by index sequence churn. No staging
+// under this owner is allowed until renewal finishes. Errors return no keys.
+// Fresh recovery starts a fresh scan; no saved discovery prefix is authority.
+type OwnerScopeScanPort interface {
+	OwnerScopeWitnessPort
+	BeginOwnerScopeScan(context.Context, string) (OwnerScopeScan, error)
+}
+
+type OwnerScopeScan interface {
+	Advance(context.Context, uint64) ([]string, bool, error)
+}
+
 // RootCatalogPort enumerates every retained destination in this isolated
 // authority namespace, including empty roots and witnessed absences. The
 // catalog is permanent under ordinary operations; enumeration returns no

@@ -1,0 +1,27 @@
+=== RUN   TestGraphCompactionOwnerScanCompletenessAndBounds
+=== RUN   TestGraphCompactionOwnerScanCompletenessAndBounds/duplicate
+--- FAIL: TestGraphCompactionOwnerScanCompletenessAndBounds (0.00s)
+    --- FAIL: TestGraphCompactionOwnerScanCompletenessAndBounds/duplicate (0.00s)
+panic: runtime error: index out of range [0] with length 0 [recovered, repanicked]
+
+goroutine 9 [running]:
+testing.tRunner.func1.2({0x1600f78, 0x3c6d5ed4e3c0})
+	/usr/local/go/src/testing/testing.go:2123 +0x232
+testing.tRunner.func1()
+	/usr/local/go/src/testing/testing.go:2126 +0x329
+panic({0x1600f78?, 0x3c6d5ed4e3c0?})
+	/usr/local/go/src/runtime/panic.go:859 +0x125
+js-wf/internal/graphpublication.TestGraphCompactionOwnerScanCompletenessAndBounds.func1.3({0x0, 0x0, 0x0?}, 0x0?)
+	/home/exedev/js-wf/internal/graphpublication/compaction_owner_scan_test.go:97 +0x58b
+js-wf/internal/graphpublication.(*ownerScanModel).Advance(0x3c6d5f09f200, {0x1652038?, 0x16e6ea0?}, 0x2)
+	/home/exedev/js-wf/internal/graphpublication/compaction_owner_scan_test.go:28 +0x126
+js-wf/internal/graphpublication.(*CompactionIntentRenewal).Advance(_, {_, _}, _)
+	/home/exedev/js-wf/internal/graphpublication/compaction_renewal.go:127 +0x1ff
+js-wf/internal/graphpublication.TestGraphCompactionOwnerScanCompletenessAndBounds.func1(0x3c6d5ee98fc8)
+	/home/exedev/js-wf/internal/graphpublication/compaction_owner_scan_test.go:121 +0xe3e
+testing.tRunner(0x3c6d5ee98fc8, 0x3c6d5ed38588)
+	/usr/local/go/src/testing/testing.go:2193 +0xea
+created by testing.(*T).Run in goroutine 8
+	/usr/local/go/src/testing/testing.go:2258 +0x4d4
+FAIL	js-wf/internal/graphpublication	0.010s
+FAIL

@@ -1,5 +1,33 @@
 # JetStream Durable Workflow Runtime — Implementation Plan
 
+## Incremental complete owner discovery — 2026-10-10
+
+Renewal now prefers OwnerScopeScanPort. Native setup captures an acknowledged
+owner-specific reservation boundary and a filtered count without fetching every
+key. Advance discovers at most its scope budget, validates marker/grant authority
+and original source/time, and rejects duplicate identities. Exhaustion requires
+the exact boundary and count; undiscovered marker churn cannot silently omit a
+scope. Fresh recovery starts a new scan rather than accepting a saved prefix.
+Static/legacy discovery remains available. No namespace migration, TTL or
+production deadline change is made.
+[Evidence](scale/graph-owner-scan-2026-10-10/README.md).
+
+Twelve scan controls plus thirty-five prior controls pass restored race 5.065
+seconds. Five native churn controls, R1/R3 restart recovery and large setup pass
+race 22.591 seconds. The R1 fixture acknowledges 100,001 reservations plus six
+grants and one boundary; setup counts 100,008 registrations in 275.172398 ms
+inside its unchanged three-second context, fetching no client key list. Its
+next budget-two batch examines only two scopes. Removing count equality fails
+one omission control; removing duplicate rejection fails two controls. Restored
+R1/R3 indexed workers pass race 20.014 seconds; all 853 pins pass 7.625 seconds.
+
+The large fixture does not renew every scope or contain 100,000 journal entries.
+Server filtered-count work and client seen-identity memory still grow with owner
+cardinality. Complete renewal must still finish before original expiry and needs
+per-grant reads/CAS. Next: qualify total large-owned-grant cost and liveness before
+another multi-hour full-entry run. Original seed/fault/storage/security, majority,
+soak, retention and rollout gates remain open; admission and collection stay off.
+
 ## Owner marker validation is batched; census timing still open — 2026-10-10
 
 OwnerScopeWitnessPort now separates marker validation from complete discovery.
