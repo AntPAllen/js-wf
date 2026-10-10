@@ -21,8 +21,8 @@ func ValidateReplayGraphChildren(records []journal.Record, objects map[string][]
 	return err
 }
 
-func replayGraphChildValidator(records []journal.Record, objects map[string][]byte) (func(context.Context, Signal) error, error) {
-	if !hasReplayGraphAnnotations(records) {
+func replayGraphChildValidator(records []journal.Record, objects map[string][]byte, canonical ...bool) (func(context.Context, Signal) error, error) {
+	if !hasReplayGraphAnnotations(records) && (len(canonical) == 0 || !canonical[0]) {
 		return nil, nil
 	}
 	bindings := map[uint64]Signal{}

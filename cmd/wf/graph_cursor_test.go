@@ -22,6 +22,7 @@ import (
 	"js-wf/journal"
 	"js-wf/provision"
 	"js-wf/testcluster"
+	"js-wf/wf"
 )
 
 func TestGraphOperatorCursorRejectsUnknownVersion(t *testing.T) {
@@ -123,9 +124,12 @@ func TestNativeGraphCursorOperatorHistory(t *testing.T) {
 					t.Fatal(err)
 				}
 				request, _ := json.Marshal(map[string]string{"kind": "checkpoint", "name": "next", "input_hash": hex.EncodeToString(digest[:])})
-				completion, _ := json.Marshal(map[string]string{"result_ref": "step-result-" + hash, "result_hash": hash})
+				metadata, _ := json.Marshal(map[string]any{"version": 1, "identity": frame.Identity, "anchor": frame.Anchor, "frame_sha256": hash, "children": map[string]any{}, "signals": map[string]any{}, "signal_next": 0, "signal_last": 0})
+				metadataSum := sha256.Sum256(metadata)
+				metadataHash := hex.EncodeToString(metadataSum[:])
+				completion, _ := json.Marshal(map[string]string{"result_ref": "step-result-" + hash, "result_hash": hash, "checkpoint_metadata_ref": "step-result-" + metadataHash, "checkpoint_metadata_hash": metadataHash})
 				appendRecord(journal.StepRequested, request)
-				appendRecord(journal.StepCompleted, completion, body)
+				appendRecord(journal.StepCompleted, completion, body, metadata)
 				appendRecord(journal.Suspended, []byte(`{"waiting_on":"continuation:next"}`))
 				view, err := store.Open(ctx, h.Type, h.ID, h.InvSeq)
 				if err != nil {
@@ -248,7 +252,7 @@ func TestNativeGraphCursorOperatorHistory(t *testing.T) {
 					}
 				}
 				bundle, err := fetchGraphReplayBundle(ctx, js, store, h.Type, h.ID)
-				if err != nil || bundle.InvSeq != h.InvSeq || !bytes.Equal(bundle.Input, []byte(`7`)) || !reflect.DeepEqual(bundle.Journal, want) || !bytes.Equal(bundle.Objects["step-result-"+hash], body) || !bytes.Equal(bundle.Objects["input:"+status.State.Start.InputSHA256], []byte(`7`)) {
+				if err != nil || bundle.Format != wf.ReplayFormatGraphV1 || bundle.InvSeq != h.InvSeq || !bytes.Equal(bundle.Input, []byte(`7`)) || !reflect.DeepEqual(bundle.Journal, want) || !bytes.Equal(bundle.Objects["step-result-"+hash], body) || !bytes.Equal(bundle.Objects["input:"+status.State.Start.InputSHA256], []byte(`7`)) {
 					t.Fatal("canonical replay export lost collected history/frame/input", bundle.InvSeq, len(bundle.Journal), err)
 				}
 				final, err := port.ReadRoot(ctx, keys[0])

@@ -1,0 +1,25 @@
+{
+  "actual_exit": 0,
+  "command": [
+    "go",
+    "test",
+    "-race",
+    "./cmd/wf",
+    "-run",
+    "^TestNativeGraphCursorOperatorHistory$/v5/R1-domain$",
+    "-count=1",
+    "-timeout=5m",
+    "-v"
+  ],
+  "environment": {
+    "GOMAXPROCS": "2",
+    "GOMEMLIMIT": "768MiB"
+  },
+  "source_files_sha256": {
+    "cmd/wf/graph.go": "459ee240500083b6ae31550238ca97cdf5831e7356065d1c61199a2d79781207",
+    "cmd/wf/graph_cursor_test.go": "c614973271ec89bc5e1226c434733ebadeaa84a02ef036ea7c461d8b5c7f5131",
+    "wf/replay_graph_format.go": "4a5b65403bd9cb2bbf30ec34770d7c4834470831bdcf87f3e27d51a59c069064"
+  },
+  "log_sha256": "d5e2885cc0d4ba05f370dfeba8b76332f3e96bd128b47a8376dfe3c4790d4709",
+  "scope": "Development R1/v5 exported format and metadata only; complete frozen qualification follows separately."
+}

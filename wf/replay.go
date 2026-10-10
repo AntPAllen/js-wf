@@ -20,6 +20,8 @@ var ErrReplayObjectMissing = errors.New("offline replay object is missing")
 var ErrReplayPendingStep = errors.New("offline replay reached an incomplete step")
 
 type ReplayOptions struct {
+	// Format declares the export contract; graph-v1 requires canonical markers.
+	Format      string
 	Type        string
 	ID          string
 	InvSeq      uint64
@@ -122,10 +124,13 @@ func replayWithStages[T any](journalBytes []byte, fn func(*Context) (T, error), 
 			return result, fmt.Errorf("%w: %v", ErrCorruptJournal, checkErr)
 		}
 	}
+	if err := validateReplayGraphFormat(records, opts.Objects, opts.Format); err != nil {
+		return result, err
+	}
 	if err := ValidateReplayGraphCheckpoints(records, opts.Objects, opts.Type, opts.ID, opts.InvSeq); err != nil {
 		return result, err
 	}
-	childValidator, err := replayGraphChildValidator(records, opts.Objects)
+	childValidator, err := replayGraphChildValidator(records, opts.Objects, opts.Format == ReplayFormatGraphV1)
 	if err != nil {
 		return result, err
 	}
