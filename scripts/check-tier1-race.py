@@ -6,12 +6,15 @@ import json
 import os
 from pathlib import Path
 import subprocess
+from tier1_partitions import partition_tests, selector
 
 REPO = Path(__file__).resolve().parents[1]
 p = argparse.ArgumentParser(description=__doc__)
 p.add_argument('--root', type=Path, required=True)
 p.add_argument('--seeds', type=int, choices=(1000,10000,100000), default=1000)
 p.add_argument('--no-race', action='store_true', help='retain a normal binary for the extended seed suite')
+p.add_argument('--shards', type=int, choices=range(1,33), default=1,
+               help='disjoint sequential package processes from the same retained binary')
 a = p.parse_args()
 root = a.root.resolve()
 assert not root.exists() and not root.is_relative_to(REPO)
@@ -32,11 +35,12 @@ execution_contexts = []
 command_results = []
 def call(command, **kwargs):
     cwd = kwargs.pop('cwd', REPO)
+    child_env = kwargs.pop('env', env)
     commands.append(command)
     execution_contexts.append(dict(command=command, working_directory=str(cwd)))
     (root/'commands.json').write_text(json.dumps(commands, indent=2)+'\n')
     (root/'execution-contexts.json').write_text(json.dumps(execution_contexts, indent=2)+'\n')
-    result = subprocess.run(command, cwd=cwd, env=env, **kwargs)
+    result = subprocess.run(command, cwd=cwd, env=child_env, **kwargs)
     command_results.append(dict(command=command, working_directory=str(cwd), exit_code=result.returncode))
     (root/'command-results.json').write_text(json.dumps(command_results, indent=2)+'\n')
     result.check_returncode()
@@ -55,11 +59,33 @@ try:
                      environment={k: env[k] for k in ('GOMEMLIMIT', 'GOMAXPROCS', 'SIM_SEEDS', 'SIM_COVERAGE_SUMMARY', 'SIM_PROGRESS')})
     assert ('-race=true' in provenance['build_info']) == provenance['race_instrumented'], 'binary race provenance mismatch'
     (root/'binary.json').write_text(json.dumps(provenance, indent=2)+'\n')
-    with (root/'tier1-events.jsonl').open('w') as out, (root/'stderr.log').open('w') as err:
-        call(['/usr/bin/time', '-o', str(root/'tier1-time.txt'), '-f', 'elapsed=%e user=%U system=%S',
-              'go', 'tool', 'test2json', '-t', '-p', 'js-wf/sim', str(binary),
-              '-test.v=test2json', '-test.count=1', '-test.timeout=300m'], cwd=REPO/'sim', stdout=out, stderr=err)
-    call(['python3', 'scripts/check-tier1-suite.py', '--events', str(root/'tier1-events.jsonl'),
+    if a.shards == 1:
+        with (root/'tier1-events.jsonl').open('w') as out, (root/'stderr.log').open('w') as err:
+            call(['/usr/bin/time', '-o', str(root/'tier1-time.txt'), '-f', 'elapsed=%e user=%U system=%S',
+                  'go', 'tool', 'test2json', '-t', '-p', 'js-wf/sim', str(binary),
+                  '-test.v=test2json', '-test.count=1', '-test.timeout=300m'], cwd=REPO/'sim', stdout=out, stderr=err)
+        evidence = ['--events', str(root/'tier1-events.jsonl')]
+    else:
+        groups = partition_tests((root/'tier1-inventory.txt').read_text().splitlines(),
+                                 (root/'tier1-seeded-inventory.txt').read_text().splitlines(), a.shards)
+        parts = []
+        for index, group in enumerate(groups):
+            part = root/f'part-{index:02d}'
+            part.mkdir()
+            (part/'inventory.txt').write_text('\n'.join(group)+'\n')
+            parts.append(dict(inventory=str(part/'inventory.txt'), events=str(part/'events.jsonl')))
+        manifest = root/'parts.json'
+        manifest.write_text(json.dumps(parts, indent=2)+'\n')
+        for index, group in enumerate(groups):
+            part = root/f'part-{index:02d}'
+            with (part/'events.jsonl').open('w') as out, (part/'stderr.log').open('w') as err:
+                call(['/usr/bin/time', '-o', str(part/'time.txt'), '-f', 'elapsed=%e user=%U system=%S',
+                      'go', 'tool', 'test2json', '-t', '-p', 'js-wf/sim', str(binary),
+                      '-test.v=test2json', '-test.run='+selector(group), '-test.count=1', '-test.timeout=300m'],
+                     cwd=REPO/'sim', stdout=out, stderr=err,
+                     env=dict(env, FAULT_TRACE_OUT=str(part/'failure-trace.json')))
+        evidence = ['--parts', str(manifest)]
+    call(['python3', 'scripts/check-tier1-suite.py', *evidence,
           '--inventory', str(root/'tier1-inventory.txt'), '--regressions', str(root/'tier1-regression-inventory.txt'),
           '--source', str(root/'tier1-source.txt'), '--seeded-inventory', str(root/'tier1-seeded-inventory.txt'),
           '--seeds', str(a.seeds), '--output', str(root/'tier1-result.json')])

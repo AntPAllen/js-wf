@@ -2,6 +2,7 @@ import copy
 import importlib.util
 from pathlib import Path
 import unittest
+from tier1_partitions import partition_tests
 
 spec = importlib.util.spec_from_file_location("tier1_suite", Path(__file__).with_name("check-tier1-suite.py"))
 module = importlib.util.module_from_spec(spec)
@@ -123,6 +124,96 @@ class Tier1SuiteTests(unittest.TestCase):
             self.check(source="main")
         with self.assertRaises(ValueError):
             self.check(seeds=0)
+
+
+class Tier1PartitionTests(unittest.TestCase):
+    def setUp(self):
+        Tier1SuiteTests.setUp(self)
+        self.inventory += "TestSeededOther\n"
+        self.seeded = "TestSeededWorkload\nTestSeededOther\n"
+        self.events += [
+            {"Package": module.PACKAGE, "Action": "run", "Test": "TestSeededOther"},
+            {"Package": module.PACKAGE, "Action": "pass", "Test": "TestSeededOther"},
+        ]
+        for name in self.seeded.splitlines():
+            self.events.append({"Package": module.PACKAGE, "Action": "output", "Test": name,
+                                "Output": f"TIER1_SEEDS test={name} first=1 last=100000 completed=100000 requested=100000\n"})
+        self.parts = []
+        for local in (["TestSeededWorkload", "TestPinnedRegressionCorpus"], ["TestSeededOther", *module.TRACE_SKIPS]):
+            rows = [copy.deepcopy(e) for e in self.events if not e.get("Test") or e["Test"].split("/", 1)[0] in local]
+            self.parts.append(("\n".join(local)+"\n", rows))
+
+    def verify(self, parts=None):
+        return module.check_parts(self.parts if parts is None else parts, self.inventory, 100000,
+                                  "a"*40, self.regressions, self.seeded)
+
+    def test_disjoint_process_union(self):
+        report = self.verify()
+        self.assertEqual(report["package_processes"], 2)
+        self.assertEqual(report["top_level_pass"], 3)
+        self.assertEqual(report["pinned_regressions_pass"], 1)
+        self.assertEqual(report["per_workload_seed_proof"]["completed_bodies"], 200000)
+        self.assertEqual(report["aggregate_counts"]["generated_schedules"], 20)
+        self.assertEqual(report["aggregate_counts"]["virtual_ms_max"], 60000)
+
+    def test_partition_plan_preserves_inventory_and_seeded_coverage(self):
+        names = ["TestSeededA", "TestControlA", "TestSeededB", "TestSeededC", "TestControlB"]
+        seeded = ["TestSeededA", "TestSeededB", "TestSeededC"]
+        groups = partition_tests(names, seeded, 3)
+        self.assertEqual(groups, partition_tests(names, seeded, 3))
+        self.assertEqual(sorted(n for group in groups for n in group), sorted(names))
+        self.assertTrue(all(set(group).intersection(seeded) for group in groups))
+        for bad_names, bad_seeded, count in ((names+names[:1], seeded, 3), (names, seeded[:1], 3),
+                                            (names, seeded+["TestAbsent"], 3), (names, seeded, 0),
+                                            (names, seeded, 33), (["Bad"], ["Bad"], 2)):
+            with self.assertRaises(ValueError):
+                partition_tests(bad_names, bad_seeded, count)
+
+    def test_reject_race_warning_even_with_passing_receipts(self):
+        parts = copy.deepcopy(self.parts)
+        parts[0][1].insert(0, {"Package": module.PACKAGE, "Action": "output", "Output": "WARNING: DATA RACE\n"})
+        with self.assertRaises(ValueError):
+            self.verify(parts)
+
+    def test_reject_missing_overlapping_or_empty_processes(self):
+        invalid = [self.parts[:1], self.parts+[self.parts[0]],
+                   [("", self.parts[0][1]), self.parts[1]],
+                   [(self.parts[0][0].replace("TestSeededWorkload\n", ""), self.parts[0][1]), self.parts[1]]]
+        for parts in invalid:
+            with self.subTest(parts=[p[0] for p in parts]), self.assertRaises(ValueError):
+                self.verify(parts)
+
+    def test_reject_cross_process_execution(self):
+        parts = copy.deepcopy(self.parts)
+        parts[0][1].append({"Package": module.PACKAGE, "Action": "run", "Test": "TestSeededOther"})
+        with self.assertRaises(ValueError):
+            self.verify(parts)
+
+    def test_reject_incomplete_process_and_seed_proof(self):
+        for predicate in (lambda e: not e.get("Test") and e["Action"]=="pass",
+                          lambda e: "TIER1_COVERAGE" in e.get("Output", ""),
+                          lambda e: "TIER1_SEEDS" in e.get("Output", ""),
+                          lambda e: e.get("Test", "").startswith("TestPinnedRegressionCorpus/")):
+            parts = copy.deepcopy(self.parts)
+            parts[0] = (parts[0][0], [e for e in parts[0][1] if not predicate(e)])
+            with self.assertRaises(ValueError):
+                self.verify(parts)
+
+    def test_reject_failed_or_incompatible_process(self):
+        for old, new in (("model_version=3", "model_version=4"), ("seeds_per_workload=100000", "seeds_per_workload=1000"),
+                         ("completed=100000", "completed=99999")):
+            parts = copy.deepcopy(self.parts)
+            for e in parts[1][1]:
+                if "Output" in e:
+                    e["Output"] = e["Output"].replace(old, new)
+            with self.subTest(new=new), self.assertRaises(ValueError):
+                self.verify(parts)
+        parts = copy.deepcopy(self.parts)
+        for e in parts[1][1]:
+            if not e.get("Test") and e["Action"]=="pass":
+                e["Action"]="fail"
+        with self.assertRaises(ValueError):
+            self.verify(parts)
 
 
 if __name__ == "__main__":
