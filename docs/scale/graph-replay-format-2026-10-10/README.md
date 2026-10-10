@@ -2,7 +2,10 @@
 
 Worker graph snapshots carry `Format: graph-v1` and validate that contract
 before returning. CLI exports propagate it as `format: graph-v1`; SDK callers use
-`ReplayOptions.Format = wf.ReplayFormatGraphV1`. Export validates that contract
+`ReplayOptions.Format = wf.ReplayFormatGraphV1`. Current SDK replay also supplies
+`ReplayOptions.InputHash = snapshot.InputHash`; the later
+[input-binding fix](../graph-replay-input-binding-2026-10-10/README.md) checks it
+against Started. Export validates that contract
 before returning bytes, and CLI replay validates it before plugin loading.
 Unknown nonempty formats reject. Empty format preserves previously exported
 legacy/unversioned histories and their existing annotation validation.

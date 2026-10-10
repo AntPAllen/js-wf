@@ -1,5 +1,26 @@
 # Implementation status against the supplied plan
 
+## Canonical replay input binding fixed; qualification live — 2026-10-10
+
+A real retained graph-v1 child export accepts an ignored extra input field after
+its own bundle hash is recomputed, even though canonical Started still declares
+the original bytes. Frozen `dab8be3` now binds ReplayOptions.InputHash to that
+durable declaration in shared SDK and before CLI plugin loading. Worker snapshots
+return the verified InputHash. Graph-v1 requires both hashes and unambiguous
+Start keys; supplied unversioned hashes verify declarations when present while
+legacy histories without declarations retain compatibility.
+
+Twelve SDK and two CLI pre-plugin race controls pass, including ignored-field
+mutations, missing/malformed declarations, duplicate/case-aliased keys and
+legacy behavior. Existing declared-format and worker export development controls
+also pass. [Actual old acceptance and implementation scope](scale/graph-replay-input-binding-2026-10-10/README.md).
+Frozen full SDK/corpus/export/209-command qualification is running under a
+retained-exit service; its overall result remains unaccepted pending terminal
+completion and independent review. Both older broad campaigns continue.
+Full authenticity/import/rollout, fault/retention/admission matrices, latest-source
+seeded/extended, remaining cap variants, public admission, production collection
+and every broader original requirement remain open.
+
 ## Canonical replay format combined evidence verified — 2026-10-10
 
 Independent review binds frozen `04f542b` to 3,336 unchanged Git inputs and six
