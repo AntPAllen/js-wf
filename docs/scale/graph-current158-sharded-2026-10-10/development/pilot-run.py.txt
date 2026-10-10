@@ -1,0 +1,22 @@
+import subprocess,os,json,hashlib,importlib.util
+from pathlib import Path
+root=Path(__file__).resolve().parent;repo=Path('/home/exedev/js-wf');source=subprocess.check_output(['git','rev-parse','HEAD'],cwd=repo,text=True).strip()
+groups=[['TestSeededGraphReplayLifecycleReplay','TestReplayFaultTrace','TestMinimizeFaultTrace'],['TestSeededGraphRunningCancelPollReplay','TestPinnedRegressionCorpus']]
+env=dict(os.environ,GOMAXPROCS='2',GOMEMLIMIT='768MiB',SIM_SEEDS='1000',SIM_COVERAGE_SUMMARY='1');commands=[];parts=[]
+for i,names in enumerate(groups):
+ part=root/str(i);part.mkdir();(part/'inventory.txt').write_text('\n'.join(names)+'\n')
+ command=['go','tool','test2json','-t','-p','js-wf/sim',str(root/'sim.test'),'-test.v=test2json','-test.run=^('+'|'.join(names)+')$','-test.count=1','-test.timeout=5m']
+ with (part/'events.jsonl').open('w') as output:code=subprocess.call(command,cwd=repo/'sim',env=env,stdout=output,stderr=subprocess.STDOUT)
+ commands.append(dict(command=command,exit=code));assert code==0
+ parts.append(dict(inventory=str(part/'inventory.txt'),events=str(part/'events.jsonl')))
+(root/'parts.json').write_text(json.dumps(parts,indent=2)+'\n');(root/'inventory.txt').write_text('\n'.join(n for group in groups for n in group)+'\n');(root/'seeded.txt').write_text('TestSeededGraphReplayLifecycleReplay\nTestSeededGraphRunningCancelPollReplay\n');(root/'source.txt').write_text(source+'\n')
+regressions=subprocess.check_output(['git','ls-files','sim/testdata/regressions/*.json'],cwd=repo,text=True);assert len(regressions.splitlines())==853;(root/'regressions.txt').write_text(regressions)
+command=['python3','scripts/check-tier1-suite.py','--parts',str(root/'parts.json'),'--inventory',str(root/'inventory.txt'),'--source',str(root/'source.txt'),'--regressions',str(root/'regressions.txt'),'--seeded-inventory',str(root/'seeded.txt'),'--seeds','1000','--output',str(root/'report.json')]
+code=subprocess.call(command,cwd=repo);commands.append(dict(command=command,exit=code));assert code==0
+spec=importlib.util.spec_from_file_location('checker',repo/'scripts/check-tier1-suite.py');module=importlib.util.module_from_spec(spec);spec.loader.exec_module(module)
+full=subprocess.check_output([str(root/'sim.test'),'-test.list=^Test'],cwd=repo,env=dict(env,SIM_COVERAGE_SUMMARY='0'),text=True);full='\n'.join(l for l in full.splitlines() if l.startswith('Test'))+'\n'
+rows=[(Path(p['inventory']).read_text(),[json.loads(l) for l in Path(p['events']).read_text().splitlines()]) for p in parts]
+try:module.check_parts(rows,full,1000,source,regressions,(root/'seeded.txt').read_text())
+except ValueError as error:assert 'union omits compiled tests' in str(error);rejection=str(error)
+else:raise AssertionError('Pilot accepted as complete compiled suite')
+(root/'receipt.json').write_text(json.dumps(dict(source=source,commands=commands,binary_sha256=hashlib.sha256((root/'sim.test').read_bytes()).hexdigest(),complete_compiled_inventory_rejection=rejection,scope='Development pilot:two actual processes, five selected roots/two seeded families/853 pins/trace helper skips; not complete source suite qualification.'),indent=2)+'\n')

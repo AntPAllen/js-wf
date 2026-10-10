@@ -1,0 +1,61 @@
+{
+  "source": "75703a170199c8c6620832c201c7ff42e748c91f",
+  "commands": [
+    {
+      "command": [
+        "go",
+        "tool",
+        "test2json",
+        "-t",
+        "-p",
+        "js-wf/sim",
+        "/home/exedev/js-wf-tier1-partitions-pilot-20261010/sim.test",
+        "-test.v=test2json",
+        "-test.run=^(TestSeededGraphReplayLifecycleReplay|TestReplayFaultTrace|TestMinimizeFaultTrace)$",
+        "-test.count=1",
+        "-test.timeout=5m"
+      ],
+      "exit": 0
+    },
+    {
+      "command": [
+        "go",
+        "tool",
+        "test2json",
+        "-t",
+        "-p",
+        "js-wf/sim",
+        "/home/exedev/js-wf-tier1-partitions-pilot-20261010/sim.test",
+        "-test.v=test2json",
+        "-test.run=^(TestSeededGraphRunningCancelPollReplay|TestPinnedRegressionCorpus)$",
+        "-test.count=1",
+        "-test.timeout=5m"
+      ],
+      "exit": 0
+    },
+    {
+      "command": [
+        "python3",
+        "scripts/check-tier1-suite.py",
+        "--parts",
+        "/home/exedev/js-wf-tier1-partitions-pilot-20261010/parts.json",
+        "--inventory",
+        "/home/exedev/js-wf-tier1-partitions-pilot-20261010/inventory.txt",
+        "--source",
+        "/home/exedev/js-wf-tier1-partitions-pilot-20261010/source.txt",
+        "--regressions",
+        "/home/exedev/js-wf-tier1-partitions-pilot-20261010/regressions.txt",
+        "--seeded-inventory",
+        "/home/exedev/js-wf-tier1-partitions-pilot-20261010/seeded.txt",
+        "--seeds",
+        "1000",
+        "--output",
+        "/home/exedev/js-wf-tier1-partitions-pilot-20261010/report.json"
+      ],
+      "exit": 0
+    }
+  ],
+  "binary_sha256": "e8edaf980d463a904163ab8f849e508502df3f35f86be77645336247a5943586",
+  "complete_compiled_inventory_rejection": "process union omits compiled tests",
+  "scope": "Development pilot:two actual processes, five selected roots/two seeded families/853 pins/trace helper skips; not complete source suite qualification."
+}
