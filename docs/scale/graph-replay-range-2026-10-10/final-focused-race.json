@@ -1,0 +1,20 @@
+{
+  "actual_exit_code": 0,
+  "command": [
+    "go",
+    "test",
+    "-race",
+    "./worker",
+    "./journal",
+    "./cmd/wf",
+    "-run",
+    "TestGraphReplaySnapshot|TestGraphFullHistoryRange|TestGraphEmptyHistoryInspection|TestGraphJournalAcquireRenewContention|TestGraphOperatorCursorRejectsUnknownVersion",
+    "-count=1",
+    "-v"
+  ],
+  "environment": {
+    "GOMAXPROCS": "1",
+    "GOMEMLIMIT": "512MiB"
+  },
+  "scope": "Focused development race checks; post-execution modified-source hashes, not a retained binary/full dependency manifest."
+}

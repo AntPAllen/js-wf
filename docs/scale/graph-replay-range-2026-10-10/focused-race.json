@@ -1,0 +1,22 @@
+{
+  "command": [
+    "go",
+    "test",
+    "-race",
+    "./worker",
+    "./journal",
+    "./cmd/wf",
+    "-run",
+    "TestGraphReplaySnapshot|TestGraphFullHistoryRange|TestGraphEmptyHistoryInspection|TestGraphJournalAcquireRenewContention|TestGraphOperatorCursorRejectsUnknownVersion",
+    "-count=1",
+    "-v"
+  ],
+  "working_directory": "/home/exedev/js-wf",
+  "actual_exit_code": 0,
+  "started": "2026-10-10T08:56:37.475361+00:00",
+  "finished": "2026-10-10T08:57:25.386114+00:00",
+  "env": {
+    "GOMAXPROCS": "1",
+    "GOMEMLIMIT": "512MiB"
+  }
+}

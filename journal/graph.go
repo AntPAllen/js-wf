@@ -530,6 +530,22 @@ func (v *GraphView) Payload(ctx context.Context, index uint64, link GraphPayload
 	return data, nil
 }
 
+// RenewIfNeeded renews a live pin once half its lifetime has elapsed, using
+// the store's collection-consistent clock. It never resurrects an expired pin.
+// Call before traversal and while copying owned payloads from a long read.
+func (v *GraphView) RenewIfNeeded(ctx context.Context) error {
+	if err := ctx.Err(); err != nil {
+		return err
+	}
+	if err := v.alive(); err != nil {
+		return err
+	}
+	if !v.store.cfg.Now().Before(v.expires.Add(-v.store.cfg.PinTTL / 2)) {
+		return v.Renew(ctx)
+	}
+	return nil
+}
+
 func (v *GraphView) Renew(ctx context.Context) error {
 	for attempt := 0; attempt < 16; attempt++ {
 		if err := v.alive(); err != nil {
@@ -610,19 +626,13 @@ func (s *GraphStore) read(ctx context.Context, typ, id string, invocation uint64
 		// Record-only empty views are metadata witnesses with no reader pin.
 		return nil, view.Tail(), nil
 	}
-	renew := func() error {
-		if !s.cfg.Now().Before(view.expires.Add(-s.cfg.PinTTL / 2)) {
-			return view.Renew(ctx)
-		}
-		return nil
-	}
 	// Acquisition may itself consume half the pin lifetime. Renew before
 	// fetching the first traversal spine, as the former point-read loop did.
-	if err = renew(); err != nil {
+	if err = view.RenewIfNeeded(ctx); err != nil {
 		return nil, 0, err
 	}
 	err = view.ReadRange(ctx, 0, view.Count(), func(item GraphRecord) error {
-		if e := renew(); e != nil {
+		if e := view.RenewIfNeeded(ctx); e != nil {
 			return e
 		}
 		var e error

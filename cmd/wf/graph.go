@@ -78,18 +78,25 @@ func readGraphCLIHistory(ctx context.Context, js jetstream.JetStream, graph *jou
 			err = closeErr
 		}
 	}()
+	if err = view.RenewIfNeeded(ctx); err != nil {
+		return
+	}
 	if err = view.ValidateStartInvocation(ctx, input); err != nil {
 		return
 	}
 	records = make([]journal.Record, 0, view.Count())
-	for index := uint64(0); index < view.Count(); index++ {
-		record, e := view.Read(ctx, index)
-		if e != nil {
-			records = nil
-			err = e
-			return
+	if err = view.RenewIfNeeded(ctx); err != nil {
+		return
+	}
+	err = view.ReadRange(ctx, 0, view.Count(), func(record journal.GraphRecord) error {
+		if e := view.RenewIfNeeded(ctx); e != nil {
+			return e
 		}
 		records = append(records, record.Record)
+		return nil
+	})
+	if err != nil {
+		records = nil
 	}
 	return
 }

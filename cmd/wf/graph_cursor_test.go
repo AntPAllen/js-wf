@@ -247,10 +247,15 @@ func TestNativeGraphCursorOperatorHistory(t *testing.T) {
 						t.Fatal("operator changed logical history", command, records, want)
 					}
 				}
+				bundle, err := fetchGraphReplayBundle(ctx, js, store, h.Type, h.ID)
+				if err != nil || bundle.InvSeq != h.InvSeq || !bytes.Equal(bundle.Input, []byte(`7`)) || !reflect.DeepEqual(bundle.Journal, want) || !bytes.Equal(bundle.Objects["step-result-"+hash], body) || !bytes.Equal(bundle.Objects["input:"+status.State.Start.InputSHA256], []byte(`7`)) {
+					t.Fatal("canonical replay export lost collected history/frame/input", bundle.InvSeq, len(bundle.Journal), err)
+				}
 				final, err := port.ReadRoot(ctx, keys[0])
 				if err != nil || len(final.Readers) != 0 {
 					t.Fatal("operator reader leaked", err)
 				}
+				t.Logf("CURSOR_REPLAY_EXPORT version=%d replicas=%d records=%d frame_bytes=%d input=7 readers=0", version, replicas, len(bundle.Journal), len(body))
 				if wrongDomain.Load() != 0 || legacy.Load() != 0 {
 					t.Fatal("operator API namespace mismatch", wrongDomain.Load(), legacy.Load())
 				}

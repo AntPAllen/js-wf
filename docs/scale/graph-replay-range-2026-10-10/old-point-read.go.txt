@@ -50,9 +50,6 @@ func ReadGraphReplaySnapshot(ctx context.Context, store *journal.GraphStore, typ
 			snapshot = GraphReplaySnapshot{}
 		}
 	}()
-	if err = view.RenewIfNeeded(ctx); err != nil {
-		return snapshot, err
-	}
 	if err = view.ValidateStartInvocation(ctx, invocation); err != nil {
 		return snapshot, err
 	}
@@ -64,34 +61,31 @@ func ReadGraphReplaySnapshot(ctx context.Context, store *journal.GraphStore, typ
 	g := &graphDelivery{store: store, typ: typ, id: id, invocation: invocation.Sequence, view: view, refs: map[string]graphPayload{}, pending: snapshot.Objects, children: map[string]graphChildResult{}, childSignals: map[uint64]signalRecord{}}
 	loadedHashes := map[string]string{}
 	next, lastSequence := uint64(0), uint64(0)
-	if err = view.RenewIfNeeded(ctx); err != nil {
-		return snapshot, err
-	}
-	err = view.ReadRange(ctx, 0, view.Count(), func(record journal.GraphRecord) error {
-		if e := view.RenewIfNeeded(ctx); e != nil {
-			return e
+	for i := uint64(0); i < view.Count(); i++ {
+		record, e := view.Read(ctx, i)
+		if e != nil {
+			return snapshot, e
 		}
-		i := record.Index
 		if i == 0 && record.Kind != journal.Started {
-			return journal.ErrGap
+			return snapshot, journal.ErrGap
 		}
 		if i > 0 {
 			previous := snapshot.Records[len(snapshot.Records)-1]
 			if record.Sequence != previous.Sequence+1 || record.Epoch < previous.Epoch || previous.Kind == journal.Completed || previous.Kind == journal.Failed {
-				return journal.ErrGap
+				return snapshot, journal.ErrGap
 			}
 		}
-		if e := g.register(record); e != nil {
-			return e
+		if e = g.register(record); e != nil {
+			return snapshot, e
 		}
 		refs, e := graphReferences(record.Entry)
 		if e != nil {
-			return e
+			return snapshot, e
 		}
 		names := make([]string, 0, len(refs))
 		for name, hash := range refs {
 			if prior, ok := loadedHashes[name]; ok && prior != hash {
-				return journal.ErrGap
+				return snapshot, journal.ErrGap
 			}
 			if _, ok := snapshot.Objects[name]; !ok {
 				names = append(names, name)
@@ -100,18 +94,15 @@ func ReadGraphReplaySnapshot(ctx context.Context, store *journal.GraphStore, typ
 		sort.Strings(names)
 		for _, name := range names {
 			ref := g.refs[name]
-			if e := view.RenewIfNeeded(ctx); e != nil {
-				return e
-			}
 			data, e := view.Payload(ctx, ref.index, ref.link, store.PayloadReadLimit())
 			if e != nil {
-				return e
+				return snapshot, e
 			}
 			snapshot.Objects[name] = data
 			loadedHashes[name] = ref.link.Hash
 		}
 		if e = g.validateChildSignal(ctx, record.Entry); e != nil {
-			return e
+			return snapshot, e
 		}
 		var event *signalRecord
 		switch record.Kind {
@@ -120,17 +111,17 @@ func ReadGraphReplaySnapshot(ctx context.Context, store *journal.GraphStore, typ
 				Hash string `json:"input_sha256"`
 			}
 			if i != 0 || json.Unmarshal(record.Payload, &start) != nil || start.Hash != graphHash(snapshot.Input) {
-				return journal.ErrGap
+				return snapshot, journal.ErrGap
 			}
 		case journal.SignalConsumed:
 			event = &signalRecord{}
 			if json.Unmarshal(record.Payload, event) != nil {
-				return journal.ErrGap
+				return snapshot, journal.ErrGap
 			}
 		case journal.Completed, journal.Failed:
 			var outcome wf.Outcome
 			if json.Unmarshal(record.Payload, &outcome) != nil || outcome.InvSeq != invocation.Sequence || record.Kind == journal.Completed && outcome.Error != "" || record.Kind == journal.Failed && (outcome.Error == "" || len(outcome.Result) != 0 || outcome.ResultRef != "" || outcome.ResultHash != "") {
-				return wf.ErrCorruptJournal
+				return snapshot, wf.ErrCorruptJournal
 			}
 			if record.Kind == journal.Completed {
 				if _, e := outcome.ResultBytes(ctx, func(_ context.Context, name string) ([]byte, error) {
@@ -140,27 +131,27 @@ func ReadGraphReplaySnapshot(ctx context.Context, store *journal.GraphStore, typ
 					}
 					return data, nil
 				}); e != nil {
-					return e
+					return snapshot, e
 				}
 			}
 			if outcome.LimitEntry != nil && outcome.LimitEntry.Kind == string(journal.SignalConsumed) {
 				event = &signalRecord{}
 				if json.Unmarshal(outcome.LimitEntry.Payload, event) != nil {
-					return journal.ErrGap
+					return snapshot, journal.ErrGap
 				}
 			}
 		}
 		if event != nil {
 			if event.Canonical == nil || event.Canonical.Index != next || event.Sequence <= lastSequence || event.Ref != "graph-signal-"+event.Hash || len(event.Payload) != 0 {
-				return wf.ErrCorruptJournal
+				return snapshot, wf.ErrCorruptJournal
 			}
 			binding, e := view.SignalBindingAt(ctx, next)
 			if e != nil {
-				return e
+				return snapshot, e
 			}
 			data, ok := snapshot.Objects[event.Ref]
 			if !ok || binding.Sequence != event.Sequence || binding.Input.Token != event.Canonical.Token || binding.Input.Request.Name != event.Name || binding.Input.InputSHA256 != event.Hash || binding.Input.InputSize != len(data) || graphHash(data) != event.Hash {
-				return wf.ErrCorruptJournal
+				return snapshot, wf.ErrCorruptJournal
 			}
 			if record.Kind == journal.Failed {
 				snapshot.PendingSignal = &GraphReplaySignal{Sequence: event.Sequence, Name: event.Name, Ref: event.Ref, Hash: event.Hash}
@@ -170,10 +161,6 @@ func ReadGraphReplaySnapshot(ctx context.Context, store *journal.GraphStore, typ
 			}
 		}
 		snapshot.Records = append(snapshot.Records, record.Record)
-		return nil
-	})
-	if err != nil {
-		return snapshot, err
 	}
 	return snapshot, nil
 }

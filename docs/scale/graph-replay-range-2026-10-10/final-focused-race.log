@@ -1,0 +1,53 @@
+=== RUN   TestGraphReplaySnapshotRangeAndSlowAcquisition
+=== RUN   TestGraphReplaySnapshotRangeAndSlowAcquisition/census
+    graph_replay_range_test.go:145: REPLAY_RANGE records=33 range_gets=108 point_gets=237 elapsed=0s pin_ttl=4s pin_writes=1
+=== RUN   TestGraphReplaySnapshotRangeAndSlowAcquisition/slow-acquisition
+    graph_replay_range_test.go:145: REPLAY_RANGE records=33 range_gets=108 point_gets=237 elapsed=24.6s pin_ttl=4s pin_writes=11
+--- PASS: TestGraphReplaySnapshotRangeAndSlowAcquisition (0.82s)
+    --- PASS: TestGraphReplaySnapshotRangeAndSlowAcquisition/census (0.42s)
+    --- PASS: TestGraphReplaySnapshotRangeAndSlowAcquisition/slow-acquisition (0.41s)
+=== RUN   TestGraphReplaySnapshotOwnsInputsAndRejectedSignals
+=== RUN   TestGraphReplaySnapshotOwnsInputsAndRejectedSignals/consumed
+    graph_replay_test.go:127: mode=consumed source deleted; owned body reads=1
+=== RUN   TestGraphReplaySnapshotOwnsInputsAndRejectedSignals/rejected
+    graph_replay_test.go:127: mode=rejected source deleted; owned body reads=1
+=== RUN   TestGraphReplaySnapshotOwnsInputsAndRejectedSignals/unreadable
+=== RUN   TestGraphReplaySnapshotOwnsInputsAndRejectedSignals/forged-source
+=== RUN   TestGraphReplaySnapshotOwnsInputsAndRejectedSignals/release-unknown
+=== RUN   TestGraphReplaySnapshotOwnsInputsAndRejectedSignals/forged-terminal
+--- PASS: TestGraphReplaySnapshotOwnsInputsAndRejectedSignals (0.43s)
+    --- PASS: TestGraphReplaySnapshotOwnsInputsAndRejectedSignals/consumed (0.08s)
+    --- PASS: TestGraphReplaySnapshotOwnsInputsAndRejectedSignals/rejected (0.08s)
+    --- PASS: TestGraphReplaySnapshotOwnsInputsAndRejectedSignals/unreadable (0.06s)
+    --- PASS: TestGraphReplaySnapshotOwnsInputsAndRejectedSignals/forged-source (0.07s)
+    --- PASS: TestGraphReplaySnapshotOwnsInputsAndRejectedSignals/release-unknown (0.09s)
+    --- PASS: TestGraphReplaySnapshotOwnsInputsAndRejectedSignals/forged-terminal (0.05s)
+PASS
+ok  	js-wf/worker	2.315s
+=== RUN   TestGraphEmptyHistoryInspectionDoesNotPublishReader
+--- PASS: TestGraphEmptyHistoryInspectionDoesNotPublishReader (0.01s)
+=== RUN   TestGraphFullHistoryRangeRenewsAfterSlowAcquire
+--- PASS: TestGraphFullHistoryRangeRenewsAfterSlowAcquire (0.23s)
+=== RUN   TestGraphFullHistoryRangeCensusAndRenewal
+    graph_full_range_test.go:127: FULL_HISTORY_RANGE records=33 range_gets=97 point_gets=226 simulated_elapsed=19.4s pin_ttl=4s
+--- PASS: TestGraphFullHistoryRangeCensusAndRenewal (0.35s)
+=== RUN   TestGraphJournalAcquireRenewContention
+=== RUN   TestGraphJournalAcquireRenewContention/open
+=== RUN   TestGraphJournalAcquireRenewContention/renew
+=== RUN   TestGraphJournalAcquireRenewContention/open-replaced
+=== RUN   TestGraphJournalAcquireRenewContention/renew-expired
+=== RUN   TestGraphJournalAcquireRenewContention/open-unknown
+=== RUN   TestGraphJournalAcquireRenewContention/renew-unknown
+--- PASS: TestGraphJournalAcquireRenewContention (0.06s)
+    --- PASS: TestGraphJournalAcquireRenewContention/open (0.01s)
+    --- PASS: TestGraphJournalAcquireRenewContention/renew (0.01s)
+    --- PASS: TestGraphJournalAcquireRenewContention/open-replaced (0.01s)
+    --- PASS: TestGraphJournalAcquireRenewContention/renew-expired (0.01s)
+    --- PASS: TestGraphJournalAcquireRenewContention/open-unknown (0.01s)
+    --- PASS: TestGraphJournalAcquireRenewContention/renew-unknown (0.01s)
+PASS
+ok  	js-wf/journal	1.711s
+=== RUN   TestGraphOperatorCursorRejectsUnknownVersion
+--- PASS: TestGraphOperatorCursorRejectsUnknownVersion (0.00s)
+PASS
+ok  	js-wf/cmd/wf	1.057s
