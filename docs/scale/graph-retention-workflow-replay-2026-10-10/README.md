@@ -45,3 +45,16 @@ Its source predates this change. Full 159-family normal/race and extended seed
 qualification remain open until their own actual runs and independent reviews.
 Original native scale/fault/soak/storage/retention/import/security/rollout gates
 remain separate; admission and online collection remain disabled.
+
+## Complete current-source launch
+
+The complete normal run is live at source f15a573 in a clean shared Git worktree.
+`normal-launch.json` binds its actual supervisor, driver child, invocation and
+one-core service quota. Original process watchdogs and all complete-suite checks
+are retained. Completion and independent review are pending.
+
+The first launch rejected an incorrectly transcribed revision in preflight before
+any driver or simulation child started. Its terminal service exit 1 and journal
+are preserved in `launch-preflight-rejected.*`. The corrected launch uses the
+exact committed revision and a separate invocation; this was a launcher error,
+not a simulator failure.
