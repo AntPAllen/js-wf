@@ -40,3 +40,13 @@ the new test source, 50,000-row crash/rebuild acceptance, sustained database
 fault recovery or the broader implementation gates. Admission and collection
 remain off. Preserve failed evidence and inspect actual terminal status;
 observation timeouts do not authorize a restart.
+
+## Persistent CI coverage
+
+The `canonical-postgres-cli` job in
+[operator-runtime-domain-controls](../../../.github/workflows/operator-runtime-domain-controls.yml)
+runs these exact focused race selectors against PostgreSQL 18 on relevant
+pushes and pull requests. It requires both native cases and all three selected
+groups without skips, and retains complete captures and the real Go log even
+on failure. Hosted execution is independent of local acceptance; adding the
+job does not establish a hosted pass or the independent wire review.

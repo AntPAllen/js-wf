@@ -57,6 +57,59 @@ on:
 permissions:
   contents: read
 jobs:
+  canonical-postgres-cli:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    services:
+      postgres:
+        image: postgres:18-alpine
+        env:
+          POSTGRES_DB: wf_canonical_cli
+          POSTGRES_PASSWORD: fixture
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d wf_canonical_cli"
+          --health-interval 5s --health-timeout 5s --health-retries 12
+    env:
+      WF_OPERATOR_STANDALONE: '1'
+      WF_TEST_POSTGRES_DSN: postgres://postgres:fixture@127.0.0.1:5432/wf_canonical_cli?sslmode=disable
+      WF_OPERATOR_TEST_ROOT: ${{ runner.temp }}/canonical-postgres-cli
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - name: Run compiled canonical PostgreSQL commands and visibility controls
+        shell: bash
+        run: |
+          set -o pipefail
+          mkdir -p "$WF_OPERATOR_TEST_ROOT"
+          go test -race -p=1 ./cmd/wf ./visibility -run '^(TestOperatorStandaloneCanonicalGraphPostgresCommands|TestGraphPostgresVisibilityCanonicalRowsAndUncertainty|TestPostgresNamespaceIsolation)$' -count=1 -v -timeout=20m 2>&1 | tee canonical-postgres-race.log
+          python3 - <<'PY'
+          import pathlib, re
+          log = pathlib.Path('canonical-postgres-race.log').read_text()
+          assert not re.search(r'^--- SKIP:', log, re.M)
+          for name in ('TestOperatorStandaloneCanonicalGraphPostgresCommands', 'TestGraphPostgresVisibilityCanonicalRowsAndUncertainty', 'TestPostgresNamespaceIsolation'):
+              assert re.search(r'^--- PASS: ' + name + r' ', log, re.M), name
+          for case in ('R1', 'R3Domain'):
+              assert re.search(r'--- PASS: TestOperatorStandaloneCanonicalGraphPostgresCommands/' + case + r' ', log), case
+          PY
+      - name: Preserve complete command and projector captures
+        if: always()
+        shell: bash
+        run: |
+          if [ -d "$WF_OPERATOR_TEST_ROOT" ]; then
+            tar -C "$WF_OPERATOR_TEST_ROOT" -czf canonical-postgres-cli.tar.gz .
+          fi
+      - if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: canonical-postgres-cli
+          path: |
+            canonical-postgres-race.log
+            canonical-postgres-cli.tar.gz
+          if-no-files-found: error
   graph-cursor-controls:
     runs-on: ubuntu-latest
     timeout-minutes: 15
