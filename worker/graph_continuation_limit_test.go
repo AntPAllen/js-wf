@@ -76,7 +76,16 @@ func TestNativeGraphContinuationGlobalLimitAndTerminalSlot(t *testing.T) {
 				if err = provision.Ensure(ctx, js, replicas); err != nil {
 					t.Fatal(err)
 				}
-				cfg := journal.NativeGraphConfig{AuthorityStream: "LIMIT_AUTH", AuthorityPrefix: "wf.graph.limit", ObjectBucket: "LIMIT_OBJECTS", ExpectedReplicas: replicas, CanonicalStarts: true, CanonicalSignals: true, CheckpointIndex: true, ArchiveCheckpoints: archive}
+				var checkpointStorage journal.CompactionCheckpointPort
+				if archive && os.Getenv("WF_GRAPH_CONTINUATION_DURABLE") == "1" {
+					kv, err := js.CreateKeyValue(ctx, jetstream.KeyValueConfig{Bucket: "LIMIT_PROGRESS", Replicas: replicas, Storage: jetstream.FileStorage, MaxValueSize: journal.MaxCompactionCheckpointBytes})
+					if err != nil {
+						t.Fatal(err)
+					}
+					checkpointStorage = journal.NewCompactionCheckpointPort(kv)
+					t.Log("GRAPH_LIMIT_DURABLE storage=file whole_handoff=delivery_context request_bounds_unchanged=true")
+				}
+				cfg := journal.NativeGraphConfig{AuthorityStream: "LIMIT_AUTH", AuthorityPrefix: "wf.graph.limit", ObjectBucket: "LIMIT_OBJECTS", ExpectedReplicas: replicas, CanonicalStarts: true, CanonicalSignals: true, CheckpointIndex: true, ArchiveCheckpoints: archive, CompactionCheckpoints: checkpointStorage}
 				configs, err := journal.NativeGraphStreamConfigs(cfg, replicas)
 				if err != nil {
 					t.Fatal(err)
@@ -103,7 +112,7 @@ func TestNativeGraphContinuationGlobalLimitAndTerminalSlot(t *testing.T) {
 					profile = &graphLimitProfilePort{NativePort: port, totals: make(map[string]graphLimitPortTiming)}
 					// OpenNativeGraphStore above still performs native configuration
 					// admission. This test-only decorator preserves the same settings.
-					graph, err = journal.NewGraphStore(journal.GraphConfig{Protocol: graphpublication.Protocol{Port: profile}, Now: cfg.Now, PinTTL: cfg.PinTTL, IntentTTL: cfg.IntentTTL, Encoding: cfg.Encoding, PayloadReadLimit: cfg.PayloadReadLimit, CanonicalStarts: cfg.CanonicalStarts, CanonicalSignals: cfg.CanonicalSignals, CheckpointIndex: cfg.CheckpointIndex, ArchiveCheckpoints: cfg.ArchiveCheckpoints})
+					graph, err = journal.NewGraphStore(journal.GraphConfig{Protocol: graphpublication.Protocol{Port: profile}, Now: cfg.Now, PinTTL: cfg.PinTTL, IntentTTL: cfg.IntentTTL, Encoding: cfg.Encoding, PayloadReadLimit: cfg.PayloadReadLimit, CanonicalStarts: cfg.CanonicalStarts, CanonicalSignals: cfg.CanonicalSignals, CheckpointIndex: cfg.CheckpointIndex, ArchiveCheckpoints: cfg.ArchiveCheckpoints, CompactionCheckpoints: cfg.CompactionCheckpoints})
 					if err != nil {
 						t.Fatal(err)
 					}

@@ -1,0 +1,269 @@
+=== RUN   TestContinuationPublicationContextOwnershipAndBounds
+=== RUN   TestContinuationPublicationContextOwnershipAndBounds/legacy
+=== RUN   TestContinuationPublicationContextOwnershipAndBounds/graph-ephemeral
+=== RUN   TestContinuationPublicationContextOwnershipAndBounds/storage-without-archive
+=== RUN   TestContinuationPublicationContextOwnershipAndBounds/durable
+--- PASS: TestContinuationPublicationContextOwnershipAndBounds (0.00s)
+    --- PASS: TestContinuationPublicationContextOwnershipAndBounds/legacy (0.00s)
+    --- PASS: TestContinuationPublicationContextOwnershipAndBounds/graph-ephemeral (0.00s)
+    --- PASS: TestContinuationPublicationContextOwnershipAndBounds/storage-without-archive (0.00s)
+    --- PASS: TestContinuationPublicationContextOwnershipAndBounds/durable (0.00s)
+=== RUN   TestNativeGraphStoredMaintenanceFreshWorkerRecovery
+=== RUN   TestNativeGraphStoredMaintenanceFreshWorkerRecovery/R1-domain
+    continuation_storage_native_test.go:211: NATIVE_STORED_WORKER replicas=1 fresh_workers=3 stage_batches=[1 5 0] verify_batches=[0 10 0] initial_calls=1 stage_calls=1 pending_next=2 source_head_unchanged=true descriptors_after_recovery=0 readers=0
+=== RUN   TestNativeGraphStoredMaintenanceFreshWorkerRecovery/R3-domain
+    continuation_storage_native_test.go:211: NATIVE_STORED_WORKER replicas=3 fresh_workers=3 stage_batches=[1 5 0] verify_batches=[0 10 0] initial_calls=1 stage_calls=1 pending_next=2 source_head_unchanged=true descriptors_after_recovery=0 readers=0
+--- PASS: TestNativeGraphStoredMaintenanceFreshWorkerRecovery (17.49s)
+    --- PASS: TestNativeGraphStoredMaintenanceFreshWorkerRecovery/R1-domain (6.92s)
+    --- PASS: TestNativeGraphStoredMaintenanceFreshWorkerRecovery/R3-domain (10.57s)
+=== RUN   TestGraphContinuationMaintenanceLeaseAndCancellation
+=== RUN   TestGraphContinuationMaintenanceLeaseAndCancellation/json/normal
+    continuation_maintenance_test.go:213: WORKER_MAINTENANCE mode=normal pointer_batches=6 confirm_batches=1 stage_batches=6 verify_batches=10 renew_batches=0 readers=0 initial_calls=1 stage_calls=1 retained_from=9
+=== RUN   TestGraphContinuationMaintenanceLeaseAndCancellation/json/owner-loss-pointer
+    continuation_maintenance_test.go:213: WORKER_MAINTENANCE mode=owner-loss-pointer pointer_batches=1 confirm_batches=0 stage_batches=0 verify_batches=0 renew_batches=0 readers=0 initial_calls=1 stage_calls=0 retained_from=0
+=== RUN   TestGraphContinuationMaintenanceLeaseAndCancellation/json/owner-loss-confirm
+    continuation_maintenance_test.go:213: WORKER_MAINTENANCE mode=owner-loss-confirm pointer_batches=6 confirm_batches=1 stage_batches=0 verify_batches=0 renew_batches=0 readers=0 initial_calls=1 stage_calls=0 retained_from=0
+=== RUN   TestGraphContinuationMaintenanceLeaseAndCancellation/json/owner-loss-stage
+    continuation_maintenance_test.go:213: WORKER_MAINTENANCE mode=owner-loss-stage pointer_batches=6 confirm_batches=1 stage_batches=1 verify_batches=0 renew_batches=0 readers=0 initial_calls=1 stage_calls=0 retained_from=0
+=== RUN   TestGraphContinuationMaintenanceLeaseAndCancellation/json/owner-loss-verify
+    continuation_maintenance_test.go:213: WORKER_MAINTENANCE mode=owner-loss-verify pointer_batches=6 confirm_batches=1 stage_batches=6 verify_batches=1 renew_batches=0 readers=0 initial_calls=1 stage_calls=0 retained_from=0
+=== RUN   TestGraphContinuationMaintenanceLeaseAndCancellation/json/owner-loss-nodes
+    continuation_maintenance_test.go:213: WORKER_MAINTENANCE mode=owner-loss-nodes pointer_batches=6 confirm_batches=1 stage_batches=6 verify_batches=6 renew_batches=0 readers=0 initial_calls=1 stage_calls=0 retained_from=0
+=== RUN   TestGraphContinuationMaintenanceLeaseAndCancellation/json/cancel-pointer
+    continuation_maintenance_test.go:213: WORKER_MAINTENANCE mode=cancel-pointer pointer_batches=1 confirm_batches=0 stage_batches=0 verify_batches=0 renew_batches=0 readers=0 initial_calls=1 stage_calls=0 retained_from=0
+=== RUN   TestGraphContinuationMaintenanceLeaseAndCancellation/json/cancel-confirm
+    continuation_maintenance_test.go:213: WORKER_MAINTENANCE mode=cancel-confirm pointer_batches=6 confirm_batches=1 stage_batches=0 verify_batches=0 renew_batches=0 readers=0 initial_calls=1 stage_calls=0 retained_from=0
+=== RUN   TestGraphContinuationMaintenanceLeaseAndCancellation/json/cancel-stage
+    continuation_maintenance_test.go:213: WORKER_MAINTENANCE mode=cancel-stage pointer_batches=6 confirm_batches=1 stage_batches=1 verify_batches=0 renew_batches=0 readers=0 initial_calls=1 stage_calls=0 retained_from=0
+=== RUN   TestGraphContinuationMaintenanceLeaseAndCancellation/json/cancel-verify
+    continuation_maintenance_test.go:213: WORKER_MAINTENANCE mode=cancel-verify pointer_batches=6 confirm_batches=1 stage_batches=6 verify_batches=1 renew_batches=0 readers=0 initial_calls=1 stage_calls=0 retained_from=0
+=== RUN   TestGraphContinuationMaintenanceLeaseAndCancellation/json/cancel-nodes
+    continuation_maintenance_test.go:213: WORKER_MAINTENANCE mode=cancel-nodes pointer_batches=6 confirm_batches=1 stage_batches=6 verify_batches=6 renew_batches=0 readers=0 initial_calls=1 stage_calls=0 retained_from=0
+=== RUN   TestGraphContinuationMaintenanceLeaseAndCancellation/json/renew-stage
+    continuation_maintenance_test.go:213: WORKER_MAINTENANCE mode=renew-stage pointer_batches=6 confirm_batches=1 stage_batches=6 verify_batches=10 renew_batches=12 readers=0 initial_calls=1 stage_calls=1 retained_from=9
+=== RUN   TestGraphContinuationMaintenanceLeaseAndCancellation/json/renew-verify
+    continuation_maintenance_test.go:213: WORKER_MAINTENANCE mode=renew-verify pointer_batches=6 confirm_batches=1 stage_batches=6 verify_batches=10 renew_batches=19 readers=0 initial_calls=1 stage_calls=1 retained_from=9
+=== RUN   TestGraphContinuationMaintenanceLeaseAndCancellation/json/renew-nodes
+    continuation_maintenance_test.go:213: WORKER_MAINTENANCE mode=renew-nodes pointer_batches=6 confirm_batches=1 stage_batches=6 verify_batches=10 renew_batches=19 readers=0 initial_calls=1 stage_calls=1 retained_from=9
+=== RUN   TestGraphContinuationMaintenanceLeaseAndCancellation/json/owner-loss-renew
+    continuation_maintenance_test.go:213: WORKER_MAINTENANCE mode=owner-loss-renew pointer_batches=6 confirm_batches=1 stage_batches=1 verify_batches=0 renew_batches=1 readers=0 initial_calls=1 stage_calls=0 retained_from=0
+=== RUN   TestGraphContinuationMaintenanceLeaseAndCancellation/json/cancel-renew
+    continuation_maintenance_test.go:213: WORKER_MAINTENANCE mode=cancel-renew pointer_batches=6 confirm_batches=1 stage_batches=1 verify_batches=0 renew_batches=1 readers=0 initial_calls=1 stage_calls=0 retained_from=0
+=== RUN   TestGraphContinuationMaintenanceLeaseAndCancellation/protobuf-v1/normal
+    continuation_maintenance_test.go:213: WORKER_MAINTENANCE mode=normal pointer_batches=6 confirm_batches=1 stage_batches=6 verify_batches=10 renew_batches=0 readers=0 initial_calls=1 stage_calls=1 retained_from=9
+=== RUN   TestGraphContinuationMaintenanceLeaseAndCancellation/protobuf-v1/owner-loss-pointer
+    continuation_maintenance_test.go:213: WORKER_MAINTENANCE mode=owner-loss-pointer pointer_batches=1 confirm_batches=0 stage_batches=0 verify_batches=0 renew_batches=0 readers=0 initial_calls=1 stage_calls=0 retained_from=0
+=== RUN   TestGraphContinuationMaintenanceLeaseAndCancellation/protobuf-v1/owner-loss-confirm
+    continuation_maintenance_test.go:213: WORKER_MAINTENANCE mode=owner-loss-confirm pointer_batches=6 confirm_batches=1 stage_batches=0 verify_batches=0 renew_batches=0 readers=0 initial_calls=1 stage_calls=0 retained_from=0
+=== RUN   TestGraphContinuationMaintenanceLeaseAndCancellation/protobuf-v1/owner-loss-stage
+    continuation_maintenance_test.go:213: WORKER_MAINTENANCE mode=owner-loss-stage pointer_batches=6 confirm_batches=1 stage_batches=1 verify_batches=0 renew_batches=0 readers=0 initial_calls=1 stage_calls=0 retained_from=0
+=== RUN   TestGraphContinuationMaintenanceLeaseAndCancellation/protobuf-v1/owner-loss-verify
+    continuation_maintenance_test.go:213: WORKER_MAINTENANCE mode=owner-loss-verify pointer_batches=6 confirm_batches=1 stage_batches=6 verify_batches=1 renew_batches=0 readers=0 initial_calls=1 stage_calls=0 retained_from=0
+=== RUN   TestGraphContinuationMaintenanceLeaseAndCancellation/protobuf-v1/owner-loss-nodes
+    continuation_maintenance_test.go:213: WORKER_MAINTENANCE mode=owner-loss-nodes pointer_batches=6 confirm_batches=1 stage_batches=6 verify_batches=6 renew_batches=0 readers=0 initial_calls=1 stage_calls=0 retained_from=0
+=== RUN   TestGraphContinuationMaintenanceLeaseAndCancellation/protobuf-v1/cancel-pointer
+    continuation_maintenance_test.go:213: WORKER_MAINTENANCE mode=cancel-pointer pointer_batches=1 confirm_batches=0 stage_batches=0 verify_batches=0 renew_batches=0 readers=0 initial_calls=1 stage_calls=0 retained_from=0
+=== RUN   TestGraphContinuationMaintenanceLeaseAndCancellation/protobuf-v1/cancel-confirm
+    continuation_maintenance_test.go:213: WORKER_MAINTENANCE mode=cancel-confirm pointer_batches=6 confirm_batches=1 stage_batches=0 verify_batches=0 renew_batches=0 readers=0 initial_calls=1 stage_calls=0 retained_from=0
+=== RUN   TestGraphContinuationMaintenanceLeaseAndCancellation/protobuf-v1/cancel-stage
+    continuation_maintenance_test.go:213: WORKER_MAINTENANCE mode=cancel-stage pointer_batches=6 confirm_batches=1 stage_batches=1 verify_batches=0 renew_batches=0 readers=0 initial_calls=1 stage_calls=0 retained_from=0
+=== RUN   TestGraphContinuationMaintenanceLeaseAndCancellation/protobuf-v1/cancel-verify
+    continuation_maintenance_test.go:213: WORKER_MAINTENANCE mode=cancel-verify pointer_batches=6 confirm_batches=1 stage_batches=6 verify_batches=1 renew_batches=0 readers=0 initial_calls=1 stage_calls=0 retained_from=0
+=== RUN   TestGraphContinuationMaintenanceLeaseAndCancellation/protobuf-v1/cancel-nodes
+    continuation_maintenance_test.go:213: WORKER_MAINTENANCE mode=cancel-nodes pointer_batches=6 confirm_batches=1 stage_batches=6 verify_batches=6 renew_batches=0 readers=0 initial_calls=1 stage_calls=0 retained_from=0
+=== RUN   TestGraphContinuationMaintenanceLeaseAndCancellation/protobuf-v1/renew-stage
+    continuation_maintenance_test.go:213: WORKER_MAINTENANCE mode=renew-stage pointer_batches=6 confirm_batches=1 stage_batches=6 verify_batches=10 renew_batches=12 readers=0 initial_calls=1 stage_calls=1 retained_from=9
+=== RUN   TestGraphContinuationMaintenanceLeaseAndCancellation/protobuf-v1/renew-verify
+    continuation_maintenance_test.go:213: WORKER_MAINTENANCE mode=renew-verify pointer_batches=6 confirm_batches=1 stage_batches=6 verify_batches=10 renew_batches=19 readers=0 initial_calls=1 stage_calls=1 retained_from=9
+=== RUN   TestGraphContinuationMaintenanceLeaseAndCancellation/protobuf-v1/renew-nodes
+    continuation_maintenance_test.go:213: WORKER_MAINTENANCE mode=renew-nodes pointer_batches=6 confirm_batches=1 stage_batches=6 verify_batches=10 renew_batches=19 readers=0 initial_calls=1 stage_calls=1 retained_from=9
+=== RUN   TestGraphContinuationMaintenanceLeaseAndCancellation/protobuf-v1/owner-loss-renew
+    continuation_maintenance_test.go:213: WORKER_MAINTENANCE mode=owner-loss-renew pointer_batches=6 confirm_batches=1 stage_batches=1 verify_batches=0 renew_batches=1 readers=0 initial_calls=1 stage_calls=0 retained_from=0
+=== RUN   TestGraphContinuationMaintenanceLeaseAndCancellation/protobuf-v1/cancel-renew
+    continuation_maintenance_test.go:213: WORKER_MAINTENANCE mode=cancel-renew pointer_batches=6 confirm_batches=1 stage_batches=1 verify_batches=0 renew_batches=1 readers=0 initial_calls=1 stage_calls=0 retained_from=0
+--- PASS: TestGraphContinuationMaintenanceLeaseAndCancellation (7.50s)
+    --- PASS: TestGraphContinuationMaintenanceLeaseAndCancellation/json/normal (0.31s)
+    --- PASS: TestGraphContinuationMaintenanceLeaseAndCancellation/json/owner-loss-pointer (0.12s)
+    --- PASS: TestGraphContinuationMaintenanceLeaseAndCancellation/json/owner-loss-confirm (0.17s)
+    --- PASS: TestGraphContinuationMaintenanceLeaseAndCancellation/json/owner-loss-stage (0.18s)
+    --- PASS: TestGraphContinuationMaintenanceLeaseAndCancellation/json/owner-loss-verify (0.26s)
+    --- PASS: TestGraphContinuationMaintenanceLeaseAndCancellation/json/owner-loss-nodes (0.30s)
+    --- PASS: TestGraphContinuationMaintenanceLeaseAndCancellation/json/cancel-pointer (0.13s)
+    --- PASS: TestGraphContinuationMaintenanceLeaseAndCancellation/json/cancel-confirm (0.19s)
+    --- PASS: TestGraphContinuationMaintenanceLeaseAndCancellation/json/cancel-stage (0.18s)
+    --- PASS: TestGraphContinuationMaintenanceLeaseAndCancellation/json/cancel-verify (0.26s)
+    --- PASS: TestGraphContinuationMaintenanceLeaseAndCancellation/json/cancel-nodes (0.26s)
+    --- PASS: TestGraphContinuationMaintenanceLeaseAndCancellation/json/renew-stage (0.37s)
+    --- PASS: TestGraphContinuationMaintenanceLeaseAndCancellation/json/renew-verify (0.37s)
+    --- PASS: TestGraphContinuationMaintenanceLeaseAndCancellation/json/renew-nodes (0.38s)
+    --- PASS: TestGraphContinuationMaintenanceLeaseAndCancellation/json/owner-loss-renew (0.17s)
+    --- PASS: TestGraphContinuationMaintenanceLeaseAndCancellation/json/cancel-renew (0.16s)
+    --- PASS: TestGraphContinuationMaintenanceLeaseAndCancellation/protobuf-v1/normal (0.28s)
+    --- PASS: TestGraphContinuationMaintenanceLeaseAndCancellation/protobuf-v1/owner-loss-pointer (0.12s)
+    --- PASS: TestGraphContinuationMaintenanceLeaseAndCancellation/protobuf-v1/owner-loss-confirm (0.16s)
+    --- PASS: TestGraphContinuationMaintenanceLeaseAndCancellation/protobuf-v1/owner-loss-stage (0.19s)
+    --- PASS: TestGraphContinuationMaintenanceLeaseAndCancellation/protobuf-v1/owner-loss-verify (0.21s)
+    --- PASS: TestGraphContinuationMaintenanceLeaseAndCancellation/protobuf-v1/owner-loss-nodes (0.24s)
+    --- PASS: TestGraphContinuationMaintenanceLeaseAndCancellation/protobuf-v1/cancel-pointer (0.11s)
+    --- PASS: TestGraphContinuationMaintenanceLeaseAndCancellation/protobuf-v1/cancel-confirm (0.17s)
+    --- PASS: TestGraphContinuationMaintenanceLeaseAndCancellation/protobuf-v1/cancel-stage (0.17s)
+    --- PASS: TestGraphContinuationMaintenanceLeaseAndCancellation/protobuf-v1/cancel-verify (0.21s)
+    --- PASS: TestGraphContinuationMaintenanceLeaseAndCancellation/protobuf-v1/cancel-nodes (0.24s)
+    --- PASS: TestGraphContinuationMaintenanceLeaseAndCancellation/protobuf-v1/renew-stage (0.35s)
+    --- PASS: TestGraphContinuationMaintenanceLeaseAndCancellation/protobuf-v1/renew-verify (0.38s)
+    --- PASS: TestGraphContinuationMaintenanceLeaseAndCancellation/protobuf-v1/renew-nodes (0.44s)
+    --- PASS: TestGraphContinuationMaintenanceLeaseAndCancellation/protobuf-v1/owner-loss-renew (0.21s)
+    --- PASS: TestGraphContinuationMaintenanceLeaseAndCancellation/protobuf-v1/cancel-renew (0.22s)
+=== RUN   TestGraphDeliveryCompactionReleaseUncertaintyIsSticky
+=== RUN   TestGraphDeliveryCompactionReleaseUncertaintyIsSticky/drop
+    continuation_release_test.go:103: COMPACTION_RELEASE mode=drop attempts=1 hidden_reads=0 retained_readers=1
+=== RUN   TestGraphDeliveryCompactionReleaseUncertaintyIsSticky/lost
+    continuation_release_test.go:103: COMPACTION_RELEASE mode=lost attempts=1 hidden_reads=0 retained_readers=0
+=== RUN   TestGraphDeliveryCompactionReleaseUncertaintyIsSticky/cancel-before
+--- PASS: TestGraphDeliveryCompactionReleaseUncertaintyIsSticky (0.00s)
+    --- PASS: TestGraphDeliveryCompactionReleaseUncertaintyIsSticky/drop (0.00s)
+    --- PASS: TestGraphDeliveryCompactionReleaseUncertaintyIsSticky/lost (0.00s)
+    --- PASS: TestGraphDeliveryCompactionReleaseUncertaintyIsSticky/cancel-before (0.00s)
+=== RUN   TestGraphContinuationStoredMaintenanceAcrossDeliveries
+=== RUN   TestGraphContinuationStoredMaintenanceAcrossDeliveries/json/normal
+    continuation_storage_test.go:368: STORED_WORKER mode=normal wall=332.186374ms deliveries=2 stage_batches=[6 0 0 0 0] verify_batches=[10 0 0 0 0] renew_batches=[0 0 0 0 0] saves=7 deletes=1 initial_calls=1 stage_calls=1
+=== RUN   TestGraphContinuationStoredMaintenanceAcrossDeliveries/json/slow-handoff
+    continuation_storage_test.go:368: STORED_WORKER mode=slow-handoff wall=18.337065389s deliveries=2 stage_batches=[6 0 0 0 0] verify_batches=[10 0 0 0 0] renew_batches=[0 0 0 0 0] saves=7 deletes=1 initial_calls=1 stage_calls=1
+=== RUN   TestGraphContinuationStoredMaintenanceAcrossDeliveries/json/slow-recovery
+    continuation_storage_test.go:368: STORED_WORKER mode=slow-recovery wall=18.330810227s deliveries=3 stage_batches=[1 5 0 0 0] verify_batches=[0 10 0 0 0] renew_batches=[0 0 0 0 0] saves=7 deletes=1 initial_calls=1 stage_calls=1
+=== RUN   TestGraphContinuationStoredMaintenanceAcrossDeliveries/json/cut-stage
+    continuation_storage_test.go:368: STORED_WORKER mode=cut-stage wall=333.839736ms deliveries=3 stage_batches=[1 5 0 0 0] verify_batches=[0 10 0 0 0] renew_batches=[0 0 0 0 0] saves=7 deletes=1 initial_calls=1 stage_calls=1
+=== RUN   TestGraphContinuationStoredMaintenanceAcrossDeliveries/json/cut-verify
+    continuation_storage_test.go:368: STORED_WORKER mode=cut-verify wall=318.313012ms deliveries=3 stage_batches=[6 1 0 0 0] verify_batches=[1 10 0 0 0] renew_batches=[0 0 0 0 0] saves=8 deletes=1 initial_calls=1 stage_calls=1
+=== RUN   TestGraphContinuationStoredMaintenanceAcrossDeliveries/json/cut-nodes
+    continuation_storage_test.go:368: STORED_WORKER mode=cut-nodes wall=327.484425ms deliveries=3 stage_batches=[6 1 0 0 0] verify_batches=[6 10 0 0 0] renew_batches=[0 0 0 0 0] saves=8 deletes=1 initial_calls=1 stage_calls=1
+=== RUN   TestGraphContinuationStoredMaintenanceAcrossDeliveries/json/cut-renew
+    continuation_storage_test.go:368: STORED_WORKER mode=cut-renew wall=367.88091ms deliveries=3 stage_batches=[1 5 0 0 0] verify_batches=[0 10 0 0 0] renew_batches=[1 12 0 0 0] saves=9 deletes=1 initial_calls=1 stage_calls=1
+=== RUN   TestGraphContinuationStoredMaintenanceAcrossDeliveries/json/create-drop
+    continuation_storage_test.go:368: STORED_WORKER mode=create-drop wall=330.929512ms deliveries=3 stage_batches=[0 6 0 0 0] verify_batches=[0 10 0 0 0] renew_batches=[0 0 0 0 0] saves=8 deletes=1 initial_calls=1 stage_calls=1
+=== RUN   TestGraphContinuationStoredMaintenanceAcrossDeliveries/json/create-lost
+    continuation_storage_test.go:368: STORED_WORKER mode=create-lost wall=301.486981ms deliveries=3 stage_batches=[0 6 0 0 0] verify_batches=[0 10 0 0 0] renew_batches=[0 0 0 0 0] saves=7 deletes=1 initial_calls=1 stage_calls=1
+=== RUN   TestGraphContinuationStoredMaintenanceAcrossDeliveries/json/update-drop
+    continuation_storage_test.go:368: STORED_WORKER mode=update-drop wall=297.635134ms deliveries=3 stage_batches=[1 6 0 0 0] verify_batches=[0 10 0 0 0] renew_batches=[0 0 0 0 0] saves=8 deletes=1 initial_calls=1 stage_calls=1
+=== RUN   TestGraphContinuationStoredMaintenanceAcrossDeliveries/json/update-lost
+    continuation_storage_test.go:368: STORED_WORKER mode=update-lost wall=266.909903ms deliveries=3 stage_batches=[1 5 0 0 0] verify_batches=[0 10 0 0 0] renew_batches=[0 0 0 0 0] saves=7 deletes=1 initial_calls=1 stage_calls=1
+=== RUN   TestGraphContinuationStoredMaintenanceAcrossDeliveries/json/delete-drop
+    continuation_storage_test.go:368: STORED_WORKER mode=delete-drop wall=321.221553ms deliveries=2 stage_batches=[6 0 0 0 0] verify_batches=[10 0 0 0 0] renew_batches=[0 0 0 0 0] saves=7 deletes=2 initial_calls=1 stage_calls=1
+=== RUN   TestGraphContinuationStoredMaintenanceAcrossDeliveries/json/delete-lost
+    continuation_storage_test.go:368: STORED_WORKER mode=delete-lost wall=350.084782ms deliveries=2 stage_batches=[6 0 0 0 0] verify_batches=[10 0 0 0 0] renew_batches=[0 0 0 0 0] saves=7 deletes=1 initial_calls=1 stage_calls=1
+=== RUN   TestGraphContinuationStoredMaintenanceAcrossDeliveries/json/read-lost
+    continuation_storage_test.go:368: STORED_WORKER mode=read-lost wall=386.530362ms deliveries=3 stage_batches=[0 6 0 0 0] verify_batches=[0 10 0 0 0] renew_batches=[0 0 0 0 0] saves=7 deletes=1 initial_calls=1 stage_calls=1
+=== RUN   TestGraphContinuationStoredMaintenanceAcrossDeliveries/json/source-change
+    continuation_storage_test.go:368: STORED_WORKER mode=source-change wall=376.435375ms deliveries=4 stage_batches=[1 0 6 0 0] verify_batches=[0 0 10 0 0] renew_batches=[0 0 0 0 0] saves=9 deletes=2 initial_calls=1 stage_calls=1
+=== RUN   TestGraphContinuationStoredMaintenanceAcrossDeliveries/json/expired
+    continuation_storage_test.go:368: STORED_WORKER mode=expired wall=357.950191ms deliveries=4 stage_batches=[1 0 6 0 0] verify_batches=[0 0 10 0 0] renew_batches=[0 0 0 0 0] saves=9 deletes=2 initial_calls=1 stage_calls=1
+=== RUN   TestGraphContinuationStoredMaintenanceAcrossDeliveries/json/corrupt
+=== RUN   TestGraphContinuationStoredMaintenanceAcrossDeliveries/json/wrong-invocation
+=== RUN   TestGraphContinuationStoredMaintenanceAcrossDeliveries/json/owner-loss-save
+    continuation_storage_test.go:368: STORED_WORKER mode=owner-loss-save wall=331.77699ms deliveries=3 stage_batches=[0 6 0 0 0] verify_batches=[0 10 0 0 0] renew_batches=[0 0 0 0 0] saves=7 deletes=1 initial_calls=1 stage_calls=1
+=== RUN   TestGraphContinuationStoredMaintenanceAcrossDeliveries/json/owner-loss-delete
+    continuation_storage_test.go:368: STORED_WORKER mode=owner-loss-delete wall=355.459404ms deliveries=2 stage_batches=[6 0 0 0 0] verify_batches=[10 0 0 0 0] renew_batches=[0 0 0 0 0] saves=7 deletes=1 initial_calls=1 stage_calls=1
+=== RUN   TestGraphContinuationStoredMaintenanceAcrossDeliveries/json/cancel-save
+    continuation_storage_test.go:368: STORED_WORKER mode=cancel-save wall=336.079992ms deliveries=3 stage_batches=[0 6 0 0 0] verify_batches=[0 10 0 0 0] renew_batches=[0 0 0 0 0] saves=7 deletes=1 initial_calls=1 stage_calls=1
+=== RUN   TestGraphContinuationStoredMaintenanceAcrossDeliveries/json/cancel-delete
+    continuation_storage_test.go:368: STORED_WORKER mode=cancel-delete wall=324.379324ms deliveries=2 stage_batches=[6 0 0 0 0] verify_batches=[10 0 0 0 0] renew_batches=[0 0 0 0 0] saves=7 deletes=1 initial_calls=1 stage_calls=1
+=== RUN   TestGraphContinuationStoredMaintenanceAcrossDeliveries/protobuf-v1/normal
+    continuation_storage_test.go:368: STORED_WORKER mode=normal wall=348.205527ms deliveries=2 stage_batches=[6 0 0 0 0] verify_batches=[10 0 0 0 0] renew_batches=[0 0 0 0 0] saves=7 deletes=1 initial_calls=1 stage_calls=1
+=== RUN   TestGraphContinuationStoredMaintenanceAcrossDeliveries/protobuf-v1/cut-stage
+    continuation_storage_test.go:368: STORED_WORKER mode=cut-stage wall=346.197523ms deliveries=3 stage_batches=[1 5 0 0 0] verify_batches=[0 10 0 0 0] renew_batches=[0 0 0 0 0] saves=7 deletes=1 initial_calls=1 stage_calls=1
+=== RUN   TestGraphContinuationStoredMaintenanceAcrossDeliveries/protobuf-v1/cut-verify
+    continuation_storage_test.go:368: STORED_WORKER mode=cut-verify wall=347.718195ms deliveries=3 stage_batches=[6 1 0 0 0] verify_batches=[1 10 0 0 0] renew_batches=[0 0 0 0 0] saves=8 deletes=1 initial_calls=1 stage_calls=1
+=== RUN   TestGraphContinuationStoredMaintenanceAcrossDeliveries/protobuf-v1/cut-nodes
+    continuation_storage_test.go:368: STORED_WORKER mode=cut-nodes wall=374.272085ms deliveries=3 stage_batches=[6 1 0 0 0] verify_batches=[6 10 0 0 0] renew_batches=[0 0 0 0 0] saves=8 deletes=1 initial_calls=1 stage_calls=1
+=== RUN   TestGraphContinuationStoredMaintenanceAcrossDeliveries/protobuf-v1/cut-renew
+    continuation_storage_test.go:368: STORED_WORKER mode=cut-renew wall=357.850098ms deliveries=3 stage_batches=[1 5 0 0 0] verify_batches=[0 10 0 0 0] renew_batches=[1 12 0 0 0] saves=9 deletes=1 initial_calls=1 stage_calls=1
+=== RUN   TestGraphContinuationStoredMaintenanceAcrossDeliveries/protobuf-v1/create-drop
+    continuation_storage_test.go:368: STORED_WORKER mode=create-drop wall=313.051281ms deliveries=3 stage_batches=[0 6 0 0 0] verify_batches=[0 10 0 0 0] renew_batches=[0 0 0 0 0] saves=8 deletes=1 initial_calls=1 stage_calls=1
+=== RUN   TestGraphContinuationStoredMaintenanceAcrossDeliveries/protobuf-v1/create-lost
+    continuation_storage_test.go:368: STORED_WORKER mode=create-lost wall=317.920115ms deliveries=3 stage_batches=[0 6 0 0 0] verify_batches=[0 10 0 0 0] renew_batches=[0 0 0 0 0] saves=7 deletes=1 initial_calls=1 stage_calls=1
+=== RUN   TestGraphContinuationStoredMaintenanceAcrossDeliveries/protobuf-v1/update-drop
+    continuation_storage_test.go:368: STORED_WORKER mode=update-drop wall=334.639603ms deliveries=3 stage_batches=[1 6 0 0 0] verify_batches=[0 10 0 0 0] renew_batches=[0 0 0 0 0] saves=8 deletes=1 initial_calls=1 stage_calls=1
+=== RUN   TestGraphContinuationStoredMaintenanceAcrossDeliveries/protobuf-v1/update-lost
+    continuation_storage_test.go:368: STORED_WORKER mode=update-lost wall=337.003135ms deliveries=3 stage_batches=[1 5 0 0 0] verify_batches=[0 10 0 0 0] renew_batches=[0 0 0 0 0] saves=7 deletes=1 initial_calls=1 stage_calls=1
+=== RUN   TestGraphContinuationStoredMaintenanceAcrossDeliveries/protobuf-v1/delete-drop
+    continuation_storage_test.go:368: STORED_WORKER mode=delete-drop wall=341.57075ms deliveries=2 stage_batches=[6 0 0 0 0] verify_batches=[10 0 0 0 0] renew_batches=[0 0 0 0 0] saves=7 deletes=2 initial_calls=1 stage_calls=1
+=== RUN   TestGraphContinuationStoredMaintenanceAcrossDeliveries/protobuf-v1/delete-lost
+    continuation_storage_test.go:368: STORED_WORKER mode=delete-lost wall=325.82397ms deliveries=2 stage_batches=[6 0 0 0 0] verify_batches=[10 0 0 0 0] renew_batches=[0 0 0 0 0] saves=7 deletes=1 initial_calls=1 stage_calls=1
+=== RUN   TestGraphContinuationStoredMaintenanceAcrossDeliveries/protobuf-v1/read-lost
+    continuation_storage_test.go:368: STORED_WORKER mode=read-lost wall=345.40607ms deliveries=3 stage_batches=[0 6 0 0 0] verify_batches=[0 10 0 0 0] renew_batches=[0 0 0 0 0] saves=7 deletes=1 initial_calls=1 stage_calls=1
+=== RUN   TestGraphContinuationStoredMaintenanceAcrossDeliveries/protobuf-v1/source-change
+    continuation_storage_test.go:368: STORED_WORKER mode=source-change wall=354.599447ms deliveries=4 stage_batches=[1 0 6 0 0] verify_batches=[0 0 10 0 0] renew_batches=[0 0 0 0 0] saves=9 deletes=2 initial_calls=1 stage_calls=1
+=== RUN   TestGraphContinuationStoredMaintenanceAcrossDeliveries/protobuf-v1/expired
+    continuation_storage_test.go:368: STORED_WORKER mode=expired wall=357.032305ms deliveries=4 stage_batches=[1 0 6 0 0] verify_batches=[0 0 10 0 0] renew_batches=[0 0 0 0 0] saves=9 deletes=2 initial_calls=1 stage_calls=1
+=== RUN   TestGraphContinuationStoredMaintenanceAcrossDeliveries/protobuf-v1/corrupt
+=== RUN   TestGraphContinuationStoredMaintenanceAcrossDeliveries/protobuf-v1/wrong-invocation
+=== RUN   TestGraphContinuationStoredMaintenanceAcrossDeliveries/protobuf-v1/owner-loss-save
+    continuation_storage_test.go:368: STORED_WORKER mode=owner-loss-save wall=379.973043ms deliveries=3 stage_batches=[0 6 0 0 0] verify_batches=[0 10 0 0 0] renew_batches=[0 0 0 0 0] saves=7 deletes=1 initial_calls=1 stage_calls=1
+=== RUN   TestGraphContinuationStoredMaintenanceAcrossDeliveries/protobuf-v1/owner-loss-delete
+    continuation_storage_test.go:368: STORED_WORKER mode=owner-loss-delete wall=297.612639ms deliveries=2 stage_batches=[6 0 0 0 0] verify_batches=[10 0 0 0 0] renew_batches=[0 0 0 0 0] saves=7 deletes=1 initial_calls=1 stage_calls=1
+=== RUN   TestGraphContinuationStoredMaintenanceAcrossDeliveries/protobuf-v1/cancel-save
+    continuation_storage_test.go:368: STORED_WORKER mode=cancel-save wall=314.718405ms deliveries=3 stage_batches=[0 6 0 0 0] verify_batches=[0 10 0 0 0] renew_batches=[0 0 0 0 0] saves=7 deletes=1 initial_calls=1 stage_calls=1
+=== RUN   TestGraphContinuationStoredMaintenanceAcrossDeliveries/protobuf-v1/cancel-delete
+    continuation_storage_test.go:368: STORED_WORKER mode=cancel-delete wall=303.931657ms deliveries=2 stage_batches=[6 0 0 0 0] verify_batches=[10 0 0 0 0] renew_batches=[0 0 0 0 0] saves=7 deletes=1 initial_calls=1 stage_calls=1
+--- PASS: TestGraphContinuationStoredMaintenanceAcrossDeliveries (49.96s)
+    --- PASS: TestGraphContinuationStoredMaintenanceAcrossDeliveries/json/normal (0.34s)
+    --- PASS: TestGraphContinuationStoredMaintenanceAcrossDeliveries/json/slow-handoff (18.34s)
+    --- PASS: TestGraphContinuationStoredMaintenanceAcrossDeliveries/json/slow-recovery (18.34s)
+    --- PASS: TestGraphContinuationStoredMaintenanceAcrossDeliveries/json/cut-stage (0.34s)
+    --- PASS: TestGraphContinuationStoredMaintenanceAcrossDeliveries/json/cut-verify (0.33s)
+    --- PASS: TestGraphContinuationStoredMaintenanceAcrossDeliveries/json/cut-nodes (0.33s)
+    --- PASS: TestGraphContinuationStoredMaintenanceAcrossDeliveries/json/cut-renew (0.37s)
+    --- PASS: TestGraphContinuationStoredMaintenanceAcrossDeliveries/json/create-drop (0.34s)
+    --- PASS: TestGraphContinuationStoredMaintenanceAcrossDeliveries/json/create-lost (0.31s)
+    --- PASS: TestGraphContinuationStoredMaintenanceAcrossDeliveries/json/update-drop (0.31s)
+    --- PASS: TestGraphContinuationStoredMaintenanceAcrossDeliveries/json/update-lost (0.27s)
+    --- PASS: TestGraphContinuationStoredMaintenanceAcrossDeliveries/json/delete-drop (0.33s)
+    --- PASS: TestGraphContinuationStoredMaintenanceAcrossDeliveries/json/delete-lost (0.36s)
+    --- PASS: TestGraphContinuationStoredMaintenanceAcrossDeliveries/json/read-lost (0.39s)
+    --- PASS: TestGraphContinuationStoredMaintenanceAcrossDeliveries/json/source-change (0.38s)
+    --- PASS: TestGraphContinuationStoredMaintenanceAcrossDeliveries/json/expired (0.37s)
+    --- PASS: TestGraphContinuationStoredMaintenanceAcrossDeliveries/json/corrupt (0.22s)
+    --- PASS: TestGraphContinuationStoredMaintenanceAcrossDeliveries/json/wrong-invocation (0.21s)
+    --- PASS: TestGraphContinuationStoredMaintenanceAcrossDeliveries/json/owner-loss-save (0.35s)
+    --- PASS: TestGraphContinuationStoredMaintenanceAcrossDeliveries/json/owner-loss-delete (0.36s)
+    --- PASS: TestGraphContinuationStoredMaintenanceAcrossDeliveries/json/cancel-save (0.34s)
+    --- PASS: TestGraphContinuationStoredMaintenanceAcrossDeliveries/json/cancel-delete (0.33s)
+    --- PASS: TestGraphContinuationStoredMaintenanceAcrossDeliveries/protobuf-v1/normal (0.36s)
+    --- PASS: TestGraphContinuationStoredMaintenanceAcrossDeliveries/protobuf-v1/cut-stage (0.36s)
+    --- PASS: TestGraphContinuationStoredMaintenanceAcrossDeliveries/protobuf-v1/cut-verify (0.37s)
+    --- PASS: TestGraphContinuationStoredMaintenanceAcrossDeliveries/protobuf-v1/cut-nodes (0.38s)
+    --- PASS: TestGraphContinuationStoredMaintenanceAcrossDeliveries/protobuf-v1/cut-renew (0.36s)
+    --- PASS: TestGraphContinuationStoredMaintenanceAcrossDeliveries/protobuf-v1/create-drop (0.32s)
+    --- PASS: TestGraphContinuationStoredMaintenanceAcrossDeliveries/protobuf-v1/create-lost (0.33s)
+    --- PASS: TestGraphContinuationStoredMaintenanceAcrossDeliveries/protobuf-v1/update-drop (0.34s)
+    --- PASS: TestGraphContinuationStoredMaintenanceAcrossDeliveries/protobuf-v1/update-lost (0.34s)
+    --- PASS: TestGraphContinuationStoredMaintenanceAcrossDeliveries/protobuf-v1/delete-drop (0.35s)
+    --- PASS: TestGraphContinuationStoredMaintenanceAcrossDeliveries/protobuf-v1/delete-lost (0.33s)
+    --- PASS: TestGraphContinuationStoredMaintenanceAcrossDeliveries/protobuf-v1/read-lost (0.35s)
+    --- PASS: TestGraphContinuationStoredMaintenanceAcrossDeliveries/protobuf-v1/source-change (0.36s)
+    --- PASS: TestGraphContinuationStoredMaintenanceAcrossDeliveries/protobuf-v1/expired (0.37s)
+    --- PASS: TestGraphContinuationStoredMaintenanceAcrossDeliveries/protobuf-v1/corrupt (0.19s)
+    --- PASS: TestGraphContinuationStoredMaintenanceAcrossDeliveries/protobuf-v1/wrong-invocation (0.22s)
+    --- PASS: TestGraphContinuationStoredMaintenanceAcrossDeliveries/protobuf-v1/owner-loss-save (0.39s)
+    --- PASS: TestGraphContinuationStoredMaintenanceAcrossDeliveries/protobuf-v1/owner-loss-delete (0.31s)
+    --- PASS: TestGraphContinuationStoredMaintenanceAcrossDeliveries/protobuf-v1/cancel-save (0.32s)
+    --- PASS: TestGraphContinuationStoredMaintenanceAcrossDeliveries/protobuf-v1/cancel-delete (0.31s)
+=== RUN   TestGraphContinuationRepairsArchiveBeforeStage
+=== RUN   TestGraphContinuationRepairsArchiveBeforeStage/archive=false/healthy
+=== RUN   TestGraphContinuationRepairsArchiveBeforeStage/archive=false/pointer-cut
+=== RUN   TestGraphContinuationRepairsArchiveBeforeStage/archive=false/suspension-cut
+=== RUN   TestGraphContinuationRepairsArchiveBeforeStage/archive=true/healthy
+=== RUN   TestGraphContinuationRepairsArchiveBeforeStage/archive=true/pointer-cut
+=== RUN   TestGraphContinuationRepairsArchiveBeforeStage/archive=true/suspension-cut
+=== RUN   TestGraphContinuationRepairsArchiveBeforeStage/archive=true/archive-cut
+    graph_continuation_recovery_test.go:183: HANDOFF_RECOVERY original_receipts_physically_reclaimed=19 before_stage=true
+--- PASS: TestGraphContinuationRepairsArchiveBeforeStage (2.25s)
+    --- PASS: TestGraphContinuationRepairsArchiveBeforeStage/archive=false/healthy (0.15s)
+    --- PASS: TestGraphContinuationRepairsArchiveBeforeStage/archive=false/pointer-cut (0.21s)
+    --- PASS: TestGraphContinuationRepairsArchiveBeforeStage/archive=false/suspension-cut (0.21s)
+    --- PASS: TestGraphContinuationRepairsArchiveBeforeStage/archive=true/healthy (0.20s)
+    --- PASS: TestGraphContinuationRepairsArchiveBeforeStage/archive=true/pointer-cut (0.40s)
+    --- PASS: TestGraphContinuationRepairsArchiveBeforeStage/archive=true/suspension-cut (0.39s)
+    --- PASS: TestGraphContinuationRepairsArchiveBeforeStage/archive=true/archive-cut (0.70s)
+PASS
+ok  	js-wf/worker	78.221s

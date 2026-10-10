@@ -124,7 +124,15 @@ func (w *Worker) publishContinuation(ctx context.Context, typ, id string, invSeq
 		return wf.ErrCorruptJournal
 	}
 	runtime := journal.RuntimeCheckpoint{InvSeq: invSeq, Stage: point.Stage, Sequence: sequence, Index: point.Index, Epoch: point.Epoch, StepPosition: point.StepPosition, Object: point.Object, SHA256: point.SHA256}
-	if err := owner.Renew(ctx); err != nil {
+	renewOwner := func() error {
+		if w.graphJournal != nil && w.graphJournal.HasCompactionCheckpointStorage() {
+			renewCtx, stop := context.WithTimeout(ctx, 3*time.Second)
+			defer stop()
+			return owner.Renew(renewCtx)
+		}
+		return owner.Renew(ctx)
+	}
+	if err := renewOwner(); err != nil {
 		return err
 	}
 	if w.graphJournal != nil {
@@ -174,7 +182,7 @@ func (w *Worker) publishContinuation(ctx context.Context, typ, id string, invSeq
 	// The next delivery reconstructs references from the relocated checkpoint.
 	if w.graphJournal != nil && w.graphJournal.ArchiveCheckpoints() {
 		if w.graphJournal.HasCompactionCheckpointStorage() && len(releaseDelivery) > 0 {
-			if err := owner.Renew(ctx); err != nil {
+			if err := renewOwner(); err != nil {
 				return err
 			}
 			started := ops.begin()
@@ -193,13 +201,18 @@ func (w *Worker) publishContinuation(ctx context.Context, typ, id string, invSeq
 			return err
 		}
 	}
-	if err := owner.Renew(ctx); err != nil {
+	if err := renewOwner(); err != nil {
 		return err
 	}
 	messageID := fmt.Sprintf("continuation:%d:%d", invSeq, sequence)
 	if w.graphJournal != nil {
 		// Recovery dispatch must survive a prior delivery inside the dedup window.
 		messageID = ""
+	}
+	if w.graphJournal != nil && w.graphJournal.HasCompactionCheckpointStorage() {
+		dispatchCtx, stop := context.WithTimeout(ctx, 5*time.Second)
+		defer stop()
+		return w.client.Enqueue(dispatchCtx, typ, id, messageID)
 	}
 	return w.client.Enqueue(ctx, typ, id, messageID)
 }

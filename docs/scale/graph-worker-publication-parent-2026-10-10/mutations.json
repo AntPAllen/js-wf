@@ -1,0 +1,47 @@
+[
+  {
+    "name": "restore-whole-deadline",
+    "command": [
+      "go",
+      "test",
+      "-race",
+      "./worker",
+      "-run",
+      "^TestGraphContinuationStoredMaintenanceAcrossDeliveries$/json/(slow-handoff|slow-recovery)$",
+      "-count=1",
+      "-v"
+    ],
+    "exit_code": 1,
+    "failures": 2
+  },
+  {
+    "name": "detach-caller",
+    "command": [
+      "go",
+      "test",
+      "-race",
+      "./worker",
+      "-run",
+      "^TestContinuationPublicationContextOwnershipAndBounds$/durable$",
+      "-count=1",
+      "-v"
+    ],
+    "exit_code": 1,
+    "failures": 1
+  },
+  {
+    "name": "unbounded-complete-read",
+    "command": [
+      "go",
+      "test",
+      "-race",
+      "./worker",
+      "-run",
+      "^TestGraphContinuationStoredMaintenanceAcrossDeliveries$/(json|protobuf-v1)/normal$",
+      "-count=1",
+      "-v"
+    ],
+    "exit_code": 1,
+    "failures": 2
+  }
+]

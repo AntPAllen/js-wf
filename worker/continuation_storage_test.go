@@ -26,21 +26,41 @@ type workerCompactionStorage struct {
 }
 
 func (p *workerCompactionStorage) Get(ctx context.Context, key string) ([]byte, uint64, error) {
+	if err := compactionStorageRequestBound(ctx, 15*time.Second); err != nil {
+		return nil, 0, err
+	}
 	e, err := p.KVTransport.Get(ctx, key)
 	return e.Value, e.Revision, err
 }
 func (p *workerCompactionStorage) Create(ctx context.Context, key string, data []byte) (uint64, error) {
+	if err := compactionStorageRequestBound(ctx, 3*time.Second); err != nil {
+		return 0, err
+	}
 	p.key = key
 	p.saves++
 	return p.KVTransport.Create(ctx, key, data)
 }
 func (p *workerCompactionStorage) Update(ctx context.Context, key string, data []byte, rev uint64) (uint64, error) {
+	if err := compactionStorageRequestBound(ctx, 3*time.Second); err != nil {
+		return 0, err
+	}
 	p.saves++
 	return p.KVTransport.Update(ctx, key, data, rev)
 }
 func (p *workerCompactionStorage) Delete(ctx context.Context, key string, rev uint64) error {
+	if err := compactionStorageRequestBound(ctx, 3*time.Second); err != nil {
+		return err
+	}
 	p.deletes++
 	return p.KVTransport.Delete(ctx, key, rev)
+}
+
+func compactionStorageRequestBound(ctx context.Context, max time.Duration) error {
+	deadline, ok := ctx.Deadline()
+	if !ok || time.Until(deadline) > max {
+		return fmt.Errorf("descriptor request exceeds budget %s", max)
+	}
+	return nil
 }
 
 type storedInvocationOverride struct {
@@ -64,7 +84,10 @@ func (p storedInvocationOverride) LastInvocation(ctx context.Context, subject st
 
 func TestGraphContinuationStoredMaintenanceAcrossDeliveries(t *testing.T) {
 	for _, encoding := range []journal.Encoding{journal.JSON, journal.ProtobufV1} {
-		for _, mode := range []string{"normal", "cut-stage", "cut-verify", "cut-nodes", "cut-renew", "create-drop", "create-lost", "update-drop", "update-lost", "delete-drop", "delete-lost", "read-lost", "source-change", "expired", "corrupt", "wrong-invocation", "owner-loss-save", "owner-loss-delete", "cancel-save", "cancel-delete"} {
+		for _, mode := range []string{"normal", "slow-handoff", "slow-recovery", "cut-stage", "cut-verify", "cut-nodes", "cut-renew", "create-drop", "create-lost", "update-drop", "update-lost", "delete-drop", "delete-lost", "read-lost", "source-change", "expired", "corrupt", "wrong-invocation", "owner-loss-save", "owner-loss-delete", "cancel-save", "cancel-delete"} {
+			if (mode == "slow-handoff" || mode == "slow-recovery") && encoding != journal.JSON {
+				continue
+			}
 			t.Run(string(encoding)+"/"+mode, func(t *testing.T) {
 				base := context.Background()
 				ctx, cancel := context.WithCancel(base)
@@ -134,10 +157,16 @@ func TestGraphContinuationStoredMaintenanceAcrossDeliveries(t *testing.T) {
 				trigger := false
 				stageCounts, verifyCounts, renewCounts := make([]int, 5), make([]int, 5), make([]int, 5)
 				delivery := 0
+				delayed := make(map[string]bool)
+				started := time.Now()
 				renewRequested, crossedExpiry := false, false
 				observe := func(event worker.OperationEvent) {
 					if event.Error != "" {
 						return
+					}
+					if !delayed[event.Operation] && (mode == "slow-handoff" && delivery == 0 && (event.Operation == "continuation_checkpoint_verify_batch" || event.Operation == "continuation_archive_stage_batch" || event.Operation == "continuation_archive_verify_batch") || mode == "slow-recovery" && delivery == 1 && (event.Operation == "continuation_archive_stage_batch" || event.Operation == "continuation_archive_verify_batch" || event.Operation == "continuation_archive_checkpoint_delete")) {
+						delayed[event.Operation] = true
+						time.Sleep(6 * time.Second)
 					}
 					switch event.Operation {
 					case "continuation_archive_stage_batch":
@@ -162,7 +191,7 @@ func TestGraphContinuationStoredMaintenanceAcrossDeliveries(t *testing.T) {
 					if delivery != 0 || trigger {
 						return
 					}
-					cut := mode == "cut-stage" && event.Operation == "continuation_archive_checkpoint_save" && storage.saves == 2 || (mode == "source-change" || mode == "expired" || mode == "corrupt" || mode == "wrong-invocation") && event.Operation == "continuation_archive_checkpoint_save" && storage.saves == 2 || mode == "cut-verify" && verifyCounts[0] == 1 || mode == "cut-nodes" && verifyCounts[0] == 6 || mode == "cut-renew" && renewCounts[0] == 1 || mode == "cancel-save" && event.Operation == "continuation_archive_checkpoint_save" || mode == "cancel-delete" && verifyCounts[0] == 10
+					cut := (mode == "cut-stage" || mode == "slow-recovery") && event.Operation == "continuation_archive_checkpoint_save" && storage.saves == 2 || (mode == "source-change" || mode == "expired" || mode == "corrupt" || mode == "wrong-invocation") && event.Operation == "continuation_archive_checkpoint_save" && storage.saves == 2 || mode == "cut-verify" && verifyCounts[0] == 1 || mode == "cut-nodes" && verifyCounts[0] == 6 || mode == "cut-renew" && renewCounts[0] == 1 || mode == "cancel-save" && event.Operation == "continuation_archive_checkpoint_save" || mode == "cancel-delete" && verifyCounts[0] == 10
 					if cut {
 						trigger = true
 						cancel()
@@ -223,11 +252,11 @@ func TestGraphContinuationStoredMaintenanceAcrossDeliveries(t *testing.T) {
 					}
 				}
 				e = execute(ctx)
-				if mode == "normal" {
+				if mode == "normal" || mode == "slow-handoff" {
 					if e != nil {
 						t.Fatal(e)
 					}
-				} else if strings.HasPrefix(mode, "cut-") || mode == "source-change" || mode == "expired" || mode == "corrupt" || mode == "wrong-invocation" || mode == "cancel-save" || mode == "cancel-delete" {
+				} else if strings.HasPrefix(mode, "cut-") || mode == "slow-recovery" || mode == "source-change" || mode == "expired" || mode == "corrupt" || mode == "wrong-invocation" || mode == "cancel-save" || mode == "cancel-delete" {
 					if !trigger || !errors.Is(e, context.Canceled) {
 						t.Fatal("cut missed", trigger, e)
 					}
@@ -245,10 +274,13 @@ func TestGraphContinuationStoredMaintenanceAcrossDeliveries(t *testing.T) {
 				if strings.HasPrefix(mode, "create-") && storage.saves != 1 || strings.HasPrefix(mode, "update-") && storage.saves != 2 || strings.HasPrefix(mode, "delete-") && storage.deletes != 1 || mode == "owner-loss-save" && storage.saves != 0 || (mode == "owner-loss-delete" || mode == "cancel-delete") && storage.deletes != 0 {
 					t.Fatal("mutation continued past uncertainty or ownership loss", mode, storage.saves, storage.deletes)
 				}
+				if mode == "slow-handoff" && (len(delayed) != 3 || time.Since(started) < 18*time.Second) {
+					t.Fatal("whole-handoff boundary not crossed", len(delayed), time.Since(started))
+				}
 				if initial != 1 || entered != 0 {
 					t.Fatal("early stage admission", initial, entered)
 				}
-				published := mode == "normal" || strings.HasPrefix(mode, "delete-") || mode == "owner-loss-delete" || mode == "cancel-delete"
+				published := mode == "normal" || mode == "slow-handoff" || strings.HasPrefix(mode, "delete-") || mode == "owner-loss-delete" || mode == "cancel-delete"
 				if published {
 					rootState(9)
 				} else {
@@ -302,6 +334,9 @@ func TestGraphContinuationStoredMaintenanceAcrossDeliveries(t *testing.T) {
 				if e != nil {
 					t.Fatal("fresh delivery failed", e)
 				}
+				if mode == "slow-recovery" && (len(delayed) != 3 || time.Since(started) < 18*time.Second) {
+					t.Fatal("recovery boundary not crossed", len(delayed), time.Since(started))
+				}
 				if !published && entered != 0 {
 					t.Fatal("repaired delivery admitted stage", entered)
 				}
@@ -330,7 +365,7 @@ func TestGraphContinuationStoredMaintenanceAcrossDeliveries(t *testing.T) {
 				if e != nil && !errors.Is(e, jetstream.ErrNoKeysFound) || len(keys) != 0 {
 					t.Fatal("stored progress leaked", keys, e)
 				}
-				t.Logf("STORED_WORKER mode=%s deliveries=%d stage_batches=%v verify_batches=%v renew_batches=%v saves=%d deletes=%d initial_calls=%d stage_calls=%d", mode, delivery+1, stageCounts, verifyCounts, renewCounts, storage.saves, storage.deletes, initial, entered)
+				t.Logf("STORED_WORKER mode=%s wall=%s deliveries=%d stage_batches=%v verify_batches=%v renew_batches=%v saves=%d deletes=%d initial_calls=%d stage_calls=%d", mode, time.Since(started), delivery+1, stageCounts, verifyCounts, renewCounts, storage.saves, storage.deletes, initial, entered)
 			})
 		}
 	}

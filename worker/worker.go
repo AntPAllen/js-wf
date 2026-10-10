@@ -1100,7 +1100,7 @@ func (w *Worker) execute(ctx context.Context, typ, id string, l *lease.Lease, wa
 		// reopens the relocated forest and reconstructs its owned references.
 		r := graph.checkpoint.Runtime
 		point := wf.ContinuationCheckpoint{ContinuationAnchor: wf.ContinuationAnchor{Index: r.Index, Epoch: r.Epoch}, Stage: r.Stage, Object: r.Object, SHA256: r.SHA256, StepPosition: r.StepPosition}
-		publishCtx, stopPublish := context.WithTimeout(ctx, 15*time.Second)
+		publishCtx, stopPublish := w.continuationPublicationContext(ctx)
 		defer stopPublish()
 		started := ops.begin()
 		err := w.publishContinuation(publishCtx, typ, id, input.Sequence, l, records, point, appendEntry, ops, func(releaseCtx context.Context) error {
@@ -1352,11 +1352,11 @@ func (w *Worker) execute(ctx context.Context, typ, id string, l *lease.Lease, wa
 		return failure
 	}
 	if point, ok := wctx.Continuation(); ok {
-		// The append closures capture ctx. Assign the publication context so
-		// archive, manifest, purge, suspension append and handoff share one
-		// deadline; a missing reply cannot hold this delivery indefinitely.
+		// Append closures capture ctx. Durable graph maintenance inherits the
+		// delivery's cancellation while each request/batch has its own bound.
+		// Legacy publication retains the whole-handoff deadline.
 		var stopPublication context.CancelFunc
-		ctx, stopPublication = context.WithTimeout(ctx, 15*time.Second)
+		ctx, stopPublication = w.continuationPublicationContext(ctx)
 		defer stopPublication()
 		started := ops.begin()
 		err := w.publishContinuation(ctx, typ, id, input.Sequence, l, records, point, appendEntry, ops, func(releaseCtx context.Context) error {

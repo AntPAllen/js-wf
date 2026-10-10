@@ -1,5 +1,32 @@
 # JetStream Durable Workflow Runtime — Implementation Plan
 
+## Durable maintenance continues under its delivery context — 2026-10-10
+
+Graph archive workers with configured descriptor storage no longer add a whole
+15-second publication/recovery deadline. They preserve caller cancellation and
+deadlines, unconditional ownership checks,15-second batches,3-second descriptor/
+owner requests and5-second final dispatch. Legacy/ephemeral graph handoffs retain
+the whole15-second policy. No public admission or production cap is changed.
+[Evidence](scale/graph-worker-publication-parent-2026-10-10/README.md).
+
+The restored race selection passes78.221s:4 context-policy controls,42 stored
+controls (including initial handoff and recovery both crossing18 seconds),3
+release controls,32 existing maintenance controls,7 repairs and native R1/R3
+fresh-worker cases. Restoring the whole deadline fails2 controls, detaching the
+caller fails1, and removing a complete-descriptor read bound fails2. After that
+last bypass, all42 stored/4 policy controls pass49.097s. Native durable R1/R3
+budget64 terminal-slot cases pass97.609s; the private fixture exposes explicit
+WF_GRAPH_CONTINUATION_DURABLE=1 configuration and retains its2-minute watchdog.
+All853 common pins pass8.695s. Production MaxEntries remains100000.
+
+Actual100000-entry acceptance remains failed/unrerun. Intent renewal still
+censuses the entire isolated namespace and reads every scope, including foreign
+ones, before its original expiry. Setup is context-bounded rather than per-item
+memory-bounded. That cost at full scale is unqualified; address/qualify renewal
+scaling before another multi-hour padding run. Removing the parent alone does
+not clear full-cap liveness, termination, current full seed campaigns, majority,
+soak, retention or rollout gates. Collection stays off and admission stays closed.
+
 ## Worker persists and resumes archive maintenance across deliveries — 2026-10-10
 
 Workers with an explicitly configured descriptor port now save completed staging

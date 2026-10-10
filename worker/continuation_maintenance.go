@@ -14,6 +14,16 @@ import (
 
 const continuationVerificationRecords = uint64(128)
 
+// Durable maintenance uses the delivery's cancellation/deadline. Its individual
+// batches and requests remain bounded below, and each batch renews ownership.
+// Legacy handoffs retain their existing whole-publication deadline.
+func (w *Worker) continuationPublicationContext(parent context.Context) (context.Context, context.CancelFunc) {
+	if w.graphJournal != nil && w.graphJournal.ArchiveCheckpoints() && w.graphJournal.HasCompactionCheckpointStorage() {
+		return context.WithCancel(parent)
+	}
+	return context.WithTimeout(parent, 15*time.Second)
+}
+
 // publishGraphCheckpointBatches uses the delivery's existing publication parent.
 // Each batch rechecks lease ownership and has a bounded request context. The
 // outer handoff deadline is unchanged; this does not persist scan progress or
@@ -194,7 +204,7 @@ func (w *Worker) recoverStoredGraphCompaction(ctx context.Context, typ, id strin
 	if err != nil || handoff == nil {
 		return false, err
 	}
-	workCtx, stopWork := context.WithTimeout(ctx, 15*time.Second)
+	workCtx, stopWork := w.continuationPublicationContext(ctx)
 	defer stopWork()
 	renewCtx, stopRenew := context.WithTimeout(workCtx, 3*time.Second)
 	err = owner.Renew(renewCtx)
@@ -205,7 +215,9 @@ func (w *Worker) recoverStoredGraphCompaction(ctx context.Context, typ, id strin
 	if handoff.Complete {
 		// Canonical publication is already complete. An observed descriptor is
 		// obsolete even if its bytes are malformed; never use it for execution.
-		_, revision, readErr := w.graphJournal.ResumeStoredCheckpointCompaction(workCtx, typ, id, handoff.Runtime, handoff.Tail)
+		readCtx, stopRead := context.WithTimeout(workCtx, 3*time.Second)
+		_, revision, readErr := w.graphJournal.ResumeStoredCheckpointCompaction(readCtx, typ, id, handoff.Runtime, handoff.Tail)
+		stopRead()
 		if readErr != nil && !(revision != 0 && (errors.Is(readErr, journal.ErrStale) || errors.Is(readErr, journal.ErrGap))) {
 			return false, readErr
 		}
@@ -225,5 +237,7 @@ func (w *Worker) recoverStoredGraphCompaction(ctx context.Context, typ, id strin
 	if err != nil {
 		return true, err
 	}
-	return true, w.client.Enqueue(workCtx, typ, id, "")
+	dispatchCtx, stopDispatch := context.WithTimeout(workCtx, 5*time.Second)
+	defer stopDispatch()
+	return true, w.client.Enqueue(dispatchCtx, typ, id, "")
 }
