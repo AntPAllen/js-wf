@@ -54,3 +54,25 @@ from launch or partial progress.
 The [development export command](export-development-receipt.json) passes after
 an initial unused-import compile failure, preserved in its separate log. These
 development results do not substitute for the frozen review or broader gates.
+
+## Combined command evidence accepted; original runner failure preserved
+
+[Executed independent review](review.json) verifies 3,336 selected Git inputs,
+unchanged inventories, six retained binaries and the complete test/control
+inventories listed above. All 205 required command outcomes are verified from
+[closed raw evidence](qualified/). The original supervisor exits **one**, after
+192 native outcomes pass, because its variant control uses `Workflow` for the
+actual child input. It correctly reports missing `child_middle_v1`. Its partial
+state, failed input/command and actual loaded-unit exit receipt remain preserved.
+
+The [supplemental driver](run-variant-correction.py) derives the correct
+`ChildWorkflow` from the immutable input and runs only 13 variants using the
+same binaries. [Correction receipt](variant-correction.json) and actual retained
+supervisor exit **zero** prove this bounded correction. No SDK/corpus/native
+suite repeats. The reviewer accepts combined source-identical command evidence
+and explicitly records `original_runner_accepted: false`, preserving both exits.
+The as-executed original runner is retained rather than rewritten as a success.
+
+This result leaves all broader original gates and both live broad campaigns
+open. Removing the format declaration itself still changes the supplied input
+contract; the bundle is not cryptographically authenticated.

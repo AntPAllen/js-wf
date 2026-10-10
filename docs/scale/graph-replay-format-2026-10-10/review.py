@@ -3,17 +3,27 @@ import datetime,hashlib,io,json,subprocess
 from pathlib import Path
 base=Path(__file__).resolve().parent
 state=json.loads((base/'state.json').read_text());root,checkout=Path(state['root']),Path(state['checkout'])
-assert state.get('phase')=='closed' and state['exit']==0 and state['finished']
+correction=json.loads((base/'variant-correction.json').read_text())
+assert correction['phase']=='closed' and correction['exit']==0 and correction['finished']
+assert correction['source']==state['source'] and correction['root']==state['root']
 properties=subprocess.check_output(['systemctl','--user','show','js-wf-replay-format-20261010.service','-p','MainPID','-p','ExecMainStatus','-p','InvocationID','-p','LoadState'],text=True)
-assert 'MainPID=0\n' in properties
-assert 'LoadState=loaded\n' in properties
-assert 'ExecMainStatus=0\n' in properties and 'InvocationID='+state['invocation']+'\n' in properties
-loaded=True
-supervisor_exit=0
-(root/'supervisor-exit.txt').write_text(properties)
+assert 'MainPID=0\n' in properties and 'LoadState=loaded\n' in properties
+assert 'ExecMainStatus=1\n' in properties and 'InvocationID='+state['invocation']+'\n' in properties
+(root/'original-supervisor-exit.txt').write_text(properties)
+properties=subprocess.check_output(['systemctl','--user','show','js-wf-replay-format-variant-correction-20261010.service','-p','MainPID','-p','ExecMainStatus','-p','InvocationID','-p','LoadState'],text=True)
+assert 'MainPID=0\n' in properties and 'LoadState=loaded\n' in properties
+assert 'ExecMainStatus=0\n' in properties and 'InvocationID='+correction['invocation']+'\n' in properties
+(root/'correction-supervisor-exit.txt').write_text(properties)
+assert len(state['replays'])==193 and len(correction['replays'])==13
+bad=state['replays'][-1]
+assert bad['label']=='variant-unversioned-control' and bad['exit']==1 and bad['command'][6]=='Workflow'
+assert 'continuation stage is not registered: child_middle_v1' in bad['output']
+assert correction['selected_symbol']=='ChildWorkflow'
+replays=state['replays'][:192]+correction['replays']
+binaries=correction['binaries']
 def hash(path):return hashlib.sha256(path.read_bytes()).hexdigest()
-before,after=[json.loads((root/n).read_text()) for n in ('source-before.json','source-after.json')]
-assert before==after and before['source']==state['source']
+before,after=[json.loads((root/n).read_text()) for n in ('source-before.json','source-after-correction.json')]
+assert before==after==json.loads((root/'source-after-failed-run.json').read_text()) and before['source']==state['source']
 tracked=subprocess.check_output(['git','ls-tree','-r','--name-only',state['source']],cwd=checkout,text=True).splitlines()
 names=[n for n in tracked if n.endswith(('.go','.py','.yml')) or n in ('go.mod','go.sum') or n.startswith('sim/testdata/')]
 assert set(names)==set(before['files'])
@@ -27,8 +37,8 @@ assert all(r['finished'] for r in state['commands'])
 assert not any(a.startswith('-test.run=') for a in state['commands'][1]['command'])
 assert '-test.run=^TestPinnedRegressionCorpus$' in state['commands'][3]['command']
 assert '-test.run=^(TestReplayGraphChildProvenance|TestReplayContinuationPlugin|TestReplayDeclaredGraphBeforePlugin|TestNativeGraphCursorOperatorHistory)$' in state['commands'][5]['command']
-assert set(state['binaries'])=={'wf-race.test','sim-normal.test','cli-race.test','worker-race.test','wf','handler.so'}
-for name,artifact in state['binaries'].items():
+assert set(binaries)=={'wf-race.test','sim-normal.test','cli-race.test','worker-race.test','wf','handler.so'}
+for name,artifact in binaries.items():
  path=root/name;assert path.stat().st_size==artifact['bytes'] and hash(path)==artifact['sha256']
  assert ('-race=true' in subprocess.check_output(['go','version','-m',str(path)],text=True))==(name!='sim-normal.test')
 def events(name):
@@ -73,9 +83,9 @@ assert actual=={'TestReplayDeclaredGraphFormat/missing_annotation','TestReplayDe
 producer=base.parent/'graph-continuation-child-offline-2026-10-10'
 assert hash(producer/'review.json')==state['producer_review_sha256']
 pr=json.loads((producer/'review.json').read_text());assert pr['accepted'] and pr['source']==state['producer_source'] and pr['git_verified_inputs']==3312
-assert len(state['replays'])==205
+assert len(replays)==205
 labels={}
-for row in state['replays']:
+for row in replays:
  path=Path(row['input']);assert hash(path)==row['input_sha256']
  args=row['command'];assert args[1:3]==['-url','nats://127.0.0.1:1'] and args[8]==str(path) and args[-1]=='replay'
  assert args[0]==str(root/'wf') and args[4]==str(root/'handler.so')
@@ -99,8 +109,8 @@ for mode in ('graph-v1','unversioned'):
  assert labels[mode+'-native-missing-objects.json']==20 and labels[mode+'-native-missing-child-result.json']==8 and labels[mode+'-native-missing-stage']==20
 for name in ('control','missing-canonical','all-markers-removed','checkpoint-metadata-removed','wrong-queue-index','missing-token'):
  assert labels['variant-unversioned-'+name]==labels['variant-graph-'+name]==1
- original=json.loads((root/'variants'/(name+'-unversioned.json')).read_text())
- declared=json.loads((root/'variants'/(name+'-graph.json')).read_text())
+ original=json.loads((root/'corrected-variants'/(name+'-unversioned.json')).read_text())
+ declared=json.loads((root/'corrected-variants'/(name+'-graph.json')).read_text())
  assert declared.pop('format')=='graph-v1' and declared==original
 assert labels['variant-graph-unknown-format']==1
 # Bind diagnostic transformations to the actual qualified producer's control.
@@ -118,10 +128,10 @@ for name in ('control','missing-canonical','all-markers-removed','checkpoint-met
    if name=='missing-token':e['canonical_signal'].pop('token',None)
   if name in ('all-markers-removed','checkpoint-metadata-removed'):
    e.pop('checkpoint_metadata_ref',None);e.pop('checkpoint_metadata_hash',None)
- assert json.loads((root/'variants'/(name+'-unversioned.json')).read_text())==expected
+ assert json.loads((root/'corrected-variants'/(name+'-unversioned.json')).read_text())==expected
 unknown=copy.deepcopy(control);unknown['format']='graph-v99'
-assert json.loads((root/'variants/unknown-format-graph.json').read_text())==unknown
+assert json.loads((root/'corrected-variants/unknown-format-graph.json').read_text())==unknown
 assert not (root/'effect').exists()
-result=dict(accepted=True,source=state['source'],git_verified_inputs=len(names),full_sdk_race_top_tests=len(tops),format_controls=14,metadata_controls=62,selected_child_controls=10,cli_format_preplugin_controls=3,native_export_cases=6,worker_export_controls=8,normal_saved_traces=841,cli_provenance_controls=20,legacy_plugin_pass=True,required_negative_failures=2,offline_cli_invocations=205,healthy_native_replays_each_format=48,missing_objects_each_format=28,missing_stages_each_format=20,declared_graph_mutation_rejections=6,unversioned_compatibility_controls=6,actual_supervisor_exit=0,supervisor_exit_proven=True,producer_source=state['producer_source'],reviewed=datetime.datetime.now(datetime.timezone.utc).isoformat(),scope='Declared graph-v1 export/replay contract, worker/CLI export controls and retained native bundles. Removing the declaration itself changes the requested compatibility contract; external authenticity, full import/fault/retention/admission/latest seeded/extended and broader original gates remain open.')
+result=dict(accepted=True,source=state['source'],git_verified_inputs=len(names),full_sdk_race_top_tests=len(tops),format_controls=14,metadata_controls=62,selected_child_controls=10,cli_format_preplugin_controls=3,native_export_cases=6,worker_export_controls=8,normal_saved_traces=841,cli_provenance_controls=20,legacy_plugin_pass=True,required_negative_failures=2,offline_cli_invocations=205,healthy_native_replays_each_format=48,missing_objects_each_format=28,missing_stages_each_format=20,declared_graph_mutation_rejections=6,unversioned_compatibility_controls=6,original_supervisor_exit=1,original_runner_accepted=False,correction_supervisor_exit=0,supervisor_exits_proven=True,original_failed_variant_preserved=True,producer_source=state['producer_source'],reviewed=datetime.datetime.now(datetime.timezone.utc).isoformat(),scope='Combined source-identical command evidence after handler-selector correction, with original runner exit1 retained. Declared graph-v1 export/replay contract, worker/CLI export controls and retained native bundles. Removing the declaration itself changes the requested compatibility contract; external authenticity, full import/fault/retention/admission/latest seeded/extended and broader original gates remain open.')
 result['events_sha256']={n:hash(root/n) for n in ('wf-events.jsonl','sim-events.jsonl','cmd-wf-events.jsonl','worker-events.jsonl')}
 (base/'review.json').write_text(json.dumps(result,indent=2)+'\n');print(json.dumps(result,indent=2))

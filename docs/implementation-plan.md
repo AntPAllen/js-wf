@@ -1,5 +1,29 @@
 # JetStream Durable Workflow Runtime — Implementation Plan
 
+## Canonical replay format combined evidence verified — 2026-10-10
+
+Independent review binds frozen `04f542b` to 3,336 unchanged Git inputs and six
+retained binaries. All 64 SDK race top tests, 14 format controls, 62 metadata
+controls, 10 child-selection controls, 841 normal saved traces, 20 CLI provenance
+controls/legacy plugin, six native domain export cases and eight worker export
+controls pass. Two required disabled-format failures establish sensitivity.
+All 205 required offline command outcomes pass: each format covers 48 healthy
+native replays, 28 missing-object and 20 missing-stage controls; explicit graph
+mode rejects six variant mutations while six unversioned controls remain valid.
+
+The original supervisor actually exits one after 192 native checks because its
+variant driver selects Workflow for a child bundle. The failed control and exact
+input/command are retained. Only the 13 variant checks are corrected, using the
+same source/binaries and the matching ChildWorkflow. That retained supplemental
+supervisor exits zero. The combined review accepts those command results while
+explicitly leaving the original runner unaccepted; no SDK/corpus/native suite is
+repeated. [Raw proof and correction scope](scale/graph-replay-format-2026-10-10/README.md).
+
+Both broad campaigns remain live/unaccepted. Complete import/rollout, external
+authenticity, fault/retention/admission, latest-source seeded/extended, remaining
+cap variants, public admission, production collection and every broader original
+requirement remain open.
+
 ## Declared canonical graph replay format implemented; qualification live — 2026-10-10
 
 New worker snapshots validate and carry `graph-v1`; CLI graph exports preserve

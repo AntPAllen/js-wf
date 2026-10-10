@@ -1,0 +1,304 @@
+{
+  "source": "04f542bcf8ec9099feb07e509db97361c504a633",
+  "root": "/home/exedev/js-wf-replay-format-20261010",
+  "checkout": "/home/exedev/js-wf-replay-format-qualification",
+  "pid": 81751,
+  "invocation": "326a2d2e894b40fa94c7f988bf85b7d5",
+  "started": "2026-10-10T11:15:56.053709+00:00",
+  "original_supervisor_exit": 1,
+  "original_variant_error": "Workflow selected for actual child bundle; child_middle_v1 is correctly unavailable in the simple definition.",
+  "replays": [
+    {
+      "label": "variant-unversioned-control",
+      "input": "/home/exedev/js-wf-replay-format-20261010/corrected-variants/control-unversioned.json",
+      "input_sha256": "f0b38bac5f04160e87c27ff7fad7c0a6a680126daf8471a802915ad1c2db23de",
+      "command": [
+        "/home/exedev/js-wf-replay-format-20261010/wf",
+        "-url",
+        "nats://127.0.0.1:1",
+        "-handler-plugin",
+        "/home/exedev/js-wf-replay-format-20261010/handler.so",
+        "-handler-symbol",
+        "ChildWorkflow",
+        "-replay-bundle",
+        "/home/exedev/js-wf-replay-format-20261010/corrected-variants/control-unversioned.json",
+        "replay"
+      ],
+      "exit": 0,
+      "output": "{\n  \"type\": \"continued\",\n  \"id\": \"offline\",\n  \"inv_seq\": 1,\n  \"journal_entries\": 26,\n  \"status\": \"completed\",\n  \"result\": 60\n}\n",
+      "expected": "completed"
+    },
+    {
+      "label": "variant-graph-control",
+      "input": "/home/exedev/js-wf-replay-format-20261010/corrected-variants/control-graph.json",
+      "input_sha256": "a4b972b90bcc1ecaa84b27951fec6ab702eb290d670271289285dc465e06a912",
+      "command": [
+        "/home/exedev/js-wf-replay-format-20261010/wf",
+        "-url",
+        "nats://127.0.0.1:1",
+        "-handler-plugin",
+        "/home/exedev/js-wf-replay-format-20261010/handler.so",
+        "-handler-symbol",
+        "ChildWorkflow",
+        "-replay-bundle",
+        "/home/exedev/js-wf-replay-format-20261010/corrected-variants/control-graph.json",
+        "replay"
+      ],
+      "exit": 0,
+      "output": "{\n  \"type\": \"continued\",\n  \"id\": \"offline\",\n  \"inv_seq\": 1,\n  \"journal_entries\": 26,\n  \"status\": \"completed\",\n  \"result\": 60\n}\n",
+      "expected": "completed"
+    },
+    {
+      "label": "variant-unversioned-missing-canonical",
+      "input": "/home/exedev/js-wf-replay-format-20261010/corrected-variants/missing-canonical-unversioned.json",
+      "input_sha256": "5338d24f675f3616db733d5d8d8d5e8ec0995fd007095d795f8549172410f534",
+      "command": [
+        "/home/exedev/js-wf-replay-format-20261010/wf",
+        "-url",
+        "nats://127.0.0.1:1",
+        "-handler-plugin",
+        "/home/exedev/js-wf-replay-format-20261010/handler.so",
+        "-handler-symbol",
+        "ChildWorkflow",
+        "-replay-bundle",
+        "/home/exedev/js-wf-replay-format-20261010/corrected-variants/missing-canonical-unversioned.json",
+        "replay"
+      ],
+      "exit": 0,
+      "output": "{\n  \"type\": \"continued\",\n  \"id\": \"offline\",\n  \"inv_seq\": 1,\n  \"journal_entries\": 26,\n  \"status\": \"completed\",\n  \"result\": 60\n}\n",
+      "expected": "completed"
+    },
+    {
+      "label": "variant-graph-missing-canonical",
+      "input": "/home/exedev/js-wf-replay-format-20261010/corrected-variants/missing-canonical-graph.json",
+      "input_sha256": "6cca137923fc640ce69d263f3808bf155ff584757c62e73225b5eae590beb155",
+      "command": [
+        "/home/exedev/js-wf-replay-format-20261010/wf",
+        "-url",
+        "nats://127.0.0.1:1",
+        "-handler-plugin",
+        "/home/exedev/js-wf-replay-format-20261010/handler.so",
+        "-handler-symbol",
+        "ChildWorkflow",
+        "-replay-bundle",
+        "/home/exedev/js-wf-replay-format-20261010/corrected-variants/missing-canonical-graph.json",
+        "replay"
+      ],
+      "exit": 1,
+      "output": "invalid step protocol in journal\n",
+      "expected": "invalid step protocol in journal"
+    },
+    {
+      "label": "variant-unversioned-all-markers-removed",
+      "input": "/home/exedev/js-wf-replay-format-20261010/corrected-variants/all-markers-removed-unversioned.json",
+      "input_sha256": "2cdb887c23dbcdd1cf75ca40c6bcdc42a0ea50e19e8c6f77b34e046ad0f0ee70",
+      "command": [
+        "/home/exedev/js-wf-replay-format-20261010/wf",
+        "-url",
+        "nats://127.0.0.1:1",
+        "-handler-plugin",
+        "/home/exedev/js-wf-replay-format-20261010/handler.so",
+        "-handler-symbol",
+        "ChildWorkflow",
+        "-replay-bundle",
+        "/home/exedev/js-wf-replay-format-20261010/corrected-variants/all-markers-removed-unversioned.json",
+        "replay"
+      ],
+      "exit": 0,
+      "output": "{\n  \"type\": \"continued\",\n  \"id\": \"offline\",\n  \"inv_seq\": 1,\n  \"journal_entries\": 26,\n  \"status\": \"completed\",\n  \"result\": 60\n}\n",
+      "expected": "completed"
+    },
+    {
+      "label": "variant-graph-all-markers-removed",
+      "input": "/home/exedev/js-wf-replay-format-20261010/corrected-variants/all-markers-removed-graph.json",
+      "input_sha256": "fdb51ceb86a0800b2f39e6cd958294ee7dd6d0c1490e502a197e3482097cbcc9",
+      "command": [
+        "/home/exedev/js-wf-replay-format-20261010/wf",
+        "-url",
+        "nats://127.0.0.1:1",
+        "-handler-plugin",
+        "/home/exedev/js-wf-replay-format-20261010/handler.so",
+        "-handler-symbol",
+        "ChildWorkflow",
+        "-replay-bundle",
+        "/home/exedev/js-wf-replay-format-20261010/corrected-variants/all-markers-removed-graph.json",
+        "replay"
+      ],
+      "exit": 1,
+      "output": "invalid step protocol in journal\n",
+      "expected": "invalid step protocol in journal"
+    },
+    {
+      "label": "variant-unversioned-checkpoint-metadata-removed",
+      "input": "/home/exedev/js-wf-replay-format-20261010/corrected-variants/checkpoint-metadata-removed-unversioned.json",
+      "input_sha256": "8c3f2783eeadb8ef67096cdb7334a9aace99d79b6411bd40dc834deb11a5d244",
+      "command": [
+        "/home/exedev/js-wf-replay-format-20261010/wf",
+        "-url",
+        "nats://127.0.0.1:1",
+        "-handler-plugin",
+        "/home/exedev/js-wf-replay-format-20261010/handler.so",
+        "-handler-symbol",
+        "ChildWorkflow",
+        "-replay-bundle",
+        "/home/exedev/js-wf-replay-format-20261010/corrected-variants/checkpoint-metadata-removed-unversioned.json",
+        "replay"
+      ],
+      "exit": 0,
+      "output": "{\n  \"type\": \"continued\",\n  \"id\": \"offline\",\n  \"inv_seq\": 1,\n  \"journal_entries\": 26,\n  \"status\": \"completed\",\n  \"result\": 60\n}\n",
+      "expected": "completed"
+    },
+    {
+      "label": "variant-graph-checkpoint-metadata-removed",
+      "input": "/home/exedev/js-wf-replay-format-20261010/corrected-variants/checkpoint-metadata-removed-graph.json",
+      "input_sha256": "329e85129549cdc137261f2fa9eb45cd20be84cfd43fd521f70291655278b429",
+      "command": [
+        "/home/exedev/js-wf-replay-format-20261010/wf",
+        "-url",
+        "nats://127.0.0.1:1",
+        "-handler-plugin",
+        "/home/exedev/js-wf-replay-format-20261010/handler.so",
+        "-handler-symbol",
+        "ChildWorkflow",
+        "-replay-bundle",
+        "/home/exedev/js-wf-replay-format-20261010/corrected-variants/checkpoint-metadata-removed-graph.json",
+        "replay"
+      ],
+      "exit": 1,
+      "output": "invalid step protocol in journal\n",
+      "expected": "invalid step protocol in journal"
+    },
+    {
+      "label": "variant-unversioned-wrong-queue-index",
+      "input": "/home/exedev/js-wf-replay-format-20261010/corrected-variants/wrong-queue-index-unversioned.json",
+      "input_sha256": "a3db0daac9f5b8e23453418aafad4ac5cbe478108a95d840aff911e36d55762f",
+      "command": [
+        "/home/exedev/js-wf-replay-format-20261010/wf",
+        "-url",
+        "nats://127.0.0.1:1",
+        "-handler-plugin",
+        "/home/exedev/js-wf-replay-format-20261010/handler.so",
+        "-handler-symbol",
+        "ChildWorkflow",
+        "-replay-bundle",
+        "/home/exedev/js-wf-replay-format-20261010/corrected-variants/wrong-queue-index-unversioned.json",
+        "replay"
+      ],
+      "exit": 0,
+      "output": "{\n  \"type\": \"continued\",\n  \"id\": \"offline\",\n  \"inv_seq\": 1,\n  \"journal_entries\": 26,\n  \"status\": \"completed\",\n  \"result\": 60\n}\n",
+      "expected": "completed"
+    },
+    {
+      "label": "variant-graph-wrong-queue-index",
+      "input": "/home/exedev/js-wf-replay-format-20261010/corrected-variants/wrong-queue-index-graph.json",
+      "input_sha256": "5354655aa8c7a61ef7c58c028b1f32a645fb523ad7dcd05d5b092a14c04a9756",
+      "command": [
+        "/home/exedev/js-wf-replay-format-20261010/wf",
+        "-url",
+        "nats://127.0.0.1:1",
+        "-handler-plugin",
+        "/home/exedev/js-wf-replay-format-20261010/handler.so",
+        "-handler-symbol",
+        "ChildWorkflow",
+        "-replay-bundle",
+        "/home/exedev/js-wf-replay-format-20261010/corrected-variants/wrong-queue-index-graph.json",
+        "replay"
+      ],
+      "exit": 1,
+      "output": "invalid step protocol in journal\n",
+      "expected": "invalid step protocol in journal"
+    },
+    {
+      "label": "variant-unversioned-missing-token",
+      "input": "/home/exedev/js-wf-replay-format-20261010/corrected-variants/missing-token-unversioned.json",
+      "input_sha256": "a1d124f3057cb91ba9629d4c9bc431458d69cdbe23d6a7258637dc1d7d44a115",
+      "command": [
+        "/home/exedev/js-wf-replay-format-20261010/wf",
+        "-url",
+        "nats://127.0.0.1:1",
+        "-handler-plugin",
+        "/home/exedev/js-wf-replay-format-20261010/handler.so",
+        "-handler-symbol",
+        "ChildWorkflow",
+        "-replay-bundle",
+        "/home/exedev/js-wf-replay-format-20261010/corrected-variants/missing-token-unversioned.json",
+        "replay"
+      ],
+      "exit": 0,
+      "output": "{\n  \"type\": \"continued\",\n  \"id\": \"offline\",\n  \"inv_seq\": 1,\n  \"journal_entries\": 26,\n  \"status\": \"completed\",\n  \"result\": 60\n}\n",
+      "expected": "completed"
+    },
+    {
+      "label": "variant-graph-missing-token",
+      "input": "/home/exedev/js-wf-replay-format-20261010/corrected-variants/missing-token-graph.json",
+      "input_sha256": "82e44f965f6e214a0026b7078742e7414bde230f80250f20e8c82c0eda1b4bf0",
+      "command": [
+        "/home/exedev/js-wf-replay-format-20261010/wf",
+        "-url",
+        "nats://127.0.0.1:1",
+        "-handler-plugin",
+        "/home/exedev/js-wf-replay-format-20261010/handler.so",
+        "-handler-symbol",
+        "ChildWorkflow",
+        "-replay-bundle",
+        "/home/exedev/js-wf-replay-format-20261010/corrected-variants/missing-token-graph.json",
+        "replay"
+      ],
+      "exit": 1,
+      "output": "invalid step protocol in journal\n",
+      "expected": "invalid step protocol in journal"
+    },
+    {
+      "label": "variant-graph-unknown-format",
+      "input": "/home/exedev/js-wf-replay-format-20261010/corrected-variants/unknown-format-graph.json",
+      "input_sha256": "4d3b3faf580f707474a9e8e807f4c13ec5c398aa94978c77a5001e4ca351ab01",
+      "command": [
+        "/home/exedev/js-wf-replay-format-20261010/wf",
+        "-url",
+        "nats://127.0.0.1:1",
+        "-handler-plugin",
+        "/home/exedev/js-wf-replay-format-20261010/handler.so",
+        "-handler-symbol",
+        "ChildWorkflow",
+        "-replay-bundle",
+        "/home/exedev/js-wf-replay-format-20261010/corrected-variants/unknown-format-graph.json",
+        "replay"
+      ],
+      "exit": 1,
+      "output": "unsupported offline replay format: graph-v99\n",
+      "expected": "unsupported offline replay format"
+    }
+  ],
+  "binaries": {
+    "wf-race.test": {
+      "bytes": 24289139,
+      "sha256": "10f3ea474a8f1e968e685f934dddc09d8028fc324a28786554517f4e2966234d"
+    },
+    "sim-normal.test": {
+      "bytes": 27162509,
+      "sha256": "443d3837f10b7e6eb22c8494dd1868802133833d16491e838fe1a04639c8d8cf"
+    },
+    "cli-race.test": {
+      "bytes": 67699160,
+      "sha256": "e2de3e2ed7ca0e869182d9f8ac8fa65d5909f101a88bc5117564a88c3f07641d"
+    },
+    "worker-race.test": {
+      "bytes": 48966720,
+      "sha256": "128dee6967a8ad76b2a1f9da0c67ed2509c4f37210387f70f51182eef2a59ded"
+    },
+    "wf": {
+      "bytes": 39667392,
+      "sha256": "43f3530365d4210ff54136c80651905b18f5088f77aaa083984900279fb4a9a7"
+    },
+    "handler.so": {
+      "bytes": 26970752,
+      "sha256": "1740821bb8894d772c066a63ecceebe5fea0a2aa0341ffb1108682357fc70d80"
+    }
+  },
+  "accepted": false,
+  "selected_symbol": "ChildWorkflow",
+  "control_input_sha256": "d2aaff2775e931703b138fe5e306a1b93d5994d1ca0872b93bfd704196dea9d0",
+  "phase": "closed",
+  "exit": 0,
+  "finished": "2026-10-10T11:16:04.786028+00:00"
+}
