@@ -1,5 +1,32 @@
 # Implementation status against the supplied plan
 
+## Declared canonical graph replay format implemented; qualification live — 2026-10-10
+
+New worker snapshots validate and carry `graph-v1`; CLI graph exports preserve
+that declaration. Replay checks the declared contract before user/plugin code:
+canonical signal queue markers, contiguous indices, increasing sequences,
+hashed referenced body bytes, and metadata on every completed checkpoint.
+Removing both checkpoint metadata fields or all signal markers cannot select
+legacy behavior while graph-v1 remains declared. Unknown formats reject;
+previously exported unversioned histories retain compatibility. This is an input
+contract, not authentication against rewriting the declaration itself.
+
+Development SDK format and CLI pre-plugin controls pass, as do worker export
+controls and the complete six-case R1/R3 domain v4/v5/v6 native export matrix.
+The native fixture now owns worker metadata beside its SDK frame rather than
+exporting a partial representation. The initial stale-import compile failure is
+preserved; after removing it, the full export command passes.
+
+Frozen `04f542b` qualification is live under `js-wf-replay-format-20261010.service`
+with RemainAfterExit enabled. Full SDK race and all 841 saved traces have closed
+successfully; CLI/native/worker and both-mode retained-bundle checks continue.
+Overall qualification remains unaccepted until actual retained supervisor
+completion and independent review. [Contract, runner and review requirements](scale/graph-replay-format-2026-10-10/README.md).
+Both older broad campaigns remain live/unaccepted. Full import/rollout,
+authenticity, fault/retention/admission matrices, latest-source seeded/extended,
+remaining cap variants, public admission, production collection and all broader
+original requirements remain open.
+
 ## Offline checkpoint metadata defect fixed; individual source-bound results verified — 2026-10-10
 
 A retained real native export proves that the old offline reader accepts six

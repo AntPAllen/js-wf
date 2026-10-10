@@ -30,3 +30,27 @@ caller's requested compatibility contract. Import/rollout, external authenticity
 full native fault/retention/admission matrices, seeded/extended latest-source
 campaigns, remaining cap variants, public admission, production collection and
 all original broader requirements remain open.
+
+## Frozen qualification live
+
+Source `04f542bcf8ec9099feb07e509db97361c504a633` runs under
+`js-wf-replay-format-20261010.service` with `RemainAfterExit=yes`.
+[Launch identity](launch.json) records the actual process/invocation. Operational
+`state.json` remains uncommitted while running. The retained sparse checkout,
+six matching binaries, source inventories, raw event streams and CLI inputs
+live under `/home/exedev/js-wf-replay-format-20261010`.
+
+[Reviewer](review.py) requires an actually loaded terminal unit, matching
+invocation and actual zero supervisor status; a not-found unit cannot satisfy
+the gate. It checks the complete SDK inventory, 14 format controls, existing
+62 metadata and 10 selected-child controls, 841 saved traces, CLI pre-plugin and
+legacy controls, all six native export cases, eight worker export controls and
+two required disabled-format failures. All 76 producer files are replayed in
+both formats, including their missing-object/stage controls. Missing-marker
+variants preserve both explicit graph rejection and unversioned compatibility.
+The expected CLI inventory is 205 invocations. No passing result is inferred
+from launch or partial progress.
+
+The [development export command](export-development-receipt.json) passes after
+an initial unused-import compile failure, preserved in its separate log. These
+development results do not substitute for the frozen review or broader gates.
