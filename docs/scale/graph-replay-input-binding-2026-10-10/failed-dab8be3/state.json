@@ -1,0 +1,122 @@
+{
+  "source": "dab8be3b30b7b10f0d1af06bc2247eacbd62f638",
+  "checkout": "/home/exedev/js-wf-replay-input-binding-qualification",
+  "root": "/home/exedev/js-wf-replay-input-binding-20261010",
+  "pid": 82950,
+  "invocation": "5a426e13f78d46ed9ff6b46d71df5f1d",
+  "started": "2026-10-10T11:27:01.274232+00:00",
+  "commands": [
+    {
+      "command": [
+        "go",
+        "test",
+        "-race",
+        "-c",
+        "-o",
+        "/home/exedev/js-wf-replay-input-binding-20261010/wf-race.test",
+        "./wf"
+      ],
+      "cwd": "/home/exedev/js-wf-replay-input-binding-qualification",
+      "started": "2026-10-10T11:27:01.567671+00:00",
+      "expected_exit": 0,
+      "exit": 0,
+      "finished": "2026-10-10T11:27:18.987530+00:00"
+    },
+    {
+      "command": [
+        "go",
+        "tool",
+        "test2json",
+        "-t",
+        "-p",
+        "js-wf/wf",
+        "/home/exedev/js-wf-replay-input-binding-20261010/wf-race.test",
+        "-test.v=test2json",
+        "-test.count=1",
+        "-test.timeout=10m"
+      ],
+      "cwd": "/home/exedev/js-wf-replay-input-binding-qualification/wf",
+      "started": "2026-10-10T11:27:18.987894+00:00",
+      "expected_exit": 0,
+      "exit": 0,
+      "finished": "2026-10-10T11:27:50.359487+00:00"
+    },
+    {
+      "command": [
+        "go",
+        "test",
+        "-c",
+        "-o",
+        "/home/exedev/js-wf-replay-input-binding-20261010/sim-normal.test",
+        "./sim"
+      ],
+      "cwd": "/home/exedev/js-wf-replay-input-binding-qualification",
+      "started": "2026-10-10T11:27:50.360192+00:00",
+      "expected_exit": 0,
+      "exit": 0,
+      "finished": "2026-10-10T11:28:18.675173+00:00"
+    },
+    {
+      "command": [
+        "go",
+        "tool",
+        "test2json",
+        "-t",
+        "-p",
+        "js-wf/sim",
+        "/home/exedev/js-wf-replay-input-binding-20261010/sim-normal.test",
+        "-test.v=test2json",
+        "-test.count=1",
+        "-test.timeout=10m",
+        "-test.run=^TestPinnedRegressionCorpus$"
+      ],
+      "cwd": "/home/exedev/js-wf-replay-input-binding-qualification/sim",
+      "started": "2026-10-10T11:28:18.675560+00:00",
+      "expected_exit": 0,
+      "exit": 0,
+      "finished": "2026-10-10T11:28:29.951229+00:00"
+    },
+    {
+      "command": [
+        "go",
+        "test",
+        "-race",
+        "-c",
+        "-o",
+        "/home/exedev/js-wf-replay-input-binding-20261010/cli-race.test",
+        "./cmd/wf"
+      ],
+      "cwd": "/home/exedev/js-wf-replay-input-binding-qualification",
+      "started": "2026-10-10T11:28:29.951694+00:00",
+      "expected_exit": 0,
+      "exit": 0,
+      "finished": "2026-10-10T11:28:46.138685+00:00"
+    },
+    {
+      "command": [
+        "go",
+        "tool",
+        "test2json",
+        "-t",
+        "-p",
+        "js-wf/cmd/wf",
+        "/home/exedev/js-wf-replay-input-binding-20261010/cli-race.test",
+        "-test.v=test2json",
+        "-test.count=1",
+        "-test.timeout=10m",
+        "-test.run=^(TestReplayGraphChildProvenance|TestReplayContinuationPlugin|TestReplayDeclaredGraphBeforePlugin|TestReplayInputBindingBeforePlugin|TestNativeGraphCursorOperatorHistory)$"
+      ],
+      "cwd": "/home/exedev/js-wf-replay-input-binding-qualification/cmd/wf",
+      "started": "2026-10-10T11:28:46.139104+00:00",
+      "expected_exit": 0,
+      "exit": 1,
+      "finished": "2026-10-10T11:30:02.761260+00:00"
+    }
+  ],
+  "replays": [],
+  "accepted": false,
+  "environment": {
+    "GOMAXPROCS": "2",
+    "GOMEMLIMIT": "768MiB"
+  }
+}

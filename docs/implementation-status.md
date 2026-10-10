@@ -1,5 +1,19 @@
 # Implementation status against the supplied plan
 
+## Input-binding legacy regression repaired; new qualification pending — 2026-10-10
+
+Frozen `dab8be3` qualification failed with retained supervisor exit 1. Full SDK
+race and 841 saved traces passed; the legacy plugin and two CLI provenance
+controls failed. [Original evidence](scale/graph-replay-input-binding-2026-10-10/failed-dab8be3/failure-receipt.json)
+preserves that failure. The compatibility fix skips absent declarations in
+unversioned empty/opaque Started payloads, still rejecting invalid declarations.
+CLI provenance fixtures now include their required Started record.
+
+Directed SDK/CLI/legacy plugin race tests pass; SDK input controls increase to 15.
+A separate frozen qualification will repeat the complete component matrix and
+209 offline invocations. Original failures remain unaccepted. Both broader
+campaigns are confirmed live; all broader original plan gates remain open.
+
 ## Canonical replay input binding fixed; qualification live — 2026-10-10
 
 A real retained graph-v1 child export accepts an ignored extra input field after

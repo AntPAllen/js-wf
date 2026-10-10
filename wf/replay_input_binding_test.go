@@ -30,6 +30,9 @@ func TestReplayInputBindsStarted(t *testing.T) {
 		{"unversioned_annotated_changed", "", foreign, json.RawMessage(`{"input_sha256":"` + original + `"}`), ErrReplayInputMismatch},
 		{"legacy_without_declaration", "", original, json.RawMessage(`null`), nil},
 		{"legacy_without_expected", "", "", json.RawMessage(`null`), nil},
+		{"legacy_empty_payload", "", original, nil, nil},
+		{"legacy_opaque_payload", "", original, json.RawMessage(`7`), nil},
+		{"unversioned_null_declaration", "", original, json.RawMessage(`{"input_sha256":null}`), ErrReplayInputMismatch},
 	}
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {

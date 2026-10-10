@@ -2,8 +2,8 @@
 import datetime,hashlib,json,os,subprocess,sys
 from pathlib import Path
 base=Path(__file__).resolve().parent;repo=base.parents[2]
-checkout=Path('/home/exedev/js-wf-replay-input-binding-legacy-qualification')
-root=Path('/home/exedev/js-wf-replay-input-binding-legacy-20261010')
+checkout=Path('/home/exedev/js-wf-replay-input-binding-qualification')
+root=Path('/home/exedev/js-wf-replay-input-binding-20261010')
 source=sys.argv[1]
 assert subprocess.check_output(['git','rev-parse','HEAD'],cwd=checkout,text=True).strip()==source
 assert not subprocess.check_output(['git','status','--porcelain'],cwd=checkout)

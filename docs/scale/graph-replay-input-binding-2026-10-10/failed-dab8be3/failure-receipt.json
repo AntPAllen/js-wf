@@ -1,0 +1,13 @@
+{
+  "source": "dab8be3b30b7b10f0d1af06bc2247eacbd62f638",
+  "actual_command_exit": 1,
+  "actual_supervisor_exit": 1,
+  "failing_tests": [
+    "TestReplayContinuationPlugin",
+    "TestReplayGraphChildProvenance/missing_outcome",
+    "TestReplayGraphChildProvenance/missing_result",
+    "TestReplayGraphChildProvenance"
+  ],
+  "cause": "Legacy plugin Started payload is nil and must not force decoding an absent declaration. Two CLI provenance fixtures instead omit Started entirely; complete their CLI histories without weakening the Started requirement.",
+  "scope": "SDK race and841 normal pins pass; CLI/legacy package fails. No overall source qualification; all evidence preserved."
+}

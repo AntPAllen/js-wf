@@ -117,6 +117,9 @@ func TestReplayGraphChildProvenance(t *testing.T) {
 			}
 			if test.want != nil {
 				// The actual CLI bundle path must reject before opening a handler plugin.
+				// Structural controls above use a history fragment; the CLI requires
+				// a complete history, including the legacy empty Started record.
+				b.Journal = append([]journal.Record{{Entry: journal.Entry{Kind: journal.Started}}}, b.Journal...)
 				_, err = runReplayBundle(b, "/does-not-exist.so", "Workflow")
 				if !errors.Is(err, test.want) {
 					t.Fatalf("CLI validation=%v want=%v", err, test.want)

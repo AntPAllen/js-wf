@@ -132,11 +132,20 @@ func validateReplayInputBinding(records []journal.Record, format, inputHash stri
 		if checkpoint.DecodeUnambiguous(records[0].Payload, &start) != nil {
 			return ErrCorruptJournal
 		}
-	} else if json.Unmarshal(records[0].Payload, &start) != nil {
-		return ErrCorruptJournal
-	}
-	if start.Hash == "" && format != ReplayFormatGraphV1 {
-		return nil
+	} else {
+		// Legacy workers write Started with no payload. Other old callers may
+		// store opaque JSON here; only an actual declaration opts into binding.
+		var fields map[string]json.RawMessage
+		if json.Unmarshal(records[0].Payload, &fields) != nil {
+			return nil
+		}
+		declared, ok := fields["input_sha256"]
+		if !ok {
+			return nil
+		}
+		if json.Unmarshal(declared, &start.Hash) != nil {
+			return ErrReplayInputMismatch
+		}
 	}
 	valid := func(hash string) bool {
 		raw, err := hex.DecodeString(hash)

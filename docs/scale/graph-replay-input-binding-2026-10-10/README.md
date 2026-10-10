@@ -25,16 +25,16 @@ full import/fault/retention/admission, remaining cap variants, public admission,
 production collection or broader original requirements. Rewriting every input
 and journal declaration is outside authenticity supplied by this local bundle.
 
-## Frozen qualification live
+## Original frozen qualification failed
 
-Source `dab8be3b30b7b10f0d1af06bc2247eacbd62f638` is running under
+Source `dab8be3b30b7b10f0d1af06bc2247eacbd62f638` failed under
 `js-wf-replay-input-binding-20261010.service` with RemainAfterExit enabled.
 [Launch identity](launch.json) records the actual process/invocation. Live
 `state.json` remains uncommitted. The [reviewer](review.py) refuses a missing,
 unloaded, live or nonzero original supervisor and verifies source/retained
 binary/raw event/CLI input identities before acceptance.
 
-Expected scope includes 65 full SDK race top tests, 12 input-binding controls,
+The original intended scope includes 65 full SDK race top tests, 12 input-binding controls,
 14 prior format controls, 62 metadata and 10 selected-child controls, all 841
 normal saved traces, CLI pre-plugin/provenance/legacy plugin tests, six native
 exports, eight worker export controls and two required disabled-input-binding
@@ -48,3 +48,15 @@ SDK replay of a worker snapshot supplies both `Format: snapshot.Format` and
 handler must receive the corresponding snapshot input bytes. This contract
 binds those supplied bytes to the journal declaration; it does not authenticate
 an attacker rewriting the entire bundle and every declaration together.
+
+## Legacy repair and separate retry
+
+Original supervisor exit 1 and partial commands are preserved in
+[failed-dab8be3](failed-dab8be3/failure-receipt.json), including the as-executed
+runner, reviewer and launch identity. Empty or opaque legacy Started payloads
+do not declare an input hash. Explicit declarations still bind supplied input.
+Two provenance fixtures now provide Started for their CLI histories. Directed
+SDK, CLI and legacy plugin race tests pass in [development log](development-legacy-fix.log).
+The revised runner uses a separate checkout, artifact root and retained service;
+its reviewer requires all 15 SDK input controls and the complete prior matrix.
+Qualification remains pending.

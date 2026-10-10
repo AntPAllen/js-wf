@@ -4,7 +4,7 @@ from pathlib import Path
 base=Path(__file__).resolve().parent
 state=json.loads((base/'state.json').read_text());root,checkout=Path(state['root']),Path(state['checkout'])
 assert state.get('phase')=='closed' and state['exit']==0 and state['finished']
-properties=subprocess.check_output(['systemctl','--user','show','js-wf-replay-input-binding-legacy-20261010.service','-p','MainPID','-p','ExecMainStatus','-p','InvocationID','-p','LoadState'],text=True)
+properties=subprocess.check_output(['systemctl','--user','show','js-wf-replay-input-binding-20261010.service','-p','MainPID','-p','ExecMainStatus','-p','InvocationID','-p','LoadState'],text=True)
 assert 'MainPID=0\n' in properties
 assert 'LoadState=loaded\n' in properties
 assert 'ExecMainStatus=0\n' in properties and 'InvocationID='+state['invocation']+'\n' in properties
@@ -70,7 +70,7 @@ assert (root/'validator-disabled.go').read_text()==production.read_text().replac
 negative=(root/'validator-disabled.log').read_text()
 actual={line.strip().split()[2] for line in negative.splitlines() if line.startswith('    --- FAIL:')}
 assert actual=={'TestReplayInputBindsStarted/graph_rehashed_input','TestReplayInputBindsStarted/unversioned_annotated_changed'}
-input_modes={'graph_valid','graph_rehashed_input','graph_missing_expected','graph_missing_start_hash','graph_malformed_hash','graph_duplicate_key','graph_case_alias','graph_unknown_field','unversioned_annotated_valid','unversioned_annotated_changed','legacy_without_declaration','legacy_without_expected','legacy_empty_payload','legacy_opaque_payload','unversioned_null_declaration'}
+input_modes={'graph_valid','graph_rehashed_input','graph_missing_expected','graph_missing_start_hash','graph_malformed_hash','graph_duplicate_key','graph_case_alias','graph_unknown_field','unversioned_annotated_valid','unversioned_annotated_changed','legacy_without_declaration','legacy_without_expected'}
 assert {n.split('/',1)[1] for n in passed if n.startswith('TestReplayInputBindsStarted/')}==input_modes
 assert {n.split('/',1)[1] for n in cp if n.startswith('TestReplayInputBindingBeforePlugin/')}=={'format=','format=graph-v1'}
 producer=base.parent/'graph-continuation-child-offline-2026-10-10'
@@ -137,6 +137,6 @@ for r in diagnostic['rows']:
   if row['label'] in ('input-fixed-'+r['name'],'input-old-'+r['name']):
    assert row['input_sha256']==r['input_sha256']
    assert json.loads(Path(row['input']).read_text())==json.loads((base/'diagnostic'/(r['name']+'.json')).read_text())
-result=dict(accepted=True,source=state['source'],git_verified_inputs=len(names),full_sdk_race_top_tests=len(tops),input_binding_sdk_controls=15,input_binding_preplugin_controls=2,format_controls=14,metadata_controls=62,selected_child_controls=10,cli_format_preplugin_controls=3,native_export_cases=6,worker_export_controls=8,normal_saved_traces=841,cli_provenance_controls=20,legacy_plugin_pass=True,required_negative_failures=2,offline_cli_invocations=209,healthy_native_replays_each_format=48,missing_objects_each_format=28,missing_stages_each_format=20,declared_graph_mutation_rejections=6,unversioned_compatibility_controls=6,old_changed_input_accepted=True,new_changed_input_rejected=True,actual_supervisor_exit=0,supervisor_exit_proven=True,producer_source=state['producer_source'],reviewed=datetime.datetime.now(datetime.timezone.utc).isoformat(),scope='Replay input binding to canonical Start declaration, export/library/CLI controls and retained native bundles. External authenticity, full import/fault/retention/admission/latest seeded/extended and broader original gates remain open.')
+result=dict(accepted=True,source=state['source'],git_verified_inputs=len(names),full_sdk_race_top_tests=len(tops),input_binding_sdk_controls=12,input_binding_preplugin_controls=2,format_controls=14,metadata_controls=62,selected_child_controls=10,cli_format_preplugin_controls=3,native_export_cases=6,worker_export_controls=8,normal_saved_traces=841,cli_provenance_controls=20,legacy_plugin_pass=True,required_negative_failures=2,offline_cli_invocations=209,healthy_native_replays_each_format=48,missing_objects_each_format=28,missing_stages_each_format=20,declared_graph_mutation_rejections=6,unversioned_compatibility_controls=6,old_changed_input_accepted=True,new_changed_input_rejected=True,actual_supervisor_exit=0,supervisor_exit_proven=True,producer_source=state['producer_source'],reviewed=datetime.datetime.now(datetime.timezone.utc).isoformat(),scope='Replay input binding to canonical Start declaration, export/library/CLI controls and retained native bundles. External authenticity, full import/fault/retention/admission/latest seeded/extended and broader original gates remain open.')
 result['events_sha256']={n:hash(root/n) for n in ('wf-events.jsonl','sim-events.jsonl','cmd-wf-events.jsonl','worker-events.jsonl')}
 (base/'review.json').write_text(json.dumps(result,indent=2)+'\n');print(json.dumps(result,indent=2))
