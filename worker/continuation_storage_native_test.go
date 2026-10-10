@@ -5,6 +5,8 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"strings"
+	"sync/atomic"
 	"testing"
 	"time"
 
@@ -18,6 +20,14 @@ import (
 )
 
 func TestNativeGraphStoredMaintenanceFreshWorkerRecovery(t *testing.T) {
+	testNativeGraphStoredMaintenanceFreshWorkerRecovery(t, false)
+}
+
+func TestNativeGraphIndexedStoredRenewalFreshWorkerRecovery(t *testing.T) {
+	testNativeGraphStoredMaintenanceFreshWorkerRecovery(t, true)
+}
+
+func testNativeGraphStoredMaintenanceFreshWorkerRecovery(t *testing.T, indexed bool) {
 	for _, replicas := range []int{1, 3} {
 		t.Run(fmt.Sprintf("R%d-domain", replicas), func(t *testing.T) {
 			cluster, e := testcluster.StartWithDomain(t.TempDir(), replicas, "STOREDWORKER")
@@ -43,7 +53,25 @@ func TestNativeGraphStoredMaintenanceFreshWorkerRecovery(t *testing.T) {
 					}
 				}
 			}
-			js, e := jetstream.NewWithDomain(cluster.Clients[0], "STOREDWORKER")
+			var executing atomic.Bool
+			var scopedCensus, fullCensus atomic.Int64
+			trace := jetstream.WithClientTrace(&jetstream.ClientTrace{RequestSent: func(_ string, body []byte) {
+				if !executing.Load() {
+					return
+				}
+				var request struct {
+					Filter string `json:"subjects_filter"`
+				}
+				if json.Unmarshal(body, &request) != nil {
+					return
+				}
+				if strings.HasPrefix(request.Filter, "wf.graph.storedworker.owner.") {
+					scopedCensus.Add(1)
+				} else if request.Filter == "wf.graph.storedworker.>" {
+					fullCensus.Add(1)
+				}
+			}})
+			js, e := jetstream.NewWithDomain(cluster.Clients[0], "STOREDWORKER", trace)
 			if e != nil {
 				t.Fatal(e)
 			}
@@ -55,6 +83,11 @@ func TestNativeGraphStoredMaintenanceFreshWorkerRecovery(t *testing.T) {
 				t.Fatal(e)
 			}
 			cfg := journal.NativeGraphConfig{AuthorityStream: "STORED_AUTH", AuthorityPrefix: "wf.graph.storedworker", ObjectBucket: "STORED_OBJECTS", ExpectedReplicas: replicas, CanonicalStarts: true, CanonicalSignals: true, CheckpointIndex: true, ArchiveCheckpoints: true}
+			now := time.Now().UTC()
+			if indexed {
+				cfg.OwnerScopeIndex = true
+				cfg.Now = func() time.Time { return now }
+			}
 			configs, e := journal.NativeGraphStreamConfigs(cfg, replicas)
 			if e != nil {
 				t.Fatal(e)
@@ -107,6 +140,9 @@ func TestNativeGraphStoredMaintenanceFreshWorkerRecovery(t *testing.T) {
 				return json.RawMessage(`42`), nil
 			}}
 			stageCounts, verifyCounts := [3]int{}, [3]int{}
+			renewCounts := [3]int{}
+			censusCounts := [3]int64{}
+			renewRequested, crossedExpiry := false, false
 			cut := false
 			for delivery := 0; delivery < 3; delivery++ {
 				runCtx, cancel := context.WithCancel(ctx)
@@ -118,11 +154,25 @@ func TestNativeGraphStoredMaintenanceFreshWorkerRecovery(t *testing.T) {
 					switch event.Operation {
 					case "continuation_archive_stage_batch":
 						stageCounts[delivery]++
+						if indexed && delivery == 0 && !renewRequested {
+							renewRequested = true
+							now = now.Add(41 * time.Second)
+						}
+						if indexed && delivery == 1 && !crossedExpiry {
+							crossedExpiry = true
+							now = now.Add(20 * time.Second)
+						}
+					case "continuation_archive_renew_batch":
+						renewCounts[delivery]++
+						if indexed && delivery == 0 && renewCounts[0] == 1 {
+							cut = true
+							cancel()
+						}
 					case "continuation_archive_verify_batch":
 						verifyCounts[delivery]++
 					case "continuation_archive_checkpoint_save":
 						saves++
-						if delivery == 0 && saves == 2 {
+						if !indexed && delivery == 0 && saves == 2 {
 							cut = true
 							cancel()
 						}
@@ -140,7 +190,11 @@ func TestNativeGraphStoredMaintenanceFreshWorkerRecovery(t *testing.T) {
 					t.Fatal(e)
 				}
 				var noOp bool
+				beforeCensus := scopedCensus.Load()
+				executing.Store(true)
 				e = runner.execute(runCtx, h.Type, h.ID, owner, time.Time{}, timerWakeup{}, &noOp, runner.deliveryOperations(h.Type, h.ID, 0, 0))
+				executing.Store(false)
+				censusCounts[delivery] = scopedCensus.Load() - beforeCensus
 				cancel()
 				releaseErr := owner.Release(ctx)
 				closeErr := runner.Close()
@@ -157,7 +211,11 @@ func TestNativeGraphStoredMaintenanceFreshWorkerRecovery(t *testing.T) {
 				if initial != 1 || entered != delivery/2 {
 					t.Fatal("early/duplicate stage", delivery, initial, entered)
 				}
-				authority, e := graphpublication.OpenNativeAuthority(ctx, js, cfg.AuthorityStream, cfg.AuthorityPrefix)
+				openAuthority := graphpublication.OpenNativeAuthority
+				if indexed {
+					openAuthority = graphpublication.OpenOwnerIndexedNativeAuthority
+				}
+				authority, e := openAuthority(ctx, js, cfg.AuthorityStream, cfg.AuthorityPrefix)
 				if e != nil {
 					t.Fatal(e)
 				}
@@ -196,10 +254,14 @@ func TestNativeGraphStoredMaintenanceFreshWorkerRecovery(t *testing.T) {
 						t.Fatal(e)
 					}
 					var saved struct {
-						Stage struct{ Next, Expected uint64 } `json:"stage"`
+						Stage   struct{ Next, Expected uint64 } `json:"stage"`
+						RenewTo time.Time                       `json:"renew_to"`
 					}
 					if e = json.Unmarshal(entry.Value(), &saved); e != nil || saved.Stage.Next != 2 || saved.Stage.Expected != root.Head {
 						t.Fatal("reader changed saved authority", saved, root.Head, e)
+					}
+					if indexed && saved.RenewTo.IsZero() {
+						t.Fatal("pending renewal not stored before grant updates")
 					}
 				} else if !errors.Is(e, jetstream.ErrNoKeysFound) || len(keys) != 0 {
 					t.Fatal("descriptor not deleted", keys, e)
@@ -208,7 +270,13 @@ func TestNativeGraphStoredMaintenanceFreshWorkerRecovery(t *testing.T) {
 			if stageCounts[0] != 1 || stageCounts[1] != 5 || verifyCounts[1] != 10 || initial != 1 || entered != 1 {
 				t.Fatal("progress not recovered", stageCounts, verifyCounts, initial, entered)
 			}
-			t.Logf("NATIVE_STORED_WORKER replicas=%d fresh_workers=3 stage_batches=%v verify_batches=%v initial_calls=1 stage_calls=1 pending_next=2 source_head_unchanged=true descriptors_after_recovery=0 readers=0", replicas, stageCounts, verifyCounts)
+			if indexed && (!renewRequested || !crossedExpiry || renewCounts[0] != 1 || renewCounts[1] == 0) {
+				t.Fatal("pending indexed renewal not resumed", renewRequested, crossedExpiry, renewCounts)
+			}
+			if indexed && (censusCounts[0] == 0 || censusCounts[1] == 0 || fullCensus.Load() != 0) {
+				t.Fatal("indexed worker did not use owner-filtered discovery", censusCounts, fullCensus.Load())
+			}
+			t.Logf("NATIVE_STORED_WORKER replicas=%d indexed=%t fresh_workers=3 stage_batches=%v verify_batches=%v renew_batches=%v owner_census=%v full_census=%d initial_calls=1 stage_calls=1 pending_next=2 source_head_unchanged=true descriptors_after_recovery=0 readers=0", replicas, indexed, stageCounts, verifyCounts, renewCounts, censusCounts, fullCensus.Load())
 		})
 	}
 }

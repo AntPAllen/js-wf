@@ -1,0 +1,18 @@
+=== RUN   TestNativeGraphStoredMaintenanceFreshWorkerRecovery
+=== RUN   TestNativeGraphStoredMaintenanceFreshWorkerRecovery/R1-domain
+    continuation_storage_native_test.go:251: NATIVE_STORED_WORKER replicas=1 indexed=false fresh_workers=3 stage_batches=[1 5 0] verify_batches=[0 10 0] renew_batches=[0 0 0] initial_calls=1 stage_calls=1 pending_next=2 source_head_unchanged=true descriptors_after_recovery=0 readers=0
+=== RUN   TestNativeGraphStoredMaintenanceFreshWorkerRecovery/R3-domain
+    continuation_storage_native_test.go:251: NATIVE_STORED_WORKER replicas=3 indexed=false fresh_workers=3 stage_batches=[1 5 0] verify_batches=[0 10 0] renew_batches=[0 0 0] initial_calls=1 stage_calls=1 pending_next=2 source_head_unchanged=true descriptors_after_recovery=0 readers=0
+--- PASS: TestNativeGraphStoredMaintenanceFreshWorkerRecovery (16.69s)
+    --- PASS: TestNativeGraphStoredMaintenanceFreshWorkerRecovery/R1-domain (6.61s)
+    --- PASS: TestNativeGraphStoredMaintenanceFreshWorkerRecovery/R3-domain (10.07s)
+=== RUN   TestNativeGraphIndexedStoredRenewalFreshWorkerRecovery
+=== RUN   TestNativeGraphIndexedStoredRenewalFreshWorkerRecovery/R1-domain
+    continuation_storage_native_test.go:251: NATIVE_STORED_WORKER replicas=1 indexed=true fresh_workers=3 stage_batches=[1 5 0] verify_batches=[0 10 0] renew_batches=[1 2 0] initial_calls=1 stage_calls=1 pending_next=2 source_head_unchanged=true descriptors_after_recovery=0 readers=0
+=== RUN   TestNativeGraphIndexedStoredRenewalFreshWorkerRecovery/R3-domain
+    continuation_storage_native_test.go:251: NATIVE_STORED_WORKER replicas=3 indexed=true fresh_workers=3 stage_batches=[1 5 0] verify_batches=[0 10 0] renew_batches=[1 2 0] initial_calls=1 stage_calls=1 pending_next=2 source_head_unchanged=true descriptors_after_recovery=0 readers=0
+--- PASS: TestNativeGraphIndexedStoredRenewalFreshWorkerRecovery (20.87s)
+    --- PASS: TestNativeGraphIndexedStoredRenewalFreshWorkerRecovery/R1-domain (8.35s)
+    --- PASS: TestNativeGraphIndexedStoredRenewalFreshWorkerRecovery/R3-domain (12.52s)
+PASS
+ok  	js-wf/worker	38.591s

@@ -1,5 +1,33 @@
 # Implementation status against the supplied plan
 
+## Indexed native journal configuration and worker recovery — 2026-10-10
+
+NativeGraphConfig.OwnerScopeIndex now explicitly provisions/selects the indexed
+adapter, preserving owner discovery through OpenNativeGraphStore. Mode mismatch
+rejects admission without changing stream configuration or physical sequences.
+The false/default mode retains existing stores and full discovery; no upgrade or
+public continuation admission is enabled.
+[Evidence](scale/graph-indexed-worker-renewal-2026-10-10/README.md).
+
+Native domain R1/R3 indexed workers save pending renewal before cancellation,
+resume with fresh graph/descriptor adapters, cross the old intent expiry under
+a controlled journal clock, independently verify all ten target batches, and
+enter the next stage once. Real SDK traces show owner censuses [1,1,0] and zero
+full censuses across three fresh workers. Replacing the indexed wrapper with a
+bare port fails both controls. Restored indexed and legacy R1/R3 worker cases
+pass race 46.626 seconds; two mode controls and prior admission pass race 1.213
+seconds. All 853 common pins pass 8.605 seconds. The original two-minute fixture
+watchdog and production request/batch contexts remain enforced.
+
+Large owned-grant census setup, pagination and registration cost remain open.
+Discovery witnesses every owned marker in the worker's three-second begin
+context; that work can still prevent large compaction progress. Qualify and
+bound setup before another actual 100,000-entry run. This fixture uses fresh
+worker objects, real native lease/storage/dispatch, and controlled journal time;
+it does not prove OS worker/server/VM kill recovery. Existing namespaces require
+proven complete migration. Full scale, fault, retention, majority, soak,
+admission, collection and rollout gates remain open.
+
 ## Native owner index for newly provisioned namespaces — 2026-10-10
 
 An explicit native indexed adapter now registers every scope in the permanent

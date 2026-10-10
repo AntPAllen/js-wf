@@ -20,16 +20,19 @@ type NativeGraphConfig struct {
 	ObjectBucket    string
 	// ExpectedReplicas optionally requires both stores to have this replica count.
 	// Zero accepts the adapter's structurally safe positive replica counts.
-	ExpectedReplicas      int
-	Now                   func() time.Time
-	PinTTL                time.Duration
-	IntentTTL             time.Duration
-	Encoding              Encoding
-	PayloadReadLimit      int
-	CanonicalStarts       bool
-	CanonicalSignals      bool
-	CheckpointIndex       bool
-	ArchiveCheckpoints    bool
+	ExpectedReplicas   int
+	Now                func() time.Time
+	PinTTL             time.Duration
+	IntentTTL          time.Duration
+	Encoding           Encoding
+	PayloadReadLimit   int
+	CanonicalStarts    bool
+	CanonicalSignals   bool
+	CheckpointIndex    bool
+	ArchiveCheckpoints bool
+	// OwnerScopeIndex selects a newly provisioned indexed authority namespace.
+	// It does not upgrade existing stores. Every adapter must select this mode.
+	OwnerScopeIndex       bool
 	CompactionCheckpoints CompactionCheckpointPort
 }
 
@@ -57,8 +60,12 @@ func NativeGraphStreamConfigs(cfg NativeGraphConfig, replicas int) ([]jetstream.
 	if replicas < 1 || replicas > 5 || cfg.ExpectedReplicas != 0 && cfg.ExpectedReplicas != replicas {
 		return nil, fmt.Errorf("graph replicas must be between 1 and 5")
 	}
+	authority := graphpublication.AuthorityStreamConfig(cfg.AuthorityStream, cfg.AuthorityPrefix, replicas)
+	if cfg.OwnerScopeIndex {
+		authority = graphpublication.OwnerIndexedAuthorityStreamConfig(cfg.AuthorityStream, cfg.AuthorityPrefix, replicas)
+	}
 	return []jetstream.StreamConfig{
-		graphpublication.AuthorityStreamConfig(cfg.AuthorityStream, cfg.AuthorityPrefix, replicas),
+		authority,
 		graphpublication.NativeObjectStreamConfig(cfg.ObjectBucket, replicas),
 	}, nil
 }
@@ -91,11 +98,20 @@ func OpenNativeGraphStore(ctx context.Context, js jetstream.JetStream, cfg Nativ
 			}
 		}
 	}
-	authority, err := graphpublication.OpenNativeAuthority(ctx, js, cfg.AuthorityStream, cfg.AuthorityPrefix)
+	openAuthority := graphpublication.OpenNativeAuthority
+	if cfg.OwnerScopeIndex {
+		openAuthority = graphpublication.OpenOwnerIndexedNativeAuthority
+	}
+	authority, err := openAuthority(ctx, js, cfg.AuthorityStream, cfg.AuthorityPrefix)
 	if err != nil {
 		return nil, err
 	}
-	port, err := graphpublication.OpenNativePort(ctx, authority, cfg.ObjectBucket)
+	var port graphpublication.Port
+	if cfg.OwnerScopeIndex {
+		port, err = graphpublication.OpenOwnerIndexedNativePort(ctx, authority, cfg.ObjectBucket)
+	} else {
+		port, err = graphpublication.OpenNativePort(ctx, authority, cfg.ObjectBucket)
+	}
 	if err != nil {
 		return nil, err
 	}
