@@ -1,6 +1,7 @@
 package worker
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"errors"
@@ -13,6 +14,7 @@ import (
 	"github.com/nats-io/nats.go/jetstream"
 	"js-wf/client"
 	"js-wf/identity"
+	"js-wf/internal/checkpoint"
 	"js-wf/internal/graphpublication"
 	"js-wf/internal/retainedgraph"
 	"js-wf/journal"
@@ -87,6 +89,24 @@ func TestNativeGraphContinuationFailedChildPromise(t *testing.T) {
 	}
 }
 
+func TestNativeGraphContinuationPendingChildAcrossCheckpoints(t *testing.T) {
+	for _, domain := range []string{"", "WFCONTINUATIONSDK"} {
+		for _, archive := range []bool{false, true} {
+			for _, failed := range []bool{false, true} {
+				name := "R1"
+				if domain != "" {
+					name = "R3Domain"
+				}
+				t.Run(fmt.Sprintf("%s/archive=%t/failed=%t", name, archive, failed), func(t *testing.T) {
+					// Carry an unresolved promise through both checkpoints, then
+					// actually suspend the final stage before executing the child.
+					testNativeGraphContinuationSDKFlow(t, domain, false, false, true, true, archive, failed, true)
+				})
+			}
+		}
+	}
+}
+
 func TestNativeGraphContinuationArchiveCollection(t *testing.T) {
 	for _, domain := range []string{"", "WFCONTINUATIONSDK"} {
 		for _, mode := range []string{"state", "signals", "child", "buffered-child"} {
@@ -103,6 +123,10 @@ func TestNativeGraphContinuationArchiveCollection(t *testing.T) {
 func testNativeGraphContinuationSDKFlow(t *testing.T, domain string, partition, bufferedSignals, childPromiseFlow, bufferedChild bool, archiveMode ...bool) {
 	archive := len(archiveMode) != 0 && archiveMode[0]
 	childFailure := len(archiveMode) > 1 && archiveMode[1]
+	pendingChild := len(archiveMode) > 2 && archiveMode[2]
+	if pendingChild && (!childPromiseFlow || !bufferedChild || partition) {
+		t.Fatal("pending-child fixture requires direct deliveries and a carried promise")
+	}
 	replicas := 1
 	if domain != "" {
 		replicas = 3
@@ -122,7 +146,7 @@ func testNativeGraphContinuationSDKFlow(t *testing.T, domain string, partition, 
 	if childPromiseFlow || archive {
 		timeout = time.Minute
 	}
-	if childFailure && archive {
+	if childFailure && archive || pendingChild {
 		// Functional watchdog for the complete multi-delivery/collection fixture.
 		// Recovery latency is checked separately from kill through exact ACK.
 		timeout = 2 * time.Minute
@@ -191,6 +215,7 @@ func testNativeGraphContinuationSDKFlow(t *testing.T, domain string, partition, 
 	calls, effects := map[string]int{}, 0
 	var childPromise wf.Promise
 	childCalls := 0
+	var pendingPrefix []journal.Record
 	childResult := strings.Repeat("child", 140000)
 	checkPromise := func(c *wf.Context, locals json.RawMessage, count int) error {
 		var data struct {
@@ -249,7 +274,7 @@ func testNativeGraphContinuationSDKFlow(t *testing.T, domain string, partition, 
 		}
 	}
 	var observe func(OperationEvent)
-	if childFailure {
+	if childFailure || pendingChild {
 		observe = func(event OperationEvent) {
 			if event.Operation == "journal_append" || event.Error != "" {
 				t.Logf("SDK_OPERATION op=%s type=%s index=%d kind=%s duration=%s error=%q sdk_requests=%d", event.Operation, event.Type, event.JournalIndex, event.JournalKind, event.Duration, event.Error, requests.Load())
@@ -405,8 +430,38 @@ func testNativeGraphContinuationSDKFlow(t *testing.T, domain string, partition, 
 			if err != nil || status.Checkpoint == nil || status.Checkpoint.Stage != stage || !status.ContinuationReady() {
 				t.Fatal("SDK did not publish checkpoint", stage, status, err)
 			}
+			if pendingChild {
+				view, err := graph.Open(ctx, h.Type, h.ID, h.InvSeq)
+				if err != nil {
+					t.Fatal(err)
+				}
+				found, err := view.ReadCheckpoint(ctx, h.Type, h.ID)
+				if err != nil || found == nil {
+					t.Fatal("pending promise checkpoint absent", found, err)
+				}
+				var frame checkpoint.Frame
+				var locals struct {
+					Count   int        `json:"count"`
+					Promise wf.Promise `json:"promise"`
+				}
+				wantCount := 1
+				if stage == "finish" {
+					wantCount = 2
+				}
+				if json.Unmarshal(found.Frame, &frame) != nil || json.Unmarshal(frame.Data, &locals) != nil || frame.Stage != stage || locals.Count != wantCount || locals.Promise != childPromise || len(frame.PromiseOutcomes) != 0 || len(frame.PendingSignals) != 0 || childCalls != 0 {
+					t.Fatal("pending child was resolved or lost before checkpoint", stage, frame, locals, childCalls)
+				}
+				if err := view.Close(ctx); err != nil {
+					t.Fatal(err)
+				}
+				childStatus, err := graph.InspectStart(ctx, childPromise.ChildType, childPromise.ChildID)
+				if err != nil || childStatus.JournalCount != 0 || childStatus.Kind == journal.Completed || childStatus.Kind == journal.Failed {
+					t.Fatal("pending child executed before parent checkpoint", childStatus, err)
+				}
+				t.Logf("PENDING_CHILD_CHECKPOINT stage=%s locals_count=%d child_calls=0 outcomes=0 buffered_signals=0", stage, locals.Count)
+			}
 			var childReceipts []journal.GraphPayloadLink
-			if childPromiseFlow && stage == "finish" {
+			if childPromiseFlow && stage == "finish" && !pendingChild {
 				retired, err := graph.InspectRetirement(ctx, childPromise.ChildType, childPromise.ChildID)
 				if err != nil {
 					t.Fatal(err)
@@ -449,7 +504,7 @@ func testNativeGraphContinuationSDKFlow(t *testing.T, domain string, partition, 
 				if _, err = protocol.SweepWithReaders(ctx, time.Now().Add(2*time.Minute)); err != nil {
 					t.Fatal(err)
 				}
-				if childPromiseFlow && stage == "finish" {
+				if childPromiseFlow && stage == "finish" && !pendingChild {
 					for _, receipt := range childReceipts {
 						if _, err = port.Get(ctx, receipt, journal.DefaultGraphPayloadLimit); !errors.Is(err, jetstream.ErrObjectNotFound) {
 							t.Fatal("retired child receipt absence unconfirmed", receipt, err)
@@ -536,7 +591,7 @@ func testNativeGraphContinuationSDKFlow(t *testing.T, domain string, partition, 
 			}
 			phase("boundary_scan_end_" + stage)
 			if childPromiseFlow {
-				if stage == "next" {
+				if stage == "next" && !pendingChild {
 					executeWorkflow(childPromise.ChildType, childPromise.ChildID, "sdkchild")
 					phase("child_execute_end")
 				}
@@ -547,16 +602,68 @@ func testNativeGraphContinuationSDKFlow(t *testing.T, domain string, partition, 
 				}
 			}
 		}
+		if pendingChild {
+			execute() // The restored finish stage must wait, never complete early.
+			var err error
+			pendingPrefix, _, err = graph.ReadExisting(ctx, h.Type, h.ID, h.InvSeq)
+			if err != nil || len(pendingPrefix) == 0 {
+				t.Fatal("pending parent history absent", err)
+			}
+			last := pendingPrefix[len(pendingPrefix)-1]
+			var wait struct {
+				WaitingOn string `json:"waiting_on"`
+			}
+			if last.Kind != journal.Suspended || json.Unmarshal(last.Payload, &wait) != nil || wait.WaitingOn != "signal:"+childPromise.SignalName || childCalls != 0 || effects != 2 || calls["initial"] != 1 || calls["next"] != 1 || calls["finish"] != 1 {
+				t.Fatal("parent did not suspend for unresolved child", last, wait, calls, effects, childCalls)
+			}
+			status, err := graph.InspectStart(ctx, h.Type, h.ID)
+			if err != nil || status.Kind != journal.Suspended || status.ContinuationReady() {
+				t.Fatal("child wait incorrectly became checkpoint boundary wakeup", status, err)
+			}
+			t.Logf("PENDING_CHILD_SUSPENDED records=%d effects=2 child_calls=0 waiting_on=%s", len(pendingPrefix), wait.WaitingOn)
+			executeWorkflow(childPromise.ChildType, childPromise.ChildID, "sdkchild")
+			phase("pending_child_execute_end")
+			if err := runs.Purge(ctx); err != nil {
+				t.Fatal(err)
+			}
+			signalScan, err := reconcile.NewCanonicalSignalScan(js, graph)
+			if err != nil {
+				t.Fatal(err)
+			}
+			recovered, err := signalScan.Scan(ctx, 1, 4, false)
+			if err != nil || recovered.Reenqueued != 1 {
+				t.Fatal("pending child outcome wakeup not recovered", recovered, err)
+			}
+			t.Log("PENDING_CHILD_WAKEUP_RECOVERED reenqueued=1")
+		}
 		execute()
 	}
 	execute() // Completion followed by an independently fenced duplicate.
 	result, err := c.Await(ctx, h.Type, h.ID)
-	if err != nil || string(result) != "43" || effects != 2 || calls["initial"] != 1 || calls["next"] != 1 || calls["finish"] != 1 {
+	wantFinish := 1
+	if pendingChild {
+		wantFinish = 2
+	}
+	if err != nil || string(result) != "43" || effects != 2 || calls["initial"] != 1 || calls["next"] != 1 || calls["finish"] != wantFinish {
 		t.Fatal("SDK workflow replay/result", string(result), err, calls, effects)
 	}
 	records, _, err := graph.ReadExisting(ctx, h.Type, h.ID, h.InvSeq)
 	if err != nil {
 		t.Fatal(err)
+	}
+	if pendingChild {
+		if len(records) <= len(pendingPrefix) {
+			t.Fatal("child completion did not extend parent history")
+		}
+		for i, original := range pendingPrefix {
+			// Collection may relocate owned receipts; logical bytes and the
+			// publication sequence/epoch/index are immutable across resume.
+			current := records[i]
+			if current.Index != original.Index || current.Epoch != original.Epoch || current.Sequence != original.Sequence || current.Kind != original.Kind || !bytes.Equal(current.Payload, original.Payload) {
+				t.Fatal("pending prefix changed on child resume", i, original, current)
+			}
+		}
+		t.Logf("PENDING_CHILD_RESUMED failed=%t archive=%t prefix_records=%d records=%d initial=1 next=1 finish=2 effects=2 child_calls=%d result=43", childFailure, archive, len(pendingPrefix), len(records), childCalls)
 	}
 	completions := 0
 	for i, record := range records {
