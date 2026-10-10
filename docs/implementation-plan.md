@@ -1,5 +1,24 @@
 # JetStream Durable Workflow Runtime — Implementation Plan
 
+## SDK canonical continuation offline CLI replay verified — 2026-10-10
+
+Frozen85f2629 passes four native race cases, R1/R3-domain × live v5/archive v6,
+in118.459s with actual child/supervisor exit0. Independent review binds3,309
+unchanged Git inputs and retained worker/CLI/plugin binaries. Production SDK
+frames preserve state23 and locals7/30 across two checkpoints; both archive
+cases physically collect original prefix receipts at both boundaries. The
+packaged CLI exports matching13-record suspended and18-record completed bundles;
+after all native servers stop, the matching plugin replays the real signal wait
+and result60 offline without executing effects. Missing stage/owned frame bytes
+require their precise errors, duplicate delivery executes no handler again and
+all readers close. [Raw evidence, retained exports and executed review](scale/graph-continuation-offline-2026-10-10/README.md).
+The first failed fixture is retained separately; only test assumptions changed.
+This closes this healthy SDK canonical offline replay boundary. Full replay fault,
+child, import and rollout matrices, public/default continuation admission,
+production collection, actual100,000-entry cap and every broader original gate
+remain open. The separate full156 race campaign at d504a33 remains live/unaccepted
+and excludes the later production export changes.
+
 ## Complete frozen156 normal accepted; ordered export component verified — 2026-10-10
 
 Frozen d504a33 completes all156,000 seeded bodies, all841 saved traces and223 groups in2235.589 seconds, actual child exit0. Independent review verifies3,293 unchanged exact Git inputs, retained normal binary and independently rerun complete-suite checker. [Full normal evidence](scale/graph-d504-full-qualification-2026-10-10/README.md). Matching full race began08:52:58 UTC from that same source and remains live/unaccepted. The old frozen156 failed campaign is preserved separately.

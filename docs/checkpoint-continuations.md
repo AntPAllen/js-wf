@@ -20,13 +20,14 @@ for deployment.
 | Healthy archive matrix | Eight native race cases: R1/R3 domain × state/signals/successful child/buffered child; all16 collected boundaries audited, all four700KB child terminal/result pairs reclaimed before parent resume, existing60-second case watchdogs preserved | [Frozen 57ee0b7](scale/graph-continuation-archive-matrix-2026-10-10/README.md) |
 | Pending child | Eight native race cases: R1/R3 domain × live/archive × success/failure; unresolved promise in two frames, actual suspension, repaired lost wakeup, immutable logical prefix and one child execution | [Frozen 0bf850c](scale/graph-continuation-pending-child-2026-10-10/README.md) |
 | Pending-parent cancellation | Eight native race cases: R1/R3 domain × live/archive × success/failure child; repaired cancellation wakeup, immutable parent cancellation, independent child completion, late/duplicate isolation and post-cancellation collection | [Frozen 57ee0b7](scale/graph-continuation-cancel-pending-child-2026-10-10/README.md) |
+| Healthy offline replay | Four native race R1/R3-domain × live/archive cases; two SDK checkpoints, collected original receipts, packaged CLI export and suspended/completed offline replay after all servers stop; exact stage/object errors and no effects | [Frozen 85f2629](scale/graph-continuation-offline-2026-10-10/README.md) |
 | Process recovery | Three worker cuts plus SIGKILL of all three server processes before persisted-store restart; exact killed dispatch sequence ACKed within30 seconds | [All-server SIGKILL](scale/graph-continuation-all-server-kill-2026-10-09/README.md) |
 | Absolute entry limit | Four native R1/R3 × live/archive controls at a private16-entry budget, with the terminal slot reserved; production100,000-entry cap unchanged | [Limit boundary](scale/graph-continuation-global-limit-2026-10-09/README.md) |
 
 Each result applies to its recorded source and test boundary. The complete
 current simulation pipeline remains pending independently. Full retention and running-effect cancellation matrices, arbitrary fault interleavings,
-VM/power/storage loss, the actual100,000-entry boundary, canonical offline
-replay/import/rollout and public/default admission remain open. v1 children run
+VM/power/storage loss, the actual100,000-entry boundary, full offline replay fault/child matrices,
+import/rollout and public/default admission remain open. v1 children run
 independently when their parent is cancelled; propagation is a separate v2
 feature. Earlier component sections below retain their historical source scope.
 
