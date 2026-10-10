@@ -1,0 +1,7 @@
+# Complete existing native archive matrix
+
+Run the unchanged `TestNativeGraphContinuationArchiveCollection` matrix: R1/R3 domain × state/signals/successful child/buffered successful child (eight cases). Both SDK parent checkpoint boundaries compact, collect and audit the full absolute logical history through relocated owned receipts. Original obsolete receipt absence must be quorum-confirmed. Child cases retire the completed child and require both its terminal entry and700,000-byte result receipt to be absent before parent resume, while preserving the copied/cached/buffered outcome.
+
+[Runner](run.py) reuses the actual frozen57ee0b7 race binary already retained and verified by the pending-parent cancellation qualification. It revalidates its SHA256 and source inventories before starting and records actual child exit and unchanged inventories afterward; no rebuild or new source checkout is needed. [Launch identity](launch.json) binds the durable user systemd job. Native functional contexts stay at their existing60-second watchdog, with the existing10-minute package watchdog and unchanged runtime append/lease/recovery budgets.
+
+Raw artifacts live outside the repository. Operational `state.json` is not acceptance evidence until terminal independent review. The full156/841 simulation campaign remains on frozen d504a33; native proof does not qualify full simulation, faults/retention/scale/soak, the actual100,000-entry boundary, canonical offline/import/rollout, public admission or production collection.
