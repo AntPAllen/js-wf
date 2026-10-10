@@ -23,3 +23,7 @@ Acceptance remains pending the actual terminal result and independent review.
 This is normal Tier-1 only; full current race/extended and every original broader
 native/matrix/VM/storage/partition/scale/soak/drain/admission/collection/release
 requirement remain open.
+
+## Failed terminal result
+
+The original run closes with actual child exit1 at00:28:03UTC on2026-10-10. All156,000 seeded bodies complete, but the caller-retry directed control and110 saved traces fail;731 pins pass. Source-before/source-after remain identical and match frozen fd95754. Elapsed3336.913s. [Raw failed evidence and executed review](failed-normal1000/). The fresh source must include corpus migration, explicit caller-retry admission fault and early pin renewal; this failed run is not resumed/relabelled as passing.

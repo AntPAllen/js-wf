@@ -338,9 +338,9 @@ func testNativeGraphContinuationSDKFlow(t *testing.T, domain string, partition, 
 	if err != nil {
 		t.Fatal(err)
 	}
-	executeWorkflow := func(typ, id, workerID string) {
+	execute := func() {
 		t.Helper()
-		owner, err := leases.Acquire(ctx, typ, id, workerID)
+		owner, err := leases.Acquire(ctx, h.Type, h.ID, "sdkcontinue")
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -369,7 +369,7 @@ func testNativeGraphContinuationSDKFlow(t *testing.T, domain string, partition, 
 				}
 			}
 		}()
-		err = runner.execute(stageCtx, typ, id, owner, time.Time{}, timerWakeup{}, &noOp, runner.deliveryOperations(typ, id, 0, 0))
+		err = runner.execute(stageCtx, h.Type, h.ID, owner, time.Time{}, timerWakeup{}, &noOp, runner.deliveryOperations(h.Type, h.ID, 0, 0))
 		stopStage()
 		heartbeatErr := <-heartbeatDone
 		releaseErr := owner.Release(ctx)
@@ -377,7 +377,6 @@ func testNativeGraphContinuationSDKFlow(t *testing.T, domain string, partition, 
 			t.Fatal("SDK stage delivery", err, releaseErr, heartbeatErr)
 		}
 	}
-	execute := func() { executeWorkflow(h.Type, h.ID, "sdkcontinue") }
 	scan, err := reconcile.NewCanonicalContinuationScan(js, graph)
 	if err != nil {
 		t.Fatal(err)
@@ -537,7 +536,16 @@ func testNativeGraphContinuationSDKFlow(t *testing.T, domain string, partition, 
 			phase("boundary_scan_end_" + stage)
 			if childPromiseFlow {
 				if stage == "next" {
-					executeWorkflow(childPromise.ChildType, childPromise.ChildID, "sdkchild")
+					owner, err := leases.Acquire(ctx, childPromise.ChildType, childPromise.ChildID, "sdkchild")
+					if err != nil {
+						t.Fatal(err)
+					}
+					var noOp bool
+					err = runner.execute(ctx, childPromise.ChildType, childPromise.ChildID, owner, time.Time{}, timerWakeup{}, &noOp, runner.deliveryOperations(childPromise.ChildType, childPromise.ChildID, 0, 0))
+					releaseErr := owner.Release(ctx)
+					if err != nil || releaseErr != nil {
+						t.Fatal("child delivery", err, releaseErr)
+					}
 					phase("child_execute_end")
 				}
 			}

@@ -1,0 +1,24 @@
+{
+  "source_hashes": {
+    "worker/graph_continuation_sdk_test.go": "2a488f2c3db767cf6c5373a067a782d0440c947f1da81fe2dd1c61eefb64e684",
+    "journal/graph.go": "88a29201500106472ed402b665b456b96f289ffda6472b1a5929faec2935062b",
+    "worker/graph_journal.go": "e38fa71f281665cf7fc1e802fa4f1e635523e64587584926e8ae88e31f72a1d9"
+  },
+  "command": [
+    "go",
+    "test",
+    "-race",
+    "./worker",
+    "-run",
+    "^TestNativeGraphContinuationFailedChildPromise$",
+    "-count=1",
+    "-timeout=10m",
+    "-v"
+  ],
+  "started": "2026-10-10T00:25:56.276979+00:00",
+  "fixture_sha256": "2a488f2c3db767cf6c5373a067a782d0440c947f1da81fe2dd1c61eefb64e684",
+  "env": {
+    "GOMAXPROCS": "4",
+    "GOMEMLIMIT": "512MiB"
+  }
+}
