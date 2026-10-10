@@ -95,7 +95,7 @@ func TestGraphPostgresVisibilityCanonicalRowsAndUncertainty(t *testing.T) {
 	testGraphVisibilityCanonicalRowsAndUncertainty(t, true)
 }
 func testGraphVisibilityCanonicalRowsAndUncertainty(t *testing.T, postgres bool) {
-	for _, mode := range []string{"ordinary", "catalog-unknown", "source-forged", "lease-held", "lease-unknown", "retired"} {
+	for _, mode := range []string{"ordinary", "catalog-unknown", "source-forged", "lease-held", "lease-unknown", "completed-lease-held", "failed-lease-held", "completed-lease-held-history-unknown", "retired"} {
 		t.Run(mode, func(t *testing.T) {
 			ctx := context.Background()
 			schedule := sim.NewScheduler(1)
@@ -138,9 +138,24 @@ func testGraphVisibilityCanonicalRowsAndUncertainty(t *testing.T, postgres bool)
 					t.Fatal(e)
 				}
 			}
+			terminalStatus := ""
+			if mode == "completed-lease-held" || mode == "failed-lease-held" || mode == "completed-lease-held-history-unknown" {
+				kind := journal.Completed
+				outcome := wf.Outcome{InvSeq: h.InvSeq, Result: []byte(`42`)}
+				terminalStatus = "completed"
+				if mode == "failed-lease-held" {
+					kind, terminalStatus = journal.Failed, "failed"
+					outcome = wf.Outcome{InvSeq: h.InvSeq, Error: "directed failure"}
+				}
+				payload, _ := json.Marshal(outcome)
+				tail, e = store.Append(ctx, h.Type, h.ID, h.InvSeq, journal.Entry{Index: 4, Kind: kind, Payload: payload}, tail, nil, nil)
+				if e != nil {
+					t.Fatal(e)
+				}
+			}
 			view := &graphViewKV{rows: map[string][]byte{}}
 			source := graphViewInput{transport: transport, forged: mode == "source-forged"}
-			held := mode == "lease-held"
+			held := mode == "lease-held" || mode == "completed-lease-held" || mode == "failed-lease-held" || mode == "completed-lease-held-history-unknown"
 			p := &Projection{graph: store, inv: source, view: view, schemaVersion: 1, graphLeaseCheck: func(context.Context, string, string) (bool, error) {
 				if mode == "lease-unknown" {
 					return false, context.DeadlineExceeded
@@ -173,8 +188,26 @@ func testGraphVisibilityCanonicalRowsAndUncertainty(t *testing.T, postgres bool)
 					t.Fatal(e)
 				}
 			}
+			if mode == "completed-lease-held-history-unknown" {
+				if e = model.QueueFault("get", sim.DropBeforeCommit); e != nil {
+					t.Fatal(e)
+				}
+			}
 			port.pinWrites, port.bodyReads = 0, 0
 			e = p.Rebuild(ctx)
+			if mode == "completed-lease-held-history-unknown" {
+				if !errors.Is(e, sim.ErrTransportLost) {
+					t.Fatal("terminal summary bypassed unavailable owned history", e)
+				}
+				row, err := p.Get(ctx, h.Type, h.ID)
+				if err != nil || row.Status != "queued" || port.pinWrites == 0 {
+					t.Fatal("unknown terminal history changed prior projection", row, err, port.pinWrites)
+				}
+				if _, err := p.Get(ctx, "stale", "prior"); err != nil {
+					t.Fatal("unknown terminal history pruned prior row", err)
+				}
+				return
+			}
 			if mode == "catalog-unknown" || mode == "source-forged" || mode == "lease-unknown" {
 				if !errors.Is(e, journal.ErrUnknown) {
 					t.Fatal("uncertainty certified progress", e)
@@ -193,6 +226,20 @@ func testGraphVisibilityCanonicalRowsAndUncertainty(t *testing.T, postgres bool)
 			}
 			if _, err := p.Get(ctx, "stale", "prior"); !errors.Is(err, ErrNotFound) {
 				t.Fatal("successful scan retained stale row", err)
+			}
+			if terminalStatus != "" {
+				page, err := p.ListPage(ctx, terminalStatus, "", 1)
+				if err != nil || len(page.Rows) != 1 || page.Rows[0].Status != terminalStatus || page.Rows[0].InvSeq != h.InvSeq || page.Rows[0].Attributes["tenant"] != "one" {
+					t.Fatal("held lease hid canonical terminal history", page, err)
+				}
+				if !held || port.pinWrites == 0 || port.bodyReads != 0 {
+					t.Fatal("terminal projection did not validate owned history while lease remained held", held, port.pinWrites, port.bodyReads)
+				}
+				if lag, err := p.Lag(ctx); err != nil || lag != 0 {
+					t.Fatal("terminal lease inflated lag", lag, err)
+				}
+				t.Logf("terminal=%s held_lease=true owned_history_verified=true input_body_reads=0", terminalStatus)
+				return
 			}
 			if mode == "lease-held" {
 				if port.pinWrites != 0 {

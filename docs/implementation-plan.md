@@ -1,5 +1,29 @@
 # JetStream Durable Workflow Runtime — Implementation Plan
 
+## Terminal visibility under held leases; full CLI race passes — 2026-10-10
+
+The complete current default CLI race package passes169.892 seconds, actual
+exit0. R1/R3 canonical operator cases pass41.32/53.61 seconds. Review verifies
+1,932 source inputs, exact command and exit, frozen modified files, both cases
+and skips. Full visibility race passes7.703 seconds.
+[Evidence](scale/graph-cli-r3-timing-2026-10-10/README.md).
+
+A preceding full CLI run fails at an empty R3 completed page after successful
+Start/Signal/Result/Replay. Two seeded in-memory cases reproduce a fresh
+projector replacing completed/failed rows with queued rows while a delivery
+lease remains held. Terminal lifecycle now permits an owned-history reader;
+full record/source/outcome/attribute validation remains required. Injected
+object-read loss preserves prior rows. Nonterminal held leases still avoid
+reader pins. CLI timing/request-count diagnostics retain all original bounds.
+
+The earlier intermittent signal deadline cause remains unconfirmed; passing
+calls do not erase it. PostgreSQL and standalone/retained-envelope opt-ins are
+skipped and unqualified. Original actual100,000-entry and all broader simulation,
+fault/storage/security/soak/retention/rollout gates remain open. The independent
+100,000-native-grant test remains live under its original invocation and frozen
+source; these changes do not alter its native package. Admission and collection
+remain off.
+
 ## Retained actual-entry campaign inputs and binaries — 2026-10-10
 
 The full-entry fixture now optionally retains native file stores in a fresh,

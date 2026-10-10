@@ -121,24 +121,38 @@ func testNativeCanonicalGraphOperatorCommands(t *testing.T, postgres bool) {
 			if err != nil {
 				t.Fatal(err)
 			}
-			var observed, wrong atomic.Int64
+			var observed, wrong, requests atomic.Int64
 			opts := []jetstream.JetStreamOpt{}
-			if domain != "" {
-				opts = append(opts, jetstream.WithClientTrace(&jetstream.ClientTrace{RequestSent: func(subject string, _ []byte) {
+			opts = append(opts, jetstream.WithClientTrace(&jetstream.ClientTrace{RequestSent: func(subject string, _ []byte) {
+				requests.Add(1)
+				if domain != "" {
 					if strings.HasPrefix(subject, "$JS."+domain+".API.") {
 						observed.Add(1)
 					} else {
 						wrong.Add(1)
 					}
-				}}))
-			}
+				}
+			}}))
 			base := []string{"-url", cluster.Servers[0].ClientURL(), "-timeout", "45s", "-replicas", strconv.Itoa(count), "-graph-authority-stream", cfg.AuthorityStream, "-graph-authority-prefix", cfg.AuthorityPrefix, "-graph-object-bucket", cfg.ObjectBucket}
 			if domain != "" {
 				base = append(base, "-domain", domain)
 			}
 			call := func(args ...string) ([]byte, error) {
+				phase := "other"
+			operation:
+				for _, arg := range args {
+					switch arg {
+					case "start", "signal", "result", "export-journal", "export-replay", "replay", "describe", "audit", "list", "lag", "cancel", "purge", "history", "scans", "scan-start", "scan-signal", "scan-terminal", "scan-timer", "scan-suspended":
+						phase = arg
+						break operation
+					}
+				}
+				started, before := time.Now(), requests.Load()
+				deadline, _ := ctx.Deadline()
+				t.Logf("GRAPH_OPERATOR_CALL_BEGIN operation=%s domain=%s fixture_remaining=%s", phase, domain, time.Until(deadline))
 				var out bytes.Buffer
 				err := runWithJetStreamOptions(append(append([]string(nil), base...), args...), &out, opts...)
+				t.Logf("GRAPH_OPERATOR_CALL_END operation=%s domain=%s wall=%s api_requests=%d fixture_remaining=%s error=%v", phase, domain, time.Since(started), requests.Load()-before, time.Until(deadline), err)
 				return out.Bytes(), err
 			}
 			const viewBucket = "OP_GRAPH_VIEW"

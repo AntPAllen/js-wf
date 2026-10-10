@@ -229,6 +229,10 @@ func (p *Projection) refreshGraph(ctx context.Context, force bool) error {
 		if err != nil {
 			return fmt.Errorf("%w: graph visibility scheduling hint: %w", journal.ErrUnknown, err)
 		}
+		// A delivery may retain its lease after committing a terminal record.
+		// The terminal lifecycle permits a reader, but does not replace owned
+		// history validation below. Unfinished deliveries still avoid pins.
+		blocked = blocked && status.Kind != journal.Completed && status.Kind != journal.Failed
 		cached, known := p.graphRows[rowKey(start.Request.Type, start.Request.ID)]
 		var row Row
 		if known && cached.InvSeq == input.Sequence && cached.SchemaVersion == p.schemaVersion && (blocked || !force && graphRowCurrent(cached, status)) {

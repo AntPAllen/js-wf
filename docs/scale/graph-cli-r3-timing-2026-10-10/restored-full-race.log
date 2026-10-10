@@ -1,0 +1,511 @@
+=== RUN   TestOperatorStandaloneConnectionSignals
+    daemon_connect_standalone_test.go:23: set WF_OPERATOR_STANDALONE=1 for actual compiled CLI controls
+--- SKIP: TestOperatorStandaloneConnectionSignals (0.00s)
+=== RUN   TestOperatorDaemonProcessHelper
+    daemon_test.go:30: subprocess helper
+--- SKIP: TestOperatorDaemonProcessHelper (0.00s)
+=== RUN   TestOperatorDaemonSignals
+=== RUN   TestOperatorDaemonSignals/project/startup
+    daemon_test.go:276: operator daemon stopped command=project stage=startup domain="" signal=terminated exit=0 pid=179771
+=== RUN   TestOperatorDaemonSignals/project/running
+    daemon_test.go:276: operator daemon stopped command=project stage=running domain="" signal=interrupt exit=0 pid=179779
+=== RUN   TestOperatorDaemonSignals/tombstone-loop/startup
+    daemon_test.go:276: operator daemon stopped command=tombstone-loop stage=startup domain="" signal=terminated exit=0 pid=179789
+=== RUN   TestOperatorDaemonSignals/tombstone-loop/running
+    daemon_test.go:276: operator daemon stopped command=tombstone-loop stage=running domain="" signal=interrupt exit=0 pid=179798
+=== NAME  TestOperatorDaemonSignals
+    daemon_test.go:301: operator daemon fatal startup domain="" error=stream-not-found exit=1
+--- PASS: TestOperatorDaemonSignals (9.33s)
+    --- PASS: TestOperatorDaemonSignals/project/startup (3.02s)
+    --- PASS: TestOperatorDaemonSignals/project/running (2.04s)
+    --- PASS: TestOperatorDaemonSignals/tombstone-loop/startup (3.02s)
+    --- PASS: TestOperatorDaemonSignals/tombstone-loop/running (1.13s)
+=== RUN   TestOperatorDaemonSignalsInJetStreamDomain
+    daemon_test.go:114: operator daemon domain admitted node=0 domain=WFOPS server_id=NBWH3LUKY5DOEXZZFBF4DKRPGGU44ONWZG5PWOFY75GH5YUDWICHO2OA
+    daemon_test.go:114: operator daemon domain admitted node=1 domain=WFOPS server_id=NDPSO555OUIDOIL7I5WOPN7ODI4XYJEN57WNMC4EYVCEVVUQYT23XWPO
+    daemon_test.go:114: operator daemon domain admitted node=2 domain=WFOPS server_id=NBN5UAJKMRUS7UZXSPBLIHRP65M5E25BH22UDLYOGDS7SY6FCHCH7I4N
+=== RUN   TestOperatorDaemonSignalsInJetStreamDomain/project/startup
+    daemon_test.go:276: operator daemon stopped command=project stage=startup domain="WFOPS" signal=terminated exit=0 pid=179824
+=== RUN   TestOperatorDaemonSignalsInJetStreamDomain/project/running
+    daemon_test.go:276: operator daemon stopped command=project stage=running domain="WFOPS" signal=interrupt exit=0 pid=179832
+=== RUN   TestOperatorDaemonSignalsInJetStreamDomain/tombstone-loop/startup
+    daemon_test.go:276: operator daemon stopped command=tombstone-loop stage=startup domain="WFOPS" signal=terminated exit=0 pid=179841
+=== RUN   TestOperatorDaemonSignalsInJetStreamDomain/tombstone-loop/running
+    daemon_test.go:276: operator daemon stopped command=tombstone-loop stage=running domain="WFOPS" signal=interrupt exit=0 pid=179849
+=== NAME  TestOperatorDaemonSignalsInJetStreamDomain
+    daemon_test.go:301: operator daemon fatal startup domain="WFOPS" error=stream-not-found exit=1
+--- PASS: TestOperatorDaemonSignalsInJetStreamDomain (14.54s)
+    --- PASS: TestOperatorDaemonSignalsInJetStreamDomain/project/startup (3.03s)
+    --- PASS: TestOperatorDaemonSignalsInJetStreamDomain/project/running (2.16s)
+    --- PASS: TestOperatorDaemonSignalsInJetStreamDomain/tombstone-loop/startup (3.02s)
+    --- PASS: TestOperatorDaemonSignalsInJetStreamDomain/tombstone-loop/running (1.15s)
+=== RUN   TestGraphOperatorCursorRejectsUnknownVersion
+--- PASS: TestGraphOperatorCursorRejectsUnknownVersion (0.00s)
+=== RUN   TestNativeGraphCursorOperatorHistory
+=== RUN   TestNativeGraphCursorOperatorHistory/v4/R1-domain
+    graph_cursor_test.go:262: CURSOR_REPLAY_EXPORT version=4 replicas=1 records=8 frame_bytes=254 input=7 readers=0
+    graph_cursor_test.go:266: NATIVE_CURSOR_OPERATOR version=4 records=8 retained_from=0 original_entry_collected=false incorrect_schemas_rejected=2 domain_errors=0 legacy_journal_requests=0 readers_after=0
+=== RUN   TestNativeGraphCursorOperatorHistory/v4/R3-domain
+    graph_cursor_test.go:262: CURSOR_REPLAY_EXPORT version=4 replicas=3 records=8 frame_bytes=254 input=7 readers=0
+    graph_cursor_test.go:266: NATIVE_CURSOR_OPERATOR version=4 records=8 retained_from=0 original_entry_collected=false incorrect_schemas_rejected=2 domain_errors=0 legacy_journal_requests=0 readers_after=0
+=== RUN   TestNativeGraphCursorOperatorHistory/v5/R1-domain
+    graph_cursor_test.go:262: CURSOR_REPLAY_EXPORT version=5 replicas=1 records=8 frame_bytes=254 input=7 readers=0
+    graph_cursor_test.go:266: NATIVE_CURSOR_OPERATOR version=5 records=8 retained_from=0 original_entry_collected=false incorrect_schemas_rejected=2 domain_errors=0 legacy_journal_requests=0 readers_after=0
+=== RUN   TestNativeGraphCursorOperatorHistory/v5/R3-domain
+    graph_cursor_test.go:262: CURSOR_REPLAY_EXPORT version=5 replicas=3 records=8 frame_bytes=254 input=7 readers=0
+    graph_cursor_test.go:266: NATIVE_CURSOR_OPERATOR version=5 records=8 retained_from=0 original_entry_collected=false incorrect_schemas_rejected=2 domain_errors=0 legacy_journal_requests=0 readers_after=0
+=== RUN   TestNativeGraphCursorOperatorHistory/v6/R1-domain
+    graph_cursor_test.go:262: CURSOR_REPLAY_EXPORT version=6 replicas=1 records=8 frame_bytes=254 input=7 readers=0
+    graph_cursor_test.go:266: NATIVE_CURSOR_OPERATOR version=6 records=8 retained_from=5 original_entry_collected=true incorrect_schemas_rejected=2 domain_errors=0 legacy_journal_requests=0 readers_after=0
+=== RUN   TestNativeGraphCursorOperatorHistory/v6/R3-domain
+    graph_cursor_test.go:262: CURSOR_REPLAY_EXPORT version=6 replicas=3 records=8 frame_bytes=254 input=7 readers=0
+    graph_cursor_test.go:266: NATIVE_CURSOR_OPERATOR version=6 records=8 retained_from=5 original_entry_collected=true incorrect_schemas_rejected=2 domain_errors=0 legacy_journal_requests=0 readers_after=0
+--- PASS: TestNativeGraphCursorOperatorHistory (32.04s)
+    --- PASS: TestNativeGraphCursorOperatorHistory/v4/R1-domain (2.44s)
+    --- PASS: TestNativeGraphCursorOperatorHistory/v4/R3-domain (5.23s)
+    --- PASS: TestNativeGraphCursorOperatorHistory/v5/R1-domain (2.90s)
+    --- PASS: TestNativeGraphCursorOperatorHistory/v5/R3-domain (8.14s)
+    --- PASS: TestNativeGraphCursorOperatorHistory/v6/R1-domain (4.93s)
+    --- PASS: TestNativeGraphCursorOperatorHistory/v6/R3-domain (8.39s)
+=== RUN   TestGraphOperatorRejectsPartialOrLegacyOnlySelection
+--- PASS: TestGraphOperatorRejectsPartialOrLegacyOnlySelection (0.00s)
+=== RUN   TestNativeCanonicalGraphOperatorCommands
+=== RUN   TestNativeCanonicalGraphOperatorCommands/R1
+    graph_test.go:152: GRAPH_OPERATOR_CALL_BEGIN operation=start domain= fixture_remaining=1m59.801836389s
+    graph_test.go:155: GRAPH_OPERATOR_CALL_END operation=start domain= wall=2.292594221s api_requests=207 fixture_remaining=1m57.50924318s error=<nil>
+    graph_test.go:152: GRAPH_OPERATOR_CALL_BEGIN operation=signal domain= fixture_remaining=1m57.509140514s
+    graph_test.go:155: GRAPH_OPERATOR_CALL_END operation=signal domain= wall=4.793893181s api_requests=409 fixture_remaining=1m52.715247453s error=<nil>
+    graph_test.go:152: GRAPH_OPERATOR_CALL_BEGIN operation=result domain= fixture_remaining=1m52.715185429s
+    graph_test.go:155: GRAPH_OPERATOR_CALL_END operation=result domain= wall=5.097243841s api_requests=396 fixture_remaining=1m47.617940176s error=<nil>
+    graph_test.go:152: GRAPH_OPERATOR_CALL_BEGIN operation=result domain= fixture_remaining=1m47.397309796s
+    graph_test.go:155: GRAPH_OPERATOR_CALL_END operation=result domain= wall=1.391773585s api_requests=125 fixture_remaining=1m46.005534338s error=<nil>
+    graph_test.go:152: GRAPH_OPERATOR_CALL_BEGIN operation=export-journal domain= fixture_remaining=1m45.998365361s
+    graph_test.go:155: GRAPH_OPERATOR_CALL_END operation=export-journal domain= wall=235.2163ms api_requests=137 fixture_remaining=1m45.763153087s error=<nil>
+    graph_test.go:152: GRAPH_OPERATOR_CALL_BEGIN operation=export-replay domain= fixture_remaining=1m45.759575829s
+    graph_test.go:155: GRAPH_OPERATOR_CALL_END operation=export-replay domain= wall=5.63705577s api_requests=369 fixture_remaining=1m40.122519908s error=<nil>
+    graph_test.go:152: GRAPH_OPERATOR_CALL_BEGIN operation=replay domain= fixture_remaining=1m37.130125088s
+    graph_test.go:155: GRAPH_OPERATOR_CALL_END operation=replay domain= wall=4.226219966s api_requests=372 fixture_remaining=1m32.903906173s error=<nil>
+    graph_test.go:152: GRAPH_OPERATOR_CALL_BEGIN operation=list domain= fixture_remaining=1m25.233403193s
+    graph_test.go:155: GRAPH_OPERATOR_CALL_END operation=list domain= wall=346.863112ms api_requests=205 fixture_remaining=1m24.886542223s error=<nil>
+    graph_test.go:152: GRAPH_OPERATOR_CALL_BEGIN operation=lag domain= fixture_remaining=1m24.886429772s
+    graph_test.go:155: GRAPH_OPERATOR_CALL_END operation=lag domain= wall=27.746566ms api_requests=19 fixture_remaining=1m24.858683206s error=<nil>
+    graph_test.go:152: GRAPH_OPERATOR_CALL_BEGIN operation=describe domain= fixture_remaining=1m24.85855426s
+    graph_test.go:155: GRAPH_OPERATOR_CALL_END operation=describe domain= wall=230.345753ms api_requests=131 fixture_remaining=1m24.628208948s error=<nil>
+    graph_test.go:152: GRAPH_OPERATOR_CALL_BEGIN operation=scan-start domain= fixture_remaining=1m24.627943324s
+    graph_test.go:155: GRAPH_OPERATOR_CALL_END operation=scan-start domain= wall=26.79576ms api_requests=18 fixture_remaining=1m24.601147674s error=<nil>
+    graph_test.go:152: GRAPH_OPERATOR_CALL_BEGIN operation=scan-signal domain= fixture_remaining=1m24.601063836s
+    graph_test.go:155: GRAPH_OPERATOR_CALL_END operation=scan-signal domain= wall=24.134836ms api_requests=18 fixture_remaining=1m24.576929171s error=<nil>
+    graph_test.go:152: GRAPH_OPERATOR_CALL_BEGIN operation=scan-terminal domain= fixture_remaining=1m24.576762708s
+    graph_test.go:155: GRAPH_OPERATOR_CALL_END operation=scan-terminal domain= wall=40.821159ms api_requests=20 fixture_remaining=1m24.535941699s error=<nil>
+    graph_test.go:152: GRAPH_OPERATOR_CALL_BEGIN operation=scan-timer domain= fixture_remaining=1m24.534782667s
+    graph_test.go:155: GRAPH_OPERATOR_CALL_END operation=scan-timer domain= wall=219.523844ms api_requests=134 fixture_remaining=1m24.315259354s error=<nil>
+    graph_test.go:152: GRAPH_OPERATOR_CALL_BEGIN operation=scan-suspended domain= fixture_remaining=1m24.315098269s
+    graph_test.go:155: GRAPH_OPERATOR_CALL_END operation=scan-suspended domain= wall=207.78568ms api_requests=133 fixture_remaining=1m24.107312639s error=<nil>
+    graph_test.go:152: GRAPH_OPERATOR_CALL_BEGIN operation=scan-terminal domain= fixture_remaining=1m24.106856966s
+    graph_test.go:155: GRAPH_OPERATOR_CALL_END operation=scan-terminal domain= wall=35.524688ms api_requests=23 fixture_remaining=1m24.071332438s error=<nil>
+    graph_test.go:152: GRAPH_OPERATOR_CALL_BEGIN operation=scan-terminal domain= fixture_remaining=1m24.070819999s
+    graph_test.go:155: GRAPH_OPERATOR_CALL_END operation=scan-terminal domain= wall=39.318896ms api_requests=28 fixture_remaining=1m24.031501393s error=<nil>
+    graph_test.go:152: GRAPH_OPERATOR_CALL_BEGIN operation=export-journal domain= fixture_remaining=1m22.95415996s
+    graph_test.go:155: GRAPH_OPERATOR_CALL_END operation=export-journal domain= wall=258.419275ms api_requests=134 fixture_remaining=1m22.695741657s error=<nil>
+    graph_test.go:152: GRAPH_OPERATOR_CALL_BEGIN operation=start domain= fixture_remaining=1m22.69566513s
+    graph_test.go:155: GRAPH_OPERATOR_CALL_END operation=start domain= wall=208.369999ms api_requests=127 fixture_remaining=1m22.487295282s error=<nil>
+    graph_test.go:152: GRAPH_OPERATOR_CALL_BEGIN operation=cancel domain= fixture_remaining=1m22.48717568s
+    graph_test.go:155: GRAPH_OPERATOR_CALL_END operation=cancel domain= wall=661.258083ms api_requests=327 fixture_remaining=1m21.825917487s error=<nil>
+    graph_test.go:152: GRAPH_OPERATOR_CALL_BEGIN operation=result domain= fixture_remaining=1m21.825778165s
+    graph_test.go:155: GRAPH_OPERATOR_CALL_END operation=result domain= wall=852.410279ms api_requests=109 fixture_remaining=1m20.973368096s error=workflow cancelled
+    graph_test.go:152: GRAPH_OPERATOR_CALL_BEGIN operation=purge domain= fixture_remaining=1m20.972073638s
+    graph_test.go:155: GRAPH_OPERATOR_CALL_END operation=purge domain= wall=1.231608491s api_requests=150 fixture_remaining=1m19.740465618s error=<nil>
+    graph_test.go:152: GRAPH_OPERATOR_CALL_BEGIN operation=result domain= fixture_remaining=1m19.740399127s
+    graph_test.go:155: GRAPH_OPERATOR_CALL_END operation=result domain= wall=16.24259ms api_requests=14 fixture_remaining=1m19.724156307s error=workflow invocation was purged
+    graph_test.go:455: canonical CLI large Start/Signal/result, forged mirror ignored, canonical online/offline replay after source/blob deletion, canonical CLI project/list/lag and isolated page while worker active, history/scans, dry-run/apply terminal restoration, cancellation, purge and effect one; domain= requests=0 wrong=0
+    graph_test.go:217: graph project subprocess joined; legacy journal requests zero and domain API verified
+=== RUN   TestNativeCanonicalGraphOperatorCommands/R3Domain
+    graph_test.go:152: GRAPH_OPERATOR_CALL_BEGIN operation=start domain=WFGRAPHOPS fixture_remaining=1m58.00621887s
+    graph_test.go:155: GRAPH_OPERATOR_CALL_END operation=start domain=WFGRAPHOPS wall=2.956127126s api_requests=213 fixture_remaining=1m55.050092425s error=<nil>
+    graph_test.go:152: GRAPH_OPERATOR_CALL_BEGIN operation=signal domain=WFGRAPHOPS fixture_remaining=1m55.049999944s
+    graph_test.go:155: GRAPH_OPERATOR_CALL_END operation=signal domain=WFGRAPHOPS wall=8.03537015s api_requests=581 fixture_remaining=1m47.014629463s error=<nil>
+    graph_test.go:152: GRAPH_OPERATOR_CALL_BEGIN operation=result domain=WFGRAPHOPS fixture_remaining=1m47.01361399s
+    graph_test.go:155: GRAPH_OPERATOR_CALL_END operation=result domain=WFGRAPHOPS wall=7.334984666s api_requests=493 fixture_remaining=1m39.678629404s error=<nil>
+    graph_test.go:152: GRAPH_OPERATOR_CALL_BEGIN operation=result domain=WFGRAPHOPS fixture_remaining=1m39.431674739s
+    graph_test.go:155: GRAPH_OPERATOR_CALL_END operation=result domain=WFGRAPHOPS wall=1.684436502s api_requests=125 fixture_remaining=1m37.747238277s error=<nil>
+    graph_test.go:152: GRAPH_OPERATOR_CALL_BEGIN operation=export-journal domain=WFGRAPHOPS fixture_remaining=1m37.74143091s
+    graph_test.go:155: GRAPH_OPERATOR_CALL_END operation=export-journal domain=WFGRAPHOPS wall=337.06257ms api_requests=131 fixture_remaining=1m37.404373478s error=<nil>
+    graph_test.go:152: GRAPH_OPERATOR_CALL_BEGIN operation=export-replay domain=WFGRAPHOPS fixture_remaining=1m37.384147635s
+    graph_test.go:155: GRAPH_OPERATOR_CALL_END operation=export-replay domain=WFGRAPHOPS wall=6.697842273s api_requests=375 fixture_remaining=1m30.686305361s error=<nil>
+    graph_test.go:152: GRAPH_OPERATOR_CALL_BEGIN operation=replay domain=WFGRAPHOPS fixture_remaining=1m29.044547482s
+    graph_test.go:155: GRAPH_OPERATOR_CALL_END operation=replay domain=WFGRAPHOPS wall=5.000030539s api_requests=372 fixture_remaining=1m24.044518606s error=<nil>
+    graph_test.go:152: GRAPH_OPERATOR_CALL_BEGIN operation=list domain=WFGRAPHOPS fixture_remaining=1m15.839438052s
+    graph_test.go:155: GRAPH_OPERATOR_CALL_END operation=list domain=WFGRAPHOPS wall=505.986767ms api_requests=202 fixture_remaining=1m15.333451775s error=<nil>
+    graph_test.go:152: GRAPH_OPERATOR_CALL_BEGIN operation=lag domain=WFGRAPHOPS fixture_remaining=1m15.333252412s
+    graph_test.go:155: GRAPH_OPERATOR_CALL_END operation=lag domain=WFGRAPHOPS wall=50.433389ms api_requests=19 fixture_remaining=1m15.282819465s error=<nil>
+    graph_test.go:152: GRAPH_OPERATOR_CALL_BEGIN operation=describe domain=WFGRAPHOPS fixture_remaining=1m15.282026249s
+    graph_test.go:155: GRAPH_OPERATOR_CALL_END operation=describe domain=WFGRAPHOPS wall=396.074942ms api_requests=137 fixture_remaining=1m14.885951718s error=<nil>
+    graph_test.go:152: GRAPH_OPERATOR_CALL_BEGIN operation=scan-start domain=WFGRAPHOPS fixture_remaining=1m14.885884286s
+    graph_test.go:155: GRAPH_OPERATOR_CALL_END operation=scan-start domain=WFGRAPHOPS wall=32.997626ms api_requests=18 fixture_remaining=1m14.85288704s error=<nil>
+    graph_test.go:152: GRAPH_OPERATOR_CALL_BEGIN operation=scan-signal domain=WFGRAPHOPS fixture_remaining=1m14.852721669s
+    graph_test.go:155: GRAPH_OPERATOR_CALL_END operation=scan-signal domain=WFGRAPHOPS wall=34.722898ms api_requests=18 fixture_remaining=1m14.817999031s error=<nil>
+    graph_test.go:152: GRAPH_OPERATOR_CALL_BEGIN operation=scan-terminal domain=WFGRAPHOPS fixture_remaining=1m14.816784044s
+    graph_test.go:155: GRAPH_OPERATOR_CALL_END operation=scan-terminal domain=WFGRAPHOPS wall=52.398425ms api_requests=20 fixture_remaining=1m14.764386119s error=<nil>
+    graph_test.go:152: GRAPH_OPERATOR_CALL_BEGIN operation=scan-timer domain=WFGRAPHOPS fixture_remaining=1m14.764292026s
+    graph_test.go:155: GRAPH_OPERATOR_CALL_END operation=scan-timer domain=WFGRAPHOPS wall=351.445866ms api_requests=131 fixture_remaining=1m14.412846471s error=<nil>
+    graph_test.go:152: GRAPH_OPERATOR_CALL_BEGIN operation=scan-suspended domain=WFGRAPHOPS fixture_remaining=1m14.412748572s
+    graph_test.go:155: GRAPH_OPERATOR_CALL_END operation=scan-suspended domain=WFGRAPHOPS wall=414.163886ms api_requests=130 fixture_remaining=1m13.998584646s error=<nil>
+    graph_test.go:152: GRAPH_OPERATOR_CALL_BEGIN operation=scan-terminal domain=WFGRAPHOPS fixture_remaining=1m13.988623074s
+    graph_test.go:155: GRAPH_OPERATOR_CALL_END operation=scan-terminal domain=WFGRAPHOPS wall=39.580242ms api_requests=20 fixture_remaining=1m13.949043694s error=<nil>
+    graph_test.go:152: GRAPH_OPERATOR_CALL_BEGIN operation=scan-terminal domain=WFGRAPHOPS fixture_remaining=1m13.948514329s
+    graph_test.go:155: GRAPH_OPERATOR_CALL_END operation=scan-terminal domain=WFGRAPHOPS wall=77.997736ms api_requests=31 fixture_remaining=1m13.870516293s error=<nil>
+    graph_test.go:152: GRAPH_OPERATOR_CALL_BEGIN operation=export-journal domain=WFGRAPHOPS fixture_remaining=1m12.640227903s
+    graph_test.go:155: GRAPH_OPERATOR_CALL_END operation=export-journal domain=WFGRAPHOPS wall=374.728144ms api_requests=134 fixture_remaining=1m12.26550031s error=<nil>
+    graph_test.go:152: GRAPH_OPERATOR_CALL_BEGIN operation=start domain=WFGRAPHOPS fixture_remaining=1m12.26543442s
+    graph_test.go:155: GRAPH_OPERATOR_CALL_END operation=start domain=WFGRAPHOPS wall=397.65966ms api_requests=127 fixture_remaining=1m11.867770504s error=<nil>
+    graph_test.go:152: GRAPH_OPERATOR_CALL_BEGIN operation=cancel domain=WFGRAPHOPS fixture_remaining=1m11.86770866s
+    graph_test.go:155: GRAPH_OPERATOR_CALL_END operation=cancel domain=WFGRAPHOPS wall=1.103443906s api_requests=361 fixture_remaining=1m10.764264013s error=<nil>
+    graph_test.go:152: GRAPH_OPERATOR_CALL_BEGIN operation=result domain=WFGRAPHOPS fixture_remaining=1m10.764166385s
+    graph_test.go:155: GRAPH_OPERATOR_CALL_END operation=result domain=WFGRAPHOPS wall=1.379676124s api_requests=178 fixture_remaining=1m9.38449013s error=workflow cancelled
+    graph_test.go:152: GRAPH_OPERATOR_CALL_BEGIN operation=purge domain=WFGRAPHOPS fixture_remaining=1m9.384195533s
+    graph_test.go:155: GRAPH_OPERATOR_CALL_END operation=purge domain=WFGRAPHOPS wall=1.658783382s api_requests=153 fixture_remaining=1m7.725411449s error=<nil>
+    graph_test.go:152: GRAPH_OPERATOR_CALL_BEGIN operation=result domain=WFGRAPHOPS fixture_remaining=1m7.725260259s
+    graph_test.go:155: GRAPH_OPERATOR_CALL_END operation=result domain=WFGRAPHOPS wall=35.297792ms api_requests=14 fixture_remaining=1m7.689962767s error=workflow invocation was purged
+    graph_test.go:455: canonical CLI large Start/Signal/result, forged mirror ignored, canonical online/offline replay after source/blob deletion, canonical CLI project/list/lag and isolated page while worker active, history/scans, dry-run/apply terminal restoration, cancellation, purge and effect one; domain=WFGRAPHOPS requests=3983 wrong=0
+    graph_test.go:217: graph project subprocess joined; legacy journal requests zero and domain API verified
+--- PASS: TestNativeCanonicalGraphOperatorCommands (94.94s)
+    --- PASS: TestNativeCanonicalGraphOperatorCommands/R1 (41.32s)
+    --- PASS: TestNativeCanonicalGraphOperatorCommands/R3Domain (53.61s)
+=== RUN   TestNativeCanonicalGraphPostgresOperatorCommands
+    graph_test.go:58: set WF_TEST_POSTGRES_DSN
+--- SKIP: TestNativeCanonicalGraphPostgresOperatorCommands (0.00s)
+=== RUN   TestOperatorStandaloneDaemonSignalsThroughLeaf
+    leaf_daemon_standalone_test.go:29: set WF_OPERATOR_STANDALONE=1
+--- SKIP: TestOperatorStandaloneDaemonSignalsThroughLeaf (0.00s)
+=== RUN   TestOperatorStandaloneCommandsThroughLeaf
+    leaf_standalone_test.go:22: set WF_OPERATOR_STANDALONE=1
+--- SKIP: TestOperatorStandaloneCommandsThroughLeaf (0.00s)
+=== RUN   TestOperatorCommands
+--- PASS: TestOperatorCommands (2.84s)
+=== RUN   TestOperatorCommandsInJetStreamDomain
+    main_test.go:166: operator domain admitted node=0 domain=WFOPS server_id=NA5J5FTWIEZJDRSVRNSORJFMRKTGIXLTURARQIC2C6U5FA4A5HCHSNSN
+    main_test.go:166: operator domain admitted node=1 domain=WFOPS server_id=NAEQDXMEOI6EQ6UC5NCF3MGVFNQ6KCVX4HBLJFUUABPLRPTCRGFIHHQX
+    main_test.go:166: operator domain admitted node=2 domain=WFOPS server_id=NDFT2C7IALQGURRNKD4IGITEXSDXKRGAC7VUZTGVWVT3QVDFFBNA4FYJ
+    main_test.go:227: operator real domain=WFOPS peers=3 domain_api_requests=203 wrong_prefix_requests=0
+--- PASS: TestOperatorCommandsInJetStreamDomain (8.48s)
+=== RUN   TestListAttributeFilter
+--- PASS: TestListAttributeFilter (0.14s)
+=== RUN   TestJournalCapacityAlert
+--- PASS: TestJournalCapacityAlert (0.20s)
+=== RUN   TestOperatorReplayFailedAndSuspended
+--- PASS: TestOperatorReplayFailedAndSuspended (1.12s)
+=== RUN   TestReplayCompletionEnvelopeBeforePlugin
+=== RUN   TestReplayCompletionEnvelopeBeforePlugin/result
+=== RUN   TestReplayCompletionEnvelopeBeforePlugin/reference
+=== RUN   TestReplayCompletionEnvelopeBeforePlugin/hash
+=== RUN   TestReplayCompletionEnvelopeBeforePlugin/error
+=== RUN   TestReplayCompletionEnvelopeBeforePlugin/signal
+=== RUN   TestReplayCompletionEnvelopeBeforePlugin/selected
+=== RUN   TestReplayCompletionEnvelopeBeforePlugin/case
+=== RUN   TestReplayCompletionEnvelopeBeforePlugin/cancelled
+=== RUN   TestReplayCompletionEnvelopeBeforePlugin/unknown
+--- PASS: TestReplayCompletionEnvelopeBeforePlugin (0.00s)
+    --- PASS: TestReplayCompletionEnvelopeBeforePlugin/result (0.00s)
+    --- PASS: TestReplayCompletionEnvelopeBeforePlugin/reference (0.00s)
+    --- PASS: TestReplayCompletionEnvelopeBeforePlugin/hash (0.00s)
+    --- PASS: TestReplayCompletionEnvelopeBeforePlugin/error (0.00s)
+    --- PASS: TestReplayCompletionEnvelopeBeforePlugin/signal (0.00s)
+    --- PASS: TestReplayCompletionEnvelopeBeforePlugin/selected (0.00s)
+    --- PASS: TestReplayCompletionEnvelopeBeforePlugin/case (0.00s)
+    --- PASS: TestReplayCompletionEnvelopeBeforePlugin/cancelled (0.00s)
+    --- PASS: TestReplayCompletionEnvelopeBeforePlugin/unknown (0.00s)
+=== RUN   TestReplayContinuationPlugin
+    replay_continuation_plugin_test.go:45: provision attempt: context deadline exceeded
+    replay_continuation_plugin_test.go:173: two continuation plugin stages: raw_entries=18 objects=2 result=60 offline_effects=0
+--- PASS: TestReplayContinuationPlugin (4.98s)
+=== RUN   TestReplayBundleEnvelope
+=== RUN   TestReplayBundleEnvelope/valid
+=== RUN   TestReplayBundleEnvelope/legacy
+=== RUN   TestReplayBundleEnvelope/opaque_payload
+=== RUN   TestReplayBundleEnvelope/duplicate_format_downgrade
+=== RUN   TestReplayBundleEnvelope/escaped_duplicate_format
+=== RUN   TestReplayBundleEnvelope/alias_format
+=== RUN   TestReplayBundleEnvelope/duplicate_input
+=== RUN   TestReplayBundleEnvelope/duplicate_identity
+=== RUN   TestReplayBundleEnvelope/duplicate_object
+=== RUN   TestReplayBundleEnvelope/alias_pending_sequence
+=== RUN   TestReplayBundleEnvelope/duplicate_pending_header
+=== RUN   TestReplayBundleEnvelope/unknown_field
+=== RUN   TestReplayBundleEnvelope/unknown_journal_field
+=== RUN   TestReplayBundleEnvelope/trailing_value
+--- PASS: TestReplayBundleEnvelope (0.01s)
+    --- PASS: TestReplayBundleEnvelope/valid (0.00s)
+    --- PASS: TestReplayBundleEnvelope/legacy (0.00s)
+    --- PASS: TestReplayBundleEnvelope/opaque_payload (0.00s)
+    --- PASS: TestReplayBundleEnvelope/duplicate_format_downgrade (0.00s)
+    --- PASS: TestReplayBundleEnvelope/escaped_duplicate_format (0.00s)
+    --- PASS: TestReplayBundleEnvelope/alias_format (0.00s)
+    --- PASS: TestReplayBundleEnvelope/duplicate_input (0.00s)
+    --- PASS: TestReplayBundleEnvelope/duplicate_identity (0.00s)
+    --- PASS: TestReplayBundleEnvelope/duplicate_object (0.00s)
+    --- PASS: TestReplayBundleEnvelope/alias_pending_sequence (0.00s)
+    --- PASS: TestReplayBundleEnvelope/duplicate_pending_header (0.00s)
+    --- PASS: TestReplayBundleEnvelope/unknown_field (0.00s)
+    --- PASS: TestReplayBundleEnvelope/unknown_journal_field (0.00s)
+    --- PASS: TestReplayBundleEnvelope/trailing_value (0.00s)
+=== RUN   TestReplayBundleRetainedEnvelope
+    replay_envelope_test.go:47: set WF_REPLAY_ENVELOPE_FIXTURE_ROOT to the native export root
+--- SKIP: TestReplayBundleRetainedEnvelope (0.00s)
+=== RUN   TestReplayEpochWorkerBeforePlugin
+=== RUN   TestReplayEpochWorkerBeforePlugin/format=
+=== RUN   TestReplayEpochWorkerBeforePlugin/format=graph-v1
+--- PASS: TestReplayEpochWorkerBeforePlugin (0.00s)
+    --- PASS: TestReplayEpochWorkerBeforePlugin/format= (0.00s)
+    --- PASS: TestReplayEpochWorkerBeforePlugin/format=graph-v1 (0.00s)
+=== RUN   TestReplayGraphChildProvenance
+=== RUN   TestReplayGraphChildProvenance/valid
+=== RUN   TestReplayGraphChildProvenance/wrong_type
+=== RUN   TestReplayGraphChildProvenance/wrong_id
+=== RUN   TestReplayGraphChildProvenance/wrong_invocation
+=== RUN   TestReplayGraphChildProvenance/zero_invocation
+=== RUN   TestReplayGraphChildProvenance/wrong_reference
+=== RUN   TestReplayGraphChildProvenance/wrong_hash
+=== RUN   TestReplayGraphChildProvenance/missing_binding
+=== RUN   TestReplayGraphChildProvenance/missing_outcome
+=== RUN   TestReplayGraphChildProvenance/missing_result
+=== RUN   TestReplayGraphChildProvenance/changed_outcome_bytes
+=== RUN   TestReplayGraphChildProvenance/changed_result_bytes
+=== RUN   TestReplayGraphChildProvenance/annotation_before_request
+=== RUN   TestReplayGraphChildProvenance/undeclared_name
+=== RUN   TestReplayGraphChildProvenance/legacy_signal
+=== RUN   TestReplayGraphChildProvenance/ordinary_before_child_request
+=== RUN   TestReplayGraphChildProvenance/failed_child
+=== RUN   TestReplayGraphChildProvenance/failed_with_result
+=== RUN   TestReplayGraphChildProvenance/inline_result
+=== RUN   TestReplayGraphChildProvenance/limit_nested_signal
+--- PASS: TestReplayGraphChildProvenance (0.01s)
+    --- PASS: TestReplayGraphChildProvenance/valid (0.00s)
+    --- PASS: TestReplayGraphChildProvenance/wrong_type (0.00s)
+    --- PASS: TestReplayGraphChildProvenance/wrong_id (0.00s)
+    --- PASS: TestReplayGraphChildProvenance/wrong_invocation (0.00s)
+    --- PASS: TestReplayGraphChildProvenance/zero_invocation (0.00s)
+    --- PASS: TestReplayGraphChildProvenance/wrong_reference (0.00s)
+    --- PASS: TestReplayGraphChildProvenance/wrong_hash (0.00s)
+    --- PASS: TestReplayGraphChildProvenance/missing_binding (0.00s)
+    --- PASS: TestReplayGraphChildProvenance/missing_outcome (0.00s)
+    --- PASS: TestReplayGraphChildProvenance/missing_result (0.00s)
+    --- PASS: TestReplayGraphChildProvenance/changed_outcome_bytes (0.00s)
+    --- PASS: TestReplayGraphChildProvenance/changed_result_bytes (0.00s)
+    --- PASS: TestReplayGraphChildProvenance/annotation_before_request (0.00s)
+    --- PASS: TestReplayGraphChildProvenance/undeclared_name (0.00s)
+    --- PASS: TestReplayGraphChildProvenance/legacy_signal (0.00s)
+    --- PASS: TestReplayGraphChildProvenance/ordinary_before_child_request (0.00s)
+    --- PASS: TestReplayGraphChildProvenance/failed_child (0.00s)
+    --- PASS: TestReplayGraphChildProvenance/failed_with_result (0.00s)
+    --- PASS: TestReplayGraphChildProvenance/inline_result (0.00s)
+    --- PASS: TestReplayGraphChildProvenance/limit_nested_signal (0.00s)
+=== RUN   TestReplayDeclaredGraphBeforePlugin
+=== RUN   TestReplayDeclaredGraphBeforePlugin/removed_annotation
+=== RUN   TestReplayDeclaredGraphBeforePlugin/unknown_format
+=== RUN   TestReplayDeclaredGraphBeforePlugin/removed_checkpoint_metadata
+--- PASS: TestReplayDeclaredGraphBeforePlugin (0.00s)
+    --- PASS: TestReplayDeclaredGraphBeforePlugin/removed_annotation (0.00s)
+    --- PASS: TestReplayDeclaredGraphBeforePlugin/unknown_format (0.00s)
+    --- PASS: TestReplayDeclaredGraphBeforePlugin/removed_checkpoint_metadata (0.00s)
+=== RUN   TestReplayInputBindingBeforePlugin
+=== RUN   TestReplayInputBindingBeforePlugin/format=
+=== RUN   TestReplayInputBindingBeforePlugin/format=graph-v1
+--- PASS: TestReplayInputBindingBeforePlugin (0.00s)
+    --- PASS: TestReplayInputBindingBeforePlugin/format= (0.00s)
+    --- PASS: TestReplayInputBindingBeforePlugin/format=graph-v1 (0.00s)
+=== RUN   TestReplayJournalHeaderAmbiguity
+=== RUN   TestReplayJournalHeaderAmbiguity/valid_opaque_payload
+=== RUN   TestReplayJournalHeaderAmbiguity/record_wire_shape
+=== RUN   TestReplayJournalHeaderAmbiguity/duplicate_epoch
+=== RUN   TestReplayJournalHeaderAmbiguity/alias_epoch
+=== RUN   TestReplayJournalHeaderAmbiguity/duplicate_index
+=== RUN   TestReplayJournalHeaderAmbiguity/alias_index
+=== RUN   TestReplayJournalHeaderAmbiguity/duplicate_kind
+=== RUN   TestReplayJournalHeaderAmbiguity/alias_kind
+=== RUN   TestReplayJournalHeaderAmbiguity/duplicate_payload_header
+=== RUN   TestReplayJournalHeaderAmbiguity/alias_payload_header
+=== RUN   TestReplayJournalHeaderAmbiguity/duplicate_worker
+=== RUN   TestReplayJournalHeaderAmbiguity/alias_worker
+=== RUN   TestReplayJournalHeaderAmbiguity/duplicate_sequence
+=== RUN   TestReplayJournalHeaderAmbiguity/alias_sequence
+=== RUN   TestReplayJournalHeaderAmbiguity/escaped_sequence
+--- PASS: TestReplayJournalHeaderAmbiguity (0.01s)
+    --- PASS: TestReplayJournalHeaderAmbiguity/valid_opaque_payload (0.00s)
+    --- PASS: TestReplayJournalHeaderAmbiguity/record_wire_shape (0.00s)
+    --- PASS: TestReplayJournalHeaderAmbiguity/duplicate_epoch (0.00s)
+    --- PASS: TestReplayJournalHeaderAmbiguity/alias_epoch (0.00s)
+    --- PASS: TestReplayJournalHeaderAmbiguity/duplicate_index (0.00s)
+    --- PASS: TestReplayJournalHeaderAmbiguity/alias_index (0.00s)
+    --- PASS: TestReplayJournalHeaderAmbiguity/duplicate_kind (0.00s)
+    --- PASS: TestReplayJournalHeaderAmbiguity/alias_kind (0.00s)
+    --- PASS: TestReplayJournalHeaderAmbiguity/duplicate_payload_header (0.00s)
+    --- PASS: TestReplayJournalHeaderAmbiguity/alias_payload_header (0.00s)
+    --- PASS: TestReplayJournalHeaderAmbiguity/duplicate_worker (0.00s)
+    --- PASS: TestReplayJournalHeaderAmbiguity/alias_worker (0.00s)
+    --- PASS: TestReplayJournalHeaderAmbiguity/duplicate_sequence (0.00s)
+    --- PASS: TestReplayJournalHeaderAmbiguity/alias_sequence (0.00s)
+    --- PASS: TestReplayJournalHeaderAmbiguity/escaped_sequence (0.00s)
+=== RUN   TestReplayJournalLimitChecksAttemptedStepWithoutEffect
+--- PASS: TestReplayJournalLimitChecksAttemptedStepWithoutEffect (0.00s)
+=== RUN   TestReplayNonStepJournalLimit
+=== RUN   TestReplayNonStepJournalLimit/suspension
+=== RUN   TestReplayNonStepJournalLimit/panic
+--- PASS: TestReplayNonStepJournalLimit (0.01s)
+    --- PASS: TestReplayNonStepJournalLimit/suspension (0.00s)
+    --- PASS: TestReplayNonStepJournalLimit/panic (0.00s)
+=== RUN   TestReplayRejectedSignalDrainUsesRetainedSource
+--- PASS: TestReplayRejectedSignalDrainUsesRetainedSource (0.14s)
+=== RUN   TestReplayLongPanicMatchesTruncatedAttempt
+--- PASS: TestReplayLongPanicMatchesTruncatedAttempt (0.02s)
+=== RUN   TestReplayRecordOrderBeforePlugin
+=== RUN   TestReplayRecordOrderBeforePlugin/format=/index_gap
+=== RUN   TestReplayRecordOrderBeforePlugin/format=/zero_sequence
+=== RUN   TestReplayRecordOrderBeforePlugin/format=/repeated_sequence
+=== RUN   TestReplayRecordOrderBeforePlugin/format=/backwards_epoch
+=== RUN   TestReplayRecordOrderBeforePlugin/format=/repeated_started
+=== RUN   TestReplayRecordOrderBeforePlugin/format=/after_terminal
+=== RUN   TestReplayRecordOrderBeforePlugin/format=/unknown_kind
+=== RUN   TestReplayRecordOrderBeforePlugin/format=/foreign_terminal
+=== RUN   TestReplayRecordOrderBeforePlugin/format=/empty_failure
+=== RUN   TestReplayRecordOrderBeforePlugin/format=graph-v1/index_gap
+=== RUN   TestReplayRecordOrderBeforePlugin/format=graph-v1/zero_sequence
+=== RUN   TestReplayRecordOrderBeforePlugin/format=graph-v1/repeated_sequence
+=== RUN   TestReplayRecordOrderBeforePlugin/format=graph-v1/backwards_epoch
+=== RUN   TestReplayRecordOrderBeforePlugin/format=graph-v1/repeated_started
+=== RUN   TestReplayRecordOrderBeforePlugin/format=graph-v1/after_terminal
+=== RUN   TestReplayRecordOrderBeforePlugin/format=graph-v1/unknown_kind
+=== RUN   TestReplayRecordOrderBeforePlugin/format=graph-v1/foreign_terminal
+=== RUN   TestReplayRecordOrderBeforePlugin/format=graph-v1/empty_failure
+--- PASS: TestReplayRecordOrderBeforePlugin (0.00s)
+    --- PASS: TestReplayRecordOrderBeforePlugin/format=/index_gap (0.00s)
+    --- PASS: TestReplayRecordOrderBeforePlugin/format=/zero_sequence (0.00s)
+    --- PASS: TestReplayRecordOrderBeforePlugin/format=/repeated_sequence (0.00s)
+    --- PASS: TestReplayRecordOrderBeforePlugin/format=/backwards_epoch (0.00s)
+    --- PASS: TestReplayRecordOrderBeforePlugin/format=/repeated_started (0.00s)
+    --- PASS: TestReplayRecordOrderBeforePlugin/format=/after_terminal (0.00s)
+    --- PASS: TestReplayRecordOrderBeforePlugin/format=/unknown_kind (0.00s)
+    --- PASS: TestReplayRecordOrderBeforePlugin/format=/foreign_terminal (0.00s)
+    --- PASS: TestReplayRecordOrderBeforePlugin/format=/empty_failure (0.00s)
+    --- PASS: TestReplayRecordOrderBeforePlugin/format=graph-v1/index_gap (0.00s)
+    --- PASS: TestReplayRecordOrderBeforePlugin/format=graph-v1/zero_sequence (0.00s)
+    --- PASS: TestReplayRecordOrderBeforePlugin/format=graph-v1/repeated_sequence (0.00s)
+    --- PASS: TestReplayRecordOrderBeforePlugin/format=graph-v1/backwards_epoch (0.00s)
+    --- PASS: TestReplayRecordOrderBeforePlugin/format=graph-v1/repeated_started (0.00s)
+    --- PASS: TestReplayRecordOrderBeforePlugin/format=graph-v1/after_terminal (0.00s)
+    --- PASS: TestReplayRecordOrderBeforePlugin/format=graph-v1/unknown_kind (0.00s)
+    --- PASS: TestReplayRecordOrderBeforePlugin/format=graph-v1/foreign_terminal (0.00s)
+    --- PASS: TestReplayRecordOrderBeforePlugin/format=graph-v1/empty_failure (0.00s)
+=== RUN   TestReplayRequestEnvelopeBeforePlugin
+=== RUN   TestReplayRequestEnvelopeBeforePlugin/kind
+=== RUN   TestReplayRequestEnvelopeBeforePlugin/name
+=== RUN   TestReplayRequestEnvelopeBeforePlugin/hash
+=== RUN   TestReplayRequestEnvelopeBeforePlugin/timer
+=== RUN   TestReplayRequestEnvelopeBeforePlugin/child
+=== RUN   TestReplayRequestEnvelopeBeforePlugin/cases
+=== RUN   TestReplayRequestEnvelopeBeforePlugin/nested
+=== RUN   TestReplayRequestEnvelopeBeforePlugin/unknown
+--- PASS: TestReplayRequestEnvelopeBeforePlugin (0.00s)
+    --- PASS: TestReplayRequestEnvelopeBeforePlugin/kind (0.00s)
+    --- PASS: TestReplayRequestEnvelopeBeforePlugin/name (0.00s)
+    --- PASS: TestReplayRequestEnvelopeBeforePlugin/hash (0.00s)
+    --- PASS: TestReplayRequestEnvelopeBeforePlugin/timer (0.00s)
+    --- PASS: TestReplayRequestEnvelopeBeforePlugin/child (0.00s)
+    --- PASS: TestReplayRequestEnvelopeBeforePlugin/cases (0.00s)
+    --- PASS: TestReplayRequestEnvelopeBeforePlugin/nested (0.00s)
+    --- PASS: TestReplayRequestEnvelopeBeforePlugin/unknown (0.00s)
+=== RUN   TestReplaySignalEnvelopeBeforePlugin
+=== RUN   TestReplaySignalEnvelopeBeforePlugin/sequence
+=== RUN   TestReplaySignalEnvelopeBeforePlugin/name
+=== RUN   TestReplaySignalEnvelopeBeforePlugin/payload
+=== RUN   TestReplaySignalEnvelopeBeforePlugin/reference
+=== RUN   TestReplaySignalEnvelopeBeforePlugin/hash
+=== RUN   TestReplaySignalEnvelopeBeforePlugin/child
+=== RUN   TestReplaySignalEnvelopeBeforePlugin/canonical
+=== RUN   TestReplaySignalEnvelopeBeforePlugin/unknown
+--- PASS: TestReplaySignalEnvelopeBeforePlugin (0.00s)
+    --- PASS: TestReplaySignalEnvelopeBeforePlugin/sequence (0.00s)
+    --- PASS: TestReplaySignalEnvelopeBeforePlugin/name (0.00s)
+    --- PASS: TestReplaySignalEnvelopeBeforePlugin/payload (0.00s)
+    --- PASS: TestReplaySignalEnvelopeBeforePlugin/reference (0.00s)
+    --- PASS: TestReplaySignalEnvelopeBeforePlugin/hash (0.00s)
+    --- PASS: TestReplaySignalEnvelopeBeforePlugin/child (0.00s)
+    --- PASS: TestReplaySignalEnvelopeBeforePlugin/canonical (0.00s)
+    --- PASS: TestReplaySignalEnvelopeBeforePlugin/unknown (0.00s)
+=== RUN   TestReplayTerminalEnvelopeBeforePlugin
+=== RUN   TestReplayTerminalEnvelopeBeforePlugin/format=
+=== RUN   TestReplayTerminalEnvelopeBeforePlugin/format=/duplicate_invocation
+=== RUN   TestReplayTerminalEnvelopeBeforePlugin/format=/alias_invocation
+=== RUN   TestReplayTerminalEnvelopeBeforePlugin/format=/escaped_invocation
+=== RUN   TestReplayTerminalEnvelopeBeforePlugin/format=/duplicate_result
+=== RUN   TestReplayTerminalEnvelopeBeforePlugin/format=/alias_result
+=== RUN   TestReplayTerminalEnvelopeBeforePlugin/format=/duplicate_reference
+=== RUN   TestReplayTerminalEnvelopeBeforePlugin/format=/alias_reference
+=== RUN   TestReplayTerminalEnvelopeBeforePlugin/format=/duplicate_hash
+=== RUN   TestReplayTerminalEnvelopeBeforePlugin/format=/alias_hash
+=== RUN   TestReplayTerminalEnvelopeBeforePlugin/format=/duplicate_error
+=== RUN   TestReplayTerminalEnvelopeBeforePlugin/format=/alias_error
+=== RUN   TestReplayTerminalEnvelopeBeforePlugin/format=/duplicate_limit_request
+=== RUN   TestReplayTerminalEnvelopeBeforePlugin/format=/alias_limit_request
+=== RUN   TestReplayTerminalEnvelopeBeforePlugin/format=/duplicate_limit_entry
+=== RUN   TestReplayTerminalEnvelopeBeforePlugin/format=/alias_limit_entry
+=== RUN   TestReplayTerminalEnvelopeBeforePlugin/format=/unknown_field
+=== RUN   TestReplayTerminalEnvelopeBeforePlugin/format=graph-v1
+=== RUN   TestReplayTerminalEnvelopeBeforePlugin/format=graph-v1/duplicate_invocation
+=== RUN   TestReplayTerminalEnvelopeBeforePlugin/format=graph-v1/alias_invocation
+=== RUN   TestReplayTerminalEnvelopeBeforePlugin/format=graph-v1/escaped_invocation
+=== RUN   TestReplayTerminalEnvelopeBeforePlugin/format=graph-v1/duplicate_result
+=== RUN   TestReplayTerminalEnvelopeBeforePlugin/format=graph-v1/alias_result
+=== RUN   TestReplayTerminalEnvelopeBeforePlugin/format=graph-v1/duplicate_reference
+=== RUN   TestReplayTerminalEnvelopeBeforePlugin/format=graph-v1/alias_reference
+=== RUN   TestReplayTerminalEnvelopeBeforePlugin/format=graph-v1/duplicate_hash
+=== RUN   TestReplayTerminalEnvelopeBeforePlugin/format=graph-v1/alias_hash
+=== RUN   TestReplayTerminalEnvelopeBeforePlugin/format=graph-v1/duplicate_error
+=== RUN   TestReplayTerminalEnvelopeBeforePlugin/format=graph-v1/alias_error
+=== RUN   TestReplayTerminalEnvelopeBeforePlugin/format=graph-v1/duplicate_limit_request
+=== RUN   TestReplayTerminalEnvelopeBeforePlugin/format=graph-v1/alias_limit_request
+=== RUN   TestReplayTerminalEnvelopeBeforePlugin/format=graph-v1/duplicate_limit_entry
+=== RUN   TestReplayTerminalEnvelopeBeforePlugin/format=graph-v1/alias_limit_entry
+=== RUN   TestReplayTerminalEnvelopeBeforePlugin/format=graph-v1/unknown_field
+--- PASS: TestReplayTerminalEnvelopeBeforePlugin (0.01s)
+    --- PASS: TestReplayTerminalEnvelopeBeforePlugin/format= (0.00s)
+        --- PASS: TestReplayTerminalEnvelopeBeforePlugin/format=/duplicate_invocation (0.00s)
+        --- PASS: TestReplayTerminalEnvelopeBeforePlugin/format=/alias_invocation (0.00s)
+        --- PASS: TestReplayTerminalEnvelopeBeforePlugin/format=/escaped_invocation (0.00s)
+        --- PASS: TestReplayTerminalEnvelopeBeforePlugin/format=/duplicate_result (0.00s)
+        --- PASS: TestReplayTerminalEnvelopeBeforePlugin/format=/alias_result (0.00s)
+        --- PASS: TestReplayTerminalEnvelopeBeforePlugin/format=/duplicate_reference (0.00s)
+        --- PASS: TestReplayTerminalEnvelopeBeforePlugin/format=/alias_reference (0.00s)
+        --- PASS: TestReplayTerminalEnvelopeBeforePlugin/format=/duplicate_hash (0.00s)
+        --- PASS: TestReplayTerminalEnvelopeBeforePlugin/format=/alias_hash (0.00s)
+        --- PASS: TestReplayTerminalEnvelopeBeforePlugin/format=/duplicate_error (0.00s)
+        --- PASS: TestReplayTerminalEnvelopeBeforePlugin/format=/alias_error (0.00s)
+        --- PASS: TestReplayTerminalEnvelopeBeforePlugin/format=/duplicate_limit_request (0.00s)
+        --- PASS: TestReplayTerminalEnvelopeBeforePlugin/format=/alias_limit_request (0.00s)
+        --- PASS: TestReplayTerminalEnvelopeBeforePlugin/format=/duplicate_limit_entry (0.00s)
+        --- PASS: TestReplayTerminalEnvelopeBeforePlugin/format=/alias_limit_entry (0.00s)
+        --- PASS: TestReplayTerminalEnvelopeBeforePlugin/format=/unknown_field (0.00s)
+    --- PASS: TestReplayTerminalEnvelopeBeforePlugin/format=graph-v1 (0.00s)
+        --- PASS: TestReplayTerminalEnvelopeBeforePlugin/format=graph-v1/duplicate_invocation (0.00s)
+        --- PASS: TestReplayTerminalEnvelopeBeforePlugin/format=graph-v1/alias_invocation (0.00s)
+        --- PASS: TestReplayTerminalEnvelopeBeforePlugin/format=graph-v1/escaped_invocation (0.00s)
+        --- PASS: TestReplayTerminalEnvelopeBeforePlugin/format=graph-v1/duplicate_result (0.00s)
+        --- PASS: TestReplayTerminalEnvelopeBeforePlugin/format=graph-v1/alias_result (0.00s)
+        --- PASS: TestReplayTerminalEnvelopeBeforePlugin/format=graph-v1/duplicate_reference (0.00s)
+        --- PASS: TestReplayTerminalEnvelopeBeforePlugin/format=graph-v1/alias_reference (0.00s)
+        --- PASS: TestReplayTerminalEnvelopeBeforePlugin/format=graph-v1/duplicate_hash (0.00s)
+        --- PASS: TestReplayTerminalEnvelopeBeforePlugin/format=graph-v1/alias_hash (0.00s)
+        --- PASS: TestReplayTerminalEnvelopeBeforePlugin/format=graph-v1/duplicate_error (0.00s)
+        --- PASS: TestReplayTerminalEnvelopeBeforePlugin/format=graph-v1/alias_error (0.00s)
+        --- PASS: TestReplayTerminalEnvelopeBeforePlugin/format=graph-v1/duplicate_limit_request (0.00s)
+        --- PASS: TestReplayTerminalEnvelopeBeforePlugin/format=graph-v1/alias_limit_request (0.00s)
+        --- PASS: TestReplayTerminalEnvelopeBeforePlugin/format=graph-v1/duplicate_limit_entry (0.00s)
+        --- PASS: TestReplayTerminalEnvelopeBeforePlugin/format=graph-v1/alias_limit_entry (0.00s)
+        --- PASS: TestReplayTerminalEnvelopeBeforePlugin/format=graph-v1/unknown_field (0.00s)
+=== RUN   TestOperatorStandaloneCommands
+    standalone_test.go:81: set WF_OPERATOR_STANDALONE=1 for actual compiled CLI controls
+--- SKIP: TestOperatorStandaloneCommands (0.00s)
+=== RUN   TestOperatorStandaloneCommandsInJetStreamDomain
+    standalone_test.go:88: set WF_OPERATOR_STANDALONE=1 for actual compiled CLI controls
+--- SKIP: TestOperatorStandaloneCommandsInJetStreamDomain (0.00s)
+PASS
+ok  	js-wf/cmd/wf	169.892s
