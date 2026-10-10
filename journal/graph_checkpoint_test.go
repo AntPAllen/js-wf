@@ -39,7 +39,7 @@ func (p *checkpointPayloadFaultPort) CASRoot(ctx context.Context, key string, he
 
 func TestGraphCheckpointOwnedFrameAndSuffix(t *testing.T) {
 	for _, encoding := range []journal.Encoding{journal.JSON, journal.ProtobufV1} {
-		for _, mode := range []string{"valid", "absent", "pending", "wrong-generation", "wrong-locals", "missing-edge", "borrowed-edge", "unreadable", "expired", "latest"} {
+		for _, mode := range []string{"valid", "absent", "pending", "wrong-generation", "wrong-locals", "missing-edge", "borrowed-edge", "unreadable", "expired", "latest", "duplicate-request", "alias-request", "unknown-request"} {
 			t.Run(string(encoding)+"/"+mode, func(t *testing.T) {
 				_, model, now := graphModel(t, encoding)
 				port := &checkpointPayloadFaultPort{GraphPublicationTransport: model}
@@ -64,6 +64,15 @@ func TestGraphCheckpointOwnedFrameAndSuffix(t *testing.T) {
 				data := json.RawMessage(`{"count":1}`)
 				digest := sha256.Sum256(data)
 				request, _ := json.Marshal(map[string]string{"kind": "checkpoint", "name": "next", "input_hash": hex.EncodeToString(digest[:])})
+
+				switch mode {
+				case "duplicate-request":
+					request = append([]byte(`{"kind":"run",`), request[1:]...)
+				case "alias-request":
+					request = append([]byte(`{"Kind":"run",`), request[1:]...)
+				case "unknown-request":
+					request = append([]byte(`{"foreign":true,`), request[1:]...)
+				}
 				frame := checkpoint.Frame{Version: checkpoint.Version, Identity: checkpoint.Identity{Type: "flow", ID: "checkpoint", InvSeq: 7}, Stage: "next", Data: data, Anchor: checkpoint.Anchor{Index: 2, Epoch: 3}, StepPosition: 2, State: map[string]json.RawMessage{"value": json.RawMessage(`42`)}}
 				if mode == "wrong-generation" {
 					frame.Identity.InvSeq = 8
@@ -110,7 +119,7 @@ func TestGraphCheckpointOwnedFrameAndSuffix(t *testing.T) {
 						t.Fatal("incomplete checkpoint selected", got, err)
 					}
 					return
-				case "wrong-generation", "wrong-locals", "missing-edge", "borrowed-edge", "unreadable", "expired":
+				case "wrong-generation", "wrong-locals", "missing-edge", "borrowed-edge", "unreadable", "expired", "duplicate-request", "alias-request", "unknown-request":
 					if err == nil || got != nil {
 						t.Fatal("invalid checkpoint accepted", got, err)
 					}

@@ -19,3 +19,7 @@ Source `2de6dfa93184b4489436bf55f29179684e4e08d2`, detached clean sparse checkou
 The pipeline runs compaction controls under race, exact six-leaf grant-bypass negative control, the bounded native R1/archive64 fixture, compaction1000 race, all853 normal pins and compaction100000 normal. Nonzero native or model stages keep the pipeline failed; subsequent model evidence is still retained. [Independent reviewer](review.py) checks matching loaded terminal supervisor exit0, all Git inputs and source stability, binary hashes/build modes, exact commands/exits, package/test terminals, full pin inventory, actual seed-body proofs and bounded native phase/boundary receipt. It cannot accept a launch or partial run.
 
 No qualification result exists yet. Full original source-wide extended campaigns, actual100000 native cap, native matrices, scale/soak/lifecycle/import/admission/collector/rollout requirements remain open.
+
+## Development race timeout retained
+
+The earlier unfrozen compaction1000 race attempt closes nonzero at600.085s under the default10-minute Go package watchdog. It is failed development evidence, not a completed seed proof or a model defect finding. It is not restarted. The already-running frozen component qualifier uses an explicit300-minute watchdog and must still complete; do not infer acceptance from that configuration. The separate full158 race supervisor is live.

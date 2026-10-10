@@ -10,6 +10,7 @@ import (
 	"reflect"
 
 	"js-wf/identity"
+	"js-wf/internal/stepwire"
 )
 
 var ErrContinuation = errors.New("workflow ends delivery at a continuation checkpoint")
@@ -95,7 +96,7 @@ func Continue(c *Context, stage string, data any) error {
 	if recorded {
 		entry := c.entries[c.position]
 		var got request
-		if entry.Kind != StepRequested || json.Unmarshal(entry.Payload, &got) != nil {
+		if entry.Kind != StepRequested || stepwire.Decode(entry.Payload, &got) != nil {
 			return ErrCorruptJournal
 		}
 		if got.Kind != want.Kind || got.Name != stage || got.InputHash != want.InputHash {

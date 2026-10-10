@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"js-wf/internal/checkpoint"
+	"js-wf/internal/stepwire"
 )
 
 type graphCheckpointPointer struct {
@@ -47,11 +48,7 @@ func (v *GraphView) ReadCheckpoint(ctx context.Context, typ, id string) (*GraphC
 	start := uint64(0)
 	var records []Record
 	var request Record
-	var declaration struct {
-		Kind      string `json:"kind"`
-		Name      string `json:"name"`
-		InputHash string `json:"input_hash"`
-	}
+	var declaration stepwire.Request
 	var pending bool
 	var position uint64
 	var candidate *GraphCheckpointRead
@@ -67,7 +64,7 @@ func (v *GraphView) ReadCheckpoint(ctx context.Context, typ, id string) (*GraphC
 		if err != nil {
 			return nil, err
 		}
-		if declared.Kind != StepRequested || json.Unmarshal(declared.Payload, &declaration) != nil || declaration.Kind != "checkpoint" || declaration.Name != pointer.Runtime.Stage || declared.Sequence >= anchor.Sequence || declared.Epoch > anchor.Epoch || verifyCheckpointAnchor(anchor.Record, pointer.Runtime) != nil {
+		if declared.Kind != StepRequested || stepwire.Decode(declared.Payload, &declaration) != nil || declaration.Kind != "checkpoint" || declaration.Name != pointer.Runtime.Stage || declared.Sequence >= anchor.Sequence || declared.Epoch > anchor.Epoch || verifyCheckpointAnchor(anchor.Record, pointer.Runtime) != nil {
 			return nil, ErrGap
 		}
 		candidate = &GraphCheckpointRead{Runtime: pointer.Runtime, Request: declared.Record, Anchor: anchor.Record}
@@ -100,12 +97,8 @@ func (v *GraphView) ReadCheckpoint(ctx context.Context, typ, id string) (*GraphC
 			if pending {
 				return ErrGap
 			}
-			declaration = struct {
-				Kind      string `json:"kind"`
-				Name      string `json:"name"`
-				InputHash string `json:"input_hash"`
-			}{}
-			if json.Unmarshal(record.Payload, &declaration) != nil {
+			declaration = stepwire.Request{}
+			if stepwire.Decode(record.Payload, &declaration) != nil {
 				return ErrGap
 			}
 			request = record.Record

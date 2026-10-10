@@ -13,6 +13,7 @@ import (
 	"time"
 
 	"js-wf/identity"
+	"js-wf/internal/stepwire"
 )
 
 var ErrNonDeterministic = errors.New("workflow step differs from recorded journal")
@@ -100,18 +101,8 @@ func NewContext(base context.Context, entries []Entry, appendFn Appender, signal
 	return &Context{base: base, entries: entries, append: appendFn, signals: signals, usedSignals: map[uint64]bool{}, state: map[string]json.RawMessage{}}
 }
 
-type request struct {
-	Kind          string    `json:"kind,omitempty"`
-	Name          string    `json:"name"`
-	InputHash     string    `json:"input_hash"`
-	DurationNanos int64     `json:"duration_nanos,omitempty"`
-	FireAt        time.Time `json:"fire_at,omitempty"`
-	ClockDomain   string    `json:"clock_domain,omitempty"`
-	TimerStep     uint64    `json:"timer_step,omitempty"`
-	TimerName     string    `json:"timer_name,omitempty"`
-	ChildType     string    `json:"child_type,omitempty"`
-	ChildID       string    `json:"child_id,omitempty"`
-}
+type request = stepwire.Request
+
 type completion struct {
 	Result     json.RawMessage `json:"result,omitempty"`
 	ResultRef  string          `json:"result_ref,omitempty"`
@@ -173,7 +164,7 @@ func runWithKind[T any](c *Context, kind, name string, input any, fn func(contex
 			return zero, ErrCorruptJournal
 		}
 		var got request
-		if err := json.Unmarshal(recorded.Payload, &got); err != nil {
+		if err := stepwire.Decode(recorded.Payload, &got); err != nil {
 			return zero, ErrCorruptJournal
 		}
 		if (got.Kind != kind && !(kind == "run" && got.Kind == "")) || got.Name != name || got.InputHash != want.InputHash {
@@ -381,7 +372,7 @@ func Call(c *Context, childType string, input []byte) ([]byte, error) {
 			return nil, ErrCorruptJournal
 		}
 		var got request
-		if err := json.Unmarshal(recorded.Payload, &got); err != nil {
+		if err := stepwire.Decode(recorded.Payload, &got); err != nil {
 			return nil, ErrCorruptJournal
 		}
 		if got.Kind != "call" || got.Name != want.Name || got.InputHash != want.InputHash || got.ChildType != childType || got.ChildID != childID {
@@ -480,7 +471,7 @@ func CallAsync(c *Context, childType string, input []byte) (Promise, error) {
 			return empty, ErrCorruptJournal
 		}
 		var got request
-		if err := json.Unmarshal(recorded.Payload, &got); err != nil {
+		if err := stepwire.Decode(recorded.Payload, &got); err != nil {
 			return empty, ErrCorruptJournal
 		}
 		if got.Kind != "call_async" || got.Name != want.Name || got.InputHash != want.InputHash || got.ChildType != childType || got.ChildID != p.ChildID {
@@ -574,7 +565,7 @@ func Version(c *Context, changeID string, min, max int) (int, error) {
 			return 0, ErrCorruptJournal
 		}
 		var got request
-		if err := json.Unmarshal(recorded.Payload, &got); err != nil {
+		if err := stepwire.Decode(recorded.Payload, &got); err != nil {
 			return 0, ErrCorruptJournal
 		}
 		if got.Kind != "version" || got.Name != changeID {
@@ -700,7 +691,7 @@ func awaitSignal(c *Context, name string, child bool) ([]byte, error) {
 			return nil, ErrCorruptJournal
 		}
 		var got request
-		if err := json.Unmarshal(recorded.Payload, &got); err != nil {
+		if err := stepwire.Decode(recorded.Payload, &got); err != nil {
 			return nil, ErrCorruptJournal
 		}
 		if got.Kind != "signal" || got.Name != name {

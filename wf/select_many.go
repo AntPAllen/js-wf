@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"js-wf/identity"
+	"js-wf/internal/checkpoint"
 )
 
 // Awaitable is a durable timer, named signal, or child promise usable in Select.
@@ -95,7 +96,7 @@ func Select(c *Context, awaitables ...Awaitable) (int, []byte, error) {
 	if c.position < len(c.entries) {
 		record := c.entries[c.position]
 		var got selectRequest
-		if record.Kind != StepRequested || json.Unmarshal(record.Payload, &got) != nil {
+		if record.Kind != StepRequested || checkpoint.DecodeUnambiguous(record.Payload, &got) != nil {
 			return -1, nil, ErrCorruptJournal
 		}
 		encoded, _ := json.Marshal(got)

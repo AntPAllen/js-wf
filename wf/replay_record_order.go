@@ -4,6 +4,7 @@ import (
 	"bytes"
 
 	"js-wf/internal/checkpoint"
+	"js-wf/internal/stepwire"
 	"js-wf/journal"
 )
 
@@ -42,7 +43,12 @@ func validateReplayRecordOrder(records []journal.Record, invocation uint64) erro
 			if decodeReplaySignal(record.Payload, &signal) != nil {
 				return ErrCorruptJournal
 			}
-		case journal.Started, journal.StepRequested, journal.StepCompleted, journal.Suspended, journal.Attempt, journal.Completed, journal.Failed:
+		case journal.StepRequested:
+			var request stepwire.Request
+			if stepwire.Decode(record.Payload, &request) != nil {
+				return ErrCorruptJournal
+			}
+		case journal.Started, journal.StepCompleted, journal.Suspended, journal.Attempt, journal.Completed, journal.Failed:
 		default:
 			return ErrCorruptJournal
 		}

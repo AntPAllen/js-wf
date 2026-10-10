@@ -1,5 +1,20 @@
 # Implementation status against the supplied plan
 
+## Runtime step declaration admission hardened — 2026-10-10
+
+Shared typed request decoding rejects duplicate/aliased/escaped/unknown header
+keys and nested Select ambiguity before offline handlers/plugins, inside SDK
+request replay and during canonical checkpoint confirmation. Valid request
+variants and hashed user inputs retain their existing handling. Full SDK race,
+all853 unchanged pins, journal checkpoint/index race controls and8 CLI admission
+cases pass. An ordinary decoder mutant fails13 SDK,8 CLI and6 journal controls.
+[Development evidence](scale/graph-step-request-envelope-2026-10-10/README.md).
+Full CLI race is still live; this is not frozen or all-record-kind qualification.
+The earlier unfrozen compaction1000 race attempt failed at its default10-minute
+package watchdog and is preserved. It is not restarted. The frozen compaction
+qualifier remains live with its explicit300-minute watchdog and observed seed
+progress. Actual100000 native gate and all other original requirements stay open.
+
 ## Frozen compaction component qualification launched — 2026-10-10
 
 Source `2de6dfa` is running under the loaded matching unit, original PID131436,

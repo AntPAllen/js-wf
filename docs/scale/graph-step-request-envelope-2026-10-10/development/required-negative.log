@@ -1,0 +1,76 @@
+=== RUN   TestReplayRequestEnvelopeBeforeHandler
+=== RUN   TestReplayRequestEnvelopeBeforeHandler/duplicate_child
+    replay_request_envelope_test.go:42: ambiguous declaration reached handler: calls=1 err=workflow step differs from recorded journal: 1 unplayed entries
+=== RUN   TestReplayRequestEnvelopeBeforeHandler/nested_alias
+    replay_request_envelope_test.go:42: ambiguous declaration reached handler: calls=1 err=workflow step differs from recorded journal: 1 unplayed entries
+=== RUN   TestReplayRequestEnvelopeBeforeHandler/alias_timer
+    replay_request_envelope_test.go:42: ambiguous declaration reached handler: calls=1 err=workflow step differs from recorded journal: 1 unplayed entries
+=== RUN   TestReplayRequestEnvelopeBeforeHandler/duplicate_cases
+    replay_request_envelope_test.go:42: ambiguous declaration reached handler: calls=1 err=workflow step differs from recorded journal: 1 unplayed entries
+=== RUN   TestReplayRequestEnvelopeBeforeHandler/null
+=== RUN   TestReplayRequestEnvelopeBeforeHandler/alias_kind
+    replay_request_envelope_test.go:42: ambiguous declaration reached handler: calls=1 err=workflow step differs from recorded journal: 1 unplayed entries
+=== RUN   TestReplayRequestEnvelopeBeforeHandler/nested_case
+    replay_request_envelope_test.go:42: ambiguous declaration reached handler: calls=1 err=workflow step differs from recorded journal: 1 unplayed entries
+=== RUN   TestReplayRequestEnvelopeBeforeHandler/duplicate_name
+    replay_request_envelope_test.go:42: ambiguous declaration reached handler: calls=1 err=workflow step differs from recorded journal: 1 unplayed entries
+=== RUN   TestReplayRequestEnvelopeBeforeHandler/alias_hash
+    replay_request_envelope_test.go:42: ambiguous declaration reached handler: calls=1 err=workflow step differs from recorded journal: 1 unplayed entries
+=== RUN   TestReplayRequestEnvelopeBeforeHandler/unknown_field
+    replay_request_envelope_test.go:42: ambiguous declaration reached handler: calls=1 err=workflow step differs from recorded journal: 1 unplayed entries
+=== RUN   TestReplayRequestEnvelopeBeforeHandler/missing
+=== RUN   TestReplayRequestEnvelopeBeforeHandler/duplicate_kind
+    replay_request_envelope_test.go:42: ambiguous declaration reached handler: calls=1 err=workflow step differs from recorded journal: 1 unplayed entries
+=== RUN   TestReplayRequestEnvelopeBeforeHandler/escaped_kind
+    replay_request_envelope_test.go:42: ambiguous declaration reached handler: calls=1 err=workflow step differs from recorded journal: 1 unplayed entries
+=== RUN   TestReplayRequestEnvelopeBeforeHandler/alias_name
+    replay_request_envelope_test.go:42: ambiguous declaration reached handler: calls=1 err=workflow step differs from recorded journal: 1 unplayed entries
+=== RUN   TestReplayRequestEnvelopeBeforeHandler/duplicate_hash
+    replay_request_envelope_test.go:42: ambiguous declaration reached handler: calls=1 err=workflow step differs from recorded journal: 1 unplayed entries
+--- FAIL: TestReplayRequestEnvelopeBeforeHandler (0.00s)
+    --- FAIL: TestReplayRequestEnvelopeBeforeHandler/duplicate_child (0.00s)
+    --- FAIL: TestReplayRequestEnvelopeBeforeHandler/nested_alias (0.00s)
+    --- FAIL: TestReplayRequestEnvelopeBeforeHandler/alias_timer (0.00s)
+    --- FAIL: TestReplayRequestEnvelopeBeforeHandler/duplicate_cases (0.00s)
+    --- PASS: TestReplayRequestEnvelopeBeforeHandler/null (0.00s)
+    --- FAIL: TestReplayRequestEnvelopeBeforeHandler/alias_kind (0.00s)
+    --- FAIL: TestReplayRequestEnvelopeBeforeHandler/nested_case (0.00s)
+    --- FAIL: TestReplayRequestEnvelopeBeforeHandler/duplicate_name (0.00s)
+    --- FAIL: TestReplayRequestEnvelopeBeforeHandler/alias_hash (0.00s)
+    --- FAIL: TestReplayRequestEnvelopeBeforeHandler/unknown_field (0.00s)
+    --- PASS: TestReplayRequestEnvelopeBeforeHandler/missing (0.00s)
+    --- FAIL: TestReplayRequestEnvelopeBeforeHandler/duplicate_kind (0.00s)
+    --- FAIL: TestReplayRequestEnvelopeBeforeHandler/escaped_kind (0.00s)
+    --- FAIL: TestReplayRequestEnvelopeBeforeHandler/alias_name (0.00s)
+    --- FAIL: TestReplayRequestEnvelopeBeforeHandler/duplicate_hash (0.00s)
+FAIL
+FAIL	js-wf/wf	0.009s
+=== RUN   TestReplayRequestEnvelopeBeforePlugin
+=== RUN   TestReplayRequestEnvelopeBeforePlugin/kind
+    replay_request_envelope_test.go:35: legacy request envelope reached plugin: open replay handler: plugin.Open("/does-not-exist.so"): realpath failed
+=== RUN   TestReplayRequestEnvelopeBeforePlugin/name
+    replay_request_envelope_test.go:35: legacy request envelope reached plugin: open replay handler: plugin.Open("/does-not-exist.so"): realpath failed
+=== RUN   TestReplayRequestEnvelopeBeforePlugin/hash
+    replay_request_envelope_test.go:35: legacy request envelope reached plugin: open replay handler: plugin.Open("/does-not-exist.so"): realpath failed
+=== RUN   TestReplayRequestEnvelopeBeforePlugin/timer
+    replay_request_envelope_test.go:35: legacy request envelope reached plugin: open replay handler: plugin.Open("/does-not-exist.so"): realpath failed
+=== RUN   TestReplayRequestEnvelopeBeforePlugin/child
+    replay_request_envelope_test.go:35: legacy request envelope reached plugin: open replay handler: plugin.Open("/does-not-exist.so"): realpath failed
+=== RUN   TestReplayRequestEnvelopeBeforePlugin/cases
+    replay_request_envelope_test.go:35: legacy request envelope reached plugin: open replay handler: plugin.Open("/does-not-exist.so"): realpath failed
+=== RUN   TestReplayRequestEnvelopeBeforePlugin/nested
+    replay_request_envelope_test.go:35: legacy request envelope reached plugin: open replay handler: plugin.Open("/does-not-exist.so"): realpath failed
+=== RUN   TestReplayRequestEnvelopeBeforePlugin/unknown
+    replay_request_envelope_test.go:35: legacy request envelope reached plugin: open replay handler: plugin.Open("/does-not-exist.so"): realpath failed
+--- FAIL: TestReplayRequestEnvelopeBeforePlugin (0.00s)
+    --- FAIL: TestReplayRequestEnvelopeBeforePlugin/kind (0.00s)
+    --- FAIL: TestReplayRequestEnvelopeBeforePlugin/name (0.00s)
+    --- FAIL: TestReplayRequestEnvelopeBeforePlugin/hash (0.00s)
+    --- FAIL: TestReplayRequestEnvelopeBeforePlugin/timer (0.00s)
+    --- FAIL: TestReplayRequestEnvelopeBeforePlugin/child (0.00s)
+    --- FAIL: TestReplayRequestEnvelopeBeforePlugin/cases (0.00s)
+    --- FAIL: TestReplayRequestEnvelopeBeforePlugin/nested (0.00s)
+    --- FAIL: TestReplayRequestEnvelopeBeforePlugin/unknown (0.00s)
+FAIL
+FAIL	js-wf/cmd/wf	0.009s
+FAIL

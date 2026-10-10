@@ -1,0 +1,11 @@
+# Unambiguous runtime step declarations
+
+A shared internal stepwire decoder covers the SDK request variants: kind/name/input hash, timer scheduling/domain/step/name, child identity and ordered Select cases. Typed header keys reject duplicates, case aliases, escaped duplicate keys and unknown fields, including nested Select cases. Missing/null declarations reject. Kind-specific semantics and hash comparisons remain with the existing callers. The SDK request alias retains its existing serialized fields; user input bytes are hashed without interpreting their JSON fields.
+
+The decoder is used by SDK run/call/promise/version/signal/continuation replay, journal checkpoint confirmation (initial prefix and indexed declaration), and the complete offline replay admission before a handler/plugin. Select's direct replay decoder uses the same ambiguity rules. This does not claim complete canonical payload admission for all record kinds; completion/attempt/suspension and other admission requirements remain separate.
+
+Development full SDK race suite passes in96.568s; shared wire variant controls pass in1.068s. Full853 unchanged saved regressions pass in22.227s. Checkpoint owned-frame/index race controls pass in24.079s, including duplicate/alias/unknown declaration rejection in JSON and protobuf. Eight CLI request admission cases pass before loading a nonexistent plugin. The full CLI race package is still live and not accepted yet.
+
+The ordinary-decoder negative overlay preserves missing/null checks but bypasses just request ambiguity admission. It causes13 SDK handler-entry cases,8 CLI plugin-entry cases and6 JSON/protobuf checkpoint acceptance cases to fail, with no compilation failure. Exact overlay, raw output and required-failure review are retained in [development](development/). The missing/null controls still reject under the mutant and are not counted among required ambiguity failures.
+
+These are working-source development checks, not frozen qualification. The separate full158 race at0404fc0 and compaction qualifier at2de6dfa exclude this later decoder change. All original actual-cap, native matrices/scale/soak, extended complete suites, lifecycle/import, collector/admission and rollout gates remain open.
