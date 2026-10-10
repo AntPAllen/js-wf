@@ -145,13 +145,28 @@ func checkpointArchiveScenario(t *testing.T, ctx context.Context, seed uint64, c
 		if err != nil {
 			t.Fatal(err)
 		}
+		var storedRevision uint64
+		if config.CompactionCheckpoints != nil {
+			storedRevision, err = op.SaveCheckpoint(ctx, 0)
+			if err != nil {
+				t.Fatal(err)
+			}
+		}
 		if err := op.Close(ctx); err != nil {
 			t.Fatal(err)
 		}
 		// Persisted renewal input survives all-peer same-store restart;
 		// the existing old reader remains canonical and protected.
 		store = reopen()
-		op, err = store.ResumeCheckpointCompaction(ctx, h.Type, h.ID, first.Runtime, tail, saved)
+		if storedRevision != 0 {
+			var observed uint64
+			op, observed, err = store.ResumeStoredCheckpointCompaction(ctx, h.Type, h.ID, first.Runtime, tail)
+			if err == nil && (op == nil || observed != storedRevision) {
+				t.Fatal("native stored descriptor lost", observed, storedRevision)
+			}
+		} else {
+			op, err = store.ResumeCheckpointCompaction(ctx, h.Type, h.ID, first.Runtime, tail, saved)
+		}
 		if err != nil || op.Phase() != "renew" {
 			t.Fatal("native renewal resume failed", err)
 		}
@@ -197,6 +212,12 @@ func checkpointArchiveScenario(t *testing.T, ctx context.Context, seed uint64, c
 		if !verificationRenewed || verifyBatches != 8 {
 			t.Fatal("native private progress restarted", verificationRenewed, verifyBatches)
 		}
+		if storedRevision != 0 {
+			if err := store.DeleteCompactionCheckpoint(ctx, h.Type, h.ID, first.Runtime, tail, storedRevision); err != nil {
+				t.Fatal(err)
+			}
+			t.Logf("NATIVE_STORED_COMPACTION revision=%d all_peer_restart=true fresh_kv_adapter=true deletion_confirmed=true", storedRevision)
+		}
 		t.Logf("NATIVE_BOUND_COMPACTION renewal_batches=%d verification_batches=%d saved_bytes=%d old_reader_preserved=true expired_old_intents_swept=true", renewBatches, verifyBatches, len(saved))
 	} else {
 		if err = store.CompactCheckpoint(ctx, h.Type, h.ID, first.Runtime, tail); err != nil {
@@ -205,6 +226,12 @@ func checkpointArchiveScenario(t *testing.T, ctx context.Context, seed uint64, c
 	}
 	if reopen != nil {
 		store = reopen()
+	}
+	if config.CompactionCheckpoints != nil {
+		op, rev, err := store.ResumeStoredCheckpointCompaction(ctx, h.Type, h.ID, first.Runtime, tail)
+		if err != nil || op != nil || rev != 0 {
+			t.Fatal("deleted descriptor resurrected after restart", rev, err)
+		}
 	}
 	if err = store.CompactCheckpoint(ctx, h.Type, h.ID, first.Runtime, tail); err != nil {
 		t.Fatal("idempotent compact", err)

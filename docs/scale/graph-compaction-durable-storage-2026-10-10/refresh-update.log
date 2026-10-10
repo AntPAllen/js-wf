@@ -1,0 +1,17 @@
+=== RUN   TestGraphCompactionStoredCheckpointCASAndRecovery
+=== RUN   TestGraphCompactionStoredCheckpointCASAndRecovery/json/stale-writer
+    graph_compaction_storage_test.go:167: old writer overwrote newer progress <nil>
+=== RUN   TestGraphCompactionStoredCheckpointCASAndRecovery/json/stale-read
+    graph_compaction_storage_test.go:258: stale read overwrote new descriptor <nil>
+=== RUN   TestGraphCompactionStoredCheckpointCASAndRecovery/protobuf-v1/stale-writer
+    graph_compaction_storage_test.go:167: old writer overwrote newer progress <nil>
+=== RUN   TestGraphCompactionStoredCheckpointCASAndRecovery/protobuf-v1/stale-read
+    graph_compaction_storage_test.go:258: stale read overwrote new descriptor <nil>
+--- FAIL: TestGraphCompactionStoredCheckpointCASAndRecovery (0.69s)
+    --- FAIL: TestGraphCompactionStoredCheckpointCASAndRecovery/json/stale-writer (0.18s)
+    --- FAIL: TestGraphCompactionStoredCheckpointCASAndRecovery/json/stale-read (0.14s)
+    --- FAIL: TestGraphCompactionStoredCheckpointCASAndRecovery/protobuf-v1/stale-writer (0.18s)
+    --- FAIL: TestGraphCompactionStoredCheckpointCASAndRecovery/protobuf-v1/stale-read (0.17s)
+FAIL
+FAIL	js-wf/journal	0.703s
+FAIL

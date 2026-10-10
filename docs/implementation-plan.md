@@ -1,5 +1,32 @@
 # JetStream Durable Workflow Runtime — Implementation Plan
 
+## Durable journal compaction descriptor storage — 2026-10-10
+
+Journal graph configuration now accepts an optional dedicated revision-CAS
+storage port. Save creates/updates exact observed revisions; stored resume checks
+identity, canonical source and expiry, then restarts all private verification.
+Pending renewal retains its original input/requested expiry. Delete targets only
+an observed revision. Lost replies return Unknown without retries or readback;
+CAS conflicts remain Stale. Storage does not provide lease ownership or a proof.
+[Evidence](scale/graph-compaction-durable-storage-2026-10-10/README.md).
+
+All36 JSON/protobuf storage controls pass under race7.869s after restoring four
+bypasses. Refreshing update/delete revisions fails4/2 controls, skipping expiry
+fails2, and retrying uncertain writes fails8. The combined36+40 binding+11 malformed
+controls and native R1/R3 selection passes91.469s. Native cases load pending input
+from file-backed KV through fresh adapters after all-peer same-store restart,
+complete renewal/verification, and confirm deletion survives another restart.
+All853 common pins pass9.485s. An earlier R3 KV metadata lookup failed120s;
+its log remains retained. Bounded read-only metadata lookup passes in the later
+run, which needed no retry and does not establish that failure's server cause.
+
+Worker adoption remains incomplete: release its delivery reader before capturing
+staging authority and resume stored maintenance before opening a new reader,
+then persist batch/renewal input under the existing owner and revision checks.
+The current worker still has ephemeral progress and a whole15-second parent.
+Public admission stays closed, collection stays off, actual100000-entry acceptance
+remains failed, and original campaign/majority/soak/rollout gates remain open.
+
 ## Worker schedules archive intent renewal between batches — 2026-10-10
 
 Worker archive maintenance now schedules renewal with one third of IntentTTL

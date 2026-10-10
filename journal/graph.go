@@ -50,6 +50,9 @@ type GraphConfig struct {
 	// ArchiveCheckpoints selects a new isolated v6 cursor with logical archive
 	// offsets. It requires CheckpointIndex and does not import existing stores.
 	ArchiveCheckpoints bool
+	// CompactionCheckpoints optionally stores unpublished staging descriptors in
+	// a dedicated revision-CAS namespace. It does not enable worker recovery.
+	CompactionCheckpoints CompactionCheckpointPort
 }
 
 type GraphStore struct{ cfg GraphConfig }

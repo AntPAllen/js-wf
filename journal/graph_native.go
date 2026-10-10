@@ -20,16 +20,17 @@ type NativeGraphConfig struct {
 	ObjectBucket    string
 	// ExpectedReplicas optionally requires both stores to have this replica count.
 	// Zero accepts the adapter's structurally safe positive replica counts.
-	ExpectedReplicas   int
-	Now                func() time.Time
-	PinTTL             time.Duration
-	IntentTTL          time.Duration
-	Encoding           Encoding
-	PayloadReadLimit   int
-	CanonicalStarts    bool
-	CanonicalSignals   bool
-	CheckpointIndex    bool
-	ArchiveCheckpoints bool
+	ExpectedReplicas      int
+	Now                   func() time.Time
+	PinTTL                time.Duration
+	IntentTTL             time.Duration
+	Encoding              Encoding
+	PayloadReadLimit      int
+	CanonicalStarts       bool
+	CanonicalSignals      bool
+	CheckpointIndex       bool
+	ArchiveCheckpoints    bool
+	CompactionCheckpoints CompactionCheckpointPort
 }
 
 var nativeGraphName = regexp.MustCompile(`^[A-Za-z0-9_-]+$`)
@@ -98,5 +99,5 @@ func OpenNativeGraphStore(ctx context.Context, js jetstream.JetStream, cfg Nativ
 	if err != nil {
 		return nil, err
 	}
-	return NewGraphStore(GraphConfig{Protocol: graphpublication.Protocol{Port: port}, Now: cfg.Now, PinTTL: cfg.PinTTL, IntentTTL: cfg.IntentTTL, Encoding: cfg.Encoding, PayloadReadLimit: cfg.PayloadReadLimit, CanonicalStarts: cfg.CanonicalStarts, CanonicalSignals: cfg.CanonicalSignals, CheckpointIndex: cfg.CheckpointIndex, ArchiveCheckpoints: cfg.ArchiveCheckpoints})
+	return NewGraphStore(GraphConfig{Protocol: graphpublication.Protocol{Port: port}, Now: cfg.Now, PinTTL: cfg.PinTTL, IntentTTL: cfg.IntentTTL, Encoding: cfg.Encoding, PayloadReadLimit: cfg.PayloadReadLimit, CanonicalStarts: cfg.CanonicalStarts, CanonicalSignals: cfg.CanonicalSignals, CheckpointIndex: cfg.CheckpointIndex, ArchiveCheckpoints: cfg.ArchiveCheckpoints, CompactionCheckpoints: cfg.CompactionCheckpoints})
 }

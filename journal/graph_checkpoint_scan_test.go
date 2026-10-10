@@ -21,6 +21,7 @@ import (
 type checkpointScanFixtureOptions struct {
 	indexed bool
 	archive bool
+	storage journal.CompactionCheckpointPort
 	wrap    func(*checkpointCostPort) graphpublication.Port
 }
 
@@ -40,7 +41,7 @@ func checkpointScanFixture(t *testing.T, encoding journal.Encoding, completion [
 		protocol.Port = option.wrap(port)
 	}
 	now := time.Unix(1000, 0)
-	store, err := journal.NewGraphStore(journal.GraphConfig{Protocol: protocol, Encoding: encoding, Now: func() time.Time { return now }, PinTTL: 4 * time.Second, CanonicalStarts: option.indexed, CanonicalSignals: option.indexed, CheckpointIndex: option.indexed, ArchiveCheckpoints: option.archive})
+	store, err := journal.NewGraphStore(journal.GraphConfig{Protocol: protocol, Encoding: encoding, Now: func() time.Time { return now }, PinTTL: 4 * time.Second, CanonicalStarts: option.indexed, CanonicalSignals: option.indexed, CheckpointIndex: option.indexed, ArchiveCheckpoints: option.archive, CompactionCheckpoints: option.storage})
 	if err != nil {
 		t.Fatal(err)
 	}

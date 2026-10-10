@@ -104,6 +104,10 @@ func nativeCheckpointArchiveFixture(t *testing.T, ctx context.Context, replicas 
 	if err != nil {
 		t.Fatal(err)
 	}
+	progressKV, err := js.CreateKeyValue(ctx, jetstream.KeyValueConfig{Bucket: "ARCHIVE_PROGRESS", Replicas: replicas, Storage: jetstream.FileStorage, MaxValueSize: journal.MaxCompactionCheckpointBytes})
+	if err != nil {
+		t.Fatal(err)
+	}
 	now := time.Now().UTC()
 	cfg := journal.NativeGraphConfig{AuthorityStream: "ARCHIVE_AUTH", AuthorityPrefix: "wf.graph.archive", ObjectBucket: "ARCHIVE_OBJECTS", ExpectedReplicas: replicas, CanonicalStarts: true, CanonicalSignals: true, CheckpointIndex: true, ArchiveCheckpoints: true, Now: func() time.Time { return now }, PinTTL: 3 * time.Hour, IntentTTL: time.Second}
 	configs, err := journal.NativeGraphStreamConfigs(cfg, replicas)
@@ -124,7 +128,7 @@ func nativeCheckpointArchiveFixture(t *testing.T, ctx context.Context, replicas 
 		t.Fatal(err)
 	}
 	port := &archiveReopenPort{nativePort}
-	config := journal.GraphConfig{Protocol: graphpublication.Protocol{Port: port}, CanonicalStarts: true, CanonicalSignals: true, CheckpointIndex: true, ArchiveCheckpoints: true, Now: cfg.Now, PinTTL: cfg.PinTTL, IntentTTL: cfg.IntentTTL}
+	config := journal.GraphConfig{Protocol: graphpublication.Protocol{Port: port}, CanonicalStarts: true, CanonicalSignals: true, CheckpointIndex: true, ArchiveCheckpoints: true, Now: cfg.Now, PinTTL: cfg.PinTTL, IntentTTL: cfg.IntentTTL, CompactionCheckpoints: journal.NewCompactionCheckpointPort(progressKV)}
 	reopen := func() *journal.GraphStore {
 		keys, err := port.RootKeys(ctx)
 		if err != nil || len(keys) != 1 {
@@ -150,6 +154,26 @@ func nativeCheckpointArchiveFixture(t *testing.T, ctx context.Context, replicas 
 		if err != nil {
 			t.Fatal(err)
 		}
+		// Metadata reads after all-peer restart can lose one response. Bound each
+		// read-only lookup, retaining the original whole-fixture deadline.
+		for attempts := 1; ; attempts++ {
+			lookupCtx, stopLookup := context.WithTimeout(ctx, 3*time.Second)
+			progressKV, err = js.KeyValue(lookupCtx, "ARCHIVE_PROGRESS")
+			stopLookup()
+			if err == nil {
+				break
+			}
+			t.Logf("NATIVE_PROGRESS_LOOKUP_RETRY attempt=%d error=%v", attempts, err)
+			if ctx.Err() != nil {
+				t.Fatal(ctx.Err())
+			}
+			select {
+			case <-ctx.Done():
+				t.Fatal(ctx.Err())
+			case <-time.After(100 * time.Millisecond):
+			}
+		}
+		cfg.CompactionCheckpoints = journal.NewCompactionCheckpointPort(progressKV)
 		store, err := journal.OpenNativeGraphStore(ctx, js, cfg)
 		if err != nil {
 			t.Fatal(err)
