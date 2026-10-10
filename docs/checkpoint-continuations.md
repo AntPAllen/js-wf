@@ -1,12 +1,33 @@
 # Materialized SDK checkpoints with named continuations
 
-Status: continuation contract, SDK cursor foundation, bounded frame codec and
-SDK capture/restore, archive/runtime publication and prefix-free journal reads.
-SDK Continue publication and worker stage dispatch, suffix resume, boundary
-compaction and handoff are implemented. Full crash/restart and retirement gates remain open. Complete-history offline
-stage replay is implemented with focused/model/real-journal checks below.
-This document preserves the plan's checkpoint requirement; it does not count
-as a completed checkpoint feature.
+Status: SDK continuation publication, named-stage dispatch, checkpoint restore,
+suffix resume, compaction and handoff are implemented. Public canonical graph
+continuation admission remains closed and production collection remains off.
+The source-qualified component results below do not complete the checkpoint
+feature or the original implementation plan.
+
+## Current canonical graph evidence — 2026-10-10
+
+Internal migration tests register stages after worker construction. They use
+production SDK frames, owned graph storage and worker delivery code; this test
+registration does not make `WithGraphJournal` plus `WithContinuations` available
+for deployment.
+
+| Boundary | Verified scope | Evidence |
+| --- | --- | --- |
+| Bounded restore | Native R1/R3 domain, 131 earlier encoded bodies unavailable; owned anchor/suffix references, reader refresh and one terminal outcome | [Reader refresh](scale/graph-reader-refresh-2026-10-09/README.md) |
+| Failed child | Eight native race cases: R1/R3 domain × live/archive × cached/buffered failure; exact child error, two parent checkpoints, one child execution and reclaimed child terminal receipts | [Frozen d504a33](scale/graph-d504-full-qualification-2026-10-10/README.md) |
+| Pending child | Eight native race cases: R1/R3 domain × live/archive × success/failure; unresolved promise in two frames, actual suspension, repaired lost wakeup, immutable logical prefix and one child execution | [Frozen 0bf850c](scale/graph-continuation-pending-child-2026-10-10/README.md) |
+| Process recovery | Three worker cuts plus SIGKILL of all three server processes before persisted-store restart; exact killed dispatch sequence ACKed within30 seconds | [All-server SIGKILL](scale/graph-continuation-all-server-kill-2026-10-09/README.md) |
+| Absolute entry limit | Four native R1/R3 × live/archive controls at a private16-entry budget, with the terminal slot reserved; production100,000-entry cap unchanged | [Limit boundary](scale/graph-continuation-global-limit-2026-10-09/README.md) |
+
+Each result applies to its recorded source and test boundary. The complete
+current simulation pipeline remains pending independently. Full successful-child
+archive/retention and cancellation matrices, arbitrary fault interleavings,
+VM/power/storage loss, the actual100,000-entry boundary, canonical offline
+replay/import/rollout and public/default admission remain open. v1 children run
+independently when their parent is cancelled; propagation is a separate v2
+feature. Earlier component sections below retain their historical source scope.
 
 ## Bounded canonical resume component — 2026-10-09
 
@@ -32,8 +53,10 @@ into the same append as the frame. The worker resolver moves the reference to th
 completion index. Native R1/R3-domain race controls reject unowned/staged/forged
 sources and read copied bytes from fresh completion pins with earlier encoded
 bodies unavailable. [Evidence and remaining materialization scope](scale/graph-checkpoint-materialization-2026-10-09/README.md).
-The full worker prefix/reference loading, pending-child provenance, actual archival
-compaction and survival through physical prefix collection still require migration.
+At this component's recorded source, full worker prefix/reference loading,
+pending-child provenance and archival collection still required migration. The
+later source-qualified results above cover selected bounded restore and collection
+boundaries; broader migration and admission remain open.
 
 ## Canonical graph migration status — 2026-10-09
 
@@ -47,9 +70,10 @@ its frames through `wf.Continue`; separate recovery controls cover explicit lost
 wakeups and a fixture with an unpublished pointer. [Evidence and limits](scale/graph-unpublished-checkpoint-recovery-2026-10-09/README.md).
 
 The legacy archive/runtime implementation described below does not establish
-canonical prefix compaction or materialized payload ownership. Those migrations,
-bounded worker references, full audit/offline/import/v5 deployment, native process
-kill/failure/limit qualification and original broader gates remain required.
+canonical prefix compaction or materialized payload ownership. Selected later
+canonical boundaries are recorded above. Full audit/offline/import/deployment,
+the remaining native fault/retention/limit matrices and original broader gates
+remain required.
 
 ## Execution contract
 
