@@ -152,9 +152,7 @@ func (s *CompactionStage) Advance(ctx context.Context, maxRecords uint64) (Prepa
 	if s.err != nil {
 		return PreparedCompaction{}, false, s.err
 	}
-	if s.renewal != nil {
-		return PreparedCompaction{}, false, ErrConflict
-	}
+	
 	if maxRecords == 0 {
 		return PreparedCompaction{}, false, errors.New("positive compaction record budget required")
 	}

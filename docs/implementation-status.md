@@ -1,5 +1,38 @@
 # Implementation status against the supplied plan
 
+## Paused staging now renews intents and resumes renewed checkpoints — 2026-10-10
+
+`CompactionStage.BeginIntentRenewal` freezes staging, overlapping renewal and
+checkpoint emission until all publication scopes are extended. Full success
+adopts the new expiry; renewal exposes no prepared plan or content certificate.
+In-batch errors poison the old stage. Fresh Resume from the saved pre-renewal
+checkpoint can reconcile the exact requested expiry before the old deadline.
+Successful descriptors retain renewed expiry under the unchanged staging schema.
+[Development evidence](scale/graph-compaction-stage-renewal-2026-10-10/README.md).
+
+Fourteen staging controls cover pre/post renewal resumption, repeated/empty/
+completed staging, cancellation, dropped/lost renewals and uploads, expiry,
+collection and append. Two more controls renew valid grants for forged prefixes;
+commit rejects both without publishing. The restored16-control selection passes
+under race2.478s. Staging/checkpoint freeze, expiry adoption and content comparison
+bypasses fail13/13/11/2 controls. Healthy prefix4 examines42 scopes/renews8;
+independent completion compares12 records/validates19 nodes. All853 saved pins
+pass unchanged9.599s. The broader compaction/native race selection passes58.020s
+before the two forgery controls were added; those run in the restored16 selection.
+
+Both existing and renewed native R1/R3 restart variants pass. Renewed variants
+resume prefix1 after all embedded peers restart, examine13 scopes/renew2 grants
+one at a time, reload the renewed descriptor and preserve source authority when
+sweeping beyond old expiry. Independent commit checks4 records/6 nodes, preserves
+2 archive/2 live records and reclaims11 old objects with surviving bytes verified.
+Renewal occurs after peer restart; no second restart of renewed metadata or VM/
+power/storage/real clock-jump qualification is claimed. Native45-second parents
+are unchanged. Worker/journal renewal adoption, durable descriptor/expiry binding,
+unknown-renewal recovery, bounded-memory namespace census and long maintenance
+lifetimes remain required. Runtime handoff still has its15-second deadline and
+fixed intent expiry. Actual100000 and all broader original qualification gates
+remain open. Public continuation admission stays closed; production GC stays off.
+
 ## Compaction intent renewal covers the complete frozen publication — 2026-10-10
 
 `BeginCompactionIntentRenewal` now extends all scopes owned by a frozen prepared

@@ -1,0 +1,58 @@
+{
+  "staging-freeze-bypass": {
+    "command": [
+      "go",
+      "test",
+      "-p=1",
+      "./internal/graphpublication",
+      "-run",
+      "^TestGraphCompactionStageRenewalPauseResumeAndFences$",
+      "-count=1",
+      "-v"
+    ],
+    "exit_code": 1,
+    "race": false
+  },
+  "checkpoint-freeze-bypass": {
+    "command": [
+      "go",
+      "test",
+      "-p=1",
+      "./internal/graphpublication",
+      "-run",
+      "^TestGraphCompactionStageRenewalPauseResumeAndFences$",
+      "-count=1",
+      "-v"
+    ],
+    "exit_code": 1,
+    "race": false
+  },
+  "expiry-adoption-bypass": {
+    "command": [
+      "go",
+      "test",
+      "-p=1",
+      "./internal/graphpublication",
+      "-run",
+      "^TestGraphCompactionStageRenewalPauseResumeAndFences$",
+      "-count=1",
+      "-v"
+    ],
+    "exit_code": 1,
+    "race": false
+  },
+  "content-comparison-bypass": {
+    "command": [
+      "go",
+      "test",
+      "-p=1",
+      "./internal/graphpublication",
+      "-run",
+      "^TestGraphCompactionStageRenewalDoesNotCertifyForgedPrefix$",
+      "-count=1",
+      "-v"
+    ],
+    "exit_code": 1,
+    "race": false
+  }
+}

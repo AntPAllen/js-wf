@@ -68,9 +68,7 @@ func (s *CompactionStage) result() PreparedCompaction {
 // Even after an uncertain record error it omits that record and its orphan
 // uploads. A fresh Resume may re-stage it using freshly observed authority.
 func (s *CompactionStage) Checkpoint() ([]byte, error) {
-	if s.renewal != nil {
-		return nil, ErrConflict
-	}
+	
 	result := s.result()
 	v := compactionCheckpoint{CompactionCheckpointSchema, result.destination, result.expected, result.first, s.next, result.expires, s.maxPayloadBytes, result.base, result.publication}
 	if err := validateCompactionCheckpoint(v); err != nil {

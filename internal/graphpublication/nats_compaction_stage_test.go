@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"reflect"
 	"testing"
 	"time"
 
@@ -12,6 +13,14 @@ import (
 )
 
 func TestNativeGraphCompactionStageStoreRestart(t *testing.T) {
+	testNativeGraphCompactionStageStoreRestart(t, false)
+}
+
+func TestNativeGraphCompactionStageRenewalStoreRestart(t *testing.T) {
+	testNativeGraphCompactionStageStoreRestart(t, true)
+}
+
+func testNativeGraphCompactionStageStoreRestart(t *testing.T, renew bool) {
 	for _, replicas := range []int{1, 3} {
 		t.Run(fmt.Sprintf("R%d", replicas), func(t *testing.T) {
 			cluster, authority, c := nativeGraphFixture(t, replicas)
@@ -34,7 +43,11 @@ func TestNativeGraphCompactionStageStoreRestart(t *testing.T) {
 					t.Fatal(err)
 				}
 			}
-			stage, err := p.BeginPrefixCompaction(c, "history", root.Head, 2, 1024, time.Now().Add(time.Hour), nil)
+			oldExpiry := time.Now().UTC().Add(time.Hour)
+			if renew {
+				oldExpiry = time.Now().UTC().Add(time.Minute)
+			}
+			stage, err := p.BeginPrefixCompaction(c, "history", root.Head, 2, 1024, oldExpiry, nil)
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -106,6 +119,53 @@ func TestNativeGraphCompactionStageStoreRestart(t *testing.T) {
 			stage, err = p.ResumePrefixCompaction(c, data)
 			if err != nil || stage.NextIndex() != 1 {
 				t.Fatal(err)
+			}
+			if renew {
+				before, err := port.ReadRoot(c, "history")
+				if err != nil {
+					t.Fatal(err)
+				}
+				nextExpiry := oldExpiry.Add(2 * time.Minute)
+				renewal, err := stage.BeginIntentRenewal(c, func() time.Time { return time.Now().UTC() }, nextExpiry)
+				if err != nil {
+					t.Fatal(err)
+				}
+				for {
+					prior := renewal.ExaminedScopes()
+					done, err := renewal.Advance(c, 1)
+					if err != nil || renewal.ExaminedScopes()-prior > 1 || stage.NextIndex() != 1 {
+						t.Fatal("native renewal exceeded budget", err)
+					}
+					if done {
+						break
+					}
+				}
+				data, err = stage.Checkpoint()
+				if err != nil {
+					t.Fatal(err)
+				}
+				if err = os.WriteFile(file, data, 0o600); err != nil {
+					t.Fatal(err)
+				}
+				stage = nil
+				data, err = os.ReadFile(file)
+				if err != nil {
+					t.Fatal(err)
+				}
+				stage, err = p.ResumePrefixCompaction(c, data)
+				if err != nil || stage.NextIndex() != 1 || !stage.prepared.expires.Equal(nextExpiry) {
+					t.Fatal("native renewed checkpoint lost expiry", err)
+				}
+				// Sweep uses a controlled authority clock beyond the old expiry;
+				// this is no claim about server/VM clock-jump qualification.
+				if _, err = p.SweepWithReaders(c, oldExpiry.Add(time.Second)); err != nil {
+					t.Fatal(err)
+				}
+				after, err := port.ReadRoot(c, "history")
+				if err != nil || !reflect.DeepEqual(before, after) {
+					t.Fatal("old expiry fenced renewed stage", before, after, err)
+				}
+				t.Logf("NATIVE_STAGE_RENEWAL replicas=%d checkpoint_next=1 examined=%d renewed=%d scope_budget=1 root_unchanged_after_old_expiry=true", replicas, renewal.ExaminedScopes(), renewal.RenewedScopes())
 			}
 			var plan PreparedCompaction
 			for {
