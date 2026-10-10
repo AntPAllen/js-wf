@@ -1,0 +1,12 @@
+=== RUN   TestNativeGraphIndexedProfileStoredRenewalFreshWorkerRecovery
+=== RUN   TestNativeGraphIndexedProfileStoredRenewalFreshWorkerRecovery/R1-domain
+    continuation_storage_native_test.go:314: NATIVE_PROFILED_WORKER replicas=1 owner_scan_calls=2 marker_calls=11 static_census_calls=0 preserved_incremental=true
+    continuation_storage_native_test.go:316: NATIVE_STORED_WORKER replicas=1 indexed=true fresh_workers=3 stage_batches=[1 5 0] verify_batches=[0 10 0] renew_batches=[1 2 0] owner_census=[1 1 0] full_census=0 initial_calls=1 stage_calls=1 pending_next=2 source_head_unchanged=true descriptors_after_recovery=0 readers=0
+=== RUN   TestNativeGraphIndexedProfileStoredRenewalFreshWorkerRecovery/R3-domain
+    continuation_storage_native_test.go:314: NATIVE_PROFILED_WORKER replicas=3 owner_scan_calls=2 marker_calls=11 static_census_calls=0 preserved_incremental=true
+    continuation_storage_native_test.go:316: NATIVE_STORED_WORKER replicas=3 indexed=true fresh_workers=3 stage_batches=[1 5 0] verify_batches=[0 10 0] renew_batches=[1 2 0] owner_census=[1 1 0] full_census=0 initial_calls=1 stage_calls=1 pending_next=2 source_head_unchanged=true descriptors_after_recovery=0 readers=0
+--- PASS: TestNativeGraphIndexedProfileStoredRenewalFreshWorkerRecovery (22.15s)
+    --- PASS: TestNativeGraphIndexedProfileStoredRenewalFreshWorkerRecovery/R1-domain (8.03s)
+    --- PASS: TestNativeGraphIndexedProfileStoredRenewalFreshWorkerRecovery/R3-domain (14.11s)
+PASS
+ok  	js-wf/worker	23.235s

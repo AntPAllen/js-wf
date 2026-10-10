@@ -37,6 +37,15 @@ func TestNativeGraphContinuationGlobalLimitAndTerminalSlot(t *testing.T) {
 		budget = parsed
 	}
 	padding := int((budget - 16) / 2)
+	indexed := os.Getenv("WF_GRAPH_CONTINUATION_OWNER_INDEX") == "1"
+	var compactionTTL time.Duration
+	if raw := os.Getenv("WF_GRAPH_CONTINUATION_COMPACTION_TTL"); raw != "" {
+		var err error
+		compactionTTL, err = time.ParseDuration(raw)
+		if err != nil || compactionTTL <= 0 {
+			t.Fatal("invalid explicit compaction lifetime", raw)
+		}
+	}
 	paddingFirst := padding / 2
 	for _, replicas := range []int{1, 3} {
 		for _, archive := range []bool{false, true} {
@@ -86,6 +95,8 @@ func TestNativeGraphContinuationGlobalLimitAndTerminalSlot(t *testing.T) {
 					t.Log("GRAPH_LIMIT_DURABLE storage=file whole_handoff=delivery_context request_bounds_unchanged=true")
 				}
 				cfg := journal.NativeGraphConfig{AuthorityStream: "LIMIT_AUTH", AuthorityPrefix: "wf.graph.limit", ObjectBucket: "LIMIT_OBJECTS", ExpectedReplicas: replicas, CanonicalStarts: true, CanonicalSignals: true, CheckpointIndex: true, ArchiveCheckpoints: archive, CompactionCheckpoints: checkpointStorage}
+				cfg.OwnerScopeIndex, cfg.CompactionIntentTTL = indexed, compactionTTL
+				t.Logf("GRAPH_LIMIT_CONFIG owner_index=%t compaction_ttl=%s default_append_ttl=true", indexed, compactionTTL)
 				configs, err := journal.NativeGraphStreamConfigs(cfg, replicas)
 				if err != nil {
 					t.Fatal(err)
@@ -99,20 +110,24 @@ func TestNativeGraphContinuationGlobalLimitAndTerminalSlot(t *testing.T) {
 				if err != nil {
 					t.Fatal(err)
 				}
-				authority, err := graphpublication.OpenNativeAuthority(ctx, js, cfg.AuthorityStream, cfg.AuthorityPrefix)
+				openAuthority := graphpublication.OpenNativeAuthority
+				if indexed {
+					openAuthority = graphpublication.OpenOwnerIndexedNativeAuthority
+				}
+				authority, err := openAuthority(ctx, js, cfg.AuthorityStream, cfg.AuthorityPrefix)
 				if err != nil {
 					t.Fatal(err)
 				}
 				var profile *graphLimitProfilePort
 				if os.Getenv("WF_GRAPH_LIMIT_PORT_PROFILE") == "1" {
-					port, err := graphpublication.OpenNativePort(ctx, authority, cfg.ObjectBucket)
+					var port graphpublication.Port
+					profile, port, err = openGraphLimitProfile(ctx, authority, cfg.ObjectBucket, indexed)
 					if err != nil {
 						t.Fatal(err)
 					}
-					profile = &graphLimitProfilePort{NativePort: port, totals: make(map[string]graphLimitPortTiming)}
 					// OpenNativeGraphStore above still performs native configuration
 					// admission. This test-only decorator preserves the same settings.
-					graph, err = journal.NewGraphStore(journal.GraphConfig{Protocol: graphpublication.Protocol{Port: profile}, Now: cfg.Now, PinTTL: cfg.PinTTL, IntentTTL: cfg.IntentTTL, CompactionIntentTTL: cfg.CompactionIntentTTL, Encoding: cfg.Encoding, PayloadReadLimit: cfg.PayloadReadLimit, CanonicalStarts: cfg.CanonicalStarts, CanonicalSignals: cfg.CanonicalSignals, CheckpointIndex: cfg.CheckpointIndex, ArchiveCheckpoints: cfg.ArchiveCheckpoints, CompactionCheckpoints: cfg.CompactionCheckpoints})
+					graph, err = journal.NewGraphStore(journal.GraphConfig{Protocol: graphpublication.Protocol{Port: port}, Now: cfg.Now, PinTTL: cfg.PinTTL, IntentTTL: cfg.IntentTTL, CompactionIntentTTL: cfg.CompactionIntentTTL, Encoding: cfg.Encoding, PayloadReadLimit: cfg.PayloadReadLimit, CanonicalStarts: cfg.CanonicalStarts, CanonicalSignals: cfg.CanonicalSignals, CheckpointIndex: cfg.CheckpointIndex, ArchiveCheckpoints: cfg.ArchiveCheckpoints, CompactionCheckpoints: cfg.CompactionCheckpoints})
 					if err != nil {
 						t.Fatal(err)
 					}

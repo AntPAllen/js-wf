@@ -1,5 +1,31 @@
 # JetStream Durable Workflow Runtime — Implementation Plan
 
+## Indexed full-entry fixture and profiler configuration — 2026-10-10
+
+The native global-entry-limit fixture now accepts explicit owner-index and
+compaction-lifetime options, selecting matching newly provisioned authority
+stores/adapters. Its profiler retains incremental owner discovery in indexed
+mode; the legacy profiler does not advertise indexed completeness. Payload,
+expiry, lease and entry-cap production defaults are unchanged.
+[Evidence](scale/graph-indexed-limit-preparation-2026-10-10/README.md).
+
+Profiled R1/R3 stored renewal recovery passes race 23.235 seconds, with two owner
+scans per case, marker validation, no static/full census, three fresh workers,
+independent verification and one next-stage call. Hiding the capability fails
+both cases; exact source restoration passes race 36.451 seconds. Indexed,
+durable, profiled private-budget-20 cases pass R1/R3 race 58.021 seconds with
+explicit three-hour compaction lifetime, two SDK checkpoints, terminal slot19,
+zero forbidden effects and prefix calls1/1. Legacy profiler R1 passes race
+17.300 seconds. Source-bound review passes.
+
+These are small configuration and recovery controls. Actual production-cap
+100,000 entries are not qualified or launched by this preparation. The separate
+100,000-native-grant diagnostic remains live under its original source and
+invocation; these worker-only test changes do not alter that frozen package.
+Next: inspect complete native grant renewal before the multi-hour actual-entry
+run using indexed durable stores and an explicit measured lifetime budget.
+Original broad gates remain open; admission and collection remain off.
+
 ## Native 10,000-grant diagnostic; durable terminal capture — 2026-10-10
 
 The R1 10,000-orphan test logs PASS, full audit/renewal of 10,006 grants, 10,007

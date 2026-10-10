@@ -1,0 +1,66 @@
+=== RUN   TestNativeGraphContinuationGlobalLimitAndTerminalSlot
+=== RUN   TestNativeGraphContinuationGlobalLimitAndTerminalSlot/R1/archive=true
+    graph_continuation_limit_test.go:95: GRAPH_LIMIT_DURABLE storage=file whole_handoff=delivery_context request_bounds_unchanged=true
+    graph_continuation_limit_test.go:99: GRAPH_LIMIT_CONFIG owner_index=true compaction_ttl=3h0m0s default_append_ttl=true
+    graph_continuation_limit_test.go:160: GRAPH_LIMIT_PADDING completed=1 requested=2 budget=20
+    graph_continuation_limit_test.go:152: GRAPH_LIMIT_PORT_PROFILE from=0 to=1 wall_ns=643007706 operations={"CASBlob":{"calls":12,"errors":0,"total_ns":106615357},"CASRoot":{"calls":4,"errors":0,"total_ns":42166833},"Get":{"calls":12,"errors":0,"total_ns":42521640},"Put":{"calls":6,"errors":0,"total_ns":100961033},"ReadBlob":{"calls":18,"errors":0,"total_ns":116202967},"ReadRoot":{"calls":12,"errors":0,"total_ns":212845599}}
+    graph_continuation_limit_test.go:208: CONTINUATION_PHASE operation=continuation_checkpoint_verify_batch index=7 duration=405.325812ms error=""
+    graph_continuation_limit_test.go:208: CONTINUATION_PHASE operation=continuation_checkpoint_publish index=6 duration=437.120625ms error=""
+    graph_continuation_limit_test.go:208: CONTINUATION_PHASE operation=continuation_archive_delivery_release index=6 duration=53.116497ms error=""
+    graph_continuation_limit_test.go:208: CONTINUATION_PHASE operation=continuation_archive_confirm_batch index=6 duration=119.340878ms error=""
+    graph_continuation_limit_test.go:208: CONTINUATION_PHASE operation=continuation_archive_checkpoint_save index=6 duration=4.593997ms error=""
+    graph_continuation_limit_test.go:208: CONTINUATION_PHASE operation=continuation_archive_stage_batch index=6 duration=1.478176367s error=""
+    graph_continuation_limit_test.go:208: CONTINUATION_PHASE operation=continuation_archive_checkpoint_save index=6 duration=1.816349ms error=""
+    graph_continuation_limit_test.go:208: CONTINUATION_PHASE operation=continuation_archive_verify_batch index=6 duration=714.616208ms error=""
+    graph_continuation_limit_test.go:208: CONTINUATION_PHASE operation=continuation_archive_checkpoint_delete index=6 duration=589.726µs error=""
+    graph_continuation_limit_test.go:208: CONTINUATION_PHASE operation=continuation_archive index=6 duration=2.523341653s error=""
+    graph_continuation_limit_test.go:208: CONTINUATION_PHASE operation=continuation_publish index=0 duration=3.520146786s error=""
+    graph_continuation_limit_test.go:160: GRAPH_LIMIT_PADDING completed=2 requested=2 budget=20
+    graph_continuation_limit_test.go:152: GRAPH_LIMIT_PORT_PROFILE from=1 to=2 wall_ns=714640212 operations={"CASBlob":{"calls":10,"errors":0,"total_ns":83546204},"CASRoot":{"calls":4,"errors":0,"total_ns":88247861},"Get":{"calls":9,"errors":0,"total_ns":40126656},"Put":{"calls":5,"errors":0,"total_ns":72822741},"ReadBlob":{"calls":15,"errors":0,"total_ns":107939450},"ReadRoot":{"calls":12,"errors":0,"total_ns":288698048}}
+    graph_continuation_limit_test.go:208: CONTINUATION_PHASE operation=continuation_checkpoint_verify_batch index=14 duration=483.143753ms error=""
+    graph_continuation_limit_test.go:208: CONTINUATION_PHASE operation=continuation_checkpoint_publish index=13 duration=715.917235ms error=""
+    graph_continuation_limit_test.go:208: CONTINUATION_PHASE operation=continuation_archive_delivery_release index=13 duration=33.775629ms error=""
+    graph_continuation_limit_test.go:208: CONTINUATION_PHASE operation=continuation_archive_confirm_batch index=13 duration=114.255853ms error=""
+    graph_continuation_limit_test.go:208: CONTINUATION_PHASE operation=continuation_archive_checkpoint_save index=13 duration=1.769187ms error=""
+    graph_continuation_limit_test.go:208: CONTINUATION_PHASE operation=continuation_archive_stage_batch index=13 duration=2.224754003s error=""
+    graph_continuation_limit_test.go:208: CONTINUATION_PHASE operation=continuation_archive_checkpoint_save index=13 duration=2.193121ms error=""
+    graph_continuation_limit_test.go:208: CONTINUATION_PHASE operation=continuation_archive_verify_batch index=13 duration=1.093960892s error=""
+    graph_continuation_limit_test.go:208: CONTINUATION_PHASE operation=continuation_archive_checkpoint_delete index=13 duration=427.128µs error=""
+    graph_continuation_limit_test.go:208: CONTINUATION_PHASE operation=continuation_archive index=13 duration=3.612722076s error=""
+    graph_continuation_limit_test.go:208: CONTINUATION_PHASE operation=continuation_publish index=0 duration=4.746443348s error=""
+    graph_continuation_limit_test.go:378: GRAPH_CONTINUATION_LIMIT budget=20 entries=20 archive=true checkpoints=2 effects=0 rejected_request=must_not_run terminal_slot=19 prefix_stage_calls=1/1 production_cap=false padding_operations=2
+=== RUN   TestNativeGraphContinuationGlobalLimitAndTerminalSlot/R3/archive=true
+    graph_continuation_limit_test.go:95: GRAPH_LIMIT_DURABLE storage=file whole_handoff=delivery_context request_bounds_unchanged=true
+    graph_continuation_limit_test.go:99: GRAPH_LIMIT_CONFIG owner_index=true compaction_ttl=3h0m0s default_append_ttl=true
+    graph_continuation_limit_test.go:160: GRAPH_LIMIT_PADDING completed=1 requested=2 budget=20
+    graph_continuation_limit_test.go:152: GRAPH_LIMIT_PORT_PROFILE from=0 to=1 wall_ns=1263120167 operations={"CASBlob":{"calls":12,"errors":0,"total_ns":257535952},"CASRoot":{"calls":4,"errors":0,"total_ns":80250315},"Get":{"calls":12,"errors":0,"total_ns":174534823},"Put":{"calls":6,"errors":0,"total_ns":256049783},"ReadBlob":{"calls":18,"errors":0,"total_ns":259839015},"ReadRoot":{"calls":12,"errors":0,"total_ns":203535479}}
+    graph_continuation_limit_test.go:208: CONTINUATION_PHASE operation=continuation_checkpoint_verify_batch index=7 duration=514.893138ms error=""
+    graph_continuation_limit_test.go:208: CONTINUATION_PHASE operation=continuation_checkpoint_publish index=6 duration=593.281805ms error=""
+    graph_continuation_limit_test.go:208: CONTINUATION_PHASE operation=continuation_archive_delivery_release index=6 duration=27.438794ms error=""
+    graph_continuation_limit_test.go:208: CONTINUATION_PHASE operation=continuation_archive_confirm_batch index=6 duration=106.977319ms error=""
+    graph_continuation_limit_test.go:208: CONTINUATION_PHASE operation=continuation_archive_checkpoint_save index=6 duration=39.495247ms error=""
+    graph_continuation_limit_test.go:208: CONTINUATION_PHASE operation=continuation_archive_stage_batch index=6 duration=2.006949884s error=""
+    graph_continuation_limit_test.go:208: CONTINUATION_PHASE operation=continuation_archive_checkpoint_save index=6 duration=3.604956ms error=""
+    graph_continuation_limit_test.go:208: CONTINUATION_PHASE operation=continuation_archive_verify_batch index=6 duration=752.320527ms error=""
+    graph_continuation_limit_test.go:208: CONTINUATION_PHASE operation=continuation_archive_checkpoint_delete index=6 duration=27.022921ms error=""
+    graph_continuation_limit_test.go:208: CONTINUATION_PHASE operation=continuation_archive index=6 duration=3.145883026s error=""
+    graph_continuation_limit_test.go:208: CONTINUATION_PHASE operation=continuation_publish index=0 duration=4.35769927s error=""
+    graph_continuation_limit_test.go:160: GRAPH_LIMIT_PADDING completed=2 requested=2 budget=20
+    graph_continuation_limit_test.go:152: GRAPH_LIMIT_PORT_PROFILE from=1 to=2 wall_ns=788877810 operations={"CASBlob":{"calls":10,"errors":0,"total_ns":156516843},"CASRoot":{"calls":4,"errors":0,"total_ns":52273262},"Get":{"calls":9,"errors":0,"total_ns":37815546},"Put":{"calls":5,"errors":0,"total_ns":128501510},"ReadBlob":{"calls":15,"errors":0,"total_ns":169273469},"ReadRoot":{"calls":12,"errors":0,"total_ns":185984993}}
+    graph_continuation_limit_test.go:208: CONTINUATION_PHASE operation=continuation_checkpoint_verify_batch index=14 duration=436.589791ms error=""
+    graph_continuation_limit_test.go:208: CONTINUATION_PHASE operation=continuation_checkpoint_publish index=13 duration=640.99225ms error=""
+    graph_continuation_limit_test.go:208: CONTINUATION_PHASE operation=continuation_archive_delivery_release index=13 duration=32.118242ms error=""
+    graph_continuation_limit_test.go:208: CONTINUATION_PHASE operation=continuation_archive_confirm_batch index=13 duration=134.371816ms error=""
+    graph_continuation_limit_test.go:208: CONTINUATION_PHASE operation=continuation_archive_checkpoint_save index=13 duration=3.874715ms error=""
+    graph_continuation_limit_test.go:208: CONTINUATION_PHASE operation=continuation_archive_stage_batch index=13 duration=2.558431572s error=""
+    graph_continuation_limit_test.go:208: CONTINUATION_PHASE operation=continuation_archive_checkpoint_save index=13 duration=5.698885ms error=""
+    graph_continuation_limit_test.go:208: CONTINUATION_PHASE operation=continuation_archive_verify_batch index=13 duration=1.10190862s error=""
+    graph_continuation_limit_test.go:208: CONTINUATION_PHASE operation=continuation_archive_checkpoint_delete index=13 duration=974.41µs error=""
+    graph_continuation_limit_test.go:208: CONTINUATION_PHASE operation=continuation_archive index=13 duration=3.992461484s error=""
+    graph_continuation_limit_test.go:208: CONTINUATION_PHASE operation=continuation_publish index=0 duration=5.114389767s error=""
+    graph_continuation_limit_test.go:378: GRAPH_CONTINUATION_LIMIT budget=20 entries=20 archive=true checkpoints=2 effects=0 rejected_request=must_not_run terminal_slot=19 prefix_stage_calls=1/1 production_cap=false padding_operations=2
+--- PASS: TestNativeGraphContinuationGlobalLimitAndTerminalSlot (56.94s)
+    --- PASS: TestNativeGraphContinuationGlobalLimitAndTerminalSlot/R1/archive=true (25.06s)
+    --- PASS: TestNativeGraphContinuationGlobalLimitAndTerminalSlot/R3/archive=true (31.88s)
+PASS
+ok  	js-wf/worker	58.021s

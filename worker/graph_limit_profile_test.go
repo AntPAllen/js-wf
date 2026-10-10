@@ -86,3 +86,40 @@ func (p *graphLimitProfilePort) Get(ctx context.Context, link retainedgraph.Link
 }
 
 var _ graphpublication.Port = (*graphLimitProfilePort)(nil)
+
+// Only explicitly indexed adapters expose complete owner discovery. The legacy
+// profiler must keep its original interface set.
+type graphLimitIndexedProfilePort struct {
+	*graphLimitProfilePort
+	indexed *graphpublication.OwnerIndexedNativePort
+}
+
+func (p *graphLimitIndexedProfilePort) BlobKeysForOwner(ctx context.Context, owner string) ([]string, error) {
+	return graphLimitMeasure(p.graphLimitProfilePort, "BlobKeysForOwner", func() ([]string, error) { return p.indexed.BlobKeysForOwner(ctx, owner) })
+}
+func (p *graphLimitIndexedProfilePort) ValidateOwnerScope(ctx context.Context, owner, key string) error {
+	_, err := graphLimitMeasure(p.graphLimitProfilePort, "ValidateOwnerScope", func() (struct{}, error) { return struct{}{}, p.indexed.ValidateOwnerScope(ctx, owner, key) })
+	return err
+}
+func (p *graphLimitIndexedProfilePort) BeginOwnerScopeScan(ctx context.Context, owner string) (graphpublication.OwnerScopeScan, error) {
+	return graphLimitMeasure(p.graphLimitProfilePort, "BeginOwnerScopeScan", func() (graphpublication.OwnerScopeScan, error) { return p.indexed.BeginOwnerScopeScan(ctx, owner) })
+}
+
+func openGraphLimitProfile(ctx context.Context, authority *graphpublication.NativeAuthority, bucket string, indexed bool) (*graphLimitProfilePort, graphpublication.Port, error) {
+	if indexed {
+		port, err := graphpublication.OpenOwnerIndexedNativePort(ctx, authority, bucket)
+		if err != nil {
+			return nil, nil, err
+		}
+		profile := &graphLimitProfilePort{NativePort: port.NativePort, totals: make(map[string]graphLimitPortTiming)}
+		return profile, &graphLimitIndexedProfilePort{graphLimitProfilePort: profile, indexed: port}, nil
+	}
+	port, err := graphpublication.OpenNativePort(ctx, authority, bucket)
+	if err != nil {
+		return nil, nil, err
+	}
+	profile := &graphLimitProfilePort{NativePort: port, totals: make(map[string]graphLimitPortTiming)}
+	return profile, profile, nil
+}
+
+var _ graphpublication.OwnerScopeScanPort = (*graphLimitIndexedProfilePort)(nil)

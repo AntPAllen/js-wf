@@ -27,7 +27,15 @@ func TestNativeGraphIndexedStoredRenewalFreshWorkerRecovery(t *testing.T) {
 	testNativeGraphStoredMaintenanceFreshWorkerRecovery(t, true)
 }
 
-func testNativeGraphStoredMaintenanceFreshWorkerRecovery(t *testing.T, indexed bool) {
+func TestNativeGraphIndexedProfileStoredRenewalFreshWorkerRecovery(t *testing.T) {
+	if _, ok := any(&graphLimitProfilePort{}).(graphpublication.OwnerScopePort); ok {
+		t.Fatal("legacy profiler advertises indexed authority")
+	}
+	testNativeGraphStoredMaintenanceFreshWorkerRecovery(t, true, true)
+}
+
+func testNativeGraphStoredMaintenanceFreshWorkerRecovery(t *testing.T, indexed bool, profileArgs ...bool) {
+	profiled := len(profileArgs) > 0 && profileArgs[0]
 	for _, replicas := range []int{1, 3} {
 		t.Run(fmt.Sprintf("R%d-domain", replicas), func(t *testing.T) {
 			cluster, e := testcluster.StartWithDomain(t.TempDir(), replicas, "STOREDWORKER")
@@ -97,6 +105,7 @@ func testNativeGraphStoredMaintenanceFreshWorkerRecovery(t *testing.T, indexed b
 					t.Fatal(e)
 				}
 			}
+			var profiles []*graphLimitProfilePort
 			openStore := func() *journal.GraphStore {
 				t.Helper()
 				readCtx, stop := context.WithTimeout(ctx, 5*time.Second)
@@ -110,6 +119,21 @@ func testNativeGraphStoredMaintenanceFreshWorkerRecovery(t *testing.T, indexed b
 				store, e := journal.OpenNativeGraphStore(readCtx, js, next)
 				if e != nil {
 					t.Fatal(e)
+				}
+				if profiled {
+					authority, e := graphpublication.OpenOwnerIndexedNativeAuthority(readCtx, js, next.AuthorityStream, next.AuthorityPrefix)
+					if e != nil {
+						t.Fatal(e)
+					}
+					core, port, e := openGraphLimitProfile(readCtx, authority, next.ObjectBucket, indexed)
+					if e != nil {
+						t.Fatal(e)
+					}
+					profiles = append(profiles, core)
+					store, e = journal.NewGraphStore(journal.GraphConfig{Protocol: graphpublication.Protocol{Port: port}, Now: next.Now, PinTTL: next.PinTTL, IntentTTL: next.IntentTTL, CompactionIntentTTL: next.CompactionIntentTTL, Encoding: next.Encoding, PayloadReadLimit: next.PayloadReadLimit, CanonicalStarts: next.CanonicalStarts, CanonicalSignals: next.CanonicalSignals, CheckpointIndex: next.CheckpointIndex, ArchiveCheckpoints: next.ArchiveCheckpoints, CompactionCheckpoints: next.CompactionCheckpoints})
+					if e != nil {
+						t.Fatal(e)
+					}
 				}
 				return store
 			}
@@ -275,6 +299,19 @@ func testNativeGraphStoredMaintenanceFreshWorkerRecovery(t *testing.T, indexed b
 			}
 			if indexed && (censusCounts[0] == 0 || censusCounts[1] == 0 || fullCensus.Load() != 0) {
 				t.Fatal("indexed worker did not use owner-filtered discovery", censusCounts, fullCensus.Load())
+			}
+			if profiled {
+				var scans, markers, census uint64
+				for _, core := range profiles {
+					timings := core.snapshot()
+					scans += timings["BeginOwnerScopeScan"].Calls
+					markers += timings["ValidateOwnerScope"].Calls
+					census += timings["BlobKeysForOwner"].Calls
+				}
+				if scans != uint64(censusCounts[0]+censusCounts[1]+censusCounts[2]) || scans != 2 || markers == 0 || census != 0 {
+					t.Fatal("profiler lost incremental discovery", scans, markers, census, censusCounts)
+				}
+				t.Logf("NATIVE_PROFILED_WORKER replicas=%d owner_scan_calls=%d marker_calls=%d static_census_calls=%d preserved_incremental=true", replicas, scans, markers, census)
 			}
 			t.Logf("NATIVE_STORED_WORKER replicas=%d indexed=%t fresh_workers=3 stage_batches=%v verify_batches=%v renew_batches=%v owner_census=%v full_census=%d initial_calls=1 stage_calls=1 pending_next=2 source_head_unchanged=true descriptors_after_recovery=0 readers=0", replicas, indexed, stageCounts, verifyCounts, renewCounts, censusCounts, fullCensus.Load())
 		})
