@@ -19,9 +19,52 @@ Six synchronous/asynchronous legacy/unbound/bound cases and four checkpoint
 legacy/ordinary/child cases pass in development. Disabling only validator
 installation requires three failures: Call, AwaitPromise and selection from a
 real SDK checkpoint's pending-signal frame. [Negative control](disabled-selector.log)
-and [actual receipt](disabled-selector-receipt.json) are preserved. Shared SDK
-and complete corpus/native-export/CLI qualification follow from frozen source;
-this development result is not full qualification. Full offline provenance,
+and [actual receipt](disabled-selector-receipt.json) are preserved. The frozen qualification below verifies SDK, corpus and retained native CLI
+evidence; this component result does not qualify the full implementation plan. Full offline provenance,
 fault/buffered-signal/import/rollout, retention/admission, actual100,000-entry
 boundary, public/default admission, production collection and all broader
 original requirements remain open.
+
+## Frozen qualification accepted — 2026-10-10
+
+Source `02c3506b76b326237c00987f6f31994f833fe0b9`: the independent
+[executed reviewer](review.json) verifies all 3,321 selected Git inputs,
+unchanged source inventories and five retained matching binaries. The complete
+SDK race suite passes all 62 top tests, including six direct child selection
+and four SDK checkpoint restoration controls. A source overlay removing only
+the selection hook causes exactly the three required failures; metadata checks
+remain enabled. CLI race controls and the legacy continuation plugin pass.
+All 106 offline CLI invocations meet their expected result/error: 48 healthy
+native replays, 28 missing-object controls, 20 missing-stage controls, four new
+malformed-binding rejections, four required old-reader acceptances and two
+valid diagnostic controls. No effect marker appears. Native bundles remain
+bound to independently qualified producer `ccc8f19`; no native tests repeated.
+
+### Corpus runner mistakes preserved
+
+The initial selector `TestSavedSeedReplayCorpus` exits zero but selects **zero
+tests**. It is explicitly invalid evidence. The supplemental command uses the
+actual `TestPinnedRegressionCorpus` suite in the same retained source/binary;
+all **841** exact filename cases pass, actual Go exit zero, package 7.018 seconds.
+Its post-test assertion incorrectly compares filename stems against Go subtest
+names containing `.json`, causing actual **supervisor exit one**. The
+[corrected read-only review](corpus-correction-review.json) verifies exact full
+filenames, source and binary hashes without repeating tests. Both as-executed
+runners, original receipts and actual supervisor statuses are preserved.
+The main qualification supervisor exits zero; the supplemental supervisor's
+exit one remains visible and is not presented as a successful runner.
+
+[Raw closed evidence](qualified/), [main runner](run.py),
+[supplemental runner as executed](run-corpus-correction.py) and
+[independent review](review.py) make this bounded acceptance reviewable.
+Binaries remain in `/home/exedev/js-wf-selected-child-20261010` with hashes in
+[the manifest](qualified/binaries.json).
+
+This qualifies shared offline child selection/provenance, the full SDK race
+suite and the normal saved corpus at this source. Full latest-source seeded
+race/extended campaigns, native fault/import/retention/admission matrices,
+actual 100,000-entry boundary, public canonical continuation admission,
+production collection and all broader original requirements remain open.
+The existing frozen `d504a33` full race campaign is still live and excludes
+these later production fixes.
+

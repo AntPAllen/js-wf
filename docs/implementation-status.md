@@ -1,5 +1,29 @@
 # Implementation status against the supplied plan
 
+## Shared SDK offline child selection fixed and qualified — 2026-10-10
+
+Frozen `02c3506` installs the verified child signal selector in initial and
+restored SDK replay contexts. An ordinary buffered signal cannot satisfy Call
+or AwaitPromise in graph histories, while ordinary AwaitSignal and legacy
+histories preserve their expected behavior. Independent review binds 3,321
+unchanged Git inputs, five retained binaries, all 62 SDK race top tests,
+10 selection/checkpoint controls and three required failures when only the
+selector hook is disabled. The 20 CLI provenance controls, legacy plugin and
+106 offline invocations over retained native bundles meet expected outcomes.
+
+All 841 saved traces pass using the same source/binary. The initial corpus
+selector ran zero cases and is rejected as evidence; the supplemental Go test
+passes but its filename-stem reporting assertion causes supervisor exit one.
+A corrected read-only review accepts the exact full filenames while preserving
+both harness mistakes and actual statuses, without repeating tests.
+[Executed review and raw evidence](scale/graph-offline-selected-child-2026-10-10/README.md).
+
+This component qualification leaves full latest-source seeded/race/extended,
+fault/import/retention/admission matrices, actual 100,000-entry boundary,
+public continuation admission, production collection and every broader original
+requirement open. The older frozen `d504a33` full race campaign remains live
+and unaccepted, and excludes these production fixes.
+
 ## Offline graph child provenance defect fixed and independently verified — 2026-10-10
 
 A local diagnostic against frozenccc8f19 showed that four contradictory child
