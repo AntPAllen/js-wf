@@ -49,6 +49,10 @@ func Finish(c *wf.Context, input, locals json.RawMessage) (json.RawMessage, erro
 	if string(input) != "7" || string(locals) != "30" {
 		return nil, wf.ErrCorruptJournal
 	}
+	return finishEffect(c)
+}
+
+func finishEffect(c *wf.Context) (json.RawMessage, error) {
 	if _, err := wf.AwaitSignal(c, "gate"); err != nil {
 		return nil, err
 	}
