@@ -33,7 +33,11 @@ type GraphConfig struct {
 	Now       func() time.Time
 	PinTTL    time.Duration
 	IntentTTL time.Duration
-	Encoding  Encoding
+	// CompactionIntentTTL budgets owned-grant renewal for prefix compaction.
+	// Zero inherits IntentTTL. It does not change append intent expiry, worker
+	// lease TTL, or permit revival after the original compaction expiry.
+	CompactionIntentTTL time.Duration
+	Encoding            Encoding
 	// PayloadReadLimit bounds runtime input/result/signal reads. Direct GraphView
 	// callers can supply their own explicit bound. Zero selects 64MiB.
 	PayloadReadLimit int
@@ -85,7 +89,7 @@ type graphEntry struct {
 }
 
 func NewGraphStore(cfg GraphConfig) (*GraphStore, error) {
-	if cfg.Protocol.Port == nil || validateEncoding(cfg.Encoding) != nil || cfg.PinTTL < 0 || cfg.IntentTTL < 0 || cfg.PayloadReadLimit < 0 || int64(cfg.PayloadReadLimit) == math.MaxInt64 || cfg.CanonicalSignals && !cfg.CanonicalStarts || cfg.CheckpointIndex && !cfg.CanonicalSignals || cfg.ArchiveCheckpoints && !cfg.CheckpointIndex {
+	if cfg.Protocol.Port == nil || validateEncoding(cfg.Encoding) != nil || cfg.PinTTL < 0 || cfg.IntentTTL < 0 || cfg.CompactionIntentTTL < 0 || cfg.PayloadReadLimit < 0 || int64(cfg.PayloadReadLimit) == math.MaxInt64 || cfg.CanonicalSignals && !cfg.CanonicalStarts || cfg.CheckpointIndex && !cfg.CanonicalSignals || cfg.ArchiveCheckpoints && !cfg.CheckpointIndex {
 		return nil, fmt.Errorf("invalid graph journal configuration")
 	}
 	if cfg.Now == nil {
@@ -96,6 +100,9 @@ func NewGraphStore(cfg GraphConfig) (*GraphStore, error) {
 	}
 	if cfg.IntentTTL == 0 {
 		cfg.IntentTTL = time.Minute
+	}
+	if cfg.CompactionIntentTTL == 0 {
+		cfg.CompactionIntentTTL = cfg.IntentTTL
 	}
 	if cfg.PayloadReadLimit == 0 {
 		cfg.PayloadReadLimit = DefaultGraphPayloadLimit

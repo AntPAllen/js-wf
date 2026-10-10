@@ -50,16 +50,18 @@ func (p *ownedCostPort) BeginOwnerScopeScan(c context.Context, owner string) (Ow
 func TestGraphCompactionOwnedRenewalCost(t *testing.T) {
 	for _, seed := range []int64{2, 5, 42} {
 		for _, tc := range []struct {
-			name    string
-			extra   int
-			latency time.Duration
-			failure bool
+			name     string
+			extra    int
+			latency  time.Duration
+			failure  bool
+			lifetime time.Duration
 		}{
-			{"owned1000-1ms", 1000, time.Millisecond, false},
-			{"owned10000-1ms", 10000, time.Millisecond, true},
-			{"owned10000-10us", 10000, 10 * time.Microsecond, false},
-			{"owned100000-1ms", 100000, time.Millisecond, true},
-			{"owned100000-10us", 100000, 10 * time.Microsecond, false},
+			{"owned1000-1ms", 1000, time.Millisecond, false, 0},
+			{"owned10000-1ms", 10000, time.Millisecond, true, 0},
+			{"owned10000-10us", 10000, 10 * time.Microsecond, false, 0},
+			{"owned100000-1ms", 100000, time.Millisecond, true, 0},
+			{"owned100000-10us", 100000, 10 * time.Microsecond, false, 0},
+			{"owned100000-1ms-60min", 100000, time.Millisecond, false, time.Hour},
 		} {
 			if tc.extra == 100000 && seed != 42 {
 				continue
@@ -69,6 +71,12 @@ func TestGraphCompactionOwnedRenewalCost(t *testing.T) {
 				index := &ownerScopeModelPort{Port: m, registry: map[string]map[string]bool{}}
 				p.Port = index
 				expires, nextExpiry := epoch.Add(time.Minute), epoch.Add(2*time.Minute)
+				start := epoch.Add(40 * time.Second)
+				if tc.lifetime != 0 {
+					expires = epoch.Add(tc.lifetime)
+					start = epoch.Add(tc.lifetime - tc.lifetime/3)
+					nextExpiry = start.Add(tc.lifetime)
+				}
 				plan, err := p.PreparePrefixCompaction(ctx, "owner", root.Head, 5, 1024, expires, nil)
 				if err != nil {
 					t.Fatal(err)
@@ -84,7 +92,6 @@ func TestGraphCompactionOwnedRenewalCost(t *testing.T) {
 						t.Fatal(err)
 					}
 				}
-				start := epoch.Add(40 * time.Second)
 				cost := &renewalLatencyPort{Port: m, now: start, rng: rand.New(rand.NewSource(seed)), latency: tc.latency}
 				index.Port, index.latency = cost, cost
 				model := &ownerScanModelPort{ownerWitnessModel: &ownerWitnessModel{ownerScopeModelPort: index}}

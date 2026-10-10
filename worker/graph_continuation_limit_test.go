@@ -112,7 +112,7 @@ func TestNativeGraphContinuationGlobalLimitAndTerminalSlot(t *testing.T) {
 					profile = &graphLimitProfilePort{NativePort: port, totals: make(map[string]graphLimitPortTiming)}
 					// OpenNativeGraphStore above still performs native configuration
 					// admission. This test-only decorator preserves the same settings.
-					graph, err = journal.NewGraphStore(journal.GraphConfig{Protocol: graphpublication.Protocol{Port: profile}, Now: cfg.Now, PinTTL: cfg.PinTTL, IntentTTL: cfg.IntentTTL, Encoding: cfg.Encoding, PayloadReadLimit: cfg.PayloadReadLimit, CanonicalStarts: cfg.CanonicalStarts, CanonicalSignals: cfg.CanonicalSignals, CheckpointIndex: cfg.CheckpointIndex, ArchiveCheckpoints: cfg.ArchiveCheckpoints, CompactionCheckpoints: cfg.CompactionCheckpoints})
+					graph, err = journal.NewGraphStore(journal.GraphConfig{Protocol: graphpublication.Protocol{Port: profile}, Now: cfg.Now, PinTTL: cfg.PinTTL, IntentTTL: cfg.IntentTTL, CompactionIntentTTL: cfg.CompactionIntentTTL, Encoding: cfg.Encoding, PayloadReadLimit: cfg.PayloadReadLimit, CanonicalStarts: cfg.CanonicalStarts, CanonicalSignals: cfg.CanonicalSignals, CheckpointIndex: cfg.CheckpointIndex, ArchiveCheckpoints: cfg.ArchiveCheckpoints, CompactionCheckpoints: cfg.CompactionCheckpoints})
 					if err != nil {
 						t.Fatal(err)
 					}

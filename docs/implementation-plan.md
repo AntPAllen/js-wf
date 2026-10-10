@@ -1,5 +1,28 @@
 # JetStream Durable Workflow Runtime — Implementation Plan
 
+## Separate configurable compaction lifetime — 2026-10-10
+
+GraphConfig/NativeGraphConfig now expose CompactionIntentTTL, zero inheriting
+IntentTTL and negatives rejecting admission. It controls only initial prefix
+compaction expiry and automatic renewal threshold/target. Ordinary append expiry
+and defaults stay unchanged. Native adapters and the profiling wrapper forward
+it. Longer lifetime delays collection of abandoned grants; saved authority keeps
+its original expiry and cannot be revived by changing configuration.
+[Evidence](scale/graph-compaction-lifetime-2026-10-10/README.md).
+
+Eight JSON/protobuf lifetime controls plus negative configuration and 76 prior
+recovery controls pass race 23.701 seconds. Native legacy/indexed forwarding and
+inheritance pass; a deliberate append-TTL substitution fails four controls, and
+restored lifetime/native controls pass race 2.064 seconds. All 853 pins pass.
+An explicit 60-minute seeded lifetime covers 100,020 owned grants at assumed
+1 ms operation cost in 11m42.104752496s, within its 20-minute renewal window.
+This is modeled budget evidence, not native latency or full-entry acceptance.
+
+Next: native total-owned-grant renewal cost and interruption/recovery with an
+explicit lifetime, then actual 100,000-entry qualification. Existing short-TTL
+counterexamples, original-head fencing, unknown outcomes and expired-grant
+refusal remain. Broad gates remain open; collection and admission stay off.
+
 ## Owned-grant renewal cost counterexample — 2026-10-10
 
 The seeded incremental-discovery model now measures total cost for real owned

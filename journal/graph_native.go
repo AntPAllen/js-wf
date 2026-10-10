@@ -20,16 +20,18 @@ type NativeGraphConfig struct {
 	ObjectBucket    string
 	// ExpectedReplicas optionally requires both stores to have this replica count.
 	// Zero accepts the adapter's structurally safe positive replica counts.
-	ExpectedReplicas   int
-	Now                func() time.Time
-	PinTTL             time.Duration
-	IntentTTL          time.Duration
-	Encoding           Encoding
-	PayloadReadLimit   int
-	CanonicalStarts    bool
-	CanonicalSignals   bool
-	CheckpointIndex    bool
-	ArchiveCheckpoints bool
+	ExpectedReplicas int
+	Now              func() time.Time
+	PinTTL           time.Duration
+	IntentTTL        time.Duration
+	// CompactionIntentTTL has the same inheritance and authority rules as GraphConfig.
+	CompactionIntentTTL time.Duration
+	Encoding            Encoding
+	PayloadReadLimit    int
+	CanonicalStarts     bool
+	CanonicalSignals    bool
+	CheckpointIndex     bool
+	ArchiveCheckpoints  bool
 	// OwnerScopeIndex selects a newly provisioned indexed authority namespace.
 	// It does not upgrade existing stores. Every adapter must select this mode.
 	OwnerScopeIndex       bool
@@ -43,7 +45,7 @@ func (cfg NativeGraphConfig) validate() error {
 	if !nativeGraphName.MatchString(cfg.AuthorityStream) || !nativeGraphPrefix.MatchString(cfg.AuthorityPrefix) || !nativeGraphName.MatchString(cfg.ObjectBucket) || len(cfg.ObjectBucket) > 32 || cfg.AuthorityStream == "OBJ_"+cfg.ObjectBucket {
 		return fmt.Errorf("invalid native graph namespace")
 	}
-	if cfg.ExpectedReplicas < 0 || cfg.ExpectedReplicas > 5 || cfg.PinTTL < 0 || cfg.IntentTTL < 0 || cfg.PayloadReadLimit < 0 || int64(cfg.PayloadReadLimit) == math.MaxInt64 || validateEncoding(cfg.Encoding) != nil || cfg.CanonicalSignals && !cfg.CanonicalStarts || cfg.CheckpointIndex && !cfg.CanonicalSignals || cfg.ArchiveCheckpoints && !cfg.CheckpointIndex {
+	if cfg.ExpectedReplicas < 0 || cfg.ExpectedReplicas > 5 || cfg.PinTTL < 0 || cfg.IntentTTL < 0 || cfg.CompactionIntentTTL < 0 || cfg.PayloadReadLimit < 0 || int64(cfg.PayloadReadLimit) == math.MaxInt64 || validateEncoding(cfg.Encoding) != nil || cfg.CanonicalSignals && !cfg.CanonicalStarts || cfg.CheckpointIndex && !cfg.CanonicalSignals || cfg.ArchiveCheckpoints && !cfg.CheckpointIndex {
 		return fmt.Errorf("invalid native graph journal configuration")
 	}
 	return nil
@@ -115,5 +117,5 @@ func OpenNativeGraphStore(ctx context.Context, js jetstream.JetStream, cfg Nativ
 	if err != nil {
 		return nil, err
 	}
-	return NewGraphStore(GraphConfig{Protocol: graphpublication.Protocol{Port: port}, Now: cfg.Now, PinTTL: cfg.PinTTL, IntentTTL: cfg.IntentTTL, Encoding: cfg.Encoding, PayloadReadLimit: cfg.PayloadReadLimit, CanonicalStarts: cfg.CanonicalStarts, CanonicalSignals: cfg.CanonicalSignals, CheckpointIndex: cfg.CheckpointIndex, ArchiveCheckpoints: cfg.ArchiveCheckpoints, CompactionCheckpoints: cfg.CompactionCheckpoints})
+	return NewGraphStore(GraphConfig{Protocol: graphpublication.Protocol{Port: port}, Now: cfg.Now, PinTTL: cfg.PinTTL, IntentTTL: cfg.IntentTTL, CompactionIntentTTL: cfg.CompactionIntentTTL, Encoding: cfg.Encoding, PayloadReadLimit: cfg.PayloadReadLimit, CanonicalStarts: cfg.CanonicalStarts, CanonicalSignals: cfg.CanonicalSignals, CheckpointIndex: cfg.CheckpointIndex, ArchiveCheckpoints: cfg.ArchiveCheckpoints, CompactionCheckpoints: cfg.CompactionCheckpoints})
 }

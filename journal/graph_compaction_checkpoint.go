@@ -52,7 +52,7 @@ func (c *CheckpointCompaction) Checkpoint() ([]byte, error) {
 	return data, nil
 }
 
-// BeginIntentRenewalIfNeeded schedules renewal with one third of IntentTTL left.
+// BeginIntentRenewalIfNeeded schedules renewal with one third of CompactionIntentTTL left.
 // It uses the store's authority clock and leaves confirmation and active renewal
 // alone. An expired intent is rejected by BeginIntentRenewal, never revived.
 // The caller must still advance renewal in bounded batches under its lease.
@@ -67,10 +67,10 @@ func (c *CheckpointCompaction) BeginIntentRenewalIfNeeded(ctx context.Context) (
 		return false, nil
 	}
 	now := c.store.cfg.Now()
-	if c.stage.IntentExpiry().Sub(now) > c.store.cfg.IntentTTL/3 {
+	if c.stage.IntentExpiry().Sub(now) > c.store.cfg.CompactionIntentTTL/3 {
 		return false, nil
 	}
-	if err := c.BeginIntentRenewal(ctx, now.Add(c.store.cfg.IntentTTL)); err != nil {
+	if err := c.BeginIntentRenewal(ctx, now.Add(c.store.cfg.CompactionIntentTTL)); err != nil {
 		return false, err
 	}
 	return true, nil

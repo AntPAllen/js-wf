@@ -136,7 +136,7 @@ func (c *CheckpointCompaction) Advance(ctx context.Context, maxRecords, maxNodes
 			return false, err
 		}
 		limit := max(c.store.cfg.PayloadReadLimit, MaxGraphEntryBytes)
-		c.stage, err = c.store.cfg.Protocol.BeginPrefixCompaction(ctx, destination, root.Head, next.RetainedFrom-cursor.RetainedFrom, limit, c.store.cfg.Now().Add(c.store.cfg.IntentTTL), data)
+		c.stage, err = c.store.cfg.Protocol.BeginPrefixCompaction(ctx, destination, root.Head, next.RetainedFrom-cursor.RetainedFrom, limit, c.store.cfg.Now().Add(c.store.cfg.CompactionIntentTTL), data)
 		if err != nil {
 			return false, graphMutationError(err)
 		}
