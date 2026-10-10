@@ -9,7 +9,6 @@ import (
 	"time"
 
 	"js-wf/internal/checkpoint"
-	"js-wf/internal/stepwire"
 )
 
 type graphCheckpointPointer struct {
@@ -39,147 +38,18 @@ type GraphCheckpointRead struct {
 // unreadable owned frame bytes return an error, never an initial-replay result.
 // The caller owns the view and its release/renewal lifecycle.
 func (v *GraphView) ReadCheckpoint(ctx context.Context, typ, id string) (*GraphCheckpointRead, error) {
-	if err := v.alive(); err != nil {
-		return nil, err
-	}
-	destination, err := graphDestination(typ, id)
+	scan, err := v.NewCheckpointScan(ctx, typ, id)
 	if err != nil {
 		return nil, err
 	}
-	if destination != v.destination {
-		return nil, ErrCheckpointGeneration
-	}
-	if err := v.RenewIfNeeded(ctx); err != nil {
-		return nil, err
-	}
-	read := func(index uint64) (GraphRecord, error) {
-		if err := v.RenewIfNeeded(ctx); err != nil {
-			return GraphRecord{}, err
-		}
-		return v.Read(ctx, index)
-	}
-	start := uint64(0)
-	var records []Record
-	var request Record
-	var declaration stepwire.Request
-	var pending bool
-	var position uint64
-	var candidate *GraphCheckpointRead
-	var receipt GraphRecord
-	var localsHash string
-	if pointer := v.cursor.Checkpoint; pointer != nil {
-		start = pointer.Runtime.Index
-		anchor, err := read(start)
-		if err != nil {
-			return nil, err
-		}
-		declared, err := read(pointer.RequestIndex)
-		if err != nil {
-			return nil, err
-		}
-		if declared.Kind != StepRequested || stepwire.Decode(declared.Payload, &declaration) != nil || declaration.Kind != "checkpoint" || declaration.Name != pointer.Runtime.Stage || declared.Sequence >= anchor.Sequence || declared.Epoch > anchor.Epoch || verifyCheckpointAnchor(anchor.Record, pointer.Runtime) != nil {
-			return nil, ErrGap
-		}
-		candidate = &GraphCheckpointRead{Runtime: pointer.Runtime, Request: declared.Record, Anchor: anchor.Record}
-		receipt = anchor
-		localsHash = declaration.InputHash
-		position = pointer.Runtime.StepPosition
-		if err := v.readCheckpointFrame(ctx, typ, id, candidate, receipt, localsHash); err != nil {
-			return nil, err
-		}
-		records = make([]Record, 0, v.Count()-start)
-		records = append(records, anchor.Record)
-	}
-	if records == nil {
-		records = make([]Record, 0, v.Count())
-	}
-	first := start
-	if candidate != nil {
-		first++
-	}
-	if err := v.RenewIfNeeded(ctx); err != nil {
-		return nil, err
-	}
-	err = v.ReadRange(ctx, first, v.Count(), func(record GraphRecord) error {
-		if err := v.RenewIfNeeded(ctx); err != nil {
-			return err
-		}
-
-		if len(records) > 0 {
-			previous := records[len(records)-1]
-			if record.Sequence != previous.Sequence+1 || record.Epoch < previous.Epoch {
-				return ErrGap
-			}
-		}
-		records = append(records, record.Record)
-		switch record.Kind {
-		case StepRequested:
-			if pending {
-				return ErrGap
-			}
-			declaration = stepwire.Request{}
-			if stepwire.Decode(record.Payload, &declaration) != nil {
-				return ErrGap
-			}
-			request = record.Record
-			pending = true
-			position++
-		case StepCompleted:
-			if !pending {
-				return ErrGap
-			}
-			pending = false
-			position++
-			if declaration.Kind != "checkpoint" {
-				return nil
-			}
-			var completion stepwire.Completion
-			if stepwire.DecodeCompletion(record.Payload, &completion) != nil {
-				return ErrGap
-			}
-			runtime := RuntimeCheckpoint{InvSeq: v.cursor.Invocation, Stage: declaration.Name, Sequence: record.Sequence, Index: record.Index, Epoch: record.Epoch, StepPosition: position, Object: completion.ResultRef, SHA256: completion.ResultHash}
-			// Reuse the existing checkpoint contract without introducing an archive
-			// identity into the graph. Started guarantees the anchor is not index zero.
-			if ValidateRuntimeSnapshot(Snapshot{Version: 2, Runtime: &runtime}) != nil || verifyCheckpointAnchor(record.Record, runtime) != nil || request.Index >= record.Index {
-				return ErrGap
-			}
-			candidate = &GraphCheckpointRead{Runtime: runtime, Request: request, Anchor: record.Record}
-			receipt = record
-			localsHash = declaration.InputHash
-		}
-		return nil
-	})
+	result, done, err := scan.Advance(ctx, max(uint64(1), v.Count()))
 	if err != nil {
 		return nil, err
 	}
-	if candidate == nil {
-		return nil, nil
+	if !done {
+		return nil, ErrGap
 	}
-	if candidate.Frame == nil {
-		if err := v.readCheckpointFrame(ctx, typ, id, candidate, receipt, localsHash); err != nil {
-			return nil, err
-		}
-	}
-	candidate.Records = append([]Record(nil), records[candidate.Runtime.Index+1-start:]...)
-	candidate.Tail = v.Tail()
-	published := !v.store.cfg.CheckpointIndex || v.cursor.Checkpoint != nil &&
-		v.cursor.Checkpoint.Runtime == candidate.Runtime && v.cursor.Checkpoint.RequestIndex == candidate.Request.Index
-	archived := !v.store.cfg.ArchiveCheckpoints || v.cursor.RetainedFrom == candidate.Request.Index
-	suspended := false
-	for _, record := range candidate.Records {
-		var marker struct {
-			WaitingOn string `json:"waiting_on"`
-		}
-		if record.Kind == Suspended && checkpoint.DecodeUnambiguous(record.Payload, &marker) == nil && marker.WaitingOn == "continuation:"+candidate.Runtime.Stage {
-			suspended = true
-			break
-		}
-	}
-	candidate.HandoffPending = !published || !archived || !suspended
-	if err := v.alive(); err != nil {
-		return nil, err
-	}
-	return candidate, nil
+	return result, nil
 }
 
 func (v *GraphView) readCheckpointFrame(ctx context.Context, typ, id string, candidate *GraphCheckpointRead, receipt GraphRecord, localsHash string) error {

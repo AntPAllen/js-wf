@@ -1,5 +1,25 @@
 # JetStream Durable Workflow Runtime — Implementation Plan
 
+## Checkpoint verification supports bounded process-local scans — 2026-10-10
+
+A scan now advances in caller-sized record batches against one exact pinned
+forest, with renewed authority and no whole-prefix record buffer. Deadline pauses
+retain verified progress; closed/expired readers cannot revive. Final frame
+ownership adds one anchor recheck. Twelve JSON/protobuf batch/authority controls
+and caller-owned result checks pass under race; a limit bypass fails all12, and
+an ownership bypass fails eight. Existing publication remains synchronous and
+keeps its15-second worker bound; this is not durable scan handover.
+[Development evidence and remaining integration](scale/graph-checkpoint-bounded-scan-2026-10-10/README.md).
+The refactor also closes a confirmed initial-scan gap: all12 ambiguous earlier
+completion cases accepted by the old discovery path now reject; four plain/opaque
+user-result siblings pass. Indexed pointers retain their existing prefix skip.
+The broader checkpoint race,853 unchanged regressions and native R1/archive20
+passed before the final result ownership copy; final directed controls cover that
+copy. This is not frozen qualification. Actual100000 remains failed. Publication
+integration, durable handover, archive staging/lifetime handling and every
+original full/extended/native/fault/scale/soak/retention/import/rollout gate remain
+open. Public continuation admission stays closed and collection stays off.
+
 ## Compaction comparison streams authenticated ranges — 2026-10-10
 
 Commit now streams source and relocated records together and checks node grants

@@ -1,0 +1,70 @@
+=== RUN   TestGraphCheckpointRejectsAmbiguousEarlierCompletion
+=== RUN   TestGraphCheckpointRejectsAmbiguousEarlierCompletion/json/duplicate
+=== RUN   TestGraphCheckpointRejectsAmbiguousEarlierCompletion/json/alias
+=== RUN   TestGraphCheckpointRejectsAmbiguousEarlierCompletion/json/escaped
+=== RUN   TestGraphCheckpointRejectsAmbiguousEarlierCompletion/json/unknown
+=== RUN   TestGraphCheckpointRejectsAmbiguousEarlierCompletion/json/missing
+=== RUN   TestGraphCheckpointRejectsAmbiguousEarlierCompletion/json/null
+=== RUN   TestGraphCheckpointRejectsAmbiguousEarlierCompletion/json/valid
+=== RUN   TestGraphCheckpointRejectsAmbiguousEarlierCompletion/json/opaque-result
+=== RUN   TestGraphCheckpointRejectsAmbiguousEarlierCompletion/protobuf-v1/duplicate
+=== RUN   TestGraphCheckpointRejectsAmbiguousEarlierCompletion/protobuf-v1/alias
+=== RUN   TestGraphCheckpointRejectsAmbiguousEarlierCompletion/protobuf-v1/escaped
+=== RUN   TestGraphCheckpointRejectsAmbiguousEarlierCompletion/protobuf-v1/unknown
+=== RUN   TestGraphCheckpointRejectsAmbiguousEarlierCompletion/protobuf-v1/missing
+=== RUN   TestGraphCheckpointRejectsAmbiguousEarlierCompletion/protobuf-v1/null
+=== RUN   TestGraphCheckpointRejectsAmbiguousEarlierCompletion/protobuf-v1/valid
+=== RUN   TestGraphCheckpointRejectsAmbiguousEarlierCompletion/protobuf-v1/opaque-result
+--- PASS: TestGraphCheckpointRejectsAmbiguousEarlierCompletion (0.91s)
+    --- PASS: TestGraphCheckpointRejectsAmbiguousEarlierCompletion/json/duplicate (0.08s)
+    --- PASS: TestGraphCheckpointRejectsAmbiguousEarlierCompletion/json/alias (0.03s)
+    --- PASS: TestGraphCheckpointRejectsAmbiguousEarlierCompletion/json/escaped (0.07s)
+    --- PASS: TestGraphCheckpointRejectsAmbiguousEarlierCompletion/json/unknown (0.03s)
+    --- PASS: TestGraphCheckpointRejectsAmbiguousEarlierCompletion/json/missing (0.07s)
+    --- PASS: TestGraphCheckpointRejectsAmbiguousEarlierCompletion/json/null (0.03s)
+    --- PASS: TestGraphCheckpointRejectsAmbiguousEarlierCompletion/json/valid (0.08s)
+    --- PASS: TestGraphCheckpointRejectsAmbiguousEarlierCompletion/json/opaque-result (0.03s)
+    --- PASS: TestGraphCheckpointRejectsAmbiguousEarlierCompletion/protobuf-v1/duplicate (0.07s)
+    --- PASS: TestGraphCheckpointRejectsAmbiguousEarlierCompletion/protobuf-v1/alias (0.03s)
+    --- PASS: TestGraphCheckpointRejectsAmbiguousEarlierCompletion/protobuf-v1/escaped (0.07s)
+    --- PASS: TestGraphCheckpointRejectsAmbiguousEarlierCompletion/protobuf-v1/unknown (0.03s)
+    --- PASS: TestGraphCheckpointRejectsAmbiguousEarlierCompletion/protobuf-v1/missing (0.08s)
+    --- PASS: TestGraphCheckpointRejectsAmbiguousEarlierCompletion/protobuf-v1/null (0.03s)
+    --- PASS: TestGraphCheckpointRejectsAmbiguousEarlierCompletion/protobuf-v1/valid (0.08s)
+    --- PASS: TestGraphCheckpointRejectsAmbiguousEarlierCompletion/protobuf-v1/opaque-result (0.09s)
+=== RUN   TestGraphCheckpointScanBatchesAndAuthority
+=== RUN   TestGraphCheckpointScanBatchesAndAuthority/json/paused
+    graph_checkpoint_scan_test.go:238: CHECKPOINT_SCAN mode=paused records=36 batches=8 entry_read_attempts=38 renewals=0 captured_tail=36
+=== RUN   TestGraphCheckpointScanBatchesAndAuthority/json/renewing
+    graph_checkpoint_scan_test.go:238: CHECKPOINT_SCAN mode=renewing records=36 batches=10 entry_read_attempts=37 renewals=18 captured_tail=36
+=== RUN   TestGraphCheckpointScanBatchesAndAuthority/json/tail-change
+    graph_checkpoint_scan_test.go:238: CHECKPOINT_SCAN mode=tail-change records=36 batches=10 entry_read_attempts=37 renewals=0 captured_tail=36
+=== RUN   TestGraphCheckpointScanBatchesAndAuthority/json/retire-reuse
+    graph_checkpoint_scan_test.go:238: CHECKPOINT_SCAN mode=retire-reuse records=36 batches=10 entry_read_attempts=37 renewals=0 captured_tail=36
+=== RUN   TestGraphCheckpointScanBatchesAndAuthority/json/closed
+=== RUN   TestGraphCheckpointScanBatchesAndAuthority/json/expired
+=== RUN   TestGraphCheckpointScanBatchesAndAuthority/protobuf-v1/paused
+    graph_checkpoint_scan_test.go:238: CHECKPOINT_SCAN mode=paused records=36 batches=8 entry_read_attempts=38 renewals=0 captured_tail=36
+=== RUN   TestGraphCheckpointScanBatchesAndAuthority/protobuf-v1/renewing
+    graph_checkpoint_scan_test.go:238: CHECKPOINT_SCAN mode=renewing records=36 batches=10 entry_read_attempts=37 renewals=18 captured_tail=36
+=== RUN   TestGraphCheckpointScanBatchesAndAuthority/protobuf-v1/tail-change
+    graph_checkpoint_scan_test.go:238: CHECKPOINT_SCAN mode=tail-change records=36 batches=10 entry_read_attempts=37 renewals=0 captured_tail=36
+=== RUN   TestGraphCheckpointScanBatchesAndAuthority/protobuf-v1/retire-reuse
+    graph_checkpoint_scan_test.go:238: CHECKPOINT_SCAN mode=retire-reuse records=36 batches=10 entry_read_attempts=37 renewals=0 captured_tail=36
+=== RUN   TestGraphCheckpointScanBatchesAndAuthority/protobuf-v1/closed
+=== RUN   TestGraphCheckpointScanBatchesAndAuthority/protobuf-v1/expired
+--- PASS: TestGraphCheckpointScanBatchesAndAuthority (5.02s)
+    --- PASS: TestGraphCheckpointScanBatchesAndAuthority/json/paused (0.40s)
+    --- PASS: TestGraphCheckpointScanBatchesAndAuthority/json/renewing (0.50s)
+    --- PASS: TestGraphCheckpointScanBatchesAndAuthority/json/tail-change (0.57s)
+    --- PASS: TestGraphCheckpointScanBatchesAndAuthority/json/retire-reuse (0.46s)
+    --- PASS: TestGraphCheckpointScanBatchesAndAuthority/json/closed (0.35s)
+    --- PASS: TestGraphCheckpointScanBatchesAndAuthority/json/expired (0.25s)
+    --- PASS: TestGraphCheckpointScanBatchesAndAuthority/protobuf-v1/paused (0.47s)
+    --- PASS: TestGraphCheckpointScanBatchesAndAuthority/protobuf-v1/renewing (0.48s)
+    --- PASS: TestGraphCheckpointScanBatchesAndAuthority/protobuf-v1/tail-change (0.52s)
+    --- PASS: TestGraphCheckpointScanBatchesAndAuthority/protobuf-v1/retire-reuse (0.42s)
+    --- PASS: TestGraphCheckpointScanBatchesAndAuthority/protobuf-v1/closed (0.30s)
+    --- PASS: TestGraphCheckpointScanBatchesAndAuthority/protobuf-v1/expired (0.30s)
+PASS
+ok  	js-wf/journal	7.007s
