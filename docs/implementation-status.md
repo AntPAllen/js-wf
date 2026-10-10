@@ -1,5 +1,29 @@
 # Implementation status against the supplied plan
 
+## Complete owner-scoped discovery primitive — 2026-10-10
+
+Compaction renewal now accepts optional OwnerScopePort discovery. Its authority
+contract requires durable registration before scope creation, includes abandoned
+and uncertain writes, and survives fresh adapters. The protocol independently
+validates returned records, rejects foreign scopes and duplicate keys, stops on
+unknown enumeration, and retains original-head/expiry checks. Existing ports
+continue full namespace discovery. Client descriptors and final forests cannot
+provide completeness. [Evidence](scale/graph-owner-scope-discovery-2026-10-10/README.md).
+
+Eleven indexed-model controls and seventeen existing safety controls pass under
+race in 3.798 seconds. At assumed 1 ms request cost, namespaces of 54 and 100,054
+scopes both read/update only the publication's 20 grants in 95.310 ms of modeled
+time. Abandoned/unknown-created grants and absent reservations are included.
+Forcing full discovery fails the scale control; restored source and all 853
+common pins pass (5.488 seconds).
+
+NativeAuthority/NativePort do not yet implement this interface. Their current
+owner-hashed subject layout requires a durable native index and a complete
+migration/isolated-schema rule that prevents earlier writers bypassing it.
+Next: native complete registration, unknown/restart controls and R1/R3 coverage;
+then qualify the publication's own large grant set before the full-entry run.
+The actual 100,000-entry, admission, collection and rollout gates remain open.
+
 ## Seeded renewal namespace cost exposes a liveness limit — 2026-10-10
 
 A deterministic in-memory request-cost model now reproduces renewal expiry

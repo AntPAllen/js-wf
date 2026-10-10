@@ -11,7 +11,8 @@ import (
 // CompactionIntentRenewal extends every scope owned by a frozen publication,
 // including intermediate and abandoned uploads absent from its final forests.
 // Use from one goroutine, with no concurrent staging under the same token.
-// Enumeration is context-bound but retains the namespace key list in memory.
+// OwnerScopePort bounds discovery to this owner; other ports retain the full
+// namespace scan. Enumeration is context-bound but retains the key list in memory.
 // Batches bound examined scopes, not enumeration, source reads or wall time.
 // The clock must be the caller's current authority clock, not a saved timestamp.
 type CompactionIntentRenewal struct {
@@ -20,6 +21,7 @@ type CompactionIntentRenewal struct {
 	now           func() time.Time
 	expires       time.Time
 	keys          []string
+	ownerScoped   bool
 	next, renewed uint64
 	done          bool
 	err           error
@@ -38,7 +40,14 @@ func (p Protocol) BeginCompactionIntentRenewal(ctx context.Context, prepared Pre
 	if err := r.check(ctx); err != nil {
 		return nil, err
 	}
-	keys, err := p.Port.BlobKeys(ctx)
+	var keys []string
+	var err error
+	if indexed, ok := p.Port.(OwnerScopePort); ok {
+		r.ownerScoped = true
+		keys, err = indexed.BlobKeysForOwner(ctx, prepared.publication.Token)
+	} else {
+		keys, err = p.Port.BlobKeys(ctx)
+	}
 	if err != nil {
 		return nil, err
 	}
@@ -114,6 +123,9 @@ func (r *CompactionIntentRenewal) Advance(ctx context.Context, maxScopes uint64)
 		}
 		if err = validateFence(k, record); err != nil {
 			return plan, false, err
+		}
+		if r.ownerScoped && record.Revision != 0 && record.Fence.Owner != r.prepared.publication.Token {
+			return plan, false, errors.New("foreign scope in owner enumeration")
 		}
 		if record.Fence.Owner == r.prepared.publication.Token {
 			intent, ok := record.Fence.Intents[record.Fence.Owner]

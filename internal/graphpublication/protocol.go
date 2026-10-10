@@ -116,6 +116,23 @@ type Port interface {
 	Objects(context.Context) ([]blobpublication.Object, error)
 }
 
+// OwnerScopePort supplies complete discovery of one publication's permanent
+// authority scopes without scanning unrelated owners. It must include ready,
+// uploading, closed and abandoned scopes, plus scopes whose writes had unknown
+// outcomes. Index registration must become durable before a scope can be
+// created; fresh adapters must share that authority. Never implement this from
+// a final forest, saved client descriptor, or a partial best-effort index.
+// Enumeration is discovery only: callers independently read and validate each
+// returned scope. Reservations for absent scopes are permitted. No concurrent
+// staging under this owner is allowed during compaction renewal.
+// Existing namespaces need a proven complete migration or must omit this
+// interface and retain full namespace discovery. An enumeration error supplies
+// no partial result and must not be hidden by fallback or retry.
+type OwnerScopePort interface {
+	Port
+	BlobKeysForOwner(context.Context, string) ([]string, error)
+}
+
 // RootCatalogPort enumerates every retained destination in this isolated
 // authority namespace, including empty roots and witnessed absences. The
 // catalog is permanent under ordinary operations; enumeration returns no
