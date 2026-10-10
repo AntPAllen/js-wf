@@ -39,3 +39,12 @@ original native matrices, actual100000-entry cap, majority raw-p99 failure,
 24h/million drain, lifecycle/retention/import/admission/collector/rollout
 remain separate open requirements. Production collection is off; canonical
 continuation deployment admission stays closed.
+
+## Full normal live launch
+
+Frozen `0404fc0` is running under
+`js-wf-current158-sharded-normal-20261010.service`, original PID121314,
+invocation `fea4ed5e835c4f2f8065c0ca0ce732ea`. [Launch identity](normal-launch.json)
+records the loaded live service. Normal state/logs are operational; no stage
+acceptance is inferred until it actually stops and independent review passes.
+Race has not started and requires accepted full normal from this same source.

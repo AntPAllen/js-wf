@@ -1,5 +1,28 @@
 # Implementation status against the supplied plan
 
+## Latest158 full normal running in verified process groups — 2026-10-10
+
+Tier1 campaigns now support eight disjoint sequential package processes from
+one retained binary. Original512MiB/2 Go CPU/1000-seed profile and300-minute
+per-process watchdog stay explicit. Complete-source acceptance requires all
+compiled tests and subtests once,853 pins,158 exact seeded ranges, one actual
+package pass/coverage summary per group and all real command exits. No
+synthetic package completion or passing subset qualifies a whole campaign.
+
+Seventeen checker tests pass. A real two-process pilot completes two selected
+families/2000 bodies, full853 pins and both documented trace skips; its union
+is correctly rejected against the full compiled source list. Legacy single
+process report equals the accepted156 normal report exactly.
+[Development and prepared full qualification](scale/graph-current158-sharded-2026-10-10/README.md).
+
+Frozen `0404fc0` full latest158 normal is live under retained supervisor
+PID121314/invocation `fea4ed5e835c4f2f8065c0ca0ce732ea`. Race is prepared and
+requires independently accepted normal from this same source; neither full
+stage is accepted yet. Earlier failed156 race remains failed. Original
+actual100000 cap is independently live; original matrices, majority raw-p99
+failure, extended/24h/million drain and retention/import/admission/collection/
+rollout requirements remain open.
+
 ## Native object read RPC removed; full frozen race timed out — 2026-10-10
 
 Native Get now validates fresh configuration and exact chunk census from one

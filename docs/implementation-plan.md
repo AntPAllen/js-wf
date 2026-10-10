@@ -1,5 +1,19 @@
 # JetStream Durable Workflow Runtime — Implementation Plan
 
+## Complete simulation process grouping implemented — 2026-10-10
+
+Full-suite runner/checker now supports disjoint sequential package processes
+from one binary, exact compiled/source-inventory union, per-process original
+resource profile/watchdog and real completion/body/pin proof. Development
+checks pass; full latest158 normal has launched at frozen `0404fc0`. Same
+source race waits for independently accepted normal.
+[Current follow-through](scale/graph-current158-sharded-2026-10-10/README.md).
+
+This implements the execution/evidence path required after the older full156
+race watchdog failure. Full normal/race and extended campaigns remain open
+until actual complete receipts; all original phase/fault/scale/soak/retention/
+import/admission/collector/rollout requirements below stay in scope.
+
 ## Full simulation follow-through and native read cost — 2026-10-10
 
 The full frozen156 race campaign fails at its300-minute package watchdog
