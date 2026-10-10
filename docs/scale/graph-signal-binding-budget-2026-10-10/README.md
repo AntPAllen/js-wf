@@ -35,3 +35,15 @@ exact internal cancellation point or a NATS defect in the failed native run.
 No runtime deadline, fixture bound, payload verification or cross-forest
 ownership rule changed. The PostgreSQL CLI campaign remains failed. A resource
 isolated native qualification and the original larger gates remain open.
+
+## Clean frozen-source qualification
+
+Frozen `d26f571` now independently passes the focused race qualification under
+an explicit one-core service quota, GOMAXPROCS=2 and GOMEMLIMIT=1GiB.
+[Independent review](qualification/review.json) verifies 1,925 complete
+Git/before/after inputs, actual compiler/test exits, matching retained terminal
+service, and the retained race executable's SHA/build flags. All 48 cases and
+exact replays, the real deadline control and 112 existing recovery cuts pass.
+[Supervisor and independent reviewer](qualification/) preserve reproducible
+commands and raw logs. This closes the focused source qualification, not the
+failed native PostgreSQL CLI or full implementation gates.

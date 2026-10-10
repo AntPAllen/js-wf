@@ -42,3 +42,15 @@ Race requires independently accepted normal and a separate launch receipt.
 Current race, extended 10,000/100,000 seed runs, original native fault matrices,
 actual entry cap, storage/VM faults, soak/drain, security, retention, admission
 and rollout remain separate open gates. Admission and collection remain off.
+
+## Source comparison through d26f571
+
+[The source ledger](source-equivalence-d26f571.json) hashes 1,256 identical
+inputs from frozen `b3d0cb1` through `d26f571`: local-module compiled simulation
+Go/Cgo/native/embed inputs, module files, every simulation fixture, the AST
+seed inventory, and driver/checker/partition helpers. Every hash matches the
+original running campaign's actual source-before inventory and current files.
+Later client external tests and CLI fixtures are outside this compiled binary;
+the new Signal model has separate clean-source qualification. This is source
+equivalence, not a completed full-suite result or a statement about future
+source changes. Keep the original invocation until actual terminal review.

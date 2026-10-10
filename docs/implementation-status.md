@@ -1,5 +1,26 @@
 # Implementation status against the supplied plan
 
+## Clean Signal budget qualification and Tier 1 source comparison — 2026-10-10
+
+Frozen `d26f571` independently qualifies the focused binding-budget race:
+1,925 complete Git inputs remain unchanged, actual compiler/test/service exits
+are zero, and the retained executable is race enabled. All 48 seeded cases
+and exact replays, the actual context timer control and 112 publication-recovery
+cuts pass. [Clean qualification](scale/graph-signal-binding-budget-2026-10-10/qualification/review.json).
+
+A separate ledger matches 1,256 compiled simulation/fixture/runner/checker
+inputs between the running `b3d0cb1` campaign and `d26f571`, and matches the
+actual original source-before inventory. Later CLI/client external tests have
+separate scope. This source comparison supports retaining the original live
+Tier 1 invocation; it is not terminal acceptance or a future-source claim.
+[Comparison scope](scale/graph-current-tier1-2026-10-10/README.md).
+
+The entry campaign has passed initial checkpoint batch verification and is
+staging the first archive; final checkpoint/terminal/cap proofs remain pending.
+The failed PostgreSQL CLI campaign stays rejected; no runtime deadline or
+ownership rule changed. Original full-source/extended/native/matrix/fault/
+storage/soak/retention/security/rollout gates remain open, admission/collection off.
+
 ## Signal aggregate binding budget reproduced in Tier 1 transport — 2026-10-10
 
 A focused in-memory cost model runs the production client/journal through
