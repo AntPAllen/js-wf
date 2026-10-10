@@ -92,6 +92,15 @@ func TestReplayGraphCheckpointMetadata(t *testing.T) {
 		want   error
 	}{
 		{"valid", func(*fixture) {}, nil},
+		{"duplicate_completion_metadata_reference", func(f *fixture) {
+			at := len(f.records) - 1
+			f.records[at].Payload = append([]byte(`{"checkpoint_metadata_ref":"foreign",`), f.records[at].Payload[1:]...)
+		}, ErrCorruptJournal},
+		{"duplicate_completion_metadata_hash", func(f *fixture) {
+			at := len(f.records) - 1
+			f.records[at].Payload = append([]byte(`{"checkpoint_metadata_hash":"foreign",`), f.records[at].Payload[1:]...)
+		}, ErrCorruptJournal},
+
 		{"legacy", func(f *fixture) {
 			mutateCompletion(f, func(e map[string]any) { delete(e, "checkpoint_metadata_ref"); delete(e, "checkpoint_metadata_hash") })
 		}, nil},

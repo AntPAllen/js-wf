@@ -1,0 +1,47 @@
+{
+  "development_only": true,
+  "sdk_required_failures": [
+    "result",
+    "hash",
+    "error_kind",
+    "reference",
+    "error",
+    "cancelled",
+    "result_alias",
+    "escaped_result",
+    "signal",
+    "selected",
+    "case",
+    "unknown"
+  ],
+  "cli_required_failures": [
+    "result",
+    "reference",
+    "hash",
+    "error",
+    "signal",
+    "selected",
+    "case",
+    "cancelled",
+    "unknown"
+  ],
+  "journal_required_failures": [
+    "json/duplicate-completion",
+    "json/alias-completion",
+    "json/unknown-completion",
+    "protobuf-v1/duplicate-completion",
+    "protobuf-v1/alias-completion",
+    "protobuf-v1/unknown-completion"
+  ],
+  "metadata_cases_rejected_by_additional_annotation_checks": [
+    "metadata_reference",
+    "metadata_hash"
+  ],
+  "ordinary_decoder_preserves_missing_null_metadata_scalar_guards": true,
+  "valid_annotation_admission_required_failures": [
+    "buffered=false/duplicate_completion_metadata_reference",
+    "buffered=false/duplicate_completion_metadata_hash",
+    "buffered=true/duplicate_completion_metadata_reference",
+    "buffered=true/duplicate_completion_metadata_hash"
+  ]
+}

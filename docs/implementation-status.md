@@ -1,5 +1,22 @@
 # Implementation status against the supplied plan
 
+## Runtime completion envelopes hardened — 2026-10-10
+
+Shared typed completion admission rejects duplicate/aliased/escaped/unknown
+runtime fields before offline handlers/plugins and in SDK/journal checkpoint
+paths. User result JSON stays opaque; empty timer completion objects stay valid.
+Final full SDK race, all853 unchanged pins, checkpoint/index race and CLI replay
+race checks pass. A completion ambiguity bypass mutant fails12 SDK handler-entry,
+9 CLI plugin-entry and6 JSON/protobuf journal acceptance controls. Two malformed
+metadata cases also reject through separate annotation checks and are not counted.
+[Development evidence](scale/graph-step-completion-envelope-2026-10-10/README.md).
+The full CLI native operator attempt remains FAILED at R3Domain unknown signal
+append outcome after a deadline; its cause is unconfirmed and replay successes
+cannot clear it. Frozen compaction qualification now passed1000 race seeds and
+all853 normal pins and is running100000 normal seeds. Its terminal independent
+review is still pending; frozen full158 race remains live. All original open
+requirements remain in scope, including actual100000 native failure.
+
 ## Runtime step declaration admission hardened — 2026-10-10
 
 Shared typed request decoding rejects duplicate/aliased/escaped/unknown header
