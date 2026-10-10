@@ -1,0 +1,24 @@
+{
+  "base": "5245496abce96bb383e4c0b0492185617983952a",
+  "command": [
+    "go",
+    "test",
+    "-race",
+    "./workflowlint",
+    "./cmd/wf-lint",
+    "-count=1",
+    "-v",
+    "-timeout=2m"
+  ],
+  "actual_exit": 0,
+  "sha256": {
+    "workflowlint/lint.go": "272c85ae1c90f70e70533bed21d133f226b1e252c79c15e8e8255150184cfb2f",
+    "workflowlint/lint_test.go": "9f25ffdc3942970cffbc6beef48606651eb605c0f7b3303075db341ffcc0a83f",
+    "cmd/wf-lint/main.go": "90dcabb34a2dfbe9a939470a5b044b25bf35cf4ca7359bf6d983c1f80ab425a1",
+    "cmd/wf-lint/main_test.go": "b5a008cc27b14e51f2e64eb18acebe74ace9a896a3f12e7808a40aa4d5825675",
+    "go.mod": "dde8362ebdd9ab84708601a02234e1babfdd7e0ec4fc14f252d3237b61257c46",
+    "go.sum": "fd6c0554118f16b0ffad4a734115e2cbb34cd352c394bda99fa3a204097fc82b"
+  },
+  "scope": "Focused worktree linter/CLI check only; unrelated workflow runtime gates remain open.",
+  "historical_corpus_source": "negative-corpus.go.txt contains the exact earlier lint_test.go input before the toolchain export guard was added."
+}

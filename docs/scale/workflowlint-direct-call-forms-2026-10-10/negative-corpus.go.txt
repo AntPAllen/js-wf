@@ -1,40 +1,11 @@
 package workflowlint
 
 import (
-	"go/ast"
-	"go/build"
-	"go/parser"
-	"go/token"
 	"os"
 	"path/filepath"
 	"strings"
 	"testing"
 )
-
-func TestDotRandomFunctionTableCoversToolchainExports(t *testing.T) {
-	for path, names := range dotRandomFunctions {
-		pkg, err := build.Default.Import(path, "", 0)
-		if err != nil {
-			t.Fatal(err)
-		}
-		listed := map[string]bool{}
-		for _, name := range strings.Fields(names) {
-			listed[name] = true
-		}
-		for _, name := range pkg.GoFiles {
-			file, err := parser.ParseFile(token.NewFileSet(), filepath.Join(pkg.Dir, name), nil, 0)
-			if err != nil {
-				t.Fatal(err)
-			}
-			for _, decl := range file.Decls {
-				fn, ok := decl.(*ast.FuncDecl)
-				if ok && fn.Recv == nil && ast.IsExported(fn.Name.Name) && !listed[fn.Name.Name] {
-					t.Errorf("dot import table misses %s.%s in the current toolchain", path, fn.Name.Name)
-				}
-			}
-		}
-	}
-}
 
 func TestScanWorkflowCallsAndShadows(t *testing.T) {
 	dir := t.TempDir()

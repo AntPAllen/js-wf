@@ -85,8 +85,6 @@ func scanFile(fset *token.FileSet, file *ast.File) []Diagnostic {
 	wfAliases := map[string]bool{}
 	timeAliases := map[string]bool{}
 	randAliases := map[string]bool{}
-	dotCalls := map[string]string{}
-	dotWorkflow := false
 	for _, spec := range file.Imports {
 		path, err := strconv.Unquote(spec.Path.Value)
 		if err != nil {
@@ -96,20 +94,7 @@ func scanFile(fset *token.FileSet, file *ast.File) []Diagnostic {
 		if spec.Name != nil {
 			alias = spec.Name.Name
 		}
-		if alias == "_" {
-			continue
-		}
-		if alias == "." {
-			switch {
-			case path == "js-wf/wf" || strings.HasSuffix(path, "/wf"):
-				dotWorkflow = true
-			case path == "time":
-				dotCalls["Now"] = "journal time with wf.Now"
-			default:
-				for _, name := range strings.Fields(dotRandomFunctions[path]) {
-					dotCalls[name] = "journal randomness with wf.Random or a recorded step"
-				}
-			}
+		if alias == "_" || alias == "." {
 			continue
 		}
 		switch {
@@ -121,7 +106,7 @@ func scanFile(fset *token.FileSet, file *ast.File) []Diagnostic {
 			randAliases[alias] = true
 		}
 	}
-	if len(wfAliases) == 0 && !dotWorkflow || len(timeAliases)+len(randAliases)+len(dotCalls) == 0 {
+	if len(wfAliases) == 0 || len(timeAliases)+len(randAliases) == 0 {
 		return nil
 	}
 	seen := map[token.Pos]bool{}
@@ -133,15 +118,12 @@ func scanFile(fset *token.FileSet, file *ast.File) []Diagnostic {
 			if !ok || len(call.Args) == 0 {
 				return true
 			}
-			effectCall := false
-			switch fun := unwrapCall(call.Fun).(type) {
-			case *ast.SelectorExpr:
-				pkg, ok := fun.X.(*ast.Ident)
-				effectCall = ok && pkg.Obj == nil && wfAliases[pkg.Name] && (fun.Sel.Name == "Run" || fun.Sel.Name == "RunOnce")
-			case *ast.Ident:
-				effectCall = dotWorkflow && fun.Obj == nil && (fun.Name == "Run" || fun.Name == "RunOnce")
+			selector, ok := call.Fun.(*ast.SelectorExpr)
+			if !ok || selector.Sel.Name != "Run" && selector.Sel.Name != "RunOnce" {
+				return true
 			}
-			if !effectCall {
+			pkg, ok := selector.X.(*ast.Ident)
+			if !ok || pkg.Obj != nil || !wfAliases[pkg.Name] {
 				return true
 			}
 			if effect, ok := call.Args[len(call.Args)-1].(*ast.FuncLit); ok {
@@ -157,31 +139,24 @@ func scanFile(fset *token.FileSet, file *ast.File) []Diagnostic {
 			if !ok {
 				return true
 			}
-			if seen[call.Pos()] {
+			selector, ok := call.Fun.(*ast.SelectorExpr)
+			if !ok {
 				return true
 			}
-			hint, name := "", ""
-			switch fun := unwrapCall(call.Fun).(type) {
-			case *ast.SelectorExpr:
-				pkg, ok := fun.X.(*ast.Ident)
-				if !ok || pkg.Obj != nil {
-					return true
-				}
-				name = pkg.Name + "." + fun.Sel.Name
-				if timeAliases[pkg.Name] && fun.Sel.Name == "Now" {
-					hint = "journal time with wf.Now"
-				} else if randAliases[pkg.Name] {
-					hint = "journal randomness with wf.Random or a recorded step"
-				}
-			case *ast.Ident:
-				if fun.Obj == nil {
-					name, hint = fun.Name, dotCalls[fun.Name]
-				}
+			pkg, ok := selector.X.(*ast.Ident)
+			if !ok || pkg.Obj != nil || seen[call.Pos()] {
+				return true
+			}
+			hint := ""
+			if timeAliases[pkg.Name] && selector.Sel.Name == "Now" {
+				hint = "journal time with wf.Now"
+			} else if randAliases[pkg.Name] {
+				hint = "journal randomness with wf.Random or a recorded step"
 			}
 			if hint != "" {
 				seen[call.Pos()] = true
 				position := fset.Position(call.Pos())
-				findings = append(findings, Diagnostic{File: position.Filename, Line: position.Line, Column: position.Column, Call: name, Hint: hint})
+				findings = append(findings, Diagnostic{File: position.Filename, Line: position.Line, Column: position.Column, Call: pkg.Name + "." + selector.Sel.Name, Hint: hint})
 			}
 			return true
 		})
@@ -189,11 +164,11 @@ func scanFile(fset *token.FileSet, file *ast.File) []Diagnostic {
 	ast.Inspect(file, func(node ast.Node) bool {
 		switch fn := node.(type) {
 		case *ast.FuncDecl:
-			if fn.Body != nil && hasWorkflowContext(fn.Type.Params, wfAliases, dotWorkflow) {
+			if fn.Body != nil && hasWorkflowContext(fn.Type.Params, wfAliases) {
 				inspectHandler(fn.Body)
 			}
 		case *ast.FuncLit:
-			if hasWorkflowContext(fn.Type.Params, wfAliases, dotWorkflow) {
+			if hasWorkflowContext(fn.Type.Params, wfAliases) {
 				inspectHandler(fn.Body)
 			}
 		}
@@ -202,30 +177,7 @@ func scanFile(fset *token.FileSet, file *ast.File) []Diagnostic {
 	return findings
 }
 
-// Exported random functions in the supported Go toolchain. Keep this list
-// explicit so the standalone linter does not require a GOROOT source tree.
-var dotRandomFunctions = map[string]string{
-	"math/rand":    "NewSource New Seed Int63 Uint32 Uint64 Int31 Int Int63n Int31n Intn Float64 Float32 Perm Shuffle Read NormFloat64 ExpFloat64 NewZipf",
-	"math/rand/v2": "New NewPCG NewChaCha8 NewZipf Int64 Uint32 Uint64N Uint32N Uint64 Int32 Int Uint Int64N Int32N IntN UintN N Float64 Float32 Perm Shuffle NormFloat64 ExpFloat64",
-	"crypto/rand":  "Read Text Prime Int",
-}
-
-func unwrapCall(fun ast.Expr) ast.Expr {
-	for {
-		switch node := fun.(type) {
-		case *ast.ParenExpr:
-			fun = node.X
-		case *ast.IndexExpr:
-			fun = node.X
-		case *ast.IndexListExpr:
-			fun = node.X
-		default:
-			return fun
-		}
-	}
-}
-
-func hasWorkflowContext(params *ast.FieldList, aliases map[string]bool, dotWorkflow bool) bool {
+func hasWorkflowContext(params *ast.FieldList, aliases map[string]bool) bool {
 	if params == nil {
 		return false
 	}
@@ -233,9 +185,6 @@ func hasWorkflowContext(params *ast.FieldList, aliases map[string]bool, dotWorkf
 		pointer, ok := field.Type.(*ast.StarExpr)
 		if !ok {
 			continue
-		}
-		if name, ok := pointer.X.(*ast.Ident); ok && dotWorkflow && name.Name == "Context" && name.Obj == nil {
-			return true
 		}
 		selector, ok := pointer.X.(*ast.SelectorExpr)
 		if !ok || selector.Sel.Name != "Context" {

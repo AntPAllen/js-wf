@@ -1,0 +1,38 @@
+{
+  "command": [
+    "/home/exedev/js-wf-lint-command-20261010/wf-lint",
+    "/home/exedev/js-wf-lint-command-20261010/workflow.go"
+  ],
+  "actual_exit": 1,
+  "stdout": "/home/exedev/js-wf-lint-command-20261010/workflow.go:3:29: clock.Now inside workflow handler; journal time with wf.Now\n/home/exedev/js-wf-lint-command-20261010/workflow.go:3:44: random.N inside workflow handler; journal randomness with wf.Random or a recorded step\n",
+  "stderr": "2 nondeterministic workflow calls found\n",
+  "build": [
+    "go",
+    "build",
+    "-o",
+    "/home/exedev/js-wf-lint-command-20261010/wf-lint",
+    "./cmd/wf-lint"
+  ],
+  "binary_sha256": "bb98bf5477243562d2135e2c8bd158f89ab7c77c9f6b8cd906d216499e892221",
+  "fixture_sha256": "a96b0c499fa3d794e58bd983a3ae5090ff4adfdc9258a886bf288d440effaa5b",
+  "source": {
+    "workflowlint/lint.go": "272c85ae1c90f70e70533bed21d133f226b1e252c79c15e8e8255150184cfb2f",
+    "workflowlint/lint_test.go": "776b209060d2f49d3cbf4d0e823feca0a3439a1819efbe20c183e8db7270562c",
+    "cmd/wf-lint/main.go": "90dcabb34a2dfbe9a939470a5b044b25bf35cf4ca7359bf6d983c1f80ab425a1",
+    "cmd/wf-lint/main_test.go": "b5a008cc27b14e51f2e64eb18acebe74ace9a896a3f12e7808a40aa4d5825675",
+    "go.mod": "dde8362ebdd9ab84708601a02234e1babfdd7e0ec4fc14f252d3237b61257c46",
+    "go.sum": "fd6c0554118f16b0ffad4a734115e2cbb34cd352c394bda99fa3a204097fc82b"
+  },
+  "race_command": [
+    "go",
+    "test",
+    "-race",
+    "./workflowlint",
+    "./cmd/wf-lint",
+    "-count=1",
+    "-v",
+    "-timeout=2m"
+  ],
+  "actual_race_exit": 0,
+  "scope": "Focused development source/compiled linter check; no clean-source or workflow runtime acceptance."
+}

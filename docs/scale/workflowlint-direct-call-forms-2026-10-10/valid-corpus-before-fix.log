@@ -1,0 +1,20 @@
+=== RUN   TestScanDotImportsGenericCallsAndJournaledEffects
+=== RUN   TestScanDotImportsGenericCallsAndJournaledEffects/dot-clock
+    lint_test.go:95: findings=[] err=<nil> want=[Now]
+=== RUN   TestScanDotImportsGenericCallsAndJournaledEffects/dot-context-and-effects
+    lint_test.go:95: findings=[] err=<nil> want=[clock.Now]
+=== RUN   TestScanDotImportsGenericCallsAndJournaledEffects/dot-rand-v2
+    lint_test.go:95: findings=[] err=<nil> want=[N IntN]
+=== RUN   TestScanDotImportsGenericCallsAndJournaledEffects/dot-crypto-rand
+    lint_test.go:95: findings=[] err=<nil> want=[Read Text]
+=== RUN   TestScanDotImportsGenericCallsAndJournaledEffects/named-generic-and-parentheses
+    lint_test.go:95: findings=[] err=<nil> want=[r.N clock.Now r.Float64]
+--- FAIL: TestScanDotImportsGenericCallsAndJournaledEffects (0.00s)
+    --- FAIL: TestScanDotImportsGenericCallsAndJournaledEffects/dot-clock (0.00s)
+    --- FAIL: TestScanDotImportsGenericCallsAndJournaledEffects/dot-context-and-effects (0.00s)
+    --- FAIL: TestScanDotImportsGenericCallsAndJournaledEffects/dot-rand-v2 (0.00s)
+    --- FAIL: TestScanDotImportsGenericCallsAndJournaledEffects/dot-crypto-rand (0.00s)
+    --- FAIL: TestScanDotImportsGenericCallsAndJournaledEffects/named-generic-and-parentheses (0.00s)
+FAIL
+FAIL	js-wf/workflowlint	0.003s
+FAIL

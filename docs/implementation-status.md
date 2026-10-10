@@ -1,5 +1,21 @@
 # Implementation status against the supplied plan
 
+## Phase 4 linter direct-call forms corrected — 2026-10-10
+
+The scanner now recognizes dot-imported workflow Context/time/random functions,
+parenthesized calls and generic random calls. The original source misses all
+five valid corpus cases under an overlay; the fixed complete linter/command
+race suites pass, with local shadows and journaled-effect exclusions intact.
+A compiled command reports two formerly missed calls and exits 1 as expected.
+A toolchain-export guard keeps the static random-function table complete.
+[Corpus, original-source counterexample and actual command evidence](scale/workflowlint-direct-call-forms-2026-10-10/README.md).
+
+This completes the focused direct-call coverage correction. The scanner does
+not follow separate helpers or indirect function values. Workflow runtime and
+original acceptance targets are unchanged. Entry/Tier 1 campaigns continue
+under their original live invocations; broader implementation/scale/fault/
+storage/soak/retention/security/rollout gates remain open, admission/collection off.
+
 ## Clean Signal budget qualification and Tier 1 source comparison — 2026-10-10
 
 Frozen `d26f571` independently qualifies the focused binding-budget race:
