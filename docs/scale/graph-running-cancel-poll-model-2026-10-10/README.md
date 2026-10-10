@@ -21,3 +21,6 @@ exact source/binary identity, complete body/mode counts and every pinned result.
 No frozen or extended acceptance is claimed before closure and review. Full
 latest157 normal/race/extended, native fault, retention, import, public admission,
 production collection, rollout and every broader original requirement remain open.
+
+Frozen source `ecc78eb811f7f556a65c2b972948042a7b18024e` is confirmed live under `js-wf-graph-cancel-poll-20261010.service`.
+[Launch identity](launch.json) records the process and retained invocation.
