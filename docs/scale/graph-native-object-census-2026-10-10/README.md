@@ -31,3 +31,14 @@ and eight required unsafe-configuration failures. The [reviewer](review.py)
 requires all five actual command exits, exact Git inputs, both binary hashes,
 all16 new R1/R3 cells, the exact disabled source, and loaded matching terminal
 supervisor exit0. Until that review succeeds, frozen qualification is open.
+
+## Frozen verification accepted
+
+Frozen `af731f4` passes [independent review](review.json):3403 exact Git
+inputs, both retained race binaries, all seven native object roots,16 R1/R3
+new cells, eight required unsafe-configuration failures, and bounded64-entry
+R1/domain/archive continuation control33.164s. All five expected command
+exits and loaded matching supervisor exit0 are proven. [Closed evidence](qualified/)
+preserves exact source inventories, command state, raw events and mutant.
+The original cap run and all broader original requirements remain separate;
+this accepts single-RPC Get admission/census, not an overall latency gain.

@@ -1,0 +1,470 @@
+package graphpublication
+
+import (
+	"bytes"
+	"context"
+	"crypto/sha256"
+	"encoding/base64"
+	"encoding/hex"
+	"encoding/json"
+	"errors"
+	"fmt"
+	"math"
+	"reflect"
+	"sort"
+	"strconv"
+	"strings"
+	"time"
+
+	"js-wf/internal/blobpublication"
+	"js-wf/internal/retainedgraph"
+
+	"js-wf/internal/natsstream"
+
+	"github.com/nats-io/nats.go"
+	"github.com/nats-io/nats.go/jetstream"
+)
+
+const nativeBlobFormat = "graph-recoverable-v1"
+const nativeChunkSize = 128 * 1024
+
+var ErrUntrackedChunks = errors.New("untracked native blob chunks")
+
+// NativePort is an experimental graph protocol port. The bucket is exclusively
+// written through this adapter, with a graph-only format that legacy adapters
+// reject before enumeration. Ordinary ObjectStore physical readers are compatible.
+// Chunk IDs encode the unique physical attempt so partial uploads are visible
+// to collection even before metadata exists. Runtime workflow wiring is absent.
+type NativePort struct {
+	*NativeAuthority
+	bucket       string
+	objects      jetstream.ObjectStore
+	objectStream jetstream.Stream
+}
+
+var _ Port = (*NativePort)(nil)
+var _ RootCatalogPort = (*NativePort)(nil)
+var _ RootScanPort = (*NativePort)(nil)
+var _ RootCatalogWatermarkPort = (*NativePort)(nil)
+
+// ReaderMaintenanceScope binds maintenance leases/checkpoints to this isolated
+// authority and object namespace. It is stable across adapter restarts.
+func (p *NativePort) ReaderMaintenanceScope() string {
+	if p == nil || p.NativeAuthority == nil {
+		return ""
+	}
+	encoded, _ := json.Marshal([]string{p.name, p.prefix, p.bucket})
+	digest := sha256.Sum256(encoded)
+	return hex.EncodeToString(digest[:])
+}
+
+// NativeObjectStreamConfig provisions a NEW isolated protocol bucket. Metadata
+// uses standard ObjectStore rollups; chunk subjects retain all their messages.
+// Administrators must not relax retention or destroy/recreate its authority.
+func NativeObjectStreamConfig(bucket string, replicas int) jetstream.StreamConfig {
+	return jetstream.StreamConfig{Name: "OBJ_" + bucket, Subjects: []string{"$O." + bucket + ".C.>", "$O." + bucket + ".M.>"}, Storage: jetstream.FileStorage, Replicas: replicas, Retention: jetstream.LimitsPolicy, Discard: jetstream.DiscardOld, AllowRollup: true, DenyDelete: true, Metadata: map[string]string{"js-wf-blob-format": nativeBlobFormat}}
+}
+func OpenNativePort(ctx context.Context, authority *NativeAuthority, bucket string) (*NativePort, error) {
+	if authority == nil || !validID(strings.ReplaceAll(bucket, "_", "-")) {
+		return nil, errors.New("invalid native blob bucket")
+	}
+	var last error
+	for attempt := 0; attempt < 3; attempt++ {
+		if err := ctx.Err(); err != nil {
+			return nil, err
+		}
+		lookup, stop := context.WithTimeout(ctx, 2*time.Second)
+		p, err := openNativePortAttempt(lookup, authority, bucket)
+		stop()
+		if err == nil {
+			return p, nil
+		}
+		if ctx.Err() != nil {
+			return nil, ctx.Err()
+		}
+		last = err
+		if !errors.Is(err, context.DeadlineExceeded) && !errors.Is(err, nats.ErrTimeout) {
+			return nil, err
+		}
+	}
+	return nil, last
+}
+
+// Admission is read-only: no stream/bucket creation or mutation is retried.
+func openNativePortAttempt(ctx context.Context, authority *NativeAuthority, bucket string) (*NativePort, error) {
+	stream, err := authority.js.Stream(ctx, "OBJ_"+bucket)
+	if err != nil {
+		return nil, fmt.Errorf("open graph object stream: %w", err)
+	}
+	p := &NativePort{NativeAuthority: authority, bucket: bucket, objectStream: natsstream.Guard(stream)}
+	if err = p.validateObjects(ctx); err != nil {
+		return nil, fmt.Errorf("validate graph object stream: %w", err)
+	}
+	p.objects, err = authority.js.ObjectStore(ctx, bucket)
+	if err != nil {
+		return nil, fmt.Errorf("open graph object reader: %w", err)
+	}
+	return p, nil
+}
+
+func (p *NativePort) validateObjects(ctx context.Context) error {
+	info, err := p.objectStream.Info(ctx)
+	if err != nil {
+		return err
+	}
+	return p.validateObjectConfig(info.Config)
+}
+
+func (p *NativePort) validateObjectConfig(c jetstream.StreamConfig) error {
+	if c.Name != "OBJ_"+p.bucket || !reflect.DeepEqual(c.Subjects, []string{"$O." + p.bucket + ".C.>", "$O." + p.bucket + ".M.>"}) || c.Metadata["js-wf-blob-format"] != nativeBlobFormat || c.Storage != jetstream.FileStorage || c.Replicas < 1 || c.Retention != jetstream.LimitsPolicy || c.Discard != jetstream.DiscardOld || c.MaxAge != 0 || c.MaxMsgs > 0 || c.MaxBytes > 0 || c.MaxMsgsPerSubject > 0 || c.MaxMsgSize > 0 || c.AllowDirect || c.AllowMsgTTL || c.SubjectDeleteMarkerTTL != 0 || !c.AllowRollup || !c.DenyDelete || c.DenyPurge || c.NoAck || c.Sealed || c.Mirror != nil || len(c.Sources) != 0 || c.SubjectTransform != nil || c.RePublish != nil || c.DiscardNewPerSubject || c.AllowAtomicPublish || c.AllowMsgSchedules || c.PersistMode != jetstream.DefaultPersistMode {
+		return errors.New("unsafe graph recoverable ObjectStore configuration")
+	}
+	return nil
+}
+func parsePhysicalObject(name string) (blobpublication.Object, error) {
+	parts := strings.Split(name, "/")
+	if len(parts) != 3 {
+		return blobpublication.Object{}, errors.New("invalid physical object name")
+	}
+	gen, err := strconv.ParseUint(parts[1], 10, 64)
+	if err != nil {
+		return blobpublication.Object{}, err
+	}
+	o := blobpublication.Object{Key: parts[0], Reference: blobpublication.Reference{Generation: gen, Object: name}}
+	if !validHash(o.Key) || !validObject(o) || parts[1] != strconv.FormatUint(gen, 10) {
+		return blobpublication.Object{}, errors.New("invalid physical object identity")
+	}
+	if _, _, err = objectAuthority(o); err != nil {
+		return blobpublication.Object{}, err
+	}
+	return o, nil
+}
+func boolUint(b bool) uint64 {
+	if b {
+		return 1
+	}
+	return 0
+}
+
+func physicalEncoding(name string) string { return base64.URLEncoding.EncodeToString([]byte(name)) }
+func (p *NativePort) metaSubject(name string) string {
+	return "$O." + p.bucket + ".M." + physicalEncoding(name)
+}
+func (p *NativePort) chunkSubject(name string) string {
+	return "$O." + p.bucket + ".C." + physicalEncoding(name)
+}
+func (p *NativePort) metadata(ctx context.Context, name string) (*jetstream.ObjectInfo, uint64, error) {
+	message, err := p.objectStream.GetLastMsgForSubject(ctx, p.metaSubject(name))
+	if errors.Is(err, jetstream.ErrMsgNotFound) {
+		return nil, 0, nil
+	}
+	if err != nil {
+		return nil, 0, err
+	}
+	var info jetstream.ObjectInfo
+	if len(message.Data) > 4096 {
+		return nil, 0, errors.New("graph object metadata byte limit")
+	}
+	decoder := json.NewDecoder(bytes.NewReader(message.Data))
+	decoder.DisallowUnknownFields()
+	if err = decoder.Decode(&info); err != nil {
+		return nil, 0, err
+	}
+	encoded, encodeErr := json.Marshal(info)
+	if encodeErr != nil || !bytes.Equal(encoded, message.Data) {
+		return nil, 0, errors.New("noncanonical graph object metadata")
+	}
+	if len(info.Metadata) != 1 {
+		return nil, 0, errors.New("invalid graph object state metadata")
+	}
+	state := info.Metadata["js-wf-graph-state"]
+	if info.Opts != nil && (info.Opts.Link != nil || info.Opts.ChunkSize != nativeChunkSize) {
+		return nil, 0, errors.New("invalid graph chunk options")
+	}
+	switch state {
+	case "staging":
+		if info.Deleted || info.Size != 0 || info.Chunks != 0 || info.Digest != "" || info.Opts == nil {
+			return nil, 0, errors.New("invalid staged graph attempt")
+		}
+	case "complete":
+		object, parseErr := parsePhysicalObject(name)
+		hashBytes, hashErr := hex.DecodeString(object.Key)
+		if hashErr != nil || parseErr != nil || info.Deleted || info.Opts == nil || info.Chunks != uint32(info.Size/nativeChunkSize+boolUint(info.Size%nativeChunkSize != 0)) || info.Size/nativeChunkSize+boolUint(info.Size%nativeChunkSize != 0) > math.MaxUint32 || info.Digest != "SHA-256="+base64.URLEncoding.EncodeToString(hashBytes) {
+			return nil, 0, errors.New("invalid complete graph attempt")
+		}
+	case "deleted":
+		if !info.Deleted || info.Size != 0 || info.Chunks != 0 || info.Digest != "" {
+			return nil, 0, errors.New("invalid graph tombstone")
+		}
+	default:
+		return nil, 0, errors.New("unknown graph object state")
+	}
+	if message.Subject != p.metaSubject(name) || info.Name != name || info.Bucket != p.bucket || info.NUID != physicalEncoding(name) || info.Opts != nil && info.Opts.Link != nil {
+		return nil, 0, errors.New("foreign or invalid native object metadata")
+	}
+	if _, err = parsePhysicalObject(info.Name); err != nil {
+		return nil, 0, err
+	}
+	return &info, message.Sequence, nil
+}
+func (p *NativePort) publishObjectSequence(ctx context.Context, subject string, data []byte, headers nats.Header) (uint64, error) {
+	if headers == nil {
+		headers = nats.Header{}
+	}
+	headers.Set(jetstream.ExpectedStreamHeader, "OBJ_"+p.bucket)
+	ack, err := p.js.PublishMsg(ctx, &nats.Msg{Subject: subject, Data: data, Header: headers})
+	if err != nil {
+		var api *jetstream.APIError
+		if errors.As(err, &api) && (api.ErrorCode == jetstream.JSErrCodeStreamWrongLastSequence || api.ErrorCode == jetstream.JSErrCodeStreamWrongLastSequenceConstant) {
+			return 0, ErrConflict
+		}
+		return 0, err
+	}
+	if ack == nil || ack.Stream != "OBJ_"+p.bucket || ack.Sequence == 0 || ack.Duplicate {
+		return 0, errors.New("unexpected native object acknowledgment")
+	}
+	return ack.Sequence, nil
+}
+func (p *NativePort) publishMetadata(ctx context.Context, info jetstream.ObjectInfo, expected uint64) (uint64, error) {
+	data, err := json.Marshal(info)
+	if err != nil {
+		return 0, err
+	}
+	return p.publishObjectSequence(ctx, p.metaSubject(info.Name), data, nats.Header{jetstream.ExpectedLastSubjSeqHeader: []string{fmt.Sprint(expected)}, jetstream.MsgRollup: []string{jetstream.MsgRollupSubject}})
+}
+
+// Put never overwrites an attempt, including a deleted one. Synchronous chunk
+// acknowledgments follow an immutable staging reservation and precede one
+// completion publication conditional on that exact reservation sequence. A failed call
+// does not promote by observing bytes; recovery treats all its chunks as orphans.
+func (p *NativePort) Put(ctx context.Context, name string, data []byte) error {
+	object, err := parsePhysicalObject(name)
+	if err != nil {
+		return err
+	}
+	if uint64(len(data))/nativeChunkSize+boolUint(uint64(len(data))%nativeChunkSize != 0) > math.MaxUint32 {
+		return errors.New("graph object chunk population exhausted")
+	}
+	if key(data) != object.Key {
+		return errors.New("physical object content hash mismatch")
+	}
+	if err = p.validateObjects(ctx); err != nil {
+		return err
+	}
+	scope, owner, err := objectAuthority(object)
+	if err != nil {
+		return err
+	}
+	record, err := p.ReadBlob(ctx, scope)
+	if err != nil {
+		return err
+	}
+	if record.Revision == 0 || record.Fence.Generation != object.Reference.Generation || record.Fence.Phase != "uploading" || record.Fence.Owner != owner {
+		return ErrRevoked
+	}
+	if err = validateFence(scope, record); err != nil {
+		return err
+	}
+	if _, exists := record.Fence.Intents[owner]; !exists {
+		return ErrRevoked
+	}
+	existing, _, err := p.metadata(ctx, name)
+	if err != nil {
+		return err
+	}
+	if existing != nil {
+		return errors.New("native physical attempt reused")
+	}
+	// Permanently reserve this unique attempt before any chunks. Retries and
+	// concurrent duplicate names lose the sequence-zero metadata condition.
+	reservation := jetstream.ObjectInfo{ObjectMeta: jetstream.ObjectMeta{Name: name, Opts: &jetstream.ObjectMetaOptions{ChunkSize: nativeChunkSize}, Metadata: map[string]string{"js-wf-graph-state": "staging"}}, Bucket: p.bucket, NUID: physicalEncoding(name)}
+	reservedSequence, err := p.publishMetadata(ctx, reservation, 0)
+	if err != nil {
+		return err
+	}
+	chunks := uint32(0)
+	for offset := 0; offset < len(data); offset += nativeChunkSize {
+		end := offset + nativeChunkSize
+		if end > len(data) {
+			end = len(data)
+		}
+		if _, err = p.publishObjectSequence(ctx, p.chunkSubject(name), data[offset:end], nil); err != nil {
+			return err
+		}
+		chunks++
+	}
+	hash := sha256.New()
+	_, _ = hash.Write(data)
+	info := jetstream.ObjectInfo{ObjectMeta: jetstream.ObjectMeta{Name: name, Opts: &jetstream.ObjectMetaOptions{ChunkSize: nativeChunkSize}, Metadata: map[string]string{"js-wf-graph-state": "complete"}}, Bucket: p.bucket, NUID: physicalEncoding(name), Size: uint64(len(data)), Chunks: chunks, Digest: jetstream.GetObjectDigestValue(hash)}
+	_, err = p.publishMetadata(ctx, info, reservedSequence)
+	return err
+}
+
+// Delete writes a durable attempt tombstone before purging its chunk subject.
+// A delayed reservation or completion publish loses its sequence condition.
+// Later chunk writes cannot become referenced; Objects discovers them again.
+func (p *NativePort) Delete(ctx context.Context, name string) error {
+	if _, err := parsePhysicalObject(name); err != nil {
+		return err
+	}
+	if err := p.validateObjects(ctx); err != nil {
+		return err
+	}
+	for attempt := 0; attempt < 16; attempt++ {
+		info, seq, err := p.metadata(ctx, name)
+		if err != nil {
+			return err
+		}
+		if info == nil {
+			info = &jetstream.ObjectInfo{ObjectMeta: jetstream.ObjectMeta{Name: name}, Bucket: p.bucket, NUID: physicalEncoding(name)}
+		}
+		info.Metadata = map[string]string{"js-wf-graph-state": "deleted"}
+		info.Deleted = true
+		info.Size = 0
+		info.Chunks = 0
+		info.Digest = ""
+		_, err = p.publishMetadata(ctx, *info, seq)
+		if errors.Is(err, ErrConflict) {
+			continue
+		}
+		if err != nil {
+			return err
+		}
+		return p.objectStream.Purge(ctx, jetstream.WithPurgeSubject(p.chunkSubject(name)))
+	}
+	return ErrConflict
+}
+
+// Objects includes partial uploads and chunks recreated after a prior delete.
+// Unknown subjects/opaque chunk IDs block collection before physical deletion.
+func (p *NativePort) Objects(ctx context.Context) ([]blobpublication.Object, error) {
+	if err := p.validateObjects(ctx); err != nil {
+		return nil, err
+	}
+	prefix := "$O." + p.bucket + "."
+	info, err := p.objectStream.Info(ctx, jetstream.WithSubjectFilter(prefix+">"))
+	if err != nil {
+		return nil, err
+	}
+	if uint64(len(info.State.Subjects)) != info.State.NumSubjects {
+		return nil, errors.New("incomplete native object census")
+	}
+	names := map[string]bool{}
+	for subject, count := range info.State.Subjects {
+		if !strings.HasPrefix(subject, prefix) || count == 0 {
+			return nil, ErrUntrackedChunks
+		}
+		suffix := strings.TrimPrefix(subject, prefix)
+		parts := strings.Split(suffix, ".")
+		if len(parts) != 2 || (parts[0] != "C" && parts[0] != "M") {
+			return nil, ErrUntrackedChunks
+		}
+		decoded, err := base64.URLEncoding.DecodeString(parts[1])
+		if err != nil || physicalEncoding(string(decoded)) != parts[1] {
+			return nil, ErrUntrackedChunks
+		}
+		name := string(decoded)
+		if _, err = parsePhysicalObject(name); err != nil {
+			return nil, ErrUntrackedChunks
+		}
+		if parts[0] == "C" {
+			names[name] = true
+			continue
+		}
+		if count != 1 {
+			return nil, errors.New("invalid native object metadata history")
+		}
+		meta, _, err := p.metadata(ctx, name)
+		if err != nil {
+			return nil, err
+		}
+		if meta == nil {
+			return nil, errors.New("native object disappeared during census")
+		}
+		if !meta.Deleted {
+			names[name] = true
+		}
+	}
+	result := make([]blobpublication.Object, 0, len(names))
+	for name := range names {
+		o, err := parsePhysicalObject(name)
+		if err != nil {
+			return nil, err
+		}
+		result = append(result, o)
+	}
+	sort.Slice(result, func(i, j int) bool { return result[i].Reference.Object < result[j].Reference.Object })
+	return result, nil
+}
+
+// Get checks a bounded physical chunk census and reads only this immutable
+// attempt with context-bound native message requests. No reader consumer or
+// blocking SDK ObjectResult is created. This is not a retention/ownership pin.
+func (p *NativePort) Get(ctx context.Context, link retainedgraph.Link, maxBytes int) ([]byte, error) {
+	if err := ctx.Err(); err != nil {
+		return nil, err
+	}
+	if maxBytes < 0 || int64(maxBytes) == math.MaxInt64 || !link.Reference.ValidFor(link.Hash) {
+		return nil, errors.New("invalid graph read bounds/identity")
+	}
+	object, err := parsePhysicalObject(link.Reference.Object)
+	if err != nil || object.Key != link.Hash || object.Reference != link.Reference {
+		return nil, errors.New("invalid graph read receipt")
+	}
+	// The census response carries the current configuration as well as exact
+	// subject counts. Validate both from this one fresh response; never cache
+	// admission across reads or fetch a separate configuration-only image.
+	subject := p.chunkSubject(link.Reference.Object)
+	census, err := p.objectStream.Info(ctx, jetstream.WithSubjectFilter(subject))
+	if err != nil {
+		return nil, err
+	}
+	if false { // required unsafe-configuration negative control
+		return nil, err
+	}
+	meta, _, err := p.metadata(ctx, link.Reference.Object)
+	if err != nil {
+		return nil, err
+	}
+	if meta == nil || meta.Deleted || meta.Metadata["js-wf-graph-state"] != "complete" {
+		return nil, jetstream.ErrObjectNotFound
+	}
+	if meta.Size > uint64(maxBytes) {
+		return nil, errors.New("graph object read byte limit")
+	}
+	for s := range census.State.Subjects {
+		if s != subject {
+			return nil, errors.New("foreign graph chunk census")
+		}
+	}
+	if census.State.Subjects[subject] != uint64(meta.Chunks) {
+		return nil, errors.New("incomplete graph chunk census")
+	}
+	data := []byte{}
+	next := uint64(1)
+	for index := uint32(0); index < meta.Chunks; index++ {
+		if err = ctx.Err(); err != nil {
+			return nil, err
+		}
+		message, err := p.objectStream.GetMsg(ctx, next, jetstream.WithGetMsgSubject(subject))
+		if err != nil {
+			return nil, err
+		}
+		expected := uint64(nativeChunkSize)
+		if index == meta.Chunks-1 {
+			expected = meta.Size - uint64(index)*nativeChunkSize
+		}
+		if message == nil || message.Subject != subject || message.Sequence < next || message.Sequence == math.MaxUint64 || uint64(len(message.Data)) != expected || uint64(len(data))+expected > meta.Size {
+			return nil, errors.New("invalid graph chunk message")
+		}
+		data = append(data, message.Data...)
+		next = message.Sequence + 1
+	}
+	if err = ctx.Err(); err != nil {
+		return nil, err
+	}
+	if len(data) > maxBytes || uint64(len(data)) != meta.Size || key(data) != link.Hash {
+		return nil, errors.New("graph object size/digest mismatch")
+	}
+	return data, nil
+}

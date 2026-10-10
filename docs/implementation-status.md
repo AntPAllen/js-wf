@@ -1,5 +1,28 @@
 # Implementation status against the supplied plan
 
+## Native object read RPC removed; full frozen race timed out — 2026-10-10
+
+Native Get now validates fresh configuration and exact chunk census from one
+Info response, removing one redundant stream-info RPC per read. No admission
+is cached. Frozen `af731f4` passes independent review:3403 exact Git inputs,
+two race binaries, all seven native object roots,16 R1/R3 cells, eight required
+unsafe-config failures, and bounded64-entry R1/domain/archive continuation
+control33.164s, with loaded matching supervisor exit0.
+[Accepted native verification](scale/graph-native-object-census-2026-10-10/review.json).
+No overall latency improvement or actual100000 cap acceptance is claimed.
+
+The older full frozen156 race closes exit1 at13:53:20 UTC on its unchanged
+300-minute package watchdog.110 families/110000 bodies complete;46 families
+remain unqualified. SuspendedScanReplay has run seven seconds at the timeout.
+No race warning occurs. Exact source/binary/commands and loaded matching
+supervisor prove the failed whole campaign, not a passing subset. Earlier
+accepted normal156 and native child8 results remain separately valid.
+[Failure preserved](scale/graph-d504-full-qualification-2026-10-10/failed-race1000/failure-review.json).
+
+Latest158 full normal/race/extended, original matrices/majority raw-p99 failure,
+actual100000 cap,24h/million drain and full retention/import/admission/
+collection/rollout remain open. The original actual-cap service is still live.
+
 ## Replay lifecycle model qualified; native call costs measured — 2026-10-10
 
 Frozen `fd05fba` passes independent lifecycle-model review:3395 exact Git

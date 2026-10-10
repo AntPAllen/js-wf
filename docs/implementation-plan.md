@@ -1,5 +1,23 @@
 # JetStream Durable Workflow Runtime — Implementation Plan
 
+## Full simulation follow-through and native read cost — 2026-10-10
+
+The full frozen156 race campaign fails at its300-minute package watchdog
+after110 completed families; its original source, commands, binary and
+terminal supervisor are preserved. This does not clear the latest158 race
+requirement. Future complete campaigns need disjoint compiled-inventory
+process groups with exact union coverage, all853 pins, per-family contiguous
+seed-body proof and actual successful command receipts for every group.
+Aggregate watchdog failures cannot become passing subsets.
+[Failure review](scale/graph-d504-full-qualification-2026-10-10/failed-race1000/failure-review.json).
+
+Native object Get now obtains fresh configuration and chunk census in one
+Info request. Frozen verification covers all seven native object roots, R1/R3
+rejection controls and a bounded continuation/archive control. This removes
+one RPC per Get; it does not change any workload target or qualify the actual
+100000 cap. [Accepted component](scale/graph-native-object-census-2026-10-10/review.json).
+All remaining original phase requirements below stay in scope.
+
 ## Current qualification and remaining plan scope — 2026-10-10
 
 The frozen terminal/shared-header retry is accepted at `14a3552`; the later

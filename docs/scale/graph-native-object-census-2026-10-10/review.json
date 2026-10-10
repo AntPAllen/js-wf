@@ -1,0 +1,114 @@
+{
+  "accepted": true,
+  "source": "af731f42603bb567ea2b8f639b1a7146ecd6c353",
+  "git_verified_inputs": 3403,
+  "actual_go_exit": 0,
+  "actual_supervisor_exit": 0,
+  "cases": [
+    "R1/archive=true"
+  ],
+  "budget": 64,
+  "entries": 64,
+  "terminal_slot": 63,
+  "checkpoints": 2,
+  "padding_operations": 24,
+  "forbidden_effects": 0,
+  "prefix_stage_calls": [
+    1,
+    1
+  ],
+  "production_cap_unchanged": true,
+  "binary_sha256": "a7149ab0738c9f6a9a79dffa00b9db6982e44d2b06a7ea703c29ed13797c1e38",
+  "events_sha256": "cd76b9296e1842be64e15a9aee13b56ef7371a926bff9925c99c45fcc4a84b7e",
+  "elapsed": 33.164,
+  "reviewed": "2026-10-10T14:00:15.029304+00:00",
+  "native_object_roots": [
+    "TestNativeGraphObjectAppendReuseAndRetirement",
+    "TestNativeGraphObjectCancellationBoundsAndUnknownChunks",
+    "TestNativeGraphObjectGetFreshCombinedCensus",
+    "TestNativeGraphObjectOpeningBoundsReadOnlyAdmission",
+    "TestNativeGraphObjectPublishCollectOrderAndDelayedDelete",
+    "TestNativeGraphObjectReadUncertaintyAndFormatIsolation",
+    "TestNativeGraphObjectReservationsLostRepliesAndLateCompletion"
+  ],
+  "fresh_config_census_cells": 16,
+  "required_unsafe_config_failures": 8,
+  "graph_binary_sha256": "779ec569488fedfc50422f57c2457bc07c0eac24a09f545c93dee2d0d4470dca",
+  "port_profiles": [
+    {
+      "from_operation": 0,
+      "to_operation": 12,
+      "wall_ns": 3585264033,
+      "operations": {
+        "CASBlob": {
+          "calls": 140,
+          "errors": 0,
+          "total_ns": 469442893
+        },
+        "CASRoot": {
+          "calls": 48,
+          "errors": 0,
+          "total_ns": 333450701
+        },
+        "Get": {
+          "calls": 138,
+          "errors": 0,
+          "total_ns": 462079355
+        },
+        "Put": {
+          "calls": 70,
+          "errors": 0,
+          "total_ns": 446280789
+        },
+        "ReadBlob": {
+          "calls": 210,
+          "errors": 0,
+          "total_ns": 696129297
+        },
+        "ReadRoot": {
+          "calls": 144,
+          "errors": 0,
+          "total_ns": 944957188
+        }
+      }
+    },
+    {
+      "from_operation": 12,
+      "to_operation": 24,
+      "wall_ns": 4066295709,
+      "operations": {
+        "CASBlob": {
+          "calls": 140,
+          "errors": 0,
+          "total_ns": 498858343
+        },
+        "CASRoot": {
+          "calls": 48,
+          "errors": 0,
+          "total_ns": 493980682
+        },
+        "Get": {
+          "calls": 138,
+          "errors": 0,
+          "total_ns": 445911519
+        },
+        "Put": {
+          "calls": 70,
+          "errors": 0,
+          "total_ns": 441110301
+        },
+        "ReadBlob": {
+          "calls": 210,
+          "errors": 0,
+          "total_ns": 684593259
+        },
+        "ReadRoot": {
+          "calls": 144,
+          "errors": 0,
+          "total_ns": 1188589306
+        }
+      }
+    }
+  ],
+  "scope": "Native object single fresh Info admission/census, all seven race roots/R1/R3 controls/eight required unsafe config failures, plus bounded 64-entry native R1/archive race diagnostic. Completed port calls include concurrent polling; summed durations overlap. This is not the 100000-entry gate or evidence of a NATS cause. Original live cap job unchanged; all broader gates remain open."
+}
