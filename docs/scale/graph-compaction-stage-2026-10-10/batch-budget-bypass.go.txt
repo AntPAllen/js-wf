@@ -1,0 +1,292 @@
+package graphpublication
+
+import (
+	"bytes"
+	"context"
+	"encoding/json"
+	"errors"
+	"io"
+	"math"
+	"reflect"
+	"time"
+	"unicode/utf8"
+
+	"js-wf/internal/blobpublication"
+	"js-wf/internal/retainedgraph"
+)
+
+const CompactionCheckpointSchema = "js-wf-graph-compaction-stage-v1"
+const MaxCompactionCheckpointBytes = 2*MaxRootBytes + 4096
+
+// CompactionStage holds unpublished original-head relocation progress. Use it
+// from one goroutine. Each batch stages at most maxRecords new logical records;
+// a record can require multiple uploads. Grant expiry remains fixed: this API
+// cannot revive collected receipts or renew an abandoned publication's lifetime.
+// Checkpoint is portable staging input, not proof of verified source/target data.
+type CompactionStage struct {
+	protocol          Protocol
+	prepared          PreparedCompaction
+	archive           retainedgraph.Root
+	maxPayloadBytes   int
+	next              uint64
+	observed, resumed bool
+	cache             map[string]retainedgraph.Link
+	locations         map[string]map[string]bool
+	err               error
+}
+
+type compactionCheckpoint struct {
+	Schema                string
+	Destination           string
+	Expected, First, Next uint64
+	Expires               time.Time
+	MaxPayloadBytes       int
+	Base, Publication     Root
+}
+
+func (s *CompactionStage) NextIndex() uint64 { return s.next }
+
+func copyCompactionRoot(root Root) Root {
+	root.Graph = copyGraph(root.Graph)
+	root.Streams = copyStreams(root.Streams)
+	root.Readers = copyReaders(root.Readers)
+	root.Application = bytes.Clone(root.Application)
+	return root
+}
+
+func (s *CompactionStage) result() PreparedCompaction {
+	result := s.prepared
+	result.base = copyCompactionRoot(result.base)
+	result.publication = copyCompactionRoot(result.publication)
+	setStream(&result.publication, PrefixArchiveStream, copyGraph(s.archive))
+	result.publication.Head = result.expected + 1
+	return result
+}
+
+// Checkpoint serializes only completed record progress and bounded frontiers.
+// Even after an uncertain record error it omits that record and its orphan
+// uploads. A fresh Resume may re-stage it using freshly observed authority.
+func (s *CompactionStage) Checkpoint() ([]byte, error) {
+	result := s.result()
+	v := compactionCheckpoint{CompactionCheckpointSchema, result.destination, result.expected, result.first, s.next, result.expires, s.maxPayloadBytes, result.base, result.publication}
+	if err := validateCompactionCheckpoint(v); err != nil {
+		return nil, err
+	}
+	data, err := json.Marshal(v)
+	if err != nil || len(data) > MaxCompactionCheckpointBytes {
+		return nil, errors.New("compaction checkpoint byte limit")
+	}
+	return data, nil
+}
+
+func validateCompactionCheckpoint(v compactionCheckpoint) error {
+	if v.Schema != CompactionCheckpointSchema || v.Destination == "" || !utf8.ValidString(v.Destination) || len(v.Destination) > 256 || v.Expected == math.MaxUint64 || v.First == 0 || v.First > v.Base.Graph.Count || v.Next > v.Base.Graph.Count || v.Expires.IsZero() || v.MaxPayloadBytes < 1 || v.Base.Head != v.Expected || v.Publication.Head != v.Expected+1 || v.Publication.Schema != StreamsSchema || !validID(v.Publication.Token) {
+		return errors.New("invalid compaction checkpoint")
+	}
+	for _, root := range []Root{v.Base, v.Publication} {
+		if _, err := normalizeRoot(root); err != nil {
+			return err
+		}
+	}
+	oldArchive := selectGraph(v.Base.Graph, v.Base.Streams, PrefixArchiveStream)
+	archive := selectGraph(v.Publication.Graph, v.Publication.Streams, PrefixArchiveStream)
+	prefix := min(v.Next, v.First)
+	if oldArchive.Count > math.MaxInt64-v.First || archive.Count != oldArchive.Count+prefix || v.Publication.Graph.Count != v.Next-prefix || !reflect.DeepEqual(v.Base.Readers, v.Publication.Readers) {
+		return errors.New("invalid compaction checkpoint progress")
+	}
+	preserved := v.Base
+	preserved.Graph = v.Publication.Graph
+	setStream(&preserved, PrefixArchiveStream, archive)
+	if !reflect.DeepEqual(preserved.Streams, v.Publication.Streams) {
+		return errors.New("compaction checkpoint changed streams")
+	}
+	return nil
+}
+
+// ResumePrefixCompaction obtains fresh canonical source authority. Descriptor
+// bytes cannot create authority or certify a partial target: Commit still checks
+// the entire relocation and every grant. Application bytes remain caller-owned
+// opaque metadata as in Begin; runtime adoption must bind its own operation.
+func (p Protocol) ResumePrefixCompaction(ctx context.Context, data []byte) (*CompactionStage, error) {
+	if err := ctx.Err(); err != nil {
+		return nil, err
+	}
+	if p.Port == nil || len(data) == 0 || len(data) > MaxCompactionCheckpointBytes {
+		return nil, errors.New("invalid compaction checkpoint size")
+	}
+	var v compactionCheckpoint
+	d := json.NewDecoder(bytes.NewReader(data))
+	d.DisallowUnknownFields()
+	if err := d.Decode(&v); err != nil {
+		return nil, err
+	}
+	if d.Decode(new(any)) != io.EOF {
+		return nil, errors.New("trailing compaction checkpoint")
+	}
+	canonical, err := json.Marshal(v)
+	if err != nil || !bytes.Equal(data, canonical) {
+		return nil, errors.New("noncanonical compaction checkpoint")
+	}
+	if err = validateCompactionCheckpoint(v); err != nil {
+		return nil, err
+	}
+	base, err := p.readRoot(ctx, v.Destination)
+	if err != nil {
+		return nil, err
+	}
+	if !reflect.DeepEqual(base, v.Base) {
+		return nil, ErrConflict
+	}
+	prepared := PreparedCompaction{destination: v.Destination, expected: v.Expected, first: v.First, expires: v.Expires, base: base, publication: v.Publication}
+	return &CompactionStage{protocol: p, prepared: prepared, archive: selectGraph(v.Publication.Graph, v.Publication.Streams, PrefixArchiveStream), maxPayloadBytes: v.MaxPayloadBytes, next: v.Next, observed: true, resumed: true, cache: map[string]retainedgraph.Link{}, locations: map[string]map[string]bool{}}, nil
+}
+
+// Advance never publishes. Errors during traversal or writes latch failure;
+// checkpoint/resume uses only completed records, independently of uncertain
+// uploads. An initial canceled context or invalid budget does not change state.
+func (s *CompactionStage) Advance(ctx context.Context, maxRecords uint64) (PreparedCompaction, bool, error) {
+	if s.err != nil {
+		return PreparedCompaction{}, false, s.err
+	}
+	if maxRecords == 0 {
+		return PreparedCompaction{}, false, errors.New("positive compaction record budget required")
+	}
+	if err := ctx.Err(); err != nil {
+		return PreparedCompaction{}, false, err
+	}
+	if s.next == s.prepared.base.Graph.Count {
+		return s.result(), true, nil
+	}
+	if s.observed {
+		root, err := s.protocol.readRoot(ctx, s.prepared.destination)
+		if err != nil {
+			s.err = err
+			return PreparedCompaction{}, false, err
+		}
+		if !reflect.DeepEqual(root, s.prepared.base) {
+			s.err = ErrConflict
+			return PreparedCompaction{}, false, s.err
+		}
+	}
+	s.observed = true
+	end := s.prepared.base.Graph.Count
+	err := retainedgraph.ReadRange(ctx, stageStore{protocol: s.protocol}, s.prepared.base.Graph, s.next, end, func(index uint64, source retainedgraph.Record) error {
+		if index != s.next {
+			return errors.New("compaction staging coverage")
+		}
+		if err := s.stageRecord(ctx, index, source); err != nil {
+			return err
+		}
+		s.next++
+		return nil
+	})
+	if err != nil {
+		s.err = err
+		return PreparedCompaction{}, false, err
+	}
+	if s.next != s.prepared.base.Graph.Count {
+		return PreparedCompaction{}, false, nil
+	}
+	result := s.result()
+	if _, err = normalizeRoot(result.publication); err != nil {
+		s.err = err
+		return PreparedCompaction{}, false, err
+	}
+	return result, true, nil
+}
+
+func (s *CompactionStage) stageRecord(ctx context.Context, index uint64, source retainedgraph.Record) error {
+	p, prepared := s.protocol, s.prepared
+	target, stream := s.prepared.publication.Graph, ""
+	if index < prepared.first {
+		target, stream = s.archive, PrefixArchiveStream
+	}
+	record := retainedgraph.Record{Data: bytes.Clone(source.Data), Blobs: []retainedgraph.Link{}}
+	for _, link := range source.Blobs {
+		if err := p.verifyOwnedGrant(ctx, prepared.destination, prepared.base, OwnedPayload{Index: index, Link: link}); err != nil {
+			return err
+		}
+		copied, known := s.cache[link.Hash]
+		if !known && s.resumed {
+			// Discover only a ready selection, never adopt an orphan by hash.
+			grant, err := p.Port.ReadBlob(ctx, authorityKey(link.Hash, prepared.publication.Token))
+			if err != nil {
+				return err
+			}
+			if err = validateFence(authorityKey(link.Hash, prepared.publication.Token), grant); err != nil {
+				return err
+			}
+			if grant.Fence.Phase == "ready" {
+				intent, ok := grant.Fence.Intents[prepared.publication.Token]
+				if !ok || intent.Destination != prepared.destination || intent.Expected != prepared.expected || !intent.Expires.Equal(prepared.expires) {
+					return ErrRevoked
+				}
+				copied = retainedgraph.Link{Hash: link.Hash, Reference: blobpublication.Reference{Generation: grant.Fence.Generation, Object: grant.Fence.Object}}
+				known = true
+				s.cache[link.Hash] = copied
+				s.locations[link.Hash] = map[string]bool{}
+				// Recover deduplication only from an authenticated edge in the
+				// completed partial forest, not an orphan's recorded location.
+				for _, location := range intent.Locations {
+					if location.Kind != "payload" || s.locations[link.Hash][location.Stream] {
+						continue
+					}
+					graph := s.prepared.publication.Graph
+					if location.Stream == PrefixArchiveStream {
+						graph = s.archive
+					} else if location.Stream != "" {
+						continue
+					}
+					if location.First >= graph.Count {
+						continue
+					}
+					present, err := retainedgraph.ContainsBlob(ctx, stageStore{protocol: p}, graph, location.First, copied)
+					if err != nil {
+						return err
+					}
+					if present {
+						s.locations[link.Hash][location.Stream] = true
+					}
+				}
+			}
+		}
+		if !known || !s.locations[link.Hash][stream] {
+			var data []byte
+			var err error
+			if !known {
+				data, err = p.Port.Get(ctx, link, s.maxPayloadBytes)
+				if err != nil {
+					return err
+				}
+				if len(data) > s.maxPayloadBytes || key(data) != link.Hash {
+					return errors.New("relocation payload digest or bound")
+				}
+			}
+			intent := Intent{Destination: prepared.destination, Expected: prepared.expected, Expires: prepared.expires, Locations: []Location{{Kind: "payload", First: target.Count, Stream: stream}}}
+			ref, err := p.acquire(ctx, link.Hash, data, prepared.publication.Token, intent)
+			if err != nil {
+				return err
+			}
+			copied = retainedgraph.Link{Hash: link.Hash, Reference: ref}
+			if known && copied != s.cache[link.Hash] {
+				return errors.New("relocation receipt changed")
+			}
+			if !known {
+				s.cache[link.Hash] = copied
+				s.locations[link.Hash] = map[string]bool{}
+			}
+			s.locations[link.Hash][stream] = true
+		}
+		record.Blobs = append(record.Blobs, copied)
+	}
+	next, err := retainedgraph.Append(ctx, stageStore{protocol: p, destination: prepared.destination, expected: prepared.expected, expires: prepared.expires, token: prepared.publication.Token, index: target.Count, stream: stream}, target, record)
+	if err != nil {
+		return err
+	}
+	if stream == PrefixArchiveStream {
+		s.archive = next
+	} else {
+		s.prepared.publication.Graph = next
+	}
+	return nil
+}

@@ -1,5 +1,32 @@
 # JetStream Durable Workflow Runtime — Implementation Plan
 
+## Archive preparation supports bounded portable staging progress — 2026-10-10
+
+`BeginPrefixCompaction` now stages caller-sized record batches without publishing.
+A canonical bounded descriptor carries completed progress across handle loss;
+resumption observes the exact original source authority. It does not certify a
+prefix: full independent record/payload/grant/inherited-archive checks and the
+captured-head commit remain. Shared-payload deduplication survives repeated
+restarts without adding a grant location per batch. In-process maps still scale
+with unique payloads; serialized progress omits them. Intent expiry remains fixed.
+[Development evidence](scale/graph-compaction-stage-2026-10-10/README.md).
+The final prefix-compaction race selection passes19.997s, including12 batch/cut
+controls,12 descriptor controls, two freshly granted forged prefixes, result
+ownership and32 local sampled schedules. Batch/source-binding/content bypasses
+fail12/12/2 controls. All853 common simulation pins pass unchanged7.004s.
+Native R1/archive20 plus handoff repair passes20.098s under race. New native R1/R3
+staging restart cases pass11.977s: saved progress after record1, original stores
+reopened, four records split2/2,11 original objects reclaimed and all surviving
+payloads verified. Initial R3 reopening timeout is retained; the fixture adds the
+existing restart quorum-readiness wait under its unchanged45-second parent.
+This is development/component evidence, not frozen qualification or OS process/
+VM power/storage loss proof. Worker/journal archive use stays synchronous within
+its15-second publication context. Runtime descriptor binding/persistence,
+durable checkpoint verification, intent renewal, bounded final commit and the
+failed actual100000 native gate remain open, alongside every original full/
+extended/native/fault/scale/soak/retention/import/admission/collector/rollout gate.
+Public continuation admission stays closed and production collection stays off.
+
 ## Older compaction campaign finished; known-defect source remains unaccepted — 2026-10-10
 
 Matching loaded supervisor identity, MainPID0 and actual exit0 are confirmed.

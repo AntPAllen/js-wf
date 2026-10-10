@@ -1,0 +1,67 @@
+=== RUN   TestGraphPrefixCompactionStageBatchesAndResumption
+=== RUN   TestGraphPrefixCompactionStageBatchesAndResumption/normal
+    compaction_stage_test.go:184: committed descriptor became authority <nil>
+=== RUN   TestGraphPrefixCompactionStageBatchesAndResumption/resume-every-record
+    compaction_stage_test.go:184: committed descriptor became authority <nil>
+=== RUN   TestGraphPrefixCompactionStageBatchesAndResumption/inherited-archive
+    compaction_stage_test.go:184: committed descriptor became authority <nil>
+=== RUN   TestGraphPrefixCompactionStageBatchesAndResumption/cancel
+    compaction_stage_test.go:184: committed descriptor became authority <nil>
+=== RUN   TestGraphPrefixCompactionStageBatchesAndResumption/put-drop
+    compaction_stage_test.go:184: committed descriptor became authority <nil>
+=== RUN   TestGraphPrefixCompactionStageBatchesAndResumption/put-lost
+    compaction_stage_test.go:184: committed descriptor became authority <nil>
+=== RUN   TestGraphPrefixCompactionStageBatchesAndResumption/ready-lost
+    compaction_stage_test.go:184: committed descriptor became authority <nil>
+=== RUN   TestGraphPrefixCompactionStageBatchesAndResumption/append
+    compaction_stage_test.go:115: stale source resumed &{{0x368a9bc64080 0xcb5d00} {owner 12 5 {0 62135597860 <nil>} {js-wf-graph-publication-v1 13 stage-append-50 {js-wf-retained-append-graph-v1 13 [{0 3 {5405708d92923cfb2011d706823cb7e31462ac13bbc1c2376e466f49c8d39b22 {1 5405708d92923cfb2011d706823cb7e31462ac13bbc1c2376e466f49c8d39b22/1/73746167652d617070656e642d3236-73746167652d617070656e642d3331}}} {8 2 {bcd493fc9de183f41a491b1f62e9c41aff7c5fb33d86e7a52d0287f97e4d7a59 {1 bcd493fc9de183f41a491b1f62e9c41aff7c5fb33d86e7a52d0287f97e4d7a59/1/73746167652d617070656e642d3432-73746167652d617070656e642d3436}}} {12 0 {5f8d1c29ef8993b0e42e78693d77a345e6bed38b1a23f74a755fc0bcb70db659 {1 5f8d1c29ef8993b0e42e78693d77a345e6bed38b1a23f74a755fc0bcb70db659/1/73746167652d617070656e642d3530-73746167652d617070656e642d3531}}}]} [] [] []} {js-wf-graph-publication-streams-v4 13 stage-append-47 {js-wf-retained-append-graph-v1 0 []} [] [99 117 114 115 111 114] [{archive {js-wf-retained-append-graph-v1 1 [{0 0 {994b81c250be7d15646d546cc8d37fb4f892facc9624f16204a5fc79957922a5 {1 994b81c250be7d15646d546cc8d37fb4f892facc9624f16204a5fc79957922a5/1/73746167652d617070656e642d3437-73746167652d617070656e642d3439}}}]}}]}} {js-wf-retained-append-graph-v1 1 [{0 0 {994b81c250be7d15646d546cc8d37fb4f892facc9624f16204a5fc79957922a5 {1 994b81c250be7d15646d546cc8d37fb4f892facc9624f16204a5fc79957922a5/1/73746167652d617070656e642d3437-73746167652d617070656e642d3439}}}]} 1024 1 true true map[] map[] <nil>} <nil>
+=== RUN   TestGraphPrefixCompactionStageBatchesAndResumption/retire
+    compaction_stage_test.go:115: stale source resumed &{{0x368a9bc64100 0xcb5d00} {owner 12 5 {0 62135597860 <nil>} {js-wf-graph-publication-v1 13  {js-wf-retained-append-graph-v1 0 []} [] [] []} {js-wf-graph-publication-streams-v4 13 stage-retire-47 {js-wf-retained-append-graph-v1 0 []} [] [99 117 114 115 111 114] [{archive {js-wf-retained-append-graph-v1 1 [{0 0 {12129e88e85a6ca3e5d8b406a6de8affe00e45cd72f5946f8eddabd437ae8ea3 {1 12129e88e85a6ca3e5d8b406a6de8affe00e45cd72f5946f8eddabd437ae8ea3/1/73746167652d7265746972652d3437-73746167652d7265746972652d3439}}}]}}]}} {js-wf-retained-append-graph-v1 1 [{0 0 {12129e88e85a6ca3e5d8b406a6de8affe00e45cd72f5946f8eddabd437ae8ea3 {1 12129e88e85a6ca3e5d8b406a6de8affe00e45cd72f5946f8eddabd437ae8ea3/1/73746167652d7265746972652d3437-73746167652d7265746972652d3439}}}]} 1024 1 true true map[] map[] <nil>} <nil>
+=== RUN   TestGraphPrefixCompactionStageBatchesAndResumption/reader
+    compaction_stage_test.go:115: stale source resumed &{{0x368a9bc64000 0xcb5d00} {owner 12 5 {0 62135597860 <nil>} {js-wf-graph-publication-retention-v2 13 stage-reader-42 {js-wf-retained-append-graph-v1 12 [{0 3 {42262a48a3fcc2f6b8646baa57fb1945db8ca19a90cf0b1167486a79d32929d2 {1 42262a48a3fcc2f6b8646baa57fb1945db8ca19a90cf0b1167486a79d32929d2/1/73746167652d7265616465722d3236-73746167652d7265616465722d3331}}} {8 2 {f89b70168b5dd202b39c70168b0eb15be8e17d60c9772931cb254aa97fb411fb {1 f89b70168b5dd202b39c70168b0eb15be8e17d60c9772931cb254aa97fb411fb/1/73746167652d7265616465722d3432-73746167652d7265616465722d3436}}}]} [{stage-reader-50 {0 62135601400 <nil>} {js-wf-retained-append-graph-v1 12 [{0 3 {42262a48a3fcc2f6b8646baa57fb1945db8ca19a90cf0b1167486a79d32929d2 {1 42262a48a3fcc2f6b8646baa57fb1945db8ca19a90cf0b1167486a79d32929d2/1/73746167652d7265616465722d3236-73746167652d7265616465722d3331}}} {8 2 {f89b70168b5dd202b39c70168b0eb15be8e17d60c9772931cb254aa97fb411fb {1 f89b70168b5dd202b39c70168b0eb15be8e17d60c9772931cb254aa97fb411fb/1/73746167652d7265616465722d3432-73746167652d7265616465722d3436}}}]} []}] [] []} {js-wf-graph-publication-streams-v4 13 stage-reader-47 {js-wf-retained-append-graph-v1 0 []} [] [99 117 114 115 111 114] [{archive {js-wf-retained-append-graph-v1 1 [{0 0 {56717b05562e04658805ae2e04f891d93b68e13f63ac4032c08e39b406721a9f {1 56717b05562e04658805ae2e04f891d93b68e13f63ac4032c08e39b406721a9f/1/73746167652d7265616465722d3437-73746167652d7265616465722d3439}}}]}}]}} {js-wf-retained-append-graph-v1 1 [{0 0 {56717b05562e04658805ae2e04f891d93b68e13f63ac4032c08e39b406721a9f {1 56717b05562e04658805ae2e04f891d93b68e13f63ac4032c08e39b406721a9f/1/73746167652d7265616465722d3437-73746167652d7265616465722d3439}}}]} 1024 1 true true map[] map[] <nil>} <nil>
+=== RUN   TestGraphPrefixCompactionStageBatchesAndResumption/collector
+    compaction_stage_test.go:115: stale source resumed &{{0x368a9bc64080 0xcb5d00} {owner 12 5 {0 62135597860 <nil>} {js-wf-graph-publication-v1 13 stage-collector-42 {js-wf-retained-append-graph-v1 12 [{0 3 {19276a6da6c600e05a3666aecc6111a30f3b79ba7d17742f4f61816fc7131ea1 {1 19276a6da6c600e05a3666aecc6111a30f3b79ba7d17742f4f61816fc7131ea1/1/73746167652d636f6c6c6563746f722d3236-73746167652d636f6c6c6563746f722d3331}}} {8 2 {f918b91a61d802d79abe23d6c03d608734af9dc00fe4cb270bd3ca8e28cb872a {1 f918b91a61d802d79abe23d6c03d608734af9dc00fe4cb270bd3ca8e28cb872a/1/73746167652d636f6c6c6563746f722d3432-73746167652d636f6c6c6563746f722d3436}}}]} [] [] []} {js-wf-graph-publication-streams-v4 13 stage-collector-47 {js-wf-retained-append-graph-v1 0 []} [] [99 117 114 115 111 114] [{archive {js-wf-retained-append-graph-v1 1 [{0 0 {93fd4abeabbdaa5a1bcb37876609f51b397ea802f58f0c615684811ffd17b41c {1 93fd4abeabbdaa5a1bcb37876609f51b397ea802f58f0c615684811ffd17b41c/1/73746167652d636f6c6c6563746f722d3437-73746167652d636f6c6c6563746f722d3439}}}]}}]}} {js-wf-retained-append-graph-v1 1 [{0 0 {93fd4abeabbdaa5a1bcb37876609f51b397ea802f58f0c615684811ffd17b41c {1 93fd4abeabbdaa5a1bcb37876609f51b397ea802f58f0c615684811ffd17b41c/1/73746167652d636f6c6c6563746f722d3437-73746167652d636f6c6c6563746f722d3439}}}]} 1024 1 true true map[] map[] <nil>} <nil>
+=== RUN   TestGraphPrefixCompactionStageBatchesAndResumption/stale-target
+--- FAIL: TestGraphPrefixCompactionStageBatchesAndResumption (0.11s)
+    --- FAIL: TestGraphPrefixCompactionStageBatchesAndResumption/normal (0.01s)
+    --- FAIL: TestGraphPrefixCompactionStageBatchesAndResumption/resume-every-record (0.01s)
+    --- FAIL: TestGraphPrefixCompactionStageBatchesAndResumption/inherited-archive (0.01s)
+    --- FAIL: TestGraphPrefixCompactionStageBatchesAndResumption/cancel (0.01s)
+    --- FAIL: TestGraphPrefixCompactionStageBatchesAndResumption/put-drop (0.01s)
+    --- FAIL: TestGraphPrefixCompactionStageBatchesAndResumption/put-lost (0.03s)
+    --- FAIL: TestGraphPrefixCompactionStageBatchesAndResumption/ready-lost (0.01s)
+    --- FAIL: TestGraphPrefixCompactionStageBatchesAndResumption/append (0.00s)
+    --- FAIL: TestGraphPrefixCompactionStageBatchesAndResumption/retire (0.00s)
+    --- FAIL: TestGraphPrefixCompactionStageBatchesAndResumption/reader (0.00s)
+    --- FAIL: TestGraphPrefixCompactionStageBatchesAndResumption/collector (0.00s)
+    --- PASS: TestGraphPrefixCompactionStageBatchesAndResumption/stale-target (0.00s)
+=== RUN   TestGraphPrefixCompactionStageRejectsCheckpointMutations
+=== RUN   TestGraphPrefixCompactionStageRejectsCheckpointMutations/duplicate
+=== RUN   TestGraphPrefixCompactionStageRejectsCheckpointMutations/alias
+=== RUN   TestGraphPrefixCompactionStageRejectsCheckpointMutations/unknown
+=== RUN   TestGraphPrefixCompactionStageRejectsCheckpointMutations/trailing
+=== RUN   TestGraphPrefixCompactionStageRejectsCheckpointMutations/oversize
+=== RUN   TestGraphPrefixCompactionStageRejectsCheckpointMutations/schema
+=== RUN   TestGraphPrefixCompactionStageRejectsCheckpointMutations/head
+=== RUN   TestGraphPrefixCompactionStageRejectsCheckpointMutations/source
+    compaction_stage_test.go:275: forged descriptor accepted &{{0x368a9bc00580 0xcb5d00} {owner 4 2 {0 62135597860 <nil>} {js-wf-graph-publication-v1 4 stage-source-11 {js-wf-retained-append-graph-v1 4 [{0 2 {097d8f54de1b76a471e1fc07a1a5e0d07550715b87372d703172f154aa66f57f {1 097d8f54de1b76a471e1fc07a1a5e0d07550715b87372d703172f154aa66f57f/1/73746167652d736f757263652d3131-73746167652d736f757263652d3135}}}]} [] [] []} {js-wf-graph-publication-streams-v4 5 stage-source-16 {js-wf-retained-append-graph-v1 0 []} [] [] [{archive {js-wf-retained-append-graph-v1 1 [{0 0 {a2fdb9e1f434cd18b6ee5c5d537e9890a149382d20ce0dd89ac4f8b5536b718f {1 a2fdb9e1f434cd18b6ee5c5d537e9890a149382d20ce0dd89ac4f8b5536b718f/1/73746167652d736f757263652d3136-73746167652d736f757263652d3138}}}]}}]}} {js-wf-retained-append-graph-v1 1 [{0 0 {a2fdb9e1f434cd18b6ee5c5d537e9890a149382d20ce0dd89ac4f8b5536b718f {1 a2fdb9e1f434cd18b6ee5c5d537e9890a149382d20ce0dd89ac4f8b5536b718f/1/73746167652d736f757263652d3136-73746167652d736f757263652d3138}}}]} 1024 1 true true map[] map[] <nil>} <nil>
+=== RUN   TestGraphPrefixCompactionStageRejectsCheckpointMutations/progress
+=== RUN   TestGraphPrefixCompactionStageRejectsCheckpointMutations/cut
+=== RUN   TestGraphPrefixCompactionStageRejectsCheckpointMutations/readers
+=== RUN   TestGraphPrefixCompactionStageRejectsCheckpointMutations/streams
+--- FAIL: TestGraphPrefixCompactionStageRejectsCheckpointMutations (0.01s)
+    --- PASS: TestGraphPrefixCompactionStageRejectsCheckpointMutations/duplicate (0.00s)
+    --- PASS: TestGraphPrefixCompactionStageRejectsCheckpointMutations/alias (0.00s)
+    --- PASS: TestGraphPrefixCompactionStageRejectsCheckpointMutations/unknown (0.00s)
+    --- PASS: TestGraphPrefixCompactionStageRejectsCheckpointMutations/trailing (0.00s)
+    --- PASS: TestGraphPrefixCompactionStageRejectsCheckpointMutations/oversize (0.00s)
+    --- PASS: TestGraphPrefixCompactionStageRejectsCheckpointMutations/schema (0.00s)
+    --- PASS: TestGraphPrefixCompactionStageRejectsCheckpointMutations/head (0.00s)
+    --- FAIL: TestGraphPrefixCompactionStageRejectsCheckpointMutations/source (0.00s)
+    --- PASS: TestGraphPrefixCompactionStageRejectsCheckpointMutations/progress (0.00s)
+    --- PASS: TestGraphPrefixCompactionStageRejectsCheckpointMutations/cut (0.00s)
+    --- PASS: TestGraphPrefixCompactionStageRejectsCheckpointMutations/readers (0.00s)
+    --- PASS: TestGraphPrefixCompactionStageRejectsCheckpointMutations/streams (0.00s)
+FAIL
+FAIL	js-wf/internal/graphpublication	0.129s
+FAIL

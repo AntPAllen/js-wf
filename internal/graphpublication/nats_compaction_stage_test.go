@@ -1,0 +1,154 @@
+package graphpublication
+
+import (
+	"fmt"
+	"os"
+	"path/filepath"
+	"testing"
+	"time"
+
+	"github.com/nats-io/nats.go/jetstream"
+	"js-wf/internal/retainedgraph"
+)
+
+func TestNativeGraphCompactionStageStoreRestart(t *testing.T) {
+	for _, replicas := range []int{1, 3} {
+		t.Run(fmt.Sprintf("R%d", replicas), func(t *testing.T) {
+			cluster, authority, c := nativeGraphFixture(t, replicas)
+			if _, err := authority.js.CreateStream(c, NativeObjectStreamConfig("STAGE_RESTART", replicas)); err != nil {
+				t.Fatal(err)
+			}
+			port, err := OpenNativePort(c, authority, "STAGE_RESTART")
+			if err != nil {
+				t.Fatal(err)
+			}
+			p := Protocol{Port: port}
+			root := EmptyRoot()
+			for i := 0; i < 4; i++ {
+				prepared, err := p.PrepareAppend(c, "history", root.Head, []byte(fmt.Sprint("record-", i)), [][]byte{[]byte("shared-native")}, time.Now().Add(time.Hour))
+				if err != nil {
+					t.Fatal(err)
+				}
+				root, err = p.Commit(c, prepared)
+				if err != nil {
+					t.Fatal(err)
+				}
+			}
+			stage, err := p.BeginPrefixCompaction(c, "history", root.Head, 2, 1024, time.Now().Add(time.Hour), nil)
+			if err != nil {
+				t.Fatal(err)
+			}
+			if _, done, err := stage.Advance(c, 1); err != nil || done {
+				t.Fatal(done, err)
+			}
+			data, err := stage.Checkpoint()
+			if err != nil {
+				t.Fatal(err)
+			}
+			file := filepath.Join(t.TempDir(), "stage.json")
+			if err = os.WriteFile(file, data, 0o600); err != nil {
+				t.Fatal(err)
+			}
+			stage = nil
+			data = nil
+			p = Protocol{}
+			port = nil
+			authority = nil
+			root = Root{}
+			for i := range cluster.Servers {
+				cluster.KillNode(i)
+			}
+			for _, server := range cluster.Servers {
+				if server.Running() {
+					t.Fatal("peer still running")
+				}
+			}
+			for i := range cluster.Servers {
+				if err = cluster.RestartNode(i); err != nil {
+					t.Fatal(err)
+				}
+			}
+			// As with the existing reader restart fixture, witness a restored
+			// metadata quorum before using the bounded authority opener.
+			ticker := time.NewTicker(20 * time.Millisecond)
+			defer ticker.Stop()
+			for {
+				ready := replicas == 1
+				for _, server := range cluster.Servers {
+					ready = ready || (server.JetStreamIsLeader() && len(server.JetStreamClusterPeers()) == replicas)
+				}
+				if ready && cluster.Clients[0].IsConnected() {
+					break
+				}
+				select {
+				case <-ticker.C:
+				case <-c.Done():
+					t.Fatal(c.Err())
+				}
+			}
+			js, err := jetstream.New(cluster.Clients[0])
+			if err != nil {
+				t.Fatal(err)
+			}
+			authority, err = OpenNativeAuthority(c, js, "GRAPH_AUTH", "wf.graph.authority")
+			if err != nil {
+				t.Fatal(err)
+			}
+			port, err = OpenNativePort(c, authority, "STAGE_RESTART")
+			if err != nil {
+				t.Fatal(err)
+			}
+			p = Protocol{Port: port}
+			data, err = os.ReadFile(file)
+			if err != nil {
+				t.Fatal(err)
+			}
+			stage, err = p.ResumePrefixCompaction(c, data)
+			if err != nil || stage.NextIndex() != 1 {
+				t.Fatal(err)
+			}
+			var plan PreparedCompaction
+			for {
+				var done bool
+				plan, done, err = stage.Advance(c, 1)
+				if err != nil {
+					t.Fatal(err)
+				}
+				if done {
+					break
+				}
+				data, err = stage.Checkpoint()
+				if err != nil {
+					t.Fatal(err)
+				}
+				stage, err = p.ResumePrefixCompaction(c, data)
+				if err != nil {
+					t.Fatal(err)
+				}
+			}
+			root, err = p.CommitPrefixCompaction(c, plan)
+			if err != nil {
+				t.Fatal(err)
+			}
+			deleted, err := p.SweepWithReaders(c, time.Now().Add(2*time.Hour))
+			if err != nil || deleted == 0 {
+				t.Fatal("old objects not reclaimed", deleted, err)
+			}
+			for i := uint64(0); i < 4; i++ {
+				graph, index := root.Graph, i-2
+				if i < 2 {
+					graph, index = selectGraph(root.Graph, root.Streams, PrefixArchiveStream), i
+				}
+				record, err := retainedgraph.Read(c, nativeGraphReadStore{port}, graph, index)
+				if err != nil || string(record.Data) != fmt.Sprint("record-", i) || len(record.Blobs) != 1 {
+					t.Fatal(record, err)
+				}
+				payload, err := port.Get(c, record.Blobs[0], 1024)
+				if err != nil || string(payload) != "shared-native" {
+					t.Fatal(string(payload), err)
+				}
+			}
+			t.Logf("NATIVE_COMPACTION_STAGE replicas=%d checkpoint_next=1 records=4 archive=2 live=2 original_objects_deleted=%d checkpoint_bytes=%d", replicas, deleted, len(data))
+		})
+	}
+}

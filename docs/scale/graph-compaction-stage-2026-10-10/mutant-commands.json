@@ -1,0 +1,44 @@
+{
+  "batch-budget-bypass": {
+    "command": [
+      "go",
+      "test",
+      "-p=1",
+      "./internal/graphpublication",
+      "-run",
+      "^TestGraphPrefixCompactionStageBatchesAndResumption$",
+      "-count=1",
+      "-v"
+    ],
+    "exit_code": 1,
+    "race": false
+  },
+  "source-binding-bypass": {
+    "command": [
+      "go",
+      "test",
+      "-p=1",
+      "./internal/graphpublication",
+      "-run",
+      "^TestGraphPrefixCompactionStageBatchesAndResumption$|^TestGraphPrefixCompactionStageRejectsCheckpointMutations$",
+      "-count=1",
+      "-v"
+    ],
+    "exit_code": 1,
+    "race": false
+  },
+  "content-comparison-bypass": {
+    "command": [
+      "go",
+      "test",
+      "-p=1",
+      "./internal/graphpublication",
+      "-run",
+      "^TestGraphPrefixCompactionStageDoesNotCertifyForgedPrefix$",
+      "-count=1",
+      "-v"
+    ],
+    "exit_code": 1,
+    "race": false
+  }
+}
