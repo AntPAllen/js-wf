@@ -1,5 +1,33 @@
 # JetStream Durable Workflow Runtime — Implementation Plan
 
+## Final compaction verification supports private record/node batches — 2026-10-10
+
+`BeginCompactionCommit` now owns copied verification state for an original-head
+plan. Separate record and node budgets preserve full data/payload/grant checks;
+verification deadlines retain only completed progress. Fresh authority checks
+between batches and the original-head final CAS reject stale source or collector
+fences. Finalization errors require a fresh operation; no portable verified-prefix
+certificate is introduced. Constructor inherited-frontier checks remain context-
+bounded without record budgets, and callbacks can perform additional path/RPC work.
+[Development evidence](scale/graph-compaction-commit-batches-2026-10-10/README.md).
+Fifteen commit controls pass under race, alongside five fresh node-iterator
+controls. Iterator131 records/259 nodes use259 Gets and at most10 pending
+coordinates; a failed deadline visit adds one fresh retry Get. Record/node budget,
+node grant and refreshed-head CAS bypasses fail15/11/2/1 controls respectively.
+Full prefix-compaction plus native R1/R3 restart selection passes47.045s under
+race. Native restart cases verify four records/six nodes one at a time, preserve
+2 archive/2 live records and reclaim11 original objects. All853 common simulation
+pins pass unchanged13.454s. Native R1/archive20 plus seven handoff repairs passes
+25.372s under race. These are development/component checks, not frozen current-
+source, OS process/VM power/storage loss or original whole-plan qualification.
+Verification progress is process-local. Existing journal/worker compaction still
+uses one synchronous batch under its15-second publication context; intent expiry
+is unchanged. Worker maintenance integration, runtime persistence/binding,
+durable checkpoint verification, intent lifetime handling and failed actual100000
+remain open alongside every original full/extended/native/fault/scale/soak/
+retention/import/admission/collector/rollout requirement. Public continuation
+admission stays closed and production collection stays off.
+
 ## Archive preparation supports bounded portable staging progress — 2026-10-10
 
 `BeginPrefixCompaction` now stages caller-sized record batches without publishing.

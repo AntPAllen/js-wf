@@ -5,7 +5,6 @@ import (
 	"context"
 	"errors"
 	"math"
-	"reflect"
 	"time"
 	"unicode/utf8"
 
@@ -141,128 +140,16 @@ func (p Protocol) checkCompactionGrant(ctx context.Context, prepared PreparedCom
 // preserved snapshots, then publishes at the captured head. Lost acknowledgments
 // require exact quorum-confirmed publication readback, as with ordinary append.
 func (p Protocol) CommitPrefixCompaction(ctx context.Context, prepared PreparedCompaction) (Root, error) {
-	if err := ctx.Err(); err != nil {
-		return Root{}, err
-	}
-	if p.Port == nil || prepared.destination == "" || !validID(prepared.publication.Token) || prepared.first == 0 || prepared.first > prepared.base.Graph.Count {
-		return Root{}, errors.New("invalid prepared compaction")
-	}
-	current, err := p.readRoot(ctx, prepared.destination)
+	operation, err := p.BeginCompactionCommit(ctx, prepared)
 	if err != nil {
 		return Root{}, err
 	}
-	if current.Head > prepared.expected && samePublication(current, prepared.publication) {
-		return current, nil
-	}
-	if current.Head != prepared.expected || !samePublication(current, prepared.base) {
-		return Root{}, ErrConflict
-	}
-	if !reflect.DeepEqual(prepared.base.Readers, prepared.publication.Readers) {
-		return Root{}, errors.New("compaction changed readers")
-	}
-	oldArchive := selectGraph(prepared.base.Graph, prepared.base.Streams, PrefixArchiveStream)
-	nextArchive := selectGraph(prepared.publication.Graph, prepared.publication.Streams, PrefixArchiveStream)
-	preserved := prepared.base
-	preserved.Graph = prepared.publication.Graph
-	setStream(&preserved, PrefixArchiveStream, nextArchive)
-	if !reflect.DeepEqual(preserved.Streams, prepared.publication.Streams) || prepared.publication.Graph.Count != prepared.base.Graph.Count-prepared.first || nextArchive.Count != oldArchive.Count+prepared.first {
-		return Root{}, errors.New("invalid compaction forest set")
-	}
-	for _, tree := range oldArchive.Frontier {
-		present, err := retainedgraph.ContainsNode(ctx, stageStore{protocol: p}, nextArchive, tree)
-		if err != nil {
-			return Root{}, err
-		}
-		if !present {
-			return Root{}, errors.New("compaction replaced inherited archive")
-		}
-	}
-	sourceRange, err := retainedgraph.NewRangeIterator(ctx, stageStore{protocol: p}, prepared.base.Graph, 0, prepared.base.Graph.Count)
+	root, done, err := operation.Advance(ctx, max(uint64(1), prepared.base.Graph.Count), ^uint64(0))
 	if err != nil {
 		return Root{}, err
 	}
-	archiveRange, err := retainedgraph.NewRangeIterator(ctx, stageStore{protocol: p}, nextArchive, oldArchive.Count, nextArchive.Count)
-	if err != nil {
-		return Root{}, err
+	if !done {
+		return Root{}, errors.New("incomplete compaction verification")
 	}
-	liveRange, err := retainedgraph.NewRangeIterator(ctx, stageStore{protocol: p}, prepared.publication.Graph, 0, prepared.publication.Graph.Count)
-	if err != nil {
-		return Root{}, err
-	}
-	for {
-		sourceIndex, source, ok, err := sourceRange.Next()
-		if err != nil {
-			return Root{}, err
-		}
-		if !ok {
-			break
-		}
-		stream, index := "", sourceIndex-prepared.first
-		targetRange := liveRange
-		if sourceIndex < prepared.first {
-			stream, index = PrefixArchiveStream, oldArchive.Count+sourceIndex
-			targetRange = archiveRange
-		}
-		nextIndex, next, ok, err := targetRange.Next()
-		if err != nil {
-			return Root{}, err
-		}
-		if !ok || nextIndex != index {
-			return Root{}, errors.New("compaction range mismatch")
-		}
-		if !bytes.Equal(source.Data, next.Data) || len(source.Blobs) != len(next.Blobs) {
-			return Root{}, errors.New("compaction changed record")
-		}
-		for i, link := range next.Blobs {
-			if link.Hash != source.Blobs[i].Hash {
-				return Root{}, errors.New("compaction changed payload")
-			}
-			if err := p.verifyOwnedGrant(ctx, prepared.destination, prepared.base, OwnedPayload{Index: sourceIndex, Link: source.Blobs[i]}); err != nil {
-				return Root{}, err
-			}
-			if err := p.checkCompactionGrant(ctx, prepared, link, stream, nil); err != nil {
-				return Root{}, err
-			}
-		}
-	}
-	for _, targetRange := range []*retainedgraph.RangeIterator{archiveRange, liveRange} {
-		_, _, ok, err := targetRange.Next()
-		if err != nil {
-			return Root{}, err
-		}
-		if ok {
-			return Root{}, errors.New("compaction range mismatch")
-		}
-	}
-	for _, stream := range []string{"", PrefixArchiveStream} {
-		graph := selectGraph(prepared.publication.Graph, prepared.publication.Streams, stream)
-		if err := retainedgraph.WalkNodes(ctx, stageStore{protocol: p}, graph, func(tree retainedgraph.Tree) error {
-			link := tree.Link
-			_, owner, err := objectAuthority(blobpublication.Object{Key: link.Hash, Reference: link.Reference})
-			if err != nil {
-				return err
-			}
-			if owner != prepared.publication.Token {
-				if stream != PrefixArchiveStream {
-					return ErrRevoked
-				}
-				return nil // Inherited archive frontiers were checked above.
-			}
-			return p.checkCompactionGrant(ctx, prepared, link, stream, &tree)
-		}); err != nil {
-			return Root{}, err
-		}
-	}
-	root, err := p.casRoot(ctx, prepared.destination, prepared.expected, prepared.publication)
-	if err == nil {
-		return root, nil
-	}
-	if ctx.Err() != nil {
-		return Root{}, err
-	}
-	actual, readErr := p.readRoot(ctx, prepared.destination)
-	if readErr == nil && actual.Head > prepared.expected && samePublication(actual, prepared.publication) {
-		return actual, nil
-	}
-	return Root{}, err
+	return root, nil
 }

@@ -1,0 +1,46 @@
+=== RUN   TestGraphPrefixCompactionCommitBatchesAndFences
+=== RUN   TestGraphPrefixCompactionCommitBatchesAndFences/normal
+    compaction_commit_test.go:179: COMPACTION_COMMIT mode=normal records=12 nodes=19 final_node_calls=6
+=== RUN   TestGraphPrefixCompactionCommitBatchesAndFences/inherited
+    compaction_commit_test.go:179: COMPACTION_COMMIT mode=inherited records=10 nodes=19 final_node_calls=6
+=== RUN   TestGraphPrefixCompactionCommitBatchesAndFences/record-deadline
+    compaction_commit_test.go:179: COMPACTION_COMMIT mode=record-deadline records=12 nodes=19 final_node_calls=6
+=== RUN   TestGraphPrefixCompactionCommitBatchesAndFences/node-deadline
+    compaction_commit_test.go:103: node deadline lost progress false <nil> 7 3
+=== RUN   TestGraphPrefixCompactionCommitBatchesAndFences/append
+=== RUN   TestGraphPrefixCompactionCommitBatchesAndFences/reader
+=== RUN   TestGraphPrefixCompactionCommitBatchesAndFences/retire
+=== RUN   TestGraphPrefixCompactionCommitBatchesAndFences/collector-records
+=== RUN   TestGraphPrefixCompactionCommitBatchesAndFences/collector-nodes
+    compaction_commit_test.go:179: COMPACTION_COMMIT mode=collector-nodes records=12 nodes=3 final_node_calls=1
+=== RUN   TestGraphPrefixCompactionCommitBatchesAndFences/collector-at-cas
+    compaction_commit_test.go:179: COMPACTION_COMMIT mode=collector-at-cas records=12 nodes=19 final_node_calls=6
+=== RUN   TestGraphPrefixCompactionCommitBatchesAndFences/node-grant
+    compaction_commit_test.go:155: failed verification committed true <nil>
+=== RUN   TestGraphPrefixCompactionCommitBatchesAndFences/drop
+    compaction_commit_test.go:179: COMPACTION_COMMIT mode=drop records=12 nodes=19 final_node_calls=6
+=== RUN   TestGraphPrefixCompactionCommitBatchesAndFences/lost
+    compaction_commit_test.go:179: COMPACTION_COMMIT mode=lost records=12 nodes=19 final_node_calls=6
+=== RUN   TestGraphPrefixCompactionCommitBatchesAndFences/unconfirmed
+    compaction_commit_test.go:179: COMPACTION_COMMIT mode=unconfirmed records=12 nodes=19 final_node_calls=6
+=== RUN   TestGraphPrefixCompactionCommitBatchesAndFences/plan-ownership
+    compaction_commit_test.go:179: COMPACTION_COMMIT mode=plan-ownership records=12 nodes=19 final_node_calls=6
+--- FAIL: TestGraphPrefixCompactionCommitBatchesAndFences (0.10s)
+    --- PASS: TestGraphPrefixCompactionCommitBatchesAndFences/normal (0.00s)
+    --- PASS: TestGraphPrefixCompactionCommitBatchesAndFences/inherited (0.01s)
+    --- PASS: TestGraphPrefixCompactionCommitBatchesAndFences/record-deadline (0.00s)
+    --- FAIL: TestGraphPrefixCompactionCommitBatchesAndFences/node-deadline (0.00s)
+    --- PASS: TestGraphPrefixCompactionCommitBatchesAndFences/append (0.00s)
+    --- PASS: TestGraphPrefixCompactionCommitBatchesAndFences/reader (0.00s)
+    --- PASS: TestGraphPrefixCompactionCommitBatchesAndFences/retire (0.00s)
+    --- PASS: TestGraphPrefixCompactionCommitBatchesAndFences/collector-records (0.00s)
+    --- PASS: TestGraphPrefixCompactionCommitBatchesAndFences/collector-nodes (0.01s)
+    --- PASS: TestGraphPrefixCompactionCommitBatchesAndFences/collector-at-cas (0.01s)
+    --- FAIL: TestGraphPrefixCompactionCommitBatchesAndFences/node-grant (0.00s)
+    --- PASS: TestGraphPrefixCompactionCommitBatchesAndFences/drop (0.01s)
+    --- PASS: TestGraphPrefixCompactionCommitBatchesAndFences/lost (0.00s)
+    --- PASS: TestGraphPrefixCompactionCommitBatchesAndFences/unconfirmed (0.04s)
+    --- PASS: TestGraphPrefixCompactionCommitBatchesAndFences/plan-ownership (0.01s)
+FAIL
+FAIL	js-wf/internal/graphpublication	0.106s
+FAIL

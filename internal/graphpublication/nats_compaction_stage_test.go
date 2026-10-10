@@ -126,9 +126,27 @@ func TestNativeGraphCompactionStageStoreRestart(t *testing.T) {
 					t.Fatal(err)
 				}
 			}
-			root, err = p.CommitPrefixCompaction(c, plan)
+			commit, err := p.BeginCompactionCommit(c, plan)
 			if err != nil {
 				t.Fatal(err)
+			}
+			for {
+				beforeRecords, beforeNodes := commit.NextIndex(), commit.VerifiedNodes()
+				var done bool
+				root, done, err = commit.Advance(c, 1, 1)
+				if err != nil || commit.NextIndex()-beforeRecords > 1 || commit.VerifiedNodes()-beforeNodes > 1 {
+					t.Fatal("native verification exceeded batch", err)
+				}
+				if done {
+					break
+				}
+				current, err := port.ReadRoot(c, "history")
+				if err != nil || current.Head != plan.expected || current.Graph.Count != 4 || root.Head != 0 {
+					t.Fatal("native partial verification published", current, root, err)
+				}
+			}
+			if commit.NextIndex() != 4 || commit.VerifiedNodes() != 6 {
+				t.Fatal("native verification omitted records or nodes", commit.NextIndex(), commit.VerifiedNodes())
 			}
 			deleted, err := p.SweepWithReaders(c, time.Now().Add(2*time.Hour))
 			if err != nil || deleted == 0 {
@@ -149,6 +167,7 @@ func TestNativeGraphCompactionStageStoreRestart(t *testing.T) {
 				}
 			}
 			t.Logf("NATIVE_COMPACTION_STAGE replicas=%d checkpoint_next=1 records=4 archive=2 live=2 original_objects_deleted=%d checkpoint_bytes=%d", replicas, deleted, len(data))
+			t.Logf("NATIVE_COMPACTION_COMMIT replicas=%d compared_records=4 verified_nodes=6 record_budget=1 node_budget=1", replicas)
 		})
 	}
 }
