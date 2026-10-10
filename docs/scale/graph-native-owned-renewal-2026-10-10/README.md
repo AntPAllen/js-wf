@@ -49,9 +49,19 @@ R1/R3 pass race 127.995 seconds. Recovery plus complete renewal takes
 go test -race ./internal/graphpublication -run '^TestNativeGraphOwnedGrantRenewalCostAndRecovery$' -count=1 -v
 WF_GRAPH_NATIVE_OWNED_GRANTS=10000 go test -race ./internal/graphpublication -run '^TestNativeGraphOwnedGrantRenewalCostAndRecovery/R1$' -timeout=25m -count=1 -v
 python3 docs/scale/graph-native-owned-renewal-2026-10-10/review.py
+python3 docs/scale/graph-native-owned-renewal-2026-10-10/review_large.py
 ```
 
 `native-race.log` records terminal default-fixture status and measured costs;
 `review.json` summarizes accepted rows and source checks. Larger runs have their
 own logs and terminal status; a launch is not acceptance. Admission and online
 collection remain off.
+
+The 10,000-grant launch is bound to source commit f471c1a and service invocation
+c0cc3ba9852a4c54a76154b87a0a1403 in owned10000-launch.json. review_large.py reads
+that exact service and records a timestamped state. While MainPID is nonzero,
+the result is explicitly unaccepted. Terminal acceptance requires a matching
+loaded invocation, actual exit status zero, terminal package PASS, unchanged
+frozen package sources, all 10,006 grants renewed across 79 fresh batches, and
+the existing batch/renewal budgets. Missing or replaced services never count as
+successful completion. Live ExecMainStatus=0 is not an acceptance signal.
