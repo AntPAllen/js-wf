@@ -58,7 +58,9 @@ for block in blocks:
     name = block.splitlines()[0]
     assert name in expected and name not in summaries
     mode = name.split('/')[1]
-    counts = {'state': (8, 17, 20), 'signals': (9, 21, 26), 'child': (10, 20, 25), 'buffered-child': (10, 22, 25)}[mode]
+    # Cached-child awaits before publishing finish, adding its request and
+    # completion there. Buffered-child awaits after that checkpoint instead.
+    counts = {'state': (8, 17, 20), 'signals': (9, 21, 26), 'child': (10, 22, 25), 'buffered-child': (10, 20, 25)}[mode]
     collected = re.findall(r'ARCHIVE_COLLECTION stage=(next|finish) original_entry_receipts_removed=(\d+) live_records=3 logical_records=(\d+)', block)
     assert len(collected) == 2 and [stage for stage, _, _ in collected] == ['next', 'finish']
     assert all(int(removed) > 0 for _, removed, _ in collected)

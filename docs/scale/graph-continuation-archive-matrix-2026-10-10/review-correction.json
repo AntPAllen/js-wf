@@ -1,0 +1,16 @@
+{
+  "initial_independent_review_exit_code": 1,
+  "failed_assertion": "per-case checkpoint logical counts",
+  "initial_expectations": {
+    "child_finish": 20,
+    "buffered_child_finish": 22
+  },
+  "corrected_expectations": {
+    "child_finish": 22,
+    "buffered_child_finish": 20
+  },
+  "reason": "The cached child is awaited before the finish checkpoint, adding request/completion there; the buffered child awaits after that checkpoint. Both terminal histories contain25 records. Source and raw case logs agree.",
+  "native_rerun": false,
+  "unchanged_watchdogs": true,
+  "corrected_independent_review_exit_code": 0
+}

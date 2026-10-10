@@ -1,0 +1,183 @@
+{
+  "verdict": "PASS complete eight-case native continuation archive matrix",
+  "source": "57ee0b7187252a6a88b24ef655798cdfe3cf4b33",
+  "repository_inputs_git_verified_unchanged": 3297,
+  "elapsed_seconds": 341.89,
+  "cases": {
+    "R1/state": 24.43,
+    "R1/signals": 34.06,
+    "R1/child": 35.7,
+    "R1/buffered-child": 35.49,
+    "R3Domain/state": 40.42,
+    "R3Domain/signals": 56.61,
+    "R3Domain/child": 56.57,
+    "R3Domain/buffered-child": 58.6
+  },
+  "physical_and_logical_checks": {
+    "R1/state": {
+      "boundaries": [
+        {
+          "stage": "next",
+          "obsolete_receipts_removed": 8,
+          "live_records": 3,
+          "logical_records": 8
+        },
+        {
+          "stage": "finish",
+          "obsolete_receipts_removed": 12,
+          "live_records": 3,
+          "logical_records": 17
+        }
+      ],
+      "terminal_parent_records": 20,
+      "reclaimed_child_receipts": 0
+    },
+    "R1/signals": {
+      "boundaries": [
+        {
+          "stage": "next",
+          "obsolete_receipts_removed": 9,
+          "live_records": 3,
+          "logical_records": 9
+        },
+        {
+          "stage": "finish",
+          "obsolete_receipts_removed": 15,
+          "live_records": 3,
+          "logical_records": 21
+        }
+      ],
+      "terminal_parent_records": 26,
+      "reclaimed_child_receipts": 0
+    },
+    "R1/child": {
+      "boundaries": [
+        {
+          "stage": "next",
+          "obsolete_receipts_removed": 10,
+          "live_records": 3,
+          "logical_records": 10
+        },
+        {
+          "stage": "finish",
+          "obsolete_receipts_removed": 15,
+          "live_records": 3,
+          "logical_records": 22
+        }
+      ],
+      "terminal_parent_records": 25,
+      "reclaimed_child_receipts": 2
+    },
+    "R1/buffered-child": {
+      "boundaries": [
+        {
+          "stage": "next",
+          "obsolete_receipts_removed": 10,
+          "live_records": 3,
+          "logical_records": 10
+        },
+        {
+          "stage": "finish",
+          "obsolete_receipts_removed": 13,
+          "live_records": 3,
+          "logical_records": 20
+        }
+      ],
+      "terminal_parent_records": 25,
+      "reclaimed_child_receipts": 2
+    },
+    "R3Domain/state": {
+      "boundaries": [
+        {
+          "stage": "next",
+          "obsolete_receipts_removed": 8,
+          "live_records": 3,
+          "logical_records": 8
+        },
+        {
+          "stage": "finish",
+          "obsolete_receipts_removed": 12,
+          "live_records": 3,
+          "logical_records": 17
+        }
+      ],
+      "terminal_parent_records": 20,
+      "reclaimed_child_receipts": 0
+    },
+    "R3Domain/signals": {
+      "boundaries": [
+        {
+          "stage": "next",
+          "obsolete_receipts_removed": 9,
+          "live_records": 3,
+          "logical_records": 9
+        },
+        {
+          "stage": "finish",
+          "obsolete_receipts_removed": 15,
+          "live_records": 3,
+          "logical_records": 21
+        }
+      ],
+      "terminal_parent_records": 26,
+      "reclaimed_child_receipts": 0
+    },
+    "R3Domain/child": {
+      "boundaries": [
+        {
+          "stage": "next",
+          "obsolete_receipts_removed": 10,
+          "live_records": 3,
+          "logical_records": 10
+        },
+        {
+          "stage": "finish",
+          "obsolete_receipts_removed": 15,
+          "live_records": 3,
+          "logical_records": 22
+        }
+      ],
+      "terminal_parent_records": 25,
+      "reclaimed_child_receipts": 2
+    },
+    "R3Domain/buffered-child": {
+      "boundaries": [
+        {
+          "stage": "next",
+          "obsolete_receipts_removed": 10,
+          "live_records": 3,
+          "logical_records": 10
+        },
+        {
+          "stage": "finish",
+          "obsolete_receipts_removed": 13,
+          "live_records": 3,
+          "logical_records": 20
+        }
+      ],
+      "terminal_parent_records": 25,
+      "reclaimed_child_receipts": 2
+    }
+  },
+  "binary_sha256": "8e9763dcd9dd347f0226d4fd72e9d8b7ba55a1f5b64d524efafe0408b246e2a3",
+  "log_sha256": "a88017e0c83b8a482660277f0817651992703ceae4c1bbeea835636744821969",
+  "actual_command_receipt": {
+    "command": [
+      "/home/exedev/js-wf-cancel-pending-child-20261010/worker-race.test",
+      "-test.run=^TestNativeGraphContinuationArchiveCollection$",
+      "-test.count=1",
+      "-test.timeout=10m",
+      "-test.v=true"
+    ],
+    "working_directory": "/home/exedev/js-wf-cancel-pending-child-qualification",
+    "started": "2026-10-10T08:38:49.485659+00:00",
+    "env": {
+      "GOMAXPROCS": "2",
+      "GOMEMLIMIT": "512MiB"
+    },
+    "pid": 56605,
+    "actual_exit_code": 0,
+    "finished": "2026-10-10T08:44:32.475768+00:00"
+  },
+  "scope": "Existing eight-case healthy native archive matrix at unchanged60-second case/10-minute package watchdogs. Two collected/relocated checkpoint boundaries each; successful700KB cached/buffered child survives child terminal/result reclamation; immutable absolute logical history and one terminal outcome. No arbitrary faults, running cancellation, full retention/scale/soak, actual100000-entry boundary, canonical offline/import/rollout, public/default admission or full goal acceptance."
+}

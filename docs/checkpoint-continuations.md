@@ -17,14 +17,14 @@ for deployment.
 | --- | --- | --- |
 | Bounded restore | Native R1/R3 domain, 131 earlier encoded bodies unavailable; owned anchor/suffix references, reader refresh and one terminal outcome | [Reader refresh](scale/graph-reader-refresh-2026-10-09/README.md) |
 | Failed child | Eight native race cases: R1/R3 domain × live/archive × cached/buffered failure; exact child error, two parent checkpoints, one child execution and reclaimed child terminal receipts | [Frozen d504a33](scale/graph-d504-full-qualification-2026-10-10/README.md) |
+| Healthy archive matrix | Eight native race cases: R1/R3 domain × state/signals/successful child/buffered child; all16 collected boundaries audited, all four700KB child terminal/result pairs reclaimed before parent resume, existing60-second case watchdogs preserved | [Frozen 57ee0b7](scale/graph-continuation-archive-matrix-2026-10-10/README.md) |
 | Pending child | Eight native race cases: R1/R3 domain × live/archive × success/failure; unresolved promise in two frames, actual suspension, repaired lost wakeup, immutable logical prefix and one child execution | [Frozen 0bf850c](scale/graph-continuation-pending-child-2026-10-10/README.md) |
 | Pending-parent cancellation | Eight native race cases: R1/R3 domain × live/archive × success/failure child; repaired cancellation wakeup, immutable parent cancellation, independent child completion, late/duplicate isolation and post-cancellation collection | [Frozen 57ee0b7](scale/graph-continuation-cancel-pending-child-2026-10-10/README.md) |
 | Process recovery | Three worker cuts plus SIGKILL of all three server processes before persisted-store restart; exact killed dispatch sequence ACKed within30 seconds | [All-server SIGKILL](scale/graph-continuation-all-server-kill-2026-10-09/README.md) |
 | Absolute entry limit | Four native R1/R3 × live/archive controls at a private16-entry budget, with the terminal slot reserved; production100,000-entry cap unchanged | [Limit boundary](scale/graph-continuation-global-limit-2026-10-09/README.md) |
 
 Each result applies to its recorded source and test boundary. The complete
-current simulation pipeline remains pending independently. Full successful-child
-archive/retention and running-effect cancellation matrices, arbitrary fault interleavings,
+current simulation pipeline remains pending independently. Full retention and running-effect cancellation matrices, arbitrary fault interleavings,
 VM/power/storage loss, the actual100,000-entry boundary, canonical offline
 replay/import/rollout and public/default admission remain open. v1 children run
 independently when their parent is cancelled; propagation is a separate v2
