@@ -1,5 +1,26 @@
 # JetStream Durable Workflow Runtime — Implementation Plan
 
+## Seeded renewal namespace cost exposes a liveness limit — 2026-10-10
+
+A deterministic in-memory request-cost model now reproduces renewal expiry
+without NATS faults. Seeds 2, 5 and 42 start with 20 seconds remaining on the
+60-second intent. With 100,000 unrelated closed scopes and approximately
+1 ms per successful metadata operation, renewal expires after examining
+9,907–9,933 of 100,054 scopes; only 20 grants belong to the publication.
+Small-namespace controls succeed at the same latency. Large-namespace controls
+at 10 µs/request finish in 2.017–2.022 seconds of modeled time. The nine cases
+pass under race (63.323 seconds); the existing 17 renewal safety controls pass.
+[Evidence](scale/graph-renewal-namespace-latency-2026-10-10/README.md).
+
+This is a reproduced algorithmic limitation, not production scale acceptance or
+an attribution of earlier native failures. Costs are assumed and enumeration is
+charged only once. No production behavior changes. The next requirement is to
+remove unrelated-history work while retaining complete owned-scope authority,
+including abandoned/uncertain uploads, original-head fencing, no expired revival
+and independent final verification. Fresh recovery cannot trust a client-saved
+list as complete authority. Qualify the publication's own large grant set next;
+the actual 100,000-entry gate remains open. Collection and admission stay closed.
+
 ## Durable maintenance continues under its delivery context — 2026-10-10
 
 Graph archive workers with configured descriptor storage no longer add a whole
