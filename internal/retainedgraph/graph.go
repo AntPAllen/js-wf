@@ -310,6 +310,20 @@ func Read(ctx context.Context, store Store, root Root, index uint64) (Record, er
 // A caller must not treat a successful traversal as a collection fence.
 // The callback may stop the walk; errors and missing/corrupt nodes fail closed.
 func Walk(ctx context.Context, store Store, root Root, visit func(Link, bool) error) error {
+	if visit == nil {
+		return walkGraph(ctx, store, root, nil, nil)
+	}
+	return walkGraph(ctx, store, root, func(tree Tree) error { return visit(tree.Link, true) }, func(link Link) error { return visit(link, false) })
+}
+
+// WalkNodes visits each freshly authenticated tree with its exact coordinates.
+// Coordinates prove membership in this traversal, not a publication grant or
+// collection fence. Traversal keeps O(log population) space and no node cache.
+func WalkNodes(ctx context.Context, store Store, root Root, visit func(Tree) error) error {
+	return walkGraph(ctx, store, root, visit, nil)
+}
+
+func walkGraph(ctx context.Context, store Store, root Root, visit func(Tree) error, payload func(Link) error) error {
 	if err := ctx.Err(); err != nil {
 		return err
 	}
@@ -325,7 +339,7 @@ func Walk(ctx context.Context, store Store, root Root, visit func(Link, bool) er
 		if err != nil {
 			return err
 		}
-		if err = visit(t.Link, true); err != nil {
+		if err = visit(t); err != nil {
 			return err
 		}
 		if t.Height == 0 {
@@ -333,8 +347,10 @@ func Walk(ctx context.Context, store Store, root Root, visit func(Link, bool) er
 				if err = ctx.Err(); err != nil {
 					return err
 				}
-				if err = visit(l, false); err != nil {
-					return err
+				if payload != nil {
+					if err = payload(l); err != nil {
+						return err
+					}
 				}
 			}
 			return nil

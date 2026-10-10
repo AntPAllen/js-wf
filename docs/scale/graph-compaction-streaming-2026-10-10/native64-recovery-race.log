@@ -1,0 +1,32 @@
+=== RUN   TestNativeGraphContinuationGlobalLimitAndTerminalSlot
+=== RUN   TestNativeGraphContinuationGlobalLimitAndTerminalSlot/R1/archive=true
+    graph_continuation_limit_test.go:136: GRAPH_LIMIT_PADDING completed=12 requested=24 budget=64
+    graph_continuation_limit_test.go:184: CONTINUATION_PHASE operation=continuation_checkpoint_publish index=28 duration=1.12905451s error=""
+    graph_continuation_limit_test.go:184: CONTINUATION_PHASE operation=continuation_archive index=28 duration=7.490677466s error=""
+    graph_continuation_limit_test.go:184: CONTINUATION_PHASE operation=continuation_publish index=0 duration=8.912842738s error=""
+    graph_continuation_limit_test.go:136: GRAPH_LIMIT_PADDING completed=24 requested=24 budget=64
+    graph_continuation_limit_test.go:184: CONTINUATION_PHASE operation=continuation_checkpoint_publish index=57 duration=1.822261664s error=""
+    graph_continuation_limit_test.go:184: CONTINUATION_PHASE operation=continuation_archive index=57 duration=11.6730267s error=""
+    graph_continuation_limit_test.go:184: CONTINUATION_PHASE operation=continuation_publish index=0 duration=14.087185551s error=""
+    graph_continuation_limit_test.go:354: GRAPH_CONTINUATION_LIMIT budget=64 entries=64 archive=true checkpoints=2 effects=0 rejected_request=must_not_run terminal_slot=63 prefix_stage_calls=1/1 production_cap=false padding_operations=24
+--- PASS: TestNativeGraphContinuationGlobalLimitAndTerminalSlot (54.24s)
+    --- PASS: TestNativeGraphContinuationGlobalLimitAndTerminalSlot/R1/archive=true (54.24s)
+=== RUN   TestGraphContinuationRepairsArchiveBeforeStage
+=== RUN   TestGraphContinuationRepairsArchiveBeforeStage/archive=false/healthy
+=== RUN   TestGraphContinuationRepairsArchiveBeforeStage/archive=false/pointer-cut
+=== RUN   TestGraphContinuationRepairsArchiveBeforeStage/archive=false/suspension-cut
+=== RUN   TestGraphContinuationRepairsArchiveBeforeStage/archive=true/healthy
+=== RUN   TestGraphContinuationRepairsArchiveBeforeStage/archive=true/pointer-cut
+=== RUN   TestGraphContinuationRepairsArchiveBeforeStage/archive=true/suspension-cut
+=== RUN   TestGraphContinuationRepairsArchiveBeforeStage/archive=true/archive-cut
+    graph_continuation_recovery_test.go:183: HANDOFF_RECOVERY original_receipts_physically_reclaimed=19 before_stage=true
+--- PASS: TestGraphContinuationRepairsArchiveBeforeStage (3.21s)
+    --- PASS: TestGraphContinuationRepairsArchiveBeforeStage/archive=false/healthy (0.25s)
+    --- PASS: TestGraphContinuationRepairsArchiveBeforeStage/archive=false/pointer-cut (0.39s)
+    --- PASS: TestGraphContinuationRepairsArchiveBeforeStage/archive=false/suspension-cut (0.36s)
+    --- PASS: TestGraphContinuationRepairsArchiveBeforeStage/archive=true/healthy (0.31s)
+    --- PASS: TestGraphContinuationRepairsArchiveBeforeStage/archive=true/pointer-cut (0.59s)
+    --- PASS: TestGraphContinuationRepairsArchiveBeforeStage/archive=true/suspension-cut (0.43s)
+    --- PASS: TestGraphContinuationRepairsArchiveBeforeStage/archive=true/archive-cut (0.88s)
+PASS
+ok  	js-wf/worker	58.580s

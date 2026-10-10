@@ -1,5 +1,25 @@
 # JetStream Durable Workflow Runtime — Implementation Plan
 
+## Compaction comparison streams authenticated ranges — 2026-10-10
+
+Commit now streams source and relocated records together and checks node grants
+against freshly authenticated traversal coordinates. Each grant authority stays
+fresh; exact original/relocated receipts, payload equality, inherited archive,
+reader and captured-head CAS checks remain. Model Gets at36/260/1028 entries fall
+from1093/12104/58442 (corrected safe baseline) to569/4924/21566. First checkpoint
+verification work is unchanged and still grows with the prefix.
+[Development evidence](scale/graph-compaction-streaming-2026-10-10/README.md).
+Iterator/corruption/cancellation controls,28 node-grant controls and four validly
+granted changed-record controls pass under race; dedicated bypasses fail all28
+and all four respectively. All853 simulations pass after refreshing only14 Get
+traces; every non-Get event/seed/decision/other trace field is unchanged. Native
+R1/archive64 and handoff recovery controls pass; whole native transitions remain
+8.913s/14.087s, so reduced Gets alone do not prove native latency improvement.
+Actual100000 remains failed. Bounded/resumable verification/archive and lifetime
+handling, full current-source/extended/native/fault/scale/soak/retention/import
+and rollout gates stay open. Older frozen campaigns exclude these fixes. Public
+continuation admission stays closed and production collection stays off.
+
 ## Pending continuation handoff repaired before stage entry — 2026-10-10
 
 A directed in-memory cut confirms that a fresh worker previously ran the next

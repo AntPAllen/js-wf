@@ -1,0 +1,17 @@
+=== RUN   TestGraphCheckpointPublicationPrefixCostAndReadBudget
+=== RUN   TestGraphCheckpointPublicationPrefixCostAndReadBudget/padding=16
+    graph_checkpoint_cost_test.go:186: CHECKPOINT_PREFIX_COST padding=16 entries=36 first_entry_reads=37 first_gets=111 indexed_entry_reads=4 indexed_gets=17 compaction_entry_reads=40 compaction_gets=569 injected_budget_entry_reads=16
+=== RUN   TestGraphCheckpointPublicationPrefixCostAndReadBudget/padding=128
+    graph_checkpoint_cost_test.go:186: CHECKPOINT_PREFIX_COST padding=128 entries=260 first_entry_reads=261 first_gets=783 indexed_entry_reads=4 indexed_gets=17 compaction_entry_reads=264 compaction_gets=4924 injected_budget_entry_reads=16
+=== RUN   TestGraphCheckpointPublicationPrefixCostAndReadBudget/padding=512
+    graph_checkpoint_cost_test.go:186: CHECKPOINT_PREFIX_COST padding=512 entries=1028 first_entry_reads=1029 first_gets=3087 indexed_entry_reads=4 indexed_gets=17 compaction_entry_reads=1032 compaction_gets=21566 injected_budget_entry_reads=16
+=== RUN   TestGraphCheckpointPublicationPrefixCostAndReadBudget/padding=16/renewing
+    graph_checkpoint_cost_test.go:179: CHECKPOINT_PIN_RENEWAL ttl=4s virtual_elapsed=57s renewals=28
+    graph_checkpoint_cost_test.go:186: CHECKPOINT_PREFIX_COST padding=16 entries=36 first_entry_reads=37 first_gets=111 indexed_entry_reads=4 indexed_gets=17 compaction_entry_reads=40 compaction_gets=569 injected_budget_entry_reads=16
+--- PASS: TestGraphCheckpointPublicationPrefixCostAndReadBudget (38.02s)
+    --- PASS: TestGraphCheckpointPublicationPrefixCostAndReadBudget/padding=16 (1.10s)
+    --- PASS: TestGraphCheckpointPublicationPrefixCostAndReadBudget/padding=128 (7.93s)
+    --- PASS: TestGraphCheckpointPublicationPrefixCostAndReadBudget/padding=512 (28.00s)
+    --- PASS: TestGraphCheckpointPublicationPrefixCostAndReadBudget/padding=16/renewing (1.00s)
+PASS
+ok  	js-wf/journal	39.098s

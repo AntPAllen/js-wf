@@ -129,7 +129,10 @@ func (p Protocol) PreparePrefixCompaction(ctx context.Context, destination strin
 	return result, nil
 }
 
-func (p Protocol) checkCompactionGrant(ctx context.Context, prepared PreparedCompaction, link retainedgraph.Link, stream string) error {
+// knownNode is supplied only by a fresh authenticated WalkNodes callback.
+// It replaces repeated membership lookup, never the fresh grant authority read.
+// Payload callers still prove the grant's recorded origin location explicitly.
+func (p Protocol) checkCompactionGrant(ctx context.Context, prepared PreparedCompaction, link retainedgraph.Link, stream string, knownNode *retainedgraph.Tree) error {
 	scope, owner, err := objectAuthority(blobpublication.Object{Key: link.Hash, Reference: link.Reference})
 	if err != nil {
 		return err
@@ -152,6 +155,12 @@ func (p Protocol) checkCompactionGrant(ctx context.Context, prepared PreparedCom
 	graph := selectGraph(prepared.publication.Graph, prepared.publication.Streams, stream)
 	for _, location := range intent.Locations {
 		if location.Stream != stream {
+			continue
+		}
+		if knownNode != nil {
+			if knownNode.Link == link && location.Kind == "node" && location.First == knownNode.First && location.Height == knownNode.Height {
+				return nil
+			}
 			continue
 		}
 		var present bool
@@ -210,18 +219,38 @@ func (p Protocol) CommitPrefixCompaction(ctx context.Context, prepared PreparedC
 			return Root{}, errors.New("compaction replaced inherited archive")
 		}
 	}
-	for sourceIndex := uint64(0); sourceIndex < prepared.base.Graph.Count; sourceIndex++ {
-		source, err := retainedgraph.Read(ctx, stageStore{protocol: p}, prepared.base.Graph, sourceIndex)
+	sourceRange, err := retainedgraph.NewRangeIterator(ctx, stageStore{protocol: p}, prepared.base.Graph, 0, prepared.base.Graph.Count)
+	if err != nil {
+		return Root{}, err
+	}
+	archiveRange, err := retainedgraph.NewRangeIterator(ctx, stageStore{protocol: p}, nextArchive, oldArchive.Count, nextArchive.Count)
+	if err != nil {
+		return Root{}, err
+	}
+	liveRange, err := retainedgraph.NewRangeIterator(ctx, stageStore{protocol: p}, prepared.publication.Graph, 0, prepared.publication.Graph.Count)
+	if err != nil {
+		return Root{}, err
+	}
+	for {
+		sourceIndex, source, ok, err := sourceRange.Next()
 		if err != nil {
 			return Root{}, err
+		}
+		if !ok {
+			break
 		}
 		stream, index := "", sourceIndex-prepared.first
+		targetRange := liveRange
 		if sourceIndex < prepared.first {
 			stream, index = PrefixArchiveStream, oldArchive.Count+sourceIndex
+			targetRange = archiveRange
 		}
-		next, err := retainedgraph.Read(ctx, stageStore{protocol: p}, selectGraph(prepared.publication.Graph, prepared.publication.Streams, stream), index)
+		nextIndex, next, ok, err := targetRange.Next()
 		if err != nil {
 			return Root{}, err
+		}
+		if !ok || nextIndex != index {
+			return Root{}, errors.New("compaction range mismatch")
 		}
 		if !bytes.Equal(source.Data, next.Data) || len(source.Blobs) != len(next.Blobs) {
 			return Root{}, errors.New("compaction changed record")
@@ -233,17 +262,24 @@ func (p Protocol) CommitPrefixCompaction(ctx context.Context, prepared PreparedC
 			if err := p.verifyOwnedGrant(ctx, prepared.destination, prepared.base, OwnedPayload{Index: sourceIndex, Link: source.Blobs[i]}); err != nil {
 				return Root{}, err
 			}
-			if err := p.checkCompactionGrant(ctx, prepared, link, stream); err != nil {
+			if err := p.checkCompactionGrant(ctx, prepared, link, stream, nil); err != nil {
 				return Root{}, err
 			}
 		}
 	}
+	for _, targetRange := range []*retainedgraph.RangeIterator{archiveRange, liveRange} {
+		_, _, ok, err := targetRange.Next()
+		if err != nil {
+			return Root{}, err
+		}
+		if ok {
+			return Root{}, errors.New("compaction range mismatch")
+		}
+	}
 	for _, stream := range []string{"", PrefixArchiveStream} {
 		graph := selectGraph(prepared.publication.Graph, prepared.publication.Streams, stream)
-		if err := retainedgraph.Walk(ctx, stageStore{protocol: p}, graph, func(link retainedgraph.Link, isNode bool) error {
-			if !isNode {
-				return nil
-			}
+		if err := retainedgraph.WalkNodes(ctx, stageStore{protocol: p}, graph, func(tree retainedgraph.Tree) error {
+			link := tree.Link
 			_, owner, err := objectAuthority(blobpublication.Object{Key: link.Hash, Reference: link.Reference})
 			if err != nil {
 				return err
@@ -254,7 +290,7 @@ func (p Protocol) CommitPrefixCompaction(ctx context.Context, prepared PreparedC
 				}
 				return nil // Inherited archive frontiers were checked above.
 			}
-			return p.checkCompactionGrant(ctx, prepared, link, stream)
+			return p.checkCompactionGrant(ctx, prepared, link, stream, &tree)
 		}); err != nil {
 			return Root{}, err
 		}

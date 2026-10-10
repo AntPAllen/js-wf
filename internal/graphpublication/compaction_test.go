@@ -378,7 +378,7 @@ func TestGraphPrefixCompactionRechecksOriginalGrant(t *testing.T) {
 func TestGraphPrefixCompactionRejectsRevokedNodeGrants(t *testing.T) {
 	for _, stream := range []string{"", PrefixArchiveStream} {
 		for _, height := range []uint8{0, 1} {
-			for _, fault := range []string{"missing", "destination", "location", "closed"} {
+			for _, fault := range []string{"missing", "destination", "location", "height", "stream", "kind", "closed"} {
 				t.Run(fmt.Sprintf("stream=%s/height=%d/%s", stream, height, fault), func(t *testing.T) {
 					m, p := newModel("node-revoke")
 					var root Root
@@ -431,6 +431,15 @@ func TestGraphPrefixCompactionRejectsRevokedNodeGrants(t *testing.T) {
 					case "location":
 						intent.Locations = []Location{{Kind: "node", First: 100, Height: height, Stream: stream}}
 						fence.Intents[owner] = intent
+					case "height":
+						intent.Locations[0].Height = height + 1
+						fence.Intents[owner] = intent
+					case "stream":
+						intent.Locations[0].Stream = "foreign"
+						fence.Intents[owner] = intent
+					case "kind":
+						intent.Locations[0].Kind = "payload"
+						fence.Intents[owner] = intent
 					case "closed":
 						fence.Phase = "closed"
 						fence.Intents = map[string]Intent{}
@@ -446,6 +455,62 @@ func TestGraphPrefixCompactionRejectsRevokedNodeGrants(t *testing.T) {
 					}
 				})
 			}
+		}
+	}
+}
+
+// Fresh, correctly granted target bytes still have to equal the source records.
+// Rebuild a complete target forest so failures cannot rely on a corrupt hash or
+// missing grant to mask an omitted source/target comparison.
+func TestGraphPrefixCompactionRejectsChangedRelocationRecords(t *testing.T) {
+	for _, stream := range []string{"", PrefixArchiveStream} {
+		for _, fault := range []string{"data", "payload"} {
+			t.Run("stream="+stream+"/"+fault, func(t *testing.T) {
+				m, p := newModel("changed-relocation")
+				var root Root
+				for i := 0; i < 4; i++ {
+					root = appendOne(t, m, p, "owner", []byte(fmt.Sprint(i)), [][]byte{[]byte(fmt.Sprint("payload", i))})
+				}
+				plan, err := p.PreparePrefixCompaction(ctx, "owner", root.Head, 2, 1024, epoch.Add(time.Second), nil)
+				if err != nil {
+					t.Fatal(err)
+				}
+				old := selectGraph(plan.publication.Graph, plan.publication.Streams, stream)
+				rebuilt := retainedgraph.Empty()
+				for index := uint64(0); index < old.Count; index++ {
+					record, err := retainedgraph.Read(ctx, stageStore{protocol: p}, old, index)
+					if err != nil {
+						t.Fatal(err)
+					}
+					if index == 0 {
+						if fault == "data" {
+							record.Data = []byte("replacement")
+						} else {
+							data := []byte("replacement payload")
+							ref, err := p.acquire(ctx, key(data), data, plan.publication.Token, Intent{Destination: plan.destination, Expected: plan.expected, Expires: plan.expires, Locations: []Location{{Kind: "payload", First: index, Stream: stream}}})
+							if err != nil {
+								t.Fatal(err)
+							}
+							record.Blobs[0] = retainedgraph.Link{Hash: key(data), Reference: ref}
+						}
+					}
+					rebuilt, err = retainedgraph.Append(ctx, stageStore{protocol: p, destination: plan.destination, expected: plan.expected, expires: plan.expires, token: plan.publication.Token, index: index, stream: stream}, rebuilt, record)
+					if err != nil {
+						t.Fatal(err)
+					}
+				}
+				if stream == "" {
+					plan.publication.Graph = rebuilt
+				} else {
+					setStream(&plan.publication, stream, rebuilt)
+				}
+				if _, err = p.CommitPrefixCompaction(ctx, plan); err == nil {
+					t.Fatal("changed relocation accepted", fault)
+				}
+				if !reflect.DeepEqual(root, m.roots["owner"]) {
+					t.Fatal("changed relocation published")
+				}
+			})
 		}
 	}
 }
