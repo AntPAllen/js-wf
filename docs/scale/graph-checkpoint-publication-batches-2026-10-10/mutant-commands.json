@@ -1,0 +1,30 @@
+{
+  "batch-budget-bypass": {
+    "command": [
+      "go",
+      "test",
+      "-p=1",
+      "./journal",
+      "-run",
+      "^TestGraphCheckpointPublicationBatchesAndFinalization$",
+      "-count=1",
+      "-v"
+    ],
+    "exit_code": 1,
+    "race": false
+  },
+  "release-confirmation-bypass": {
+    "command": [
+      "go",
+      "test",
+      "-p=1",
+      "./journal",
+      "-run",
+      "^TestGraphCheckpointPublicationBatchesAndFinalization$",
+      "-count=1",
+      "-v"
+    ],
+    "exit_code": 1,
+    "race": false
+  }
+}

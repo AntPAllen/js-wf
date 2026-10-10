@@ -127,14 +127,31 @@ func (s *GraphStore) confirmCheckpoint(ctx context.Context, typ, id string, runt
 // root CAS fences the generation, logical tail and pointer. Unknown CAS outcomes
 // require a fresh caller observation; matching retries are idempotent.
 // This retains full history and does not compact the graph or enable stages.
-func (s *GraphStore) PublishCheckpoint(ctx context.Context, typ, id string, runtime RuntimeCheckpoint, tail uint64) error {
-	if !s.cfg.CheckpointIndex {
-		return fmt.Errorf("checkpoint publication requires the explicit v5 checkpoint index")
-	}
-	verified, err := s.confirmCheckpoint(ctx, typ, id, runtime, tail)
+func (s *GraphStore) PublishCheckpoint(ctx context.Context, typ, id string, runtime RuntimeCheckpoint, tail uint64) (err error) {
+	publication, err := s.BeginCheckpointPublication(ctx, typ, id, runtime, tail)
 	if err != nil {
 		return err
 	}
+	defer func() {
+		cleanup, cancel := context.WithTimeout(context.WithoutCancel(ctx), 3*time.Second)
+		defer cancel()
+		if closeErr := publication.Close(cleanup); err == nil && closeErr != nil {
+			err = fmt.Errorf("%w: checkpoint reader release: %w", ErrUnknown, closeErr)
+		}
+	}()
+	done, err := publication.Advance(ctx, max(uint64(1), publication.view.Count()))
+	if err != nil {
+		return err
+	}
+	if !done {
+		return ErrGap
+	}
+	return nil
+}
+
+// The caller has fully verified the owned frame and confirmed reader release.
+// This fresh observation fences generation/tail, pointer order and root CAS.
+func (s *GraphStore) publishVerifiedCheckpoint(ctx context.Context, typ, id string, runtime RuntimeCheckpoint, tail, requestIndex uint64) error {
 	destination, root, cursor, err := s.observe(ctx, typ, id)
 	if err != nil {
 		return err
@@ -142,7 +159,7 @@ func (s *GraphStore) PublishCheckpoint(ctx context.Context, typ, id string, runt
 	if cursor == nil || cursor.Invocation != runtime.InvSeq || cursor.Retired || cursor.Purging || cursor.Kind == Completed || cursor.Kind == Failed || cursor.Base+cursor.Count != tail {
 		return ErrStale
 	}
-	pointer := graphCheckpointPointer{Runtime: runtime, RequestIndex: verified.Request.Index}
+	pointer := graphCheckpointPointer{Runtime: runtime, RequestIndex: requestIndex}
 	if cursor.Checkpoint != nil {
 		if *cursor.Checkpoint == pointer {
 			return nil

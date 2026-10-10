@@ -11,25 +11,60 @@ import (
 	"testing"
 	"time"
 
+	"js-wf/client"
 	"js-wf/internal/checkpoint"
 	"js-wf/internal/graphpublication"
 	"js-wf/journal"
 	"js-wf/sim"
 )
 
-func checkpointScanFixture(t *testing.T, encoding journal.Encoding, completion []byte, padding int) (*journal.GraphStore, *checkpointCostPort, *time.Time, journal.RuntimeCheckpoint) {
+type checkpointScanFixtureOptions struct {
+	indexed bool
+	wrap    func(*checkpointCostPort) graphpublication.Port
+}
+
+func checkpointScanFixture(t *testing.T, encoding journal.Encoding, completion []byte, padding int, options ...checkpointScanFixtureOptions) (*journal.GraphStore, *checkpointCostPort, *time.Time, journal.RuntimeCheckpoint) {
 	t.Helper()
 	ctx := context.Background()
-	model := sim.NewGraphPublicationTransport(sim.NewScheduler(23))
+	schedule := sim.NewScheduler(23)
+	model := sim.NewGraphPublicationTransport(schedule)
 	port := &checkpointCostPort{GraphPublicationTransport: model, entries: map[string]bool{}}
 	protocol := model.Protocol()
 	protocol.Port = port
+	var option checkpointScanFixtureOptions
+	if len(options) > 0 {
+		option = options[0]
+	}
+	if option.wrap != nil {
+		protocol.Port = option.wrap(port)
+	}
 	now := time.Unix(1000, 0)
-	store, err := journal.NewGraphStore(journal.GraphConfig{Protocol: protocol, Encoding: encoding, Now: func() time.Time { return now }, PinTTL: 4 * time.Second})
+	store, err := journal.NewGraphStore(journal.GraphConfig{Protocol: protocol, Encoding: encoding, Now: func() time.Time { return now }, PinTTL: 4 * time.Second, CanonicalStarts: option.indexed, CanonicalSignals: option.indexed, CheckpointIndex: option.indexed})
 	if err != nil {
 		t.Fatal(err)
 	}
-	tail, err := store.Begin(ctx, "flow", "scan", 7)
+	invocation := uint64(7)
+	var started []byte
+	var inputObjects [][]byte
+	if option.indexed {
+		transport := sim.NewSignalTransport(schedule)
+		c, err := client.NewWithSignalPorts(transport, transport).WithGraphJournal(store)
+		if err != nil {
+			t.Fatal(err)
+		}
+		h, err := c.Start(ctx, "flow", "scan", []byte(`7`))
+		if err != nil {
+			t.Fatal(err)
+		}
+		invocation = h.InvSeq
+		status, err := store.InspectStart(ctx, "flow", "scan")
+		if err != nil {
+			t.Fatal(err)
+		}
+		started, _ = json.Marshal(map[string]string{"input_sha256": status.State.Start.InputSHA256})
+		inputObjects = [][]byte{[]byte(`7`)}
+	}
+	tail, err := store.Begin(ctx, "flow", "scan", invocation)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -43,13 +78,13 @@ func checkpointScanFixture(t *testing.T, encoding journal.Encoding, completion [
 		}
 		sum := sha256.Sum256(raw)
 		port.entries[hex.EncodeToString(sum[:])] = true
-		tail, e = store.Append(ctx, "flow", "scan", 7, entry, tail, objects, nil)
+		tail, e = store.Append(ctx, "flow", "scan", invocation, entry, tail, objects, nil)
 		if e != nil {
 			t.Fatal(e)
 		}
 		index++
 	}
-	appendRecord(journal.Started, nil)
+	appendRecord(journal.Started, started, inputObjects...)
 	for i := 0; i < padding; i++ {
 		request, _ := json.Marshal(map[string]string{"kind": "run", "name": fmt.Sprint("padding", i)})
 		appendRecord(journal.StepRequested, request)
@@ -57,7 +92,7 @@ func checkpointScanFixture(t *testing.T, encoding journal.Encoding, completion [
 	}
 	locals := json.RawMessage(`42`)
 	sum := sha256.Sum256(locals)
-	frame := checkpoint.Frame{Version: checkpoint.Version, Identity: checkpoint.Identity{Type: "flow", ID: "scan", InvSeq: 7}, Stage: "next", Data: locals, Anchor: checkpoint.Anchor{Index: index + 1, Epoch: 3}, StepPosition: uint64(2*padding + 2)}
+	frame := checkpoint.Frame{Version: checkpoint.Version, Identity: checkpoint.Identity{Type: "flow", ID: "scan", InvSeq: invocation}, Stage: "next", Data: locals, Anchor: checkpoint.Anchor{Index: index + 1, Epoch: 3}, StepPosition: uint64(2*padding + 2)}
 	raw, hash, err := checkpoint.Encode(frame)
 	if err != nil {
 		t.Fatal(err)
@@ -66,7 +101,7 @@ func checkpointScanFixture(t *testing.T, encoding journal.Encoding, completion [
 	appendRecord(journal.StepRequested, request)
 	completion, _ = json.Marshal(map[string]string{"result_ref": "step-result-" + hash, "result_hash": hash})
 	appendRecord(journal.StepCompleted, completion, raw)
-	runtime := journal.RuntimeCheckpoint{InvSeq: 7, Stage: "next", Sequence: tail, Index: index - 1, Epoch: 3, StepPosition: frame.StepPosition, Object: "step-result-" + hash, SHA256: hash}
+	runtime := journal.RuntimeCheckpoint{InvSeq: invocation, Stage: "next", Sequence: tail, Index: index - 1, Epoch: 3, StepPosition: frame.StepPosition, Object: "step-result-" + hash, SHA256: hash}
 	appendRecord(journal.Suspended, []byte(`{"waiting_on":"continuation:next"}`))
 	return store, port, &now, runtime
 }

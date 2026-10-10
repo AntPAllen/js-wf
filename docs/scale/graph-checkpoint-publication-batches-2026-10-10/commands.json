@@ -1,0 +1,20 @@
+[
+  {
+    "command": "GOMAXPROCS=2 GOMEMLIMIT=1536MiB go test -p=1 -race ./journal -run \"^TestGraphCheckpoint|^TestGraphContinuationFrame\" -count=1 -v",
+    "log": "checkpoint-frame-index-archive-race.log.gz",
+    "exit_code": 0,
+    "race": true
+  },
+  {
+    "command": "GOMAXPROCS=2 GOMEMLIMIT=1536MiB go test -p=1 ./sim -run \"^TestPinnedRegressionCorpus$\" -count=1 -v",
+    "log": "all-853-pins.log.gz",
+    "exit_code": 0,
+    "race": false
+  },
+  {
+    "command": "WF_GRAPH_CONTINUATION_LIMIT_BUDGET=20 GOMAXPROCS=2 GOMEMLIMIT=1536MiB go test -p=1 -race ./worker -run \"^TestGraphContinuationRepairsArchiveBeforeStage$|^TestNativeGraphContinuationGlobalLimitAndTerminalSlot/R1/archive=true$\" -count=1 -v",
+    "log": "native20-recovery-race.log.gz",
+    "exit_code": 0,
+    "race": true
+  }
+]

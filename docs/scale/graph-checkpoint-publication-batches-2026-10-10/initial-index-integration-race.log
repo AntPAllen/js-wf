@@ -1,0 +1,28 @@
+=== RUN   TestGraphCheckpointPublicationPrefixCostAndReadBudget
+=== RUN   TestGraphCheckpointPublicationPrefixCostAndReadBudget/padding=16
+    graph_checkpoint_cost_test.go:186: CHECKPOINT_PREFIX_COST padding=16 entries=36 first_entry_reads=37 first_gets=111 indexed_entry_reads=4 indexed_gets=17 compaction_entry_reads=40 compaction_gets=569 injected_budget_entry_reads=16
+=== RUN   TestGraphCheckpointPublicationPrefixCostAndReadBudget/padding=16/renewing
+    graph_checkpoint_cost_test.go:179: CHECKPOINT_PIN_RENEWAL ttl=4s virtual_elapsed=57s renewals=28
+    graph_checkpoint_cost_test.go:186: CHECKPOINT_PREFIX_COST padding=16 entries=36 first_entry_reads=37 first_gets=111 indexed_entry_reads=4 indexed_gets=17 compaction_entry_reads=40 compaction_gets=569 injected_budget_entry_reads=16
+--- PASS: TestGraphCheckpointPublicationPrefixCostAndReadBudget (1.82s)
+    --- PASS: TestGraphCheckpointPublicationPrefixCostAndReadBudget/padding=16 (0.89s)
+    --- PASS: TestGraphCheckpointPublicationPrefixCostAndReadBudget/padding=16/renewing (0.93s)
+=== RUN   TestGraphCheckpointIndexPublicationAndBoundedRead
+=== RUN   TestGraphCheckpointIndexPublicationAndBoundedRead/normal
+    graph_checkpoint_index_test.go:261: mode=normal checkpoint=130 request=129 unreadable_prefix_records=129 suffix=1
+=== RUN   TestGraphCheckpointIndexPublicationAndBoundedRead/lost-ack
+    graph_checkpoint_index_test.go:261: mode=lost-ack checkpoint=130 request=129 unreadable_prefix_records=129 suffix=1
+=== RUN   TestGraphCheckpointIndexPublicationAndBoundedRead/lost-ack-unconfirmed
+    graph_checkpoint_index_test.go:261: mode=lost-ack-unconfirmed checkpoint=130 request=129 unreadable_prefix_records=129 suffix=1
+=== RUN   TestGraphCheckpointIndexPublicationAndBoundedRead/lost-before
+    graph_checkpoint_index_test.go:261: mode=lost-before checkpoint=130 request=129 unreadable_prefix_records=129 suffix=1
+=== RUN   TestGraphCheckpointIndexPublicationAndBoundedRead/tail-race
+    graph_checkpoint_index_test.go:261: mode=tail-race checkpoint=130 request=129 unreadable_prefix_records=129 suffix=2
+--- PASS: TestGraphCheckpointIndexPublicationAndBoundedRead (13.58s)
+    --- PASS: TestGraphCheckpointIndexPublicationAndBoundedRead/normal (2.51s)
+    --- PASS: TestGraphCheckpointIndexPublicationAndBoundedRead/lost-ack (2.57s)
+    --- PASS: TestGraphCheckpointIndexPublicationAndBoundedRead/lost-ack-unconfirmed (2.52s)
+    --- PASS: TestGraphCheckpointIndexPublicationAndBoundedRead/lost-before (2.97s)
+    --- PASS: TestGraphCheckpointIndexPublicationAndBoundedRead/tail-race (3.01s)
+PASS
+ok  	js-wf/journal	16.437s

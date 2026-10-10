@@ -1,0 +1,104 @@
+package journal
+
+import (
+	"context"
+	"errors"
+	"fmt"
+	"time"
+)
+
+// CheckpointPublication owns a live reader and bounded verification state.
+// Advance publishes only after complete verification and confirmed release.
+// Call Close when abandoning it. Progress is process-local; a finalization
+// error requires a fresh publication operation, including unknown CAS outcomes.
+type CheckpointPublication struct {
+	store        *GraphStore
+	view         *GraphView
+	scan         *CheckpointScan
+	typ, id      string
+	runtime      RuntimeCheckpoint
+	tail         uint64
+	closed, done bool
+	err          error
+}
+
+func (s *GraphStore) BeginCheckpointPublication(ctx context.Context, typ, id string, runtime RuntimeCheckpoint, tail uint64) (*CheckpointPublication, error) {
+	if !s.cfg.CheckpointIndex {
+		return nil, fmt.Errorf("checkpoint publication requires the explicit v5 checkpoint index")
+	}
+	view, err := s.OpenExisting(ctx, typ, id, runtime.InvSeq)
+	if err != nil {
+		return nil, err
+	}
+	if view == nil {
+		return nil, ErrStale
+	}
+	scan, err := view.NewCheckpointScan(ctx, typ, id)
+	if err != nil {
+		cleanup, cancel := context.WithTimeout(context.WithoutCancel(ctx), 3*time.Second)
+		defer cancel()
+		_ = view.Close(cleanup)
+		return nil, err
+	}
+	return &CheckpointPublication{store: s, view: view, scan: scan, typ: typ, id: id, runtime: runtime, tail: tail}, nil
+}
+
+func (p *CheckpointPublication) NextIndex() uint64 { return p.scan.NextIndex() }
+
+func (p *CheckpointPublication) Close(ctx context.Context) error {
+	if p.closed {
+		return nil
+	}
+	if err := p.view.Close(ctx); err != nil {
+		return err
+	}
+	p.closed = true
+	return nil
+}
+
+// Advance bounds newly verified records; final ownership verification and
+// publication still require bounded request contexts. Verification deadlines
+// retain progress while its reader remains alive. Once finalization starts,
+// an error is sticky and must never be promoted to success by reusing this state.
+func (p *CheckpointPublication) Advance(ctx context.Context, maxRecords uint64) (bool, error) {
+	if p.err != nil {
+		return false, p.err
+	}
+	if p.done {
+		return true, nil
+	}
+	if p.closed {
+		return false, ErrStale
+	}
+	verified, complete, err := p.scan.Advance(ctx, max(uint64(1), p.view.Count()))
+	if err != nil {
+		if !errors.Is(err, context.Canceled) && !errors.Is(err, context.DeadlineExceeded) {
+			p.err = err
+		}
+		return false, err
+	}
+	if !complete {
+		return false, nil
+	}
+	if verified == nil || verified.Runtime != p.runtime {
+		p.err = ErrGap
+		return false, p.err
+	}
+	if verified.Tail != p.tail {
+		p.err = ErrStale
+		return false, p.err
+	}
+	cleanup, cancel := context.WithTimeout(context.WithoutCancel(ctx), 3*time.Second)
+	err = p.Close(cleanup)
+	cancel()
+	if err != nil {
+		p.err = fmt.Errorf("%w: checkpoint reader release: %w", ErrUnknown, err)
+		return false, p.err
+	}
+	if err = p.store.publishVerifiedCheckpoint(ctx, p.typ, p.id, p.runtime, p.tail, verified.Request.Index); err != nil {
+		p.err = err
+		return false, err
+	}
+	p.done = true
+	return true, nil
+}

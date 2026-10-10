@@ -1,5 +1,28 @@
 # JetStream Durable Workflow Runtime — Implementation Plan
 
+## Checkpoint publication accepts bounded verification batches — 2026-10-10
+
+`BeginCheckpointPublication` now owns a live exact reader and advances verification
+in caller-sized batches. Partial scans cannot publish. Completion must match the
+requested runtime/tail and confirm reader release before fresh lifecycle/tail
+observation and the original-head pointer CAS. Verification deadlines retain
+process-local progress; unknown release or finalization requires a fresh operation.
+Thirty JSON/protobuf model controls pass under race, including release/pointer
+acknowledgement cuts and fresh retries. Removing the release guard fails four
+controls; bypassing the batch limit fails all30.
+[Development evidence](scale/graph-checkpoint-publication-batches-2026-10-10/README.md).
+The checkpoint/frame/index/archive race selection passes136.092s, all853 saved
+simulations pass unchanged25.088s, and native R1/archive20 plus seven handoff
+repair controls pass under race33.309s (two checkpoints, terminal slot19, zero
+forbidden effects). An initial mistyped native selection ran zero tests and is
+excluded. These checks are against development inputs, not frozen qualification.
+The worker still invokes synchronous publication under its15-second context;
+process death loses scan progress, and archive confirmation remains independent.
+Actual100000 remains failed. Worker maintenance integration, durable handover,
+bounded archive staging/lifetime control and every original full/extended/native/
+fault/scale/soak/retention/import/admission/collector/rollout gate remain open.
+Public continuation admission stays closed and production collection stays off.
+
 ## Checkpoint verification supports bounded process-local scans — 2026-10-10
 
 A scan now advances in caller-sized record batches against one exact pinned
