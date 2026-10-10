@@ -1,0 +1,22 @@
+{
+  "command": [
+    "go",
+    "test",
+    "-race",
+    "./wf",
+    "-count=1",
+    "-timeout=5m"
+  ],
+  "environment": {
+    "GOMAXPROCS": "2",
+    "GOMEMLIMIT": "768MiB"
+  },
+  "actual_exit": 0,
+  "source_files_sha256": {
+    "wf/replay.go": "0d953254a2a4d4b6c25e99c0e2aa98e70371d09c29f7c55c26ab15ecbb84fde7",
+    "wf/replay_graph_checkpoint.go": "4aaab455deeeba14ad11134fa839fbba41b311aeebe70deafcc534a464b9a1c7",
+    "wf/replay_graph_checkpoint_test.go": "20b03888482057906f57bf84910ce0b875eb6e77e2218ec1b8797b2847eb0d28"
+  },
+  "log_sha256": "96d061c2d1136d362ee6d0d2aad59b4536a6aff0101378b862877339e3bad82b",
+  "scope": "Development full SDK race suite; source-qualified corpus/native CLI follow separately."
+}

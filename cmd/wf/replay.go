@@ -232,6 +232,9 @@ func runReplayBundle(bundle replayBundle, pluginPath, symbolName string) (replay
 	if len(bundle.Journal) == 0 {
 		return report, fmt.Errorf("replay journal is empty")
 	}
+	if err := wf.ValidateReplayGraphCheckpoints(bundle.Journal, bundle.Objects, bundle.Type, bundle.ID, bundle.InvSeq); err != nil {
+		return report, err
+	}
 	if err := validateReplayGraphChildren(bundle); err != nil {
 		return report, err
 	}

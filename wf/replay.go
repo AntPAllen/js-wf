@@ -122,6 +122,9 @@ func replayWithStages[T any](journalBytes []byte, fn func(*Context) (T, error), 
 			return result, fmt.Errorf("%w: %v", ErrCorruptJournal, checkErr)
 		}
 	}
+	if err := ValidateReplayGraphCheckpoints(records, opts.Objects, opts.Type, opts.ID, opts.InvSeq); err != nil {
+		return result, err
+	}
 	childValidator, err := replayGraphChildValidator(records, opts.Objects)
 	if err != nil {
 		return result, err
