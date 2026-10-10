@@ -1,0 +1,29 @@
+{
+  "actual_exit": 0,
+  "command": [
+    "go",
+    "test",
+    "-race",
+    "./sim",
+    "./retention",
+    "-run",
+    "^(TestSeededGraphRetentionWorkflowReplay|TestPinnedRegressionCorpus|TestGraphRetentionWorkflowSDKCrashAndReuseReplay|TestNativeGraphRetentionWorkflowBindsAndPurgesTarget)$",
+    "-count=1",
+    "-v",
+    "-timeout=5m"
+  ],
+  "environment": {
+    "SIM_SEEDS": "1000"
+  },
+  "source_hashes_unchanged_since_observation": true,
+  "pinned_passes": 860,
+  "new_family_seed_count": 1000,
+  "sdk_modes": 7,
+  "sdk_seeds_per_mode": 16,
+  "exact_replay": true,
+  "native_replicas": [
+    1,
+    3
+  ],
+  "scope": "Focused integrated development race, not complete159 clean-source qualification."
+}

@@ -117,7 +117,9 @@ func graphHandler(graph *journal.GraphStore, grace time.Duration, lookupInvocati
 			return nil, fmt.Errorf("retention target lookup exceeded retry limit")
 		}
 		return purgeHandler(grace, true, func(ctx context.Context, typ, id string) error {
-			return purge(ctx, typ, id, generation)
+			fresh, err := lookupInvocation(ctx, typ, id)
+			if err != nil { return err }
+			return purge(ctx, typ, id, fresh.Sequence)
 		})(c, input)
 	}
 }

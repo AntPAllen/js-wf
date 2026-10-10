@@ -1,5 +1,27 @@
 # JetStream Durable Workflow Runtime — Implementation Plan
 
+## Canonical retention SDK simulation and complete frozen normal result — 2026-10-10
+
+The canonical retention workflow now runs through a shared production SDK handler
+on the narrow transport model. Four journal append boundaries and two ID-reuse
+cases preserve the recorded target generation across restart. The integrated
+focused race passes the new 1,000-seed family, exact replays, all 860 saved traces,
+112 SDK cases and native R1/R3 healthy handler controls. Re-looking up the target
+on retry is rejected by both reuse cases under a source overlay. The inventory
+is now 159 seeded families; the previous 853 traces are unchanged.
+[Source, controls and scoped evidence](scale/graph-retention-workflow-replay-2026-10-10/README.md).
+
+Separately, the frozen b3d0cb1 complete normal suite closed with actual supervisor
+and child exit 0. Independent review verifies all 158,000 seed bodies, 853 pins,
+225 passing top-level tests and two trace-only skips over eight disjoint package
+processes from one source-bound binary.
+[Accepted frozen-source review](scale/graph-current-tier1-2026-10-10/normal-review.json).
+This predates the new retention source. Complete current159 normal/race and
+extended qualification remain pending. The original actual 100,000-entry test
+continues under its existing invocation; no terminal acceptance is claimed.
+Broader original scale/fault/soak/storage/retention/import/security/rollout gates
+remain open, and admission/online collection remain disabled.
+
 ## Phase 4 linter direct-call forms corrected — 2026-10-10
 
 The scanner now recognizes dot-imported workflow Context/time/random functions,

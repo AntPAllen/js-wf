@@ -1,0 +1,18 @@
+{
+  "actual_exit": 1,
+  "command": [
+    "go",
+    "test",
+    "-overlay",
+    "/home/exedev/js-wf/docs/scale/graph-retention-workflow-replay-2026-10-10/mutation-overlay.json",
+    "./retention",
+    "-run",
+    "^TestGraphRetentionWorkflowSDKCrashAndReuseReplay$",
+    "-count=1",
+    "-v",
+    "-timeout=2m"
+  ],
+  "semantic_detection": true,
+  "mutation": "Replace the recorded target generation with a fresh invocation lookup on retry.",
+  "scope": "Both ID-reuse SDK cuts detect replacement deletion; no build error/timeouts count as detection."
+}

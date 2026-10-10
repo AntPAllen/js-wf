@@ -525,6 +525,8 @@ func replayTrace(loaded Trace) (Trace, error) {
 		replayed, err = runGraphSignalClient(loaded.Seed, &loaded)
 	case "graph_canonical_purge":
 		replayed, err = runGraphPurge(loaded.Seed, &loaded)
+	case "graph_retention_workflow":
+		replayed, err = runGraphRetentionWorkflow(loaded.Seed, &loaded)
 	case "graph_reconciler_history":
 		replayed, err = runGraphReconcile(loaded.Seed, &loaded)
 	case "graph_child_signal_provenance":
