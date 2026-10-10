@@ -26,3 +26,18 @@ public continuation admission. Source-qualified terminal independent review is
 required; launch is not acceptance. Full child fault/buffered-signal/retention,
 import/rollout, actual100,000-entry cap, public/default admission, production
 collection and all broader original requirements remain open.
+
+## Durable launch
+
+Frozen sourceccc8f19; user unit `js-wf-child-offline-20261010.service`,
+initial supervisor PID64632, invocation7df3aafebd34451998447d6628bd1631.
+Root `/home/exedev/js-wf-child-offline-20261010`; clean sparse checkout
+`/home/exedev/js-wf-child-offline-qualification` contains all3,312 selected
+Go/Python/YAML/module/corpus inputs. The sparse checkout excludes bulky
+historical document evidence, retaining every selected build/test input.
+[Runner](run.py) retains a race worker binary and matching CLI/plugin pairs,
+all native stores and exports, raw events, actual command exits, artifact hashes
+and before/after source inventories. [Reviewer](review.py) requires terminal0,
+Git-exact selected inputs, all20 concrete cases, complete frame/owned-child
+bytes, live counters, specific negative controls and physical source removal.
+The mutable state file is operational state while this unit is live.

@@ -1,5 +1,22 @@
 # Implementation status against the supplied plan
 
+## Canonical continuation child offline replay matrix launched — 2026-10-10
+
+Frozenccc8f19 is running a durable native race qualification:16 R1/R3-domain ×
+live/archive × cached/pending × success/failure child cases, plus all four
+state-only replay regressions after the shared test driver refactor. The new
+cases retire and physically collect child-owned receipts, remove the child's
+WF_INV source, then export/replay the parent's owned history after all native
+servers stop. Successful results are700,000 bytes; failed children preserve the
+planned error. Missing stage/frame/result controls require specific errors.
+All3,312 selected source inputs are present in a100MB sparse frozen checkout;
+retained commands, binaries, bundles and before/after hashes support independent
+terminal review. [Runner, reviewer and exact scope](scale/graph-continuation-child-offline-2026-10-10/README.md).
+Launch is not acceptance. The separate full156 race campaign remains live at
+d504a33; latest-source/full extended, child fault/buffered-signal/retention,
+import/rollout, actual100,000-entry cap, public/default admission, production
+collection and every broader original requirement remain open.
+
 ## SDK canonical continuation offline CLI replay verified — 2026-10-10
 
 Frozen85f2629 passes four native race cases, R1/R3-domain × live v5/archive v6,
