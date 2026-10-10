@@ -1,0 +1,88 @@
+package journal_test
+
+import (
+	"context"
+	"reflect"
+	"testing"
+	"time"
+
+	"js-wf/internal/graphpublication"
+	"js-wf/internal/retainedgraph"
+	"js-wf/journal"
+	"js-wf/sim"
+)
+
+type fullRangePort struct {
+	*sim.GraphPublicationTransport
+	gets    int
+	clock   *time.Time
+	advance bool
+}
+
+func (p *fullRangePort) Get(ctx context.Context, link retainedgraph.Link, limit int) ([]byte, error) {
+	p.gets++
+	if p.advance {
+		*p.clock = p.clock.Add(200 * time.Millisecond)
+	}
+	return p.GraphPublicationTransport.Get(ctx, link, limit)
+}
+
+func TestGraphFullHistoryRangeCensusAndRenewal(t *testing.T) {
+	ctx := context.Background()
+	now := time.Unix(1000, 0).UTC()
+	port := &fullRangePort{GraphPublicationTransport: sim.NewGraphPublicationTransport(sim.NewScheduler(73)), clock: &now}
+	store, err := journal.NewGraphStore(journal.GraphConfig{Protocol: graphpublication.Protocol{Port: port}, Now: func() time.Time { return now }, PinTTL: 4 * time.Second, IntentTTL: time.Second})
+	if err != nil {
+		t.Fatal(err)
+	}
+	tail, err := store.Begin(ctx, "flow", "range", 7)
+	if err != nil {
+		t.Fatal(err)
+	}
+	const count = 33
+	for i := uint64(0); i < count; i++ {
+		kind := journal.Suspended
+		if i == 0 {
+			kind = journal.Started
+		}
+		if i == count-1 {
+			kind = journal.Completed
+		}
+		tail, err = store.Append(ctx, "flow", "range", 7, journal.Entry{Kind: kind, Index: i, Epoch: 3}, tail, nil, nil)
+		if err != nil {
+			t.Fatal(i, err)
+		}
+	}
+	view, err := store.Open(ctx, "flow", "range", 7)
+	if err != nil {
+		t.Fatal(err)
+	}
+	port.gets = 0
+	var point []journal.Record
+	for i := uint64(0); i < count; i++ {
+		item, err := view.Read(ctx, i)
+		if err != nil {
+			t.Fatal(i, err)
+		}
+		point = append(point, item.Record)
+	}
+	pointGets := port.gets
+	if err = view.Close(ctx); err != nil {
+		t.Fatal(err)
+	}
+	start := now
+	port.gets = 0
+	port.advance = true
+	records, readTail, err := store.ReadExisting(ctx, "flow", "range", 7)
+	port.advance = false
+	if err != nil || readTail != tail || !reflect.DeepEqual(records, point) {
+		t.Fatal(readTail, tail, len(records), err)
+	}
+	if port.gets != 97 || port.gets >= pointGets {
+		t.Fatal("range/point object GET census", port.gets, pointGets)
+	}
+	if now.Sub(start) <= 4*time.Second {
+		t.Fatal("test did not require pin renewal", now.Sub(start))
+	}
+	t.Logf("FULL_HISTORY_RANGE records=%d range_gets=%d point_gets=%d simulated_elapsed=%s pin_ttl=4s", len(records), port.gets, pointGets, now.Sub(start))
+}

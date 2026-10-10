@@ -1,0 +1,14 @@
+=== RUN   TestNativeGraphContinuationFailedChildPromise
+=== RUN   TestNativeGraphContinuationFailedChildPromise/R3Domain/archive=true/buffered=false
+    graph_continuation_sdk_test.go:456: ARCHIVE_COLLECTION stage=next original_entry_receipts_removed=10 live_records=3 logical_records=10
+    graph_continuation_sdk_test.go:400: context deadline exceeded
+=== RUN   TestNativeGraphContinuationFailedChildPromise/R3Domain/archive=true/buffered=true
+    graph_continuation_sdk_test.go:456: ARCHIVE_COLLECTION stage=next original_entry_receipts_removed=10 live_records=3 logical_records=10
+    graph_continuation_sdk_test.go:456: ARCHIVE_COLLECTION stage=finish original_entry_receipts_removed=13 live_records=3 logical_records=20
+    graph_continuation_sdk_test.go:518: context deadline exceeded
+--- FAIL: TestNativeGraphContinuationFailedChildPromise (121.19s)
+    --- FAIL: TestNativeGraphContinuationFailedChildPromise/R3Domain/archive=true/buffered=false (60.67s)
+    --- FAIL: TestNativeGraphContinuationFailedChildPromise/R3Domain/archive=true/buffered=true (60.52s)
+FAIL
+FAIL	js-wf/worker	121.306s
+FAIL

@@ -121,18 +121,8 @@ func testNativeGraphContinuationSDKFlow(t *testing.T, domain string, partition, 
 	if childPromiseFlow || archive {
 		timeout = time.Minute
 	}
-	if childFailure && archive {
-		// Functional watchdog for the complete multi-delivery/collection fixture.
-		// Recovery latency is checked separately from kill through exact ACK.
-		timeout = 2 * time.Minute
-	}
 	ctx, cancel := context.WithTimeout(context.Background(), timeout)
 	defer cancel()
-	phaseStart := time.Now()
-	phase := func(name string) {
-		t.Helper()
-		t.Logf("SDK_PHASE name=%s elapsed=%s remaining=%s", name, time.Since(phaseStart), time.Until(phaseStart.Add(timeout)))
-	}
 	if replicas > 1 {
 		for ctx.Err() == nil {
 			ready := false
@@ -333,36 +323,10 @@ func testNativeGraphContinuationSDKFlow(t *testing.T, domain string, partition, 
 			t.Fatal(err)
 		}
 		var noOp bool
-		// Direct calls bypass RunPartition's delivery heartbeat. Match its
-		// renewal interval/freshness guard while archive restore reads are active.
-		stageCtx, stopStage := context.WithCancel(ctx)
-		heartbeatDone := make(chan error, 1)
-		go func() {
-			ticker := time.NewTicker(runner.heartbeatInterval)
-			defer ticker.Stop()
-			for {
-				select {
-				case <-stageCtx.Done():
-					heartbeatDone <- nil
-					return
-				case <-ticker.C:
-					renewCtx, stopRenew := context.WithTimeout(stageCtx, 3*time.Second)
-					_, renewErr := owner.RenewIfIdle(renewCtx, runner.heartbeatInterval)
-					stopRenew()
-					if renewErr != nil {
-						stopStage()
-						heartbeatDone <- renewErr
-						return
-					}
-				}
-			}
-		}()
-		err = runner.execute(stageCtx, h.Type, h.ID, owner, time.Time{}, timerWakeup{}, &noOp, nil)
-		stopStage()
-		heartbeatErr := <-heartbeatDone
+		err = runner.execute(ctx, h.Type, h.ID, owner, time.Time{}, timerWakeup{}, &noOp, nil)
 		releaseErr := owner.Release(ctx)
-		if err != nil || releaseErr != nil || heartbeatErr != nil && !errors.Is(heartbeatErr, context.Canceled) {
-			t.Fatal("SDK stage delivery", err, releaseErr, heartbeatErr)
+		if err != nil || releaseErr != nil {
+			t.Fatal("SDK stage delivery", err, releaseErr)
 		}
 	}
 	scan, err := reconcile.NewCanonicalContinuationScan(js, graph)
@@ -385,37 +349,10 @@ func testNativeGraphContinuationSDKFlow(t *testing.T, domain string, partition, 
 		}
 	} else {
 		for _, stage := range []string{"next", "finish"} {
-			phase("execute_begin_" + stage)
 			execute()
-			phase("execute_end_" + stage)
 			status, err := graph.InspectStart(ctx, h.Type, h.ID)
 			if err != nil || status.Checkpoint == nil || status.Checkpoint.Stage != stage || !status.ContinuationReady() {
 				t.Fatal("SDK did not publish checkpoint", stage, status, err)
-			}
-			var childReceipts []journal.GraphPayloadLink
-			if childPromiseFlow && stage == "finish" {
-				retired, err := graph.InspectRetirement(ctx, childPromise.ChildType, childPromise.ChildID)
-				if err != nil {
-					t.Fatal(err)
-				}
-				if archive {
-					childView, err := graph.Open(ctx, childPromise.ChildType, childPromise.ChildID, retired.Invocation)
-					if err != nil {
-						t.Fatal(err)
-					}
-					terminal, err := childView.Read(ctx, childView.Count()-1)
-					if err != nil {
-						t.Fatal(err)
-					}
-					childReceipts = append(terminal.Blobs, terminal.EntryBlob)
-					if err = childView.Close(ctx); err != nil {
-						t.Fatal(err)
-					}
-				}
-				if err := graph.Retire(ctx, childPromise.ChildType, childPromise.ChildID, retired.Invocation, retired.Tail); err != nil {
-					t.Fatal(err)
-				}
-				phase("child_retire_end")
 			}
 			if archive {
 				// Collect after the worker closed its old pin, then resume from
@@ -436,19 +373,6 @@ func testNativeGraphContinuationSDKFlow(t *testing.T, domain string, partition, 
 				if _, err = protocol.SweepWithReaders(ctx, time.Now().Add(2*time.Minute)); err != nil {
 					t.Fatal(err)
 				}
-				if childPromiseFlow && stage == "finish" {
-					for _, receipt := range childReceipts {
-						if _, err = port.Get(ctx, receipt, journal.DefaultGraphPayloadLimit); !errors.Is(err, jetstream.ErrObjectNotFound) {
-							t.Fatal("retired child receipt absence unconfirmed", receipt, err)
-						}
-					}
-					resultBytes := len(childResult)
-					if childFailure {
-						resultBytes = 0
-					}
-					t.Logf("ARCHIVE_CHILD_RECLAIMED terminal_receipts=%d result_bytes=%d", len(childReceipts), resultBytes)
-				}
-				phase("parent_sweep_end_" + stage)
 				view, err := graph.Open(ctx, h.Type, h.ID, h.InvSeq)
 				if err != nil {
 					t.Fatal(err)
@@ -484,19 +408,18 @@ func testNativeGraphContinuationSDKFlow(t *testing.T, domain string, partition, 
 					t.Fatal("compacted parent root absent")
 				}
 				entryHashes, currentObjects := map[string]bool{}, map[string]bool{}
-				audited := uint64(0)
-				if err := view.ReadRange(ctx, 0, view.Count(), func(record journal.GraphRecord) error {
+				for i := uint64(0); i < view.Count(); i++ {
+					record, err := view.Read(ctx, i)
+					if err != nil {
+						t.Fatal("audit after collection", i, err)
+					}
 					entryHashes[record.EntryBlob.Hash], currentObjects[record.EntryBlob.Reference.Object] = true, true
-					audited++
-					return nil
-				}); err != nil || audited != view.Count() {
-					t.Fatal("audit after collection", audited, view.Count(), err)
 				}
 				removedEntries := 0
 				for _, object := range before {
 					if entryHashes[object.Key] && !currentObjects[object.Reference.Object] {
-						if _, err = port.Get(ctx, retainedgraph.Link{Hash: object.Key, Reference: object.Reference}, journal.MaxGraphEntryBytes); !errors.Is(err, jetstream.ErrObjectNotFound) {
-							t.Fatal("original entry receipt absence unconfirmed", object, err)
+						if _, err = port.Get(ctx, retainedgraph.Link{Hash: object.Key, Reference: object.Reference}, journal.MaxGraphEntryBytes); err == nil {
+							t.Fatal("original entry receipt survived collection", object)
 						}
 						removedEntries++
 					}
@@ -508,7 +431,6 @@ func testNativeGraphContinuationSDKFlow(t *testing.T, domain string, partition, 
 				if err = view.Close(ctx); err != nil {
 					t.Fatal(err)
 				}
-				phase("parent_audit_end_" + stage)
 			}
 			if err := runs.Purge(ctx); err != nil {
 				t.Fatal(err)
@@ -521,7 +443,6 @@ func testNativeGraphContinuationSDKFlow(t *testing.T, domain string, partition, 
 			if err != nil || result.Reenqueued != 1 {
 				t.Fatal("SDK boundary wakeup not recovered", stage, result, err)
 			}
-			phase("boundary_scan_end_" + stage)
 			if childPromiseFlow {
 				if stage == "next" {
 					owner, err := leases.Acquire(ctx, childPromise.ChildType, childPromise.ChildID, "sdkchild")
@@ -534,7 +455,49 @@ func testNativeGraphContinuationSDKFlow(t *testing.T, domain string, partition, 
 					if err != nil || releaseErr != nil {
 						t.Fatal("child delivery", err, releaseErr)
 					}
-					phase("child_execute_end")
+				} else {
+					retired, err := graph.InspectRetirement(ctx, childPromise.ChildType, childPromise.ChildID)
+					if err != nil {
+						t.Fatal(err)
+					}
+					var childReceipts []journal.GraphPayloadLink
+					if archive {
+						childView, err := graph.Open(ctx, childPromise.ChildType, childPromise.ChildID, retired.Invocation)
+						if err != nil {
+							t.Fatal(err)
+						}
+						terminal, err := childView.Read(ctx, childView.Count()-1)
+						if err != nil {
+							t.Fatal(err)
+						}
+						childReceipts = append(terminal.Blobs, terminal.EntryBlob)
+						if err = childView.Close(ctx); err != nil {
+							t.Fatal(err)
+						}
+					}
+					if err := graph.Retire(ctx, childPromise.ChildType, childPromise.ChildID, retired.Invocation, retired.Tail); err != nil {
+						t.Fatal(err)
+					}
+					if archive {
+						authority, err := graphpublication.OpenNativeAuthority(ctx, js, cfg.AuthorityStream, cfg.AuthorityPrefix)
+						if err != nil {
+							t.Fatal(err)
+						}
+						port, err := graphpublication.OpenNativePort(ctx, authority, cfg.ObjectBucket)
+						if err != nil {
+							t.Fatal(err)
+						}
+						protocol := graphpublication.Protocol{Port: port}
+						if _, err = protocol.SweepWithReaders(ctx, time.Now().Add(2*time.Minute)); err != nil {
+							t.Fatal(err)
+						}
+						for _, receipt := range childReceipts {
+							if _, err = port.Get(ctx, receipt, journal.DefaultGraphPayloadLimit); err == nil {
+								t.Fatal("retired child receipt survived", receipt)
+							}
+						}
+						t.Logf("ARCHIVE_CHILD_RECLAIMED terminal_receipts=%d result_bytes=%d", len(childReceipts), len(childResult))
+					}
 				}
 			}
 			if bufferedSignals && stage == "next" {

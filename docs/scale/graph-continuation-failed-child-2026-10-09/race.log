@@ -1,0 +1,44 @@
+=== RUN   TestNativeGraphContinuationFailedChildPromise
+=== RUN   TestNativeGraphContinuationFailedChildPromise/R1/archive=false/buffered=false
+    graph_continuation_sdk_test.go:543: SDK initial/next/finish=map[finish:1 initial:1 next:1] effects=2 records=25 result=43
+    graph_continuation_sdk_test.go:545: GRAPH_FAILED_CHILD buffered=false archive=false child_calls=1 preserved_error=planned_child_failure parent_result=43
+=== RUN   TestNativeGraphContinuationFailedChildPromise/R1/archive=false/buffered=true
+    graph_continuation_sdk_test.go:543: SDK initial/next/finish=map[finish:1 initial:1 next:1] effects=2 records=25 result=43
+    graph_continuation_sdk_test.go:545: GRAPH_FAILED_CHILD buffered=true archive=false child_calls=1 preserved_error=planned_child_failure parent_result=43
+=== RUN   TestNativeGraphContinuationFailedChildPromise/R1/archive=true/buffered=false
+    graph_continuation_sdk_test.go:430: ARCHIVE_COLLECTION stage=next original_entry_receipts_removed=10 live_records=3 logical_records=10
+    graph_continuation_sdk_test.go:430: ARCHIVE_COLLECTION stage=finish original_entry_receipts_removed=15 live_records=3 logical_records=22
+    graph_continuation_sdk_test.go:499: ARCHIVE_CHILD_RECLAIMED terminal_receipts=1 result_bytes=700000
+    graph_continuation_sdk_test.go:543: SDK initial/next/finish=map[finish:1 initial:1 next:1] effects=2 records=25 result=43
+    graph_continuation_sdk_test.go:545: GRAPH_FAILED_CHILD buffered=false archive=true child_calls=1 preserved_error=planned_child_failure parent_result=43
+=== RUN   TestNativeGraphContinuationFailedChildPromise/R1/archive=true/buffered=true
+    graph_continuation_sdk_test.go:430: ARCHIVE_COLLECTION stage=next original_entry_receipts_removed=10 live_records=3 logical_records=10
+    graph_continuation_sdk_test.go:430: ARCHIVE_COLLECTION stage=finish original_entry_receipts_removed=13 live_records=3 logical_records=20
+    graph_continuation_sdk_test.go:499: ARCHIVE_CHILD_RECLAIMED terminal_receipts=1 result_bytes=700000
+    graph_continuation_sdk_test.go:543: SDK initial/next/finish=map[finish:1 initial:1 next:1] effects=2 records=25 result=43
+    graph_continuation_sdk_test.go:545: GRAPH_FAILED_CHILD buffered=true archive=true child_calls=1 preserved_error=planned_child_failure parent_result=43
+=== RUN   TestNativeGraphContinuationFailedChildPromise/R3Domain/archive=false/buffered=false
+    graph_continuation_sdk_test.go:543: SDK initial/next/finish=map[finish:1 initial:1 next:1] effects=2 records=25 result=43
+    graph_continuation_sdk_test.go:545: GRAPH_FAILED_CHILD buffered=false archive=false child_calls=1 preserved_error=planned_child_failure parent_result=43
+=== RUN   TestNativeGraphContinuationFailedChildPromise/R3Domain/archive=false/buffered=true
+    graph_continuation_sdk_test.go:543: SDK initial/next/finish=map[finish:1 initial:1 next:1] effects=2 records=25 result=43
+    graph_continuation_sdk_test.go:545: GRAPH_FAILED_CHILD buffered=true archive=false child_calls=1 preserved_error=planned_child_failure parent_result=43
+=== RUN   TestNativeGraphContinuationFailedChildPromise/R3Domain/archive=true/buffered=false
+    graph_continuation_sdk_test.go:430: ARCHIVE_COLLECTION stage=next original_entry_receipts_removed=10 live_records=3 logical_records=10
+    graph_continuation_sdk_test.go:352: SDK stage delivery workflow lease was lost: nats: nats: API error: code=400 err_code=10071 description=wrong last sequence: 37: nats: key revision mismatch workflow lease was lost
+=== RUN   TestNativeGraphContinuationFailedChildPromise/R3Domain/archive=true/buffered=true
+    graph_continuation_sdk_test.go:430: ARCHIVE_COLLECTION stage=next original_entry_receipts_removed=10 live_records=3 logical_records=10
+    graph_continuation_sdk_test.go:430: ARCHIVE_COLLECTION stage=finish original_entry_receipts_removed=13 live_records=3 logical_records=20
+    graph_continuation_sdk_test.go:492: context deadline exceeded
+--- FAIL: TestNativeGraphContinuationFailedChildPromise (297.59s)
+    --- PASS: TestNativeGraphContinuationFailedChildPromise/R1/archive=false/buffered=false (17.92s)
+    --- PASS: TestNativeGraphContinuationFailedChildPromise/R1/archive=false/buffered=true (18.22s)
+    --- PASS: TestNativeGraphContinuationFailedChildPromise/R1/archive=true/buffered=false (48.86s)
+    --- PASS: TestNativeGraphContinuationFailedChildPromise/R1/archive=true/buffered=true (47.53s)
+    --- PASS: TestNativeGraphContinuationFailedChildPromise/R3Domain/archive=false/buffered=false (28.31s)
+    --- PASS: TestNativeGraphContinuationFailedChildPromise/R3Domain/archive=false/buffered=true (29.06s)
+    --- FAIL: TestNativeGraphContinuationFailedChildPromise/R3Domain/archive=true/buffered=false (47.11s)
+    --- FAIL: TestNativeGraphContinuationFailedChildPromise/R3Domain/archive=true/buffered=true (60.58s)
+FAIL
+FAIL	js-wf/worker	297.686s
+FAIL

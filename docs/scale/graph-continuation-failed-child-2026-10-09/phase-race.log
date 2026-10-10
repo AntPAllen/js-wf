@@ -1,0 +1,33 @@
+=== RUN   TestNativeGraphContinuationFailedChildPromise
+=== RUN   TestNativeGraphContinuationFailedChildPromise/R3Domain/archive=true/buffered=false
+    graph_continuation_sdk_test.go:383: SDK_PHASE name=execute_begin_next elapsed=4.487212241s remaining=55.512787378s
+    graph_continuation_sdk_test.go:385: SDK_PHASE name=execute_end_next elapsed=18.407469311s remaining=41.592530338s
+    graph_continuation_sdk_test.go:409: SDK_PHASE name=parent_sweep_end_next elapsed=24.728090751s remaining=35.271908848s
+    graph_continuation_sdk_test.go:465: ARCHIVE_COLLECTION stage=next original_entry_receipts_removed=10 live_records=3 logical_records=10
+    graph_continuation_sdk_test.go:469: SDK_PHASE name=parent_audit_end_next elapsed=25.925759932s remaining=34.074239447s
+    graph_continuation_sdk_test.go:482: SDK_PHASE name=boundary_scan_end_next elapsed=26.093015642s remaining=33.906983917s
+    graph_continuation_sdk_test.go:495: SDK_PHASE name=child_execute_end elapsed=29.085219497s remaining=30.914780172s
+    graph_continuation_sdk_test.go:383: SDK_PHASE name=execute_begin_finish elapsed=29.085291967s remaining=30.914707812s
+    graph_continuation_sdk_test.go:385: SDK_PHASE name=execute_end_finish elapsed=52.505490804s remaining=7.494508815s
+    graph_continuation_sdk_test.go:407: context deadline exceeded
+=== RUN   TestNativeGraphContinuationFailedChildPromise/R3Domain/archive=true/buffered=true
+    graph_continuation_sdk_test.go:383: SDK_PHASE name=execute_begin_next elapsed=2.489763867s remaining=57.510235743s
+    graph_continuation_sdk_test.go:385: SDK_PHASE name=execute_end_next elapsed=16.297267771s remaining=43.702731879s
+    graph_continuation_sdk_test.go:409: SDK_PHASE name=parent_sweep_end_next elapsed=21.215763944s remaining=38.784235735s
+    graph_continuation_sdk_test.go:465: ARCHIVE_COLLECTION stage=next original_entry_receipts_removed=10 live_records=3 logical_records=10
+    graph_continuation_sdk_test.go:469: SDK_PHASE name=parent_audit_end_next elapsed=22.298770724s remaining=37.701228965s
+    graph_continuation_sdk_test.go:482: SDK_PHASE name=boundary_scan_end_next elapsed=22.402747118s remaining=37.597252531s
+    graph_continuation_sdk_test.go:495: SDK_PHASE name=child_execute_end elapsed=25.396780042s remaining=34.603219667s
+    graph_continuation_sdk_test.go:383: SDK_PHASE name=execute_begin_finish elapsed=25.396960406s remaining=34.603039253s
+    graph_continuation_sdk_test.go:385: SDK_PHASE name=execute_end_finish elapsed=45.78107919s remaining=14.218920509s
+    graph_continuation_sdk_test.go:409: SDK_PHASE name=parent_sweep_end_finish elapsed=56.993639175s remaining=3.006360395s
+    graph_continuation_sdk_test.go:465: ARCHIVE_COLLECTION stage=finish original_entry_receipts_removed=13 live_records=3 logical_records=20
+    graph_continuation_sdk_test.go:469: SDK_PHASE name=parent_audit_end_finish elapsed=59.02392465s remaining=976.07489ms
+    graph_continuation_sdk_test.go:482: SDK_PHASE name=boundary_scan_end_finish elapsed=59.173029581s remaining=826.969898ms
+    graph_continuation_sdk_test.go:530: context deadline exceeded
+--- FAIL: TestNativeGraphContinuationFailedChildPromise (121.28s)
+    --- FAIL: TestNativeGraphContinuationFailedChildPromise/R3Domain/archive=true/buffered=false (60.68s)
+    --- FAIL: TestNativeGraphContinuationFailedChildPromise/R3Domain/archive=true/buffered=true (60.60s)
+FAIL
+FAIL	js-wf/worker	121.387s
+FAIL

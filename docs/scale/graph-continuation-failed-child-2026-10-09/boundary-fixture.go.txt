@@ -121,11 +121,6 @@ func testNativeGraphContinuationSDKFlow(t *testing.T, domain string, partition, 
 	if childPromiseFlow || archive {
 		timeout = time.Minute
 	}
-	if childFailure && archive {
-		// Functional watchdog for the complete multi-delivery/collection fixture.
-		// Recovery latency is checked separately from kill through exact ACK.
-		timeout = 2 * time.Minute
-	}
 	ctx, cancel := context.WithTimeout(context.Background(), timeout)
 	defer cancel()
 	phaseStart := time.Now()
@@ -438,8 +433,8 @@ func testNativeGraphContinuationSDKFlow(t *testing.T, domain string, partition, 
 				}
 				if childPromiseFlow && stage == "finish" {
 					for _, receipt := range childReceipts {
-						if _, err = port.Get(ctx, receipt, journal.DefaultGraphPayloadLimit); !errors.Is(err, jetstream.ErrObjectNotFound) {
-							t.Fatal("retired child receipt absence unconfirmed", receipt, err)
+						if _, err = port.Get(ctx, receipt, journal.DefaultGraphPayloadLimit); err == nil {
+							t.Fatal("retired child receipt survived", receipt)
 						}
 					}
 					resultBytes := len(childResult)
@@ -495,8 +490,8 @@ func testNativeGraphContinuationSDKFlow(t *testing.T, domain string, partition, 
 				removedEntries := 0
 				for _, object := range before {
 					if entryHashes[object.Key] && !currentObjects[object.Reference.Object] {
-						if _, err = port.Get(ctx, retainedgraph.Link{Hash: object.Key, Reference: object.Reference}, journal.MaxGraphEntryBytes); !errors.Is(err, jetstream.ErrObjectNotFound) {
-							t.Fatal("original entry receipt absence unconfirmed", object, err)
+						if _, err = port.Get(ctx, retainedgraph.Link{Hash: object.Key, Reference: object.Reference}, journal.MaxGraphEntryBytes); err == nil {
+							t.Fatal("original entry receipt survived collection", object)
 						}
 						removedEntries++
 					}
@@ -535,6 +530,7 @@ func testNativeGraphContinuationSDKFlow(t *testing.T, domain string, partition, 
 						t.Fatal("child delivery", err, releaseErr)
 					}
 					phase("child_execute_end")
+
 				}
 			}
 			if bufferedSignals && stage == "next" {

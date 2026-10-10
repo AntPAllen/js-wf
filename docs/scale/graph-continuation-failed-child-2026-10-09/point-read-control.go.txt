@@ -606,22 +606,20 @@ func (s *GraphStore) read(ctx context.Context, typ, id string, invocation uint64
 			err = closeErr
 		}
 	}()
-	if view.Count() == 0 {
-		// Record-only empty views are metadata witnesses with no reader pin.
-		return nil, view.Tail(), nil
-	}
-	err = view.ReadRange(ctx, 0, view.Count(), func(item GraphRecord) error {
+	for i := uint64(0); i < view.Count(); i++ {
 		if !s.cfg.Now().Before(view.expires.Add(-s.cfg.PinTTL / 2)) {
 			if err = view.Renew(ctx); err != nil {
-				return err
+				return nil, 0, err
 			}
 		}
-		var e error
+		item, e := view.Read(ctx, i)
+		if e != nil {
+			return nil, 0, e
+		}
 		records, e = verifyNext(records, item.Record)
-		return e
-	})
-	if err != nil {
-		return nil, 0, err
+		if e != nil {
+			return nil, 0, e
+		}
 	}
 	return records, view.Tail(), nil
 }
