@@ -90,6 +90,16 @@ func (w *Worker) compactGraphCheckpointBatches(ctx context.Context, typ, id stri
 			return renewErr
 		}
 		started = ops.begin()
+		intentCtx, stopIntent := context.WithTimeout(ctx, 3*time.Second)
+		intentStarted, intentErr := operation.BeginIntentRenewalIfNeeded(intentCtx)
+		stopIntent()
+		if intentStarted || intentErr != nil {
+			ops.finish(started, "continuation_archive_renew_begin", runtime.Index, journal.StepCompleted, intentErr)
+		}
+		if intentErr != nil {
+			return intentErr
+		}
+		started = ops.begin()
 		phase := "continuation_archive_" + operation.Phase() + "_batch"
 		batchCtx, stopBatch := context.WithTimeout(ctx, 15*time.Second)
 		done, advanceErr := operation.Advance(batchCtx, budget, 2*budget)

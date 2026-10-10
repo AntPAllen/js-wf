@@ -52,7 +52,31 @@ func (c *CheckpointCompaction) Checkpoint() ([]byte, error) {
 	return data, nil
 }
 
-// BeginIntentRenewal freezes staging or private verification without updating grants yet.
+// BeginIntentRenewalIfNeeded schedules renewal with one third of IntentTTL left.
+// It uses the store's authority clock and leaves confirmation and active renewal
+// alone. An expired intent is rejected by BeginIntentRenewal, never revived.
+// The caller must still advance renewal in bounded batches under its lease.
+func (c *CheckpointCompaction) BeginIntentRenewalIfNeeded(ctx context.Context) (bool, error) {
+	if err := ctx.Err(); err != nil {
+		return false, err
+	}
+	if c.err != nil {
+		return false, c.err
+	}
+	if c.phase != "stage" && c.phase != "verify" {
+		return false, nil
+	}
+	now := c.store.cfg.Now()
+	if c.stage.IntentExpiry().Sub(now) > c.store.cfg.IntentTTL/3 {
+		return false, nil
+	}
+	if err := c.BeginIntentRenewal(ctx, now.Add(c.store.cfg.IntentTTL)); err != nil {
+		return false, err
+	}
+	return true, nil
+}
+
+// BeginIntentRenewal freezes staging or verification before grant updates.
 // Save Checkpoint's requested expiry before calling Advance. Renewal errors
 // require fresh Resume from that input; the old operation remains failed.
 func (c *CheckpointCompaction) BeginIntentRenewal(ctx context.Context, expires time.Time) error {

@@ -19,7 +19,7 @@ import (
 
 func TestGraphContinuationMaintenanceLeaseAndCancellation(t *testing.T) {
 	for _, encoding := range []journal.Encoding{journal.JSON, journal.ProtobufV1} {
-		for _, mode := range []string{"normal", "owner-loss-pointer", "owner-loss-confirm", "owner-loss-stage", "owner-loss-verify", "owner-loss-nodes", "cancel-pointer", "cancel-confirm", "cancel-stage", "cancel-verify", "cancel-nodes"} {
+		for _, mode := range []string{"normal", "owner-loss-pointer", "owner-loss-confirm", "owner-loss-stage", "owner-loss-verify", "owner-loss-nodes", "cancel-pointer", "cancel-confirm", "cancel-stage", "cancel-verify", "cancel-nodes", "renew-stage", "renew-verify", "renew-nodes", "owner-loss-renew", "cancel-renew"} {
 			t.Run(string(encoding)+"/"+mode, func(t *testing.T) {
 				base := context.Background()
 				ctx, cancel := context.WithCancel(base)
@@ -39,7 +39,12 @@ func TestGraphContinuationMaintenanceLeaseAndCancellation(t *testing.T) {
 				if err != nil {
 					t.Fatal(err)
 				}
-				leases := lease.NewWithKVPort(sim.NewKVTransport(schedule, 30*time.Second))
+				renewalMode := strings.Contains(mode, "renew")
+				leaseTTL := 30 * time.Second
+				if renewalMode {
+					leaseTTL = 120 * time.Second
+				}
+				leases := lease.NewWithKVPort(sim.NewKVTransport(schedule, leaseTTL))
 				owner, err := leases.Acquire(ctx, h.Type, h.ID, "original")
 				if err != nil {
 					t.Fatal(err)
@@ -63,6 +68,8 @@ func TestGraphContinuationMaintenanceLeaseAndCancellation(t *testing.T) {
 				}}
 				var replacement *lease.Lease
 				triggered := false
+				renewRequested, crossedOriginalExpiry := false, false
+				renewBatches := 0
 				pointerBatches, confirmBatches, stageBatches, verifyBatches := 0, 0, 0, 0
 				lastPointerIndex := uint64(0)
 				observe := func(event worker.OperationEvent) {
@@ -84,12 +91,31 @@ func TestGraphContinuationMaintenanceLeaseAndCancellation(t *testing.T) {
 					case "continuation_archive_stage_batch":
 						stageBatches++
 						phase = "stage"
+					case "continuation_archive_renew_batch":
+						renewBatches++
+						phase = "renew"
 					case "continuation_archive_verify_batch":
 						verifyBatches++
 						phase = "verify"
 						if verifyBatches == 6 {
 							phase = "nodes"
 						}
+					}
+					if renewalMode && !renewRequested && (strings.HasSuffix(mode, "-"+phase) && phase != "renew" || strings.HasSuffix(mode, "-renew") && phase == "stage") {
+						renewRequested = true
+						if err := schedule.AdvanceMillis(41000); err != nil {
+							t.Error(err)
+						}
+						return
+					}
+					if strings.HasPrefix(mode, "renew-") {
+						if renewBatches > 0 && !crossedOriginalExpiry && (phase == "stage" || phase == "verify" || phase == "nodes") {
+							crossedOriginalExpiry = true
+							if err := schedule.AdvanceMillis(20000); err != nil {
+								t.Error(err)
+							}
+						}
+						return
 					}
 					if phase == "" || triggered || !strings.HasSuffix(mode, "-"+phase) {
 						return
@@ -99,7 +125,7 @@ func TestGraphContinuationMaintenanceLeaseAndCancellation(t *testing.T) {
 						cancel()
 						return
 					}
-					if err := schedule.AdvanceMillis(31000); err != nil {
+					if err := schedule.AdvanceMillis(leaseTTL.Milliseconds() + 1000); err != nil {
 						t.Error(err)
 						return
 					}
@@ -116,7 +142,7 @@ func TestGraphContinuationMaintenanceLeaseAndCancellation(t *testing.T) {
 				}
 				defer w.Close()
 				err = worker.ExecuteGraphContinuationBatchesForTest(ctx, w, h.Type, h.ID, owner, stages, 2)
-				if mode == "normal" {
+				if mode == "normal" || strings.HasPrefix(mode, "renew-") {
 					if err != nil || initial != 1 || entered != 0 || pointerBatches != 6 || confirmBatches != 1 || stageBatches != 6 || verifyBatches != 10 {
 						t.Fatal("healthy maintenance incomplete", err, initial, entered, pointerBatches, confirmBatches, stageBatches, verifyBatches)
 					}
@@ -128,6 +154,9 @@ func TestGraphContinuationMaintenanceLeaseAndCancellation(t *testing.T) {
 					if !triggered || !errors.Is(err, want) || entered != 0 {
 						t.Fatal("lost/canceled maintenance continued", triggered, err, entered)
 					}
+				}
+				if strings.HasPrefix(mode, "renew-") && (!renewRequested || !crossedOriginalExpiry || renewBatches == 0) {
+					t.Fatal("renewal was not exercised across original expiry", renewRequested, crossedOriginalExpiry, renewBatches)
 				}
 				keys, e := model.RootKeys(base)
 				if e != nil || len(keys) != 1 {
@@ -152,7 +181,7 @@ func TestGraphContinuationMaintenanceLeaseAndCancellation(t *testing.T) {
 					if len(cursor.Checkpoint) != 0 || cursor.RetainedFrom != 0 || cursor.Kind != journal.StepCompleted {
 						t.Fatal("partial verification published handoff", cursor)
 					}
-				} else if mode != "normal" {
+				} else if mode != "normal" && !strings.HasPrefix(mode, "renew-") {
 					if len(cursor.Checkpoint) == 0 || cursor.RetainedFrom != 0 || cursor.Kind != journal.Suspended {
 						t.Fatal("abandoned archive published relocation", cursor)
 					}
@@ -167,7 +196,7 @@ func TestGraphContinuationMaintenanceLeaseAndCancellation(t *testing.T) {
 						t.Fatal(err)
 					}
 				}
-				if mode == "normal" {
+				if mode == "normal" || strings.HasPrefix(mode, "renew-") {
 					next, e := leases.Acquire(base, h.Type, h.ID, "next")
 					if e != nil {
 						t.Fatal(e)
@@ -181,7 +210,7 @@ func TestGraphContinuationMaintenanceLeaseAndCancellation(t *testing.T) {
 						t.Fatal(err)
 					}
 				}
-				t.Logf("WORKER_MAINTENANCE mode=%s pointer_batches=%d confirm_batches=%d stage_batches=%d verify_batches=%d readers=0 initial_calls=%d stage_calls=%d retained_from=%d", mode, pointerBatches, confirmBatches, stageBatches, verifyBatches, initial, entered, cursor.RetainedFrom)
+				t.Logf("WORKER_MAINTENANCE mode=%s pointer_batches=%d confirm_batches=%d stage_batches=%d verify_batches=%d renew_batches=%d readers=0 initial_calls=%d stage_calls=%d retained_from=%d", mode, pointerBatches, confirmBatches, stageBatches, verifyBatches, renewBatches, initial, entered, cursor.RetainedFrom)
 			})
 		}
 	}

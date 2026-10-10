@@ -47,6 +47,9 @@ type compactionCheckpoint struct {
 
 func (s *CompactionStage) NextIndex() uint64 { return s.next }
 
+// IntentExpiry is the deadline adopted only after every owned grant is renewed.
+func (s *CompactionStage) IntentExpiry() time.Time { return s.prepared.expires }
+
 // MatchesBinding lets a runtime bind opaque staging input to its freshly
 // observed transition. It establishes no record/content verification proof.
 func (s *CompactionStage) MatchesBinding(destination string, expected, first uint64, maxPayloadBytes int, application []byte) bool {

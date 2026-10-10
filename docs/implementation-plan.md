@@ -1,5 +1,28 @@
 # JetStream Durable Workflow Runtime — Implementation Plan
 
+## Worker schedules archive intent renewal between batches — 2026-10-10
+
+Worker archive maintenance now schedules renewal with one third of IntentTTL
+remaining, using the journal authority clock after its unconditional lease check.
+Every renewal batch rechecks ownership. Staging and verification freeze until
+complete renewal; private verification progress survives. Expired grants cannot
+revive. The default60-second intent TTL and whole15-second handoff parent remain.
+[Evidence](scale/graph-worker-intent-renewal-2026-10-10/README.md).
+
+All32 JSON/protobuf maintenance controls plus seven archive-repair controls pass
+under race12.537s. Six healthy renewal controls cross the original expiry during
+staging/record/node verification and preserve six staging/ten verification
+batches and next-delivery execution exactly once. Four renewal cancellation/
+replacement controls leave canonical retention at zero and admit no next stage.
+Removing scheduling fails all10 new controls. All853 common pins pass13.447s on
+restored source. Hashes, exact compressed source, mutant and logs are retained.
+
+Runtime descriptor persistence/resumption remains unfinished. Public graph
+continuation admission remains closed, production collection remains off, and
+actual100000-entry qualification remains failed. This does not qualify native
+worker renewal scheduling or clear broader campaign/majority/soak/rollout gates.
+The older sections below retain the evidence and limitations of their source.
+
 ## Final verification can renew intents without discarding private progress — 2026-10-10
 
 `CompactionCommit.BeginIntentRenewal` pairs its exact completed stage, freezes
