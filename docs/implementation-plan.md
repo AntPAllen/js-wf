@@ -1,5 +1,24 @@
 # JetStream Durable Workflow Runtime — Implementation Plan
 
+## Compiled canonical PostgreSQL coverage added; focused qualification live — 2026-10-10
+
+The canonical CLI fixture now has a PostgreSQL compiled-command/projector
+opt-in. Clean frozen `98eacf4` is running R1 and R3/domain cases under race,
+plus nine PostgreSQL visibility uncertainty/terminal controls and namespace
+isolation, against a separate loopback-only PostgreSQL 18 instance. Original
+two-minute fixture and command/request bounds stay unchanged. A one-core
+service quota records concurrent resource use. Existing Tier 1 and actual
+entry campaigns continue their original invocations.
+[Source, launch and independent review](scale/graph-compiled-canonical-postgres-2026-10-10/README.md).
+
+The previous complete compiled CLI acceptance explicitly skipped PostgreSQL.
+This launch is not acceptance: require actual service/child exits, both package
+passes, all selected tests without skips, exact frozen source/race binary,
+48 command and two projector receipts, domain/raw-wire validation and complete
+retained artifact hashes. The 50,000-row crash/rebuild, database fault/scale,
+full current-source package and broader plan requirements remain open.
+Admission and collection remain off.
+
 ## Complete current Tier 1 normal qualification launched — 2026-10-10
 
 Frozen `b3d0cb1` is running the complete normal suite: 227 compiled tests,

@@ -1,0 +1,30 @@
+{
+  "source": "98eacf438ead1f6ae6035234fbc3581f1ea11416",
+  "unit": "js-wf-compiled-canonical-postgres-20261010.service",
+  "invocation": "20f348d07431405ca9e885970861c94e",
+  "supervisor_pid": 187614,
+  "child_pid": 187638,
+  "command": [
+    "/usr/local/bin/go",
+    "test",
+    "-race",
+    "-p=1",
+    "./cmd/wf",
+    "./visibility",
+    "-run=^(TestOperatorStandaloneCanonicalGraphPostgresCommands|TestGraphPostgresVisibilityCanonicalRowsAndUncertainty|TestPostgresNamespaceIsolation)$",
+    "-count=1",
+    "-v",
+    "-timeout=20m"
+  ],
+  "service": {
+    "RuntimeMaxUSec": "30min",
+    "RemainAfterExit": "yes",
+    "MainPID": "187614",
+    "CPUQuotaPerSecUSec": "1s",
+    "LoadState": "loaded",
+    "InvocationID": "20f348d07431405ca9e885970861c94e"
+  },
+  "supervisor_sha256": "8042cd0c144dfc2332f5059706dc4775526c24b555fe14e302304e09697fe28f",
+  "accepted": false,
+  "observed_utc": "2026-10-10T23:08:23.848316+00:00"
+}
