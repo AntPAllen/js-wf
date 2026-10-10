@@ -1,0 +1,106 @@
+{
+  "source_bundle": "/home/exedev/js-wf-child-offline-20261010/artifacts/offline-2570539729/completed.json",
+  "source_bundle_sha256": "0ba1577af69bdad78ac0bf7e85397a1b71b839613fdc216a10859ee659b32b28",
+  "cli": "/home/exedev/js-wf-child-offline-20261010/artifacts/offline-619121342/wf",
+  "cli_sha256": "ac608b161560bb69bcabd3140b8d088e72a5cab810756049578b2a2b408fab9b",
+  "plugin": "/home/exedev/js-wf-child-offline-20261010/artifacts/offline-619121342/handler.so",
+  "plugin_sha256": "2b0dba51bdc17ec68fa74151cdfeac502c497a3fd981a6bce287bbfccb083313",
+  "rows": [
+    {
+      "name": "control",
+      "expected_exit": "zero",
+      "actual_exit": 0,
+      "command": [
+        "/home/exedev/js-wf-child-offline-20261010/artifacts/offline-619121342/wf",
+        "-url",
+        "nats://127.0.0.1:1",
+        "-handler-plugin",
+        "/home/exedev/js-wf-child-offline-20261010/artifacts/offline-619121342/handler.so",
+        "-handler-symbol",
+        "ChildWorkflow",
+        "-replay-bundle",
+        "/home/exedev/js-wf-child-offline-audit-diagnostic-20261010/control.json",
+        "replay"
+      ],
+      "input_sha256": "0ba1577af69bdad78ac0bf7e85397a1b71b839613fdc216a10859ee659b32b28",
+      "output": "{\n  \"type\": \"continued\",\n  \"id\": \"offline\",\n  \"inv_seq\": 1,\n  \"journal_entries\": 25,\n  \"status\": \"completed\",\n  \"result\": 60\n}\n"
+    },
+    {
+      "name": "wrong-child-type",
+      "expected_exit": "nonzero",
+      "actual_exit": 0,
+      "command": [
+        "/home/exedev/js-wf-child-offline-20261010/artifacts/offline-619121342/wf",
+        "-url",
+        "nats://127.0.0.1:1",
+        "-handler-plugin",
+        "/home/exedev/js-wf-child-offline-20261010/artifacts/offline-619121342/handler.so",
+        "-handler-symbol",
+        "ChildWorkflow",
+        "-replay-bundle",
+        "/home/exedev/js-wf-child-offline-audit-diagnostic-20261010/wrong-child-type.json",
+        "replay"
+      ],
+      "input_sha256": "2a257b0421725a8a1f481b04b601eea893a29cedefadf3aa7a9273733be0ea5d",
+      "output": "{\n  \"type\": \"continued\",\n  \"id\": \"offline\",\n  \"inv_seq\": 1,\n  \"journal_entries\": 25,\n  \"status\": \"completed\",\n  \"result\": 60\n}\n"
+    },
+    {
+      "name": "wrong-child-id",
+      "expected_exit": "nonzero",
+      "actual_exit": 0,
+      "command": [
+        "/home/exedev/js-wf-child-offline-20261010/artifacts/offline-619121342/wf",
+        "-url",
+        "nats://127.0.0.1:1",
+        "-handler-plugin",
+        "/home/exedev/js-wf-child-offline-20261010/artifacts/offline-619121342/handler.so",
+        "-handler-symbol",
+        "ChildWorkflow",
+        "-replay-bundle",
+        "/home/exedev/js-wf-child-offline-audit-diagnostic-20261010/wrong-child-id.json",
+        "replay"
+      ],
+      "input_sha256": "794d472b7a244e43c6fecbebdcf1f8f01c5efe030da20ce24e4d33c50f8075c5",
+      "output": "{\n  \"type\": \"continued\",\n  \"id\": \"offline\",\n  \"inv_seq\": 1,\n  \"journal_entries\": 25,\n  \"status\": \"completed\",\n  \"result\": 60\n}\n"
+    },
+    {
+      "name": "wrong-child-invocation",
+      "expected_exit": "nonzero",
+      "actual_exit": 0,
+      "command": [
+        "/home/exedev/js-wf-child-offline-20261010/artifacts/offline-619121342/wf",
+        "-url",
+        "nats://127.0.0.1:1",
+        "-handler-plugin",
+        "/home/exedev/js-wf-child-offline-20261010/artifacts/offline-619121342/handler.so",
+        "-handler-symbol",
+        "ChildWorkflow",
+        "-replay-bundle",
+        "/home/exedev/js-wf-child-offline-audit-diagnostic-20261010/wrong-child-invocation.json",
+        "replay"
+      ],
+      "input_sha256": "5e964a3a4bd08bb711939cf6a868f8785225606fdfe31bcb7b80e0456af6feb4",
+      "output": "{\n  \"type\": \"continued\",\n  \"id\": \"offline\",\n  \"inv_seq\": 1,\n  \"journal_entries\": 25,\n  \"status\": \"completed\",\n  \"result\": 60\n}\n"
+    },
+    {
+      "name": "wrong-child-result-ref",
+      "expected_exit": "nonzero",
+      "actual_exit": 0,
+      "command": [
+        "/home/exedev/js-wf-child-offline-20261010/artifacts/offline-619121342/wf",
+        "-url",
+        "nats://127.0.0.1:1",
+        "-handler-plugin",
+        "/home/exedev/js-wf-child-offline-20261010/artifacts/offline-619121342/handler.so",
+        "-handler-symbol",
+        "ChildWorkflow",
+        "-replay-bundle",
+        "/home/exedev/js-wf-child-offline-audit-diagnostic-20261010/wrong-child-result-ref.json",
+        "replay"
+      ],
+      "input_sha256": "3e5a092a3592013d2fac51a551156d9a59eba1aa8d309dfb72a5e6e6a0f78335",
+      "output": "{\n  \"type\": \"continued\",\n  \"id\": \"offline\",\n  \"inv_seq\": 1,\n  \"journal_entries\": 25,\n  \"status\": \"completed\",\n  \"result\": 60\n}\n"
+    }
+  ],
+  "scope": "Offline graph child annotations versus unchanged runtime request/owned outcome; no native cluster/API used."
+}

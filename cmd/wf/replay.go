@@ -232,6 +232,9 @@ func runReplayBundle(bundle replayBundle, pluginPath, symbolName string) (replay
 	if len(bundle.Journal) == 0 {
 		return report, fmt.Errorf("replay journal is empty")
 	}
+	if err := validateReplayGraphChildren(bundle); err != nil {
+		return report, err
+	}
 	tail := bundle.Journal[len(bundle.Journal)-1]
 	if tail.Kind != journal.Completed && tail.Kind != journal.Failed && tail.Kind != journal.Suspended {
 		return report, fmt.Errorf("replay requires a completed, failed or suspended journal tail")
