@@ -11,3 +11,11 @@ All14 compaction pins originally diverged on the changed Get sequence. Their exa
 This does not solve the first checkpoint prefix scan, long publication deadline/reader-intent lifetime design, actual100000-entry cap or original scale/latency gates. Production collector remains off and public continuation admission closed.
 
 The R1/domain/archive budget20 native development test passes under race with two checkpoints,20 ordered records, terminal slot19 and zero forbidden effects. Native phase observations are retained, with no latency comparison or actual-cap acceptance inferred. All853 refreshed pins pass in13.393s. A1000-seed compaction race development run is live in the current execution session; acceptance requires its actual completion.
+
+## Frozen qualification live
+
+Source `2de6dfa93184b4489436bf55f29179684e4e08d2`, detached clean sparse checkout `/home/exedev/js-wf-compaction-traversal-qualification`. Unit `js-wf-compaction-traversal-qualification-20261010.service`, original PID131436, invocation `c56c65f782b14e1ca8f024b2d3d2d57a`. [Launch](qualification-launch.json). [Driver](run.py) retains exact source inventories, four compiled binaries, actual command exits and raw test2json events. Resource profile is GOMAXPROCS2/GOMEMLIMIT512MiB; each actual package execution has a300-minute watchdog. Stages are sequential.
+
+The pipeline runs compaction controls under race, exact six-leaf grant-bypass negative control, the bounded native R1/archive64 fixture, compaction1000 race, all853 normal pins and compaction100000 normal. Nonzero native or model stages keep the pipeline failed; subsequent model evidence is still retained. [Independent reviewer](review.py) checks matching loaded terminal supervisor exit0, all Git inputs and source stability, binary hashes/build modes, exact commands/exits, package/test terminals, full pin inventory, actual seed-body proofs and bounded native phase/boundary receipt. It cannot accept a launch or partial run.
+
+No qualification result exists yet. Full original source-wide extended campaigns, actual100000 native cap, native matrices, scale/soak/lifecycle/import/admission/collector/rollout requirements remain open.

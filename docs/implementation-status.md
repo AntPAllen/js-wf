@@ -1,5 +1,17 @@
 # Implementation status against the supplied plan
 
+## Frozen compaction component qualification launched — 2026-10-10
+
+Source `2de6dfa` is running under the loaded matching unit, original PID131436,
+invocation `c56c65f782b14e1ca8f024b2d3d2d57a`. It retains four binaries and
+exact source/command/event evidence for race controls, six required negative
+failures, native R1/archive64, compaction1000 race, all853 normal pins and
+compaction100000 normal. Each package keeps its300-minute watchdog and original
+GOMAXPROCS2/GOMEMLIMIT512MiB profile. [Driver and scope](scale/graph-compaction-traversal-2026-10-10/README.md).
+Independent review requires actual completion; this launch is not acceptance.
+Full frozen158 race continues separately at0404fc0. All original open gates
+remain open, including the actual100000-entry native failure.
+
 ## Compaction traversal reduces redundant reads — 2026-10-10
 
 Preparation now traverses its captured source forest once; prepare/commit reuse
