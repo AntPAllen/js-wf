@@ -15,6 +15,7 @@ import (
 	"js-wf/client"
 	"js-wf/identity"
 	"js-wf/internal/checkpoint"
+	"js-wf/internal/journalwire"
 	"js-wf/journal"
 	"js-wf/wf"
 	"js-wf/worker"
@@ -72,16 +73,6 @@ func loadReplayBundle(path string) (replayBundle, error) {
 	// Journal payloads remain opaque workflow bytes. Inspect the import
 	// envelope separately so duplicate keys cannot downgrade its format or
 	// replace identity, input, object bodies or pending signal provenance.
-	// Use an explicit flat wire shape: Record embeds Entry, while the typed
-	// ambiguity decoder does not flatten anonymous struct fields.
-	type journalHeader struct {
-		Epoch    uint64          `json:"epoch"`
-		Index    uint64          `json:"index"`
-		Kind     journal.Kind    `json:"kind"`
-		Payload  json.RawMessage `json:"payload,omitempty"`
-		WorkerID string          `json:"worker_id,omitempty"`
-		Sequence uint64          `json:"sequence"`
-	}
 	var envelope struct {
 		Format        string               `json:"format,omitempty"`
 		Type          string               `json:"type"`
@@ -89,7 +80,7 @@ func loadReplayBundle(path string) (replayBundle, error) {
 		InvSeq        uint64               `json:"inv_seq"`
 		Input         []byte               `json:"input"`
 		InputHash     string               `json:"input_hash"`
-		Journal       []journalHeader      `json:"journal"`
+		Journal       []journalwire.Record `json:"journal"`
 		Objects       map[string][]byte    `json:"objects"`
 		PendingSignal *replayPendingSignal `json:"pending_signal,omitempty"`
 	}

@@ -1,0 +1,36 @@
+// Package journalwire admits journal record headers while retaining payload
+// contents as opaque bytes. It is shared by offline SDK and CLI import.
+package journalwire
+
+import (
+	"encoding/json"
+
+	"js-wf/internal/checkpoint"
+	"js-wf/journal"
+)
+
+// Record is the explicit flat JSON wire shape of journal.Record. The ambiguity
+// decoder does not flatten anonymous fields, so embedding Entry would omit the
+// header admission checks. Unknown fields, duplicate names and aliases reject.
+type Record struct {
+	Epoch    uint64          `json:"epoch"`
+	Index    uint64          `json:"index"`
+	Kind     journal.Kind    `json:"kind"`
+	Payload  json.RawMessage `json:"payload,omitempty"`
+	WorkerID string          `json:"worker_id,omitempty"`
+	Sequence uint64          `json:"sequence"`
+}
+
+// Decode checks the complete array before returning typed records. Semantic
+// ordering and invocation checks belong to the replay admission layer.
+func Decode(raw []byte) ([]journal.Record, error) {
+	var wire []Record
+	if err := checkpoint.DecodeUnambiguous(raw, &wire); err != nil {
+		return nil, err
+	}
+	records := make([]journal.Record, len(wire))
+	for i, r := range wire {
+		records[i] = journal.Record{Entry: journal.Entry{Epoch: r.Epoch, Index: r.Index, Kind: r.Kind, Payload: r.Payload, WorkerID: r.WorkerID}, Sequence: r.Sequence}
+	}
+	return records, nil
+}

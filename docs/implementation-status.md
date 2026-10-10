@@ -1,5 +1,16 @@
 # Implementation status against the supplied plan
 
+## SDK and CLI share journal header admission — 2026-10-10
+
+Raw SDK replay now uses the same strict flat journal wire schema as CLI import,
+rejecting unknown/duplicate/aliased headers before any handler. Payload contents
+remain opaque. Full SDK race passes30.542s;15 SDK and15 CLI header controls pass
+with prior envelope controls. Restoring ordinary decoding fails all14 rejecting
+SDK leaves with actual handler entry. [Evidence and prepared qualification](scale/graph-replay-shared-journal-header-2026-10-10/README.md).
+The earlier CLI-only frozen qualification continues on its own source. Shared
+SDK qualification is prepared, not accepted; terminal payload admission, all
+broader original gates and public production admission remain open.
+
 ## Imported journal header ambiguity rejected — 2026-10-10
 
 CLI import now rejects duplicate/case-aliased epoch, index, kind, payload field,

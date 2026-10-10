@@ -13,6 +13,7 @@ import (
 
 	"js-wf/identity"
 	"js-wf/integrity"
+	"js-wf/internal/journalwire"
 	"js-wf/journal"
 )
 
@@ -96,9 +97,9 @@ func replayWithStages[T any](journalBytes []byte, fn func(*Context) (T, error), 
 	if stages != nil && opts.Type == "" {
 		return result, ErrInvocationIdentity
 	}
-	var records []journal.Record
-	if err := json.Unmarshal(journalBytes, &records); err != nil {
-		return result, fmt.Errorf("decode journal: %w", err)
+	records, decodeErr := journalwire.Decode(journalBytes)
+	if decodeErr != nil {
+		return result, fmt.Errorf("%w: decode journal: %v", ErrCorruptJournal, decodeErr)
 	}
 	if err := validateReplayRecordOrder(records, opts.InvSeq); err != nil {
 		return result, err
