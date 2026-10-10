@@ -22,3 +22,12 @@ This removes one native stream-info RPC per Get, not a graph-port operation.
 The earlier bounded diagnostic remains62.5 port calls per SetState; no new
 latency claim, production-cap qualification or broker-cause attribution is
 made. The original live100000 run keeps its source and watchdog unchanged.
+
+## Frozen follow-through
+
+The [driver](run.py) retains source inventories and two race binaries. It runs
+the bounded64-entry R1/domain/archive control, all seven native object roots
+and eight required unsafe-configuration failures. The [reviewer](review.py)
+requires all five actual command exits, exact Git inputs, both binary hashes,
+all16 new R1/R3 cells, the exact disabled source, and loaded matching terminal
+supervisor exit0. Until that review succeeds, frozen qualification is open.
