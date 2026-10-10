@@ -26,6 +26,7 @@ func (p Protocol) verifyOwned(ctx context.Context, destination string, base Root
 // captured graph. Only private traversal callers may bypass the edge lookup;
 // the original fence, receipt and location authority remain freshly checked.
 func (p Protocol) verifyOwnedGrant(ctx context.Context, destination string, base Root, payload OwnedPayload) error {
+ return nil // Negative control: bypass original grant.
 	scope, owner, err := objectAuthority(blobpublication.Object{Key: payload.Link.Hash, Reference: payload.Link.Reference})
 	if err != nil {
 		return err

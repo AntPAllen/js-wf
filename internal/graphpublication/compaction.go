@@ -68,19 +68,15 @@ func (p Protocol) PreparePrefixCompaction(ctx context.Context, destination strin
 	result := PreparedCompaction{destination: destination, expected: expected, first: first, expires: expires.UTC(), base: base, publication: Root{Schema: StreamsSchema, Token: token, Graph: retainedgraph.Empty(), Streams: copyStreams(base.Streams), Readers: copyReaders(base.Readers), Application: bytes.Clone(application)}}
 	cache := map[string]retainedgraph.Link{}
 	locations := map[string]map[string]bool{}
-	for sourceIndex := uint64(0); sourceIndex < base.Graph.Count; sourceIndex++ {
-		source, err := retainedgraph.Read(ctx, stageStore{protocol: p}, base.Graph, sourceIndex)
-		if err != nil {
-			return PreparedCompaction{}, err
-		}
+	err = retainedgraph.ReadRange(ctx, stageStore{protocol: p}, base.Graph, 0, base.Graph.Count, func(sourceIndex uint64, source retainedgraph.Record) error {
 		target, stream := result.publication.Graph, ""
 		if sourceIndex < first {
 			target, stream = archive, PrefixArchiveStream
 		}
 		record := retainedgraph.Record{Data: bytes.Clone(source.Data), Blobs: []retainedgraph.Link{}}
 		for _, link := range source.Blobs {
-			if err := p.verifyOwned(ctx, destination, base, OwnedPayload{Index: sourceIndex, Link: link}); err != nil {
-				return PreparedCompaction{}, err
+			if err := p.verifyOwnedGrant(ctx, destination, base, OwnedPayload{Index: sourceIndex, Link: link}); err != nil {
+				return err
 			}
 			copied, known := cache[link.Hash]
 			if !known || !locations[link.Hash][stream] {
@@ -88,20 +84,20 @@ func (p Protocol) PreparePrefixCompaction(ctx context.Context, destination strin
 				if !known {
 					data, err = p.Port.Get(ctx, link, maxPayloadBytes)
 					if err != nil {
-						return PreparedCompaction{}, err
+						return err
 					}
 					if len(data) > maxPayloadBytes || key(data) != link.Hash {
-						return PreparedCompaction{}, errors.New("relocation payload digest or bound")
+						return errors.New("relocation payload digest or bound")
 					}
 				}
 				intent := Intent{Destination: destination, Expected: expected, Expires: result.expires, Locations: []Location{{Kind: "payload", First: target.Count, Stream: stream}}}
 				ref, err := p.acquire(ctx, link.Hash, data, token, intent)
 				if err != nil {
-					return PreparedCompaction{}, err
+					return err
 				}
 				copied = retainedgraph.Link{Hash: link.Hash, Reference: ref}
 				if known && copied != cache[link.Hash] {
-					return PreparedCompaction{}, errors.New("relocation receipt changed")
+					return errors.New("relocation receipt changed")
 				}
 				if !known {
 					cache[link.Hash] = copied
@@ -113,13 +109,17 @@ func (p Protocol) PreparePrefixCompaction(ctx context.Context, destination strin
 		}
 		next, err := retainedgraph.Append(ctx, stageStore{protocol: p, destination: destination, expected: expected, expires: result.expires, token: token, index: target.Count, stream: stream}, target, record)
 		if err != nil {
-			return PreparedCompaction{}, err
+			return err
 		}
 		if stream == PrefixArchiveStream {
 			archive = next
 		} else {
 			result.publication.Graph = next
 		}
+		return nil
+	})
+	if err != nil {
+		return PreparedCompaction{}, err
 	}
 	setStream(&result.publication, PrefixArchiveStream, archive)
 	result.publication.Head = expected + 1
@@ -230,7 +230,7 @@ func (p Protocol) CommitPrefixCompaction(ctx context.Context, prepared PreparedC
 			if link.Hash != source.Blobs[i].Hash {
 				return Root{}, errors.New("compaction changed payload")
 			}
-			if err := p.verifyOwned(ctx, prepared.destination, prepared.base, OwnedPayload{Index: sourceIndex, Link: source.Blobs[i]}); err != nil {
+			if err := p.verifyOwnedGrant(ctx, prepared.destination, prepared.base, OwnedPayload{Index: sourceIndex, Link: source.Blobs[i]}); err != nil {
 				return Root{}, err
 			}
 			if err := p.checkCompactionGrant(ctx, prepared, link, stream); err != nil {

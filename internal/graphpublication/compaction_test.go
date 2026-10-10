@@ -10,6 +10,7 @@ import (
 	"testing"
 	"time"
 
+	"js-wf/internal/blobpublication"
 	"js-wf/internal/retainedgraph"
 )
 
@@ -317,5 +318,58 @@ func TestGraphPrefixCompactionPublicationFaults(t *testing.T) {
 				}
 			}
 		})
+	}
+}
+
+// An authenticated source edge never substitutes for its original receipt grant.
+func TestGraphPrefixCompactionRechecksOriginalGrant(t *testing.T) {
+	for _, phase := range []string{"prepare", "commit"} {
+		for _, fault := range []string{"missing", "destination", "location"} {
+			t.Run(phase+"/"+fault, func(t *testing.T) {
+				m, p := newModel("revoked-" + phase + "-" + fault)
+				root := appendOne(t, m, p, "owner", []byte("record"), [][]byte{[]byte("payload")})
+				source, err := retainedgraph.Read(ctx, stageStore{protocol: p}, root.Graph, 0)
+				if err != nil {
+					t.Fatal(err)
+				}
+				var plan PreparedCompaction
+				if phase == "commit" {
+					plan, err = p.PreparePrefixCompaction(ctx, "owner", root.Head, 1, 1024, epoch.Add(time.Second), nil)
+					if err != nil {
+						t.Fatal(err)
+					}
+				}
+				scope, owner, err := objectAuthority(blobpublication.Object{Key: source.Blobs[0].Hash, Reference: source.Blobs[0].Reference})
+				if err != nil {
+					t.Fatal(err)
+				}
+				record := m.blobs[scope]
+				fence := cloneFence(record.Fence)
+				intent := fence.Intents[owner]
+				switch fault {
+				case "missing":
+					delete(fence.Intents, owner)
+				case "destination":
+					intent.Destination = "foreign"
+					fence.Intents[owner] = intent
+				case "location":
+					intent.Locations = []Location{{Kind: "payload", First: 1}}
+					fence.Intents[owner] = intent
+				}
+				record.Fence = fence
+				m.blobs[scope] = record
+				if phase == "prepare" {
+					_, err = p.PreparePrefixCompaction(ctx, "owner", root.Head, 1, 1024, epoch.Add(time.Second), nil)
+				} else {
+					_, err = p.CommitPrefixCompaction(ctx, plan)
+				}
+				if err == nil {
+					t.Fatal("revoked source grant accepted", phase, fault)
+				}
+				if !reflect.DeepEqual(root, m.roots["owner"]) {
+					t.Fatal("revoked compaction published")
+				}
+			})
+		}
 	}
 }

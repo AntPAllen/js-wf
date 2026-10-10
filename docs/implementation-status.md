@@ -1,5 +1,20 @@
 # Implementation status against the supplied plan
 
+## Compaction traversal reduces redundant reads — 2026-10-10
+
+Preparation now traverses its captured source forest once; prepare/commit reuse
+already verified record edges while freshly validating original grants. No
+public ownership check, original-head CAS, relocated receipt, reader or archive
+collection requirement is relaxed. Development compaction race controls and
+six revocation cases pass; a grant-bypass mutant fails all six. All853 refreshed
+saved regressions pass. Only14 compaction pins changed, with old traces retained
+and unchanged decisions/all non-Get transport events independently compared.
+At1028 entries, measured compaction Gets fall83091→51289 (38% fewer).
+[Evidence and scope](scale/graph-compaction-traversal-2026-10-10/README.md).
+The1000-seed compaction race development run is still live; the full race
+qualification separately remains frozen at0404fc0 and does not qualify this
+optimization. Actual100000 cap and original scale/admission gates remain open.
+
 ## Full latest158 normal accepted; race started — 2026-10-10
 
 Frozen `0404fc0` full normal is independently accepted: 3406 exact Git inputs,
