@@ -14,18 +14,30 @@ source = sys.argv[1]
 checkout = Path("/home/exedev/js-wf-indexed-entry100000-qualification-20261010")
 root = Path("/home/exedev/js-wf-indexed-entry100000-20261010")
 assert subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=repo, text=True).strip() == source
-assert not checkout.exists() and not root.exists(), "never overwrite a prior campaign"
-root.mkdir()
-state = dict(source=source, checkout=str(checkout), root=str(root), campaign_started=False,
-             prepared=False, started_utc=datetime.datetime.now(datetime.timezone.utc).isoformat(), commands=[],
-             compile_environment={"GOWORK": "off", "GOFLAGS": ""})
+resume = len(sys.argv) == 3 and sys.argv[2] == "--resume-empty-checkout"
+if resume:
+    state = json.loads((here / "preparation.json").read_text())
+    assert state["source"] == source and state["checkout"] == str(checkout) and state["root"] == str(root)
+    assert not state["prepared"] and not state["campaign_started"] and not state["commands"]
+    assert root.is_dir() and not list(root.iterdir())
+    assert {p.name for p in checkout.iterdir()} == {".git"}
+    assert subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=checkout, text=True).strip() == source
+    state["resumed_empty_checkout"] = True
+else:
+    assert not checkout.exists() and not root.exists(), "never overwrite a prior campaign"
+    root.mkdir()
+    state = dict(source=source, checkout=str(checkout), root=str(root), campaign_started=False,
+                 prepared=False, started_utc=datetime.datetime.now(datetime.timezone.utc).isoformat(), commands=[],
+                 compile_environment={"GOWORK": "off", "GOFLAGS": ""})
 def save():
     (here / "preparation.json").write_text(json.dumps(state, indent=2) + "\n")
 save()
-subprocess.run(["git", "worktree", "add", "--detach", "--no-checkout", str(checkout), source], cwd=repo, check=True)
+if not resume:
+    subprocess.run(["git", "worktree", "add", "--detach", "--no-checkout", str(checkout), source], cwd=repo, check=True)
 directories = subprocess.check_output(["git", "ls-tree", "-d", "--name-only", source], cwd=repo, text=True).splitlines()
 directories = [d for d in directories if d not in ("docs", "scripts", ".github")]
 subprocess.run(["git", "sparse-checkout", "set", "--cone", *directories], cwd=checkout, check=True)
+subprocess.run(["git", "checkout", "--force", "--detach", source], cwd=checkout, check=True)
 tracked = subprocess.check_output(["git", "ls-tree", "-r", "--name-only", source], cwd=checkout, text=True).splitlines()
 names = [n for n in tracked if n.split("/")[0] not in ("docs", "scripts", ".github")
          and (n.endswith(".go") or n in ("go.mod", "go.sum") or "/testdata/" in n)]

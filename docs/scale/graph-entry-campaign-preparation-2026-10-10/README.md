@@ -29,3 +29,16 @@ audit all ordered entries, two checkpoints, terminal slot 99,999, zero forbidden
 effects, exact rejected request, prefix calls 1/1 and terminal projection equality.
 R3, live mode, collection, OS/process/VM/storage faults and original broad gates
 remain separate. Public admission and collection remain off.
+
+## Reviewed preparation
+
+Source6408a5e, clean isolated checkout, 1,924 Git-verified inputs. Both compiler
+exits are zero; normal and race binaries are retained with hashes and build
+metadata. review.json accepts preparation only and records the actual campaign
+as unstarted. The initial no-checkout sparse worktree had no populated files;
+preparation resumed only after proving empty outputs and no compile commands.
+The corrected checkout initialization then populated inputs before hashing.
+
+The source inventories and compile logs are also compressed alongside receipts.
+Run `python3 docs/scale/graph-entry-campaign-preparation-2026-10-10/review.py`
+to recheck local Git, checkout, binary and retained-store evidence.

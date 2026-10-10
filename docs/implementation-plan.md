@@ -1,5 +1,29 @@
 # JetStream Durable Workflow Runtime — Implementation Plan
 
+## Retained actual-entry campaign inputs and binaries — 2026-10-10
+
+The full-entry fixture now optionally retains native file stores in a fresh,
+explicit absolute directory; ordinary tests keep automatic cleanup. Indexed,
+durable budget20 R1 control passes normal 2.133 seconds, and 54 native files
+(4,387,036 bytes) remain after cluster close with checked hashes. This preserves
+same-store diagnosis for the eventual long run instead of losing its history.
+[Evidence](scale/graph-entry-campaign-preparation-2026-10-10/README.md).
+
+A new isolated sparse checkout at source6408a5e has retained normal and race
+worker binaries. Both actual compiler exits are zero. Independent review verifies
+1,924 module/testdata inputs against Git and before/after fingerprints, a clean
+checkout, compiler flags and binary hashes. Normal binary is38,201,291 bytes;
+race binary49,833,406 bytes. The checkout and artifacts total roughly172 MiB.
+Sparse initialization was corrected before compiling; no campaign output was
+overwritten. Preparation does not execute or qualify the 100,000-entry fixture.
+
+The separate 100,000-native-grant race diagnostic has finished provisioning and
+remains live under its original source and invocation. Review that complete
+renewal/cost result before selecting the actual-entry lifetime budget and launch.
+Normal and race execution must remain independently reviewed. Original actual
+full-entry, storage/fault/security, seed matrices, retention and rollout gates
+remain open; admission and collection stay off.
+
 ## Indexed full-entry fixture and profiler configuration — 2026-10-10
 
 The native global-entry-limit fixture now accepts explicit owner-index and
