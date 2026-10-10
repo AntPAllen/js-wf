@@ -103,15 +103,7 @@ func NewContext(base context.Context, entries []Entry, appendFn Appender, signal
 
 type request = stepwire.Request
 
-type completion struct {
-	Result     json.RawMessage `json:"result,omitempty"`
-	ResultRef  string          `json:"result_ref,omitempty"`
-	ResultHash string          `json:"result_hash,omitempty"`
-	Error      string          `json:"error,omitempty"`
-	ErrorKind  string          `json:"error_kind,omitempty"`
-	SignalSeq  uint64          `json:"signal_seq,omitempty"`
-	Selected   string          `json:"selected,omitempty"`
-}
+type completion = stepwire.Completion
 
 const MaxInlineResult = 900 * 1024
 
@@ -183,7 +175,7 @@ func runWithKind[T any](c *Context, kind, name string, input any, fn func(contex
 			return zero, ErrCorruptJournal
 		}
 		var done completion
-		if err := json.Unmarshal(recorded.Payload, &done); err != nil {
+		if err := stepwire.DecodeCompletion(recorded.Payload, &done); err != nil {
 			return zero, ErrCorruptJournal
 		}
 		c.position++
@@ -391,7 +383,7 @@ func Call(c *Context, childType string, input []byte) ([]byte, error) {
 			return nil, ErrCorruptJournal
 		}
 		var done completion
-		if err := json.Unmarshal(recorded.Payload, &done); err != nil || done.SignalSeq == 0 {
+		if err := stepwire.DecodeCompletion(recorded.Payload, &done); err != nil || done.SignalSeq == 0 {
 			return nil, ErrCorruptJournal
 		}
 		if c.usedSignals[done.SignalSeq] {
@@ -485,7 +477,8 @@ func CallAsync(c *Context, childType string, input []byte) (Promise, error) {
 	}
 	c.position++
 	if c.position < len(c.entries) {
-		if c.entries[c.position].Kind != StepCompleted {
+		var completed stepwire.Completion
+		if c.entries[c.position].Kind != StepCompleted || stepwire.DecodeCompletion(c.entries[c.position].Payload, &completed) != nil {
 			return empty, ErrCorruptJournal
 		}
 		c.position++
@@ -584,7 +577,7 @@ func Version(c *Context, changeID string, min, max int) (int, error) {
 			return 0, ErrCorruptJournal
 		}
 		var done completion
-		if err := json.Unmarshal(recorded.Payload, &done); err != nil {
+		if err := stepwire.DecodeCompletion(recorded.Payload, &done); err != nil {
 			return 0, ErrCorruptJournal
 		}
 		var v int
@@ -624,7 +617,7 @@ func Sleep(c *Context, name string, d time.Duration) error {
 		if recorded.Kind != StepRequested {
 			return ErrCorruptJournal
 		}
-		if err := json.Unmarshal(recorded.Payload, &req); err != nil {
+		if err := stepwire.Decode(recorded.Payload, &req); err != nil {
 			return ErrCorruptJournal
 		}
 		if req.Kind != "timer" || req.Name != name || req.DurationNanos != int64(d) {
@@ -647,7 +640,8 @@ func Sleep(c *Context, name string, d time.Duration) error {
 	}
 	c.position++
 	if c.position < len(c.entries) {
-		if c.entries[c.position].Kind != StepCompleted {
+		var completed stepwire.Completion
+		if c.entries[c.position].Kind != StepCompleted || stepwire.DecodeCompletion(c.entries[c.position].Payload, &completed) != nil {
 			return ErrCorruptJournal
 		}
 		c.position++
@@ -710,7 +704,7 @@ func awaitSignal(c *Context, name string, child bool) ([]byte, error) {
 			return nil, ErrCorruptJournal
 		}
 		var done completion
-		if err := json.Unmarshal(recorded.Payload, &done); err != nil || done.SignalSeq == 0 {
+		if err := stepwire.DecodeCompletion(recorded.Payload, &done); err != nil || done.SignalSeq == 0 {
 			return nil, ErrCorruptJournal
 		}
 		if c.usedSignals[done.SignalSeq] {

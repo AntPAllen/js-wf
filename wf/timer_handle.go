@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"js-wf/identity"
+	"js-wf/internal/stepwire"
 )
 
 var ErrTimerCancelled = errors.New("timer was cancelled")
@@ -37,7 +38,7 @@ func (c *Context) Timer(name string, d time.Duration) (*TimerHandle, error) {
 	fresh := c.position >= len(c.entries)
 	if c.position < len(c.entries) {
 		recorded := c.entries[c.position]
-		if recorded.Kind != StepRequested || json.Unmarshal(recorded.Payload, &req) != nil {
+		if recorded.Kind != StepRequested || stepwire.Decode(recorded.Payload, &req) != nil {
 			return nil, ErrCorruptJournal
 		}
 		if req.Kind != "timer_start" || req.Name != name || req.DurationNanos != int64(d) || d > 0 && req.FireAt.IsZero() {
@@ -60,7 +61,8 @@ func (c *Context) Timer(name string, d time.Duration) (*TimerHandle, error) {
 	}
 	c.position++
 	if c.position < len(c.entries) {
-		if c.entries[c.position].Kind != StepCompleted {
+		var completed stepwire.Completion
+		if c.entries[c.position].Kind != StepCompleted || stepwire.DecodeCompletion(c.entries[c.position].Payload, &completed) != nil {
 			return nil, ErrCorruptJournal
 		}
 	} else {
@@ -96,7 +98,7 @@ func (t *TimerHandle) action(kind string) error {
 	if c.position < len(c.entries) {
 		recorded := c.entries[c.position]
 		var got request
-		if recorded.Kind != StepRequested || json.Unmarshal(recorded.Payload, &got) != nil {
+		if recorded.Kind != StepRequested || stepwire.Decode(recorded.Payload, &got) != nil {
 			return ErrCorruptJournal
 		}
 		if got.Kind != kind || got.Name != t.name || got.TimerStep != t.step || !got.FireAt.Equal(want.FireAt) || got.ClockDomain != want.ClockDomain {
@@ -127,7 +129,8 @@ func (t *TimerHandle) Await() error {
 	}
 	c := t.c
 	if c.position < len(c.entries) {
-		if c.entries[c.position].Kind != StepCompleted {
+		var completed stepwire.Completion
+		if c.entries[c.position].Kind != StepCompleted || stepwire.DecodeCompletion(c.entries[c.position].Payload, &completed) != nil {
 			return ErrCorruptJournal
 		}
 	} else {
@@ -165,10 +168,8 @@ func (t *TimerHandle) Cancel() error {
 	}
 	c := t.c
 	if c.position < len(c.entries) {
-		var completion struct {
-			Cancelled bool `json:"cancelled"`
-		}
-		if c.entries[c.position].Kind != StepCompleted || json.Unmarshal(c.entries[c.position].Payload, &completion) != nil || !completion.Cancelled {
+		var completion stepwire.Completion
+		if c.entries[c.position].Kind != StepCompleted || stepwire.DecodeCompletion(c.entries[c.position].Payload, &completion) != nil || !completion.Cancelled {
 			return ErrCorruptJournal
 		}
 	} else {

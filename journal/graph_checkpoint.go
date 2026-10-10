@@ -113,11 +113,8 @@ func (v *GraphView) ReadCheckpoint(ctx context.Context, typ, id string) (*GraphC
 			if declaration.Kind != "checkpoint" {
 				return nil
 			}
-			var completion struct {
-				ResultRef  string `json:"result_ref"`
-				ResultHash string `json:"result_hash"`
-			}
-			if json.Unmarshal(record.Payload, &completion) != nil {
+			var completion stepwire.Completion
+			if stepwire.DecodeCompletion(record.Payload, &completion) != nil {
 				return ErrGap
 			}
 			runtime := RuntimeCheckpoint{InvSeq: v.cursor.Invocation, Stage: declaration.Name, Sequence: record.Sequence, Index: record.Index, Epoch: record.Epoch, StepPosition: position, Object: completion.ResultRef, SHA256: completion.ResultHash}

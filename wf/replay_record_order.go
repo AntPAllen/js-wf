@@ -48,7 +48,12 @@ func validateReplayRecordOrder(records []journal.Record, invocation uint64) erro
 			if stepwire.Decode(record.Payload, &request) != nil {
 				return ErrCorruptJournal
 			}
-		case journal.Started, journal.StepCompleted, journal.Suspended, journal.Attempt, journal.Completed, journal.Failed:
+		case journal.StepCompleted:
+			var completion stepwire.Completion
+			if stepwire.DecodeCompletion(record.Payload, &completion) != nil {
+				return ErrCorruptJournal
+			}
+		case journal.Started, journal.Suspended, journal.Attempt, journal.Completed, journal.Failed:
 		default:
 			return ErrCorruptJournal
 		}

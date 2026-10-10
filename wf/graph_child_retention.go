@@ -8,6 +8,7 @@ import (
 	"encoding/json"
 
 	"js-wf/identity"
+	"js-wf/internal/stepwire"
 	"js-wf/journal"
 )
 
@@ -28,7 +29,7 @@ func GraphOwnsChildResult(ctx context.Context, parent *journal.GraphView, childT
 		}
 		if record.Kind == journal.StepRequested {
 			var req request
-			if json.Unmarshal(record.Payload, &req) != nil {
+			if stepwire.Decode(record.Payload, &req) != nil {
 				return false, ErrCorruptJournal
 			}
 			if (req.Kind == "call" || req.Kind == "call_async") && req.Name == signal {

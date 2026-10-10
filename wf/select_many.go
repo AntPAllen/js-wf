@@ -8,6 +8,7 @@ import (
 
 	"js-wf/identity"
 	"js-wf/internal/checkpoint"
+	"js-wf/internal/stepwire"
 )
 
 // Awaitable is a durable timer, named signal, or child promise usable in Select.
@@ -64,10 +65,7 @@ type selectRequest struct {
 	Kind  string       `json:"kind"`
 	Cases []selectCase `json:"cases"`
 }
-type selectCompletion struct {
-	CaseIndex *int   `json:"case_index"`
-	SignalSeq uint64 `json:"signal_seq,omitempty"`
-}
+type selectCompletion = stepwire.Completion
 
 // Select waits for any combination of SDK awaitables. The first ready case in
 // argument order wins; its index and signal sequence are journaled for replay.
@@ -110,7 +108,7 @@ func Select(c *Context, awaitables ...Awaitable) (int, []byte, error) {
 	if c.position < len(c.entries) {
 		record := c.entries[c.position]
 		var done selectCompletion
-		if record.Kind != StepCompleted || json.Unmarshal(record.Payload, &done) != nil || done.CaseIndex == nil || *done.CaseIndex < 0 || *done.CaseIndex >= len(awaitables) {
+		if record.Kind != StepCompleted || stepwire.DecodeCompletion(record.Payload, &done) != nil || done.CaseIndex == nil || *done.CaseIndex < 0 || *done.CaseIndex >= len(awaitables) {
 			return -1, nil, ErrCorruptJournal
 		}
 		c.position++

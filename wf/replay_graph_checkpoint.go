@@ -9,6 +9,7 @@ import (
 	"reflect"
 
 	"js-wf/internal/checkpoint"
+	"js-wf/internal/stepwire"
 	"js-wf/journal"
 )
 
@@ -44,13 +45,7 @@ type replayCheckpointMetadata struct {
 	SignalLast uint64                            `json:"signal_last"`
 }
 
-type replayCheckpointRequest struct {
-	Kind      string `json:"kind"`
-	Name      string `json:"name"`
-	Type      string `json:"child_type"`
-	ID        string `json:"child_id"`
-	InputHash string `json:"input_hash"`
-}
+type replayCheckpointRequest = stepwire.Request
 
 // ValidateReplayGraphCheckpoints verifies exported worker checkpoint metadata
 // before a handler or plugin is invoked. Unannotated legacy completions keep
@@ -81,12 +76,12 @@ func ValidateReplayGraphCheckpoints(records []journal.Record, objects map[string
 		switch record.Kind {
 		case journal.StepRequested:
 			request = replayCheckpointRequest{}
-			if json.Unmarshal(record.Payload, &request) != nil {
+			if stepwire.Decode(record.Payload, &request) != nil {
 				return ErrCorruptJournal
 			}
 			pending = true
 			if request.Kind == "call" || request.Kind == "call_async" {
-				children[request.Name] = replayCheckpointChild{Type: request.Type, ID: request.ID}
+				children[request.Name] = replayCheckpointChild{Type: request.ChildType, ID: request.ChildID}
 			}
 		case journal.SignalConsumed:
 			var signal replayCheckpointSignal
@@ -97,13 +92,8 @@ func ValidateReplayGraphCheckpoints(records []journal.Record, objects map[string
 			signalNext++
 			signalLast = signal.Sequence
 		case journal.StepCompleted:
-			var completion struct {
-				Ref          string          `json:"result_ref"`
-				Hash         string          `json:"result_hash"`
-				MetadataRef  json.RawMessage `json:"checkpoint_metadata_ref"`
-				MetadataHash json.RawMessage `json:"checkpoint_metadata_hash"`
-			}
-			if json.Unmarshal(record.Payload, &completion) != nil {
+			var completion stepwire.Completion
+			if stepwire.DecodeCompletion(record.Payload, &completion) != nil {
 				return ErrCorruptJournal
 			}
 			annotated := len(completion.MetadataRef) > 0 || len(completion.MetadataHash) > 0
@@ -126,14 +116,14 @@ func ValidateReplayGraphCheckpoints(records []journal.Record, objects map[string
 			var meta replayCheckpointMetadata
 			identity := checkpoint.Identity{Type: typ, ID: id, InvSeq: invocation}
 			anchor := checkpoint.Anchor{Index: record.Index, Epoch: record.Epoch}
-			if checkpoint.DecodeUnambiguous(raw, &meta) != nil || meta.Version != 1 || meta.Identity != identity || meta.Anchor != anchor || meta.FrameHash != completion.Hash {
+			if checkpoint.DecodeUnambiguous(raw, &meta) != nil || meta.Version != 1 || meta.Identity != identity || meta.Anchor != anchor || meta.FrameHash != completion.ResultHash {
 				return ErrCorruptJournal
 			}
-			frameBytes, err := load(completion.Ref, completion.Hash)
+			frameBytes, err := load(completion.ResultRef, completion.ResultHash)
 			if err != nil {
 				return err
 			}
-			frame, err := checkpoint.Decode(frameBytes, completion.Hash, identity, anchor)
+			frame, err := checkpoint.Decode(frameBytes, completion.ResultHash, identity, anchor)
 			if err != nil || frame.Stage != request.Name {
 				return ErrCorruptJournal
 			}

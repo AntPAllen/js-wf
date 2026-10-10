@@ -9,6 +9,7 @@ import (
 	"fmt"
 
 	"js-wf/identity"
+	"js-wf/internal/stepwire"
 	"js-wf/journal"
 )
 
@@ -117,23 +118,18 @@ func replayGraphChildValidator(records []journal.Record, objects map[string][]by
 	for _, record := range records {
 		switch record.Kind {
 		case journal.StepRequested:
-			var request struct {
-				Kind string `json:"kind"`
-				Name string `json:"name"`
-				Type string `json:"child_type"`
-				ID   string `json:"child_id"`
-			}
-			if json.Unmarshal(record.Payload, &request) != nil {
+			var request stepwire.Request
+			if stepwire.Decode(record.Payload, &request) != nil {
 				return nil, ErrCorruptJournal
 			}
 			if request.Kind == "call" || request.Kind == "call_async" {
-				if identity.ValidateToken(request.Name) != nil || identity.Validate(request.Type, request.ID) != nil {
+				if identity.ValidateToken(request.Name) != nil || identity.Validate(request.ChildType, request.ChildID) != nil {
 					return nil, ErrCorruptJournal
 				}
 				if _, exists := children[request.Name]; exists {
 					return nil, ErrCorruptJournal
 				}
-				children[request.Name] = child{Type: request.Type, ID: request.ID}
+				children[request.Name] = child{Type: request.ChildType, ID: request.ChildID}
 			}
 		case journal.SignalConsumed:
 			if err := validateSignal(record.Payload); err != nil {

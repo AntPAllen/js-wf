@@ -39,7 +39,7 @@ func (p *checkpointPayloadFaultPort) CASRoot(ctx context.Context, key string, he
 
 func TestGraphCheckpointOwnedFrameAndSuffix(t *testing.T) {
 	for _, encoding := range []journal.Encoding{journal.JSON, journal.ProtobufV1} {
-		for _, mode := range []string{"valid", "absent", "pending", "wrong-generation", "wrong-locals", "missing-edge", "borrowed-edge", "unreadable", "expired", "latest", "duplicate-request", "alias-request", "unknown-request"} {
+		for _, mode := range []string{"valid", "absent", "pending", "wrong-generation", "wrong-locals", "missing-edge", "borrowed-edge", "unreadable", "expired", "latest", "duplicate-request", "alias-request", "unknown-request", "duplicate-completion", "alias-completion", "unknown-completion"} {
 			t.Run(string(encoding)+"/"+mode, func(t *testing.T) {
 				_, model, now := graphModel(t, encoding)
 				port := &checkpointPayloadFaultPort{GraphPublicationTransport: model}
@@ -90,6 +90,15 @@ func TestGraphCheckpointOwnedFrameAndSuffix(t *testing.T) {
 					appendRecord(0, journal.Started, nil)
 				}
 				completion, _ := json.Marshal(map[string]string{"result_ref": "step-result-" + hash, "result_hash": hash})
+
+				switch mode {
+				case "duplicate-completion":
+					completion = append([]byte(`{"result_ref":"foreign",`), completion[1:]...)
+				case "alias-completion":
+					completion = append([]byte(`{"Result_ref":"foreign",`), completion[1:]...)
+				case "unknown-completion":
+					completion = append([]byte(`{"foreign":true,`), completion[1:]...)
+				}
 				if mode != "absent" {
 					appendRecord(1, journal.StepRequested, request)
 					if mode != "pending" {
@@ -119,7 +128,7 @@ func TestGraphCheckpointOwnedFrameAndSuffix(t *testing.T) {
 						t.Fatal("incomplete checkpoint selected", got, err)
 					}
 					return
-				case "wrong-generation", "wrong-locals", "missing-edge", "borrowed-edge", "unreadable", "expired", "duplicate-request", "alias-request", "unknown-request":
+				case "wrong-generation", "wrong-locals", "missing-edge", "borrowed-edge", "unreadable", "expired", "duplicate-request", "alias-request", "unknown-request", "duplicate-completion", "alias-completion", "unknown-completion":
 					if err == nil || got != nil {
 						t.Fatal("invalid checkpoint accepted", got, err)
 					}

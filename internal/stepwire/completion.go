@@ -1,0 +1,45 @@
+package stepwire
+
+import (
+	"bytes"
+	"encoding/json"
+	"fmt"
+
+	"js-wf/internal/checkpoint"
+)
+
+// Completion is the runtime envelope shared by result, signal, timer,
+// selection and checkpoint completions. Result is opaque user serialization.
+// Metadata reference bytes retain presence for checkpoint annotation admission.
+type Completion struct {
+	CaseIndex    *int            `json:"case_index,omitempty"`
+	Result       json.RawMessage `json:"result,omitempty"`
+	ResultRef    string          `json:"result_ref,omitempty"`
+	ResultHash   string          `json:"result_hash,omitempty"`
+	Error        string          `json:"error,omitempty"`
+	ErrorKind    string          `json:"error_kind,omitempty"`
+	SignalSeq    uint64          `json:"signal_seq,omitempty"`
+	Selected     string          `json:"selected,omitempty"`
+	Cancelled    bool            `json:"cancelled,omitempty"`
+	MetadataRef  json.RawMessage `json:"checkpoint_metadata_ref,omitempty"`
+	MetadataHash json.RawMessage `json:"checkpoint_metadata_hash,omitempty"`
+}
+
+func DecodeCompletion(raw []byte, target *Completion) error {
+	if len(bytes.TrimSpace(raw)) == 0 || bytes.Equal(bytes.TrimSpace(raw), []byte("null")) {
+		return fmt.Errorf("missing step completion")
+	}
+	if err := checkpoint.DecodeUnambiguous(raw, target); err != nil {
+		return err
+	}
+	for _, field := range []json.RawMessage{target.MetadataRef, target.MetadataHash} {
+		if len(field) == 0 {
+			continue
+		}
+		var text string
+		if bytes.Equal(bytes.TrimSpace(field), []byte("null")) || json.Unmarshal(field, &text) != nil {
+			return fmt.Errorf("invalid checkpoint metadata reference")
+		}
+	}
+	return nil
+}

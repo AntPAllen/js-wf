@@ -104,7 +104,7 @@ func Continue(c *Context, stage string, data any) error {
 		}
 		if c.position+1 < len(c.entries) {
 			complete := c.entries[c.position+1]
-			if complete.Kind != StepCompleted || json.Unmarshal(complete.Payload, &done) != nil {
+			if complete.Kind != StepCompleted || stepwire.DecodeCompletion(complete.Payload, &done) != nil {
 				return ErrCorruptJournal
 			}
 			completedIndex = complete.Index

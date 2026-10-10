@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 
 	"js-wf/identity"
+	"js-wf/internal/stepwire"
 )
 
 type Selection string
@@ -31,7 +32,7 @@ func (t *TimerHandle) SelectSignal(name string) (Selection, []byte, error) {
 	if c.position < len(c.entries) {
 		recorded := c.entries[c.position]
 		var got request
-		if recorded.Kind != StepRequested || json.Unmarshal(recorded.Payload, &got) != nil {
+		if recorded.Kind != StepRequested || stepwire.Decode(recorded.Payload, &got) != nil {
 			return "", nil, ErrCorruptJournal
 		}
 		if got.Kind != want.Kind || got.Name != name || got.TimerName != t.name || got.TimerStep != t.step || !got.FireAt.Equal(t.fireAt) || got.ClockDomain != want.ClockDomain {
@@ -50,7 +51,7 @@ func (t *TimerHandle) SelectSignal(name string) (Selection, []byte, error) {
 			return "", nil, ErrCorruptJournal
 		}
 		var done completion
-		if json.Unmarshal(recorded.Payload, &done) != nil {
+		if stepwire.DecodeCompletion(recorded.Payload, &done) != nil {
 			return "", nil, ErrCorruptJournal
 		}
 		c.position++

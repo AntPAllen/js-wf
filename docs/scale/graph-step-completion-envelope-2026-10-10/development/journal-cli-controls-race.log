@@ -1,0 +1,109 @@
+=== RUN   TestGraphCheckpointIndexPublicationAndBoundedRead
+=== RUN   TestGraphCheckpointIndexPublicationAndBoundedRead/normal
+    graph_checkpoint_index_test.go:261: mode=normal checkpoint=130 request=129 unreadable_prefix_records=129 suffix=1
+=== RUN   TestGraphCheckpointIndexPublicationAndBoundedRead/lost-ack
+    graph_checkpoint_index_test.go:261: mode=lost-ack checkpoint=130 request=129 unreadable_prefix_records=129 suffix=1
+=== RUN   TestGraphCheckpointIndexPublicationAndBoundedRead/lost-ack-unconfirmed
+    graph_checkpoint_index_test.go:261: mode=lost-ack-unconfirmed checkpoint=130 request=129 unreadable_prefix_records=129 suffix=1
+=== RUN   TestGraphCheckpointIndexPublicationAndBoundedRead/lost-before
+    graph_checkpoint_index_test.go:261: mode=lost-before checkpoint=130 request=129 unreadable_prefix_records=129 suffix=1
+=== RUN   TestGraphCheckpointIndexPublicationAndBoundedRead/tail-race
+    graph_checkpoint_index_test.go:261: mode=tail-race checkpoint=130 request=129 unreadable_prefix_records=129 suffix=2
+--- PASS: TestGraphCheckpointIndexPublicationAndBoundedRead (22.82s)
+    --- PASS: TestGraphCheckpointIndexPublicationAndBoundedRead/normal (3.11s)
+    --- PASS: TestGraphCheckpointIndexPublicationAndBoundedRead/lost-ack (3.38s)
+    --- PASS: TestGraphCheckpointIndexPublicationAndBoundedRead/lost-ack-unconfirmed (5.53s)
+    --- PASS: TestGraphCheckpointIndexPublicationAndBoundedRead/lost-before (6.20s)
+    --- PASS: TestGraphCheckpointIndexPublicationAndBoundedRead/tail-race (4.60s)
+=== RUN   TestGraphCheckpointIndexRequiresCanonicalStores
+--- PASS: TestGraphCheckpointIndexRequiresCanonicalStores (0.00s)
+=== RUN   TestGraphCheckpointOwnedFrameAndSuffix
+=== RUN   TestGraphCheckpointOwnedFrameAndSuffix/json/valid
+=== RUN   TestGraphCheckpointOwnedFrameAndSuffix/json/absent
+=== RUN   TestGraphCheckpointOwnedFrameAndSuffix/json/pending
+=== RUN   TestGraphCheckpointOwnedFrameAndSuffix/json/wrong-generation
+=== RUN   TestGraphCheckpointOwnedFrameAndSuffix/json/wrong-locals
+=== RUN   TestGraphCheckpointOwnedFrameAndSuffix/json/missing-edge
+=== RUN   TestGraphCheckpointOwnedFrameAndSuffix/json/borrowed-edge
+=== RUN   TestGraphCheckpointOwnedFrameAndSuffix/json/unreadable
+=== RUN   TestGraphCheckpointOwnedFrameAndSuffix/json/expired
+=== RUN   TestGraphCheckpointOwnedFrameAndSuffix/json/latest
+=== RUN   TestGraphCheckpointOwnedFrameAndSuffix/json/duplicate-request
+=== RUN   TestGraphCheckpointOwnedFrameAndSuffix/json/alias-request
+=== RUN   TestGraphCheckpointOwnedFrameAndSuffix/json/unknown-request
+=== RUN   TestGraphCheckpointOwnedFrameAndSuffix/json/duplicate-completion
+=== RUN   TestGraphCheckpointOwnedFrameAndSuffix/json/alias-completion
+=== RUN   TestGraphCheckpointOwnedFrameAndSuffix/json/unknown-completion
+=== RUN   TestGraphCheckpointOwnedFrameAndSuffix/protobuf-v1/valid
+=== RUN   TestGraphCheckpointOwnedFrameAndSuffix/protobuf-v1/absent
+=== RUN   TestGraphCheckpointOwnedFrameAndSuffix/protobuf-v1/pending
+=== RUN   TestGraphCheckpointOwnedFrameAndSuffix/protobuf-v1/wrong-generation
+=== RUN   TestGraphCheckpointOwnedFrameAndSuffix/protobuf-v1/wrong-locals
+=== RUN   TestGraphCheckpointOwnedFrameAndSuffix/protobuf-v1/missing-edge
+=== RUN   TestGraphCheckpointOwnedFrameAndSuffix/protobuf-v1/borrowed-edge
+=== RUN   TestGraphCheckpointOwnedFrameAndSuffix/protobuf-v1/unreadable
+=== RUN   TestGraphCheckpointOwnedFrameAndSuffix/protobuf-v1/expired
+=== RUN   TestGraphCheckpointOwnedFrameAndSuffix/protobuf-v1/latest
+=== RUN   TestGraphCheckpointOwnedFrameAndSuffix/protobuf-v1/duplicate-request
+=== RUN   TestGraphCheckpointOwnedFrameAndSuffix/protobuf-v1/alias-request
+=== RUN   TestGraphCheckpointOwnedFrameAndSuffix/protobuf-v1/unknown-request
+=== RUN   TestGraphCheckpointOwnedFrameAndSuffix/protobuf-v1/duplicate-completion
+=== RUN   TestGraphCheckpointOwnedFrameAndSuffix/protobuf-v1/alias-completion
+=== RUN   TestGraphCheckpointOwnedFrameAndSuffix/protobuf-v1/unknown-completion
+--- PASS: TestGraphCheckpointOwnedFrameAndSuffix (1.29s)
+    --- PASS: TestGraphCheckpointOwnedFrameAndSuffix/json/valid (0.16s)
+    --- PASS: TestGraphCheckpointOwnedFrameAndSuffix/json/absent (0.01s)
+    --- PASS: TestGraphCheckpointOwnedFrameAndSuffix/json/pending (0.01s)
+    --- PASS: TestGraphCheckpointOwnedFrameAndSuffix/json/wrong-generation (0.03s)
+    --- PASS: TestGraphCheckpointOwnedFrameAndSuffix/json/wrong-locals (0.06s)
+    --- PASS: TestGraphCheckpointOwnedFrameAndSuffix/json/missing-edge (0.02s)
+    --- PASS: TestGraphCheckpointOwnedFrameAndSuffix/json/borrowed-edge (0.07s)
+    --- PASS: TestGraphCheckpointOwnedFrameAndSuffix/json/unreadable (0.03s)
+    --- PASS: TestGraphCheckpointOwnedFrameAndSuffix/json/expired (0.02s)
+    --- PASS: TestGraphCheckpointOwnedFrameAndSuffix/json/latest (0.09s)
+    --- PASS: TestGraphCheckpointOwnedFrameAndSuffix/json/duplicate-request (0.02s)
+    --- PASS: TestGraphCheckpointOwnedFrameAndSuffix/json/alias-request (0.03s)
+    --- PASS: TestGraphCheckpointOwnedFrameAndSuffix/json/unknown-request (0.02s)
+    --- PASS: TestGraphCheckpointOwnedFrameAndSuffix/json/duplicate-completion (0.06s)
+    --- PASS: TestGraphCheckpointOwnedFrameAndSuffix/json/alias-completion (0.02s)
+    --- PASS: TestGraphCheckpointOwnedFrameAndSuffix/json/unknown-completion (0.01s)
+    --- PASS: TestGraphCheckpointOwnedFrameAndSuffix/protobuf-v1/valid (0.09s)
+    --- PASS: TestGraphCheckpointOwnedFrameAndSuffix/protobuf-v1/absent (0.01s)
+    --- PASS: TestGraphCheckpointOwnedFrameAndSuffix/protobuf-v1/pending (0.01s)
+    --- PASS: TestGraphCheckpointOwnedFrameAndSuffix/protobuf-v1/wrong-generation (0.07s)
+    --- PASS: TestGraphCheckpointOwnedFrameAndSuffix/protobuf-v1/wrong-locals (0.02s)
+    --- PASS: TestGraphCheckpointOwnedFrameAndSuffix/protobuf-v1/missing-edge (0.02s)
+    --- PASS: TestGraphCheckpointOwnedFrameAndSuffix/protobuf-v1/borrowed-edge (0.06s)
+    --- PASS: TestGraphCheckpointOwnedFrameAndSuffix/protobuf-v1/unreadable (0.02s)
+    --- PASS: TestGraphCheckpointOwnedFrameAndSuffix/protobuf-v1/expired (0.06s)
+    --- PASS: TestGraphCheckpointOwnedFrameAndSuffix/protobuf-v1/latest (0.05s)
+    --- PASS: TestGraphCheckpointOwnedFrameAndSuffix/protobuf-v1/duplicate-request (0.05s)
+    --- PASS: TestGraphCheckpointOwnedFrameAndSuffix/protobuf-v1/alias-request (0.02s)
+    --- PASS: TestGraphCheckpointOwnedFrameAndSuffix/protobuf-v1/unknown-request (0.02s)
+    --- PASS: TestGraphCheckpointOwnedFrameAndSuffix/protobuf-v1/duplicate-completion (0.02s)
+    --- PASS: TestGraphCheckpointOwnedFrameAndSuffix/protobuf-v1/alias-completion (0.06s)
+    --- PASS: TestGraphCheckpointOwnedFrameAndSuffix/protobuf-v1/unknown-completion (0.02s)
+PASS
+ok  	js-wf/journal	25.133s
+=== RUN   TestReplayCompletionEnvelopeBeforePlugin
+=== RUN   TestReplayCompletionEnvelopeBeforePlugin/result
+=== RUN   TestReplayCompletionEnvelopeBeforePlugin/reference
+=== RUN   TestReplayCompletionEnvelopeBeforePlugin/hash
+=== RUN   TestReplayCompletionEnvelopeBeforePlugin/error
+=== RUN   TestReplayCompletionEnvelopeBeforePlugin/signal
+=== RUN   TestReplayCompletionEnvelopeBeforePlugin/selected
+=== RUN   TestReplayCompletionEnvelopeBeforePlugin/case
+=== RUN   TestReplayCompletionEnvelopeBeforePlugin/cancelled
+=== RUN   TestReplayCompletionEnvelopeBeforePlugin/unknown
+--- PASS: TestReplayCompletionEnvelopeBeforePlugin (0.00s)
+    --- PASS: TestReplayCompletionEnvelopeBeforePlugin/result (0.00s)
+    --- PASS: TestReplayCompletionEnvelopeBeforePlugin/reference (0.00s)
+    --- PASS: TestReplayCompletionEnvelopeBeforePlugin/hash (0.00s)
+    --- PASS: TestReplayCompletionEnvelopeBeforePlugin/error (0.00s)
+    --- PASS: TestReplayCompletionEnvelopeBeforePlugin/signal (0.00s)
+    --- PASS: TestReplayCompletionEnvelopeBeforePlugin/selected (0.00s)
+    --- PASS: TestReplayCompletionEnvelopeBeforePlugin/case (0.00s)
+    --- PASS: TestReplayCompletionEnvelopeBeforePlugin/cancelled (0.00s)
+    --- PASS: TestReplayCompletionEnvelopeBeforePlugin/unknown (0.00s)
+PASS
+ok  	js-wf/cmd/wf	1.062s
