@@ -1,0 +1,49 @@
+=== RUN   TestNativeGraphObjectGetFreshCombinedCensus
+=== RUN   TestNativeGraphObjectGetFreshCombinedCensus/R1
+=== RUN   TestNativeGraphObjectGetFreshCombinedCensus/R1/healthy
+=== RUN   TestNativeGraphObjectGetFreshCombinedCensus/R1/no_rollup
+    nats_object_census_test.go:92: unsafe/unknown read reached chunks: mode=no_rollup bytes=131120 err=<nil> chunks=4
+=== RUN   TestNativeGraphObjectGetFreshCombinedCensus/R1/allow_direct
+    nats_object_census_test.go:92: unsafe/unknown read reached chunks: mode=allow_direct bytes=131120 err=<nil> chunks=4
+=== RUN   TestNativeGraphObjectGetFreshCombinedCensus/R1/sealed
+    nats_object_census_test.go:92: unsafe/unknown read reached chunks: mode=sealed bytes=131120 err=<nil> chunks=4
+=== RUN   TestNativeGraphObjectGetFreshCombinedCensus/R1/wrong_format
+    nats_object_census_test.go:92: unsafe/unknown read reached chunks: mode=wrong_format bytes=131120 err=<nil> chunks=4
+=== RUN   TestNativeGraphObjectGetFreshCombinedCensus/R1/foreign_subject
+=== RUN   TestNativeGraphObjectGetFreshCombinedCensus/R1/missing_chunks
+=== RUN   TestNativeGraphObjectGetFreshCombinedCensus/R1/unknown_info
+=== RUN   TestNativeGraphObjectGetFreshCombinedCensus/R3
+=== RUN   TestNativeGraphObjectGetFreshCombinedCensus/R3/healthy
+=== RUN   TestNativeGraphObjectGetFreshCombinedCensus/R3/no_rollup
+    nats_object_census_test.go:92: unsafe/unknown read reached chunks: mode=no_rollup bytes=131120 err=<nil> chunks=4
+=== RUN   TestNativeGraphObjectGetFreshCombinedCensus/R3/allow_direct
+    nats_object_census_test.go:92: unsafe/unknown read reached chunks: mode=allow_direct bytes=131120 err=<nil> chunks=4
+=== RUN   TestNativeGraphObjectGetFreshCombinedCensus/R3/sealed
+    nats_object_census_test.go:92: unsafe/unknown read reached chunks: mode=sealed bytes=131120 err=<nil> chunks=4
+=== RUN   TestNativeGraphObjectGetFreshCombinedCensus/R3/wrong_format
+    nats_object_census_test.go:92: unsafe/unknown read reached chunks: mode=wrong_format bytes=131120 err=<nil> chunks=4
+=== RUN   TestNativeGraphObjectGetFreshCombinedCensus/R3/foreign_subject
+=== RUN   TestNativeGraphObjectGetFreshCombinedCensus/R3/missing_chunks
+=== RUN   TestNativeGraphObjectGetFreshCombinedCensus/R3/unknown_info
+--- FAIL: TestNativeGraphObjectGetFreshCombinedCensus (1.62s)
+    --- FAIL: TestNativeGraphObjectGetFreshCombinedCensus/R1 (0.52s)
+        --- PASS: TestNativeGraphObjectGetFreshCombinedCensus/R1/healthy (0.06s)
+        --- FAIL: TestNativeGraphObjectGetFreshCombinedCensus/R1/no_rollup (0.07s)
+        --- FAIL: TestNativeGraphObjectGetFreshCombinedCensus/R1/allow_direct (0.07s)
+        --- FAIL: TestNativeGraphObjectGetFreshCombinedCensus/R1/sealed (0.06s)
+        --- FAIL: TestNativeGraphObjectGetFreshCombinedCensus/R1/wrong_format (0.06s)
+        --- PASS: TestNativeGraphObjectGetFreshCombinedCensus/R1/foreign_subject (0.03s)
+        --- PASS: TestNativeGraphObjectGetFreshCombinedCensus/R1/missing_chunks (0.04s)
+        --- PASS: TestNativeGraphObjectGetFreshCombinedCensus/R1/unknown_info (0.04s)
+    --- FAIL: TestNativeGraphObjectGetFreshCombinedCensus/R3 (1.10s)
+        --- PASS: TestNativeGraphObjectGetFreshCombinedCensus/R3/healthy (0.07s)
+        --- FAIL: TestNativeGraphObjectGetFreshCombinedCensus/R3/no_rollup (0.10s)
+        --- FAIL: TestNativeGraphObjectGetFreshCombinedCensus/R3/allow_direct (0.07s)
+        --- FAIL: TestNativeGraphObjectGetFreshCombinedCensus/R3/sealed (0.08s)
+        --- FAIL: TestNativeGraphObjectGetFreshCombinedCensus/R3/wrong_format (0.08s)
+        --- PASS: TestNativeGraphObjectGetFreshCombinedCensus/R3/foreign_subject (0.04s)
+        --- PASS: TestNativeGraphObjectGetFreshCombinedCensus/R3/missing_chunks (0.05s)
+        --- PASS: TestNativeGraphObjectGetFreshCombinedCensus/R3/unknown_info (0.04s)
+FAIL
+FAIL	js-wf/internal/graphpublication	1.640s
+FAIL

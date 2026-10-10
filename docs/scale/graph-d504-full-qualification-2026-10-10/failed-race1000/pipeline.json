@@ -1,0 +1,97 @@
+{
+  "source": "d504a337a8b9102a0b32673d457939c4b82fcc8f",
+  "working_directory": "/home/exedev/js-wf-d504a33-qualification",
+  "root": "/home/exedev/js-wf-d504-full-qualification-20261010",
+  "started": "2026-10-10T08:11:51.777352+00:00",
+  "supervisor_pid": 51737,
+  "systemd_invocation": "76c0d48718974e28adc4c2c4f7ec2c39",
+  "phase": "terminal",
+  "commands": [
+    {
+      "command": [
+        "go",
+        "test",
+        "-c",
+        "-race",
+        "./worker",
+        "-o",
+        "/home/exedev/js-wf-d504-full-qualification-20261010/native/worker-race.test"
+      ],
+      "working_directory": "/home/exedev/js-wf-d504a33-qualification",
+      "started": "2026-10-10T08:11:51.777688+00:00",
+      "env": {
+        "GOMAXPROCS": "4",
+        "GOMEMLIMIT": "512MiB"
+      },
+      "pid": 51761,
+      "actual_exit_code": 0,
+      "finished": "2026-10-10T08:12:08.294589+00:00"
+    },
+    {
+      "command": [
+        "/home/exedev/js-wf-d504-full-qualification-20261010/native/worker-race.test",
+        "-test.run=^TestNativeGraphContinuationFailedChildPromise$",
+        "-test.count=1",
+        "-test.timeout=10m",
+        "-test.v=true"
+      ],
+      "working_directory": "/home/exedev/js-wf-d504a33-qualification",
+      "started": "2026-10-10T08:12:08.371944+00:00",
+      "env": {
+        "GOMAXPROCS": "4",
+        "GOMEMLIMIT": "512MiB"
+      },
+      "pid": 52075,
+      "actual_exit_code": 0,
+      "finished": "2026-10-10T08:15:21.209927+00:00"
+    },
+    {
+      "command": [
+        "python3",
+        "scripts/check-tier1-race.py",
+        "--root",
+        "/home/exedev/js-wf-d504-full-qualification-20261010/normal1000",
+        "--seeds",
+        "1000",
+        "--no-race"
+      ],
+      "working_directory": "/home/exedev/js-wf-d504a33-qualification",
+      "started": "2026-10-10T08:15:21.210978+00:00",
+      "env": {
+        "GOMAXPROCS": "2",
+        "GOMEMLIMIT": "512MiB"
+      },
+      "pid": 52362,
+      "actual_exit_code": 0,
+      "finished": "2026-10-10T08:52:58.648101+00:00"
+    },
+    {
+      "command": [
+        "python3",
+        "scripts/check-tier1-race.py",
+        "--root",
+        "/home/exedev/js-wf-d504-full-qualification-20261010/race1000",
+        "--seeds",
+        "1000"
+      ],
+      "working_directory": "/home/exedev/js-wf-d504a33-qualification",
+      "started": "2026-10-10T08:52:58.649095+00:00",
+      "env": {
+        "GOMAXPROCS": "2",
+        "GOMEMLIMIT": "512MiB"
+      },
+      "pid": 58225,
+      "actual_exit_code": 1,
+      "finished": "2026-10-10T13:53:20.187244+00:00"
+    }
+  ],
+  "scope": "Eight native failed-child cases; complete156-family/841-pin normal1000 and race1000. Race starts only after full normal success. Every broader original requirement remains separate.",
+  "native_compile_exit": 0,
+  "native_exit": 0,
+  "native_complete_eight_cases": true,
+  "normal_exit": 0,
+  "normal_complete": true,
+  "race_exit": 1,
+  "source_unchanged": true,
+  "finished": "2026-10-10T13:53:20.323322+00:00"
+}

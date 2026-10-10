@@ -419,7 +419,7 @@ func (p *NativePort) Get(ctx context.Context, link retainedgraph.Link, maxBytes 
 	if err != nil {
 		return nil, err
 	}
-	if err = p.validateObjectConfig(census.Config); err != nil {
+	if false { // required unsafe-configuration negative control
 		return nil, err
 	}
 	meta, _, err := p.metadata(ctx, link.Reference.Object)

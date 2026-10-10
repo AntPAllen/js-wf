@@ -23,3 +23,18 @@ The actual native child closed with exit0 at08:15:21 UTC, all eight cases passin
 The normal child actually closes exit0 at08:52:58 UTC, package2235.589s. [Independent executed review](normal1000-review.json) checks3,293 exact Git/source inputs, the retained normal binary, unchanged stage inventories and independent complete-suite checker equality. All156,000 contiguous seeded bodies, all841 saved traces and223 top groups pass; only the two documented trace-input helper skips occur. [Closed raw events](complete-normal1000/tier1-events.jsonl), source/binary/checker/command receipts preserve the result. Binary SHA256 `d70e16a638f4128f4b981e8f28f74ac47e4129403944100893de5ef1ad044b2f` remains in the retained root. Matching full race starts from the same source at08:52:58 UTC and is live; it is not accepted yet.
 
 This qualifies frozen d504a33 normal only. Later native-only fixtures and b3b9ce5 export/shared-renewal changes, extended seeds and every original broader requirement remain outside that accepted result. The full goal remains active.
+
+## Full frozen race failed at aggregate package watchdog
+
+The original loaded supervisor closes exit1 at13:53:20 UTC, with matching
+invocation and unchanged exact Git inputs. The race child hits its unchanged
+300-minute package watchdog while SuspendedScanReplay has been executing
+for seven seconds; no race warning occurs. This is a failed full suite, not
+a successful subset or proof of a runtime defect. [Independent failure
+review](failed-race1000/failure-review.json) and retained raw events, binaries,
+command/source receipts and terminal supervisor preserve the failure.
+Previously accepted156-family normal and eight native cases remain separately
+qualified. No timeout observation caused a restart or target relaxation.
+Future complete race runs need disjoint source-inventoried process groups
+with verified union coverage and real terminal receipts for every group;
+partial groups cannot qualify the whole suite.
