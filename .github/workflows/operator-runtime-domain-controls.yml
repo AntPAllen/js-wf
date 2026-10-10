@@ -118,7 +118,7 @@ jobs:
       matrix:
         include:
           - package: client
-            tests: 'TestGraphAwaitContentionFreshReadAndGenerationFence|TestGraphAwaitOwnReadDeadline'
+            tests: 'TestGraphAwaitContentionFreshReadAndGenerationFence|TestGraphAwaitOwnReadDeadline|TestGraphCanonicalSignalBindingBudgetRecovery|TestGraphCanonicalSignalBindingActualDeadlineRecovery'
           - package: cmd/wf
             tests: 'TestNativeGraphCursorOperatorHistory|TestGraphOperatorCursorRejectsUnknownVersion|TestGraphOperatorRejectsPartialOrLegacyOnlySelection'
           - package: cmd/wf-worker

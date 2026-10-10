@@ -1,5 +1,24 @@
 # Implementation status against the supplied plan
 
+## Signal aggregate binding budget reproduced in Tier 1 transport — 2026-10-10
+
+A focused in-memory cost model runs the production client/journal through
+48 seeded cases and exact replays. A 2.8s owned-body cost binds; a 3.2s cost
+returns unknown/deadline without a binding or wakeup, and same-token recovery
+succeeds after healing with one source and one bound input. Corrupt-body controls
+also reject publication. A separate control exercises the actual production
+three-second context timer once. The race command including 112 existing
+publication-recovery cuts passes 22.742s; source hashes and actual exit verify.
+[Model, controls and development scope](scale/graph-signal-binding-budget-2026-10-10/README.md).
+
+The new controls join the operator CI client row. No runtime timeout or payload
+verification changed. The model narrows the aggregate-budget candidate; it does
+not establish the failed native run's exact cancellation point or a NATS defect.
+PostgreSQL CLI acceptance remains open. The original entry campaign now runs
+first-checkpoint batch verification; committed full-cap acceptance is unproven.
+Original full-source simulation, native matrices/scale/fault/storage/soak/
+retention/security/rollout requirements remain open; admission and collection off.
+
 ## PostgreSQL campaign closed failed; Signal binding diagnosis — 2026-10-10
 
 The focused compiled PostgreSQL campaign at `98eacf4` stops with actual Go
