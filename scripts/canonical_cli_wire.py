@@ -7,7 +7,7 @@ from pathlib import Path
 
 class ProtocolStream:
     def __init__(self,incoming=False,api_prefix=None):
-        self.api_prefix=api_prefix;self.incoming=incoming;self.buffer=bytearray();self.bytes=0;self.hash=hashlib.sha256();self.operations=Counter();self.api=Counter();self.infos=[];self.peak_buffer=0
+        self.legacy_purges=[];self.api_prefix=api_prefix;self.incoming=incoming;self.buffer=bytearray();self.bytes=0;self.hash=hashlib.sha256();self.operations=Counter();self.api=Counter();self.infos=[];self.peak_buffer=0
     def feed(self,data):
         self.bytes+=len(data);self.hash.update(data);self.buffer.extend(data);self.peak_buffer=max(self.peak_buffer,len(self.buffer))
         while self.buffer:
@@ -28,6 +28,17 @@ class ProtocolStream:
                 if not self.incoming and parts[1].startswith(b'$JS.') and b'.API.' in parts[1]:
                     subject=parts[1].decode('ascii');assert self.api_prefix is not None and subject.startswith(self.api_prefix),'wrong API domain'
                     self.api[subject]+=1
+                    if subject.endswith('.STREAM.PURGE.WF_JRN'):
+                        assert size<=64<<10
+                        payload=bytes(self.buffer[end+2:end+2+size])
+                        if op==b'HPUB':payload=payload[int(parts[-2]):]
+                        def unique(pairs):
+                            result={}
+                            for key,value in pairs:
+                                assert key not in result,'duplicate purge field'
+                                result[key]=value
+                            return result
+                        self.legacy_purges.append(json.loads(payload,object_pairs_hook=unique))
             elif op in (b'INFO',b'CONNECT'):
                 assert op==(b'INFO' if self.incoming else b'CONNECT')
                 value=json.loads(line.split(b' ',1)[1]);assert isinstance(value,dict)
@@ -44,18 +55,18 @@ class ProtocolStream:
             tokens=(b'MSG ',b'HMSG ',b'INFO ',b'PING',b'PONG',b'+OK') if self.incoming else (b'PUB ',b'HPUB ',b'SUB ',b'UNSUB ',b'PING',b'PONG')
             assert any(tail.startswith(token) or token.startswith(tail) for token in tokens),'unrecognized interrupted packet'
         assert allow_tail or not self.buffer,'incomplete protocol tail'
-        return dict(bytes=self.bytes,sha256=self.hash.hexdigest(),operations=dict(self.operations),api=dict(self.api),infos=self.infos,peak_buffer=self.peak_buffer,interrupted_tail_bytes=len(tail),interrupted_tail_sha256=hashlib.sha256(tail).hexdigest())
+        return dict(legacy_purges=self.legacy_purges,bytes=self.bytes,sha256=self.hash.hexdigest(),operations=dict(self.operations),api=dict(self.api),infos=self.infos,peak_buffer=self.peak_buffer,interrupted_tail_bytes=len(tail),interrupted_tail_sha256=hashlib.sha256(tail).hexdigest())
 
 
-def validate(root,domain,offline=False):
+def validate(root,domain,offline=False,legacy_purge_subject=None):
     root=Path(root)
     trace=json.loads((root/'traffic.json').read_text())
     stats=json.loads((root/'proxy-final.json').read_text())
     assert trace['truncated'] is False and not trace.get('frame_file_error')
     assert trace['frame_file']=='traffic.frames.jsonl' and trace['frames'] in (None,[])
-    assert all(stats[k]==0 for k in ('active_connections','buffered_bytes','buffer_overflows','upstream_dial_failures'))
+    assert all(type(stats[k]) is int and stats[k]==0 for k in ('active_connections','buffered_bytes','buffer_overflows','upstream_dial_failures'))
     expected=0 if offline else 1
-    assert stats['accepted_connections']==expected and len(trace['connections'] or [])==expected
+    assert type(stats['accepted_connections']) is int and stats['accepted_connections']==expected and len(trace['connections'] or [])==expected
     prefix='$JS.'+domain+'.API.' if domain else '$JS.API.'
     streams={d:ProtocolStream(d=='server_to_client',prefix) for d in ('client_to_server','server_to_client')}
     count=0
@@ -74,8 +85,14 @@ def validate(root,domain,offline=False):
     else:
         assert count>0 and result['client_to_server']['operations'].get('CONNECT')==1
         assert result['client_to_server']['api']
-        assert not any('WF_JRN' in subject for subject in result['client_to_server']['api'])
+        legacy={subject:count for subject,count in result['client_to_server']['api'].items() if 'WF_JRN' in subject}
+        purges=result['client_to_server']['legacy_purges']
+        if legacy_purge_subject is None:
+            assert not legacy and not purges
+        else:
+            assert legacy=={prefix+'STREAM.INFO.WF_JRN':1,prefix+'STREAM.PURGE.WF_JRN':1}
+            assert purges==[{'filter':legacy_purge_subject}]
         infos=result['server_to_client']['infos'];assert infos
         assert all(p.get('domain','')==domain for p in infos)
         assert len({p['server_id'] for p in infos})==1
-    return dict(domain=domain,offline=offline,frame_records=count,streams=result)
+    return dict(domain=domain,offline=offline,legacy_purge_subject=legacy_purge_subject,frame_records=count,streams=result)
