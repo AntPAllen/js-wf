@@ -1,0 +1,10 @@
+{
+  "base_source": "34fb050",
+  "command": "GOMAXPROCS=2 GOMEMLIMIT=768MiB go test -race ./worker -run '^TestNativeGraphContinuationCancelRunningEffect$/R1/archive=false/late-success=false$' -count=1 -timeout=5m",
+  "actual_exit": 1,
+  "elapsed_seconds": 120.127,
+  "fixture_sha256": "d6c2d6b54c1c4e1bc9b6bb9e6458cc9fb0a3dd60f5e36de78c6ffe657d1f6709",
+  "worker_sha256": "501ec485e23b9471af715ef9fe846c8bf1f7d4e6e38fcc2e87e37b880ad0cfa1",
+  "cause": "Fixture omitted the required retry after the running handler was intentionally abandoned. Acknowledged cancellation stops the handler; the next delivery must drain cancellation and publish its terminal. Original inference of cancellation failing to stop the effect was incorrect.",
+  "scope": "One native development R1/live/cooperative-error case; full matrix unaccepted."
+}

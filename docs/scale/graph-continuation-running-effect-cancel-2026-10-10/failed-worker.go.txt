@@ -1535,7 +1535,7 @@ func (w *Worker) ObserveCancellationNotification(message *nats.Msg) {
 	w.observeCancel(message)
 }
 
-// PollRunningCancellation checks durable cancellation for a missed core
+// PollRunningCancellation checks retained WF_SIG state for a missed core
 // notification. The real worker calls the same decision on registration and
 // every 15 seconds; modeled workers can call it at virtual-time ticks.
 func (w *Worker) PollRunningCancellation(ctx context.Context, typ, id string, invSeq uint64) (bool, error) {
@@ -1543,20 +1543,6 @@ func (w *Worker) PollRunningCancellation(ctx context.Context, typ, id string, in
 }
 
 func (w *Worker) pollRunningCancellation(ctx context.Context, typ, id, generation string, expected *cancelWaiter) (bool, error) {
-	if w.graphJournal != nil && w.graphJournal.CanonicalSignals() {
-		invocation, err := strconv.ParseUint(generation, 10, 64)
-		if err != nil || invocation == 0 {
-			return false, wf.ErrInvocationIdentity
-		}
-		// A reservation alone is not a committed cancellation. Require the
-		// validated queue binding and owned bytes for this exact generation.
-		_, _, found, err := w.graphJournal.ReadSignalBinding(ctx, journal.GraphSignalRequest{Type: typ, ID: id, Invocation: invocation, Name: client.CancelSignalName, Key: "cancel"})
-		if err != nil || !found {
-			return false, err
-		}
-		w.markRunningCancellation(cancelKey(typ, id, generation), expected)
-		return true, nil
-	}
 	if w.cancelPollPort == nil {
 		return false, fmt.Errorf("cancellation poll transport unavailable")
 	}

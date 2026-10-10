@@ -1,5 +1,19 @@
 # Implementation status against the supplied plan
 
+## Restored running-effect cancellation recovery added — 2026-10-10
+
+The canonical running cancellation poll now verifies the graph-owned queue
+binding for the exact invocation instead of depending on retained WF_SIG.
+A corrected R1/live native race control passes after disabling notifications
+and confirming removal of the cancel pointer: the next delivery consumes
+cancellation, writes one cancelled terminal, preserves the original prefix
+and leaves history unchanged on duplicate. Original fixture failures are
+preserved; they omitted the required retry after abandoned user code.
+[Evidence](scale/graph-continuation-running-effect-cancel-2026-10-10/README.md).
+The full R1/R3-domain × live/archive × cooperative-error/late-success matrix
+is prepared for separate frozen qualification. All broader original gates
+remain open; this functional control defines no new latency target.
+
 ## Canonical replay input binding qualification accepted — 2026-10-10
 
 Frozen `66fe5bc` retry passes independent review: actual retained supervisor

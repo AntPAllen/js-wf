@@ -1,0 +1,19 @@
+=== RUN   TestNativeGraphContinuationCancelRunningEffect
+=== RUN   TestNativeGraphContinuationCancelRunningEffect/R1/archive=false/late-success=false
+    graph_continuation_sdk_test.go:480: SDK_PHASE name=execute_begin_next elapsed=418.325822ms remaining=1m59.581673868s sdk_requests=171
+RUNNING_CANCEL_POLL generation=1 found=false error=<nil>
+    graph_continuation_sdk_test.go:482: SDK_PHASE name=execute_end_next elapsed=3.746071626s remaining=1m56.253928033s sdk_requests=1365
+    graph_continuation_sdk_test.go:646: SDK_PHASE name=boundary_scan_end_next elapsed=3.821565987s remaining=1m56.178433612s sdk_requests=1386
+    graph_continuation_sdk_test.go:480: SDK_PHASE name=execute_begin_finish elapsed=3.821624416s remaining=1m56.178375344s sdk_requests=1386
+RUNNING_CANCEL_POLL generation=1 found=false error=<nil>
+    graph_continuation_sdk_test.go:482: SDK_PHASE name=execute_end_finish elapsed=8.15281333s remaining=1m51.847186349s sdk_requests=2985
+    graph_continuation_sdk_test.go:646: SDK_PHASE name=boundary_scan_end_finish elapsed=8.226715015s remaining=1m51.773284645s sdk_requests=3005
+RUNNING_CANCEL_POLL generation=1 found=false error=<nil>
+    graph_continuation_sdk_test.go:459: SDK stage delivery context canceled <nil> <nil>
+    graph_continuation_sdk_test.go:682: running cancellation outcome  context deadline exceeded
+    panic.go:694: SDK_PHASE name=finished elapsed=2m0.000918194s remaining=-918.434µs sdk_requests=10550
+--- FAIL: TestNativeGraphContinuationCancelRunningEffect (120.08s)
+    --- FAIL: TestNativeGraphContinuationCancelRunningEffect/R1/archive=false/late-success=false (120.08s)
+FAIL
+FAIL	js-wf/worker	120.795s
+FAIL

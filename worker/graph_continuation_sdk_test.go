@@ -123,6 +123,22 @@ func TestNativeGraphContinuationCancelPendingChild(t *testing.T) {
 	}
 }
 
+func TestNativeGraphContinuationCancelRunningEffect(t *testing.T) {
+	for _, domain := range []string{"", "WFCONTINUATIONSDK"} {
+		for _, archive := range []bool{false, true} {
+			for _, lateSuccess := range []bool{false, true} {
+				name := "R1"
+				if domain != "" {
+					name = "R3Domain"
+				}
+				t.Run(fmt.Sprintf("%s/archive=%t/late-success=%t", name, archive, lateSuccess), func(t *testing.T) {
+					testNativeGraphContinuationSDKFlow(t, domain, false, false, false, false, archive, false, false, false, true, lateSuccess)
+				})
+			}
+		}
+	}
+}
+
 func TestNativeGraphContinuationArchiveCollection(t *testing.T) {
 	for _, domain := range []string{"", "WFCONTINUATIONSDK"} {
 		for _, mode := range []string{"state", "signals", "child", "buffered-child"} {
@@ -137,11 +153,14 @@ func TestNativeGraphContinuationArchiveCollection(t *testing.T) {
 	}
 }
 func testNativeGraphContinuationSDKFlow(t *testing.T, domain string, partition, bufferedSignals, childPromiseFlow, bufferedChild bool, archiveMode ...bool) {
-	// Optional modes: archive, failed child, pending child, cancel pending parent.
+	// Optional modes: archive, failed child, pending child, cancel pending parent, running effect cancellation, late success.
 	archive := len(archiveMode) != 0 && archiveMode[0]
 	childFailure := len(archiveMode) > 1 && archiveMode[1]
 	pendingChild := len(archiveMode) > 2 && archiveMode[2]
 	cancelPendingChild := len(archiveMode) > 3 && archiveMode[3]
+	cancelRunningEffect := len(archiveMode) > 4 && archiveMode[4]
+	lateEffectSuccess := len(archiveMode) > 5 && archiveMode[5]
+	effectEntered := make(chan struct{})
 	if cancelPendingChild && !pendingChild {
 		t.Fatal("cancellation fixture requires an unresolved child")
 	}
@@ -167,7 +186,7 @@ func testNativeGraphContinuationSDKFlow(t *testing.T, domain string, partition, 
 	if childPromiseFlow || archive {
 		timeout = time.Minute
 	}
-	if childFailure && archive || pendingChild {
+	if childFailure && archive || pendingChild || cancelRunningEffect {
 		// Functional watchdog for the complete multi-delivery/collection fixture.
 		// Recovery latency is checked separately from kill through exact ACK.
 		timeout = 2 * time.Minute
@@ -377,6 +396,20 @@ func testNativeGraphContinuationSDKFlow(t *testing.T, domain string, partition, 
 			if err != nil || !ok || value != 43 {
 				return nil, wf.ErrCorruptJournal
 			}
+			if cancelRunningEffect {
+				_, err := wf.RunOnce(c, "running-cancel-once", nil, func(effectCtx context.Context, key string) (int, error) {
+					effects++
+					close(effectEntered)
+					<-effectCtx.Done()
+					if lateEffectSuccess {
+						return 99, nil
+					}
+					return 0, effectCtx.Err()
+				})
+				if err != nil {
+					return nil, err
+				}
+			}
 			return json.Marshal(value)
 		},
 	}}
@@ -419,7 +452,7 @@ func testNativeGraphContinuationSDKFlow(t *testing.T, domain string, partition, 
 		stopStage()
 		heartbeatErr := <-heartbeatDone
 		releaseErr := owner.Release(ctx)
-		if err != nil || releaseErr != nil || heartbeatErr != nil && !errors.Is(heartbeatErr, context.Canceled) {
+		if err != nil && !(cancelRunningEffect && errors.Is(err, context.Canceled)) || releaseErr != nil || heartbeatErr != nil && !errors.Is(heartbeatErr, context.Canceled) {
 			t.Fatal("SDK stage delivery", err, releaseErr, heartbeatErr)
 		}
 	}
@@ -623,6 +656,106 @@ func testNativeGraphContinuationSDKFlow(t *testing.T, domain string, partition, 
 				}
 			}
 		}
+		if cancelRunningEffect {
+			// Remove the best-effort notification; recovery must use durable polling.
+			if err := runner.Close(); err != nil {
+				t.Fatal(err)
+			}
+			prefix, _, err := graph.ReadExisting(ctx, h.Type, h.ID, h.InvSeq)
+			if err != nil {
+				t.Fatal(err)
+			}
+			done := make(chan struct{})
+			go func() { defer close(done); execute() }()
+			select {
+			case <-effectEntered:
+			case <-ctx.Done():
+				t.Fatal("restored effect never entered", ctx.Err())
+			}
+			sequence, err := c.Cancel(ctx, h.Type, h.ID)
+			if err != nil || sequence == 0 {
+				t.Fatal("running cancellation not acknowledged", sequence, err)
+			}
+			// Canonical ownership must survive removal of its compatibility pointer.
+			signalStream, err := js.Stream(ctx, "WF_SIG")
+			if err != nil {
+				t.Fatal(err)
+			}
+			if err := signalStream.DeleteMsg(ctx, sequence); err != nil {
+				t.Fatal(err)
+			}
+			if _, err := signalStream.GetMsg(ctx, sequence); !errors.Is(err, jetstream.ErrMsgNotFound) {
+				t.Fatal("cancel pointer removal unconfirmed", err)
+			}
+
+			select {
+			case <-done:
+			case <-ctx.Done():
+				t.Fatal("running effect failed to observe cancellation", ctx.Err())
+			}
+			// A cancelled handler is intentionally abandoned. Its next delivery
+			// drains the durable cancel before entering user code.
+			execute()
+			result, err := c.Await(ctx, h.Type, h.ID)
+			if !errors.Is(err, client.ErrCancelled) || len(result) != 0 {
+				t.Fatal("running cancellation outcome", string(result), err)
+			}
+			records, _, err := graph.ReadExisting(ctx, h.Type, h.ID, h.InvSeq)
+			if err != nil || len(records) <= len(prefix) {
+				t.Fatal("running cancellation history", err)
+			}
+			a, _ := json.Marshal(prefix)
+			b, _ := json.Marshal(records[:len(prefix)])
+			if !bytes.Equal(a, b) {
+				t.Fatal("running cancellation changed checkpoint prefix")
+			}
+			terminals, cancellations, requests, completions := 0, 0, 0, 0
+			for i, record := range records {
+				if record.Index != uint64(i) {
+					t.Fatal("running cancellation absolute index", record)
+				}
+				if record.Kind == journal.Completed || record.Kind == journal.Failed {
+					terminals++
+				}
+				var event struct {
+					Name string `json:"name"`
+				}
+				if json.Unmarshal(record.Payload, &event) == nil {
+					if record.Kind == journal.SignalConsumed && event.Name == client.CancelSignalName {
+						cancellations++
+					}
+					if record.Kind == journal.StepRequested && event.Name == "running-cancel-once" {
+						requests++
+					}
+				}
+				if record.Kind == journal.StepCompleted && i > 0 {
+					var declaration struct {
+						Name string `json:"name"`
+					}
+					if json.Unmarshal(records[i-1].Payload, &declaration) == nil && declaration.Name == "running-cancel-once" {
+						completions++
+					}
+				}
+			}
+			var outcome wf.Outcome
+			tail := records[len(records)-1]
+			if tail.Kind != journal.Failed || json.Unmarshal(tail.Payload, &outcome) != nil || outcome.InvSeq != h.InvSeq || outcome.Error != client.ErrCancelled.Error() || terminals != 1 || cancellations != 1 || requests != 1 {
+				t.Fatal("running cancellation terminal/consumption", outcome, terminals, cancellations, requests, completions)
+			}
+			if calls["initial"] != 1 || calls["next"] != 1 || calls["finish"] != 1 || effects != 3 {
+				t.Fatal("running cancellation repeated handler/effect", calls, effects)
+			}
+			before, _ := json.Marshal(records)
+			execute()
+			after, _, err := graph.ReadExisting(ctx, h.Type, h.ID, h.InvSeq)
+			afterBytes, _ := json.Marshal(after)
+			if err != nil || !bytes.Equal(before, afterBytes) || effects != 3 || calls["finish"] != 1 {
+				t.Fatal("duplicate reactivated cancelled running effect", err, calls, effects)
+			}
+			t.Logf("RUNNING_EFFECT_CANCELLED archive=%t late_success=%t prefix_records=%d records=%d terminals=1 cancellations=1 requests=1 effect_completions=%d effects=3 initial=1 next=1 finish=1 immutable_duplicate=true notification_disabled=true source_removed=true retried=true", archive, lateEffectSuccess, len(prefix), len(records), completions)
+			return
+		}
+
 		if pendingChild {
 			execute() // The restored finish stage must wait, never complete early.
 			var err error
