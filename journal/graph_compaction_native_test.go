@@ -164,7 +164,7 @@ func nativeCheckpointArchiveFixture(t *testing.T, ctx context.Context, replicas 
 		}
 		return store
 	}
-	checkpointArchiveScenario(t, ctx, 3, config, port, &now, reopen)
+	checkpointArchiveScenario(t, ctx, 3, config, port, &now, reopen, true)
 	objectStream, err := js.Stream(ctx, "OBJ_"+cfg.ObjectBucket)
 	if err != nil {
 		t.Fatal(err)

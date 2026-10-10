@@ -47,6 +47,12 @@ type compactionCheckpoint struct {
 
 func (s *CompactionStage) NextIndex() uint64 { return s.next }
 
+// MatchesBinding lets a runtime bind opaque staging input to its freshly
+// observed transition. It establishes no record/content verification proof.
+func (s *CompactionStage) MatchesBinding(destination string, expected, first uint64, maxPayloadBytes int, application []byte) bool {
+	return s.prepared.destination == destination && s.prepared.expected == expected && s.prepared.first == first && s.maxPayloadBytes == maxPayloadBytes && bytes.Equal(s.prepared.publication.Application, application)
+}
+
 func copyCompactionRoot(root Root) Root {
 	root.Graph = copyGraph(root.Graph)
 	root.Streams = copyStreams(root.Streams)

@@ -1,0 +1,117 @@
+=== RUN   TestGraphCompactionCheckpointRejectsNoncanonicalEnvelope
+=== RUN   TestGraphCompactionCheckpointRejectsNoncanonicalEnvelope/zero-expiry
+=== RUN   TestGraphCompactionCheckpointRejectsNoncanonicalEnvelope/empty
+=== RUN   TestGraphCompactionCheckpointRejectsNoncanonicalEnvelope/escaped
+=== RUN   TestGraphCompactionCheckpointRejectsNoncanonicalEnvelope/leading
+=== RUN   TestGraphCompactionCheckpointRejectsNoncanonicalEnvelope/second-object
+=== RUN   TestGraphCompactionCheckpointRejectsNoncanonicalEnvelope/oversize
+=== RUN   TestGraphCompactionCheckpointRejectsNoncanonicalEnvelope/null
+=== RUN   TestGraphCompactionCheckpointRejectsNoncanonicalEnvelope/unknown
+=== RUN   TestGraphCompactionCheckpointRejectsNoncanonicalEnvelope/duplicate
+=== RUN   TestGraphCompactionCheckpointRejectsNoncanonicalEnvelope/alias
+=== RUN   TestGraphCompactionCheckpointRejectsNoncanonicalEnvelope/trailing
+--- PASS: TestGraphCompactionCheckpointRejectsNoncanonicalEnvelope (0.01s)
+    --- PASS: TestGraphCompactionCheckpointRejectsNoncanonicalEnvelope/zero-expiry (0.00s)
+    --- PASS: TestGraphCompactionCheckpointRejectsNoncanonicalEnvelope/empty (0.00s)
+    --- PASS: TestGraphCompactionCheckpointRejectsNoncanonicalEnvelope/escaped (0.00s)
+    --- PASS: TestGraphCompactionCheckpointRejectsNoncanonicalEnvelope/leading (0.00s)
+    --- PASS: TestGraphCompactionCheckpointRejectsNoncanonicalEnvelope/second-object (0.00s)
+    --- PASS: TestGraphCompactionCheckpointRejectsNoncanonicalEnvelope/oversize (0.00s)
+    --- PASS: TestGraphCompactionCheckpointRejectsNoncanonicalEnvelope/null (0.00s)
+    --- PASS: TestGraphCompactionCheckpointRejectsNoncanonicalEnvelope/unknown (0.00s)
+    --- PASS: TestGraphCompactionCheckpointRejectsNoncanonicalEnvelope/duplicate (0.00s)
+    --- PASS: TestGraphCompactionCheckpointRejectsNoncanonicalEnvelope/alias (0.00s)
+    --- PASS: TestGraphCompactionCheckpointRejectsNoncanonicalEnvelope/trailing (0.00s)
+=== RUN   TestGraphCompactionCheckpointBindingRenewalAndResumption
+=== RUN   TestGraphCompactionCheckpointBindingRenewalAndResumption/json/normal
+    graph_compaction_checkpoint_test.go:313: BOUND_COMPACTION mode=normal renewal_batches=0 verification_batches=10 retained_from=9 readers=0 checkpoint_bytes=3972
+=== RUN   TestGraphCompactionCheckpointBindingRenewalAndResumption/json/renew
+    graph_compaction_checkpoint_test.go:313: BOUND_COMPACTION mode=renew renewal_batches=11 verification_batches=10 retained_from=9 readers=0 checkpoint_bytes=4006
+=== RUN   TestGraphCompactionCheckpointBindingRenewalAndResumption/json/renew-drop
+    graph_compaction_checkpoint_test.go:313: BOUND_COMPACTION mode=renew-drop renewal_batches=11 verification_batches=10 retained_from=9 readers=0 checkpoint_bytes=4006
+=== RUN   TestGraphCompactionCheckpointBindingRenewalAndResumption/json/renew-lost
+    graph_compaction_checkpoint_test.go:313: BOUND_COMPACTION mode=renew-lost renewal_batches=11 verification_batches=10 retained_from=9 readers=0 checkpoint_bytes=4006
+=== RUN   TestGraphCompactionCheckpointBindingRenewalAndResumption/json/verify
+    graph_compaction_checkpoint_test.go:313: BOUND_COMPACTION mode=verify renewal_batches=0 verification_batches=10 retained_from=9 readers=0 checkpoint_bytes=4641
+=== RUN   TestGraphCompactionCheckpointBindingRenewalAndResumption/json/every-batch
+    graph_compaction_checkpoint_test.go:313: BOUND_COMPACTION mode=every-batch renewal_batches=0 verification_batches=10 retained_from=9 readers=0 checkpoint_bytes=3972
+=== RUN   TestGraphCompactionCheckpointBindingRenewalAndResumption/json/type
+    graph_compaction_checkpoint_test.go:243: foreign/stale transition resumed &{0x1425e009a730 <nil> <nil> 0x1425dfda6800 <nil> <nil> [] <nil> flow scan {1 next 11 10 3 10 step-result-13ffca2542e3c95f31d068b49078c71376fc91ff4b1157afb1c36a7b4dc118f5 13ffca2542e3c95f31d068b49078c71376fc91ff4b1157afb1c36a7b4dc118f5} 12 stage true true <nil> <nil>} <nil>
+=== RUN   TestGraphCompactionCheckpointBindingRenewalAndResumption/json/id
+    graph_compaction_checkpoint_test.go:243: foreign/stale transition resumed &{0x1425e0063090 <nil> <nil> 0x1425dfda6800 <nil> <nil> [] <nil> flow scan {1 next 11 10 3 10 step-result-13ffca2542e3c95f31d068b49078c71376fc91ff4b1157afb1c36a7b4dc118f5 13ffca2542e3c95f31d068b49078c71376fc91ff4b1157afb1c36a7b4dc118f5} 12 stage true true <nil> <nil>} <nil>
+=== RUN   TestGraphCompactionCheckpointBindingRenewalAndResumption/json/runtime
+    graph_compaction_checkpoint_test.go:243: foreign/stale transition resumed &{0x1425dff7b770 <nil> <nil> 0x1425dfda6800 <nil> <nil> [] <nil> flow scan {1 next 11 10 3 10 step-result-13ffca2542e3c95f31d068b49078c71376fc91ff4b1157afb1c36a7b4dc118f5 13ffca2542e3c95f31d068b49078c71376fc91ff4b1157afb1c36a7b4dc118f5} 12 stage true true <nil> <nil>} <nil>
+=== RUN   TestGraphCompactionCheckpointBindingRenewalAndResumption/json/tail
+    graph_compaction_checkpoint_test.go:243: foreign/stale transition resumed &{0x1425dfff9360 <nil> <nil> 0x1425dfda6800 <nil> <nil> [] <nil> flow scan {1 next 11 10 3 10 step-result-13ffca2542e3c95f31d068b49078c71376fc91ff4b1157afb1c36a7b4dc118f5 13ffca2542e3c95f31d068b49078c71376fc91ff4b1157afb1c36a7b4dc118f5} 12 stage true true <nil> <nil>} <nil>
+=== RUN   TestGraphCompactionCheckpointBindingRenewalAndResumption/json/application
+=== RUN   TestGraphCompactionCheckpointBindingRenewalAndResumption/json/cut
+=== RUN   TestGraphCompactionCheckpointBindingRenewalAndResumption/json/limit
+=== RUN   TestGraphCompactionCheckpointBindingRenewalAndResumption/json/append
+=== RUN   TestGraphCompactionCheckpointBindingRenewalAndResumption/json/reader
+=== RUN   TestGraphCompactionCheckpointBindingRenewalAndResumption/json/retire
+=== RUN   TestGraphCompactionCheckpointBindingRenewalAndResumption/json/collector
+=== RUN   TestGraphCompactionCheckpointBindingRenewalAndResumption/protobuf-v1/normal
+    graph_compaction_checkpoint_test.go:313: BOUND_COMPACTION mode=normal renewal_batches=0 verification_batches=10 retained_from=9 readers=0 checkpoint_bytes=3972
+=== RUN   TestGraphCompactionCheckpointBindingRenewalAndResumption/protobuf-v1/renew
+    graph_compaction_checkpoint_test.go:313: BOUND_COMPACTION mode=renew renewal_batches=11 verification_batches=10 retained_from=9 readers=0 checkpoint_bytes=4006
+=== RUN   TestGraphCompactionCheckpointBindingRenewalAndResumption/protobuf-v1/renew-drop
+    graph_compaction_checkpoint_test.go:313: BOUND_COMPACTION mode=renew-drop renewal_batches=11 verification_batches=10 retained_from=9 readers=0 checkpoint_bytes=4006
+=== RUN   TestGraphCompactionCheckpointBindingRenewalAndResumption/protobuf-v1/renew-lost
+    graph_compaction_checkpoint_test.go:313: BOUND_COMPACTION mode=renew-lost renewal_batches=11 verification_batches=10 retained_from=9 readers=0 checkpoint_bytes=4006
+=== RUN   TestGraphCompactionCheckpointBindingRenewalAndResumption/protobuf-v1/verify
+    graph_compaction_checkpoint_test.go:313: BOUND_COMPACTION mode=verify renewal_batches=0 verification_batches=10 retained_from=9 readers=0 checkpoint_bytes=4641
+=== RUN   TestGraphCompactionCheckpointBindingRenewalAndResumption/protobuf-v1/every-batch
+    graph_compaction_checkpoint_test.go:313: BOUND_COMPACTION mode=every-batch renewal_batches=0 verification_batches=10 retained_from=9 readers=0 checkpoint_bytes=3972
+=== RUN   TestGraphCompactionCheckpointBindingRenewalAndResumption/protobuf-v1/type
+    graph_compaction_checkpoint_test.go:243: foreign/stale transition resumed &{0x1425e00ec5a0 <nil> <nil> 0x1425dfda6800 <nil> <nil> [] <nil> flow scan {1 next 11 10 3 10 step-result-13ffca2542e3c95f31d068b49078c71376fc91ff4b1157afb1c36a7b4dc118f5 13ffca2542e3c95f31d068b49078c71376fc91ff4b1157afb1c36a7b4dc118f5} 12 stage true true <nil> <nil>} <nil>
+=== RUN   TestGraphCompactionCheckpointBindingRenewalAndResumption/protobuf-v1/id
+    graph_compaction_checkpoint_test.go:243: foreign/stale transition resumed &{0x1425dff3ac80 <nil> <nil> 0x1425dfda6800 <nil> <nil> [] <nil> flow scan {1 next 11 10 3 10 step-result-13ffca2542e3c95f31d068b49078c71376fc91ff4b1157afb1c36a7b4dc118f5 13ffca2542e3c95f31d068b49078c71376fc91ff4b1157afb1c36a7b4dc118f5} 12 stage true true <nil> <nil>} <nil>
+=== RUN   TestGraphCompactionCheckpointBindingRenewalAndResumption/protobuf-v1/runtime
+    graph_compaction_checkpoint_test.go:243: foreign/stale transition resumed &{0x1425dfe7f130 <nil> <nil> 0x1425dfda6800 <nil> <nil> [] <nil> flow scan {1 next 11 10 3 10 step-result-13ffca2542e3c95f31d068b49078c71376fc91ff4b1157afb1c36a7b4dc118f5 13ffca2542e3c95f31d068b49078c71376fc91ff4b1157afb1c36a7b4dc118f5} 12 stage true true <nil> <nil>} <nil>
+=== RUN   TestGraphCompactionCheckpointBindingRenewalAndResumption/protobuf-v1/tail
+    graph_compaction_checkpoint_test.go:243: foreign/stale transition resumed &{0x1425e00b32c0 <nil> <nil> 0x1425dfda6800 <nil> <nil> [] <nil> flow scan {1 next 11 10 3 10 step-result-13ffca2542e3c95f31d068b49078c71376fc91ff4b1157afb1c36a7b4dc118f5 13ffca2542e3c95f31d068b49078c71376fc91ff4b1157afb1c36a7b4dc118f5} 12 stage true true <nil> <nil>} <nil>
+=== RUN   TestGraphCompactionCheckpointBindingRenewalAndResumption/protobuf-v1/application
+=== RUN   TestGraphCompactionCheckpointBindingRenewalAndResumption/protobuf-v1/cut
+=== RUN   TestGraphCompactionCheckpointBindingRenewalAndResumption/protobuf-v1/limit
+=== RUN   TestGraphCompactionCheckpointBindingRenewalAndResumption/protobuf-v1/append
+=== RUN   TestGraphCompactionCheckpointBindingRenewalAndResumption/protobuf-v1/reader
+=== RUN   TestGraphCompactionCheckpointBindingRenewalAndResumption/protobuf-v1/retire
+=== RUN   TestGraphCompactionCheckpointBindingRenewalAndResumption/protobuf-v1/collector
+--- FAIL: TestGraphCompactionCheckpointBindingRenewalAndResumption (0.34s)
+    --- PASS: TestGraphCompactionCheckpointBindingRenewalAndResumption/json/normal (0.02s)
+    --- PASS: TestGraphCompactionCheckpointBindingRenewalAndResumption/json/renew (0.02s)
+    --- PASS: TestGraphCompactionCheckpointBindingRenewalAndResumption/json/renew-drop (0.02s)
+    --- PASS: TestGraphCompactionCheckpointBindingRenewalAndResumption/json/renew-lost (0.02s)
+    --- PASS: TestGraphCompactionCheckpointBindingRenewalAndResumption/json/verify (0.01s)
+    --- PASS: TestGraphCompactionCheckpointBindingRenewalAndResumption/json/every-batch (0.01s)
+    --- FAIL: TestGraphCompactionCheckpointBindingRenewalAndResumption/json/type (0.01s)
+    --- FAIL: TestGraphCompactionCheckpointBindingRenewalAndResumption/json/id (0.01s)
+    --- FAIL: TestGraphCompactionCheckpointBindingRenewalAndResumption/json/runtime (0.01s)
+    --- FAIL: TestGraphCompactionCheckpointBindingRenewalAndResumption/json/tail (0.01s)
+    --- PASS: TestGraphCompactionCheckpointBindingRenewalAndResumption/json/application (0.01s)
+    --- PASS: TestGraphCompactionCheckpointBindingRenewalAndResumption/json/cut (0.01s)
+    --- PASS: TestGraphCompactionCheckpointBindingRenewalAndResumption/json/limit (0.01s)
+    --- PASS: TestGraphCompactionCheckpointBindingRenewalAndResumption/json/append (0.01s)
+    --- PASS: TestGraphCompactionCheckpointBindingRenewalAndResumption/json/reader (0.01s)
+    --- PASS: TestGraphCompactionCheckpointBindingRenewalAndResumption/json/retire (0.01s)
+    --- PASS: TestGraphCompactionCheckpointBindingRenewalAndResumption/json/collector (0.01s)
+    --- PASS: TestGraphCompactionCheckpointBindingRenewalAndResumption/protobuf-v1/normal (0.01s)
+    --- PASS: TestGraphCompactionCheckpointBindingRenewalAndResumption/protobuf-v1/renew (0.01s)
+    --- PASS: TestGraphCompactionCheckpointBindingRenewalAndResumption/protobuf-v1/renew-drop (0.01s)
+    --- PASS: TestGraphCompactionCheckpointBindingRenewalAndResumption/protobuf-v1/renew-lost (0.02s)
+    --- PASS: TestGraphCompactionCheckpointBindingRenewalAndResumption/protobuf-v1/verify (0.01s)
+    --- PASS: TestGraphCompactionCheckpointBindingRenewalAndResumption/protobuf-v1/every-batch (0.01s)
+    --- FAIL: TestGraphCompactionCheckpointBindingRenewalAndResumption/protobuf-v1/type (0.01s)
+    --- FAIL: TestGraphCompactionCheckpointBindingRenewalAndResumption/protobuf-v1/id (0.01s)
+    --- FAIL: TestGraphCompactionCheckpointBindingRenewalAndResumption/protobuf-v1/runtime (0.01s)
+    --- FAIL: TestGraphCompactionCheckpointBindingRenewalAndResumption/protobuf-v1/tail (0.01s)
+    --- PASS: TestGraphCompactionCheckpointBindingRenewalAndResumption/protobuf-v1/application (0.01s)
+    --- PASS: TestGraphCompactionCheckpointBindingRenewalAndResumption/protobuf-v1/cut (0.01s)
+    --- PASS: TestGraphCompactionCheckpointBindingRenewalAndResumption/protobuf-v1/limit (0.01s)
+    --- PASS: TestGraphCompactionCheckpointBindingRenewalAndResumption/protobuf-v1/append (0.01s)
+    --- PASS: TestGraphCompactionCheckpointBindingRenewalAndResumption/protobuf-v1/reader (0.01s)
+    --- PASS: TestGraphCompactionCheckpointBindingRenewalAndResumption/protobuf-v1/retire (0.01s)
+    --- PASS: TestGraphCompactionCheckpointBindingRenewalAndResumption/protobuf-v1/collector (0.01s)
+FAIL
+FAIL	js-wf/journal	0.362s
+FAIL

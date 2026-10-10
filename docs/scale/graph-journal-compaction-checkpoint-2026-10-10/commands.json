@@ -1,0 +1,22 @@
+[
+  {
+    "command": "GOMAXPROCS=2 GOMEMLIMIT=1536MiB go test -p=1 -race ./journal -run '^TestGraphCompactionCheckpoint' -count=1 -v",
+    "exit_code": 0
+  },
+  {
+    "command": "GOMAXPROCS=2 GOMEMLIMIT=1536MiB go test -p=1 -race ./journal -run '^TestGraphCheckpoint|^TestGraphCompaction|^TestGraphArchive' -count=1 -v",
+    "exit_code": 0
+  },
+  {
+    "command": "GOMAXPROCS=2 GOMEMLIMIT=1536MiB go test -p=1 -race ./journal -run '^TestNativeGraphCheckpointArchiveReopenAndCollection$' -count=1 -v",
+    "exit_code": 0
+  },
+  {
+    "command": "GOMAXPROCS=2 GOMEMLIMIT=1536MiB go test -p=1 -race ./worker -run '^TestGraphContinuationMaintenanceLeaseAndCancellation$|^TestGraphContinuationRepairsArchiveBeforeStage$' -count=1 -v",
+    "exit_code": 0
+  },
+  {
+    "command": "GOMAXPROCS=2 GOMEMLIMIT=1536MiB go test -p=1 ./sim -run '^TestPinnedRegressionCorpus$' -count=1 -v",
+    "exit_code": 0
+  }
+]

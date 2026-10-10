@@ -12,14 +12,18 @@ import (
 
 // CheckpointCompaction owns confirmation, unpublished staging and private final
 // verification for one exact checkpoint. Advance performs one phase batch.
-// Progress is process-local; no serialized verification result is trusted.
-// Close on abandonment. Staging retains the original fixed intent expiry.
+// Verification progress is process-local; portable staging input is bound on
+// resumption and never trusted as a serialized verification result.
+// Close on abandonment. Explicit renewal freezes staging until completion.
 type CheckpointCompaction struct {
 	store            *GraphStore
 	view             *GraphView
 	scan             *CheckpointScan
 	stage            *graphpublication.CompactionStage
 	commit           *graphpublication.CompactionCommit
+	renewal          *graphpublication.CompactionStageRenewal
+	renewInput       []byte
+	renewTo          *time.Time
 	typ, id          string
 	runtime          RuntimeCheckpoint
 	tail             uint64
@@ -160,6 +164,18 @@ func (c *CheckpointCompaction) Advance(ctx context.Context, maxRecords, maxNodes
 			c.phase = "done"
 		}
 		return complete, nil
+	case "renew":
+		complete, err := c.renewal.Advance(ctx, maxNodes)
+		if err != nil {
+			return false, graphMutationError(err)
+		}
+		if complete {
+			c.renewal = nil
+			c.renewInput = nil
+			c.renewTo = nil
+			c.phase = "stage"
+		}
+		return false, nil
 	default:
 		return false, errors.New("invalid checkpoint compaction phase")
 	}

@@ -35,7 +35,7 @@ func TestGraphCheckpointArchiveLogicalHistoryAndCollection(t *testing.T) {
 	}
 }
 
-func checkpointArchiveScenario(t *testing.T, ctx context.Context, seed uint64, config journal.GraphConfig, objectsPort archiveObjectPort, now *time.Time, reopen func() *journal.GraphStore) {
+func checkpointArchiveScenario(t *testing.T, ctx context.Context, seed uint64, config journal.GraphConfig, objectsPort archiveObjectPort, now *time.Time, reopen func() *journal.GraphStore, stagedRestart ...bool) {
 	t.Helper()
 	protocol := config.Protocol
 	scheduler := sim.NewScheduler(int64(seed))
@@ -125,8 +125,67 @@ func checkpointArchiveScenario(t *testing.T, ctx context.Context, seed uint64, c
 	if err = store.CompactCheckpoint(ctx, h.Type, h.ID, first.Runtime, tail+1); !errors.Is(err, journal.ErrStale) {
 		t.Fatal("wrong-tail compaction accepted", err)
 	}
-	if err = store.CompactCheckpoint(ctx, h.Type, h.ID, first.Runtime, tail); err != nil {
-		t.Fatal(err)
+	if len(stagedRestart) > 0 && stagedRestart[0] {
+		op, err := store.BeginCheckpointCompaction(ctx, h.Type, h.ID, first.Runtime, tail)
+		if err != nil {
+			t.Fatal(err)
+		}
+		for op.Phase() == "confirm" {
+			if done, err := op.Advance(ctx, 2, 4); done || err != nil {
+				t.Fatal(done, err)
+			}
+		}
+		if done, err := op.Advance(ctx, 2, 4); done || err != nil {
+			t.Fatal(done, err)
+		}
+		if err := op.BeginIntentRenewal(ctx, now.Add(time.Minute)); err != nil {
+			t.Fatal(err)
+		}
+		saved, err := op.Checkpoint()
+		if err != nil {
+			t.Fatal(err)
+		}
+		if err := op.Close(ctx); err != nil {
+			t.Fatal(err)
+		}
+		// Persisted renewal input survives all-peer same-store restart;
+		// the existing old reader remains canonical and protected.
+		store = reopen()
+		op, err = store.ResumeCheckpointCompaction(ctx, h.Type, h.ID, first.Runtime, tail, saved)
+		if err != nil || op.Phase() != "renew" {
+			t.Fatal("native renewal resume failed", err)
+		}
+		renewBatches, verifyBatches := 0, 0
+		for {
+			phase := op.Phase()
+			done, err := op.Advance(ctx, 2, 4)
+			if err != nil {
+				t.Fatal(err)
+			}
+			if phase == "renew" {
+				renewBatches++
+			}
+			if phase == "verify" {
+				verifyBatches++
+			}
+			if phase == "renew" && op.Phase() == "stage" {
+				*now = now.Add(2 * time.Second)
+				if _, err := protocol.SweepWithReaders(ctx, *now); err != nil {
+					t.Fatal(err)
+				}
+			}
+			if done {
+				break
+			}
+		}
+		if err := op.Close(ctx); err != nil {
+			t.Fatal(err)
+		}
+		t.Logf("NATIVE_BOUND_COMPACTION renewal_batches=%d verification_batches=%d saved_bytes=%d old_reader_preserved=true expired_old_intents_swept=true", renewBatches, verifyBatches, len(saved))
+	} else {
+		if err = store.CompactCheckpoint(ctx, h.Type, h.ID, first.Runtime, tail); err != nil {
+			t.Fatal(err)
+		}
 	}
 	if reopen != nil {
 		store = reopen()

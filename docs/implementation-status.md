@@ -1,5 +1,38 @@
 # Implementation status against the supplied plan
 
+## Journal compaction checkpoints bind source identity and pending renewal — 2026-10-10
+
+`CheckpointCompaction.Checkpoint` now returns canonical bounded portable staging
+input. `ResumeCheckpointCompaction` binds workflow identity, invocation/runtime,
+tail, original source head, archive cut/application and configured payload limit.
+Source changes invalidate saved input; private verification restarts from zero.
+Explicit staging renewal saves the pre-renewal descriptor and exact requested
+expiry, including after unknown updates, for fresh-handle reconciliation before
+old expiry. Root/fence and underlying staging schemas are unchanged.
+[Development evidence](scale/graph-journal-compaction-checkpoint-2026-10-10/README.md).
+
+Thirty-four JSON/protobuf binding/resumption controls and11 malformed-envelope
+controls pass under race8.584s after restoring all bypasses. Binding/identity/
+requested-expiry/canonical-envelope bypasses fail6/8/6/5 controls. The broad
+journal checkpoint/archive race selection passes62.927s. All22 worker maintenance
+and7 handoff repairs pass6.606s under race; all853 common saved traces pass
+unchanged4.665s. The initial fixture tried to retire a suspended workflow; its2
+failures are retained/excluded, and corrected tests append terminal completion.
+
+Native R1/R3 domain scenarios pass under race51.494s with saved pending renewal
+input across all-peer restart and an old reader still protected. Each completes
+10 renewal/8 verification batches, sweeps beyond old expiry, then restarts all
+peers again after archive publication. Reader bytes/authority, two compactions,
+logical audit, original receipt collection and zero retired physical chunks are
+verified. The descriptor stays in the client process; no runtime descriptor-store,
+process SIGKILL, VM/power/storage loss or real clock-jump qualification is claimed.
+Native2-minute parents remain unchanged. Worker persistence/selection and lease
+integration, durable descriptor/expiry storage, verification lifetime renewal,
+bounded-memory census and long maintenance deadlines remain required. Worker
+handoff still uses its15-second parent and fixed intent expiry. Actual100000 and
+every broader original qualification gate remain open. Public graph continuation
+admission stays closed; production collection stays off.
+
 ## Paused staging now renews intents and resumes renewed checkpoints — 2026-10-10
 
 `CompactionStage.BeginIntentRenewal` freezes staging, overlapping renewal and
