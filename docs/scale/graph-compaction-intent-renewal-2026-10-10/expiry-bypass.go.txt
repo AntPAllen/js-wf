@@ -1,0 +1,154 @@
+package graphpublication
+
+import (
+	"context"
+	"errors"
+	"reflect"
+	"sort"
+	"time"
+)
+
+// CompactionIntentRenewal extends every scope owned by a frozen publication,
+// including intermediate and abandoned uploads absent from its final forests.
+// Use from one goroutine, with no concurrent staging under the same token.
+// Enumeration is context-bound but retains the namespace key list in memory.
+// Batches bound examined scopes, not enumeration, source reads or wall time.
+// The clock must be the caller's current authority clock, not a saved timestamp.
+type CompactionIntentRenewal struct {
+	protocol      Protocol
+	prepared      PreparedCompaction
+	now           func() time.Time
+	expires       time.Time
+	keys          []string
+	next, renewed uint64
+	done          bool
+	err           error
+}
+
+func (p Protocol) BeginCompactionIntentRenewal(ctx context.Context, prepared PreparedCompaction, now func() time.Time, expires time.Time) (*CompactionIntentRenewal, error) {
+	if err := ctx.Err(); err != nil {
+		return nil, err
+	}
+	if p.Port == nil || now == nil || prepared.destination == "" || !validID(prepared.publication.Token) || prepared.expires.IsZero() || !expires.After(prepared.expires) {
+		return nil, errors.New("invalid compaction intent renewal")
+	}
+	prepared.base = copyCompactionRoot(prepared.base)
+	prepared.publication = copyCompactionRoot(prepared.publication)
+	r := &CompactionIntentRenewal{protocol: p, prepared: prepared, now: now, expires: expires.UTC()}
+	if err := r.check(ctx); err != nil {
+		return nil, err
+	}
+	keys, err := p.Port.BlobKeys(ctx)
+	if err != nil {
+		return nil, err
+	}
+	r.keys = append([]string(nil), keys...)
+	sort.Strings(r.keys)
+	for i := 1; i < len(r.keys); i++ {
+		if r.keys[i] == r.keys[i-1] {
+			return nil, errors.New("duplicate graph scope enumeration")
+		}
+	}
+	if err := r.check(ctx); err != nil {
+		return nil, err
+	}
+	return r, nil
+}
+
+func (r *CompactionIntentRenewal) ExaminedScopes() uint64 { return r.next }
+func (r *CompactionIntentRenewal) RenewedScopes() uint64  { return r.renewed }
+
+func (r *CompactionIntentRenewal) check(ctx context.Context) error {
+	if err := ctx.Err(); err != nil {
+		return err
+	}
+	current := r.now()
+	if false && (current.IsZero() || !current.Before(r.prepared.expires)) {
+		return ErrRevoked
+	}
+	root, err := r.protocol.readRoot(ctx, r.prepared.destination)
+	if err != nil {
+		return err
+	}
+	if root.Head != r.prepared.expected || !reflect.DeepEqual(root, r.prepared.base) {
+		return ErrConflict
+	}
+	return nil
+}
+
+// Advance returns a copied plan only after every enumerated scope is checked
+// and renewed. It publishes no root and certifies no target content. Commit must
+// independently verify the whole plan. Any in-batch error latches failure;
+// a fresh renewal with the same old plan and new expiry can reconcile exactly
+// matching prior updates while the original deadline and source remain valid.
+func (r *CompactionIntentRenewal) Advance(ctx context.Context, maxScopes uint64) (plan PreparedCompaction, done bool, err error) {
+	if r.err != nil {
+		return plan, false, r.err
+	}
+	if maxScopes == 0 {
+		return plan, false, errors.New("positive renewal scope budget required")
+	}
+	if err := ctx.Err(); err != nil {
+		return plan, false, err
+	}
+	if r.done {
+		return r.result(), true, nil
+	}
+	defer func() {
+		if err != nil {
+			r.err = err
+		}
+	}()
+	if err = r.check(ctx); err != nil {
+		return plan, false, err
+	}
+	end := r.next + min(maxScopes, uint64(len(r.keys))-r.next)
+	for r.next < end {
+		if err = r.check(ctx); err != nil {
+			return plan, false, err
+		}
+		k := r.keys[r.next]
+		record, readErr := r.protocol.Port.ReadBlob(ctx, k)
+		if readErr != nil {
+			return plan, false, readErr
+		}
+		if err = validateFence(k, record); err != nil {
+			return plan, false, err
+		}
+		if record.Fence.Owner == r.prepared.publication.Token {
+			intent, ok := record.Fence.Intents[record.Fence.Owner]
+			if !ok || record.Revision == 0 || record.Fence.Phase == "closed" || intent.Destination != r.prepared.destination || intent.Expected != r.prepared.expected || (!intent.Expires.Equal(r.prepared.expires) && !intent.Expires.Equal(r.expires)) {
+				return plan, false, ErrRevoked
+			}
+			if !intent.Expires.Equal(r.expires) {
+				// Recheck after the blob read: time or collection may have moved.
+				if err = r.check(ctx); err != nil {
+					return plan, false, err
+				}
+				intent.Expires = r.expires
+				record.Fence.Intents[record.Fence.Owner] = intent
+				if _, err = r.protocol.casBlob(ctx, k, record.Revision, record.Fence); err != nil {
+					return plan, false, err
+				}
+			}
+			r.renewed++
+		}
+		r.next++
+	}
+	if err = r.check(ctx); err != nil {
+		return plan, false, err
+	}
+	if r.next != uint64(len(r.keys)) {
+		return plan, false, nil
+	}
+	r.done = true
+	return r.result(), true, nil
+}
+
+func (r *CompactionIntentRenewal) result() PreparedCompaction {
+	plan := r.prepared
+	plan.expires = r.expires
+	plan.base = copyCompactionRoot(plan.base)
+	plan.publication = copyCompactionRoot(plan.publication)
+	return plan
+}

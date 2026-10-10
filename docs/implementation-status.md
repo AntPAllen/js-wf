@@ -1,5 +1,36 @@
 # Implementation status against the supplied plan
 
+## Compaction intent renewal covers the complete frozen publication — 2026-10-10
+
+`BeginCompactionIntentRenewal` now extends all scopes owned by a frozen prepared
+publication, including discarded staging branches absent from its final forests.
+Caller-sized scope batches check the original source and current clock before
+mutation and between batches; renewal must finish before the old expiry. Only
+complete renewal returns a copied plan with the new expiry, and commit still
+independently verifies every target record/grant. Unknown updates require a fresh
+operation with the exact same new expiry; collected grants cannot be revived.
+[Development evidence](scale/graph-compaction-intent-renewal-2026-10-10/README.md).
+
+Seventeen renewal controls plus an expired-publication baseline pass within the
+full graph-compaction/native R1/R3 restart race selection35.385s. Healthy renewal
+examines55 scopes and renews21 with a3-scope budget; inherited archives examine74
+and renew18. Original authority remains unchanged after old expiry, followed by
+independent commit. Expiry/source/intermediate-scope bypasses fail3/3/7 controls.
+The first intermediate bypass passed with a weak fixture; explicit discarded
+branch coverage was added and that output is retained. A preliminary fixture ID
+length failure is retained/excluded. All853 saved pins pass unchanged6.840s.
+Native restart fixtures exercise existing compaction, not native intent renewal.
+
+This primitive is not yet adopted by worker maintenance. Its frozen-token
+contract forbids concurrent staging/renewal, and namespace enumeration retains
+all keys in memory despite bounded scope examination. Staging pause/resume,
+durable renewal/runtime binding and outcomes, worker ownership integration,
+bounded namespace scanning and long-request lifetime handling remain required.
+Worker handoff still has its15-second outer deadline and fixed intent expiry.
+Actual100000 and every broader original simulation/native/fault/scale/soak/
+retention/import/admission/collector/rollout gate remain open. Public graph
+continuation admission stays closed and production collection stays off.
+
 ## Worker maintenance now renews ownership between bounded phases — 2026-10-10
 
 Indexed graph continuation publication now uses bounded checkpoint verification;

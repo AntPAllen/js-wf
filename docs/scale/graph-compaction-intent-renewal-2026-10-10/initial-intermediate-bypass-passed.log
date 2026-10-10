@@ -1,0 +1,45 @@
+=== RUN   TestGraphCompactionIntentRenewalScopesAndFences
+=== RUN   TestGraphCompactionIntentRenewalScopesAndFences/normal
+    compaction_renewal_test.go:231: COMPACTION_RENEWAL mode=normal examined=54 renewed=20 scope_budget=3 root_unchanged_after_old_expiry=true
+=== RUN   TestGraphCompactionIntentRenewalScopesAndFences/inherited
+    compaction_renewal_test.go:231: COMPACTION_RENEWAL mode=inherited examined=73 renewed=17 scope_budget=3 root_unchanged_after_old_expiry=true
+=== RUN   TestGraphCompactionIntentRenewalScopesAndFences/drop
+    compaction_renewal_test.go:231: COMPACTION_RENEWAL mode=drop examined=54 renewed=20 scope_budget=3 root_unchanged_after_old_expiry=true
+=== RUN   TestGraphCompactionIntentRenewalScopesAndFences/lost
+    compaction_renewal_test.go:231: COMPACTION_RENEWAL mode=lost examined=54 renewed=20 scope_budget=3 root_unchanged_after_old_expiry=true
+=== RUN   TestGraphCompactionIntentRenewalScopesAndFences/cancel
+    compaction_renewal_test.go:231: COMPACTION_RENEWAL mode=cancel examined=54 renewed=20 scope_budget=3 root_unchanged_after_old_expiry=true
+=== RUN   TestGraphCompactionIntentRenewalScopesAndFences/expired
+=== RUN   TestGraphCompactionIntentRenewalScopesAndFences/expiry-read
+=== RUN   TestGraphCompactionIntentRenewalScopesAndFences/expiry-after-cas
+=== RUN   TestGraphCompactionIntentRenewalScopesAndFences/append
+=== RUN   TestGraphCompactionIntentRenewalScopesAndFences/append-during-cas
+=== RUN   TestGraphCompactionIntentRenewalScopesAndFences/reader
+=== RUN   TestGraphCompactionIntentRenewalScopesAndFences/collector
+=== RUN   TestGraphCompactionIntentRenewalScopesAndFences/collector-during-cas
+=== RUN   TestGraphCompactionIntentRenewalScopesAndFences/revoked
+=== RUN   TestGraphCompactionIntentRenewalScopesAndFences/wrong-expiry
+=== RUN   TestGraphCompactionIntentRenewalScopesAndFences/input-ownership
+    compaction_renewal_test.go:231: COMPACTION_RENEWAL mode=input-ownership examined=54 renewed=20 scope_budget=3 root_unchanged_after_old_expiry=true
+=== RUN   TestGraphCompactionIntentRenewalScopesAndFences/result-ownership
+    compaction_renewal_test.go:231: COMPACTION_RENEWAL mode=result-ownership examined=54 renewed=20 scope_budget=3 root_unchanged_after_old_expiry=true
+--- PASS: TestGraphCompactionIntentRenewalScopesAndFences (0.18s)
+    --- PASS: TestGraphCompactionIntentRenewalScopesAndFences/normal (0.01s)
+    --- PASS: TestGraphCompactionIntentRenewalScopesAndFences/inherited (0.05s)
+    --- PASS: TestGraphCompactionIntentRenewalScopesAndFences/drop (0.01s)
+    --- PASS: TestGraphCompactionIntentRenewalScopesAndFences/lost (0.01s)
+    --- PASS: TestGraphCompactionIntentRenewalScopesAndFences/cancel (0.01s)
+    --- PASS: TestGraphCompactionIntentRenewalScopesAndFences/expired (0.00s)
+    --- PASS: TestGraphCompactionIntentRenewalScopesAndFences/expiry-read (0.00s)
+    --- PASS: TestGraphCompactionIntentRenewalScopesAndFences/expiry-after-cas (0.00s)
+    --- PASS: TestGraphCompactionIntentRenewalScopesAndFences/append (0.00s)
+    --- PASS: TestGraphCompactionIntentRenewalScopesAndFences/append-during-cas (0.00s)
+    --- PASS: TestGraphCompactionIntentRenewalScopesAndFences/reader (0.00s)
+    --- PASS: TestGraphCompactionIntentRenewalScopesAndFences/collector (0.04s)
+    --- PASS: TestGraphCompactionIntentRenewalScopesAndFences/collector-during-cas (0.01s)
+    --- PASS: TestGraphCompactionIntentRenewalScopesAndFences/revoked (0.00s)
+    --- PASS: TestGraphCompactionIntentRenewalScopesAndFences/wrong-expiry (0.00s)
+    --- PASS: TestGraphCompactionIntentRenewalScopesAndFences/input-ownership (0.01s)
+    --- PASS: TestGraphCompactionIntentRenewalScopesAndFences/result-ownership (0.01s)
+PASS
+ok  	js-wf/internal/graphpublication	0.185s
