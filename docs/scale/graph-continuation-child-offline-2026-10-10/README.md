@@ -71,3 +71,11 @@ include the subsequently discovered/fixed contradictory graph-child annotation
 check at57393ac; [separate provenance fix qualification](../graph-offline-child-provenance-2026-10-10/README.md)
 remains pending. Full offline provenance/fault/buffered-signal/import/rollout,
 retention/admission and every broader original gate remain open.
+
+The initial review report accidentally summarized five verified inputs after a
+variable was reused for export filename kinds; its verification loop did check
+all3,312 source inputs. [Correction receipt](review-count-correction.json) retains
+the original report, corrected summary and actual rerun0. No native tests were
+rerun. The subsequent57393ac provenance fix and all-retained-bundle replay
+qualification are now [independently accepted](../graph-offline-child-provenance-2026-10-10/README.md),
+while the native source qualification above remains scoped toccc8f19.

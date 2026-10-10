@@ -155,6 +155,6 @@ for path in exports:
     assert sorted(frames) == ([('child_finish_v1', 2), ('child_middle_v1', 1)] if child else [('finish_v1', 30), ('middle_v1', 7)])
 assert all(n == 4 for n in counts.values())
 assert len(counts) == 19
-result = dict(accepted=True, source=state['source'], git_verified_inputs=len(names), cases=cases, package_elapsed=[r['Elapsed'] for r in rows if r['Action'] == 'pass' and 'Test' not in r][0], events_sha256=hashlib.sha256((root / 'events.jsonl').read_bytes()).hexdigest(), reviewed=datetime.datetime.now(datetime.timezone.utc).isoformat(), scope='Sixteen healthy pending/cached success/failure child offline replay cases, plus four state-only regressions. Public admission, import, rollout, fault/buffered-signal matrices and broader original requirements remain open.')
+result = dict(accepted=True, source=state['source'], git_verified_inputs=len(before['files']), cases=cases, package_elapsed=[r['Elapsed'] for r in rows if r['Action'] == 'pass' and 'Test' not in r][0], events_sha256=hashlib.sha256((root / 'events.jsonl').read_bytes()).hexdigest(), reviewed=datetime.datetime.now(datetime.timezone.utc).isoformat(), scope='Sixteen healthy pending/cached success/failure child offline replay cases, plus four state-only regressions. Public admission, import, rollout, fault/buffered-signal matrices and broader original requirements remain open.')
 (base / 'review.json').write_text(json.dumps(result, indent=2) + '\n')
 print(json.dumps(result, indent=2))

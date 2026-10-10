@@ -1,5 +1,27 @@
 # JetStream Durable Workflow Runtime — Implementation Plan
 
+## Offline graph child provenance defect fixed and independently verified — 2026-10-10
+
+A local diagnostic against frozenccc8f19 showed that four contradictory child
+annotations (type/ID/invocation/result reference) still produced completed60.
+Frozen57393ac now checks them against prior runtime requests and hashed owned
+outcome/result bytes before plugin loading, including failed/inline outcomes and
+limit-rejected nested consumption; missing objects retain their specific error.
+Independent qualification verifies3,317 unchanged exact Git inputs, retained race
+CLI/test/plugin binaries,20 directed controls, existing legacy continuation
+plugin behavior and106 offline CLI invocations against the actual native20-case
+bundles and old/new diagnostic controls. All48 healthy native replays pass;
+28 missing-object and20 missing-stage controls fail specifically; all four
+malformed new runs reject while the old CLI is required to accept them. No
+callback executes. [Raw receipts, source-qualified review and scope](scale/graph-offline-child-provenance-2026-10-10/README.md).
+The native producer's summary-count reporting bug is corrected with both reports
+and the actual checker rerun retained, without repeating native tests. Its16
+child/four state cases remain independently qualified atccc8f19. Full offline
+provenance/fault/buffered-signal/import/rollout, retention/admission, actual100,000-
+entry boundary, public/default continuation admission, production collection and
+every broader original requirement remain open. The full156 race campaign at
+d504a33 remains live/unaccepted and excludes later production export/CLI changes.
+
 ## Healthy canonical child offline replay matrix verified — 2026-10-10
 
 Frozenccc8f19 passes all16 native race R1/R3-domain × live/archive × cached/pending
