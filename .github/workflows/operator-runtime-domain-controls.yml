@@ -74,7 +74,6 @@ jobs:
     env:
       WF_OPERATOR_STANDALONE: '1'
       WF_TEST_POSTGRES_DSN: postgres://postgres:fixture@127.0.0.1:5432/wf_canonical_cli?sslmode=disable
-      WF_OPERATOR_TEST_ROOT: ${{ runner.temp }}/canonical-postgres-cli
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-go@v5
@@ -82,6 +81,8 @@ jobs:
           go-version-file: go.mod
       - name: Run compiled canonical PostgreSQL commands and visibility controls
         shell: bash
+        env:
+          WF_OPERATOR_TEST_ROOT: ${{ runner.temp }}/canonical-postgres-cli
         run: |
           set -o pipefail
           mkdir -p "$WF_OPERATOR_TEST_ROOT"
@@ -98,6 +99,8 @@ jobs:
       - name: Preserve complete command and projector captures
         if: always()
         shell: bash
+        env:
+          WF_OPERATOR_TEST_ROOT: ${{ runner.temp }}/canonical-postgres-cli
         run: |
           if [ -d "$WF_OPERATOR_TEST_ROOT" ]; then
             tar -C "$WF_OPERATOR_TEST_ROOT" -czf canonical-postgres-cli.tar.gz .

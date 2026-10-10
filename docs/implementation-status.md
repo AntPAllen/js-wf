@@ -1,5 +1,26 @@
 # Implementation status against the supplied plan
 
+## Phase 7 canonical retention worker SIGKILL boundaries verified — 2026-10-10
+
+A separate race-instrumented production worker is killed and reaped with SIGKILL
+after each of four accepted retention SDK appends against a real R3 cluster with
+canonical Starts/Signals enabled. All six cases pass, including ID reuse after
+the purge request and after its completion. The successor preserves the exact
+accepted prefix and original lookup generation. An unfinished old purge fails
+stale; an already recorded purge success replays successfully. Both preserve the
+replacement's retirement metadata and result. Production TTL12s/AckWait13s and
+request deadlines are unchanged. [Source and scoped evidence](scale/graph-retention-sdk-sigkill-2026-10-10/README.md).
+
+The first run's last assertion incorrectly required stale after a recorded
+success; that failed source/log remain preserved. The corrected complete six-case
+race exits 0 (140.860s). CI explicitly requires all six cases without skips.
+The PostgreSQL operator workflow's known invalid job-level runner.temp context
+is also corrected to step-level env. Hosted execution remains pending.
+The complete159 normal and actual 100,000-entry jobs continue under their original
+live invocations. Full independent native graph auditing, waiting/reader and
+combined fault cuts, original retention concurrency and other broad plan gates
+remain open; admission/online collection remain disabled.
+
 ## Canonical retention SDK simulation and complete frozen normal result — 2026-10-10
 
 The canonical retention workflow now runs through a shared production SDK handler

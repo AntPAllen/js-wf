@@ -120,6 +120,39 @@ on:
 permissions:
   contents: read
 jobs:
+  retention-sdk-sigkill:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      WF_RETENTION_SIGKILL: '1'
+      GOMAXPROCS: '4'
+      GOMEMLIMIT: 2GiB
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - name: Kill canonical retention workers at SDK journal boundaries
+        shell: bash
+        run: |
+          set -o pipefail
+          go test -race -p=1 ./retention -run '^TestNativeGraphRetentionSDKBoundarySIGKILL$' -count=1 -v -timeout=12m 2>&1 | tee retention-sdk-sigkill.log
+          python3 - <<'PY'
+          import pathlib, re
+          log = pathlib.Path('retention-sdk-sigkill.log').read_text()
+          assert not re.search(r'^--- SKIP:', log, re.M)
+          expected = {(1, 'false'), (2, 'false'), (3, 'false'), (3, 'true'), (4, 'false'), (4, 'true')}
+          passed = {(int(cut), reuse) for cut, reuse in re.findall(r'--- PASS: TestNativeGraphRetentionSDKBoundarySIGKILL/cut([1-4])/reuse(false|true) ', log)}
+          assert passed == expected, passed
+          receipts = re.findall(r'SIGKILL pid=\d+ cut=([1-4]) kind=\w+ reuse=(false|true) leaseTTL=\S+ ackWait=\S+ accepted_prefix=\d+ final_entries=\d+', log)
+          assert len(receipts) == 6 and {(int(cut), reuse) for cut, reuse in receipts} == expected
+          PY
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: retention-sdk-sigkill
+          path: retention-sdk-sigkill.log
+          if-no-files-found: error
   ownership:
     runs-on: ubuntu-latest
     timeout-minutes: 10

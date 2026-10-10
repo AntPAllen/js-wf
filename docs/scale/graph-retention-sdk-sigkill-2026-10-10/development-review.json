@@ -1,0 +1,86 @@
+{
+  "actual_exit": 0,
+  "command": [
+    "go",
+    "test",
+    "-race",
+    "./retention",
+    "-run",
+    "^TestNativeGraphRetentionSDKBoundarySIGKILL$",
+    "-count=1",
+    "-v",
+    "-timeout=12m"
+  ],
+  "environment": {
+    "WF_RETENTION_SIGKILL": "1"
+  },
+  "source_hashes_unchanged": true,
+  "native_replicas": 3,
+  "canonical_starts": true,
+  "canonical_signals": true,
+  "sdk_cases": 6,
+  "actual_sigkill_receipts": [
+    [
+      "200121",
+      "1",
+      "StepRequested",
+      "false",
+      "12s",
+      "13s",
+      "2",
+      "6"
+    ],
+    [
+      "200147",
+      "2",
+      "StepCompleted",
+      "false",
+      "12s",
+      "13s",
+      "3",
+      "6"
+    ],
+    [
+      "200156",
+      "3",
+      "StepRequested",
+      "false",
+      "12s",
+      "13s",
+      "4",
+      "6"
+    ],
+    [
+      "200174",
+      "3",
+      "StepRequested",
+      "true",
+      "12s",
+      "13s",
+      "4",
+      "6"
+    ],
+    [
+      "200337",
+      "4",
+      "StepCompleted",
+      "false",
+      "12s",
+      "13s",
+      "5",
+      "6"
+    ],
+    [
+      "200377",
+      "4",
+      "StepCompleted",
+      "true",
+      "12s",
+      "13s",
+      "5",
+      "6"
+    ]
+  ],
+  "package_seconds": 140.86,
+  "scope": "Complete focused development-worktree six-case worker SIGKILL race; full raw canonical audit and broader scale/fault gates separate."
+}

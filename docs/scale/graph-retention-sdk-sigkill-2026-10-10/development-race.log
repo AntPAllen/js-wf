@@ -1,0 +1,28 @@
+=== RUN   TestNativeGraphRetentionSDKBoundarySIGKILL
+=== RUN   TestNativeGraphRetentionSDKBoundarySIGKILL/cut1/reusefalse
+    graph_workflow_kill_test.go:101: SIGKILL pid=200121 cut=1 kind=StepRequested reuse=false leaseTTL=12s ackWait=13s accepted_prefix=2 final_entries=6
+    graph_workflow_kill_test.go:211: child output: 
+=== RUN   TestNativeGraphRetentionSDKBoundarySIGKILL/cut2/reusefalse
+    graph_workflow_kill_test.go:101: SIGKILL pid=200147 cut=2 kind=StepCompleted reuse=false leaseTTL=12s ackWait=13s accepted_prefix=3 final_entries=6
+    graph_workflow_kill_test.go:211: child output: 
+=== RUN   TestNativeGraphRetentionSDKBoundarySIGKILL/cut3/reusefalse
+    graph_workflow_kill_test.go:101: SIGKILL pid=200156 cut=3 kind=StepRequested reuse=false leaseTTL=12s ackWait=13s accepted_prefix=4 final_entries=6
+    graph_workflow_kill_test.go:211: child output: 
+=== RUN   TestNativeGraphRetentionSDKBoundarySIGKILL/cut3/reusetrue
+    graph_workflow_kill_test.go:101: SIGKILL pid=200174 cut=3 kind=StepRequested reuse=true leaseTTL=12s ackWait=13s accepted_prefix=4 final_entries=6
+    graph_workflow_kill_test.go:211: child output: 
+=== RUN   TestNativeGraphRetentionSDKBoundarySIGKILL/cut4/reusefalse
+    graph_workflow_kill_test.go:101: SIGKILL pid=200337 cut=4 kind=StepCompleted reuse=false leaseTTL=12s ackWait=13s accepted_prefix=5 final_entries=6
+    graph_workflow_kill_test.go:211: child output: 
+=== RUN   TestNativeGraphRetentionSDKBoundarySIGKILL/cut4/reusetrue
+    graph_workflow_kill_test.go:101: SIGKILL pid=200377 cut=4 kind=StepCompleted reuse=true leaseTTL=12s ackWait=13s accepted_prefix=5 final_entries=6
+    graph_workflow_kill_test.go:211: child output: 
+--- PASS: TestNativeGraphRetentionSDKBoundarySIGKILL (139.81s)
+    --- PASS: TestNativeGraphRetentionSDKBoundarySIGKILL/cut1/reusefalse (21.41s)
+    --- PASS: TestNativeGraphRetentionSDKBoundarySIGKILL/cut2/reusefalse (24.15s)
+    --- PASS: TestNativeGraphRetentionSDKBoundarySIGKILL/cut3/reusefalse (23.45s)
+    --- PASS: TestNativeGraphRetentionSDKBoundarySIGKILL/cut3/reusetrue (25.60s)
+    --- PASS: TestNativeGraphRetentionSDKBoundarySIGKILL/cut4/reusefalse (22.22s)
+    --- PASS: TestNativeGraphRetentionSDKBoundarySIGKILL/cut4/reusetrue (22.97s)
+PASS
+ok  	js-wf/retention	140.860s
