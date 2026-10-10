@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"path/filepath"
 	"strconv"
 	"strings"
 	"testing"
@@ -50,7 +51,24 @@ func TestNativeGraphContinuationGlobalLimitAndTerminalSlot(t *testing.T) {
 	for _, replicas := range []int{1, 3} {
 		for _, archive := range []bool{false, true} {
 			t.Run(fmt.Sprintf("R%d/archive=%t", replicas, archive), func(t *testing.T) {
-				cluster, err := testcluster.StartWithDomain(t.TempDir(), replicas, "GRAPH_LIMIT")
+				storeRoot := ""
+				if base := os.Getenv("WF_GRAPH_LIMIT_STORE_ROOT"); base != "" {
+					if !filepath.IsAbs(base) {
+						t.Fatal("retained store root must be absolute")
+					}
+					if err := os.MkdirAll(base, 0700); err != nil {
+						t.Fatal(err)
+					}
+					var err error
+					storeRoot, err = os.MkdirTemp(base, fmt.Sprintf("R%d-archive%t-", replicas, archive))
+					if err != nil {
+						t.Fatal(err)
+					}
+					t.Logf("GRAPH_LIMIT_STORAGE retained=true path=%s", storeRoot)
+				} else {
+					storeRoot = t.TempDir()
+				}
+				cluster, err := testcluster.StartWithDomain(storeRoot, replicas, "GRAPH_LIMIT")
 				if err != nil {
 					t.Fatal(err)
 				}

@@ -1,0 +1,34 @@
+=== RUN   TestNativeGraphContinuationGlobalLimitAndTerminalSlot
+=== RUN   TestNativeGraphContinuationGlobalLimitAndTerminalSlot/R1/archive=true
+    graph_continuation_limit_test.go:67: GRAPH_LIMIT_STORAGE retained=true path=/home/exedev/js-wf-entry-preparation-retained-20261010/R1-archivetrue-3474948116
+    graph_continuation_limit_test.go:113: GRAPH_LIMIT_DURABLE storage=file whole_handoff=delivery_context request_bounds_unchanged=true
+    graph_continuation_limit_test.go:117: GRAPH_LIMIT_CONFIG owner_index=true compaction_ttl=3h0m0s default_append_ttl=true
+    graph_continuation_limit_test.go:178: GRAPH_LIMIT_PADDING completed=1 requested=2 budget=20
+    graph_continuation_limit_test.go:226: CONTINUATION_PHASE operation=continuation_checkpoint_verify_batch index=7 duration=20.094039ms error=""
+    graph_continuation_limit_test.go:226: CONTINUATION_PHASE operation=continuation_checkpoint_publish index=6 duration=22.849254ms error=""
+    graph_continuation_limit_test.go:226: CONTINUATION_PHASE operation=continuation_archive_delivery_release index=6 duration=906.317µs error=""
+    graph_continuation_limit_test.go:226: CONTINUATION_PHASE operation=continuation_archive_confirm_batch index=6 duration=40.992346ms error=""
+    graph_continuation_limit_test.go:226: CONTINUATION_PHASE operation=continuation_archive_checkpoint_save index=6 duration=207.114µs error=""
+    graph_continuation_limit_test.go:226: CONTINUATION_PHASE operation=continuation_archive_stage_batch index=6 duration=127.774346ms error=""
+    graph_continuation_limit_test.go:226: CONTINUATION_PHASE operation=continuation_archive_checkpoint_save index=6 duration=125.831µs error=""
+    graph_continuation_limit_test.go:226: CONTINUATION_PHASE operation=continuation_archive_verify_batch index=6 duration=71.032066ms error=""
+    graph_continuation_limit_test.go:226: CONTINUATION_PHASE operation=continuation_archive_checkpoint_delete index=6 duration=88.274µs error=""
+    graph_continuation_limit_test.go:226: CONTINUATION_PHASE operation=continuation_archive index=6 duration=250.473402ms error=""
+    graph_continuation_limit_test.go:226: CONTINUATION_PHASE operation=continuation_publish index=0 duration=299.414156ms error=""
+    graph_continuation_limit_test.go:178: GRAPH_LIMIT_PADDING completed=2 requested=2 budget=20
+    graph_continuation_limit_test.go:226: CONTINUATION_PHASE operation=continuation_checkpoint_verify_batch index=14 duration=60.41373ms error=""
+    graph_continuation_limit_test.go:226: CONTINUATION_PHASE operation=continuation_checkpoint_publish index=13 duration=76.566514ms error=""
+    graph_continuation_limit_test.go:226: CONTINUATION_PHASE operation=continuation_archive_delivery_release index=13 duration=1.835047ms error=""
+    graph_continuation_limit_test.go:226: CONTINUATION_PHASE operation=continuation_archive_confirm_batch index=13 duration=43.124981ms error=""
+    graph_continuation_limit_test.go:226: CONTINUATION_PHASE operation=continuation_archive_checkpoint_save index=13 duration=173.634µs error=""
+    graph_continuation_limit_test.go:226: CONTINUATION_PHASE operation=continuation_archive_stage_batch index=13 duration=217.908572ms error=""
+    graph_continuation_limit_test.go:226: CONTINUATION_PHASE operation=continuation_archive_checkpoint_save index=13 duration=136.818µs error=""
+    graph_continuation_limit_test.go:226: CONTINUATION_PHASE operation=continuation_archive_verify_batch index=13 duration=93.927532ms error=""
+    graph_continuation_limit_test.go:226: CONTINUATION_PHASE operation=continuation_archive_checkpoint_delete index=13 duration=53.692µs error=""
+    graph_continuation_limit_test.go:226: CONTINUATION_PHASE operation=continuation_archive index=13 duration=366.155197ms error=""
+    graph_continuation_limit_test.go:226: CONTINUATION_PHASE operation=continuation_publish index=0 duration=471.604209ms error=""
+    graph_continuation_limit_test.go:396: GRAPH_CONTINUATION_LIMIT budget=20 entries=20 archive=true checkpoints=2 effects=0 rejected_request=must_not_run terminal_slot=19 prefix_stage_calls=1/1 production_cap=false padding_operations=2
+--- PASS: TestNativeGraphContinuationGlobalLimitAndTerminalSlot (2.13s)
+    --- PASS: TestNativeGraphContinuationGlobalLimitAndTerminalSlot/R1/archive=true (2.12s)
+PASS
+ok  	js-wf/worker	2.133s
