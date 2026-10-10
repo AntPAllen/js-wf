@@ -1,5 +1,24 @@
 # Implementation status against the supplied plan
 
+## Owned-grant renewal cost counterexample — 2026-10-10
+
+The seeded incremental-discovery model now measures total cost for real owned
+uploading grants, including abandoned grants outside the final forests. Eleven
+race cases pass (64.208 seconds), with 17 existing fence controls passing 0.151
+seconds. At an assumed 1 ms per operation, 10,020 and 100,020 grants exhaust the
+20 seconds remaining on the original 60-second intent after roughly 2,830
+renewals. At 10 µs, all 100,020 renew in 7.019511954 seconds. Expected expiry is a
+counterexample, not liveness acceptance. No NATS or production behavior changes.
+[Evidence](scale/graph-owned-renewal-cost-2026-10-10/README.md).
+
+Fast setup is insufficient: complete renewal still grows with owned grant count.
+Next, establish a publication authority or explicit compaction lifetime budget
+that supports total renewal while retaining original-head fencing, uncertain
+and abandoned uploads, sticky errors, no expired revival, and final verification.
+Costs are assumed rather than measured native latency; these are authority grants,
+not 100,000 journal entries. Native total-renewal, actual full-entry and all prior
+broad gates remain open. Admission and collection remain off.
+
 ## Incremental complete owner discovery — 2026-10-10
 
 Renewal now prefers OwnerScopeScanPort. Native setup captures an acknowledged
