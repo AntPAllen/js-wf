@@ -247,6 +247,7 @@ func testNativeCanonicalGraphOperatorCommandsWithStandalone(t *testing.T, postgr
 			}
 			projectDone := make(chan error, 1)
 			go func() { projectDone <- projectProcess.Wait() }()
+			purgeConfirmed := false
 			defer func() {
 				_ = projectProcess.Process.Signal(syscall.SIGTERM)
 				select {
@@ -265,8 +266,10 @@ func testNativeCanonicalGraphOperatorCommandsWithStandalone(t *testing.T, postgr
 						if err := projection.Rebuild(ctx); err != nil {
 							t.Error("graph PostgreSQL rebuild after projector shutdown", err)
 						}
-						if _, err := projection.Get(ctx, "graph-operator", "success"); !errors.Is(err, visibility.ErrNotFound) {
-							t.Error("purged PostgreSQL row retained after rebuild", err)
+						if purgeConfirmed {
+							if _, err := projection.Get(ctx, "graph-operator", "success"); !errors.Is(err, visibility.ErrNotFound) {
+								t.Error("purged PostgreSQL row retained after rebuild", err)
+							}
 						}
 					}
 					if standalone {
@@ -539,6 +542,7 @@ func testNativeCanonicalGraphOperatorCommandsWithStandalone(t *testing.T, postgr
 			if _, err = call("-grace", "1h", "purge", typ, "success"); err != nil {
 				t.Fatal(err)
 			}
+			purgeConfirmed = true
 			if _, err = call("result", typ, "success"); !matchesError(err, client.ErrPurged) {
 				t.Fatal("purged result was exposed", err)
 			}

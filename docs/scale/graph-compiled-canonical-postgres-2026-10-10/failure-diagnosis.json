@@ -1,0 +1,23 @@
+{
+  "source": "98eacf438ead1f6ae6035234fbc3581f1ea11416",
+  "pid": 188779,
+  "recorded_requests": 410,
+  "recorded_replies": 410,
+  "missing_replies": [],
+  "max_observed_packet_gap_seconds": 0.1351938247680664,
+  "signal_source_ack": {
+    "subject": "wf.sig.graph-operator.success.go",
+    "reply": "_INBOX.h5yfM1uZGmeGBbDxrN0RaQ.gCkSV4pl",
+    "at": "2026-10-10T23:10:16.202235492Z",
+    "payload_bytes": 99,
+    "response_at": "2026-10-10T23:10:16.213884123Z",
+    "response_bytes": 49,
+    "response_keys": [
+      "domain",
+      "seq",
+      "stream"
+    ],
+    "error": null
+  },
+  "interpretation": "Capture packet times are proxy observations, not server internals. Signal source receives positive ack; every captured request has a captured response. BindNextSignal runs under a three-second aggregate context in client/graph_signal_publish.go and reads the large owned input. Aggregate budget exhaustion is the next model candidate; these records do not prove the exact internal cancellation point or a NATS defect."
+}

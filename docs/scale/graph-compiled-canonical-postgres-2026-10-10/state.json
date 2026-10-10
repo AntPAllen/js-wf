@@ -1,0 +1,39 @@
+{
+  "source": "98eacf438ead1f6ae6035234fbc3581f1ea11416",
+  "checkout": "/home/exedev/js-wf-compiled-canonical-postgres-qualification-20261010",
+  "selected_inputs": 1924,
+  "root": "/home/exedev/js-wf-compiled-canonical-postgres-artifacts-20261010",
+  "invocation": "20f348d07431405ca9e885970861c94e",
+  "unit": "js-wf-compiled-canonical-postgres-20261010.service",
+  "supervisor_pid": 187614,
+  "command": [
+    "/usr/local/bin/go",
+    "test",
+    "-race",
+    "-p=1",
+    "./cmd/wf",
+    "./visibility",
+    "-run=^(TestOperatorStandaloneCanonicalGraphPostgresCommands|TestGraphPostgresVisibilityCanonicalRowsAndUncertainty|TestPostgresNamespaceIsolation)$",
+    "-count=1",
+    "-v",
+    "-timeout=20m"
+  ],
+  "configuration": {
+    "WF_OPERATOR_STANDALONE": "1",
+    "WF_OPERATOR_TEST_ROOT": "/home/exedev/js-wf-compiled-canonical-postgres-artifacts-20261010",
+    "GOWORK": "off",
+    "GOFLAGS": "",
+    "GOMAXPROCS": "2",
+    "GOMEMLIMIT": "1GiB",
+    "WF_TEST_POSTGRES_DSN": "postgres://postgres@127.0.0.1:15438/wf_canonical_cli?sslmode=disable"
+  },
+  "started_utc": "2026-10-10T23:07:51.103530+00:00",
+  "terminal": true,
+  "child_exit": 1,
+  "child_pid": 187638,
+  "child_ended_utc": "2026-10-10T23:10:28.476125+00:00",
+  "child_wall_seconds": 157.37238245698973,
+  "inputs_unchanged": true,
+  "ended_utc": "2026-10-10T23:10:28.629146+00:00",
+  "log_sha256": "a84942611dfab1247e5a796d4881a4d1277ec472c491f66ed7670d08871192b2"
+}

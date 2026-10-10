@@ -1,5 +1,23 @@
 # JetStream Durable Workflow Runtime — Implementation Plan
 
+## PostgreSQL campaign closed failed; Signal binding diagnosis — 2026-10-10
+
+The focused compiled PostgreSQL campaign at `98eacf4` stops with actual Go
+and matching retained service exits 1. R1 passes 111.85s; R3/domain Signal
+returns unknown/context deadline after 11.274s with 99.6s fixture time left.
+The nine visibility uncertainty/terminal controls and namespace isolation
+pass in 1.825s. Review binds 1,924 unchanged Git inputs and 778 retained files.
+[Closed failure and diagnosis](scale/graph-compiled-canonical-postgres-2026-10-10/README.md).
+
+The complete failed Signal capture records a source ack and responses to all
+410 requests; the largest observed packet gap is about 135ms. This narrows the
+next investigation to the three-second aggregate binding context around a
+large owned-input read, without proving its internal cancellation point or
+any NATS defect. A misleading cleanup assertion now requires a successful
+purge before checking purged-row absence. No deadlines were increased and
+no rerun launched. Original Tier 1 and entry invocations continue; PostgreSQL
+CLI acceptance and broader gates remain open. Admission and collection remain off.
+
 ## Compiled canonical PostgreSQL coverage added; focused qualification live — 2026-10-10
 
 The canonical CLI fixture now has a PostgreSQL compiled-command/projector

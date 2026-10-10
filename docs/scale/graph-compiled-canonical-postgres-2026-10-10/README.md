@@ -50,3 +50,23 @@ pushes and pull requests. It requires both native cases and all three selected
 groups without skips, and retains complete captures and the real Go log even
 on failure. Hosted execution is independent of local acceptance; adding the
 job does not establish a hosted pass or the independent wire review.
+
+## Closed failed campaign
+
+The original invocation stopped with actual Go and retained service exits 1.
+[Failure review](failure-review.json) binds 1,924 unchanged Git inputs and all
+778 retained files (628,742,152 bytes). R1 passes 111.85s. R3/domain fails its
+Signal command after 11.274s with an unknown publication outcome; the parent
+still has 99.6s left. All nine visibility cases and namespace isolation pass
+in the separate 1.825s visibility package. This campaign remains rejected.
+
+[Request correlation](failed-signal-requests.json) and
+[diagnosis](failure-diagnosis.json) show a positive Signal source ack and replies
+to all 410 captured requests, with a maximum observed packet gap near 135ms.
+These are proxy observations. The three-second aggregate BindNextSignal
+context enclosing a large owned payload read is the next model candidate;
+exact internal cancellation and server-side cause are not established.
+No request, fixture or workflow bounds were increased and no campaign rerun
+was launched. A misleading deferred purged-row assertion on early failure
+has been fixed separately: absence is asserted only after successful purge.
+The existing successful-path rebuild/absence requirement stays intact.
