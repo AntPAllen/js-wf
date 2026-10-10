@@ -2,6 +2,7 @@ package wf
 
 import (
 	"bytes"
+	"encoding/json"
 
 	"js-wf/internal/checkpoint"
 	"js-wf/journal"
@@ -66,7 +67,7 @@ func decodeReplaySignal(raw []byte, signal *replayCheckpointSignal) error {
 	if len(bytes.TrimSpace(raw)) == 0 || bytes.Equal(bytes.TrimSpace(raw), []byte("null")) {
 		return ErrCorruptJournal
 	}
-	return checkpoint.DecodeUnambiguous(raw, signal)
+	return json.Unmarshal(raw, signal)
 }
 
 // Terminal fields carry runtime identity and result provenance. Result bytes

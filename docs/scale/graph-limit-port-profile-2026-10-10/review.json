@@ -1,0 +1,102 @@
+{
+  "accepted": true,
+  "source": "431d2d11de1392079aa2120462decfb45a9f2ffd",
+  "git_verified_inputs": 3398,
+  "actual_go_exit": 0,
+  "actual_supervisor_exit": 0,
+  "cases": [
+    "R1/archive=true"
+  ],
+  "budget": 64,
+  "entries": 64,
+  "terminal_slot": 63,
+  "checkpoints": 2,
+  "padding_operations": 24,
+  "forbidden_effects": 0,
+  "prefix_stage_calls": [
+    1,
+    1
+  ],
+  "production_cap_unchanged": true,
+  "binary_sha256": "6c85ca9d42ac9fc90b6998978b35fc8bf44fc8d81dbfef92bec7dd048ee0703a",
+  "events_sha256": "57fd849f2068b27719f56833dcab583a0716354ab3598560dbc09cf49d8d1a8f",
+  "elapsed": 46.516,
+  "reviewed": "2026-10-10T13:41:05.424261+00:00",
+  "port_profiles": [
+    {
+      "from_operation": 0,
+      "to_operation": 12,
+      "wall_ns": 4920775093,
+      "operations": {
+        "CASBlob": {
+          "calls": 140,
+          "errors": 0,
+          "total_ns": 635142637
+        },
+        "CASRoot": {
+          "calls": 48,
+          "errors": 0,
+          "total_ns": 451964410
+        },
+        "Get": {
+          "calls": 138,
+          "errors": 0,
+          "total_ns": 863158698
+        },
+        "Put": {
+          "calls": 70,
+          "errors": 0,
+          "total_ns": 582696388
+        },
+        "ReadBlob": {
+          "calls": 210,
+          "errors": 0,
+          "total_ns": 906540162
+        },
+        "ReadRoot": {
+          "calls": 144,
+          "errors": 0,
+          "total_ns": 1194818197
+        }
+      }
+    },
+    {
+      "from_operation": 12,
+      "to_operation": 24,
+      "wall_ns": 5356180797,
+      "operations": {
+        "CASBlob": {
+          "calls": 140,
+          "errors": 0,
+          "total_ns": 613238362
+        },
+        "CASRoot": {
+          "calls": 48,
+          "errors": 0,
+          "total_ns": 657237204
+        },
+        "Get": {
+          "calls": 138,
+          "errors": 0,
+          "total_ns": 756576945
+        },
+        "Put": {
+          "calls": 70,
+          "errors": 0,
+          "total_ns": 574938126
+        },
+        "ReadBlob": {
+          "calls": 210,
+          "errors": 0,
+          "total_ns": 811527977
+        },
+        "ReadRoot": {
+          "calls": 144,
+          "errors": 0,
+          "total_ns": 1505840349
+        }
+      }
+    }
+  ],
+  "scope": "Bounded 64-entry native R1/archive race diagnostic. Completed port calls include concurrent polling; summed durations overlap. This is not the 100000-entry gate or evidence of a NATS cause. Original live cap job unchanged; all broader gates remain open."
+}

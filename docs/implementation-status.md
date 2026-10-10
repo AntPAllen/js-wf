@@ -1,5 +1,23 @@
 # Implementation status against the supplied plan
 
+## Replay lifecycle model qualified; native call costs measured — 2026-10-10
+
+Frozen `fd05fba` passes independent lifecycle-model review:3395 exact Git
+inputs,1000 race/100000 normal bodies, all five modes/ten input-size cells,
+exact trace replay,853 normal pins, four required generation-gate failures
+and loaded matching supervisor exit0. [Accepted model](scale/graph-replay-lifecycle-model-2026-10-10/review.json).
+Frozen `431d2d1` passes a bounded64-entry native race diagnostic46.516s:
+each12 SetState operations makes750 completed graph-port calls, with padding
+wall4.921s/5.356s and no port errors. This is call amplification evidence,
+not a production-cap gate or a broker-cause attribution. [Diagnostic](scale/graph-limit-port-profile-2026-10-10/review.json).
+
+Legacy-format signal runtime headers now reject ambiguity before replay code;
+full SDK race and853 normal pins pass, with18 SDK/seven CLI required decoder
+mutant failures. Encoded user payloads stay opaque. [Development scope](scale/graph-replay-signal-envelope-2026-10-10/README.md).
+Full latest158 qualification, original matrices/majority raw-p99 failure,
+actual100000 cap,24h/million drain and retention/import/admission/collection/
+rollout gates remain open. Older broad race and actual-cap services remain live.
+
 ## Terminal replay retry accepted; seeded lifecycle model added — 2026-10-10
 
 Frozen `14a3552` passes independent review:3387 exact Git inputs,70 full SDK race

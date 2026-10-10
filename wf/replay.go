@@ -162,14 +162,8 @@ func replayWithStages[T any](journalBytes []byte, fn func(*Context) (T, error), 
 			}
 			entries = append(entries, Entry{Index: record.Index, Kind: Kind(record.Kind), Payload: record.Payload})
 		case journal.SignalConsumed:
-			var event struct {
-				Sequence uint64 `json:"sig_seq"`
-				Name     string `json:"name"`
-				Payload  []byte `json:"payload"`
-				Ref      string `json:"ref"`
-				Hash     string `json:"hash"`
-			}
-			if json.Unmarshal(record.Payload, &event) != nil || event.Sequence <= lastSignal || identity.ValidateToken(event.Name) != nil {
+			var event replayCheckpointSignal
+			if decodeReplaySignal(record.Payload, &event) != nil || event.Sequence <= lastSignal || identity.ValidateToken(event.Name) != nil {
 				return result, ErrCorruptJournal
 			}
 			lastSignal = event.Sequence

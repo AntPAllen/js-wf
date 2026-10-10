@@ -28,3 +28,14 @@ requires exact Git inputs, unchanged sources, both binary identities, actual
 counts and all10 cells, and loaded matching supervisor exit0. Extended
 qualification is prepared, not accepted. Full latest158 normal/race/extended,
 native lifecycle/retention, original matrices and broader gates remain open.
+
+## Extended model qualification accepted
+
+Frozen `fd05fba` passes [independent review](review.json):3395 exact Git
+inputs,1000 race bodies,100000 normal bodies, all five lifecycle modes and
+ten mode/size cells, exact trace replay, full853 normal pins, four required
+generation-gate mutant failures, both binary identities, and loaded matching
+supervisor exit0. Normal100000 takes691.628s. Retained [evidence](qualified/)
+preserves source inventories, command state, raw events, exact mutant and
+terminal supervisor. This accepts this lifecycle family; full latest158
+normal/race/extended and original native/retention/admission gates remain open.

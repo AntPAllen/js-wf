@@ -1,5 +1,25 @@
 # JetStream Durable Workflow Runtime — Implementation Plan
 
+## Current qualification and remaining plan scope — 2026-10-10
+
+The frozen terminal/shared-header retry is accepted at `14a3552`; the later
+lifecycle family is accepted at `fd05fba` with1000 race/100000 normal bodies,
+853 saved traces, ten mode/size cells and four required generation-gate
+failures. Historical failed sources below remain failed.
+The inventory is158 families. [Current lifecycle evidence](scale/graph-replay-lifecycle-model-2026-10-10/review.json).
+
+Optional native port timing now gives bounded call-cost evidence without
+restarting the actual100000 run. Signal runtime header admission now extends
+to legacy format, with development proof before handler/plugin entry.
+[Diagnostic](scale/graph-limit-port-profile-2026-10-10/README.md),
+[signal admission](scale/graph-replay-signal-envelope-2026-10-10/README.md).
+
+Required remaining scope includes complete latest158 simulation/extended
+campaigns, original13×200/16×200 native matrices, unchanged majority raw-p99
+gate, actual100000 boundary, actual24h/million physical drain, full lifecycle/
+retention/import/collection and public admission/rollout. Production collection
+is off and canonical continuation deployment admission stays closed.
+
 ## Current replay admission and qualification follow-through — 2026-10-10
 
 CLI journal-header admission is qualified at `78e2a0c`. The later shared SDK
