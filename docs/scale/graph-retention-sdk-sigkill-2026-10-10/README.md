@@ -61,3 +61,8 @@ did not expose an annotation identifying its rejection cause.
 permits runner in step env and excludes it from job env. YAML and every shell
 step parse; the new native job's six-case gate accepts the real passing log.
 Hosted admission and actual job execution require their own observations.
+
+After pushing df1f3f5, GitHub admitted operator workflow run 38096239213
+and created all 13 jobs, including canonical-postgres-cli. The queued job list
+is retained in operator-ci-after.json. This verifies workflow admission after
+the context correction; job execution and test results remain pending.
