@@ -1,0 +1,60 @@
+{
+  "verdict": "PASS eight native pending-child continuation cases",
+  "source": "0bf850c37089f25be6b7d2167f2c605cd7dbfbb4",
+  "repository_inputs_git_verified_unchanged": 3295,
+  "production_and_simulation_inputs_unchanged_from": "d504a33",
+  "elapsed_seconds": 253.67,
+  "cases": {
+    "R1/archive=false/failed=false": 16.57,
+    "R1/archive=false/failed=true": 16.14,
+    "R1/archive=true/failed=false": 34.27,
+    "R1/archive=true/failed=true": 33.62,
+    "R3Domain/archive=false/failed=false": 29.1,
+    "R3Domain/archive=false/failed=true": 25.55,
+    "R3Domain/archive=true/failed=false": 49.41,
+    "R3Domain/archive=true/failed=true": 49.01
+  },
+  "binary_sha256": "da587ea44a6e409f37876c6f81427ebf24b8bf61ea2c7a1b4656a35a664daa58",
+  "log_sha256": "77c8a73fafbb28f599946f5992b3bdbec4065d5628d2d5ded63249c3e7e40ace",
+  "command_receipts": [
+    {
+      "command": [
+        "go",
+        "test",
+        "-c",
+        "-race",
+        "./worker",
+        "-o",
+        "/home/exedev/js-wf-pending-child-20261010/worker-race.test"
+      ],
+      "working_directory": "/home/exedev/js-wf-pending-child-qualification",
+      "started": "2026-10-10T08:20:51.160997+00:00",
+      "env": {
+        "GOMAXPROCS": "2",
+        "GOMEMLIMIT": "512MiB"
+      },
+      "pid": 53678,
+      "actual_exit_code": 0,
+      "finished": "2026-10-10T08:21:15.186784+00:00"
+    },
+    {
+      "command": [
+        "/home/exedev/js-wf-pending-child-20261010/worker-race.test",
+        "-test.run=^TestNativeGraphContinuationPendingChildAcrossCheckpoints$",
+        "-test.count=1",
+        "-test.timeout=10m",
+        "-test.v=true"
+      ],
+      "working_directory": "/home/exedev/js-wf-pending-child-qualification",
+      "started": "2026-10-10T08:21:15.275002+00:00",
+      "env": {
+        "GOMAXPROCS": "2",
+        "GOMEMLIMIT": "512MiB"
+      },
+      "pid": 54068,
+      "actual_exit_code": 0,
+      "finished": "2026-10-10T08:25:30.034982+00:00"
+    }
+  ],
+  "scope": "Two unresolved SDK promise checkpoints; live/archive boundaries; actual parent suspension; success700KB/failure child; canonical signal wakeup repair; immutable logical prefix; one child/two effects/one terminal outcome and fenced duplicate. No child terminal reclamation, process/storage/VM fault, broad scale/soak, actual100000-entry cap, public/default admission or full goal acceptance."
+}

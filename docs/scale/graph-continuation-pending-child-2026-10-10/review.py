@@ -54,7 +54,7 @@ assert len(resumed) == 8
 for failed in ('false', 'true'):
     for archive in ('false', 'true'):
         assert len([r for r in resumed if r[:2] == (failed, archive)]) == 2
-assert all(int(records) > int(prefix) for _, _, prefix, records in resumed)
+assert all(int(prefix) == 21 and int(records) == 26 for _, _, prefix, records in resumed)
 assert log.count('ARCHIVE_COLLECTION stage=next ') == 4 and log.count('ARCHIVE_COLLECTION stage=finish ') == 4
 assert log.count('SDK initial/next/finish=map[finish:2 initial:1 next:1] effects=2 ') == 8
 assert log.count('child_calls=1 preserved_error=planned_child_failure parent_result=43') == 4

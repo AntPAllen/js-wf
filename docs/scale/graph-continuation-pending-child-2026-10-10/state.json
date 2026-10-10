@@ -1,0 +1,54 @@
+{
+  "source": "0bf850c37089f25be6b7d2167f2c605cd7dbfbb4",
+  "working_directory": "/home/exedev/js-wf-pending-child-qualification",
+  "root": "/home/exedev/js-wf-pending-child-20261010",
+  "started": "2026-10-10T08:20:51.160777+00:00",
+  "supervisor_pid": 53654,
+  "systemd_invocation": "ab3b46cecb234a7cad786a9f69a632ba",
+  "phase": "terminal",
+  "commands": [
+    {
+      "command": [
+        "go",
+        "test",
+        "-c",
+        "-race",
+        "./worker",
+        "-o",
+        "/home/exedev/js-wf-pending-child-20261010/worker-race.test"
+      ],
+      "working_directory": "/home/exedev/js-wf-pending-child-qualification",
+      "started": "2026-10-10T08:20:51.160997+00:00",
+      "env": {
+        "GOMAXPROCS": "2",
+        "GOMEMLIMIT": "512MiB"
+      },
+      "pid": 53678,
+      "actual_exit_code": 0,
+      "finished": "2026-10-10T08:21:15.186784+00:00"
+    },
+    {
+      "command": [
+        "/home/exedev/js-wf-pending-child-20261010/worker-race.test",
+        "-test.run=^TestNativeGraphContinuationPendingChildAcrossCheckpoints$",
+        "-test.count=1",
+        "-test.timeout=10m",
+        "-test.v=true"
+      ],
+      "working_directory": "/home/exedev/js-wf-pending-child-qualification",
+      "started": "2026-10-10T08:21:15.275002+00:00",
+      "env": {
+        "GOMAXPROCS": "2",
+        "GOMEMLIMIT": "512MiB"
+      },
+      "pid": 54068,
+      "actual_exit_code": 0,
+      "finished": "2026-10-10T08:25:30.034982+00:00"
+    }
+  ],
+  "accepted": false,
+  "test_exit": 0,
+  "complete_eight_cases": true,
+  "source_unchanged": true,
+  "finished": "2026-10-10T08:25:30.197551+00:00"
+}
