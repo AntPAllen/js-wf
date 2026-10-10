@@ -9,3 +9,7 @@ Source: `d504a337a8b9102a0b32673d457939c4b82fcc8f` in a clean detached checkout.
 The native functional archive watchdog is120 seconds. Runtime append budgets and the separate30-second kill-to-exact-ACK gate are unchanged. A native nonzero exit still allows normal qualification to proceed; overall acceptance requires all three stages and unchanged source inputs. `pipeline.json` is live operational state and is not committed as acceptance evidence. Terminal results require independent review before any status promotion.
 
 This campaign does not qualify extended seeds, the actual100,000-entry boundary, public continuation admission, production collection, VM/power/storage loss, broad chaos/scale/soak or any other open original requirement. No previous failed campaign is overwritten.
+
+## Independent stage review
+
+After a stage actually closes successfully, run `python3 docs/scale/graph-d504-full-qualification-2026-10-10/review.py native` (or `normal1000` / `race1000`). The review refuses missing/nonzero exit receipts and verifies every inventoried input against the exact Git source, current frozen checkout bytes, actual retained binary and raw results. Simulation review also checks unchanged before/after inventories and reruns the source-bound complete-suite checker independently. Native review requires all eight cases, all three parent stages once,25 records/two effects/result43, all four child reclamation receipts and both archive boundaries. Stage acceptance does not accept the overall pipeline or original implementation goal.
