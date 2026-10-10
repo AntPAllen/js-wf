@@ -41,3 +41,6 @@ were fixture failures, not proof that cancellation failed to stop the effect.
 [Corrected development result](development.log) passes with actual exit 0 for
 R1/live/cooperative error, core notification disabled, WF_SIG pointer removal
 confirmed and the required retry. The frozen eight-case matrix remains pending.
+
+Frozen source `78dc5c270cb86c4b82fd1494c800bc6e6ba817e6` is live under `js-wf-running-effect-cancel-20261010.service`.
+[Launch identity](launch.json) records the retained process and invocation.
