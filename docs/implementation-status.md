@@ -1,5 +1,22 @@
 # Implementation status against the supplied plan
 
+## Pending continuation handoff repaired before stage entry — 2026-10-10
+
+A directed in-memory cut confirms that a fresh worker previously ran the next
+stage after failed archive relocation. Checkpoint discovery now identifies a
+missing pointer, suspension or configured archive publication; recovery finishes
+that handoff and returns before stage admission. A new delivery reopens receipts.
+Five pointer/suspension/archive cut controls and two healthy controls pass under
+race; bypassing only the recovery guard fails all five cuts. Controlled collection
+physically reclaims19 original tree/payload receipts before successful stage entry.
+Checkpoint/frame race controls, all853 unchanged simulations and native R1/archive20
+pass. [Development evidence](scale/graph-continuation-handoff-recovery-2026-10-10/README.md).
+The15-second deadline/global cap remain unchanged. This is development evidence;
+full native cut/unknown-outcome coverage and bounded/resumable bulk publication
+remain required. Actual100000 is still failed; older frozen campaigns exclude
+both recent fixes. All original gates remain in scope, public continuation
+admission stays closed and production collection stays off.
+
 ## Relocated compaction node grants corrected — 2026-10-10
 
 Compaction commit had interpreted the graph visitor flag backwards, skipping

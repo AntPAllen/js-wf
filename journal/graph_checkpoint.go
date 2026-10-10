@@ -28,6 +28,10 @@ type GraphCheckpointRead struct {
 	Anchor  Record
 	Records []Record
 	Tail    uint64
+	// HandoffPending reports missing pointer, suspension or configured archive
+	// publication in this pinned view. Completion alone does not admit a stage.
+	// Fresh publication still checks the exact generation and logical tail.
+	HandoffPending bool
 }
 
 // ReadCheckpoint discovers the latest completed checkpoint in this exact view.
@@ -158,6 +162,20 @@ func (v *GraphView) ReadCheckpoint(ctx context.Context, typ, id string) (*GraphC
 	}
 	candidate.Records = append([]Record(nil), records[candidate.Runtime.Index+1-start:]...)
 	candidate.Tail = v.Tail()
+	published := !v.store.cfg.CheckpointIndex || v.cursor.Checkpoint != nil &&
+		v.cursor.Checkpoint.Runtime == candidate.Runtime && v.cursor.Checkpoint.RequestIndex == candidate.Request.Index
+	archived := !v.store.cfg.ArchiveCheckpoints || v.cursor.RetainedFrom == candidate.Request.Index
+	suspended := false
+	for _, record := range candidate.Records {
+		var marker struct {
+			WaitingOn string `json:"waiting_on"`
+		}
+		if record.Kind == Suspended && checkpoint.DecodeUnambiguous(record.Payload, &marker) == nil && marker.WaitingOn == "continuation:"+candidate.Runtime.Stage {
+			suspended = true
+			break
+		}
+	}
+	candidate.HandoffPending = !published || !archived || !suspended
 	if err := v.alive(); err != nil {
 		return nil, err
 	}

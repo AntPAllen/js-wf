@@ -1086,6 +1086,20 @@ func (w *Worker) execute(ctx context.Context, typ, id string, l *lease.Lease, wa
 			return err
 		}
 	}
+	if graph != nil && graph.checkpoint != nil && graph.checkpoint.HandoffPending {
+		// A completed frame can survive a cut before pointer/suspension/archive
+		// publication. Finish that handoff without admitting the next stage or
+		// appending through original receipts after relocation. A new delivery
+		// reopens the relocated forest and reconstructs its owned references.
+		r := graph.checkpoint.Runtime
+		point := wf.ContinuationCheckpoint{ContinuationAnchor: wf.ContinuationAnchor{Index: r.Index, Epoch: r.Epoch}, Stage: r.Stage, Object: r.Object, SHA256: r.SHA256, StepPosition: r.StepPosition}
+		publishCtx, stopPublish := context.WithTimeout(ctx, 15*time.Second)
+		defer stopPublish()
+		started := ops.begin()
+		err := w.publishContinuation(publishCtx, typ, id, input.Sequence, l, records, point, appendEntry, ops)
+		ops.finish(started, "continuation_recovery_publish", r.Index, "", err)
+		return err
+	}
 	attempts := int(checkpointInfo.PanicAttempts)
 	var lastPanic string
 	for _, record := range records {
