@@ -70,6 +70,13 @@ func TestOperatorStandaloneCanonicalGraphCommands(t *testing.T) {
 	testNativeCanonicalGraphOperatorCommandsWithStandalone(t, false, true)
 }
 
+func TestOperatorStandaloneCanonicalGraphPostgresCommands(t *testing.T) {
+	if os.Getenv("WF_OPERATOR_STANDALONE") != "1" || os.Getenv("WF_TEST_POSTGRES_DSN") == "" {
+		t.Skip("set WF_OPERATOR_STANDALONE=1 and WF_TEST_POSTGRES_DSN for compiled canonical PostgreSQL CLI")
+	}
+	testNativeCanonicalGraphOperatorCommandsWithStandalone(t, true, true)
+}
+
 func testNativeCanonicalGraphOperatorCommandsWithStandalone(t *testing.T, postgres, standalone bool) {
 	marker := filepath.Join(operatorTempDir(t), "replay-effect")
 	t.Setenv("WF_REPLAY_EFFECT_MARKER", marker)
