@@ -12,6 +12,7 @@ import (
 
 	"js-wf/client"
 	"js-wf/internal/checkpoint"
+	"js-wf/internal/graphpublication"
 	"js-wf/internal/retainedgraph"
 	"js-wf/journal"
 	"js-wf/sim"
@@ -23,6 +24,9 @@ type checkpointCostPort struct {
 	*sim.GraphPublicationTransport
 	entries          map[string]bool
 	entryReads, gets int
+	clock            *time.Time
+	renewals         int
+	expires          map[string]time.Time
 	maxEntryReads    int
 }
 
@@ -34,19 +38,53 @@ func (p *checkpointCostPort) Get(ctx context.Context, link retainedgraph.Link, l
 			return nil, context.DeadlineExceeded
 		}
 	}
-	return p.GraphPublicationTransport.Get(ctx, link, limit)
+	data, err := p.GraphPublicationTransport.Get(ctx, link, limit)
+	if err == nil && p.clock != nil && p.entries[link.Hash] {
+		*p.clock = p.clock.Add(time.Second)
+	}
+	return data, err
+}
+
+func (p *checkpointCostPort) CASRoot(ctx context.Context, key string, head uint64, root graphpublication.Root) (graphpublication.Root, error) {
+	actual, err := p.GraphPublicationTransport.CASRoot(ctx, key, head, root)
+	if err == nil {
+		if p.expires == nil {
+			p.expires = map[string]time.Time{}
+		}
+		for _, r := range actual.Readers {
+			if prior, ok := p.expires[r.ID]; ok && r.Expires.After(prior) {
+				p.renewals++
+			}
+			p.expires[r.ID] = r.Expires
+		}
+	}
+	return actual, err
 }
 
 func TestGraphCheckpointPublicationPrefixCostAndReadBudget(t *testing.T) {
-	for _, padding := range []int{16, 128, 512} {
-		t.Run(fmt.Sprintf("padding=%d", padding), func(t *testing.T) {
+	for _, test := range []struct {
+		padding int
+		renew   bool
+	}{{16, false}, {128, false}, {512, false}, {16, true}} {
+		padding := test.padding
+		name := fmt.Sprintf("padding=%d", padding)
+		if test.renew {
+			name += "/renewing"
+		}
+		t.Run(name, func(t *testing.T) {
 			ctx := context.Background()
 			schedule := sim.NewScheduler(23)
 			model := sim.NewGraphPublicationTransport(schedule)
 			port := &checkpointCostPort{GraphPublicationTransport: model, entries: map[string]bool{}}
 			protocol := model.Protocol()
 			protocol.Port = port
-			store, err := journal.NewGraphStore(journal.GraphConfig{Protocol: protocol, Now: func() time.Time { return time.Unix(1000, 0) }, CanonicalStarts: true, CanonicalSignals: true, CheckpointIndex: true, ArchiveCheckpoints: true})
+			now := time.Unix(1000, 0)
+			pinTTL := time.Minute
+			if test.renew {
+				port.clock = &now
+				pinTTL = 4 * time.Second
+			}
+			store, err := journal.NewGraphStore(journal.GraphConfig{Protocol: protocol, Now: func() time.Time { return now }, PinTTL: pinTTL, CanonicalStarts: true, CanonicalSignals: true, CheckpointIndex: true, ArchiveCheckpoints: true})
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -133,6 +171,13 @@ func TestGraphCheckpointPublicationPrefixCostAndReadBudget(t *testing.T) {
 			indexedReads, indexedGets := port.entryReads, port.gets
 			if indexedReads > 4 {
 				t.Fatal("indexed retry scanned its prefix", indexedReads)
+			}
+			if test.renew {
+				if port.renewals == 0 {
+					t.Fatal("long checkpoint traversal did not renew its pin")
+				}
+				t.Logf("CHECKPOINT_PIN_RENEWAL ttl=%s virtual_elapsed=%s renewals=%d", pinTTL, now.Sub(time.Unix(1000, 0)), port.renewals)
+				port.clock = nil // Archive cost is measured separately from the read TTL control.
 			}
 			port.entryReads, port.gets = 0, 0
 			if err := store.CompactCheckpoint(ctx, h.Type, h.ID, runtime, tail); err != nil {

@@ -1,0 +1,11 @@
+=== RUN   TestGraphCheckpointPublicationPrefixCostAndReadBudget
+=== RUN   TestGraphCheckpointPublicationPrefixCostAndReadBudget/padding=16
+    graph_checkpoint_cost_test.go:186: CHECKPOINT_PREFIX_COST padding=16 entries=36 first_entry_reads=37 first_gets=111 indexed_entry_reads=4 indexed_gets=17 compaction_entry_reads=40 compaction_gets=1039 injected_budget_entry_reads=16
+=== RUN   TestGraphCheckpointPublicationPrefixCostAndReadBudget/padding=16/renewing
+    graph_checkpoint_cost_test.go:147: injected read budget did not stop confirmation blob publication revoked
+--- FAIL: TestGraphCheckpointPublicationPrefixCostAndReadBudget (0.30s)
+    --- PASS: TestGraphCheckpointPublicationPrefixCostAndReadBudget/padding=16 (0.20s)
+    --- FAIL: TestGraphCheckpointPublicationPrefixCostAndReadBudget/padding=16/renewing (0.10s)
+FAIL
+FAIL	js-wf/journal	0.316s
+FAIL

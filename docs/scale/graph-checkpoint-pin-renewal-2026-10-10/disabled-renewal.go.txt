@@ -45,11 +45,11 @@ func (v *GraphView) ReadCheckpoint(ctx context.Context, typ, id string) (*GraphC
 	if destination != v.destination {
 		return nil, ErrCheckpointGeneration
 	}
-	if err := v.RenewIfNeeded(ctx); err != nil {
+	if err := (func(context.Context) error { return nil })(ctx); err != nil {
 		return nil, err
 	}
 	read := func(index uint64) (GraphRecord, error) {
-		if err := v.RenewIfNeeded(ctx); err != nil {
+		if err := (func(context.Context) error { return nil })(ctx); err != nil {
 			return GraphRecord{}, err
 		}
 		return v.Read(ctx, index)
@@ -93,11 +93,11 @@ func (v *GraphView) ReadCheckpoint(ctx context.Context, typ, id string) (*GraphC
 	if candidate != nil {
 		first++
 	}
-	if err := v.RenewIfNeeded(ctx); err != nil {
+	if err := (func(context.Context) error { return nil })(ctx); err != nil {
 		return nil, err
 	}
 	err = v.ReadRange(ctx, first, v.Count(), func(record GraphRecord) error {
-		if err := v.RenewIfNeeded(ctx); err != nil {
+		if err := (func(context.Context) error { return nil })(ctx); err != nil {
 			return err
 		}
 
@@ -165,7 +165,7 @@ func (v *GraphView) ReadCheckpoint(ctx context.Context, typ, id string) (*GraphC
 }
 
 func (v *GraphView) readCheckpointFrame(ctx context.Context, typ, id string, candidate *GraphCheckpointRead, receipt GraphRecord, localsHash string) error {
-	if err := v.RenewIfNeeded(ctx); err != nil {
+	if err := (func(context.Context) error { return nil })(ctx); err != nil {
 		return err
 	}
 	var link GraphPayloadLink

@@ -1,5 +1,21 @@
 # Implementation status against the supplied plan
 
+## Checkpoint reader lifetime fixed; bulk transition still required — 2026-10-10
+
+Checkpoint scans now renew their exact reader before indexed reads/frame loads
+and during prefix/suffix traversal. A directed model control with a4-second pin
+completes57 seconds of virtual entry-read time through28 renewals; disabling
+only these renewal calls fails it. Existing checkpoint/index race controls and
+all853 unchanged pins pass. [Development evidence](scale/graph-checkpoint-pin-renewal-2026-10-10/README.md).
+This does not clear the actual100000 gate or its15-second whole-transition bound.
+Bulk verification/archive work needs bounded native calls, reader and intent
+lifetime handling and crash-safe progress without relaxing generation/tail,
+receipt/archive reclamation or terminal-slot requirements. A captured-head
+relocation cannot simply renew reader pins without handling CAS invalidation.
+No multi-hour cap rerun is active; both frozen qualifications remain separate.
+All original requirements remain in scope, and deployment/collection gates stay
+closed/off pending their original evidence.
+
 ## Runtime completion envelopes hardened — 2026-10-10
 
 Shared typed completion admission rejects duplicate/aliased/escaped/unknown

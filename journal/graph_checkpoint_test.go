@@ -118,10 +118,27 @@ func TestGraphCheckpointOwnedFrameAndSuffix(t *testing.T) {
 				if mode == "unreadable" {
 					port.failHash = hash
 				}
+				var expiredRoot graphpublication.Root
+				var expiredKey string
 				if mode == "expired" {
+					keys, keyErr := model.RootKeys(ctx)
+					if keyErr != nil || len(keys) != 1 {
+						t.Fatal(keys, keyErr)
+					}
+					expiredKey = keys[0]
+					expiredRoot, keyErr = model.ReadRoot(ctx, expiredKey)
+					if keyErr != nil || len(expiredRoot.Readers) != 1 {
+						t.Fatal(expiredRoot, keyErr)
+					}
 					*now = now.Add(2 * time.Minute)
 				}
 				got, err := view.ReadCheckpoint(ctx, "flow", "checkpoint")
+				if mode == "expired" {
+					after, rootErr := model.ReadRoot(ctx, expiredKey)
+					if rootErr != nil || after.Head != expiredRoot.Head || len(after.Readers) != 1 || !after.Readers[0].Expires.Equal(expiredRoot.Readers[0].Expires) {
+						t.Fatal("expired checkpoint pin was mutated or resurrected", after, rootErr)
+					}
+				}
 				switch mode {
 				case "absent", "pending":
 					if err != nil || got != nil {
