@@ -1,0 +1,238 @@
+{
+  "source": "2de6dfa93184b4489436bf55f29179684e4e08d2",
+  "checkout": "/home/exedev/js-wf-compaction-traversal-qualification",
+  "root": "/home/exedev/js-wf-compaction-traversal-qualification-20261010",
+  "pid": 131436,
+  "invocation": "c56c65f782b14e1ca8f024b2d3d2d57a",
+  "started": "2026-10-10T14:54:49.254558+00:00",
+  "commands": [
+    {
+      "command": [
+        "go",
+        "test",
+        "-p=1",
+        "-race",
+        "-c",
+        "-o",
+        "/home/exedev/js-wf-compaction-traversal-qualification-20261010/graph-race.test",
+        "./internal/graphpublication"
+      ],
+      "cwd": "/home/exedev/js-wf-compaction-traversal-qualification",
+      "started": "2026-10-10T14:54:49.571975+00:00",
+      "seeds": "1000",
+      "exit": 0,
+      "finished": "2026-10-10T14:55:00.236834+00:00"
+    },
+    {
+      "command": [
+        "go",
+        "tool",
+        "test2json",
+        "-t",
+        "-p",
+        "js-wf/internal/graphpublication",
+        "/home/exedev/js-wf-compaction-traversal-qualification-20261010/graph-race.test",
+        "-test.v=test2json",
+        "-test.run=^TestGraphPrefixCompaction",
+        "-test.count=1",
+        "-test.timeout=300m"
+      ],
+      "cwd": "/home/exedev/js-wf-compaction-traversal-qualification/internal/graphpublication",
+      "started": "2026-10-10T14:55:00.283251+00:00",
+      "seeds": "1000",
+      "exit": 0,
+      "finished": "2026-10-10T14:55:14.651767+00:00"
+    },
+    {
+      "command": [
+        "go",
+        "test",
+        "-p=1",
+        "-race",
+        "-overlay=/home/exedev/js-wf-compaction-traversal-qualification-20261010/overlay.json",
+        "./internal/graphpublication",
+        "-run",
+        "^TestGraphPrefixCompactionRechecksOriginalGrant$",
+        "-count=1",
+        "-v"
+      ],
+      "cwd": "/home/exedev/js-wf-compaction-traversal-qualification",
+      "started": "2026-10-10T14:55:14.652676+00:00",
+      "seeds": "1000",
+      "exit": 1,
+      "finished": "2026-10-10T14:55:21.744083+00:00"
+    },
+    {
+      "command": [
+        "go",
+        "test",
+        "-p=1",
+        "-race",
+        "-c",
+        "-o",
+        "/home/exedev/js-wf-compaction-traversal-qualification-20261010/worker-race.test",
+        "./worker"
+      ],
+      "cwd": "/home/exedev/js-wf-compaction-traversal-qualification",
+      "started": "2026-10-10T14:55:21.745403+00:00",
+      "seeds": "1000",
+      "exit": 0,
+      "finished": "2026-10-10T14:55:44.369985+00:00"
+    },
+    {
+      "command": [
+        "go",
+        "tool",
+        "test2json",
+        "-t",
+        "-p",
+        "js-wf/worker",
+        "/home/exedev/js-wf-compaction-traversal-qualification-20261010/worker-race.test",
+        "-test.v=test2json",
+        "-test.run=^TestNativeGraphContinuationGlobalLimitAndTerminalSlot$/R1/archive=true$",
+        "-test.count=1",
+        "-test.timeout=300m"
+      ],
+      "cwd": "/home/exedev/js-wf-compaction-traversal-qualification/worker",
+      "started": "2026-10-10T14:55:44.532283+00:00",
+      "seeds": "1000",
+      "exit": 0,
+      "finished": "2026-10-10T14:56:41.095742+00:00"
+    },
+    {
+      "command": [
+        "go",
+        "test",
+        "-p=1",
+        "-race",
+        "-c",
+        "-o",
+        "/home/exedev/js-wf-compaction-traversal-qualification-20261010/sim-race.test",
+        "./sim"
+      ],
+      "cwd": "/home/exedev/js-wf-compaction-traversal-qualification",
+      "started": "2026-10-10T14:56:41.096181+00:00",
+      "seeds": "1000",
+      "exit": 0,
+      "finished": "2026-10-10T14:57:16.480526+00:00"
+    },
+    {
+      "command": [
+        "go",
+        "tool",
+        "test2json",
+        "-t",
+        "-p",
+        "js-wf/sim",
+        "/home/exedev/js-wf-compaction-traversal-qualification-20261010/sim-race.test",
+        "-test.v=test2json",
+        "-test.run=^TestSeededGraphCheckpointCompactionReplay$",
+        "-test.count=1",
+        "-test.timeout=300m"
+      ],
+      "cwd": "/home/exedev/js-wf-compaction-traversal-qualification/sim",
+      "started": "2026-10-10T14:57:16.575791+00:00",
+      "seeds": "1000",
+      "exit": 0,
+      "finished": "2026-10-10T15:14:44.951274+00:00"
+    },
+    {
+      "command": [
+        "go",
+        "test",
+        "-p=1",
+        "-c",
+        "-o",
+        "/home/exedev/js-wf-compaction-traversal-qualification-20261010/sim-normal.test",
+        "./sim"
+      ],
+      "cwd": "/home/exedev/js-wf-compaction-traversal-qualification",
+      "started": "2026-10-10T15:14:44.952162+00:00",
+      "seeds": "1000",
+      "exit": 0,
+      "finished": "2026-10-10T15:15:14.237021+00:00"
+    },
+    {
+      "command": [
+        "go",
+        "tool",
+        "test2json",
+        "-t",
+        "-p",
+        "js-wf/sim",
+        "/home/exedev/js-wf-compaction-traversal-qualification-20261010/sim-normal.test",
+        "-test.v=test2json",
+        "-test.run=^TestPinnedRegressionCorpus$",
+        "-test.count=1",
+        "-test.timeout=300m"
+      ],
+      "cwd": "/home/exedev/js-wf-compaction-traversal-qualification/sim",
+      "started": "2026-10-10T15:15:14.277374+00:00",
+      "seeds": "1000",
+      "exit": 0,
+      "finished": "2026-10-10T15:15:21.489718+00:00"
+    },
+    {
+      "command": [
+        "go",
+        "tool",
+        "test2json",
+        "-t",
+        "-p",
+        "js-wf/sim",
+        "/home/exedev/js-wf-compaction-traversal-qualification-20261010/sim-normal.test",
+        "-test.v=test2json",
+        "-test.run=^TestSeededGraphCheckpointCompactionReplay$",
+        "-test.count=1",
+        "-test.timeout=300m"
+      ],
+      "cwd": "/home/exedev/js-wf-compaction-traversal-qualification/sim",
+      "started": "2026-10-10T15:15:21.490200+00:00",
+      "seeds": "100000",
+      "exit": 0,
+      "finished": "2026-10-10T17:12:55.069991+00:00"
+    }
+  ],
+  "binaries": {
+    "graph-race": {
+      "path": "/home/exedev/js-wf-compaction-traversal-qualification-20261010/graph-race.test",
+      "race": true,
+      "sha256": "de273f9b75650aa8df1aadfe10754e38f1d4d872734ea2f7fa77e09bf50accae",
+      "build_info": "/home/exedev/js-wf-compaction-traversal-qualification-20261010/graph-race.test: go1.27.1\n\tpath\tjs-wf/internal/graphpublication.test\n\tmod\tjs-wf\t(devel)\t\n\tdep\tgithub.com/antithesishq/antithesis-sdk-go\tv0.8.0-default-no-op\th1:1BOWQJweNyvZMlpAHXGLiZQn9S+QXGcz3xh94lC0w6E=\n\tdep\tgithub.com/klauspost/compress\tv1.20.0\th1:a3C1ke2ohxFymNlb2HWAHjDeKCI90scRskErZkR0ezA=\n\tdep\tgithub.com/minio/highwayhash\tv1.0.4\th1:asJizugGgchQod2ja9NJlGOWq4s7KsAWr5XUc9Clgl4=\n\tdep\tgithub.com/nats-io/jwt/v2\tv2.8.2\th1:XXRgB60MSTnqsRwejQurVDs/hcv2dkt+86GjI+I/bMc=\n\tdep\tgithub.com/nats-io/nats-server/v2\tv2.15.0\th1:M99yf0y05rTr46/qc/Is6ZAowI58Ryp2SjufLCUeVJc=\n\tdep\tgithub.com/nats-io/nats.go\tv1.54.0\th1:vsXoOxjHp/GmPUN+EcI7uOf/uB+iAP+kEsAFNQN0yzA=\n\tdep\tgithub.com/nats-io/nkeys\tv0.4.16\th1:rd5oAuLOb8mnAycB0xleuEBNS1pVVnN0fv/FF34Eypg=\n\tdep\tgithub.com/nats-io/nuid\tv1.0.1\th1:5iA8DT8V7q8WK2EScv2padNa/rTESc1KdnPw4TC2paw=\n\tdep\tgolang.org/x/crypto\tv0.57.0\th1:3ZVCjf8Ggz7zneR/EHRVx68Ctf+2pmIMP2UFhh9cC6M=\n\tdep\tgolang.org/x/sys\tv0.48.0\th1:bbX/i/6MgT9BVLM9RT1thmxL04yeTAhbEz4SyadbXoo=\n\tdep\tgolang.org/x/time\tv0.16.0\th1:vMb6ptszcQMkcwiRTAuNNU50gom6++Q/6gY2hDM6VDE=\n\tbuild\t-buildmode=exe\n\tbuild\t-compiler=gc\n\tbuild\t-race=true\n\tbuild\tCGO_ENABLED=1\n\tbuild\tCGO_CFLAGS=\n\tbuild\tCGO_CPPFLAGS=\n\tbuild\tCGO_CXXFLAGS=\n\tbuild\tCGO_LDFLAGS=\n\tbuild\tGOARCH=amd64\n\tbuild\tGOOS=linux\n\tbuild\tGOAMD64=v1\n"
+    },
+    "worker-race": {
+      "path": "/home/exedev/js-wf-compaction-traversal-qualification-20261010/worker-race.test",
+      "race": true,
+      "sha256": "c2308f3f78c476f84e6a615ed28a35d6599edd184dcfc85114de1ea0dad5427e",
+      "build_info": "/home/exedev/js-wf-compaction-traversal-qualification-20261010/worker-race.test: go1.27.1\n\tpath\tjs-wf/worker.test\n\tmod\tjs-wf\t(devel)\t\n\tdep\tgithub.com/anishathalye/porcupine\tv1.3.1\th1:fBZ4/NGNPnIDdd6xNtrNk9/GiEQ0L4FO5+scINN+t0E=\n\tdep\tgithub.com/antithesishq/antithesis-sdk-go\tv0.8.0-default-no-op\th1:1BOWQJweNyvZMlpAHXGLiZQn9S+QXGcz3xh94lC0w6E=\n\tdep\tgithub.com/klauspost/compress\tv1.20.0\th1:a3C1ke2ohxFymNlb2HWAHjDeKCI90scRskErZkR0ezA=\n\tdep\tgithub.com/minio/highwayhash\tv1.0.4\th1:asJizugGgchQod2ja9NJlGOWq4s7KsAWr5XUc9Clgl4=\n\tdep\tgithub.com/nats-io/jwt/v2\tv2.8.2\th1:XXRgB60MSTnqsRwejQurVDs/hcv2dkt+86GjI+I/bMc=\n\tdep\tgithub.com/nats-io/nats-server/v2\tv2.15.0\th1:M99yf0y05rTr46/qc/Is6ZAowI58Ryp2SjufLCUeVJc=\n\tdep\tgithub.com/nats-io/nats.go\tv1.54.0\th1:vsXoOxjHp/GmPUN+EcI7uOf/uB+iAP+kEsAFNQN0yzA=\n\tdep\tgithub.com/nats-io/nkeys\tv0.4.16\th1:rd5oAuLOb8mnAycB0xleuEBNS1pVVnN0fv/FF34Eypg=\n\tdep\tgithub.com/nats-io/nuid\tv1.0.1\th1:5iA8DT8V7q8WK2EScv2padNa/rTESc1KdnPw4TC2paw=\n\tdep\tgolang.org/x/crypto\tv0.57.0\th1:3ZVCjf8Ggz7zneR/EHRVx68Ctf+2pmIMP2UFhh9cC6M=\n\tdep\tgolang.org/x/sys\tv0.48.0\th1:bbX/i/6MgT9BVLM9RT1thmxL04yeTAhbEz4SyadbXoo=\n\tdep\tgolang.org/x/time\tv0.16.0\th1:vMb6ptszcQMkcwiRTAuNNU50gom6++Q/6gY2hDM6VDE=\n\tdep\tgoogle.golang.org/protobuf\tv1.36.6\th1:z1NpPI8ku2WgiWnf+t9wTPsn6eP1L7ksHUlkfLvd9xY=\n\tbuild\t-buildmode=exe\n\tbuild\t-compiler=gc\n\tbuild\t-race=true\n\tbuild\tCGO_ENABLED=1\n\tbuild\tCGO_CFLAGS=\n\tbuild\tCGO_CPPFLAGS=\n\tbuild\tCGO_CXXFLAGS=\n\tbuild\tCGO_LDFLAGS=\n\tbuild\tGOARCH=amd64\n\tbuild\tGOOS=linux\n\tbuild\tGOAMD64=v1\n"
+    },
+    "sim-race": {
+      "path": "/home/exedev/js-wf-compaction-traversal-qualification-20261010/sim-race.test",
+      "race": true,
+      "sha256": "7834ca7969358c68849928afa009c2b28319d5edb9b9a06a9db0febaa2eb85db",
+      "build_info": "/home/exedev/js-wf-compaction-traversal-qualification-20261010/sim-race.test: go1.27.1\n\tpath\tjs-wf/sim.test\n\tmod\tjs-wf\t(devel)\t\n\tdep\tgithub.com/anishathalye/porcupine\tv1.3.1\th1:fBZ4/NGNPnIDdd6xNtrNk9/GiEQ0L4FO5+scINN+t0E=\n\tdep\tgithub.com/klauspost/compress\tv1.20.0\th1:a3C1ke2ohxFymNlb2HWAHjDeKCI90scRskErZkR0ezA=\n\tdep\tgithub.com/nats-io/nats.go\tv1.54.0\th1:vsXoOxjHp/GmPUN+EcI7uOf/uB+iAP+kEsAFNQN0yzA=\n\tdep\tgithub.com/nats-io/nkeys\tv0.4.16\th1:rd5oAuLOb8mnAycB0xleuEBNS1pVVnN0fv/FF34Eypg=\n\tdep\tgithub.com/nats-io/nuid\tv1.0.1\th1:5iA8DT8V7q8WK2EScv2padNa/rTESc1KdnPw4TC2paw=\n\tdep\tgolang.org/x/crypto\tv0.57.0\th1:3ZVCjf8Ggz7zneR/EHRVx68Ctf+2pmIMP2UFhh9cC6M=\n\tdep\tgolang.org/x/sys\tv0.48.0\th1:bbX/i/6MgT9BVLM9RT1thmxL04yeTAhbEz4SyadbXoo=\n\tdep\tgoogle.golang.org/protobuf\tv1.36.6\th1:z1NpPI8ku2WgiWnf+t9wTPsn6eP1L7ksHUlkfLvd9xY=\n\tbuild\t-buildmode=exe\n\tbuild\t-compiler=gc\n\tbuild\t-race=true\n\tbuild\tCGO_ENABLED=1\n\tbuild\tCGO_CFLAGS=\n\tbuild\tCGO_CPPFLAGS=\n\tbuild\tCGO_CXXFLAGS=\n\tbuild\tCGO_LDFLAGS=\n\tbuild\tGOARCH=amd64\n\tbuild\tGOOS=linux\n\tbuild\tGOAMD64=v1\n"
+    },
+    "sim-normal": {
+      "path": "/home/exedev/js-wf-compaction-traversal-qualification-20261010/sim-normal.test",
+      "race": false,
+      "sha256": "f56534a294eeb55090c0f6e5457b586f5c789a907e35c048faa811f109cd1a7e",
+      "build_info": "/home/exedev/js-wf-compaction-traversal-qualification-20261010/sim-normal.test: go1.27.1\n\tpath\tjs-wf/sim.test\n\tmod\tjs-wf\t(devel)\t\n\tdep\tgithub.com/anishathalye/porcupine\tv1.3.1\th1:fBZ4/NGNPnIDdd6xNtrNk9/GiEQ0L4FO5+scINN+t0E=\n\tdep\tgithub.com/klauspost/compress\tv1.20.0\th1:a3C1ke2ohxFymNlb2HWAHjDeKCI90scRskErZkR0ezA=\n\tdep\tgithub.com/nats-io/nats.go\tv1.54.0\th1:vsXoOxjHp/GmPUN+EcI7uOf/uB+iAP+kEsAFNQN0yzA=\n\tdep\tgithub.com/nats-io/nkeys\tv0.4.16\th1:rd5oAuLOb8mnAycB0xleuEBNS1pVVnN0fv/FF34Eypg=\n\tdep\tgithub.com/nats-io/nuid\tv1.0.1\th1:5iA8DT8V7q8WK2EScv2padNa/rTESc1KdnPw4TC2paw=\n\tdep\tgolang.org/x/crypto\tv0.57.0\th1:3ZVCjf8Ggz7zneR/EHRVx68Ctf+2pmIMP2UFhh9cC6M=\n\tdep\tgolang.org/x/sys\tv0.48.0\th1:bbX/i/6MgT9BVLM9RT1thmxL04yeTAhbEz4SyadbXoo=\n\tdep\tgoogle.golang.org/protobuf\tv1.36.6\th1:z1NpPI8ku2WgiWnf+t9wTPsn6eP1L7ksHUlkfLvd9xY=\n\tbuild\t-buildmode=exe\n\tbuild\t-compiler=gc\n\tbuild\tCGO_ENABLED=1\n\tbuild\tCGO_CFLAGS=\n\tbuild\tCGO_CPPFLAGS=\n\tbuild\tCGO_CXXFLAGS=\n\tbuild\tCGO_LDFLAGS=\n\tbuild\tGOARCH=amd64\n\tbuild\tGOOS=linux\n\tbuild\tGOAMD64=v1\n"
+    }
+  },
+  "accepted": false,
+  "driver_sha256": "aa2bc0be45ec82b86c10d65ab047b78efefb8645112bc99a5f0d241899339145",
+  "environment": {
+    "GOMAXPROCS": "2",
+    "GOMEMLIMIT": "512MiB",
+    "SIM_SEEDS": "1000",
+    "SIM_COVERAGE_SUMMARY": "1",
+    "SIM_PROGRESS": "1",
+    "WF_GRAPH_CONTINUATION_LIMIT_BUDGET": "64",
+    "GOTMPDIR": "/home/exedev/js-wf-compaction-traversal-qualification-20261010/go-tmp",
+    "TMPDIR": "/home/exedev/js-wf-compaction-traversal-qualification-20261010/native-tmp"
+  },
+  "phase": "closed",
+  "negative_verified": true,
+  "finished": "2026-10-10T17:12:55.456219+00:00",
+  "exit": 0
+}

@@ -1,5 +1,17 @@
 # JetStream Durable Workflow Runtime — Implementation Plan
 
+## Older compaction campaign finished; known-defect source remains unaccepted — 2026-10-10
+
+Matching loaded supervisor identity, MainPID0 and actual exit0 are confirmed.
+The independent review verifies3407 Git inputs, exact commands, source/binary
+stability,1000 race and100000 normal modeled compaction seeds,853 pins, six
+bypass failures and native R1/archive64. Frozen source2de6dfa contains the known
+relocated-node grant omission: execution evidence is verified, acceptance is
+false. This cannot qualify the corrected source or the failed actual100000-entry
+native gate. Raw execution evidence is retained and every original open gate
+stays open. The separate older158-family sharded race job remains live.
+[Terminal review and scope](scale/graph-compaction-traversal-2026-10-10/README.md).
+
 ## Checkpoint publication accepts bounded verification batches — 2026-10-10
 
 `BeginCheckpointPublication` now owns a live exact reader and advances verification

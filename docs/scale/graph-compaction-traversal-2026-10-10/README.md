@@ -27,3 +27,26 @@ The earlier unfrozen compaction1000 race attempt closes nonzero at600.085s under
 ## Confirmed node-grant defect in this frozen source
 
 The graph Walk callback flag is true for nodes. Compaction interprets it as payload and skips every relocated node grant check, instead redundantly checking payload grants. Sixteen new directed controls fail at this source by committing readable nodes whose ready/origin/destination/location grant has been revoked, across live/archive leaves/branches. The production correction is later and outside this immutable qualifier. Its execution may finish, but the independent review now reports execution evidence separately and `accepted=false` because the source has this confirmed defect. No existing successful test proves the omitted node-grant invariant. The qualifier remains running unchanged; its original source/commands/events are still useful evidence and cannot qualify the corrected code. [Counterexample evidence](../graph-compaction-node-grants-2026-10-10/original-node-grant-failures.log).
+
+## Terminal review — 2026-10-10 17:12 UTC
+
+The original supervisor finished with a matching loaded InvocationID, MainPID0
+and actual exit0. Independent review verified all3407 Git inputs and unchanged
+source, binary hashes/build modes, all ten exact commands/expected exits,
+1000 race and100000 normal compaction seed bodies,853 saved pins, six deliberate
+original-grant bypass failures and native R1/archive64 (two checkpoints, terminal
+slot63, zero forbidden effects). [Review](qualification-review.json).
+
+`execution_evidence_verified=true`, **`accepted=false`**: frozen source2de6dfa
+contains the confirmed relocated-node grant validation defect. This verifies
+execution of the old commands and does not qualify corrected grant safety or
+latest-source publication. The100000 normal result is a simulation seed campaign,
+not the failed actual100000-entry native gate. That native gate and all original
+whole-plan requirements remain open.
+
+Raw event files, before/after source manifests, executed driver, exact negative
+overlay, compile logs and terminal supervisor receipt are retained in
+[terminal execution archive](terminal-execution.tar.gz), with an independent
+[artifact digest inventory](terminal-artifacts-sha256.json). The original external
+root and binaries remain available to the existing reviewer. This job is closed;
+the separate older158-family sharded race job remains live on source0404fc0.
