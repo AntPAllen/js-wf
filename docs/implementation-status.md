@@ -1,5 +1,17 @@
 # Implementation status against the supplied plan
 
+## Canonical replay input binding qualification accepted — 2026-10-10
+
+Frozen `66fe5bc` retry passes independent review: actual retained supervisor
+exit 0, 3,344 exact Git inputs, six binaries, 65 full SDK race tests, 15 input
+controls, 841 saved traces, prior format/metadata/selected-child controls,
+CLI provenance/legacy plugin, six native exports, eight worker controls,
+two required mutant failures and 209 offline CLI outcomes. Original dab8be3
+failure is preserved separately. [Evidence](scale/graph-replay-input-binding-2026-10-10/review.json).
+Later envelope admission and the new running-effect cancellation matrix are
+separate. Both older broad campaigns remain live; all remaining original
+fault/retention/import/admission/latest-seed/rollout gates stay open.
+
 ## Replay envelope ambiguity admission fixed — 2026-10-10
 
 Offline import now rejects duplicate format/identity/input keys, typed case

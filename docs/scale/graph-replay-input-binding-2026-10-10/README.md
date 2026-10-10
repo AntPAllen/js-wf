@@ -63,3 +63,15 @@ Qualification remains pending.
 
 Retry source `66fe5bc8e49b52b07ff098c9a8be2c8246e14187` is confirmed live under `js-wf-replay-input-binding-legacy-20261010.service`.
 [Retry launch identity](launch.json) records its process and invocation.
+
+## Frozen retry accepted
+
+Independent [review](review.json) verifies source `66fe5bc`, 3,344 exact Git
+inputs, all six binary identities and actual retained supervisor exit 0. It
+accepts 65 full SDK race tests, 15 input controls, 841 saved traces, prior
+format/metadata/selected-child controls, CLI provenance/legacy plugin, six
+native exports, eight worker export controls, two required mutant failures
+and 209 actual offline CLI outcomes. [Retained proof](qualified/state.json)
+preserves command results and serialized mutations. Original dab8be3 exit 1
+remains separate and unaccepted. Later envelope admission is not covered.
+Broader original gates remain open.
