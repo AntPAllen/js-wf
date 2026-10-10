@@ -22,3 +22,16 @@ canonical/compatibility terminal agreement. R1/live and both R3 variants,
 collection, SIGKILL/VM/power/storage faults, broader admission/retention/import
 matrices and all original requirements remain separate. The production run is
 unaccepted until those receipts are inspected.
+
+## Live launch
+
+Frozen source `42058f2bb00657fe1786027f4b08e6a2e6e921ba` is running under
+`js-wf-graph-production-limit-20261010.service`. [Launch identity](launch.json)
+records the live supervisor and invocation; `state.json` remains uncommitted
+operational state while running. The [independent reviewer](review.py) refuses
+live/nonzero evidence. After the actual supervisor stops, review with
+`python3 docs/scale/graph-production-limit-2026-10-10/review.py`; no acceptance
+is inferred from starting the job or from a partial progress log.
+
+[Small development race result](padding20-race.log) and
+[actual command/source receipt](padding20-receipt.json) are preserved.

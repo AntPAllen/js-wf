@@ -1,5 +1,25 @@
 # JetStream Durable Workflow Runtime — Implementation Plan
 
+## Actual graph production-cap campaign launched — 2026-10-10
+
+Frozen `42058f2` extends the existing native graph continuation fixture to build
+49,992 real SDK SetState operations across two stages and reach the unchanged
+100,000-entry production cap. Every fresh delivery keeps its lease heartbeat.
+The small R1/archive budget20 race check passes two checkpoints, terminal slot19,
+exact limit rejection and zero forbidden effects. This small check does not
+qualify the production cap.
+
+The actual R1/archive race case is now running under durable user unit
+`js-wf-graph-production-limit-20261010.service`, with a sparse frozen checkout,
+retained binary, source inventories, raw events and actual command receipts.
+The existing `d504a33` full156 race campaign continues separately. Neither live
+run is accepted. The production-cap reviewer requires terminal Go/supervisor
+success and exact 100,000-entry evidence before promotion.
+[Launch, runner, small check and review requirements](scale/graph-production-limit-2026-10-10/README.md).
+All other replica/archive modes, collection, fault/retention/admission/import
+matrices, public admission, production collection and broader original gates
+remain open.
+
 ## Shared SDK offline child selection fixed and qualified — 2026-10-10
 
 Frozen `02c3506` installs the verified child signal selector in initial and
