@@ -98,15 +98,29 @@ for path in exports:
         assert records[-1]['kind'] == 'Completed' and base64.b64decode(records[-1]['payload']['result']) == b'60'
     if not child:
         assert len(records) == (13 if path.name == 'suspended.json' else 18)
+    else:
+        expected_records = (20 if cached else 21) if path.name == 'suspended.json' else 17 if path.name == 'child-pending.json' else 25 if cached else 26
+        assert len(records) == expected_records
     if path.name == 'missing-objects.json':
         assert bundle['objects'] == {}
         continue
     frames = []
     child_ref = None
     for record in records:
-        if record['kind'] == 'SignalConsumed' and record['payload'].get('child'):
-            declaration = record['payload']['child']
-            assert declaration['type'] == 'offlinechild' and declaration['inv_seq'] > 1
+        if record['kind'] == 'SignalConsumed' and record['payload'].get('graph_child'):
+            declaration = record['payload']['graph_child']
+            assert declaration['type'] == 'offlinechild' and declaration['inv_seq'] == 2
+            event = record['payload']
+            body = base64.b64decode(bundle['objects'][event['ref']]) if event.get('ref') else base64.b64decode(event['payload'])
+            assert hashlib.sha256(body).hexdigest() == event['hash']
+            outcome = json.loads(body)
+            assert outcome['inv_seq'] == declaration['inv_seq']
+            if failed:
+                assert outcome['error'] == 'planned offline child failure'
+                assert not outcome.get('result_ref') and not declaration.get('result_ref')
+            else:
+                assert not outcome.get('error')
+                assert outcome['result_ref'] == declaration['result_ref'] and outcome['result_hash'] == declaration['result_hash']
             if not failed:
                 child_ref = declaration['result_ref']
                 if path.name == 'missing-child-result.json':
@@ -116,7 +130,7 @@ for path in exports:
                     assert owned == json.dumps('x' * 700000).encode()
                     assert hashlib.sha256(owned).hexdigest() == declaration['result_hash']
     if child and path.name != 'child-pending.json':
-        assert sum(r['kind'] == 'SignalConsumed' and bool(r['payload'].get('child')) for r in records) == 1
+        assert sum(r['kind'] == 'SignalConsumed' and bool(r['payload'].get('graph_child')) for r in records) == 1
         if not failed:
             assert child_ref
     for name, value in bundle['objects'].items():

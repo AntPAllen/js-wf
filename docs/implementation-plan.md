@@ -1,5 +1,26 @@
 # JetStream Durable Workflow Runtime — Implementation Plan
 
+## Healthy canonical child offline replay matrix verified — 2026-10-10
+
+Frozenccc8f19 passes all16 native race R1/R3-domain × live/archive × cached/pending
+× success/failure child cases in792.19s, plus four state-only regressions;
+complete package922.202s and actual child/supervisor exit0. Independent review
+binds3,312 unchanged exact Git inputs, retained race worker/CLI/plugin binaries,
+all76 exports/negative controls and exact frame/owned child bytes. Parent replay
+works after all child-owned receipts and compatibility invocation sources are
+physically removed. Pending cases retain an actual17-record child wait through
+completion; cached frames restore after source collection. All parents complete
+once with result60/effects1 and one child; missing stage/frame/result bytes fail
+specifically and no offline callback runs. [Closed evidence and full scope](scale/graph-continuation-child-offline-2026-10-10/README.md).
+A separate local diagnostic reveals that this old CLI accepts contradictory
+child type/ID/invocation/result annotations. New57393ac validates those bindings
+before plugin loading; its source-qualified directed/legacy and all-retained-
+bundle qualification is now running independently. [Defect reproduction and fix](scale/graph-offline-child-provenance-2026-10-10/README.md).
+Full offline provenance/fault/buffered-signal/import/rollout, retention/admission,
+actual100,000-entry cap, public/default continuation admission, production
+collection and every broader original gate remain open. The separate d504a33
+full156 race campaign is still live and excludes these later changes.
+
 ## Canonical continuation child offline replay matrix launched — 2026-10-10
 
 Frozenccc8f19 is running a durable native race qualification:16 R1/R3-domain ×

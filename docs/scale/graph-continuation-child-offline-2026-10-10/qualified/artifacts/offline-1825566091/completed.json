@@ -1,0 +1,235 @@
+{
+  "type": "continued",
+  "id": "offline",
+  "inv_seq": 1,
+  "input": "Nw==",
+  "input_hash": "7902699be42c8a8e46fbbb4501726517e86b22c56a189f7625a6da49081b2451",
+  "journal": [
+    {
+      "epoch": 1,
+      "index": 0,
+      "kind": "Started",
+      "payload": {
+        "input_sha256": "7902699be42c8a8e46fbbb4501726517e86b22c56a189f7625a6da49081b2451"
+      },
+      "worker_id": "offline-worker",
+      "sequence": 1
+    },
+    {
+      "epoch": 1,
+      "index": 1,
+      "kind": "StepRequested",
+      "payload": {
+        "kind": "state_set",
+        "name": "value",
+        "input_hash": "535fa30d7e25dd8a49f1536779734ec8286108d115da5045d77f3b4185d8f790",
+        "fire_at": "0001-01-01T00:00:00Z"
+      },
+      "worker_id": "offline-worker",
+      "sequence": 2
+    },
+    {
+      "epoch": 1,
+      "index": 2,
+      "kind": "StepCompleted",
+      "payload": {
+        "result": {
+          "found": true,
+          "value": 23
+        }
+      },
+      "worker_id": "offline-worker",
+      "sequence": 3
+    },
+    {
+      "epoch": 1,
+      "index": 3,
+      "kind": "StepRequested",
+      "payload": {
+        "kind": "checkpoint",
+        "name": "middle_v1",
+        "input_hash": "7902699be42c8a8e46fbbb4501726517e86b22c56a189f7625a6da49081b2451",
+        "fire_at": "0001-01-01T00:00:00Z"
+      },
+      "worker_id": "offline-worker",
+      "sequence": 4
+    },
+    {
+      "epoch": 1,
+      "index": 4,
+      "kind": "StepCompleted",
+      "payload": {
+        "checkpoint_metadata_hash": "521fa4e1ccb9e56970eee1692eca684961719b53f437cb1c656a995ad6f23c05",
+        "checkpoint_metadata_ref": "step-result-521fa4e1ccb9e56970eee1692eca684961719b53f437cb1c656a995ad6f23c05",
+        "result_hash": "02083ec90f4e509c4c447bf2ba7f2d8d158321c5546f1ad9d07650b3f8c2d997",
+        "result_ref": "step-result-02083ec90f4e509c4c447bf2ba7f2d8d158321c5546f1ad9d07650b3f8c2d997"
+      },
+      "worker_id": "offline-worker",
+      "sequence": 5
+    },
+    {
+      "epoch": 1,
+      "index": 5,
+      "kind": "Suspended",
+      "payload": {
+        "waiting_on": "continuation:middle_v1"
+      },
+      "worker_id": "offline-worker",
+      "sequence": 6
+    },
+    {
+      "epoch": 12,
+      "index": 6,
+      "kind": "StepRequested",
+      "payload": {
+        "kind": "state_get",
+        "name": "value",
+        "input_hash": "74234e98afe7498fb5daf1f36ac2d78acc339464f950703b8c019892f982b90b",
+        "fire_at": "0001-01-01T00:00:00Z"
+      },
+      "worker_id": "offline-worker",
+      "sequence": 7
+    },
+    {
+      "epoch": 12,
+      "index": 7,
+      "kind": "StepCompleted",
+      "payload": {
+        "result": {
+          "found": true,
+          "value": 23
+        }
+      },
+      "worker_id": "offline-worker",
+      "sequence": 8
+    },
+    {
+      "epoch": 12,
+      "index": 8,
+      "kind": "StepRequested",
+      "payload": {
+        "kind": "checkpoint",
+        "name": "finish_v1",
+        "input_hash": "624b60c58c9d8bfb6ff1886c2fd605d2adeb6ea4da576068201b6c6958ce93f4",
+        "fire_at": "0001-01-01T00:00:00Z"
+      },
+      "worker_id": "offline-worker",
+      "sequence": 9
+    },
+    {
+      "epoch": 12,
+      "index": 9,
+      "kind": "StepCompleted",
+      "payload": {
+        "checkpoint_metadata_hash": "4c2a8550a92ef18690ea490034a80312044c8aaeb9f6babb20645c2812caeff9",
+        "checkpoint_metadata_ref": "step-result-4c2a8550a92ef18690ea490034a80312044c8aaeb9f6babb20645c2812caeff9",
+        "result_hash": "da8218203495d8ee66366127e3f16476d17fa4699baebf2090947fd1e67657f0",
+        "result_ref": "step-result-da8218203495d8ee66366127e3f16476d17fa4699baebf2090947fd1e67657f0"
+      },
+      "worker_id": "offline-worker",
+      "sequence": 10
+    },
+    {
+      "epoch": 12,
+      "index": 10,
+      "kind": "Suspended",
+      "payload": {
+        "waiting_on": "continuation:finish_v1"
+      },
+      "worker_id": "offline-worker",
+      "sequence": 11
+    },
+    {
+      "epoch": 22,
+      "index": 11,
+      "kind": "StepRequested",
+      "payload": {
+        "kind": "signal",
+        "name": "gate",
+        "input_hash": "",
+        "fire_at": "0001-01-01T00:00:00Z"
+      },
+      "worker_id": "offline-worker",
+      "sequence": 12
+    },
+    {
+      "epoch": 22,
+      "index": 12,
+      "kind": "Suspended",
+      "payload": {
+        "waiting_on": "signal:gate"
+      },
+      "worker_id": "offline-worker",
+      "sequence": 13
+    },
+    {
+      "epoch": 27,
+      "index": 13,
+      "kind": "SignalConsumed",
+      "payload": {
+        "sig_seq": 1,
+        "name": "gate",
+        "ref": "graph-signal-b5bea41b6c623f7c09f1bf24dcae58ebab3c0cdd90ad966bc43a45b44867e12b",
+        "hash": "b5bea41b6c623f7c09f1bf24dcae58ebab3c0cdd90ad966bc43a45b44867e12b",
+        "canonical_signal": {
+          "index": 0,
+          "token": "944ee902e05362244297869dd6efd141"
+        }
+      },
+      "worker_id": "offline-worker",
+      "sequence": 14
+    },
+    {
+      "epoch": 27,
+      "index": 14,
+      "kind": "StepCompleted",
+      "payload": {
+        "signal_seq": 1
+      },
+      "worker_id": "offline-worker",
+      "sequence": 15
+    },
+    {
+      "epoch": 27,
+      "index": 15,
+      "kind": "StepRequested",
+      "payload": {
+        "kind": "run",
+        "name": "double",
+        "input_hash": "624b60c58c9d8bfb6ff1886c2fd605d2adeb6ea4da576068201b6c6958ce93f4",
+        "fire_at": "0001-01-01T00:00:00Z"
+      },
+      "worker_id": "offline-worker",
+      "sequence": 16
+    },
+    {
+      "epoch": 27,
+      "index": 16,
+      "kind": "StepCompleted",
+      "payload": {
+        "result": 60
+      },
+      "worker_id": "offline-worker",
+      "sequence": 17
+    },
+    {
+      "epoch": 27,
+      "index": 17,
+      "kind": "Completed",
+      "payload": {
+        "inv_seq": 1,
+        "result": "NjA="
+      },
+      "worker_id": "offline-worker",
+      "sequence": 18
+    }
+  ],
+  "objects": {
+    "graph-signal-b5bea41b6c623f7c09f1bf24dcae58ebab3c0cdd90ad966bc43a45b44867e12b": "dHJ1ZQ==",
+    "input:7902699be42c8a8e46fbbb4501726517e86b22c56a189f7625a6da49081b2451": "Nw==",
+    "step-result-02083ec90f4e509c4c447bf2ba7f2d8d158321c5546f1ad9d07650b3f8c2d997": "eyJ2ZXJzaW9uIjoxLCJpZGVudGl0eSI6eyJ0eXBlIjoiY29udGludWVkIiwiaWQiOiJvZmZsaW5lIiwiaW52X3NlcSI6MX0sInN0YWdlIjoibWlkZGxlX3YxIiwiZGF0YSI6NywiYW5jaG9yIjp7ImluZGV4Ijo0LCJlcG9jaCI6MX0sInN0ZXBfcG9zaXRpb24iOjQsInN0YXRlIjp7InZhbHVlIjoyM30sImNvbnN1bWVkX3NpZ25hbHMiOm51bGwsInByb21pc2Vfb3V0Y29tZXMiOnt9LCJjYW5jZWxsZWRfdGltZXJzIjpudWxsLCJwYW5pY19hdHRlbXB0cyI6MH0=",
+    "step-result-4c2a8550a92ef18690ea490034a80312044c8aaeb9f6babb20645c2812caeff9": "eyJ2ZXJzaW9uIjoxLCJpZGVudGl0eSI6eyJ0eXBlIjoiY29udGludWVkIiwiaWQiOiJvZmZsaW5lIiwiaW52X3NlcSI6MX0sImFuY2hvciI6eyJpbmRleCI6OSwiZXBvY2giOjEyfSwiZnJhbWVfc2hhMjU2IjoiZGE4MjE4MjAzNDk1ZDhlZTY2MzY2MTI3ZTNmMTY0NzZkMTdmYTQ2OTliYWViZjIwOTA5NDdmZDFlNjc2NTdmMCIsImNoaWxkcmVuIjp7fSwic2lnbmFscyI6e30sInNpZ25hbF9uZXh0IjowLCJzaWduYWxfbGFzdCI6MH0=",
+    "step-result-521fa4e1ccb9e56970eee1692eca684961719b53f437cb1c656a995ad6f23c05": "eyJ2ZXJzaW9uIjoxLCJpZGVudGl0eSI6eyJ0eXBlIjoiY29udGludWVkIiwiaWQiOiJvZmZsaW5lIiwiaW52X3NlcSI6MX0sImFuY2hvciI6eyJpbmRleCI6NCwiZXBvY2giOjF9LCJmcmFtZV9zaGEyNTYiOiIwMjA4M2VjOTBmNGU1MDljNGM0NDdiZjJiYTdmMmQ4ZDE1ODMyMWM1NTQ2ZjFhZDlkMDc2NTBiM2Y4YzJkOTk3IiwiY2hpbGRyZW4iOnt9LCJzaWduYWxzIjp7fSwic2lnbmFsX25leHQiOjAsInNpZ25hbF9sYXN0IjowfQ==",
+    "step-result-da8218203495d8ee66366127e3f16476d17fa4699baebf2090947fd1e67657f0": "eyJ2ZXJzaW9uIjoxLCJpZGVudGl0eSI6eyJ0eXBlIjoiY29udGludWVkIiwiaWQiOiJvZmZsaW5lIiwiaW52X3NlcSI6MX0sInN0YWdlIjoiZmluaXNoX3YxIiwiZGF0YSI6MzAsImFuY2hvciI6eyJpbmRleCI6OSwiZXBvY2giOjEyfSwic3RlcF9wb3NpdGlvbiI6OCwic3RhdGUiOnsidmFsdWUiOjIzfSwiY29uc3VtZWRfc2lnbmFscyI6bnVsbCwicHJvbWlzZV9vdXRjb21lcyI6e30sImNhbmNlbGxlZF90aW1lcnMiOm51bGwsInBhbmljX2F0dGVtcHRzIjowfQ=="
+  }
+}
