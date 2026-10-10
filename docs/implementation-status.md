@@ -1,5 +1,19 @@
 # Implementation status against the supplied plan
 
+## Majority-partition outlier dispatch gap isolated — 2026-10-10
+
+Integer-nanosecond analysis of the retained seed2 projections verifies frozen
+`2ef3e8b` defaults: lease TTL12s, AckWait13s and held-lease NAK5s, with no matrix
+AckWait override. The 30.123950250s invocation dispatch gap precedes run617's
+second fetch; its expected NAK deadline fell 394.960143ms after partition start.
+Redelivery occurs 6.620203965s after heal; the longest recorded operation is
+29.161366ms. This does not establish broker, pull or worker-slot causality:
+those partition-wide observations are absent. A bounded reproduction needs
+them before another full campaign. [Reproducible analysis and limits](scale/corrected-partition200-2026-10-08/terminal-failure/README.md#dispatch-gap-analysis--2026-10-10).
+The unchanged majority raw p99 remains failed at30.188460653s. No native rerun
+or target relaxation was made. Both older qualifications are independently
+confirmed live with their original process and invocation identities.
+
 ## Replay epoch ownership qualification accepted — 2026-10-10
 
 Frozen `b9380db` passes independent review: 67 full SDK race tests, 848 normal

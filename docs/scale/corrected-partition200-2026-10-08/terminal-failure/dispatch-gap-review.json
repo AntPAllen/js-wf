@@ -1,0 +1,71 @@
+{
+  "source": "2ef3e8bea19c233f14c12564b4941b721913ba6b",
+  "input_sha256": {
+    "independent-failure-review.json": "cab8368cde19ebe1be6a4712e2f94e108364260b37ff246e7bcedddfee40ad06",
+    "outlier-dispatch.json": "d5113df7bff6e5349dffd3c96f392ef5233d2e2152dae01b6126d12820024f62",
+    "outlier-operations.json": "c885c4965eed0eb03e452fc243fdf32719b643d180f524370728453f39423661"
+  },
+  "source_sha256": {
+    "provision/provision.go": "333bfaa4682659cf38d728492b3acdb0f0152260cb3079733820364f1ab7fc63",
+    "worker/worker.go": "dad6d3bf0b597882403c2535f499fc161410283fda95affc5976daea7a2c165b",
+    "integration/mixed_matrix_leader_test.go": "1d853ee16f9c8e0fb2866e24f1d4f0dd5e11430f849840f55842259858097a6c"
+  },
+  "sample": {
+    "type": "matrixfanout",
+    "id": "seed-2-batch-5-4",
+    "event": "terminal",
+    "enabled": "2026-10-08T01:35:27.507155061Z",
+    "observed": "2026-10-08T01:35:57.695615714Z",
+    "delay_ns": 30188460653
+  },
+  "source_defaults_seconds": {
+    "lease_ttl": 12,
+    "ack_wait": 13,
+    "held_lease_nak_delay": 5
+  },
+  "largest_dispatch_gap_ns": 30123950250,
+  "largest_dispatch_gap_from": {
+    "At": "2026-10-08T01:35:27.51560709Z",
+    "Worker": "matrix-worker",
+    "Type": "matrixfanout",
+    "ID": "seed-2-batch-5-4",
+    "Stage": "ack",
+    "RunSequence": 615,
+    "Delivery": 1,
+    "Error": ""
+  },
+  "largest_dispatch_gap_to": {
+    "At": "2026-10-08T01:35:57.63955734Z",
+    "Worker": "matrix-worker",
+    "Type": "matrixfanout",
+    "ID": "seed-2-batch-5-4",
+    "Stage": "fetched",
+    "RunSequence": 617,
+    "Delivery": 2,
+    "Error": ""
+  },
+  "run617_nak_to_redelivery_ns": 30169510428,
+  "expected_nak_due_at_ns": 1791423332470046912,
+  "nak_due_minus_partition_start_ns": 394960143,
+  "redelivery_after_heal_ns": 6620203965,
+  "terminal_after_heal_ns": 6676262339,
+  "longest_recorded_operation": {
+    "At": "2026-10-08T01:35:57.674074202Z",
+    "Duration": 29161366,
+    "Worker": "matrix-worker",
+    "Type": "matrixfanout",
+    "ID": "seed-2-batch-5-4",
+    "RunSequence": 617,
+    "Delivery": 2,
+    "Operation": "journal_read",
+    "JournalIndex": 0,
+    "JournalKind": "",
+    "Error": "",
+    "LeaseGateWait": 0,
+    "LeaseUpdateDuration": 0,
+    "LeaseUpdateAttempted": false
+  },
+  "raw_gate_pass": false,
+  "cause_confirmed": false,
+  "scope": "Invocation projections only: no partition-wide slot occupancy, pull lifetime, server redelivery deadline, or NAK receipt proof. A successful client NAK call does not prove server processing. No native rerun or gate change."
+}
