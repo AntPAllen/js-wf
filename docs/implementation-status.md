@@ -1,5 +1,16 @@
 # Implementation status against the supplied plan
 
+## Imported journal header ambiguity rejected — 2026-10-10
+
+CLI import now rejects duplicate/case-aliased epoch, index, kind, payload field,
+worker ID and physical sequence headers before plugin admission. Payload
+contents stay opaque. Fifteen header and14 existing envelope race controls pass;
+all76 retained native exports load under race. Thirteen negative controls
+demonstrate the ordinary decoder's last-value acceptance and must fail when the
+new check is disabled. [Evidence and frozen qualification](scale/graph-replay-journal-header-2026-10-10/README.md).
+Full frozen replay qualification is prepared; it is not yet accepted. Full
+import, payload admission and all broader original gates remain open.
+
 ## Bounded seed2 partition diagnostic passes without reproducing gap — 2026-10-10
 
 Frozen `70eb819` with the exact original candidate server passes one35s workload
