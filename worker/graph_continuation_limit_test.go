@@ -24,14 +24,14 @@ import (
 
 // Test-only continuation registration. Default runs use a private budget of 16.
 // WF_GRAPH_CONTINUATION_LIMIT_BUDGET=100000 exercises the unchanged production
-// cap through real SDK appends; 20 verifies padding without a long campaign.
+// cap through real SDK appends; 20 and 64 verify padding without a long campaign.
 // Public admission remains closed.
 func TestNativeGraphContinuationGlobalLimitAndTerminalSlot(t *testing.T) {
 	budget := uint64(16)
 	if value := os.Getenv("WF_GRAPH_CONTINUATION_LIMIT_BUDGET"); value != "" {
 		parsed, err := strconv.ParseUint(value, 10, 64)
-		if err != nil || parsed != 16 && parsed != 20 && parsed != journal.MaxEntries {
-			t.Fatal("WF_GRAPH_CONTINUATION_LIMIT_BUDGET must be 16, 20 or 100000")
+		if err != nil || parsed != 16 && parsed != 20 && parsed != 64 && parsed != journal.MaxEntries {
+			t.Fatal("WF_GRAPH_CONTINUATION_LIMIT_BUDGET must be 16, 20, 64 or 100000")
 		}
 		budget = parsed
 	}
@@ -93,6 +93,20 @@ func TestNativeGraphContinuationGlobalLimitAndTerminalSlot(t *testing.T) {
 				if err != nil {
 					t.Fatal(err)
 				}
+				var profile *graphLimitProfilePort
+				if os.Getenv("WF_GRAPH_LIMIT_PORT_PROFILE") == "1" {
+					port, err := graphpublication.OpenNativePort(ctx, authority, cfg.ObjectBucket)
+					if err != nil {
+						t.Fatal(err)
+					}
+					profile = &graphLimitProfilePort{NativePort: port, totals: make(map[string]graphLimitPortTiming)}
+					// OpenNativeGraphStore above still performs native configuration
+					// admission. This test-only decorator preserves the same settings.
+					graph, err = journal.NewGraphStore(journal.GraphConfig{Protocol: graphpublication.Protocol{Port: profile}, Now: cfg.Now, PinTTL: cfg.PinTTL, IntentTTL: cfg.IntentTTL, Encoding: cfg.Encoding, PayloadReadLimit: cfg.PayloadReadLimit, CanonicalStarts: cfg.CanonicalStarts, CanonicalSignals: cfg.CanonicalSignals, CheckpointIndex: cfg.CheckpointIndex, ArchiveCheckpoints: cfg.ArchiveCheckpoints})
+					if err != nil {
+						t.Fatal(err)
+					}
+				}
 				c, err := client.New(js).WithGraphJournal(graph)
 				if err != nil {
 					t.Fatal(err)
@@ -103,6 +117,16 @@ func TestNativeGraphContinuationGlobalLimitAndTerminalSlot(t *testing.T) {
 				}
 				calls, effects := map[string]int{}, 0
 				pad := func(c *wf.Context, from, to int) error {
+					if profile != nil {
+						before, started := profile.snapshot(), time.Now()
+						defer func() {
+							data, err := json.Marshal(profile.delta(before))
+							if err != nil {
+								t.Error(err)
+							}
+							t.Logf("GRAPH_LIMIT_PORT_PROFILE from=%d to=%d wall_ns=%d operations=%s", from, to, time.Since(started).Nanoseconds(), data)
+						}()
+					}
 					for i := from; i < to; i++ {
 						if err := c.SetState("padding", i); err != nil {
 							return err
