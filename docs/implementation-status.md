@@ -20,6 +20,12 @@ supervisor persists the actual Go exit, and RemainAfterExit preserves terminal
 service identity. Setup remains 3 seconds; 128-scope batches remain 15 seconds.
 [Preparation](scale/graph-native-owned100000-2026-10-10/README.md).
 
+The 100,000-grant R1 race diagnostic started at 21:48:30 UTC under
+js-wf-native-owned100000-20261010.service, invocation
+3c0c89936f9f479c86467f9a8bc21c95, from source 24dd8af. Launch and actual child
+configuration are recorded; acceptance is false while running. The saved child
+exit and retained terminal service must both pass review before qualification.
+
 The source remains four records. Complete large renewal and actual 100,000-entry
 qualification remain open, along with all broad original gates. No production
 lifetime defaults, collection or admission change is made.

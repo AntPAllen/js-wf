@@ -36,3 +36,12 @@ supervisor.py atomically saves the actual Go exit before returning its same
 status. The service uses RemainAfterExit=yes to preserve its invocation and
 ExecMainStatus. Acceptance requires both terminal records, matching launch and
 source fingerprints, and complete test output. A launch is not acceptance.
+
+## Launch
+
+Source 24dd8af, R1, started 2026-10-10 21:48:30 UTC. The retained service is
+js-wf-native-owned100000-20261010.service with invocation
+3c0c89936f9f479c86467f9a8bc21c95. launch.json records the exact budgets and
+configuration; process-state.json records the actual child. Run review.py to
+observe live status or verify terminal completion. No acceptance is implied by
+this launch.
