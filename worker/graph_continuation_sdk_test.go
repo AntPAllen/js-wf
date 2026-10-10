@@ -107,6 +107,22 @@ func TestNativeGraphContinuationPendingChildAcrossCheckpoints(t *testing.T) {
 	}
 }
 
+func TestNativeGraphContinuationCancelPendingChild(t *testing.T) {
+	for _, domain := range []string{"", "WFCONTINUATIONSDK"} {
+		for _, archive := range []bool{false, true} {
+			for _, failed := range []bool{false, true} {
+				name := "R1"
+				if domain != "" {
+					name = "R3Domain"
+				}
+				t.Run(fmt.Sprintf("%s/archive=%t/failed=%t", name, archive, failed), func(t *testing.T) {
+					testNativeGraphContinuationSDKFlow(t, domain, false, false, true, true, archive, failed, true, true)
+				})
+			}
+		}
+	}
+}
+
 func TestNativeGraphContinuationArchiveCollection(t *testing.T) {
 	for _, domain := range []string{"", "WFCONTINUATIONSDK"} {
 		for _, mode := range []string{"state", "signals", "child", "buffered-child"} {
@@ -121,9 +137,14 @@ func TestNativeGraphContinuationArchiveCollection(t *testing.T) {
 	}
 }
 func testNativeGraphContinuationSDKFlow(t *testing.T, domain string, partition, bufferedSignals, childPromiseFlow, bufferedChild bool, archiveMode ...bool) {
+	// Optional modes: archive, failed child, pending child, cancel pending parent.
 	archive := len(archiveMode) != 0 && archiveMode[0]
 	childFailure := len(archiveMode) > 1 && archiveMode[1]
 	pendingChild := len(archiveMode) > 2 && archiveMode[2]
+	cancelPendingChild := len(archiveMode) > 3 && archiveMode[3]
+	if cancelPendingChild && !pendingChild {
+		t.Fatal("cancellation fixture requires an unresolved child")
+	}
 	if pendingChild && (!childPromiseFlow || !bufferedChild || partition) {
 		t.Fatal("pending-child fixture requires direct deliveries and a carried promise")
 	}
@@ -621,6 +642,122 @@ func testNativeGraphContinuationSDKFlow(t *testing.T, domain string, partition, 
 				t.Fatal("child wait incorrectly became checkpoint boundary wakeup", status, err)
 			}
 			t.Logf("PENDING_CHILD_SUSPENDED records=%d effects=2 child_calls=0 waiting_on=%s", len(pendingPrefix), wait.WaitingOn)
+			if cancelPendingChild {
+				sequence, err := c.Cancel(ctx, h.Type, h.ID)
+				if err != nil || sequence == 0 {
+					t.Fatal("pending parent cancellation not acknowledged", sequence, err)
+				}
+				if err := runs.Purge(ctx); err != nil {
+					t.Fatal(err)
+				}
+				signalScan, err := reconcile.NewCanonicalSignalScan(js, graph)
+				if err != nil {
+					t.Fatal(err)
+				}
+				recovered, err := signalScan.Scan(ctx, 1, 4, false)
+				if err != nil || recovered.Reenqueued != 1 {
+					t.Fatal("pending cancellation wakeup not recovered", recovered, err)
+				}
+				t.Log("PENDING_PARENT_CANCEL_WAKEUP_RECOVERED reenqueued=1")
+				execute()
+				result, err := c.Await(ctx, h.Type, h.ID)
+				if !errors.Is(err, client.ErrCancelled) || len(result) != 0 || calls["initial"] != 1 || calls["next"] != 1 || calls["finish"] != 1 || effects != 2 || childCalls != 0 {
+					t.Fatal("pending cancellation ran another stage or changed outcome", result, err, calls, effects, childCalls)
+				}
+				cancelled, _, err := graph.ReadExisting(ctx, h.Type, h.ID, h.InvSeq)
+				if err != nil || len(cancelled) <= len(pendingPrefix) {
+					t.Fatal("cancellation history absent", cancelled, err)
+				}
+				prefixBytes, _ := json.Marshal(pendingPrefix)
+				preserved, _ := json.Marshal(cancelled[:len(pendingPrefix)])
+				if !bytes.Equal(prefixBytes, preserved) {
+					t.Fatal("pending prefix changed during cancellation")
+				}
+				terminal := cancelled[len(cancelled)-1]
+				var outcome wf.Outcome
+				if terminal.Kind != journal.Failed || json.Unmarshal(terminal.Payload, &outcome) != nil || outcome.InvSeq != h.InvSeq || outcome.Error != client.ErrCancelled.Error() {
+					t.Fatal("wrong canonical cancellation terminal", terminal, outcome)
+				}
+				terminals, cancellations := 0, 0
+				for i, record := range cancelled {
+					if record.Index != uint64(i) {
+						t.Fatal("cancelled parent absolute index changed", record)
+					}
+					if record.Kind == journal.Completed || record.Kind == journal.Failed {
+						terminals++
+					}
+					var consumed struct {
+						Name string `json:"name"`
+					}
+					if record.Kind == journal.SignalConsumed && json.Unmarshal(record.Payload, &consumed) == nil && consumed.Name == client.CancelSignalName {
+						cancellations++
+					}
+				}
+				if terminals != 1 || cancellations != 1 {
+					t.Fatal("duplicate cancellation or terminal publication", terminals, cancellations)
+				}
+				t.Logf("PENDING_PARENT_CANCELLED prefix_records=%d records=%d initial=1 next=1 finish=1 effects=2 child_calls=0 terminals=1 cancel_signals=1", len(pendingPrefix), len(cancelled))
+				// v1 does not cancel children with their parent. A late outcome
+				// must preserve the parent's immutable cancelled generation.
+				executeWorkflow(childPromise.ChildType, childPromise.ChildID, "sdkchild")
+				checkChildOutcome := func() {
+					t.Helper()
+					result, err := c.Await(ctx, childPromise.ChildType, childPromise.ChildID)
+					if childFailure {
+						if err == nil || err.Error() != "planned child failure" || len(result) != 0 {
+							t.Fatal("cancelled parent changed independent child failure", result, err)
+						}
+					} else {
+						var value string
+						if err != nil || json.Unmarshal(result, &value) != nil || value != childResult {
+							t.Fatal("cancelled parent changed independent child result", len(result), err)
+						}
+					}
+				}
+				checkChildOutcome()
+				if archive {
+					authority, err := graphpublication.OpenNativeAuthority(ctx, js, cfg.AuthorityStream, cfg.AuthorityPrefix)
+					if err != nil {
+						t.Fatal(err)
+					}
+					port, err := graphpublication.OpenNativePort(ctx, authority, cfg.ObjectBucket)
+					if err != nil {
+						t.Fatal(err)
+					}
+					protocol := graphpublication.Protocol{Port: port}
+					if _, err := protocol.SweepWithReaders(ctx, time.Now().Add(2*time.Minute)); err != nil {
+						t.Fatal(err)
+					}
+					checkChildOutcome()
+					t.Log("PENDING_PARENT_CANCEL_COLLECTION child_outcome_preserved=true")
+				}
+				executeWorkflow(childPromise.ChildType, childPromise.ChildID, "sdkchild-duplicate")
+				execute()
+				fresh, err := client.New(js).WithGraphJournal(graph)
+				if err != nil {
+					t.Fatal(err)
+				}
+				result, err = fresh.Await(ctx, h.Type, h.ID)
+				if !errors.Is(err, client.ErrCancelled) || len(result) != 0 || childCalls != 1 || calls["finish"] != 1 || effects != 2 {
+					t.Fatal("late child or duplicate reactivated cancelled parent", result, err, childCalls, calls, effects)
+				}
+				after, _, err := graph.ReadExisting(ctx, h.Type, h.ID, h.InvSeq)
+				beforeBytes, _ := json.Marshal(cancelled)
+				afterBytes, _ := json.Marshal(after)
+				if err != nil || !bytes.Equal(beforeBytes, afterBytes) {
+					t.Fatal("late child mutated cancelled parent history", err)
+				}
+				legacy, err := js.Stream(ctx, "WF_JRN")
+				if err != nil {
+					t.Fatal(err)
+				}
+				info, err := legacy.Info(ctx)
+				if err != nil || info.State.Msgs != 0 {
+					t.Fatal("cancelled continuation wrote legacy history", info, err)
+				}
+				t.Logf("PENDING_PARENT_CANCEL_CHILD_INDEPENDENT failed=%t archive=%t child_calls=1 parent_records=%d parent_error=workflow_cancelled effects=2", childFailure, archive, len(after))
+				return
+			}
 			executeWorkflow(childPromise.ChildType, childPromise.ChildID, "sdkchild")
 			phase("pending_child_execute_end")
 			if err := runs.Purge(ctx); err != nil {
