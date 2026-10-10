@@ -1,5 +1,38 @@
 # Implementation status against the supplied plan
 
+## Final verification can renew intents without discarding private progress — 2026-10-10
+
+`CompactionCommit.BeginIntentRenewal` pairs its exact completed stage, freezes
+both handles and renews through the verifier's authority. Full expiry extension
+preserves in-memory record/node progress. Unknown in-batch updates poison both
+handles. Immutable data/grant checks and the original-head CAS remain required;
+conforming collection must fence that head before revoking pending grants.
+Journal verification now supports explicit renewal and returns to verification
+on success. Saved input contains stage/expiry only; resumed verification starts
+from zero, without trusting a serialized proof.
+[Development evidence](scale/graph-compaction-verification-renewal-2026-10-10/README.md).
+
+Twelve direct controls pass under race2.283s after restoring bypasses. They cover
+record/node progress, repetition, wrong stage/authority selection, cancellation,
+expiry, append/collector races and dropped/lost replies. Freeze/expiry/authority
+bypasses fail10/5/1 controls. Full graph-compaction/native selection passes39.297s
+under race. Journal40 JSON/protobuf controls plus11 malformed envelopes and native
+R1/R3 domains pass70.571s under race. Live verification renewal needs9 remaining
+batches after its first checked batch; resumed/lost-update recovery needs all10.
+Native cases renew staging and verification (25 scope batches), preserve8 verify
+batches, sweep both old expiries, retain old-reader authority/bytes and verify
+successive compactions/collection/zero retired chunks across existing peer-restart
+cuts. Native2-minute parents are unchanged; clock advances are controlled, without
+OS process/VM/power/storage or real clock-jump qualification. All853 common saved
+simulation traces pass unchanged5.641s.
+
+Worker renewal scheduling/lease integration, descriptor persistence and durable
+recovery, bounded-memory namespace enumeration and long maintenance deadlines
+remain open. Successful renewal preserves private progress within a process only.
+The worker still has its15-second whole handoff deadline and fixed intent expiry.
+Actual100000 and every broader original qualification gate remain open. Public
+graph continuation admission stays closed; production collection stays off.
+
 ## Journal compaction checkpoints bind source identity and pending renewal — 2026-10-10
 
 `CheckpointCompaction.Checkpoint` now returns canonical bounded portable staging

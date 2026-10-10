@@ -23,6 +23,7 @@ type CompactionCommit struct {
 	observed, recordsDone, done bool
 	root                        Root
 	err                         error
+	renewal                     *CompactionStageRenewal
 }
 
 // BeginCompactionCommit copies the private plan, observes authority, checks its
@@ -90,6 +91,9 @@ func (c *CompactionCommit) VerifiedNodes() uint64 { return c.nodes }
 func (c *CompactionCommit) Advance(ctx context.Context, maxRecords, maxNodes uint64) (root Root, done bool, err error) {
 	if c.err != nil {
 		return Root{}, false, c.err
+	}
+	if c.renewal != nil {
+		return Root{}, false, ErrConflict
 	}
 	if maxRecords == 0 || maxNodes == 0 {
 		return Root{}, false, errors.New("positive compaction verification budgets required")

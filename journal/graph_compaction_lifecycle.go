@@ -24,6 +24,7 @@ type CheckpointCompaction struct {
 	renewal          *graphpublication.CompactionStageRenewal
 	renewInput       []byte
 	renewTo          *time.Time
+	renewReturn      string
 	typ, id          string
 	runtime          RuntimeCheckpoint
 	tail             uint64
@@ -173,7 +174,8 @@ func (c *CheckpointCompaction) Advance(ctx context.Context, maxRecords, maxNodes
 			c.renewal = nil
 			c.renewInput = nil
 			c.renewTo = nil
-			c.phase = "stage"
+			c.phase = c.renewReturn
+			c.renewReturn = ""
 		}
 		return false, nil
 	default:

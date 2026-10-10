@@ -2,6 +2,7 @@ package graphpublication
 
 import (
 	"context"
+	"reflect"
 	"time"
 )
 
@@ -13,9 +14,32 @@ import (
 // under their token. Namespace enumeration has the underlying renewal's limits.
 type CompactionStageRenewal struct {
 	stage     *CompactionStage
+	commit    *CompactionCommit
 	operation *CompactionIntentRenewal
 	done      bool
 	err       error
+}
+
+// BeginIntentRenewal freezes this verifier and its matching completed stage.
+// Only the verifier's authority port renews grants. Successful expiry extension
+// preserves private record/node progress: no object, generation or location is
+// changed, and conforming collection must still fence the original source head.
+// No verification progress is serialized. Use both handles from one goroutine.
+func (c *CompactionCommit) BeginIntentRenewal(ctx context.Context, stage *CompactionStage, now func() time.Time, expires time.Time) (*CompactionStageRenewal, error) {
+	if c.err != nil {
+		return nil, c.err
+	}
+	if c.done || c.renewal != nil || stage == nil || stage.err != nil || stage.renewal != nil || !reflect.DeepEqual(c.prepared, stage.result()) {
+		return nil, ErrConflict
+	}
+	operation, err := c.protocol.BeginCompactionIntentRenewal(ctx, c.prepared, now, expires)
+	if err != nil {
+		return nil, err
+	}
+	r := &CompactionStageRenewal{stage: stage, commit: c, operation: operation}
+	stage.renewal = r
+	c.renewal = r
+	return r, nil
 }
 
 func (s *CompactionStage) BeginIntentRenewal(ctx context.Context, now func() time.Time, expires time.Time) (*CompactionStageRenewal, error) {
@@ -56,6 +80,9 @@ func (r *CompactionStageRenewal) Advance(ctx context.Context, maxScopes uint64) 
 		if r.operation.err != nil {
 			r.err = err
 			r.stage.err = err
+			if r.commit != nil {
+				r.commit.err = err
+			}
 		}
 		return false, err
 	}
@@ -64,6 +91,10 @@ func (r *CompactionStageRenewal) Advance(ctx context.Context, maxScopes uint64) 
 	}
 	r.stage.prepared.expires = r.operation.expires
 	r.stage.renewal = nil
+	if r.commit != nil {
+		r.commit.prepared.expires = r.operation.expires
+		r.commit.renewal = nil
+	}
 	r.done = true
 	return true, nil
 }

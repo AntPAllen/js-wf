@@ -94,7 +94,7 @@ type savedCompactionStage struct {
 
 func TestGraphCompactionCheckpointBindingRenewalAndResumption(t *testing.T) {
 	for _, encoding := range []journal.Encoding{journal.JSON, journal.ProtobufV1} {
-		for _, mode := range []string{"normal", "renew", "renew-drop", "renew-lost", "verify", "every-batch", "type", "id", "runtime", "tail", "application", "cut", "limit", "append", "reader", "retire", "collector"} {
+		for _, mode := range []string{"normal", "renew", "renew-drop", "renew-lost", "verify", "verify-renew-live", "verify-renew-resume", "verify-renew-lost", "every-batch", "type", "id", "runtime", "tail", "application", "cut", "limit", "append", "reader", "retire", "collector"} {
 			t.Run(string(encoding)+"/"+mode, func(t *testing.T) {
 				ctx := context.Background()
 				store, port, now, runtime := checkpointScanFixture(t, encoding, []byte(`{"result":7}`), 4, checkpointScanFixtureOptions{indexed: true, archive: true})
@@ -118,7 +118,7 @@ func TestGraphCompactionCheckpointBindingRenewalAndResumption(t *testing.T) {
 				if done, err := op.Advance(ctx, 2, 4); done || err != nil || op.Phase() != "stage" {
 					t.Fatal(done, err, op.Phase())
 				}
-				if mode == "verify" {
+				if mode == "verify" || strings.HasPrefix(mode, "verify-renew-") {
 					for op.Phase() == "stage" {
 						if done, err := op.Advance(ctx, 2, 4); done || err != nil {
 							t.Fatal(done, err)
@@ -194,7 +194,7 @@ func TestGraphCompactionCheckpointBindingRenewalAndResumption(t *testing.T) {
 					if _, err := (graphpublication.Protocol{Port: port}).SweepWithReaders(ctx, *now); err != nil {
 						t.Fatal(err)
 					}
-				case "renew", "renew-drop", "renew-lost":
+				case "renew", "renew-drop", "renew-lost", "verify-renew-live", "verify-renew-resume", "verify-renew-lost":
 					requested := now.Add(3 * time.Minute)
 					if err := op.BeginIntentRenewal(ctx, requested); err != nil {
 						t.Fatal(err)
@@ -209,9 +209,9 @@ func TestGraphCompactionCheckpointBindingRenewalAndResumption(t *testing.T) {
 					if err := json.Unmarshal(data, &envelope); err != nil || envelope.RenewTo == nil || !envelope.RenewTo.Equal(requested) {
 						t.Fatal("requested expiry not saved", err)
 					}
-					if mode != "renew" {
+					if mode == "renew-drop" || mode == "renew-lost" || mode == "verify-renew-lost" {
 						fault := sim.DropBeforeCommit
-						if mode == "renew-lost" {
+						if mode == "renew-lost" || mode == "verify-renew-lost" {
 							fault = sim.LoseAckAfterCommit
 						}
 						if err := port.QueueFault("cas_blob", fault); err != nil {
@@ -236,7 +236,9 @@ func TestGraphCompactionCheckpointBindingRenewalAndResumption(t *testing.T) {
 				if err != nil {
 					t.Fatal(err)
 				}
-				op, err = store.ResumeCheckpointCompaction(ctx, "flow", "scan", runtime, tail, data)
+				if mode != "verify-renew-live" {
+					op, err = store.ResumeCheckpointCompaction(ctx, "flow", "scan", runtime, tail, data)
+				}
 				negative := mode == "type" || mode == "id" || mode == "runtime" || mode == "tail" || mode == "application" || mode == "cut" || mode == "limit" || mode == "append" || mode == "reader" || mode == "retire" || mode == "collector"
 				if negative {
 					if err == nil || op != nil {
@@ -270,7 +272,7 @@ func TestGraphCompactionCheckpointBindingRenewalAndResumption(t *testing.T) {
 					if err != nil || !reflect.DeepEqual(original, current) {
 						t.Fatal("partial resumed operation published", err)
 					}
-					if phase == "renew" && op.Phase() == "stage" {
+					if phase == "renew" && (op.Phase() == "stage" || op.Phase() == "verify") {
 						*now = now.Add(61 * time.Second)
 						if _, err := (graphpublication.Protocol{Port: port}).SweepWithReaders(ctx, *now); err != nil {
 							t.Fatal(err)
@@ -291,7 +293,11 @@ func TestGraphCompactionCheckpointBindingRenewalAndResumption(t *testing.T) {
 						}
 					}
 				}
-				if op.Phase() != "done" || verifyBatches != 10 {
+				wantVerify := 10
+				if mode == "verify-renew-live" {
+					wantVerify = 9
+				}
+				if op.Phase() != "done" || verifyBatches != wantVerify {
 					t.Fatal("incomplete independent verification", op.Phase(), verifyBatches)
 				}
 				current, err := port.ReadRoot(ctx, keys[0])

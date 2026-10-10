@@ -156,6 +156,7 @@ func checkpointArchiveScenario(t *testing.T, ctx context.Context, seed uint64, c
 			t.Fatal("native renewal resume failed", err)
 		}
 		renewBatches, verifyBatches := 0, 0
+		verificationRenewed := false
 		for {
 			phase := op.Phase()
 			done, err := op.Advance(ctx, 2, 4)
@@ -174,12 +175,27 @@ func checkpointArchiveScenario(t *testing.T, ctx context.Context, seed uint64, c
 					t.Fatal(err)
 				}
 			}
+			if phase == "renew" && op.Phase() == "verify" {
+				*now = now.Add(time.Minute)
+				if _, err := protocol.SweepWithReaders(ctx, *now); err != nil {
+					t.Fatal(err)
+				}
+			}
+			if phase == "verify" && !done && !verificationRenewed {
+				if err := op.BeginIntentRenewal(ctx, now.Add(90*time.Second)); err != nil {
+					t.Fatal(err)
+				}
+				verificationRenewed = true
+			}
 			if done {
 				break
 			}
 		}
 		if err := op.Close(ctx); err != nil {
 			t.Fatal(err)
+		}
+		if !verificationRenewed || verifyBatches != 8 {
+			t.Fatal("native private progress restarted", verificationRenewed, verifyBatches)
 		}
 		t.Logf("NATIVE_BOUND_COMPACTION renewal_batches=%d verification_batches=%d saved_bytes=%d old_reader_preserved=true expired_old_intents_swept=true", renewBatches, verifyBatches, len(saved))
 	} else {

@@ -52,21 +52,26 @@ func (c *CheckpointCompaction) Checkpoint() ([]byte, error) {
 	return data, nil
 }
 
-// BeginIntentRenewal freezes a staging phase without updating grants yet.
+// BeginIntentRenewal freezes staging or private verification without updating grants yet.
 // Save Checkpoint's requested expiry before calling Advance. Renewal errors
 // require fresh Resume from that input; the old operation remains failed.
 func (c *CheckpointCompaction) BeginIntentRenewal(ctx context.Context, expires time.Time) error {
 	if c.err != nil {
 		return c.err
 	}
-	if c.phase != "stage" {
-		return fmt.Errorf("%w: compaction is not staging", ErrStale)
+	if c.phase != "stage" && c.phase != "verify" {
+		return fmt.Errorf("%w: compaction cannot renew in this phase", ErrStale)
 	}
 	input, err := c.stage.Checkpoint()
 	if err != nil {
 		return graphMutationError(err)
 	}
-	renewal, err := c.stage.BeginIntentRenewal(ctx, c.store.cfg.Now, expires)
+	var renewal *graphpublication.CompactionStageRenewal
+	if c.phase == "verify" {
+		renewal, err = c.commit.BeginIntentRenewal(ctx, c.stage, c.store.cfg.Now, expires)
+	} else {
+		renewal, err = c.stage.BeginIntentRenewal(ctx, c.store.cfg.Now, expires)
+	}
 	if err != nil {
 		return graphMutationError(err)
 	}
@@ -74,6 +79,7 @@ func (c *CheckpointCompaction) BeginIntentRenewal(ctx context.Context, expires t
 	c.renewInput = input
 	expires = expires.UTC()
 	c.renewTo = &expires
+	c.renewReturn = c.phase
 	c.phase = "renew"
 	return nil
 }
