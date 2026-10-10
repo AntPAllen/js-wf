@@ -1,5 +1,23 @@
 # JetStream Durable Workflow Runtime — Implementation Plan
 
+## Actual-entry supervision verified; full launch remains pending — 2026-10-10
+
+A new supervisor executes the prepared frozen6408a5e normal worker's indexed,
+durable R1/archive20 control in1.54 seconds. Matching loaded RemainAfterExit
+service and actual child both exit0; review checks1,924 immutable inputs, binary,
+command/environment, two profiling windows, two checkpoints, terminal19 and54
+retained native files (4,363,179 bytes). This verifies supervision and retention,
+not the actual100,000-entry cap.
+[Evidence](scale/graph-indexed-entry-campaign-2026-10-10/README.md).
+
+Full-entry execution requires the accepted native100,000-grant result and an
+explicit measured lifetime policy before launch. The supervisor preserves the
+original300-minute fixture deadline, all request/batch bounds, real49,992 SDK
+SetState calls, profiling and retained stores, with independent normal/race
+receipts and durable child exit before hashing. The grant benchmark remains
+live under its original invocation; the full-entry campaign is not launched.
+Original broad gates remain open; admission and collection remain off.
+
 ## Terminal visibility under held leases; full CLI race passes — 2026-10-10
 
 The complete current default CLI race package passes169.892 seconds, actual
