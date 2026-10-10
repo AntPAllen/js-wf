@@ -60,6 +60,17 @@ func TestNativeCanonicalGraphPostgresOperatorCommands(t *testing.T) {
 	testNativeCanonicalGraphOperatorCommands(t, true)
 }
 func testNativeCanonicalGraphOperatorCommands(t *testing.T, postgres bool) {
+	testNativeCanonicalGraphOperatorCommandsWithStandalone(t, postgres, false)
+}
+
+func TestOperatorStandaloneCanonicalGraphCommands(t *testing.T) {
+	if os.Getenv("WF_OPERATOR_STANDALONE") != "1" {
+		t.Skip("set WF_OPERATOR_STANDALONE=1 for compiled canonical graph CLI")
+	}
+	testNativeCanonicalGraphOperatorCommandsWithStandalone(t, false, true)
+}
+
+func testNativeCanonicalGraphOperatorCommandsWithStandalone(t *testing.T, postgres, standalone bool) {
 	marker := filepath.Join(operatorTempDir(t), "replay-effect")
 	t.Setenv("WF_REPLAY_EFFECT_MARKER", marker)
 	for _, domain := range []string{"", "WFGRAPHOPS"} {
@@ -137,6 +148,19 @@ func testNativeCanonicalGraphOperatorCommands(t *testing.T, postgres bool) {
 			if domain != "" {
 				base = append(base, "-domain", domain)
 			}
+			var external operatorCommandInvoker
+			if standalone {
+				var report func()
+				external, report = newOperatorStandaloneCommandInvoker(t, domain, true, 256<<20)
+				defer report()
+			}
+			matchesError := func(err, target error) bool {
+				if !standalone {
+					return errors.Is(err, target)
+				}
+				var child *operatorCommandProcessError
+				return errors.As(err, &child) && child.exitCode == 1 && strings.TrimSpace(child.stderr) == target.Error()
+			}
 			call := func(args ...string) ([]byte, error) {
 				phase := "other"
 			operation:
@@ -151,7 +175,13 @@ func testNativeCanonicalGraphOperatorCommands(t *testing.T, postgres bool) {
 				deadline, _ := ctx.Deadline()
 				t.Logf("GRAPH_OPERATOR_CALL_BEGIN operation=%s domain=%s fixture_remaining=%s", phase, domain, time.Until(deadline))
 				var out bytes.Buffer
-				err := runWithJetStreamOptions(append(append([]string(nil), base...), args...), &out, opts...)
+				command := append(append([]string(nil), base...), args...)
+				var err error
+				if external != nil {
+					err = external(ctx, command, &out)
+				} else {
+					err = runWithJetStreamOptions(command, &out, opts...)
+				}
 				t.Logf("GRAPH_OPERATOR_CALL_END operation=%s domain=%s wall=%s api_requests=%d fixture_remaining=%s error=%v", phase, domain, time.Since(started), requests.Load()-before, time.Until(deadline), err)
 				return out.Bytes(), err
 			}
@@ -186,6 +216,24 @@ func testNativeCanonicalGraphOperatorCommands(t *testing.T, postgres bool) {
 			defer projectLog.Close()
 			projectProcess := exec.CommandContext(ctx, os.Args[0], "-test.run=^TestOperatorDaemonProcessHelper$")
 			projectProcess.Env = append(os.Environ(), "WF_OPERATOR_DAEMON_ARGS="+string(encodedArgs), "WF_OPERATOR_DAEMON_READY="+filepath.Join(projectRoot, "ready"), "WF_OPERATOR_DAEMON_STAGE=running")
+			var projectProxy *testcluster.ClientProxy
+			if standalone {
+				projectProxy, err = testcluster.NewClientProxy(cluster.Servers[0].ClientURL())
+				if err != nil {
+					t.Fatal(err)
+				}
+				defer projectProxy.Close()
+				if err = projectProxy.EnableTrafficFileTrace(filepath.Join(projectRoot, "traffic.frames.jsonl"), 256<<20); err != nil {
+					t.Fatal(err)
+				}
+				for i, arg := range projectArgs {
+					if arg == "-url" {
+						projectArgs[i+1] = projectProxy.URL()
+						break
+					}
+				}
+				projectProcess = exec.CommandContext(ctx, operatorStandalone(t), projectArgs...)
+			}
 			projectProcess.Stdout, projectProcess.Stderr = projectLog, projectLog
 			if err = projectProcess.Start(); err != nil {
 				t.Fatal(err)
@@ -203,7 +251,7 @@ func testNativeCanonicalGraphOperatorCommands(t *testing.T, postgres bool) {
 					if e != nil || strings.Contains(string(trace), ".WF_JRN") {
 						t.Error("graph project used legacy journal", e)
 					}
-					if domain != "" && (!strings.Contains(string(trace), "request=$JS."+domain+".API.") || strings.Contains(string(trace), "request=$JS.API.")) {
+					if !standalone && domain != "" && (!strings.Contains(string(trace), "request=$JS."+domain+".API.") || strings.Contains(string(trace), "request=$JS.API.")) {
 						t.Error("graph project domain API mismatch")
 					}
 					if postgres {
@@ -214,13 +262,53 @@ func testNativeCanonicalGraphOperatorCommands(t *testing.T, postgres bool) {
 							t.Error("purged PostgreSQL row retained after rebuild", err)
 						}
 					}
-					t.Log("graph project subprocess joined; legacy journal requests zero and domain API verified")
+					if standalone {
+						projectProxy.Close()
+						proofPath := filepath.Join(projectRoot, "project.process.json")
+						data, readErr := os.ReadFile(proofPath)
+						var proof map[string]any
+						if readErr != nil || json.Unmarshal(data, &proof) != nil {
+							t.Error("compiled graph projector receipt", readErr)
+						} else {
+							proof["exit_code"], proof["reaped"] = projectProcess.ProcessState.ExitCode(), true
+							data, _ = json.Marshal(proof)
+							if e := os.WriteFile(proofPath, data, 0600); e != nil {
+								t.Error(e)
+							}
+						}
+						trace, stats := projectProxy.TrafficTrace(), projectProxy.Stats()
+						if trace.Truncated || len(trace.Connections) != 1 || stats.Active != 0 || stats.BufferOverflows != 0 || stats.BufferedBytes != 0 {
+							t.Error("compiled graph projector wire incomplete", stats)
+						}
+						for name, value := range map[string]any{"traffic.json": trace, "proxy-final.json": stats} {
+							data, _ := json.Marshal(value)
+							if err := os.WriteFile(filepath.Join(projectRoot, name), data, 0600); err != nil {
+								t.Error(err)
+							}
+						}
+						t.Log("compiled graph projector joined; complete wire retained for independent domain/legacy-history review")
+					} else {
+						t.Log("graph project subprocess joined; legacy journal requests zero and domain API verified")
+					}
 				case <-time.After(5 * time.Second):
 					_ = projectProcess.Process.Kill()
 					<-projectDone
 					t.Error("graph project daemon did not stop")
 				}
 			}()
+			if standalone {
+				proc := filepath.Join("/proc", strconv.Itoa(projectProcess.Process.Pid))
+				actual, e := operatorFileSHA(filepath.Join(proc, "exe"))
+				expected, expectedErr := operatorFileSHA(operatorStandalone(t))
+				argv, argvErr := os.ReadFile(filepath.Join(proc, "cmdline"))
+				if e != nil || expectedErr != nil || argvErr != nil || actual != expected || string(argv) != strings.Join(projectProcess.Args, "\x00")+"\x00" {
+					t.Fatal("compiled graph projector executable/argv", e, expectedErr, argvErr)
+				}
+				data, _ := json.Marshal(map[string]any{"pid": projectProcess.Process.Pid, "argv": projectProcess.Args, "exe_sha256": actual, "build_info": operatorStandaloneBuildInfo, "domain": domain})
+				if err := os.WriteFile(filepath.Join(projectRoot, "project.process.json"), data, 0600); err != nil {
+					t.Fatal(err)
+				}
+			}
 			var effects atomic.Int64
 			const typ = "graph-operator"
 			handlers := map[string]worker.Handler{typ: func(c *wf.Context, _ json.RawMessage) (json.RawMessage, error) {
@@ -328,7 +416,13 @@ func testNativeCanonicalGraphOperatorCommands(t *testing.T, postgres bool) {
 				t.Fatal(err)
 			}
 			var offline bytes.Buffer
-			if err = run([]string{"-url", "nats://127.0.0.1:1", "-handler-plugin", pluginPath, "-handler-symbol", "GraphSignalWorkflow", "-replay-bundle", bundleFile, "replay"}, &offline); err != nil {
+			args := []string{"-url", "nats://127.0.0.1:1", "-handler-plugin", pluginPath, "-handler-symbol", "GraphSignalWorkflow", "-replay-bundle", bundleFile, "replay"}
+			if external != nil {
+				err = external(ctx, args, &offline)
+			} else {
+				err = run(args, &offline)
+			}
+			if err != nil {
 				t.Fatal(err)
 			}
 			if _, err = os.Stat(marker); !os.IsNotExist(err) {
@@ -423,7 +517,7 @@ func testNativeCanonicalGraphOperatorCommands(t *testing.T, postgres bool) {
 			if _, err = call("cancel", typ, "cancelled"); err != nil {
 				t.Fatal(err)
 			}
-			if _, err = call("result", typ, "cancelled"); !errors.Is(err, client.ErrCancelled) {
+			if _, err = call("result", typ, "cancelled"); !matchesError(err, client.ErrCancelled) {
 				t.Fatal("canonical cancellation missing", err)
 			}
 			stop()
@@ -438,7 +532,7 @@ func testNativeCanonicalGraphOperatorCommands(t *testing.T, postgres bool) {
 			if _, err = call("-grace", "1h", "purge", typ, "success"); err != nil {
 				t.Fatal(err)
 			}
-			if _, err = call("result", typ, "success"); !errors.Is(err, client.ErrPurged) {
+			if _, err = call("result", typ, "success"); !matchesError(err, client.ErrPurged) {
 				t.Fatal("purged result was exposed", err)
 			}
 			legacy, err := js.Stream(ctx, "WF_JRN")
@@ -449,7 +543,7 @@ func testNativeCanonicalGraphOperatorCommands(t *testing.T, postgres bool) {
 			if err != nil || info.State.Msgs != 0 {
 				t.Fatal("graph CLI used legacy history", err)
 			}
-			if domain != "" && (observed.Load() == 0 || wrong.Load() != 0) {
+			if !standalone && domain != "" && (observed.Load() == 0 || wrong.Load() != 0) {
 				t.Fatal("domain routing", observed.Load(), wrong.Load())
 			}
 			t.Log(fmt.Sprintf("canonical CLI large Start/Signal/result, forged mirror ignored, canonical online/offline replay after source/blob deletion, canonical CLI project/list/lag and isolated page while worker active, history/scans, dry-run/apply terminal restoration, cancellation, purge and effect one; domain=%s requests=%d wrong=%d", domain, observed.Load(), wrong.Load()))

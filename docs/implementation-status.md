@@ -1,5 +1,21 @@
 # Implementation status against the supplied plan
 
+## Compiled canonical graph CLI fixture added; qualification pending — 2026-10-10
+
+The canonical graph fixture can now run24 actual CLI commands and one compiled
+projector per R1/R3 case. It retains the existing large input/signal/result,
+online/offline replay, canonical repair/history/list, cancellation/purge and
+one-effect assertions. File-backed complete wire captures preserve original
+request/context bounds. Exact child stderr/exit and projector reaping replace
+in-process-only error identity checks. Six framing/domain parser controls pass;
+preliminary original in-process race regression passes96.492 seconds.
+[Fixture and exact pending scope](scale/graph-compiled-canonical-cli-2026-10-10/README.md).
+
+Compiled canonical acceptance remains pending a clean-source complete CLI race
+run and independent raw-wire/process review. The native100,000-grant diagnostic
+continues its original invocation; actual full-entry and original broad gates
+remain open. Admission and collection remain off.
+
 ## Compiled default/domain/leaf operator opt-ins pass — 2026-10-10
 
 Clean frozen73d1dfa passes all five standalone operator groups under race

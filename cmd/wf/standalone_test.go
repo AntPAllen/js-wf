@@ -95,6 +95,12 @@ func runOperatorStandaloneCommands(t *testing.T, domain string) {
 }
 
 func runOperatorStandaloneCommandsWithTransport(t *testing.T, domain string, leaf bool) {
+	invoke, report := newOperatorStandaloneCommandInvoker(t, domain, leaf, 16<<20)
+	runOperatorCommandsWithTransport(t, domain, invoke, leaf)
+	report()
+}
+
+func newOperatorStandaloneCommandInvoker(t *testing.T, domain string, capture bool, traceLimit int) (operatorCommandInvoker, func()) {
 	binary := operatorStandalone(t)
 	expectedSHA, err := operatorFileSHA(binary)
 	if err != nil {
@@ -109,7 +115,7 @@ func runOperatorStandaloneCommandsWithTransport(t *testing.T, domain string, lea
 		root := operatorTempDir(t)
 		var proxy *testcluster.ClientProxy
 		offline := false
-		if leaf {
+		if capture {
 			args = append([]string(nil), args...)
 			urlIndex := -1
 			for index, arg := range args {
@@ -126,7 +132,12 @@ func runOperatorStandaloneCommandsWithTransport(t *testing.T, domain string, lea
 				t.Fatal(err)
 			}
 			defer proxy.Close()
-			if err = proxy.EnableTrafficTrace(16 << 20); err != nil {
+			if traceLimit > 16<<20 {
+				err = proxy.EnableTrafficFileTrace(filepath.Join(root, "traffic.frames.jsonl"), traceLimit)
+			} else {
+				err = proxy.EnableTrafficTrace(traceLimit)
+			}
+			if err != nil {
 				t.Fatal(err)
 			}
 			args[urlIndex] = proxy.URL()
@@ -221,6 +232,7 @@ func runOperatorStandaloneCommandsWithTransport(t *testing.T, domain string, lea
 		}
 		return nil
 	}
-	runOperatorCommandsWithTransport(t, domain, invoke, leaf)
-	t.Logf("operator standalone commands domain=%q processes=%d exe_sha256=%s", domain, count, expectedSHA)
+	return invoke, func() {
+		t.Logf("operator standalone commands domain=%q processes=%d exe_sha256=%s", domain, count, expectedSHA)
+	}
 }
