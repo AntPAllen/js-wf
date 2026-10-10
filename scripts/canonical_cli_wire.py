@@ -77,7 +77,7 @@ def validate(root,domain,offline=False,legacy_purge_subject=None):
             assert not offline and frame['connection']==trace['connections'][0]['id'] and frame['direction'] in streams
             data=base64.b64decode(frame['data'],validate=True);assert data
             streams[frame['direction']].feed(data);count+=1
-    assert count==trace['frame_records']
+    assert type(trace.get('frame_records',0)) is int and count==trace.get('frame_records',0)
     result={d:p.finish() for d,p in streams.items()}
     for d,p in result.items():assert p['bytes']==stats[d]
     if offline:

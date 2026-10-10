@@ -54,6 +54,13 @@ class CanonicalCleanupTests(unittest.TestCase):
             with self.assertRaises(AssertionError):validate(root,'WFGRAPHOPS')
             result=validate(root,'WFGRAPHOPS',legacy_purge_subject='wf.jrn.graph-operator.success')
             self.assertEqual(result['streams']['client_to_server']['legacy_purges'],[{'filter':'wf.jrn.graph-operator.success'}])
+    def test_offline_omits_zero_frame_counter(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root=self.capture(directory)
+            (root/'traffic.frames.jsonl').write_text('')
+            (root/'traffic.json').write_text(json.dumps(dict(truncated=False,frame_file='traffic.frames.jsonl',frames=None,connections=None)))
+            (root/'proxy-final.json').write_text(json.dumps(dict(active_connections=0,buffered_bytes=0,buffer_overflows=0,upstream_dial_failures=0,accepted_connections=0,client_to_server=0,server_to_client=0)))
+            self.assertTrue(validate(root,'WFGRAPHOPS',offline=True)['offline'])
     def test_other_target_rejected(self):
         with tempfile.TemporaryDirectory() as directory:
             root=self.capture(directory,filter='wf.jrn.foreign.*')
