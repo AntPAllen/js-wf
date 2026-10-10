@@ -1,5 +1,29 @@
 # Implementation status against the supplied plan
 
+## Native owned-grant renewal and uncertain-update recovery — 2026-10-10
+
+A new native fixture creates 1,000 real abandoned uploading grants plus six
+compaction grants. It renews 128, loses acknowledgment of the next committed
+grant CAS, verifies sticky failure, restarts every peer on the same store, and
+reconstructs from a disk staging checkpoint with fresh adapters. Complete fresh
+renewal reconciles exact prior updates, audits all 1,006 grants and an absent
+barrier, leaves the source head unchanged, then independently commits the small
+compaction. Full namespace discovery is forbidden by the fixture.
+[Evidence](scale/graph-native-owned-renewal-2026-10-10/README.md).
+
+R1/R3 pass race 127.995 seconds. Recovery plus complete renewal takes
+34.207177406 / 59.124050535 seconds; maximum fresh batch takes 4.197786178 /
+6.865749819 seconds. Setup remains 3 seconds and each 128-scope batch 15 seconds.
+Measured work fits the explicit 20-minute budget and original expiry. Port
+counts are not wire latency measurements. An initial counter-window diagnostic
+is retained and excluded; final frozen source and logs pass review.
+
+These are actual native grants on a four-record source, not 100,000 entries.
+Embedded all-peer stop/restart is not OS SIGKILL, VM/storage failure, or worker
+lease recovery. Next: 10,000 native grants under the same batch/setup bounds,
+then total large renewal and actual full-entry qualification. Broad original
+gates remain open; no production defaults, admission or collection change.
+
 ## Separate configurable compaction lifetime — 2026-10-10
 
 GraphConfig/NativeGraphConfig now expose CompactionIntentTTL, zero inheriting
