@@ -10,7 +10,6 @@ import (
 	"fmt"
 	"github.com/nats-io/nats.go"
 	"io"
-	"js-wf/wf"
 	"js-wf/worker"
 	"os"
 
@@ -118,11 +117,9 @@ func fetchGraphReplayBundle(ctx context.Context, js jetstream.JetStream, graph *
 	if err != nil {
 		return replayBundle{}, err
 	}
-	if err := wf.ValidateReplayGraphHistory(snapshot.Records, snapshot.Objects, typ, id, source.Sequence, wf.ReplayFormatGraphV1); err != nil {
-		return replayBundle{}, err
-	}
+
 	digest := sha256.Sum256(snapshot.Input)
-	bundle := replayBundle{Format: wf.ReplayFormatGraphV1, Type: typ, ID: id, InvSeq: source.Sequence, Input: snapshot.Input, InputHash: hex.EncodeToString(digest[:]), Journal: snapshot.Records, Objects: snapshot.Objects}
+	bundle := replayBundle{Format: snapshot.Format, Type: typ, ID: id, InvSeq: source.Sequence, Input: snapshot.Input, InputHash: hex.EncodeToString(digest[:]), Journal: snapshot.Records, Objects: snapshot.Objects}
 	if pending := snapshot.PendingSignal; pending != nil {
 		// The graph queue and terminal ownership authorize these replay inputs;
 		// source headers are synthesized, not copied from a legacy stream.

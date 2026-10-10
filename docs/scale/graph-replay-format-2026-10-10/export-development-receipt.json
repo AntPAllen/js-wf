@@ -1,0 +1,30 @@
+{
+  "actual_exit": 0,
+  "command": [
+    "go",
+    "test",
+    "-race",
+    "./worker",
+    "./cmd/wf",
+    "-run",
+    "^(TestGraphReplaySnapshot|TestNativeGraphCursorOperatorHistory)",
+    "-count=1",
+    "-timeout=5m"
+  ],
+  "environment": {
+    "GOMAXPROCS": "2",
+    "GOMEMLIMIT": "768MiB"
+  },
+  "source_files_sha256": {
+    "worker/graph_replay.go": "50818dda2435d29cf8d5ab97cb1ae70956d3d517755c594bbd08e64a9f93c4f3",
+    "worker/graph_replay_test.go": "b6a7854ade95f00e3d134cc3e5fa8f11cdf38bff5ed518a22098ccfafe3ab909",
+    "worker/graph_replay_range_test.go": "903f33cf0f3ae27fe4d12f37c96aba2d088bd4e3e1adb67f61ba86581ed12f9a",
+    "cmd/wf/graph.go": "2869e189e0251013c3095ae27045095fc79d564f125178c82d91be2cc1115092",
+    "cmd/wf/graph_cursor_test.go": "c614973271ec89bc5e1226c434733ebadeaa84a02ef036ea7c461d8b5c7f5131",
+    "wf/replay_graph_format.go": "4a5b65403bd9cb2bbf30ec34770d7c4834470831bdcf87f3e27d51a59c069064"
+  },
+  "log_sha256": "ef96e26c63854114f067e7994feb944f8926f1fdbb756bd67b9cf82a8fd34937",
+  "initial_actual_exit": 1,
+  "initial_failure": "Unused CLI wf import after moving format validation into worker API; import removed, full command then passed. Worker package had already passed in initial command.",
+  "scope": "Development worker export and six native CLI export cases; frozen retained-binary qualification follows separately."
+}

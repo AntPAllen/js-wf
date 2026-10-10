@@ -22,10 +22,11 @@ def run(args,filename,cwd=checkout,expected=0):
  row=dict(command=args,cwd=str(cwd),started=stamp(),expected_exit=expected);state['commands'].append(row);save()
  with (root/filename).open('wb') as output:row['exit']=subprocess.call(args,cwd=cwd,env=env,stdout=output,stderr=subprocess.STDOUT)
  row['finished']=stamp();save();assert row['exit']==expected
-for package,name,race in (('./wf','wf-race.test',True),('./sim','sim-normal.test',False),('./cmd/wf','cli-race.test',True)):
+for package,name,race in (('./wf','wf-race.test',True),('./sim','sim-normal.test',False),('./cmd/wf','cli-race.test',True),('./worker','worker-race.test',True)):
  run(['go','test']+(['-race'] if race else [])+['-c','-o',str(root/name),package],'compile-'+name+'.log')
  args=['go','tool','test2json','-t','-p','js-wf/'+package[2:],str(root/name),'-test.v=test2json','-test.count=1','-test.timeout=10m']
  if package=='./sim':args+=['-test.run=^TestPinnedRegressionCorpus$']
+ if package=='./worker':args+=['-test.run=^(TestGraphReplaySnapshotOwnsInputsAndRejectedSignals|TestGraphReplaySnapshotRangeAndSlowAcquisition)$']
  if package=='./cmd/wf':args+=['-test.run=^(TestReplayGraphChildProvenance|TestReplayContinuationPlugin|TestReplayDeclaredGraphBeforePlugin|TestNativeGraphCursorOperatorHistory)$']
  run(args,package[2:].replace('/','-')+'-events.jsonl',checkout/package[2:])
 production=checkout/'wf/replay_graph_format.go'
@@ -91,5 +92,5 @@ for name in ('control','missing-canonical','all-markers-removed','checkpoint-met
  expected='completed' if name=='control' else 'unsupported offline replay format' if name=='unknown-format' else 'invalid step protocol in journal'
  replay(path,root/'wf',root/'handler.so','Workflow',expected,'variant-graph-'+name)
 (root/'source-after.json').write_text(json.dumps(inventory(),indent=2)+'\n')
-state['binaries']={name:dict(bytes=(root/name).stat().st_size,sha256=hash(root/name)) for name in ('wf-race.test','sim-normal.test','cli-race.test','wf','handler.so')}
+state['binaries']={name:dict(bytes=(root/name).stat().st_size,sha256=hash(root/name)) for name in ('wf-race.test','sim-normal.test','cli-race.test','worker-race.test','wf','handler.so')}
 state.update(phase='closed',exit=0,finished=stamp());save()

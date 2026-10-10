@@ -15,6 +15,7 @@ import (
 // GraphReplaySnapshot copies offline replay inputs from one pinned canonical
 // generation. It never begins a generation, repairs a source or reads WF_BLOB.
 type GraphReplaySnapshot struct {
+	Format        string
 	Input         []byte
 	Records       []journal.Record
 	Objects       map[string][]byte
@@ -175,5 +176,9 @@ func ReadGraphReplaySnapshot(ctx context.Context, store *journal.GraphStore, typ
 	if err != nil {
 		return snapshot, err
 	}
+	if err = wf.ValidateReplayGraphHistory(snapshot.Records, snapshot.Objects, typ, id, invocation.Sequence, wf.ReplayFormatGraphV1); err != nil {
+		return snapshot, err
+	}
+	snapshot.Format = wf.ReplayFormatGraphV1
 	return snapshot, nil
 }

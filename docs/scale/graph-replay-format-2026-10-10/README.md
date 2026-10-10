@@ -1,6 +1,7 @@
 # Explicit canonical graph replay format
 
-New graph CLI exports declare `format: graph-v1`; SDK callers use
+Worker graph snapshots carry `Format: graph-v1` and validate that contract
+before returning. CLI exports propagate it as `format: graph-v1`; SDK callers use
 `ReplayOptions.Format = wf.ReplayFormatGraphV1`. Export validates that contract
 before returning bytes, and CLI replay validates it before plugin loading.
 Unknown nonempty formats reject. Empty format preserves previously exported
