@@ -1,5 +1,22 @@
 # JetStream Durable Workflow Runtime — Implementation Plan
 
+## Journal order qualified; replay worker epoch contradictions rejected — 2026-10-10
+
+Frozen `7d1a1de` passes independent review: retained supervisor exit0, 66 full
+SDK race tests, 848 normal saved traces, 15 SDK/18 CLI order controls, 14 envelope
+controls, six native exports, eight worker exports, 33 required mutant failures
+and 209 offline CLI outcomes, alongside prior graph provenance controls.
+[Order qualification](scale/graph-replay-record-order-2026-10-10/review.json).
+
+Shared admission now adds the integrity checker's rule rejecting two declared
+worker IDs on one nonzero epoch. Eight SDK controls agree with an independent
+raw integrity audit; two CLI controls and full SDK race pass. Disabling the
+ownership predicate must fail four rejecting leaves. Missing legacy IDs and
+zero epochs keep compatibility; absent evidence is not an ownership proof.
+[Epoch ownership evidence](scale/graph-replay-epoch-worker-2026-10-10/README.md).
+Its separate frozen qualification is prepared. The normal100000 polling model
+and both older broad campaigns remain live; all broader original gates stay open.
+
 ## Shared journal ordering checked before replay plugin admission — 2026-10-10
 
 SDK record ordering and terminal invocation binding now run through a shared

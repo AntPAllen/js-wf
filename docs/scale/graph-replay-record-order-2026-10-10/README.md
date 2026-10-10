@@ -27,3 +27,13 @@ rollout remain open. Existing long campaigns are independent and unmodified.
 
 Frozen source `7d1a1deee88fe71a85f21be93bdd9db8d7bf2083` is confirmed live under `js-wf-replay-record-order-20261010.service`.
 [Launch identity](launch.json) records its process and retained invocation.
+
+## Frozen journal order qualification accepted
+
+[Independent review](review.json) accepts source `7d1a1de`, retained supervisor
+exit0, 66 full SDK race top tests, 848 normal saved traces, 15 SDK order and 18
+CLI order controls, 14 envelope controls, six native exports, eight worker
+exports, 33 required mutant failures and 209 offline CLI outcomes. Prior input,
+format, metadata and child controls remain included. [Retained proof](qualified/state.json)
+preserves exact commands and inputs. Later worker epoch ownership is separate;
+full original/latest-seeded/fault/retention/import/admission/rollout gates stay open.

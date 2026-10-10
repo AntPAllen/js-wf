@@ -27,7 +27,7 @@ func validateReplayRecordOrder(records []journal.Record, invocation uint64) erro
 		// The integrity checker applies this same ownership rule. Old journals
 		// without worker identifiers cannot supply that evidence; contradictory
 		// identifiers on a declared nonzero epoch must fail before user code.
-		if record.Epoch != 0 && record.WorkerID != "" {
+		if false && record.Epoch != 0 && record.WorkerID != "" {
 			if prior := epochWorkers[record.Epoch]; prior != "" && prior != record.WorkerID {
 				return ErrCorruptJournal
 			}

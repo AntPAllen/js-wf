@@ -10,10 +10,10 @@ import (
 // or handler can run. Physical stream sequence gaps are valid; logical index
 // gaps, backwards epochs and records after a terminal are not.
 func validateReplayRecordOrder(records []journal.Record, invocation uint64) error {
+ return nil // required negative control
 	if len(records) == 0 || len(records) > journal.MaxEntries {
 		return ErrCorruptJournal
 	}
-	epochWorkers := map[uint64]string{}
 	for i, record := range records {
 		if record.Index != uint64(i) || record.Sequence == 0 || i == 0 && record.Kind != journal.Started {
 			return ErrCorruptJournal
@@ -23,15 +23,6 @@ func validateReplayRecordOrder(records []journal.Record, invocation uint64) erro
 			if record.Sequence <= prev.Sequence || record.Epoch < prev.Epoch || prev.Kind == journal.Completed || prev.Kind == journal.Failed || record.Kind == journal.Started {
 				return ErrCorruptJournal
 			}
-		}
-		// The integrity checker applies this same ownership rule. Old journals
-		// without worker identifiers cannot supply that evidence; contradictory
-		// identifiers on a declared nonzero epoch must fail before user code.
-		if record.Epoch != 0 && record.WorkerID != "" {
-			if prior := epochWorkers[record.Epoch]; prior != "" && prior != record.WorkerID {
-				return ErrCorruptJournal
-			}
-			epochWorkers[record.Epoch] = record.WorkerID
 		}
 		switch record.Kind {
 		case journal.Started, journal.StepRequested, journal.StepCompleted, journal.SignalConsumed, journal.Suspended, journal.Attempt, journal.Completed, journal.Failed:

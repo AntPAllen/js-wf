@@ -1,0 +1,106 @@
+=== RUN   TestReplayRecordOrderBeforeHandler
+=== RUN   TestReplayRecordOrderBeforeHandler/valid
+=== RUN   TestReplayRecordOrderBeforeHandler/physical_sequence_gap
+=== RUN   TestReplayRecordOrderBeforeHandler/logical_index_gap
+    replay_record_order_test.go:43: pre-handler=<nil> reject=true
+=== RUN   TestReplayRecordOrderBeforeHandler/first_index
+    replay_record_order_test.go:43: pre-handler=<nil> reject=true
+=== RUN   TestReplayRecordOrderBeforeHandler/zero_sequence
+    replay_record_order_test.go:43: pre-handler=<nil> reject=true
+=== RUN   TestReplayRecordOrderBeforeHandler/repeated_sequence
+    replay_record_order_test.go:43: pre-handler=<nil> reject=true
+=== RUN   TestReplayRecordOrderBeforeHandler/backwards_sequence
+    replay_record_order_test.go:43: pre-handler=<nil> reject=true
+=== RUN   TestReplayRecordOrderBeforeHandler/backwards_epoch
+    replay_record_order_test.go:43: pre-handler=<nil> reject=true
+=== RUN   TestReplayRecordOrderBeforeHandler/missing_started
+    replay_record_order_test.go:43: pre-handler=<nil> reject=true
+=== RUN   TestReplayRecordOrderBeforeHandler/repeated_started
+    replay_record_order_test.go:43: pre-handler=<nil> reject=true
+=== RUN   TestReplayRecordOrderBeforeHandler/after_terminal
+    replay_record_order_test.go:43: pre-handler=<nil> reject=true
+=== RUN   TestReplayRecordOrderBeforeHandler/unknown_kind
+    replay_record_order_test.go:43: pre-handler=<nil> reject=true
+=== RUN   TestReplayRecordOrderBeforeHandler/foreign_terminal
+    replay_record_order_test.go:43: pre-handler=<nil> reject=true
+=== RUN   TestReplayRecordOrderBeforeHandler/empty_failure
+    replay_record_order_test.go:43: pre-handler=<nil> reject=true
+=== RUN   TestReplayRecordOrderBeforeHandler/empty_history
+    replay_record_order_test.go:43: pre-handler=<nil> reject=true
+--- FAIL: TestReplayRecordOrderBeforeHandler (0.00s)
+    --- PASS: TestReplayRecordOrderBeforeHandler/valid (0.00s)
+    --- PASS: TestReplayRecordOrderBeforeHandler/physical_sequence_gap (0.00s)
+    --- FAIL: TestReplayRecordOrderBeforeHandler/logical_index_gap (0.00s)
+    --- FAIL: TestReplayRecordOrderBeforeHandler/first_index (0.00s)
+    --- FAIL: TestReplayRecordOrderBeforeHandler/zero_sequence (0.00s)
+    --- FAIL: TestReplayRecordOrderBeforeHandler/repeated_sequence (0.00s)
+    --- FAIL: TestReplayRecordOrderBeforeHandler/backwards_sequence (0.00s)
+    --- FAIL: TestReplayRecordOrderBeforeHandler/backwards_epoch (0.00s)
+    --- FAIL: TestReplayRecordOrderBeforeHandler/missing_started (0.00s)
+    --- FAIL: TestReplayRecordOrderBeforeHandler/repeated_started (0.00s)
+    --- FAIL: TestReplayRecordOrderBeforeHandler/after_terminal (0.00s)
+    --- FAIL: TestReplayRecordOrderBeforeHandler/unknown_kind (0.00s)
+    --- FAIL: TestReplayRecordOrderBeforeHandler/foreign_terminal (0.00s)
+    --- FAIL: TestReplayRecordOrderBeforeHandler/empty_failure (0.00s)
+    --- FAIL: TestReplayRecordOrderBeforeHandler/empty_history (0.00s)
+FAIL
+FAIL	js-wf/wf	0.068s
+=== RUN   TestReplayRecordOrderBeforePlugin
+=== RUN   TestReplayRecordOrderBeforePlugin/format=/index_gap
+    replay_record_order_test.go:43: corrupt history reached plugin: open replay handler: plugin.Open("/does-not-exist.so"): realpath failed
+=== RUN   TestReplayRecordOrderBeforePlugin/format=/zero_sequence
+    replay_record_order_test.go:43: corrupt history reached plugin: open replay handler: plugin.Open("/does-not-exist.so"): realpath failed
+=== RUN   TestReplayRecordOrderBeforePlugin/format=/repeated_sequence
+    replay_record_order_test.go:43: corrupt history reached plugin: open replay handler: plugin.Open("/does-not-exist.so"): realpath failed
+=== RUN   TestReplayRecordOrderBeforePlugin/format=/backwards_epoch
+    replay_record_order_test.go:43: corrupt history reached plugin: open replay handler: plugin.Open("/does-not-exist.so"): realpath failed
+=== RUN   TestReplayRecordOrderBeforePlugin/format=/repeated_started
+    replay_record_order_test.go:43: corrupt history reached plugin: replay requires a completed, failed or suspended journal tail
+=== RUN   TestReplayRecordOrderBeforePlugin/format=/after_terminal
+    replay_record_order_test.go:43: corrupt history reached plugin: open replay handler: plugin.Open("/does-not-exist.so"): realpath failed
+=== RUN   TestReplayRecordOrderBeforePlugin/format=/unknown_kind
+    replay_record_order_test.go:43: corrupt history reached plugin: replay requires a completed, failed or suspended journal tail
+=== RUN   TestReplayRecordOrderBeforePlugin/format=/foreign_terminal
+    replay_record_order_test.go:43: corrupt history reached plugin: open replay handler: plugin.Open("/does-not-exist.so"): realpath failed
+=== RUN   TestReplayRecordOrderBeforePlugin/format=/empty_failure
+    replay_record_order_test.go:43: corrupt history reached plugin: open replay handler: plugin.Open("/does-not-exist.so"): realpath failed
+=== RUN   TestReplayRecordOrderBeforePlugin/format=graph-v1/index_gap
+    replay_record_order_test.go:43: corrupt history reached plugin: open replay handler: plugin.Open("/does-not-exist.so"): realpath failed
+=== RUN   TestReplayRecordOrderBeforePlugin/format=graph-v1/zero_sequence
+    replay_record_order_test.go:43: corrupt history reached plugin: open replay handler: plugin.Open("/does-not-exist.so"): realpath failed
+=== RUN   TestReplayRecordOrderBeforePlugin/format=graph-v1/repeated_sequence
+    replay_record_order_test.go:43: corrupt history reached plugin: open replay handler: plugin.Open("/does-not-exist.so"): realpath failed
+=== RUN   TestReplayRecordOrderBeforePlugin/format=graph-v1/backwards_epoch
+    replay_record_order_test.go:43: corrupt history reached plugin: open replay handler: plugin.Open("/does-not-exist.so"): realpath failed
+=== RUN   TestReplayRecordOrderBeforePlugin/format=graph-v1/repeated_started
+    replay_record_order_test.go:43: corrupt history reached plugin: replay requires a completed, failed or suspended journal tail
+=== RUN   TestReplayRecordOrderBeforePlugin/format=graph-v1/after_terminal
+    replay_record_order_test.go:43: corrupt history reached plugin: open replay handler: plugin.Open("/does-not-exist.so"): realpath failed
+=== RUN   TestReplayRecordOrderBeforePlugin/format=graph-v1/unknown_kind
+    replay_record_order_test.go:43: corrupt history reached plugin: replay requires a completed, failed or suspended journal tail
+=== RUN   TestReplayRecordOrderBeforePlugin/format=graph-v1/foreign_terminal
+    replay_record_order_test.go:43: corrupt history reached plugin: open replay handler: plugin.Open("/does-not-exist.so"): realpath failed
+=== RUN   TestReplayRecordOrderBeforePlugin/format=graph-v1/empty_failure
+    replay_record_order_test.go:43: corrupt history reached plugin: open replay handler: plugin.Open("/does-not-exist.so"): realpath failed
+--- FAIL: TestReplayRecordOrderBeforePlugin (0.00s)
+    --- FAIL: TestReplayRecordOrderBeforePlugin/format=/index_gap (0.00s)
+    --- FAIL: TestReplayRecordOrderBeforePlugin/format=/zero_sequence (0.00s)
+    --- FAIL: TestReplayRecordOrderBeforePlugin/format=/repeated_sequence (0.00s)
+    --- FAIL: TestReplayRecordOrderBeforePlugin/format=/backwards_epoch (0.00s)
+    --- FAIL: TestReplayRecordOrderBeforePlugin/format=/repeated_started (0.00s)
+    --- FAIL: TestReplayRecordOrderBeforePlugin/format=/after_terminal (0.00s)
+    --- FAIL: TestReplayRecordOrderBeforePlugin/format=/unknown_kind (0.00s)
+    --- FAIL: TestReplayRecordOrderBeforePlugin/format=/foreign_terminal (0.00s)
+    --- FAIL: TestReplayRecordOrderBeforePlugin/format=/empty_failure (0.00s)
+    --- FAIL: TestReplayRecordOrderBeforePlugin/format=graph-v1/index_gap (0.00s)
+    --- FAIL: TestReplayRecordOrderBeforePlugin/format=graph-v1/zero_sequence (0.00s)
+    --- FAIL: TestReplayRecordOrderBeforePlugin/format=graph-v1/repeated_sequence (0.00s)
+    --- FAIL: TestReplayRecordOrderBeforePlugin/format=graph-v1/backwards_epoch (0.00s)
+    --- FAIL: TestReplayRecordOrderBeforePlugin/format=graph-v1/repeated_started (0.00s)
+    --- FAIL: TestReplayRecordOrderBeforePlugin/format=graph-v1/after_terminal (0.00s)
+    --- FAIL: TestReplayRecordOrderBeforePlugin/format=graph-v1/unknown_kind (0.00s)
+    --- FAIL: TestReplayRecordOrderBeforePlugin/format=graph-v1/foreign_terminal (0.00s)
+    --- FAIL: TestReplayRecordOrderBeforePlugin/format=graph-v1/empty_failure (0.00s)
+FAIL
+FAIL	js-wf/cmd/wf	0.076s
+FAIL

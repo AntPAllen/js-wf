@@ -1,0 +1,33 @@
+=== RUN   TestReplayEpochWorkerOwnership
+=== RUN   TestReplayEpochWorkerOwnership/same_worker
+=== RUN   TestReplayEpochWorkerOwnership/new_epoch
+=== RUN   TestReplayEpochWorkerOwnership/conflicting_epoch
+    replay_epoch_worker_test.go:43: pre-handler=<nil> reject=true
+=== RUN   TestReplayEpochWorkerOwnership/conflict_after_missing_id
+    replay_epoch_worker_test.go:43: pre-handler=<nil> reject=true
+=== RUN   TestReplayEpochWorkerOwnership/legacy_missing_ids
+=== RUN   TestReplayEpochWorkerOwnership/legacy_partial_ids
+=== RUN   TestReplayEpochWorkerOwnership/legacy_zero_epoch
+=== RUN   TestReplayEpochWorkerOwnership/zero_then_owned_epoch
+--- FAIL: TestReplayEpochWorkerOwnership (0.05s)
+    --- PASS: TestReplayEpochWorkerOwnership/same_worker (0.00s)
+    --- PASS: TestReplayEpochWorkerOwnership/new_epoch (0.05s)
+    --- FAIL: TestReplayEpochWorkerOwnership/conflicting_epoch (0.00s)
+    --- FAIL: TestReplayEpochWorkerOwnership/conflict_after_missing_id (0.00s)
+    --- PASS: TestReplayEpochWorkerOwnership/legacy_missing_ids (0.00s)
+    --- PASS: TestReplayEpochWorkerOwnership/legacy_partial_ids (0.00s)
+    --- PASS: TestReplayEpochWorkerOwnership/legacy_zero_epoch (0.00s)
+    --- PASS: TestReplayEpochWorkerOwnership/zero_then_owned_epoch (0.00s)
+FAIL
+FAIL	js-wf/wf	0.083s
+=== RUN   TestReplayEpochWorkerBeforePlugin
+=== RUN   TestReplayEpochWorkerBeforePlugin/format=
+    replay_epoch_worker_test.go:22: ownership conflict reached plugin: open replay handler: plugin.Open("/does-not-exist.so"): realpath failed
+=== RUN   TestReplayEpochWorkerBeforePlugin/format=graph-v1
+    replay_epoch_worker_test.go:22: ownership conflict reached plugin: open replay handler: plugin.Open("/does-not-exist.so"): realpath failed
+--- FAIL: TestReplayEpochWorkerBeforePlugin (0.00s)
+    --- FAIL: TestReplayEpochWorkerBeforePlugin/format= (0.00s)
+    --- FAIL: TestReplayEpochWorkerBeforePlugin/format=graph-v1 (0.00s)
+FAIL
+FAIL	js-wf/cmd/wf	0.034s
+FAIL
