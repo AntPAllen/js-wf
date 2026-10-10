@@ -45,3 +45,25 @@ js-wf-native-owned100000-20261010.service with invocation
 configuration; process-state.json records the actual child. Run review.py to
 observe live status or verify terminal completion. No acceptance is implied by
 this launch.
+
+## Closed native grant result
+
+R1 race completes **3727.627 seconds**, real Go/service exits0 under the original
+loaded invocation3c0c89936f9f479c86467f9a8bc21c95 and RemainAfterExit=yes.
+Independent source-bound review accepts100,006 actual grants,100,007 examined
+scopes,100,006 renewals/writes and782 bounded batches. Provisioning takes
+12m9.360s; interrupted recovery plus complete renewal **44m7.309s**; maximum
+batch **6.489230s**, below the unchanged15-second bound. Original remaining
+lifetime is2h47m50.442s. All grants are audited, the absent boundary remains
+absent, the source root remains unchanged and independent final compaction
+commits after all peers restart and an injected committed/lost acknowledgement.
+[Closed review](review.json), [child receipt](process-state.json),
+[raw log](native-race.log). This fixture contains four real records plus orphan
+grants, **not100,000 actual ordered entries**, and does not qualify R3 large
+performance or OS/VM/storage fault cuts.
+
+The full-entry fixture now uses an explicitly reviewed six-hour compaction
+intent lifetime. Its renewal trigger leaves two hours,2.72× the measured
+100,006-grant race cost, for a larger actual-prefix shape whose cardinality and
+staging cost remain unproven. Defaults/request/batch/entry-cap bounds are not
+changed. Normal and race full-entry execution remain independent.

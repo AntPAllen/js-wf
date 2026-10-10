@@ -1,0 +1,60 @@
+{
+  "observed_utc": "2026-10-10T22:56:35.684113+00:00",
+  "source_commit": "24dd8afc6e9317d1af36b1b8233e1990b052c9c8",
+  "properties": {
+    "MainPID": "0",
+    "ExecMainExitTimestamp": "Sat 2026-10-10 22:50:42 UTC",
+    "ExecMainStatus": "0",
+    "LoadState": "loaded",
+    "ActiveState": "active",
+    "SubState": "exited",
+    "InvocationID": "3c0c89936f9f479c86467f9a8bc21c95"
+  },
+  "child": {
+    "started_utc": "2026-10-10T21:48:30.218610+00:00",
+    "terminal": true,
+    "go_exit": 0,
+    "configuration": {
+      "WF_GRAPH_NATIVE_OWNED_GRANTS": "100000",
+      "WF_GRAPH_NATIVE_COMPACTION_LIFETIME": "3h"
+    },
+    "command": [
+      "/usr/local/bin/go",
+      "test",
+      "-race",
+      "./internal/graphpublication",
+      "-run",
+      "^TestNativeGraphOwnedGrantRenewalCostAndRecovery/R1$",
+      "-timeout=100m",
+      "-count=1",
+      "-v"
+    ],
+    "go_pid": 175726,
+    "ended_utc": "2026-10-10T22:50:42.714602+00:00"
+  },
+  "accepted": true,
+  "actual_100000_entries_qualified": false,
+  "row": {
+    "replicas": "1",
+    "orphan_grants": "100000",
+    "initial_grants": "6",
+    "total_grants": "100006",
+    "examined": "100007",
+    "renewed": "100006",
+    "partial": "128",
+    "batches": "782",
+    "provision_wall": "12m9.359540887s",
+    "recovery_renewal_wall": "44m7.30873008s",
+    "original_remaining": "2h47m50.442220089s",
+    "max_batch": "6.4892298s",
+    "roots": "301850",
+    "blob_reads": "100136",
+    "blob_writes": "100006",
+    "marker_witnesses": "100136",
+    "restarted": "all_peers",
+    "lost_ack": "committed",
+    "portable_input": "true",
+    "actual_100000_entries": "false"
+  },
+  "log_sha256": "a1b15263bd499f0495630544c05dd288404ebfaca03b245de49c28d0f82d5312"
+}

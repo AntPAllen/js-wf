@@ -1,5 +1,34 @@
 # JetStream Durable Workflow Runtime — Implementation Plan
 
+## Compiled canonical CLI and native grant cost accepted; actual-entry normal live — 2026-10-10
+
+Frozen5e2d5ac complete CLI race with standalone opt-ins passes412.333 seconds,
+actual exits0. Independent framing/process/source review accepts131 real CLI
+processes, including48 canonical commands and2 compiled projectors. R1/R3
+canonical cases pass70.79/78.67 seconds with the original fixture deadline.
+Exact compatibility journal cleanup is allowed only for purge's matching
+subject; all legacy history access is rejected. Eleven parser controls pass;
+verifier corrections do not alter runtime code or require a cluster rerun.
+[CLI evidence](scale/graph-compiled-canonical-cli-2026-10-10/README.md).
+
+The R1 native100,000-orphan-grant race completes3727.627 seconds with matching
+loaded service and Go exits0. Review accepts100,006 renewed/audited grants,
+100,007 examined scopes and782 batches. Recovery/renewal takes44m7.309 seconds;
+max batch6.489230 seconds stays below15. Source remains unchanged through
+restart/lost-ack recovery and final compaction. This contains four records,
+not the actual100,000-entry boundary.
+[Grant evidence](scale/graph-native-owned100000-2026-10-10/README.md).
+
+The actual100,000-entry R1/archive **normal** campaign is now live from prepared
+6408a5e, using indexed/durable stores,49,992 real SDK SetState calls, retained
+native files and operation profiling. Explicit6h compaction lifetime leaves a
+2h renewal window (2.72× measured grant cost) for unproven larger staging cost;
+defaults, request/batch/cap and300-minute fixture bound stay unchanged. Matching
+race is separate and unlaunched. Review actual terminal results before further
+large launches. Original simulation/matrices/fault/storage/security/soak/
+retention/rollout gates remain open; admission and collection stay off.
+[Policy and launch](scale/graph-indexed-entry-campaign-2026-10-10/README.md).
+
 ## Compiled canonical graph CLI fixture added; qualification pending — 2026-10-10
 
 The canonical graph fixture can now run24 actual CLI commands and one compiled

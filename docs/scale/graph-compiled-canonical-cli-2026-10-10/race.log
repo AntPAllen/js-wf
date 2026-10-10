@@ -1,0 +1,848 @@
+=== RUN   TestOperatorStandaloneConnectionSignals
+=== RUN   TestOperatorStandaloneConnectionSignals/project/INFO/terminated
+    daemon_connect_standalone_test.go:30: operator connection signal command=project stage=INFO signal=terminated exit=0 elapsed=1.003305721s pid=183938
+=== RUN   TestOperatorStandaloneConnectionSignals/project/INFO/interrupt
+    daemon_connect_standalone_test.go:30: operator connection signal command=project stage=INFO signal=interrupt exit=0 elapsed=1.00261113s pid=183946
+=== RUN   TestOperatorStandaloneConnectionSignals/project/PONG/terminated
+    daemon_connect_standalone_test.go:30: operator connection signal command=project stage=PONG signal=terminated exit=0 elapsed=1.003126717s pid=183955
+=== RUN   TestOperatorStandaloneConnectionSignals/project/PONG/interrupt
+    daemon_connect_standalone_test.go:30: operator connection signal command=project stage=PONG signal=interrupt exit=0 elapsed=1.005341321s pid=183965
+=== RUN   TestOperatorStandaloneConnectionSignals/tombstone-loop/INFO/terminated
+    daemon_connect_standalone_test.go:30: operator connection signal command=tombstone-loop stage=INFO signal=terminated exit=0 elapsed=1.003215389s pid=183973
+=== RUN   TestOperatorStandaloneConnectionSignals/tombstone-loop/INFO/interrupt
+    daemon_connect_standalone_test.go:30: operator connection signal command=tombstone-loop stage=INFO signal=interrupt exit=0 elapsed=1.0033059s pid=183981
+=== RUN   TestOperatorStandaloneConnectionSignals/tombstone-loop/PONG/terminated
+    daemon_connect_standalone_test.go:30: operator connection signal command=tombstone-loop stage=PONG signal=terminated exit=0 elapsed=1.006054795s pid=183991
+=== RUN   TestOperatorStandaloneConnectionSignals/tombstone-loop/PONG/interrupt
+    daemon_connect_standalone_test.go:30: operator connection signal command=tombstone-loop stage=PONG signal=interrupt exit=0 elapsed=1.003995885s pid=183999
+--- PASS: TestOperatorStandaloneConnectionSignals (11.59s)
+    --- PASS: TestOperatorStandaloneConnectionSignals/project/INFO/terminated (1.10s)
+    --- PASS: TestOperatorStandaloneConnectionSignals/project/INFO/interrupt (1.12s)
+    --- PASS: TestOperatorStandaloneConnectionSignals/project/PONG/terminated (1.10s)
+    --- PASS: TestOperatorStandaloneConnectionSignals/project/PONG/interrupt (1.11s)
+    --- PASS: TestOperatorStandaloneConnectionSignals/tombstone-loop/INFO/terminated (1.12s)
+    --- PASS: TestOperatorStandaloneConnectionSignals/tombstone-loop/INFO/interrupt (1.10s)
+    --- PASS: TestOperatorStandaloneConnectionSignals/tombstone-loop/PONG/terminated (1.12s)
+    --- PASS: TestOperatorStandaloneConnectionSignals/tombstone-loop/PONG/interrupt (1.09s)
+=== RUN   TestOperatorDaemonProcessHelper
+    daemon_test.go:30: subprocess helper
+--- SKIP: TestOperatorDaemonProcessHelper (0.00s)
+=== RUN   TestOperatorDaemonSignals
+=== RUN   TestOperatorDaemonSignals/project/startup
+    daemon_test.go:276: operator daemon stopped command=project stage=startup domain="" signal=terminated exit=0 pid=184009
+=== RUN   TestOperatorDaemonSignals/project/running
+    daemon_test.go:276: operator daemon stopped command=project stage=running domain="" signal=interrupt exit=0 pid=184018
+=== RUN   TestOperatorDaemonSignals/tombstone-loop/startup
+    daemon_test.go:276: operator daemon stopped command=tombstone-loop stage=startup domain="" signal=terminated exit=0 pid=184026
+=== RUN   TestOperatorDaemonSignals/tombstone-loop/running
+    daemon_test.go:276: operator daemon stopped command=tombstone-loop stage=running domain="" signal=interrupt exit=0 pid=184035
+=== NAME  TestOperatorDaemonSignals
+    daemon_test.go:301: operator daemon fatal startup domain="" error=stream-not-found exit=1
+--- PASS: TestOperatorDaemonSignals (9.34s)
+    --- PASS: TestOperatorDaemonSignals/project/startup (3.02s)
+    --- PASS: TestOperatorDaemonSignals/project/running (2.04s)
+    --- PASS: TestOperatorDaemonSignals/tombstone-loop/startup (3.02s)
+    --- PASS: TestOperatorDaemonSignals/tombstone-loop/running (1.15s)
+=== RUN   TestOperatorDaemonSignalsInJetStreamDomain
+    daemon_test.go:114: operator daemon domain admitted node=0 domain=WFOPS server_id=NAPJPHYCMC7BBNBRIBEGNK2C5NGLE474MD3QVPP2I7OIXBDJ2VK6U3DQ
+    daemon_test.go:114: operator daemon domain admitted node=1 domain=WFOPS server_id=NCTLHM62ABB2FLKVP4CQDXVPM3RCOI5YEZOQYV4EQ44UBZHR5GKBNIDP
+    daemon_test.go:114: operator daemon domain admitted node=2 domain=WFOPS server_id=NBRSSSUZ6QIG4E4K3GSJEJ6J6DZBTRJSFD6WV3OMQAWEDSCLHMWEQMXY
+=== RUN   TestOperatorDaemonSignalsInJetStreamDomain/project/startup
+    daemon_test.go:276: operator daemon stopped command=project stage=startup domain="WFOPS" signal=terminated exit=0 pid=184057
+=== RUN   TestOperatorDaemonSignalsInJetStreamDomain/project/running
+    daemon_test.go:276: operator daemon stopped command=project stage=running domain="WFOPS" signal=interrupt exit=0 pid=184066
+=== RUN   TestOperatorDaemonSignalsInJetStreamDomain/tombstone-loop/startup
+    daemon_test.go:276: operator daemon stopped command=tombstone-loop stage=startup domain="WFOPS" signal=terminated exit=0 pid=184075
+=== RUN   TestOperatorDaemonSignalsInJetStreamDomain/tombstone-loop/running
+    daemon_test.go:276: operator daemon stopped command=tombstone-loop stage=running domain="WFOPS" signal=interrupt exit=0 pid=184085
+=== NAME  TestOperatorDaemonSignalsInJetStreamDomain
+    daemon_test.go:301: operator daemon fatal startup domain="WFOPS" error=stream-not-found exit=1
+--- PASS: TestOperatorDaemonSignalsInJetStreamDomain (14.64s)
+    --- PASS: TestOperatorDaemonSignalsInJetStreamDomain/project/startup (3.02s)
+    --- PASS: TestOperatorDaemonSignalsInJetStreamDomain/project/running (2.14s)
+    --- PASS: TestOperatorDaemonSignalsInJetStreamDomain/tombstone-loop/startup (3.02s)
+    --- PASS: TestOperatorDaemonSignalsInJetStreamDomain/tombstone-loop/running (1.15s)
+=== RUN   TestGraphOperatorCursorRejectsUnknownVersion
+--- PASS: TestGraphOperatorCursorRejectsUnknownVersion (0.00s)
+=== RUN   TestNativeGraphCursorOperatorHistory
+=== RUN   TestNativeGraphCursorOperatorHistory/v4/R1-domain
+    graph_cursor_test.go:262: CURSOR_REPLAY_EXPORT version=4 replicas=1 records=8 frame_bytes=254 input=7 readers=0
+    graph_cursor_test.go:266: NATIVE_CURSOR_OPERATOR version=4 records=8 retained_from=0 original_entry_collected=false incorrect_schemas_rejected=2 domain_errors=0 legacy_journal_requests=0 readers_after=0
+=== RUN   TestNativeGraphCursorOperatorHistory/v4/R3-domain
+    graph_cursor_test.go:262: CURSOR_REPLAY_EXPORT version=4 replicas=3 records=8 frame_bytes=254 input=7 readers=0
+    graph_cursor_test.go:266: NATIVE_CURSOR_OPERATOR version=4 records=8 retained_from=0 original_entry_collected=false incorrect_schemas_rejected=2 domain_errors=0 legacy_journal_requests=0 readers_after=0
+=== RUN   TestNativeGraphCursorOperatorHistory/v5/R1-domain
+    graph_cursor_test.go:262: CURSOR_REPLAY_EXPORT version=5 replicas=1 records=8 frame_bytes=254 input=7 readers=0
+    graph_cursor_test.go:266: NATIVE_CURSOR_OPERATOR version=5 records=8 retained_from=0 original_entry_collected=false incorrect_schemas_rejected=2 domain_errors=0 legacy_journal_requests=0 readers_after=0
+=== RUN   TestNativeGraphCursorOperatorHistory/v5/R3-domain
+    graph_cursor_test.go:262: CURSOR_REPLAY_EXPORT version=5 replicas=3 records=8 frame_bytes=254 input=7 readers=0
+    graph_cursor_test.go:266: NATIVE_CURSOR_OPERATOR version=5 records=8 retained_from=0 original_entry_collected=false incorrect_schemas_rejected=2 domain_errors=0 legacy_journal_requests=0 readers_after=0
+=== RUN   TestNativeGraphCursorOperatorHistory/v6/R1-domain
+    graph_cursor_test.go:262: CURSOR_REPLAY_EXPORT version=6 replicas=1 records=8 frame_bytes=254 input=7 readers=0
+    graph_cursor_test.go:266: NATIVE_CURSOR_OPERATOR version=6 records=8 retained_from=5 original_entry_collected=true incorrect_schemas_rejected=2 domain_errors=0 legacy_journal_requests=0 readers_after=0
+=== RUN   TestNativeGraphCursorOperatorHistory/v6/R3-domain
+    graph_cursor_test.go:262: CURSOR_REPLAY_EXPORT version=6 replicas=3 records=8 frame_bytes=254 input=7 readers=0
+    graph_cursor_test.go:266: NATIVE_CURSOR_OPERATOR version=6 records=8 retained_from=5 original_entry_collected=true incorrect_schemas_rejected=2 domain_errors=0 legacy_journal_requests=0 readers_after=0
+--- PASS: TestNativeGraphCursorOperatorHistory (28.80s)
+    --- PASS: TestNativeGraphCursorOperatorHistory/v4/R1-domain (2.32s)
+    --- PASS: TestNativeGraphCursorOperatorHistory/v4/R3-domain (4.89s)
+    --- PASS: TestNativeGraphCursorOperatorHistory/v5/R1-domain (2.70s)
+    --- PASS: TestNativeGraphCursorOperatorHistory/v5/R3-domain (5.30s)
+    --- PASS: TestNativeGraphCursorOperatorHistory/v6/R1-domain (5.01s)
+    --- PASS: TestNativeGraphCursorOperatorHistory/v6/R3-domain (8.58s)
+=== RUN   TestGraphOperatorRejectsPartialOrLegacyOnlySelection
+--- PASS: TestGraphOperatorRejectsPartialOrLegacyOnlySelection (0.00s)
+=== RUN   TestNativeCanonicalGraphOperatorCommands
+=== RUN   TestNativeCanonicalGraphOperatorCommands/R1
+    graph_test.go:176: GRAPH_OPERATOR_CALL_BEGIN operation=start domain= fixture_remaining=1m59.755741524s
+    graph_test.go:185: GRAPH_OPERATOR_CALL_END operation=start domain= wall=2.212846452s api_requests=210 fixture_remaining=1m57.542898237s error=<nil>
+    graph_test.go:176: GRAPH_OPERATOR_CALL_BEGIN operation=signal domain= fixture_remaining=1m57.542819928s
+    graph_test.go:185: GRAPH_OPERATOR_CALL_END operation=signal domain= wall=4.160762127s api_requests=406 fixture_remaining=1m53.382058302s error=<nil>
+    graph_test.go:176: GRAPH_OPERATOR_CALL_BEGIN operation=result domain= fixture_remaining=1m53.381744926s
+    graph_test.go:185: GRAPH_OPERATOR_CALL_END operation=result domain= wall=5.067647779s api_requests=380 fixture_remaining=1m48.314096416s error=<nil>
+    graph_test.go:176: GRAPH_OPERATOR_CALL_BEGIN operation=result domain= fixture_remaining=1m48.094911133s
+    graph_test.go:185: GRAPH_OPERATOR_CALL_END operation=result domain= wall=1.295450685s api_requests=122 fixture_remaining=1m46.799459035s error=<nil>
+    graph_test.go:176: GRAPH_OPERATOR_CALL_BEGIN operation=export-journal domain= fixture_remaining=1m46.790816049s
+    graph_test.go:185: GRAPH_OPERATOR_CALL_END operation=export-journal domain= wall=196.083596ms api_requests=134 fixture_remaining=1m46.594735808s error=<nil>
+    graph_test.go:176: GRAPH_OPERATOR_CALL_BEGIN operation=export-replay domain= fixture_remaining=1m46.591457493s
+    graph_test.go:185: GRAPH_OPERATOR_CALL_END operation=export-replay domain= wall=5.620871771s api_requests=372 fixture_remaining=1m40.970584731s error=<nil>
+    graph_test.go:176: GRAPH_OPERATOR_CALL_BEGIN operation=replay domain= fixture_remaining=1m32.215348842s
+    graph_test.go:185: GRAPH_OPERATOR_CALL_END operation=replay domain= wall=4.326928405s api_requests=369 fixture_remaining=1m27.888421229s error=<nil>
+    graph_test.go:176: GRAPH_OPERATOR_CALL_BEGIN operation=list domain= fixture_remaining=1m20.292265974s
+    graph_test.go:185: GRAPH_OPERATOR_CALL_END operation=list domain= wall=362.675151ms api_requests=199 fixture_remaining=1m19.929591734s error=<nil>
+    graph_test.go:176: GRAPH_OPERATOR_CALL_BEGIN operation=lag domain= fixture_remaining=1m19.92944395s
+    graph_test.go:185: GRAPH_OPERATOR_CALL_END operation=lag domain= wall=21.643018ms api_requests=19 fixture_remaining=1m19.907801213s error=<nil>
+    graph_test.go:176: GRAPH_OPERATOR_CALL_BEGIN operation=describe domain= fixture_remaining=1m19.907736845s
+    graph_test.go:185: GRAPH_OPERATOR_CALL_END operation=describe domain= wall=288.972326ms api_requests=134 fixture_remaining=1m19.618764299s error=<nil>
+    graph_test.go:176: GRAPH_OPERATOR_CALL_BEGIN operation=scan-start domain= fixture_remaining=1m19.618573219s
+    graph_test.go:185: GRAPH_OPERATOR_CALL_END operation=scan-start domain= wall=22.555351ms api_requests=18 fixture_remaining=1m19.596018438s error=<nil>
+    graph_test.go:176: GRAPH_OPERATOR_CALL_BEGIN operation=scan-signal domain= fixture_remaining=1m19.595070239s
+    graph_test.go:185: GRAPH_OPERATOR_CALL_END operation=scan-signal domain= wall=25.654475ms api_requests=18 fixture_remaining=1m19.569416385s error=<nil>
+    graph_test.go:176: GRAPH_OPERATOR_CALL_BEGIN operation=scan-terminal domain= fixture_remaining=1m19.569353209s
+    graph_test.go:185: GRAPH_OPERATOR_CALL_END operation=scan-terminal domain= wall=27.34418ms api_requests=20 fixture_remaining=1m19.542009039s error=<nil>
+    graph_test.go:176: GRAPH_OPERATOR_CALL_BEGIN operation=scan-timer domain= fixture_remaining=1m19.541840173s
+    graph_test.go:185: GRAPH_OPERATOR_CALL_END operation=scan-timer domain= wall=234.574888ms api_requests=131 fixture_remaining=1m19.307265726s error=<nil>
+    graph_test.go:176: GRAPH_OPERATOR_CALL_BEGIN operation=scan-suspended domain= fixture_remaining=1m19.307087375s
+    graph_test.go:185: GRAPH_OPERATOR_CALL_END operation=scan-suspended domain= wall=245.716117ms api_requests=136 fixture_remaining=1m19.061371459s error=<nil>
+    graph_test.go:176: GRAPH_OPERATOR_CALL_BEGIN operation=scan-terminal domain= fixture_remaining=1m19.060684045s
+    graph_test.go:185: GRAPH_OPERATOR_CALL_END operation=scan-terminal domain= wall=27.984701ms api_requests=20 fixture_remaining=1m19.032699104s error=<nil>
+    graph_test.go:176: GRAPH_OPERATOR_CALL_BEGIN operation=scan-terminal domain= fixture_remaining=1m19.031888503s
+    graph_test.go:185: GRAPH_OPERATOR_CALL_END operation=scan-terminal domain= wall=40.382929ms api_requests=28 fixture_remaining=1m18.991506106s error=<nil>
+    graph_test.go:176: GRAPH_OPERATOR_CALL_BEGIN operation=export-journal domain= fixture_remaining=1m17.961267717s
+    graph_test.go:185: GRAPH_OPERATOR_CALL_END operation=export-journal domain= wall=287.238576ms api_requests=134 fixture_remaining=1m17.674030824s error=<nil>
+    graph_test.go:176: GRAPH_OPERATOR_CALL_BEGIN operation=start domain= fixture_remaining=1m17.673963101s
+    graph_test.go:185: GRAPH_OPERATOR_CALL_END operation=start domain= wall=171.326078ms api_requests=127 fixture_remaining=1m17.502636823s error=<nil>
+    graph_test.go:176: GRAPH_OPERATOR_CALL_BEGIN operation=cancel domain= fixture_remaining=1m17.502564793s
+    graph_test.go:185: GRAPH_OPERATOR_CALL_END operation=cancel domain= wall=581.703399ms api_requests=295 fixture_remaining=1m16.920861304s error=<nil>
+    graph_test.go:176: GRAPH_OPERATOR_CALL_BEGIN operation=result domain= fixture_remaining=1m16.920785669s
+    graph_test.go:185: GRAPH_OPERATOR_CALL_END operation=result domain= wall=820.910922ms api_requests=140 fixture_remaining=1m16.099874897s error=workflow cancelled
+    graph_test.go:176: GRAPH_OPERATOR_CALL_BEGIN operation=purge domain= fixture_remaining=1m16.098360729s
+    graph_test.go:185: GRAPH_OPERATOR_CALL_END operation=purge domain= wall=1.127132261s api_requests=150 fixture_remaining=1m14.971228638s error=<nil>
+    graph_test.go:176: GRAPH_OPERATOR_CALL_BEGIN operation=result domain= fixture_remaining=1m14.971165542s
+    graph_test.go:185: GRAPH_OPERATOR_CALL_END operation=result domain= wall=22.803869ms api_requests=14 fixture_remaining=1m14.948361683s error=workflow invocation was purged
+    graph_test.go:549: canonical CLI large Start/Signal/result, forged mirror ignored, canonical online/offline replay after source/blob deletion, canonical CLI project/list/lag and isolated page while worker active, history/scans, dry-run/apply terminal restoration, cancellation, purge and effect one; domain= requests=0 wrong=0
+    graph_test.go:291: graph project subprocess joined; legacy journal requests zero and domain API verified
+=== RUN   TestNativeCanonicalGraphOperatorCommands/R3Domain
+    graph_test.go:176: GRAPH_OPERATOR_CALL_BEGIN operation=start domain=WFGRAPHOPS fixture_remaining=1m58.361218816s
+    graph_test.go:185: GRAPH_OPERATOR_CALL_END operation=start domain=WFGRAPHOPS wall=2.422674588s api_requests=213 fixture_remaining=1m55.938543358s error=<nil>
+    graph_test.go:176: GRAPH_OPERATOR_CALL_BEGIN operation=signal domain=WFGRAPHOPS fixture_remaining=1m55.938370255s
+    graph_test.go:185: GRAPH_OPERATOR_CALL_END operation=signal domain=WFGRAPHOPS wall=5.149385875s api_requests=415 fixture_remaining=1m50.788984841s error=<nil>
+    graph_test.go:176: GRAPH_OPERATOR_CALL_BEGIN operation=result domain=WFGRAPHOPS fixture_remaining=1m50.788822985s
+    graph_test.go:185: GRAPH_OPERATOR_CALL_END operation=result domain=WFGRAPHOPS wall=5.952778066s api_requests=420 fixture_remaining=1m44.836044699s error=<nil>
+    graph_test.go:176: GRAPH_OPERATOR_CALL_BEGIN operation=result domain=WFGRAPHOPS fixture_remaining=1m44.58320125s
+    graph_test.go:185: GRAPH_OPERATOR_CALL_END operation=result domain=WFGRAPHOPS wall=1.38705477s api_requests=125 fixture_remaining=1m43.19614615s error=<nil>
+    graph_test.go:176: GRAPH_OPERATOR_CALL_BEGIN operation=export-journal domain=WFGRAPHOPS fixture_remaining=1m43.189000624s
+    graph_test.go:185: GRAPH_OPERATOR_CALL_END operation=export-journal domain=WFGRAPHOPS wall=251.70392ms api_requests=131 fixture_remaining=1m42.937301412s error=<nil>
+    graph_test.go:176: GRAPH_OPERATOR_CALL_BEGIN operation=export-replay domain=WFGRAPHOPS fixture_remaining=1m42.924476477s
+    graph_test.go:185: GRAPH_OPERATOR_CALL_END operation=export-replay domain=WFGRAPHOPS wall=6.155633381s api_requests=372 fixture_remaining=1m36.768842434s error=<nil>
+    graph_test.go:176: GRAPH_OPERATOR_CALL_BEGIN operation=replay domain=WFGRAPHOPS fixture_remaining=1m35.306774214s
+    graph_test.go:185: GRAPH_OPERATOR_CALL_END operation=replay domain=WFGRAPHOPS wall=4.398407159s api_requests=375 fixture_remaining=1m30.908368577s error=<nil>
+    graph_test.go:176: GRAPH_OPERATOR_CALL_BEGIN operation=list domain=WFGRAPHOPS fixture_remaining=1m23.276675155s
+    graph_test.go:185: GRAPH_OPERATOR_CALL_END operation=list domain=WFGRAPHOPS wall=411.328049ms api_requests=202 fixture_remaining=1m22.865347706s error=<nil>
+    graph_test.go:176: GRAPH_OPERATOR_CALL_BEGIN operation=lag domain=WFGRAPHOPS fixture_remaining=1m22.86513902s
+    graph_test.go:185: GRAPH_OPERATOR_CALL_END operation=lag domain=WFGRAPHOPS wall=33.95048ms api_requests=19 fixture_remaining=1m22.83118867s error=<nil>
+    graph_test.go:176: GRAPH_OPERATOR_CALL_BEGIN operation=describe domain=WFGRAPHOPS fixture_remaining=1m22.831052364s
+    graph_test.go:185: GRAPH_OPERATOR_CALL_END operation=describe domain=WFGRAPHOPS wall=297.195661ms api_requests=137 fixture_remaining=1m22.533856472s error=<nil>
+    graph_test.go:176: GRAPH_OPERATOR_CALL_BEGIN operation=scan-start domain=WFGRAPHOPS fixture_remaining=1m22.53321554s
+    graph_test.go:185: GRAPH_OPERATOR_CALL_END operation=scan-start domain=WFGRAPHOPS wall=27.094604ms api_requests=13 fixture_remaining=1m22.506121947s error=<nil>
+    graph_test.go:176: GRAPH_OPERATOR_CALL_BEGIN operation=scan-signal domain=WFGRAPHOPS fixture_remaining=1m22.506035015s
+    graph_test.go:185: GRAPH_OPERATOR_CALL_END operation=scan-signal domain=WFGRAPHOPS wall=43.065924ms api_requests=18 fixture_remaining=1m22.462969591s error=<nil>
+    graph_test.go:176: GRAPH_OPERATOR_CALL_BEGIN operation=scan-terminal domain=WFGRAPHOPS fixture_remaining=1m22.462839885s
+    graph_test.go:185: GRAPH_OPERATOR_CALL_END operation=scan-terminal domain=WFGRAPHOPS wall=46.710637ms api_requests=20 fixture_remaining=1m22.416129407s error=<nil>
+    graph_test.go:176: GRAPH_OPERATOR_CALL_BEGIN operation=scan-timer domain=WFGRAPHOPS fixture_remaining=1m22.415985759s
+    graph_test.go:185: GRAPH_OPERATOR_CALL_END operation=scan-timer domain=WFGRAPHOPS wall=300.748203ms api_requests=137 fixture_remaining=1m22.115238488s error=<nil>
+    graph_test.go:176: GRAPH_OPERATOR_CALL_BEGIN operation=scan-suspended domain=WFGRAPHOPS fixture_remaining=1m22.115111325s
+    graph_test.go:185: GRAPH_OPERATOR_CALL_END operation=scan-suspended domain=WFGRAPHOPS wall=294.669557ms api_requests=133 fixture_remaining=1m21.820441958s error=<nil>
+    graph_test.go:176: GRAPH_OPERATOR_CALL_BEGIN operation=scan-terminal domain=WFGRAPHOPS fixture_remaining=1m21.817245727s
+    graph_test.go:185: GRAPH_OPERATOR_CALL_END operation=scan-terminal domain=WFGRAPHOPS wall=38.830327ms api_requests=20 fixture_remaining=1m21.778416081s error=<nil>
+    graph_test.go:176: GRAPH_OPERATOR_CALL_BEGIN operation=scan-terminal domain=WFGRAPHOPS fixture_remaining=1m21.77747278s
+    graph_test.go:185: GRAPH_OPERATOR_CALL_END operation=scan-terminal domain=WFGRAPHOPS wall=60.145178ms api_requests=31 fixture_remaining=1m21.717327702s error=<nil>
+    graph_test.go:176: GRAPH_OPERATOR_CALL_BEGIN operation=export-journal domain=WFGRAPHOPS fixture_remaining=1m20.662652672s
+    graph_test.go:185: GRAPH_OPERATOR_CALL_END operation=export-journal domain=WFGRAPHOPS wall=323.44285ms api_requests=134 fixture_remaining=1m20.339210644s error=<nil>
+    graph_test.go:176: GRAPH_OPERATOR_CALL_BEGIN operation=start domain=WFGRAPHOPS fixture_remaining=1m20.339060986s
+    graph_test.go:185: GRAPH_OPERATOR_CALL_END operation=start domain=WFGRAPHOPS wall=255.49592ms api_requests=127 fixture_remaining=1m20.083565807s error=<nil>
+    graph_test.go:176: GRAPH_OPERATOR_CALL_BEGIN operation=cancel domain=WFGRAPHOPS fixture_remaining=1m20.083480407s
+    graph_test.go:185: GRAPH_OPERATOR_CALL_END operation=cancel domain=WFGRAPHOPS wall=872.000992ms api_requests=303 fixture_remaining=1m19.211479856s error=<nil>
+    graph_test.go:176: GRAPH_OPERATOR_CALL_BEGIN operation=result domain=WFGRAPHOPS fixture_remaining=1m19.211399003s
+    graph_test.go:185: GRAPH_OPERATOR_CALL_END operation=result domain=WFGRAPHOPS wall=1.104359327s api_requests=139 fixture_remaining=1m18.107041699s error=workflow cancelled
+    graph_test.go:176: GRAPH_OPERATOR_CALL_BEGIN operation=purge domain=WFGRAPHOPS fixture_remaining=1m18.076984608s
+    graph_test.go:185: GRAPH_OPERATOR_CALL_END operation=purge domain=WFGRAPHOPS wall=1.37340489s api_requests=156 fixture_remaining=1m16.70358084s error=<nil>
+    graph_test.go:176: GRAPH_OPERATOR_CALL_BEGIN operation=result domain=WFGRAPHOPS fixture_remaining=1m16.703177628s
+    graph_test.go:185: GRAPH_OPERATOR_CALL_END operation=result domain=WFGRAPHOPS wall=18.060182ms api_requests=14 fixture_remaining=1m16.685117275s error=workflow invocation was purged
+    graph_test.go:549: canonical CLI large Start/Signal/result, forged mirror ignored, canonical online/offline replay after source/blob deletion, canonical CLI project/list/lag and isolated page while worker active, history/scans, dry-run/apply terminal restoration, cancellation, purge and effect one; domain=WFGRAPHOPS requests=3654 wrong=0
+    graph_test.go:291: graph project subprocess joined; legacy journal requests zero and domain API verified
+--- PASS: TestNativeCanonicalGraphOperatorCommands (90.69s)
+    --- PASS: TestNativeCanonicalGraphOperatorCommands/R1 (46.10s)
+    --- PASS: TestNativeCanonicalGraphOperatorCommands/R3Domain (44.59s)
+=== RUN   TestNativeCanonicalGraphPostgresOperatorCommands
+    graph_test.go:58: set WF_TEST_POSTGRES_DSN
+--- SKIP: TestNativeCanonicalGraphPostgresOperatorCommands (0.00s)
+=== RUN   TestOperatorStandaloneCanonicalGraphCommands
+=== RUN   TestOperatorStandaloneCanonicalGraphCommands/R1
+    graph_test.go:176: GRAPH_OPERATOR_CALL_BEGIN operation=start domain= fixture_remaining=1m59.666605701s
+    graph_test.go:181: operator child wire: pid=184413 offline=false connections=1 truncated=false client_bytes=5361425 server_bytes=14189028
+    graph_test.go:181: operator standalone process domain="" pid=184413 exit=0
+    graph_test.go:185: GRAPH_OPERATOR_CALL_END operation=start domain= wall=4.379934243s api_requests=0 fixture_remaining=1m55.286709506s error=<nil>
+    graph_test.go:176: GRAPH_OPERATOR_CALL_BEGIN operation=signal domain= fixture_remaining=1m55.286650456s
+    graph_test.go:181: operator child wire: pid=184425 offline=false connections=1 truncated=false client_bytes=21590856 server_bytes=21987596
+    graph_test.go:181: operator standalone process domain="" pid=184425 exit=0
+    graph_test.go:185: GRAPH_OPERATOR_CALL_END operation=signal domain= wall=7.922011547s api_requests=0 fixture_remaining=1m47.364639341s error=<nil>
+    graph_test.go:176: GRAPH_OPERATOR_CALL_BEGIN operation=result domain= fixture_remaining=1m47.364600582s
+    graph_test.go:181: operator child wire: pid=184460 offline=false connections=1 truncated=false client_bytes=313128 server_bytes=7571909
+    graph_test.go:181: operator standalone process domain="" pid=184460 exit=0
+    graph_test.go:185: GRAPH_OPERATOR_CALL_END operation=result domain= wall=5.89355246s api_requests=0 fixture_remaining=1m41.471047952s error=<nil>
+    graph_test.go:176: GRAPH_OPERATOR_CALL_BEGIN operation=result domain= fixture_remaining=1m41.230232979s
+    graph_test.go:181: operator child wire: pid=184471 offline=false connections=1 truncated=false client_bytes=73063 server_bytes=7152441
+    graph_test.go:181: operator standalone process domain="" pid=184471 exit=0
+    graph_test.go:185: GRAPH_OPERATOR_CALL_END operation=result domain= wall=3.178449153s api_requests=0 fixture_remaining=1m38.051784447s error=<nil>
+    graph_test.go:176: GRAPH_OPERATOR_CALL_BEGIN operation=export-journal domain= fixture_remaining=1m38.043594887s
+    graph_test.go:181: operator child wire: pid=184479 offline=false connections=1 truncated=false client_bytes=106055 server_bytes=243119
+    graph_test.go:181: operator standalone process domain="" pid=184479 exit=0
+    graph_test.go:185: GRAPH_OPERATOR_CALL_END operation=export-journal domain= wall=1.331067322s api_requests=0 fixture_remaining=1m36.712528056s error=<nil>
+    graph_test.go:176: GRAPH_OPERATOR_CALL_BEGIN operation=export-replay domain= fixture_remaining=1m36.708968724s
+    graph_test.go:181: operator child wire: pid=184491 offline=false connections=1 truncated=false client_bytes=232530 server_bytes=28446779
+    graph_test.go:181: operator standalone process domain="" pid=184491 exit=0
+    graph_test.go:185: GRAPH_OPERATOR_CALL_END operation=export-replay domain= wall=9.721435508s api_requests=0 fixture_remaining=1m26.987533386s error=<nil>
+    graph_test.go:176: GRAPH_OPERATOR_CALL_BEGIN operation=replay domain= fixture_remaining=1m25.418886367s
+    graph_test.go:181: operator child wire: pid=184499 offline=false connections=1 truncated=false client_bytes=222368 server_bytes=28429643
+    graph_test.go:181: operator standalone process domain="" pid=184499 exit=0
+    graph_test.go:185: GRAPH_OPERATOR_CALL_END operation=replay domain= wall=7.45310537s api_requests=0 fixture_remaining=1m17.965781889s error=<nil>
+    graph_test.go:421: operator child wire: pid=184507 offline=true connections=0 truncated=false client_bytes=0 server_bytes=0
+    graph_test.go:421: operator standalone process domain="" pid=184507 exit=0
+    graph_test.go:176: GRAPH_OPERATOR_CALL_BEGIN operation=list domain= fixture_remaining=1m9.47465975s
+    graph_test.go:181: operator child wire: pid=184519 offline=false connections=1 truncated=false client_bytes=135862 server_bytes=345569
+    graph_test.go:181: operator standalone process domain="" pid=184519 exit=0
+    graph_test.go:185: GRAPH_OPERATOR_CALL_END operation=list domain= wall=1.527038385s api_requests=0 fixture_remaining=1m7.947621446s error=<nil>
+    graph_test.go:176: GRAPH_OPERATOR_CALL_BEGIN operation=lag domain= fixture_remaining=1m7.94740708s
+    graph_test.go:181: operator child wire: pid=184526 offline=false connections=1 truncated=false client_bytes=4899 server_bytes=25643
+    graph_test.go:181: operator standalone process domain="" pid=184526 exit=0
+    graph_test.go:185: GRAPH_OPERATOR_CALL_END operation=lag domain= wall=1.046258614s api_requests=0 fixture_remaining=1m6.901148846s error=<nil>
+    graph_test.go:176: GRAPH_OPERATOR_CALL_BEGIN operation=describe domain= fixture_remaining=1m6.901110628s
+    graph_test.go:181: operator child wire: pid=184533 offline=false connections=1 truncated=false client_bytes=116248 server_bytes=260438
+    graph_test.go:181: operator standalone process domain="" pid=184533 exit=0
+    graph_test.go:185: GRAPH_OPERATOR_CALL_END operation=describe domain= wall=1.330940449s api_requests=0 fixture_remaining=1m5.570170811s error=<nil>
+    graph_test.go:176: GRAPH_OPERATOR_CALL_BEGIN operation=scan-start domain= fixture_remaining=1m5.570142928s
+    graph_test.go:181: operator child wire: pid=184541 offline=false connections=1 truncated=false client_bytes=4837 server_bytes=28172
+    graph_test.go:181: operator standalone process domain="" pid=184541 exit=0
+    graph_test.go:185: GRAPH_OPERATOR_CALL_END operation=scan-start domain= wall=1.053780499s api_requests=0 fixture_remaining=1m4.516362079s error=<nil>
+    graph_test.go:176: GRAPH_OPERATOR_CALL_BEGIN operation=scan-signal domain= fixture_remaining=1m4.516293515s
+    graph_test.go:181: operator child wire: pid=184548 offline=false connections=1 truncated=false client_bytes=4837 server_bytes=28171
+    graph_test.go:181: operator standalone process domain="" pid=184548 exit=0
+    graph_test.go:185: GRAPH_OPERATOR_CALL_END operation=scan-signal domain= wall=1.054656431s api_requests=0 fixture_remaining=1m3.461638165s error=<nil>
+    graph_test.go:176: GRAPH_OPERATOR_CALL_BEGIN operation=scan-terminal domain= fixture_remaining=1m3.461578194s
+    graph_test.go:181: operator child wire: pid=184554 offline=false connections=1 truncated=false client_bytes=5032 server_bytes=29388
+    graph_test.go:181: operator standalone process domain="" pid=184554 exit=0
+    graph_test.go:185: GRAPH_OPERATOR_CALL_END operation=scan-terminal domain= wall=1.057413799s api_requests=0 fixture_remaining=1m2.404164205s error=<nil>
+    graph_test.go:176: GRAPH_OPERATOR_CALL_BEGIN operation=scan-timer domain= fixture_remaining=1m2.404113468s
+    graph_test.go:181: operator child wire: pid=184561 offline=false connections=1 truncated=false client_bytes=108641 server_bytes=249157
+    graph_test.go:181: operator standalone process domain="" pid=184561 exit=0
+    graph_test.go:185: GRAPH_OPERATOR_CALL_END operation=scan-timer domain= wall=1.408376547s api_requests=0 fixture_remaining=1m0.995737312s error=<nil>
+    graph_test.go:176: GRAPH_OPERATOR_CALL_BEGIN operation=scan-suspended domain= fixture_remaining=1m0.995694346s
+    graph_test.go:181: operator child wire: pid=184568 offline=false connections=1 truncated=false client_bytes=100236 server_bytes=234264
+    graph_test.go:181: operator standalone process domain="" pid=184568 exit=0
+    graph_test.go:185: GRAPH_OPERATOR_CALL_END operation=scan-suspended domain= wall=1.348425978s api_requests=0 fixture_remaining=59.647269029s error=<nil>
+    graph_test.go:176: GRAPH_OPERATOR_CALL_BEGIN operation=scan-terminal domain= fixture_remaining=59.646276753s
+    graph_test.go:181: operator child wire: pid=184575 offline=false connections=1 truncated=false client_bytes=5032 server_bytes=29372
+    graph_test.go:181: operator standalone process domain="" pid=184575 exit=0
+    graph_test.go:185: GRAPH_OPERATOR_CALL_END operation=scan-terminal domain= wall=1.054960945s api_requests=0 fixture_remaining=58.591315658s error=<nil>
+    graph_test.go:176: GRAPH_OPERATOR_CALL_BEGIN operation=scan-terminal domain= fixture_remaining=58.590647704s
+    graph_test.go:181: operator child wire: pid=184582 offline=false connections=1 truncated=false client_bytes=11786 server_bytes=43122
+    graph_test.go:181: operator standalone process domain="" pid=184582 exit=0
+    graph_test.go:185: GRAPH_OPERATOR_CALL_END operation=scan-terminal domain= wall=1.093806224s api_requests=0 fixture_remaining=57.496842202s error=<nil>
+    graph_test.go:176: GRAPH_OPERATOR_CALL_BEGIN operation=export-journal domain= fixture_remaining=57.432573204s
+    graph_test.go:181: operator child wire: pid=184588 offline=false connections=1 truncated=false client_bytes=111166 server_bytes=251810
+    graph_test.go:181: operator standalone process domain="" pid=184588 exit=0
+    graph_test.go:185: GRAPH_OPERATOR_CALL_END operation=export-journal domain= wall=1.388153404s api_requests=0 fixture_remaining=56.04441991s error=<nil>
+    graph_test.go:176: GRAPH_OPERATOR_CALL_BEGIN operation=start domain= fixture_remaining=56.044370645s
+    graph_test.go:181: operator child wire: pid=184596 offline=false connections=1 truncated=false client_bytes=69825 server_bytes=160277
+    graph_test.go:181: operator standalone process domain="" pid=184596 exit=0
+    graph_test.go:185: GRAPH_OPERATOR_CALL_END operation=start domain= wall=1.301307299s api_requests=0 fixture_remaining=54.743063877s error=<nil>
+    graph_test.go:176: GRAPH_OPERATOR_CALL_BEGIN operation=cancel domain= fixture_remaining=54.743021342s
+    graph_test.go:181: operator child wire: pid=184604 offline=false connections=1 truncated=false client_bytes=255335 server_bytes=481459
+    graph_test.go:181: operator standalone process domain="" pid=184604 exit=0
+    graph_test.go:185: GRAPH_OPERATOR_CALL_END operation=cancel domain= wall=1.648673565s api_requests=0 fixture_remaining=53.094348278s error=<nil>
+    graph_test.go:176: GRAPH_OPERATOR_CALL_BEGIN operation=result domain= fixture_remaining=53.094298232s
+    graph_test.go:181: operator child wire: pid=184611 offline=false connections=1 truncated=false client_bytes=45091 server_bytes=96645
+    graph_test.go:181: operator standalone process domain="" pid=184611 exit=1
+    graph_test.go:185: GRAPH_OPERATOR_CALL_END operation=result domain= wall=146.549047ms api_requests=0 fixture_remaining=52.947749666s error=wf exit=1: workflow cancelled
+    graph_test.go:176: GRAPH_OPERATOR_CALL_BEGIN operation=purge domain= fixture_remaining=52.947611225s
+    graph_test.go:181: operator child wire: pid=184617 offline=false connections=1 truncated=false client_bytes=103470 server_bytes=7206131
+    graph_test.go:181: operator standalone process domain="" pid=184617 exit=0
+    graph_test.go:185: GRAPH_OPERATOR_CALL_END operation=purge domain= wall=2.64145548s api_requests=0 fixture_remaining=50.306155856s error=<nil>
+    graph_test.go:176: GRAPH_OPERATOR_CALL_BEGIN operation=result domain= fixture_remaining=50.306114383s
+    graph_test.go:181: operator child wire: pid=184624 offline=false connections=1 truncated=false client_bytes=3044 server_bytes=15602
+    graph_test.go:181: operator standalone process domain="" pid=184624 exit=1
+    graph_test.go:185: GRAPH_OPERATOR_CALL_END operation=result domain= wall=49.951995ms api_requests=0 fixture_remaining=50.256162738s error=wf exit=1: workflow invocation was purged
+    graph_test.go:549: canonical CLI large Start/Signal/result, forged mirror ignored, canonical online/offline replay after source/blob deletion, canonical CLI project/list/lag and isolated page while worker active, history/scans, dry-run/apply terminal restoration, cancellation, purge and effect one; domain= requests=0 wrong=0
+    graph_test.go:289: compiled graph projector joined; complete wire retained for independent domain/legacy-history review
+    standalone_test.go:236: operator standalone commands domain="" processes=24 exe_sha256=04af79eab73af41d387ebf98a5b15b08e32c95f89b241caef6d53222f1b51d9a
+=== RUN   TestOperatorStandaloneCanonicalGraphCommands/R3Domain
+    graph_test.go:176: GRAPH_OPERATOR_CALL_BEGIN operation=start domain=WFGRAPHOPS fixture_remaining=1m58.218387176s
+    graph_test.go:181: operator child wire: pid=184640 offline=false connections=1 truncated=false client_bytes=5368115 server_bytes=14228047
+    graph_test.go:181: operator standalone process domain="WFGRAPHOPS" pid=184640 exit=0
+    graph_test.go:185: GRAPH_OPERATOR_CALL_END operation=start domain=WFGRAPHOPS wall=4.998684067s api_requests=0 fixture_remaining=1m53.219704531s error=<nil>
+    graph_test.go:176: GRAPH_OPERATOR_CALL_BEGIN operation=signal domain=WFGRAPHOPS fixture_remaining=1m53.21957184s
+    graph_test.go:181: operator child wire: pid=184648 offline=false connections=1 truncated=false client_bytes=10845282 server_bytes=21622946
+    graph_test.go:181: operator standalone process domain="WFGRAPHOPS" pid=184648 exit=0
+    graph_test.go:185: GRAPH_OPERATOR_CALL_END operation=signal domain=WFGRAPHOPS wall=8.411865821s api_requests=0 fixture_remaining=1m44.807706208s error=<nil>
+    graph_test.go:176: GRAPH_OPERATOR_CALL_BEGIN operation=result domain=WFGRAPHOPS fixture_remaining=1m44.807676583s
+    graph_test.go:181: operator child wire: pid=184656 offline=false connections=1 truncated=false client_bytes=440162 server_bytes=7850307
+    graph_test.go:181: operator standalone process domain="WFGRAPHOPS" pid=184656 exit=0
+    graph_test.go:185: GRAPH_OPERATOR_CALL_END operation=result domain=WFGRAPHOPS wall=7.366209578s api_requests=0 fixture_remaining=1m37.441467226s error=<nil>
+    graph_test.go:176: GRAPH_OPERATOR_CALL_BEGIN operation=result domain=WFGRAPHOPS fixture_remaining=1m37.229408654s
+    graph_test.go:181: operator child wire: pid=184665 offline=false connections=1 truncated=false client_bytes=77673 server_bytes=7173805
+    graph_test.go:181: operator standalone process domain="WFGRAPHOPS" pid=184665 exit=0
+    graph_test.go:185: GRAPH_OPERATOR_CALL_END operation=result domain=WFGRAPHOPS wall=3.185970046s api_requests=0 fixture_remaining=1m34.043439299s error=<nil>
+    graph_test.go:176: GRAPH_OPERATOR_CALL_BEGIN operation=export-journal domain=WFGRAPHOPS fixture_remaining=1m34.037684664s
+    graph_test.go:181: operator child wire: pid=184672 offline=false connections=1 truncated=false client_bytes=122851 server_bytes=292658
+    graph_test.go:181: operator standalone process domain="WFGRAPHOPS" pid=184672 exit=0
+    graph_test.go:185: GRAPH_OPERATOR_CALL_END operation=export-journal domain=WFGRAPHOPS wall=1.475057433s api_requests=0 fixture_remaining=1m32.562629084s error=<nil>
+    graph_test.go:176: GRAPH_OPERATOR_CALL_BEGIN operation=export-replay domain=WFGRAPHOPS fixture_remaining=1m32.549296846s
+    graph_test.go:181: operator child wire: pid=184679 offline=false connections=1 truncated=false client_bytes=231581 server_bytes=28470827
+    graph_test.go:181: operator standalone process domain="WFGRAPHOPS" pid=184679 exit=0
+    graph_test.go:185: GRAPH_OPERATOR_CALL_END operation=export-replay domain=WFGRAPHOPS wall=10.651370277s api_requests=0 fixture_remaining=1m21.89792721s error=<nil>
+    graph_test.go:176: GRAPH_OPERATOR_CALL_BEGIN operation=replay domain=WFGRAPHOPS fixture_remaining=1m20.337035749s
+    graph_test.go:181: operator child wire: pid=184688 offline=false connections=1 truncated=false client_bytes=226470 server_bytes=28461619
+    graph_test.go:181: operator standalone process domain="WFGRAPHOPS" pid=184688 exit=0
+    graph_test.go:185: GRAPH_OPERATOR_CALL_END operation=replay domain=WFGRAPHOPS wall=7.922296674s api_requests=0 fixture_remaining=1m12.414740788s error=<nil>
+    graph_test.go:421: operator child wire: pid=184699 offline=true connections=0 truncated=false client_bytes=0 server_bytes=0
+    graph_test.go:421: operator standalone process domain="WFGRAPHOPS" pid=184699 exit=0
+    graph_test.go:176: GRAPH_OPERATOR_CALL_BEGIN operation=list domain=WFGRAPHOPS fixture_remaining=1m3.524256694s
+    graph_test.go:181: operator child wire: pid=184715 offline=false connections=1 truncated=false client_bytes=132988 server_bytes=366701
+    graph_test.go:181: operator standalone process domain="WFGRAPHOPS" pid=184715 exit=0
+    graph_test.go:185: GRAPH_OPERATOR_CALL_END operation=list domain=WFGRAPHOPS wall=1.620882323s api_requests=0 fixture_remaining=1m1.903375062s error=<nil>
+    graph_test.go:176: GRAPH_OPERATOR_CALL_BEGIN operation=lag domain=WFGRAPHOPS fixture_remaining=1m1.903200507s
+    graph_test.go:181: operator child wire: pid=184722 offline=false connections=1 truncated=false client_bytes=5108 server_bytes=31083
+    graph_test.go:181: operator standalone process domain="WFGRAPHOPS" pid=184722 exit=0
+    graph_test.go:185: GRAPH_OPERATOR_CALL_END operation=lag domain=WFGRAPHOPS wall=1.074581385s api_requests=0 fixture_remaining=1m0.828619703s error=<nil>
+    graph_test.go:176: GRAPH_OPERATOR_CALL_BEGIN operation=describe domain=WFGRAPHOPS fixture_remaining=1m0.82858523s
+    graph_test.go:181: operator child wire: pid=184729 offline=false connections=1 truncated=false client_bytes=121024 server_bytes=290293
+    graph_test.go:181: operator standalone process domain="WFGRAPHOPS" pid=184729 exit=0
+    graph_test.go:185: GRAPH_OPERATOR_CALL_END operation=describe domain=WFGRAPHOPS wall=1.511227353s api_requests=0 fixture_remaining=59.317358448s error=<nil>
+    graph_test.go:176: GRAPH_OPERATOR_CALL_BEGIN operation=scan-start domain=WFGRAPHOPS fixture_remaining=59.3173203s
+    graph_test.go:181: operator child wire: pid=184736 offline=false connections=1 truncated=false client_bytes=1517 server_bytes=21320
+    graph_test.go:181: operator standalone process domain="WFGRAPHOPS" pid=184736 exit=0
+    graph_test.go:185: GRAPH_OPERATOR_CALL_END operation=scan-start domain=WFGRAPHOPS wall=1.05007582s api_requests=0 fixture_remaining=58.267245122s error=<nil>
+    graph_test.go:176: GRAPH_OPERATOR_CALL_BEGIN operation=scan-signal domain=WFGRAPHOPS fixture_remaining=58.267219273s
+    graph_test.go:181: operator child wire: pid=184771 offline=false connections=1 truncated=false client_bytes=5035 server_bytes=33280
+    graph_test.go:181: operator standalone process domain="WFGRAPHOPS" pid=184771 exit=0
+    graph_test.go:185: GRAPH_OPERATOR_CALL_END operation=scan-signal domain=WFGRAPHOPS wall=1.073343093s api_requests=0 fixture_remaining=57.19387646s error=<nil>
+    graph_test.go:176: GRAPH_OPERATOR_CALL_BEGIN operation=scan-terminal domain=WFGRAPHOPS fixture_remaining=57.193838102s
+    graph_test.go:181: operator child wire: pid=184779 offline=false connections=1 truncated=false client_bytes=5252 server_bytes=34826
+    graph_test.go:181: operator standalone process domain="WFGRAPHOPS" pid=184779 exit=0
+    graph_test.go:185: GRAPH_OPERATOR_CALL_END operation=scan-terminal domain=WFGRAPHOPS wall=1.080461663s api_requests=0 fixture_remaining=56.11337689s error=<nil>
+    graph_test.go:176: GRAPH_OPERATOR_CALL_BEGIN operation=scan-timer domain=WFGRAPHOPS fixture_remaining=56.113344981s
+    graph_test.go:181: operator child wire: pid=184786 offline=false connections=1 truncated=false client_bytes=101764 server_bytes=256603
+    graph_test.go:181: operator standalone process domain="WFGRAPHOPS" pid=184786 exit=0
+    graph_test.go:185: GRAPH_OPERATOR_CALL_END operation=scan-timer domain=WFGRAPHOPS wall=1.429222954s api_requests=0 fixture_remaining=54.684122197s error=<nil>
+    graph_test.go:176: GRAPH_OPERATOR_CALL_BEGIN operation=scan-suspended domain=WFGRAPHOPS fixture_remaining=54.684041154s
+    graph_test.go:181: operator child wire: pid=184796 offline=false connections=1 truncated=false client_bytes=101666 server_bytes=256398
+    graph_test.go:181: operator standalone process domain="WFGRAPHOPS" pid=184796 exit=0
+    graph_test.go:185: GRAPH_OPERATOR_CALL_END operation=scan-suspended domain=WFGRAPHOPS wall=1.40538385s api_requests=0 fixture_remaining=53.278657795s error=<nil>
+    graph_test.go:176: GRAPH_OPERATOR_CALL_BEGIN operation=scan-terminal domain=WFGRAPHOPS fixture_remaining=53.275358956s
+    graph_test.go:181: operator child wire: pid=184803 offline=false connections=1 truncated=false client_bytes=5252 server_bytes=34806
+    graph_test.go:181: operator standalone process domain="WFGRAPHOPS" pid=184803 exit=0
+    graph_test.go:185: GRAPH_OPERATOR_CALL_END operation=scan-terminal domain=WFGRAPHOPS wall=1.055037826s api_requests=0 fixture_remaining=52.220321672s error=<nil>
+    graph_test.go:176: GRAPH_OPERATOR_CALL_BEGIN operation=scan-terminal domain=WFGRAPHOPS fixture_remaining=52.219394975s
+    graph_test.go:181: operator child wire: pid=184809 offline=false connections=1 truncated=false client_bytes=12094 server_bytes=50228
+    graph_test.go:181: operator standalone process domain="WFGRAPHOPS" pid=184809 exit=0
+    graph_test.go:185: GRAPH_OPERATOR_CALL_END operation=scan-terminal domain=WFGRAPHOPS wall=1.119655013s api_requests=0 fixture_remaining=51.099739532s error=<nil>
+    graph_test.go:176: GRAPH_OPERATOR_CALL_BEGIN operation=export-journal domain=WFGRAPHOPS fixture_remaining=50.86540148s
+    graph_test.go:181: operator child wire: pid=184815 offline=false connections=1 truncated=false client_bytes=127985 server_bytes=301916
+    graph_test.go:181: operator standalone process domain="WFGRAPHOPS" pid=184815 exit=0
+    graph_test.go:185: GRAPH_OPERATOR_CALL_END operation=export-journal domain=WFGRAPHOPS wall=1.516738889s api_requests=0 fixture_remaining=49.348663061s error=<nil>
+    graph_test.go:176: GRAPH_OPERATOR_CALL_BEGIN operation=start domain=WFGRAPHOPS fixture_remaining=49.348628759s
+    graph_test.go:181: operator child wire: pid=184822 offline=false connections=1 truncated=false client_bytes=71232 server_bytes=187656
+    graph_test.go:181: operator standalone process domain="WFGRAPHOPS" pid=184822 exit=0
+    graph_test.go:185: GRAPH_OPERATOR_CALL_END operation=start domain=WFGRAPHOPS wall=1.384840545s api_requests=0 fixture_remaining=47.963788694s error=<nil>
+    graph_test.go:176: GRAPH_OPERATOR_CALL_BEGIN operation=cancel domain=WFGRAPHOPS fixture_remaining=47.963752238s
+    graph_test.go:181: operator child wire: pid=184830 offline=false connections=1 truncated=false client_bytes=348322 server_bytes=690862
+    graph_test.go:181: operator standalone process domain="WFGRAPHOPS" pid=184830 exit=0
+    graph_test.go:185: GRAPH_OPERATOR_CALL_END operation=cancel domain=WFGRAPHOPS wall=2.032847961s api_requests=0 fixture_remaining=45.930904438s error=<nil>
+    graph_test.go:176: GRAPH_OPERATOR_CALL_BEGIN operation=result domain=WFGRAPHOPS fixture_remaining=45.930863035s
+    graph_test.go:181: operator child wire: pid=184837 offline=false connections=1 truncated=false client_bytes=70126 server_bytes=146574
+    graph_test.go:181: operator standalone process domain="WFGRAPHOPS" pid=184837 exit=1
+    graph_test.go:185: GRAPH_OPERATOR_CALL_END operation=result domain=WFGRAPHOPS wall=254.143633ms api_requests=0 fixture_remaining=45.676720213s error=wf exit=1: workflow cancelled
+    graph_test.go:176: GRAPH_OPERATOR_CALL_BEGIN operation=purge domain=WFGRAPHOPS fixture_remaining=45.676056265s
+    graph_test.go:181: operator child wire: pid=184844 offline=false connections=1 truncated=false client_bytes=105405 server_bytes=7226332
+    graph_test.go:181: operator standalone process domain="WFGRAPHOPS" pid=184844 exit=0
+    graph_test.go:185: GRAPH_OPERATOR_CALL_END operation=purge domain=WFGRAPHOPS wall=3.00689563s api_requests=0 fixture_remaining=42.669160795s error=<nil>
+    graph_test.go:176: GRAPH_OPERATOR_CALL_BEGIN operation=result domain=WFGRAPHOPS fixture_remaining=42.668988804s
+    graph_test.go:181: operator child wire: pid=184853 offline=false connections=1 truncated=false client_bytes=3198 server_bytes=19746
+    graph_test.go:181: operator standalone process domain="WFGRAPHOPS" pid=184853 exit=1
+    graph_test.go:185: GRAPH_OPERATOR_CALL_END operation=result domain=WFGRAPHOPS wall=60.439324ms api_requests=0 fixture_remaining=42.60854999s error=wf exit=1: workflow invocation was purged
+    graph_test.go:549: canonical CLI large Start/Signal/result, forged mirror ignored, canonical online/offline replay after source/blob deletion, canonical CLI project/list/lag and isolated page while worker active, history/scans, dry-run/apply terminal restoration, cancellation, purge and effect one; domain=WFGRAPHOPS requests=0 wrong=0
+    graph_test.go:289: compiled graph projector joined; complete wire retained for independent domain/legacy-history review
+    standalone_test.go:236: operator standalone commands domain="WFGRAPHOPS" processes=24 exe_sha256=04af79eab73af41d387ebf98a5b15b08e32c95f89b241caef6d53222f1b51d9a
+--- PASS: TestOperatorStandaloneCanonicalGraphCommands (149.46s)
+    --- PASS: TestOperatorStandaloneCanonicalGraphCommands/R1 (70.79s)
+    --- PASS: TestOperatorStandaloneCanonicalGraphCommands/R3Domain (78.67s)
+=== RUN   TestOperatorStandaloneDaemonSignalsThroughLeaf
+=== RUN   TestOperatorStandaloneDaemonSignalsThroughLeaf/project/startup
+    leaf_daemon_standalone_test.go:82: packaged leaf daemon: command=project stage=startup pid=184911 exit=0 root=/home/exedev/js-wf-compiled-canonical-cli-artifacts-20261010/TestOperatorStandaloneDaemonSignalsThroughLeaf_project_startup-1379456423 client_bytes=213 server_bytes=846
+=== RUN   TestOperatorStandaloneDaemonSignalsThroughLeaf/project/running
+    leaf_daemon_standalone_test.go:82: packaged leaf daemon: command=project stage=running pid=184920 exit=0 root=/home/exedev/js-wf-compiled-canonical-cli-artifacts-20261010/TestOperatorStandaloneDaemonSignalsThroughLeaf_project_running-4216733447 client_bytes=1766 server_bytes=9340
+=== RUN   TestOperatorStandaloneDaemonSignalsThroughLeaf/tombstone-loop/startup
+    leaf_daemon_standalone_test.go:82: packaged leaf daemon: command=tombstone-loop stage=startup pid=184928 exit=0 root=/home/exedev/js-wf-compiled-canonical-cli-artifacts-20261010/TestOperatorStandaloneDaemonSignalsThroughLeaf_tombstone-loop_startup-2662029531 client_bytes=213 server_bytes=848
+=== RUN   TestOperatorStandaloneDaemonSignalsThroughLeaf/tombstone-loop/running
+    leaf_daemon_standalone_test.go:82: packaged leaf daemon: command=tombstone-loop stage=running pid=184937 exit=0 root=/home/exedev/js-wf-compiled-canonical-cli-artifacts-20261010/TestOperatorStandaloneDaemonSignalsThroughLeaf_tombstone-loop_running-278546287 client_bytes=3550 server_bytes=15950
+=== RUN   TestOperatorStandaloneDaemonSignalsThroughLeaf/project/fatal
+    leaf_daemon_standalone_test.go:89: packaged leaf daemon: command=project stage=fatal pid=184946 exit=1 root=/home/exedev/js-wf-compiled-canonical-cli-artifacts-20261010/TestOperatorStandaloneDaemonSignalsThroughLeaf_project_fatal-588246663 client_bytes=294 server_bytes=1058
+=== NAME  TestOperatorStandaloneDaemonSignalsThroughLeaf
+    leaf_standalone_test.go:172: operator leaf: test=TestOperatorStandaloneDaemonSignalsThroughLeaf local=WFEDGE remote=WFOPS leaf_pid=184895 local_streams=0
+--- PASS: TestOperatorStandaloneDaemonSignalsThroughLeaf (11.61s)
+    --- PASS: TestOperatorStandaloneDaemonSignalsThroughLeaf/project/startup (1.05s)
+    --- PASS: TestOperatorStandaloneDaemonSignalsThroughLeaf/project/running (2.15s)
+    --- PASS: TestOperatorStandaloneDaemonSignalsThroughLeaf/tombstone-loop/startup (1.06s)
+    --- PASS: TestOperatorStandaloneDaemonSignalsThroughLeaf/tombstone-loop/running (1.14s)
+    --- PASS: TestOperatorStandaloneDaemonSignalsThroughLeaf/project/fatal (0.04s)
+=== RUN   TestOperatorStandaloneCommandsThroughLeaf
+    main_test.go:166: operator domain admitted node=0 domain=WFOPS server_id=NCLKU7TCS3EALTO3GPLY62GJ2VV2EEZA3U6TAJWPQL7OGGZSFFYNYTBZ
+    main_test.go:166: operator domain admitted node=1 domain=WFOPS server_id=NACAMYMKSA6KY5NGWDJLKSXHE6NISA6K42YF3OCSWMMTEAK4ITK7DWAC
+    main_test.go:166: operator domain admitted node=2 domain=WFOPS server_id=NCONM7AV4QFWMTDAATQUQAFTYWFOWM2UU6YDTNC7FRXU2YRIAFDFLBEB
+    main_test.go:189: operator child wire: pid=185008 offline=false connections=1 truncated=false client_bytes=296 server_bytes=967
+    main_test.go:189: operator standalone process domain="WFOPS" pid=185008 exit=1
+    main_test.go:189: operator child wire: pid=185014 offline=false connections=1 truncated=false client_bytes=9516 server_bytes=8615
+    main_test.go:189: operator standalone process domain="WFOPS" pid=185014 exit=0
+    main_test.go:189: operator child wire: pid=185020 offline=false connections=1 truncated=false client_bytes=404 server_bytes=2386
+    main_test.go:189: operator standalone process domain="WFOPS" pid=185020 exit=0
+    main_test.go:189: operator child wire: pid=185027 offline=false connections=1 truncated=false client_bytes=444 server_bytes=2242
+    main_test.go:189: operator standalone process domain="WFOPS" pid=185027 exit=0
+    main_test.go:189: operator child wire: pid=185034 offline=false connections=1 truncated=false client_bytes=444 server_bytes=2306
+    main_test.go:189: operator standalone process domain="WFOPS" pid=185034 exit=1
+    main_test.go:189: operator child wire: pid=185040 offline=false connections=1 truncated=false client_bytes=3765 server_bytes=14745
+    main_test.go:189: operator standalone process domain="WFOPS" pid=185040 exit=0
+    main_test.go:189: operator child wire: pid=185047 offline=false connections=1 truncated=false client_bytes=1550 server_bytes=7497
+    main_test.go:189: operator standalone process domain="WFOPS" pid=185047 exit=0
+    main_test.go:189: operator child wire: pid=185053 offline=false connections=1 truncated=false client_bytes=912 server_bytes=6831
+    main_test.go:189: operator standalone process domain="WFOPS" pid=185053 exit=0
+    main_test.go:189: operator child wire: pid=185060 offline=false connections=1 truncated=false client_bytes=1394 server_bytes=9922
+    main_test.go:189: operator standalone process domain="WFOPS" pid=185060 exit=0
+    main_test.go:189: operator child wire: pid=185069 offline=false connections=1 truncated=false client_bytes=1741 server_bytes=10067
+    main_test.go:189: operator standalone process domain="WFOPS" pid=185069 exit=0
+    main_test.go:189: operator child wire: pid=185076 offline=false connections=1 truncated=false client_bytes=1741 server_bytes=10067
+    main_test.go:189: operator standalone process domain="WFOPS" pid=185076 exit=0
+    main_test.go:189: operator child wire: pid=185083 offline=false connections=1 truncated=false client_bytes=1420 server_bytes=7419
+    main_test.go:189: operator standalone process domain="WFOPS" pid=185083 exit=0
+    main_test.go:189: operator child wire: pid=185090 offline=false connections=1 truncated=false client_bytes=1420 server_bytes=7429
+    main_test.go:189: operator standalone process domain="WFOPS" pid=185090 exit=1
+    main_test.go:189: operator child wire: pid=185096 offline=false connections=1 truncated=false client_bytes=1420 server_bytes=7429
+    main_test.go:189: operator standalone process domain="WFOPS" pid=185096 exit=1
+    main_test.go:189: operator child wire: pid=185103 offline=false connections=1 truncated=false client_bytes=3147 server_bytes=1857308
+    main_test.go:189: operator standalone process domain="WFOPS" pid=185103 exit=0
+    main_test.go:189: operator child wire: pid=185110 offline=false connections=1 truncated=false client_bytes=3147 server_bytes=1857309
+    main_test.go:189: operator standalone process domain="WFOPS" pid=185110 exit=0
+    main_test.go:189: operator child wire: pid=185118 offline=true connections=0 truncated=false client_bytes=0 server_bytes=0
+    main_test.go:189: operator standalone process domain="WFOPS" pid=185118 exit=0
+    main_test.go:189: operator child wire: pid=185126 offline=true connections=0 truncated=false client_bytes=0 server_bytes=0
+    main_test.go:189: operator standalone process domain="WFOPS" pid=185126 exit=1
+    main_test.go:189: operator child wire: pid=185133 offline=false connections=1 truncated=false client_bytes=1011 server_bytes=4137
+    main_test.go:189: operator standalone process domain="WFOPS" pid=185133 exit=0
+    main_test.go:189: operator child wire: pid=185140 offline=false connections=1 truncated=false client_bytes=4453 server_bytes=13700
+    main_test.go:189: operator standalone process domain="WFOPS" pid=185140 exit=0
+    main_test.go:189: operator child wire: pid=185146 offline=false connections=1 truncated=false client_bytes=7477 server_bytes=28849
+    main_test.go:189: operator standalone process domain="WFOPS" pid=185146 exit=0
+    main_test.go:189: operator child wire: pid=185153 offline=false connections=1 truncated=false client_bytes=1585 server_bytes=8547
+    main_test.go:189: operator standalone process domain="WFOPS" pid=185153 exit=0
+    main_test.go:189: operator child wire: pid=185160 offline=false connections=1 truncated=false client_bytes=1634 server_bytes=6434
+    main_test.go:189: operator standalone process domain="WFOPS" pid=185160 exit=0
+    leaf_standalone_test.go:172: operator leaf: test=TestOperatorStandaloneCommandsThroughLeaf local=WFEDGE remote=WFOPS leaf_pid=184991 local_streams=0
+    standalone_test.go:236: operator standalone commands domain="WFOPS" processes=23 exe_sha256=04af79eab73af41d387ebf98a5b15b08e32c95f89b241caef6d53222f1b51d9a
+--- PASS: TestOperatorStandaloneCommandsThroughLeaf (28.91s)
+=== RUN   TestOperatorCommands
+--- PASS: TestOperatorCommands (2.55s)
+=== RUN   TestOperatorCommandsInJetStreamDomain
+    main_test.go:166: operator domain admitted node=0 domain=WFOPS server_id=NC5S32FZI2MSJUD4W5KAHPAUIZ35VPEZZ6DEAZ5OSFZ4ZR57TBF2HN7M
+    main_test.go:166: operator domain admitted node=1 domain=WFOPS server_id=NAZC4RYMSOOEOBK57QHZXUOYZ3CE5CLU3VTSJHDS5HRV6DX3MQP4JLEU
+    main_test.go:166: operator domain admitted node=2 domain=WFOPS server_id=NDHPWJDQU4EDAEYA6QHUZXXWNI356M3FNUCL573GT62D7AYGGJW5KYCP
+    main_test.go:227: operator real domain=WFOPS peers=3 domain_api_requests=203 wrong_prefix_requests=0
+--- PASS: TestOperatorCommandsInJetStreamDomain (8.39s)
+=== RUN   TestListAttributeFilter
+--- PASS: TestListAttributeFilter (0.15s)
+=== RUN   TestJournalCapacityAlert
+--- PASS: TestJournalCapacityAlert (0.17s)
+=== RUN   TestOperatorReplayFailedAndSuspended
+--- PASS: TestOperatorReplayFailedAndSuspended (1.04s)
+=== RUN   TestReplayCompletionEnvelopeBeforePlugin
+=== RUN   TestReplayCompletionEnvelopeBeforePlugin/result
+=== RUN   TestReplayCompletionEnvelopeBeforePlugin/reference
+=== RUN   TestReplayCompletionEnvelopeBeforePlugin/hash
+=== RUN   TestReplayCompletionEnvelopeBeforePlugin/error
+=== RUN   TestReplayCompletionEnvelopeBeforePlugin/signal
+=== RUN   TestReplayCompletionEnvelopeBeforePlugin/selected
+=== RUN   TestReplayCompletionEnvelopeBeforePlugin/case
+=== RUN   TestReplayCompletionEnvelopeBeforePlugin/cancelled
+=== RUN   TestReplayCompletionEnvelopeBeforePlugin/unknown
+--- PASS: TestReplayCompletionEnvelopeBeforePlugin (0.00s)
+    --- PASS: TestReplayCompletionEnvelopeBeforePlugin/result (0.00s)
+    --- PASS: TestReplayCompletionEnvelopeBeforePlugin/reference (0.00s)
+    --- PASS: TestReplayCompletionEnvelopeBeforePlugin/hash (0.00s)
+    --- PASS: TestReplayCompletionEnvelopeBeforePlugin/error (0.00s)
+    --- PASS: TestReplayCompletionEnvelopeBeforePlugin/signal (0.00s)
+    --- PASS: TestReplayCompletionEnvelopeBeforePlugin/selected (0.00s)
+    --- PASS: TestReplayCompletionEnvelopeBeforePlugin/case (0.00s)
+    --- PASS: TestReplayCompletionEnvelopeBeforePlugin/cancelled (0.00s)
+    --- PASS: TestReplayCompletionEnvelopeBeforePlugin/unknown (0.00s)
+=== RUN   TestReplayContinuationPlugin
+    replay_continuation_plugin_test.go:45: provision attempt: context deadline exceeded
+    replay_continuation_plugin_test.go:173: two continuation plugin stages: raw_entries=18 objects=2 result=60 offline_effects=0
+--- PASS: TestReplayContinuationPlugin (4.89s)
+=== RUN   TestReplayBundleEnvelope
+=== RUN   TestReplayBundleEnvelope/valid
+=== RUN   TestReplayBundleEnvelope/legacy
+=== RUN   TestReplayBundleEnvelope/opaque_payload
+=== RUN   TestReplayBundleEnvelope/duplicate_format_downgrade
+=== RUN   TestReplayBundleEnvelope/escaped_duplicate_format
+=== RUN   TestReplayBundleEnvelope/alias_format
+=== RUN   TestReplayBundleEnvelope/duplicate_input
+=== RUN   TestReplayBundleEnvelope/duplicate_identity
+=== RUN   TestReplayBundleEnvelope/duplicate_object
+=== RUN   TestReplayBundleEnvelope/alias_pending_sequence
+=== RUN   TestReplayBundleEnvelope/duplicate_pending_header
+=== RUN   TestReplayBundleEnvelope/unknown_field
+=== RUN   TestReplayBundleEnvelope/unknown_journal_field
+=== RUN   TestReplayBundleEnvelope/trailing_value
+--- PASS: TestReplayBundleEnvelope (0.01s)
+    --- PASS: TestReplayBundleEnvelope/valid (0.00s)
+    --- PASS: TestReplayBundleEnvelope/legacy (0.00s)
+    --- PASS: TestReplayBundleEnvelope/opaque_payload (0.00s)
+    --- PASS: TestReplayBundleEnvelope/duplicate_format_downgrade (0.00s)
+    --- PASS: TestReplayBundleEnvelope/escaped_duplicate_format (0.00s)
+    --- PASS: TestReplayBundleEnvelope/alias_format (0.00s)
+    --- PASS: TestReplayBundleEnvelope/duplicate_input (0.00s)
+    --- PASS: TestReplayBundleEnvelope/duplicate_identity (0.00s)
+    --- PASS: TestReplayBundleEnvelope/duplicate_object (0.00s)
+    --- PASS: TestReplayBundleEnvelope/alias_pending_sequence (0.00s)
+    --- PASS: TestReplayBundleEnvelope/duplicate_pending_header (0.00s)
+    --- PASS: TestReplayBundleEnvelope/unknown_field (0.00s)
+    --- PASS: TestReplayBundleEnvelope/unknown_journal_field (0.00s)
+    --- PASS: TestReplayBundleEnvelope/trailing_value (0.00s)
+=== RUN   TestReplayBundleRetainedEnvelope
+    replay_envelope_test.go:47: set WF_REPLAY_ENVELOPE_FIXTURE_ROOT to the native export root
+--- SKIP: TestReplayBundleRetainedEnvelope (0.00s)
+=== RUN   TestReplayEpochWorkerBeforePlugin
+=== RUN   TestReplayEpochWorkerBeforePlugin/format=
+=== RUN   TestReplayEpochWorkerBeforePlugin/format=graph-v1
+--- PASS: TestReplayEpochWorkerBeforePlugin (0.00s)
+    --- PASS: TestReplayEpochWorkerBeforePlugin/format= (0.00s)
+    --- PASS: TestReplayEpochWorkerBeforePlugin/format=graph-v1 (0.00s)
+=== RUN   TestReplayGraphChildProvenance
+=== RUN   TestReplayGraphChildProvenance/valid
+=== RUN   TestReplayGraphChildProvenance/wrong_type
+=== RUN   TestReplayGraphChildProvenance/wrong_id
+=== RUN   TestReplayGraphChildProvenance/wrong_invocation
+=== RUN   TestReplayGraphChildProvenance/zero_invocation
+=== RUN   TestReplayGraphChildProvenance/wrong_reference
+=== RUN   TestReplayGraphChildProvenance/wrong_hash
+=== RUN   TestReplayGraphChildProvenance/missing_binding
+=== RUN   TestReplayGraphChildProvenance/missing_outcome
+=== RUN   TestReplayGraphChildProvenance/missing_result
+=== RUN   TestReplayGraphChildProvenance/changed_outcome_bytes
+=== RUN   TestReplayGraphChildProvenance/changed_result_bytes
+=== RUN   TestReplayGraphChildProvenance/annotation_before_request
+=== RUN   TestReplayGraphChildProvenance/undeclared_name
+=== RUN   TestReplayGraphChildProvenance/legacy_signal
+=== RUN   TestReplayGraphChildProvenance/ordinary_before_child_request
+=== RUN   TestReplayGraphChildProvenance/failed_child
+=== RUN   TestReplayGraphChildProvenance/failed_with_result
+=== RUN   TestReplayGraphChildProvenance/inline_result
+=== RUN   TestReplayGraphChildProvenance/limit_nested_signal
+--- PASS: TestReplayGraphChildProvenance (0.02s)
+    --- PASS: TestReplayGraphChildProvenance/valid (0.00s)
+    --- PASS: TestReplayGraphChildProvenance/wrong_type (0.00s)
+    --- PASS: TestReplayGraphChildProvenance/wrong_id (0.00s)
+    --- PASS: TestReplayGraphChildProvenance/wrong_invocation (0.00s)
+    --- PASS: TestReplayGraphChildProvenance/zero_invocation (0.00s)
+    --- PASS: TestReplayGraphChildProvenance/wrong_reference (0.00s)
+    --- PASS: TestReplayGraphChildProvenance/wrong_hash (0.00s)
+    --- PASS: TestReplayGraphChildProvenance/missing_binding (0.00s)
+    --- PASS: TestReplayGraphChildProvenance/missing_outcome (0.00s)
+    --- PASS: TestReplayGraphChildProvenance/missing_result (0.00s)
+    --- PASS: TestReplayGraphChildProvenance/changed_outcome_bytes (0.00s)
+    --- PASS: TestReplayGraphChildProvenance/changed_result_bytes (0.00s)
+    --- PASS: TestReplayGraphChildProvenance/annotation_before_request (0.00s)
+    --- PASS: TestReplayGraphChildProvenance/undeclared_name (0.00s)
+    --- PASS: TestReplayGraphChildProvenance/legacy_signal (0.00s)
+    --- PASS: TestReplayGraphChildProvenance/ordinary_before_child_request (0.00s)
+    --- PASS: TestReplayGraphChildProvenance/failed_child (0.00s)
+    --- PASS: TestReplayGraphChildProvenance/failed_with_result (0.00s)
+    --- PASS: TestReplayGraphChildProvenance/inline_result (0.00s)
+    --- PASS: TestReplayGraphChildProvenance/limit_nested_signal (0.00s)
+=== RUN   TestReplayDeclaredGraphBeforePlugin
+=== RUN   TestReplayDeclaredGraphBeforePlugin/removed_annotation
+=== RUN   TestReplayDeclaredGraphBeforePlugin/unknown_format
+=== RUN   TestReplayDeclaredGraphBeforePlugin/removed_checkpoint_metadata
+--- PASS: TestReplayDeclaredGraphBeforePlugin (0.00s)
+    --- PASS: TestReplayDeclaredGraphBeforePlugin/removed_annotation (0.00s)
+    --- PASS: TestReplayDeclaredGraphBeforePlugin/unknown_format (0.00s)
+    --- PASS: TestReplayDeclaredGraphBeforePlugin/removed_checkpoint_metadata (0.00s)
+=== RUN   TestReplayInputBindingBeforePlugin
+=== RUN   TestReplayInputBindingBeforePlugin/format=
+=== RUN   TestReplayInputBindingBeforePlugin/format=graph-v1
+--- PASS: TestReplayInputBindingBeforePlugin (0.00s)
+    --- PASS: TestReplayInputBindingBeforePlugin/format= (0.00s)
+    --- PASS: TestReplayInputBindingBeforePlugin/format=graph-v1 (0.00s)
+=== RUN   TestReplayJournalHeaderAmbiguity
+=== RUN   TestReplayJournalHeaderAmbiguity/valid_opaque_payload
+=== RUN   TestReplayJournalHeaderAmbiguity/record_wire_shape
+=== RUN   TestReplayJournalHeaderAmbiguity/duplicate_epoch
+=== RUN   TestReplayJournalHeaderAmbiguity/alias_epoch
+=== RUN   TestReplayJournalHeaderAmbiguity/duplicate_index
+=== RUN   TestReplayJournalHeaderAmbiguity/alias_index
+=== RUN   TestReplayJournalHeaderAmbiguity/duplicate_kind
+=== RUN   TestReplayJournalHeaderAmbiguity/alias_kind
+=== RUN   TestReplayJournalHeaderAmbiguity/duplicate_payload_header
+=== RUN   TestReplayJournalHeaderAmbiguity/alias_payload_header
+=== RUN   TestReplayJournalHeaderAmbiguity/duplicate_worker
+=== RUN   TestReplayJournalHeaderAmbiguity/alias_worker
+=== RUN   TestReplayJournalHeaderAmbiguity/duplicate_sequence
+=== RUN   TestReplayJournalHeaderAmbiguity/alias_sequence
+=== RUN   TestReplayJournalHeaderAmbiguity/escaped_sequence
+--- PASS: TestReplayJournalHeaderAmbiguity (0.01s)
+    --- PASS: TestReplayJournalHeaderAmbiguity/valid_opaque_payload (0.00s)
+    --- PASS: TestReplayJournalHeaderAmbiguity/record_wire_shape (0.00s)
+    --- PASS: TestReplayJournalHeaderAmbiguity/duplicate_epoch (0.00s)
+    --- PASS: TestReplayJournalHeaderAmbiguity/alias_epoch (0.00s)
+    --- PASS: TestReplayJournalHeaderAmbiguity/duplicate_index (0.00s)
+    --- PASS: TestReplayJournalHeaderAmbiguity/alias_index (0.00s)
+    --- PASS: TestReplayJournalHeaderAmbiguity/duplicate_kind (0.00s)
+    --- PASS: TestReplayJournalHeaderAmbiguity/alias_kind (0.00s)
+    --- PASS: TestReplayJournalHeaderAmbiguity/duplicate_payload_header (0.00s)
+    --- PASS: TestReplayJournalHeaderAmbiguity/alias_payload_header (0.00s)
+    --- PASS: TestReplayJournalHeaderAmbiguity/duplicate_worker (0.00s)
+    --- PASS: TestReplayJournalHeaderAmbiguity/alias_worker (0.00s)
+    --- PASS: TestReplayJournalHeaderAmbiguity/duplicate_sequence (0.00s)
+    --- PASS: TestReplayJournalHeaderAmbiguity/alias_sequence (0.00s)
+    --- PASS: TestReplayJournalHeaderAmbiguity/escaped_sequence (0.00s)
+=== RUN   TestReplayJournalLimitChecksAttemptedStepWithoutEffect
+--- PASS: TestReplayJournalLimitChecksAttemptedStepWithoutEffect (0.00s)
+=== RUN   TestReplayNonStepJournalLimit
+=== RUN   TestReplayNonStepJournalLimit/suspension
+=== RUN   TestReplayNonStepJournalLimit/panic
+--- PASS: TestReplayNonStepJournalLimit (0.01s)
+    --- PASS: TestReplayNonStepJournalLimit/suspension (0.01s)
+    --- PASS: TestReplayNonStepJournalLimit/panic (0.00s)
+=== RUN   TestReplayRejectedSignalDrainUsesRetainedSource
+--- PASS: TestReplayRejectedSignalDrainUsesRetainedSource (0.12s)
+=== RUN   TestReplayLongPanicMatchesTruncatedAttempt
+--- PASS: TestReplayLongPanicMatchesTruncatedAttempt (0.01s)
+=== RUN   TestReplayRecordOrderBeforePlugin
+=== RUN   TestReplayRecordOrderBeforePlugin/format=/index_gap
+=== RUN   TestReplayRecordOrderBeforePlugin/format=/zero_sequence
+=== RUN   TestReplayRecordOrderBeforePlugin/format=/repeated_sequence
+=== RUN   TestReplayRecordOrderBeforePlugin/format=/backwards_epoch
+=== RUN   TestReplayRecordOrderBeforePlugin/format=/repeated_started
+=== RUN   TestReplayRecordOrderBeforePlugin/format=/after_terminal
+=== RUN   TestReplayRecordOrderBeforePlugin/format=/unknown_kind
+=== RUN   TestReplayRecordOrderBeforePlugin/format=/foreign_terminal
+=== RUN   TestReplayRecordOrderBeforePlugin/format=/empty_failure
+=== RUN   TestReplayRecordOrderBeforePlugin/format=graph-v1/index_gap
+=== RUN   TestReplayRecordOrderBeforePlugin/format=graph-v1/zero_sequence
+=== RUN   TestReplayRecordOrderBeforePlugin/format=graph-v1/repeated_sequence
+=== RUN   TestReplayRecordOrderBeforePlugin/format=graph-v1/backwards_epoch
+=== RUN   TestReplayRecordOrderBeforePlugin/format=graph-v1/repeated_started
+=== RUN   TestReplayRecordOrderBeforePlugin/format=graph-v1/after_terminal
+=== RUN   TestReplayRecordOrderBeforePlugin/format=graph-v1/unknown_kind
+=== RUN   TestReplayRecordOrderBeforePlugin/format=graph-v1/foreign_terminal
+=== RUN   TestReplayRecordOrderBeforePlugin/format=graph-v1/empty_failure
+--- PASS: TestReplayRecordOrderBeforePlugin (0.00s)
+    --- PASS: TestReplayRecordOrderBeforePlugin/format=/index_gap (0.00s)
+    --- PASS: TestReplayRecordOrderBeforePlugin/format=/zero_sequence (0.00s)
+    --- PASS: TestReplayRecordOrderBeforePlugin/format=/repeated_sequence (0.00s)
+    --- PASS: TestReplayRecordOrderBeforePlugin/format=/backwards_epoch (0.00s)
+    --- PASS: TestReplayRecordOrderBeforePlugin/format=/repeated_started (0.00s)
+    --- PASS: TestReplayRecordOrderBeforePlugin/format=/after_terminal (0.00s)
+    --- PASS: TestReplayRecordOrderBeforePlugin/format=/unknown_kind (0.00s)
+    --- PASS: TestReplayRecordOrderBeforePlugin/format=/foreign_terminal (0.00s)
+    --- PASS: TestReplayRecordOrderBeforePlugin/format=/empty_failure (0.00s)
+    --- PASS: TestReplayRecordOrderBeforePlugin/format=graph-v1/index_gap (0.00s)
+    --- PASS: TestReplayRecordOrderBeforePlugin/format=graph-v1/zero_sequence (0.00s)
+    --- PASS: TestReplayRecordOrderBeforePlugin/format=graph-v1/repeated_sequence (0.00s)
+    --- PASS: TestReplayRecordOrderBeforePlugin/format=graph-v1/backwards_epoch (0.00s)
+    --- PASS: TestReplayRecordOrderBeforePlugin/format=graph-v1/repeated_started (0.00s)
+    --- PASS: TestReplayRecordOrderBeforePlugin/format=graph-v1/after_terminal (0.00s)
+    --- PASS: TestReplayRecordOrderBeforePlugin/format=graph-v1/unknown_kind (0.00s)
+    --- PASS: TestReplayRecordOrderBeforePlugin/format=graph-v1/foreign_terminal (0.00s)
+    --- PASS: TestReplayRecordOrderBeforePlugin/format=graph-v1/empty_failure (0.00s)
+=== RUN   TestReplayRequestEnvelopeBeforePlugin
+=== RUN   TestReplayRequestEnvelopeBeforePlugin/kind
+=== RUN   TestReplayRequestEnvelopeBeforePlugin/name
+=== RUN   TestReplayRequestEnvelopeBeforePlugin/hash
+=== RUN   TestReplayRequestEnvelopeBeforePlugin/timer
+=== RUN   TestReplayRequestEnvelopeBeforePlugin/child
+=== RUN   TestReplayRequestEnvelopeBeforePlugin/cases
+=== RUN   TestReplayRequestEnvelopeBeforePlugin/nested
+=== RUN   TestReplayRequestEnvelopeBeforePlugin/unknown
+--- PASS: TestReplayRequestEnvelopeBeforePlugin (0.00s)
+    --- PASS: TestReplayRequestEnvelopeBeforePlugin/kind (0.00s)
+    --- PASS: TestReplayRequestEnvelopeBeforePlugin/name (0.00s)
+    --- PASS: TestReplayRequestEnvelopeBeforePlugin/hash (0.00s)
+    --- PASS: TestReplayRequestEnvelopeBeforePlugin/timer (0.00s)
+    --- PASS: TestReplayRequestEnvelopeBeforePlugin/child (0.00s)
+    --- PASS: TestReplayRequestEnvelopeBeforePlugin/cases (0.00s)
+    --- PASS: TestReplayRequestEnvelopeBeforePlugin/nested (0.00s)
+    --- PASS: TestReplayRequestEnvelopeBeforePlugin/unknown (0.00s)
+=== RUN   TestReplaySignalEnvelopeBeforePlugin
+=== RUN   TestReplaySignalEnvelopeBeforePlugin/sequence
+=== RUN   TestReplaySignalEnvelopeBeforePlugin/name
+=== RUN   TestReplaySignalEnvelopeBeforePlugin/payload
+=== RUN   TestReplaySignalEnvelopeBeforePlugin/reference
+=== RUN   TestReplaySignalEnvelopeBeforePlugin/hash
+=== RUN   TestReplaySignalEnvelopeBeforePlugin/child
+=== RUN   TestReplaySignalEnvelopeBeforePlugin/canonical
+=== RUN   TestReplaySignalEnvelopeBeforePlugin/unknown
+--- PASS: TestReplaySignalEnvelopeBeforePlugin (0.00s)
+    --- PASS: TestReplaySignalEnvelopeBeforePlugin/sequence (0.00s)
+    --- PASS: TestReplaySignalEnvelopeBeforePlugin/name (0.00s)
+    --- PASS: TestReplaySignalEnvelopeBeforePlugin/payload (0.00s)
+    --- PASS: TestReplaySignalEnvelopeBeforePlugin/reference (0.00s)
+    --- PASS: TestReplaySignalEnvelopeBeforePlugin/hash (0.00s)
+    --- PASS: TestReplaySignalEnvelopeBeforePlugin/child (0.00s)
+    --- PASS: TestReplaySignalEnvelopeBeforePlugin/canonical (0.00s)
+    --- PASS: TestReplaySignalEnvelopeBeforePlugin/unknown (0.00s)
+=== RUN   TestReplayTerminalEnvelopeBeforePlugin
+=== RUN   TestReplayTerminalEnvelopeBeforePlugin/format=
+=== RUN   TestReplayTerminalEnvelopeBeforePlugin/format=/duplicate_invocation
+=== RUN   TestReplayTerminalEnvelopeBeforePlugin/format=/alias_invocation
+=== RUN   TestReplayTerminalEnvelopeBeforePlugin/format=/escaped_invocation
+=== RUN   TestReplayTerminalEnvelopeBeforePlugin/format=/duplicate_result
+=== RUN   TestReplayTerminalEnvelopeBeforePlugin/format=/alias_result
+=== RUN   TestReplayTerminalEnvelopeBeforePlugin/format=/duplicate_reference
+=== RUN   TestReplayTerminalEnvelopeBeforePlugin/format=/alias_reference
+=== RUN   TestReplayTerminalEnvelopeBeforePlugin/format=/duplicate_hash
+=== RUN   TestReplayTerminalEnvelopeBeforePlugin/format=/alias_hash
+=== RUN   TestReplayTerminalEnvelopeBeforePlugin/format=/duplicate_error
+=== RUN   TestReplayTerminalEnvelopeBeforePlugin/format=/alias_error
+=== RUN   TestReplayTerminalEnvelopeBeforePlugin/format=/duplicate_limit_request
+=== RUN   TestReplayTerminalEnvelopeBeforePlugin/format=/alias_limit_request
+=== RUN   TestReplayTerminalEnvelopeBeforePlugin/format=/duplicate_limit_entry
+=== RUN   TestReplayTerminalEnvelopeBeforePlugin/format=/alias_limit_entry
+=== RUN   TestReplayTerminalEnvelopeBeforePlugin/format=/unknown_field
+=== RUN   TestReplayTerminalEnvelopeBeforePlugin/format=graph-v1
+=== RUN   TestReplayTerminalEnvelopeBeforePlugin/format=graph-v1/duplicate_invocation
+=== RUN   TestReplayTerminalEnvelopeBeforePlugin/format=graph-v1/alias_invocation
+=== RUN   TestReplayTerminalEnvelopeBeforePlugin/format=graph-v1/escaped_invocation
+=== RUN   TestReplayTerminalEnvelopeBeforePlugin/format=graph-v1/duplicate_result
+=== RUN   TestReplayTerminalEnvelopeBeforePlugin/format=graph-v1/alias_result
+=== RUN   TestReplayTerminalEnvelopeBeforePlugin/format=graph-v1/duplicate_reference
+=== RUN   TestReplayTerminalEnvelopeBeforePlugin/format=graph-v1/alias_reference
+=== RUN   TestReplayTerminalEnvelopeBeforePlugin/format=graph-v1/duplicate_hash
+=== RUN   TestReplayTerminalEnvelopeBeforePlugin/format=graph-v1/alias_hash
+=== RUN   TestReplayTerminalEnvelopeBeforePlugin/format=graph-v1/duplicate_error
+=== RUN   TestReplayTerminalEnvelopeBeforePlugin/format=graph-v1/alias_error
+=== RUN   TestReplayTerminalEnvelopeBeforePlugin/format=graph-v1/duplicate_limit_request
+=== RUN   TestReplayTerminalEnvelopeBeforePlugin/format=graph-v1/alias_limit_request
+=== RUN   TestReplayTerminalEnvelopeBeforePlugin/format=graph-v1/duplicate_limit_entry
+=== RUN   TestReplayTerminalEnvelopeBeforePlugin/format=graph-v1/alias_limit_entry
+=== RUN   TestReplayTerminalEnvelopeBeforePlugin/format=graph-v1/unknown_field
+--- PASS: TestReplayTerminalEnvelopeBeforePlugin (0.00s)
+    --- PASS: TestReplayTerminalEnvelopeBeforePlugin/format= (0.00s)
+        --- PASS: TestReplayTerminalEnvelopeBeforePlugin/format=/duplicate_invocation (0.00s)
+        --- PASS: TestReplayTerminalEnvelopeBeforePlugin/format=/alias_invocation (0.00s)
+        --- PASS: TestReplayTerminalEnvelopeBeforePlugin/format=/escaped_invocation (0.00s)
+        --- PASS: TestReplayTerminalEnvelopeBeforePlugin/format=/duplicate_result (0.00s)
+        --- PASS: TestReplayTerminalEnvelopeBeforePlugin/format=/alias_result (0.00s)
+        --- PASS: TestReplayTerminalEnvelopeBeforePlugin/format=/duplicate_reference (0.00s)
+        --- PASS: TestReplayTerminalEnvelopeBeforePlugin/format=/alias_reference (0.00s)
+        --- PASS: TestReplayTerminalEnvelopeBeforePlugin/format=/duplicate_hash (0.00s)
+        --- PASS: TestReplayTerminalEnvelopeBeforePlugin/format=/alias_hash (0.00s)
+        --- PASS: TestReplayTerminalEnvelopeBeforePlugin/format=/duplicate_error (0.00s)
+        --- PASS: TestReplayTerminalEnvelopeBeforePlugin/format=/alias_error (0.00s)
+        --- PASS: TestReplayTerminalEnvelopeBeforePlugin/format=/duplicate_limit_request (0.00s)
+        --- PASS: TestReplayTerminalEnvelopeBeforePlugin/format=/alias_limit_request (0.00s)
+        --- PASS: TestReplayTerminalEnvelopeBeforePlugin/format=/duplicate_limit_entry (0.00s)
+        --- PASS: TestReplayTerminalEnvelopeBeforePlugin/format=/alias_limit_entry (0.00s)
+        --- PASS: TestReplayTerminalEnvelopeBeforePlugin/format=/unknown_field (0.00s)
+    --- PASS: TestReplayTerminalEnvelopeBeforePlugin/format=graph-v1 (0.00s)
+        --- PASS: TestReplayTerminalEnvelopeBeforePlugin/format=graph-v1/duplicate_invocation (0.00s)
+        --- PASS: TestReplayTerminalEnvelopeBeforePlugin/format=graph-v1/alias_invocation (0.00s)
+        --- PASS: TestReplayTerminalEnvelopeBeforePlugin/format=graph-v1/escaped_invocation (0.00s)
+        --- PASS: TestReplayTerminalEnvelopeBeforePlugin/format=graph-v1/duplicate_result (0.00s)
+        --- PASS: TestReplayTerminalEnvelopeBeforePlugin/format=graph-v1/alias_result (0.00s)
+        --- PASS: TestReplayTerminalEnvelopeBeforePlugin/format=graph-v1/duplicate_reference (0.00s)
+        --- PASS: TestReplayTerminalEnvelopeBeforePlugin/format=graph-v1/alias_reference (0.00s)
+        --- PASS: TestReplayTerminalEnvelopeBeforePlugin/format=graph-v1/duplicate_hash (0.00s)
+        --- PASS: TestReplayTerminalEnvelopeBeforePlugin/format=graph-v1/alias_hash (0.00s)
+        --- PASS: TestReplayTerminalEnvelopeBeforePlugin/format=graph-v1/duplicate_error (0.00s)
+        --- PASS: TestReplayTerminalEnvelopeBeforePlugin/format=graph-v1/alias_error (0.00s)
+        --- PASS: TestReplayTerminalEnvelopeBeforePlugin/format=graph-v1/duplicate_limit_request (0.00s)
+        --- PASS: TestReplayTerminalEnvelopeBeforePlugin/format=graph-v1/alias_limit_request (0.00s)
+        --- PASS: TestReplayTerminalEnvelopeBeforePlugin/format=graph-v1/duplicate_limit_entry (0.00s)
+        --- PASS: TestReplayTerminalEnvelopeBeforePlugin/format=graph-v1/alias_limit_entry (0.00s)
+        --- PASS: TestReplayTerminalEnvelopeBeforePlugin/format=graph-v1/unknown_field (0.00s)
+=== RUN   TestOperatorStandaloneCommands
+    main_test.go:189: operator standalone process domain="" pid=185168 exit=0
+    main_test.go:189: operator standalone process domain="" pid=185174 exit=0
+    main_test.go:189: operator standalone process domain="" pid=185180 exit=0
+    main_test.go:189: operator standalone process domain="" pid=185187 exit=1
+    main_test.go:189: operator standalone process domain="" pid=185194 exit=0
+    main_test.go:189: operator standalone process domain="" pid=185200 exit=0
+    main_test.go:189: operator standalone process domain="" pid=185207 exit=0
+    main_test.go:189: operator standalone process domain="" pid=185213 exit=0
+    main_test.go:189: operator standalone process domain="" pid=185220 exit=0
+    main_test.go:189: operator standalone process domain="" pid=185226 exit=0
+    main_test.go:189: operator standalone process domain="" pid=185232 exit=0
+    main_test.go:189: operator standalone process domain="" pid=185239 exit=1
+    main_test.go:189: operator standalone process domain="" pid=185246 exit=1
+    main_test.go:189: operator standalone process domain="" pid=185252 exit=0
+    main_test.go:189: operator standalone process domain="" pid=185260 exit=0
+    main_test.go:189: operator standalone process domain="" pid=185267 exit=0
+    main_test.go:189: operator standalone process domain="" pid=185274 exit=1
+    main_test.go:189: operator standalone process domain="" pid=185282 exit=0
+    main_test.go:189: operator standalone process domain="" pid=185289 exit=0
+    main_test.go:189: operator standalone process domain="" pid=185296 exit=0
+    main_test.go:189: operator standalone process domain="" pid=185303 exit=0
+    main_test.go:189: operator standalone process domain="" pid=185309 exit=0
+    standalone_test.go:236: operator standalone commands domain="" processes=22 exe_sha256=04af79eab73af41d387ebf98a5b15b08e32c95f89b241caef6d53222f1b51d9a
+--- PASS: TestOperatorStandaloneCommands (21.65s)
+=== RUN   TestOperatorStandaloneCommandsInJetStreamDomain
+    main_test.go:166: operator domain admitted node=0 domain=WFOPS server_id=NBKM3SKV73G57EERSWW7ZLAKQFIP5INTZJYHM7H5763T4GKLP57IEWIK
+    main_test.go:166: operator domain admitted node=1 domain=WFOPS server_id=NBLFOTKRSHWEYMJJCBMJSM65JG7ADWVNZMR45RY4RNQHQJO6OHVJZQW6
+    main_test.go:166: operator domain admitted node=2 domain=WFOPS server_id=NDYUYRPZS2MJX6RK232HAWO7YVT52DZ2ZR6AXOJHD6TBJAIYAP43Y5VR
+    main_test.go:189: operator standalone process domain="WFOPS" pid=185315 exit=1
+    main_test.go:189: operator standalone process domain="WFOPS" pid=185321 exit=0
+    main_test.go:189: operator standalone process domain="WFOPS" pid=185328 exit=0
+    main_test.go:189: operator standalone process domain="WFOPS" pid=185335 exit=0
+    main_test.go:189: operator standalone process domain="WFOPS" pid=185341 exit=1
+    main_test.go:189: operator standalone process domain="WFOPS" pid=185347 exit=0
+    main_test.go:189: operator standalone process domain="WFOPS" pid=185354 exit=0
+    main_test.go:189: operator standalone process domain="WFOPS" pid=185360 exit=0
+    main_test.go:189: operator standalone process domain="WFOPS" pid=185367 exit=0
+    main_test.go:189: operator standalone process domain="WFOPS" pid=185373 exit=0
+    main_test.go:189: operator standalone process domain="WFOPS" pid=185379 exit=0
+    main_test.go:189: operator standalone process domain="WFOPS" pid=185390 exit=0
+    main_test.go:189: operator standalone process domain="WFOPS" pid=185396 exit=1
+    main_test.go:189: operator standalone process domain="WFOPS" pid=185403 exit=1
+    main_test.go:189: operator standalone process domain="WFOPS" pid=185409 exit=0
+    main_test.go:189: operator standalone process domain="WFOPS" pid=185417 exit=0
+    main_test.go:189: operator standalone process domain="WFOPS" pid=185425 exit=0
+    main_test.go:189: operator standalone process domain="WFOPS" pid=185439 exit=1
+    main_test.go:189: operator standalone process domain="WFOPS" pid=185446 exit=0
+    main_test.go:189: operator standalone process domain="WFOPS" pid=185452 exit=0
+    main_test.go:189: operator standalone process domain="WFOPS" pid=185459 exit=0
+    main_test.go:189: operator standalone process domain="WFOPS" pid=185466 exit=0
+    main_test.go:189: operator standalone process domain="WFOPS" pid=185472 exit=0
+    standalone_test.go:236: operator standalone commands domain="WFOPS" processes=23 exe_sha256=04af79eab73af41d387ebf98a5b15b08e32c95f89b241caef6d53222f1b51d9a
+--- PASS: TestOperatorStandaloneCommandsInJetStreamDomain (27.21s)
+PASS
+ok  	js-wf/cmd/wf	412.333s

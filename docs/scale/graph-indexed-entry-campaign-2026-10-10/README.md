@@ -62,3 +62,21 @@ python3 docs/scale/graph-indexed-entry-campaign-2026-10-10/review.py /home/exede
 
 Original R3/live-mode, storage/VM/process cuts, matrices, collection, retention,
 soak/security/rollout gates remain open. Admission and collection remain off.
+
+## Actual production-cap normal run launched
+
+Native100,000-grant review is accepted. [lifetime-policy.json](lifetime-policy.json)
+selects6h compaction intent TTL: its two-hour renewal window is2.72× the observed
+44m7.309s native race cost, allowing measured headroom for the still-unproven
+larger prefix shape. This diagnostic choice retains abandoned grants longer;
+production defaults remain unchanged. Constructor/request/lease/batch bounds,
+100,000 cap,49,992 real SDK SetState calls and300-minute fixture deadline remain.
+
+The prepared immutable6408a5e **normal** worker binary is now live in retained
+`js-wf-indexed-entry100000-normal-20261010.service`, invocation
+290b17b6df9e45629c853c10ed5cc772, supervisor PID185859. Stores/log/state are under
+`/home/exedev/js-wf-indexed-entry100000-normal-20261010`.
+[Launch receipt](normal-launch.json). Service runtime is330 minutes; child
+watchdog310 minutes. No actual-entry acceptance is claimed before terminal
+review. Matching race execution remains unlaunched and separate; every broader
+original gate remains open.
