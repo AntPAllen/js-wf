@@ -172,31 +172,39 @@ func testNativeGraphContinuationOfflineReplay(t *testing.T, cli, plugin string, 
 			t.Fatal("SDK checkpoint", stage, status, err)
 		}
 		if archive {
-			before, err := graph.Open(ctx, h.Type, h.ID, h.InvSeq)
+			// The owned range already reads relocated archive copies. Census
+			// the old physical objects instead, and match them against the
+			// logical entry hashes and currently owned receipts after sweep.
+			before, err := port.Objects(ctx)
 			if err != nil {
-				t.Fatal(err)
-			}
-			checkpoint, err := before.ReadCheckpoint(ctx, h.Type, h.ID)
-			if err != nil || checkpoint == nil {
-				t.Fatal("checkpoint absent", err)
-			}
-			var originals []journal.GraphPayloadLink
-			if err = before.ReadRange(ctx, 0, checkpoint.Request.Index, func(record journal.GraphRecord) error { originals = append(originals, record.EntryBlob); return nil }); err != nil {
-				t.Fatal(err)
-			}
-			if err = before.Close(ctx); err != nil {
 				t.Fatal(err)
 			}
 			if _, err = (graphpublication.Protocol{Port: port}).SweepWithReaders(ctx, time.Now().Add(2*time.Minute)); err != nil {
 				t.Fatal(err)
 			}
+			view, err := graph.Open(ctx, h.Type, h.ID, h.InvSeq)
+			if err != nil {
+				t.Fatal(err)
+			}
+			hashes, owned := map[string]bool{}, map[string]bool{}
+			if err = view.ReadRange(ctx, 0, view.Count(), func(record journal.GraphRecord) error {
+				hashes[record.EntryBlob.Hash] = true
+				owned[record.EntryBlob.Reference.Object] = true
+				return nil
+			}); err != nil {
+				t.Fatal(err)
+			}
+			if err = view.Close(ctx); err != nil {
+				t.Fatal(err)
+			}
 			removed := 0
-			for _, receipt := range originals {
-				_, err := port.Get(ctx, receipt, journal.MaxGraphEntryBytes)
-				if errors.Is(err, jetstream.ErrObjectNotFound) {
+			for _, object := range before {
+				if hashes[object.Key] && !owned[object.Reference.Object] {
+					_, err := port.Get(ctx, journal.GraphPayloadLink{Hash: object.Key, Reference: object.Reference}, journal.MaxGraphEntryBytes)
+					if !errors.Is(err, jetstream.ErrObjectNotFound) {
+						t.Fatal("original entry receipt absence unconfirmed", object, err)
+					}
 					removed++
-				} else if err != nil {
-					t.Fatal(err)
 				}
 			}
 			if removed == 0 {
@@ -239,7 +247,7 @@ func testNativeGraphContinuationOfflineReplay(t *testing.T, cli, plugin string, 
 			t.Fatal(err)
 		}
 		snapshot, err := ReadGraphReplaySnapshot(ctx, graph, h.Type, h.ID, invocation)
-		if err != nil || got.Type != h.Type || got.ID != h.ID || got.InvSeq != h.InvSeq || !bytes.Equal(got.Input, []byte(`7`)) || !reflect.DeepEqual(got.Journal, snapshot.Records) || !reflect.DeepEqual(got.Objects, snapshot.Objects) {
+		if err != nil || got.Type != h.Type || got.ID != h.ID || got.InvSeq != h.InvSeq || !bytes.Equal(got.Input, []byte(`7`)) || !sameOfflineJournal(got.Journal, snapshot.Records) || !reflect.DeepEqual(got.Objects, snapshot.Objects) {
 			t.Fatal("export snapshot mismatch", err)
 		}
 		path := filepath.Join(graphOfflineTempDir(t), name+".json")
@@ -334,4 +342,16 @@ func graphOfflineTempDir(t *testing.T) string {
 		return directory
 	}
 	return t.TempDir()
+}
+
+// The CLI intentionally indents RawMessage payloads. Compare the complete
+// serialized record arrays after JSON compaction; owned object bytes remain
+// subject to exact byte comparisons above.
+func sameOfflineJournal(a, b []journal.Record) bool {
+	left, err := json.Marshal(a)
+	if err != nil {
+		return false
+	}
+	right, err := json.Marshal(b)
+	return err == nil && bytes.Equal(left, right)
 }

@@ -1,0 +1,61 @@
+{
+  "source": "94b9750346b32348f7027be4dff2b16fdcf9556e",
+  "checkout": "/home/exedev/js-wf-offline-replay-qualification",
+  "root": "/home/exedev/js-wf-offline-replay-20261010",
+  "started": "2026-10-10T09:21:38.449565+00:00",
+  "pid": 62425,
+  "invocation": "32cd9ba23ed34cbbbf4de4c12dea61dc",
+  "commands": [
+    {
+      "command": [
+        "go",
+        "test",
+        "-race",
+        "-c",
+        "-o",
+        "/home/exedev/js-wf-offline-replay-20261010/worker-race.test",
+        "./worker"
+      ],
+      "cwd": "/home/exedev/js-wf-offline-replay-qualification",
+      "started": "2026-10-10T09:21:38.656532+00:00",
+      "exit": 0,
+      "finished": "2026-10-10T09:21:57.342980+00:00"
+    },
+    {
+      "command": [
+        "go",
+        "tool",
+        "test2json",
+        "-t",
+        "-p",
+        "js-wf/worker",
+        "/home/exedev/js-wf-offline-replay-20261010/worker-race.test",
+        "-test.v=test2json",
+        "-test.run=^TestNativeGraphContinuationOfflineReplay$",
+        "-test.count=1",
+        "-test.timeout=10m"
+      ],
+      "cwd": "/home/exedev/js-wf-offline-replay-qualification/worker",
+      "started": "2026-10-10T09:21:57.343325+00:00",
+      "exit": 1,
+      "finished": "2026-10-10T09:22:48.958419+00:00"
+    }
+  ],
+  "accepted": false,
+  "artifacts": {
+    "worker-race.test": {
+      "bytes": 48837746,
+      "sha256": "8a2e475cb3fadfb98b8cc4bd431c0edc9524e4ef6aa98db2249bfa9f1e4583f4"
+    },
+    "artifacts/offline-3113705483/handler.so": {
+      "bytes": 26920800,
+      "sha256": "4cead09a6a92424779a05a25a31331c0b9a16c60d55102668e6948e8d9bed593"
+    },
+    "artifacts/offline-3113705483/wf": {
+      "bytes": 39587296,
+      "sha256": "fb83da4d46b046558202c51e225e6f29bf40fbdcad373ee132f4969259071dfc"
+    }
+  },
+  "finished": "2026-10-10T09:22:49.388681+00:00",
+  "exit": 1
+}
