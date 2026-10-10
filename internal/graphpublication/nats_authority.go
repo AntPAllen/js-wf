@@ -36,6 +36,7 @@ type NativeAuthority struct {
 	stream       jetstream.Stream
 	name, prefix string
 	reads        *authorityReadCoordinator
+	ownerIndexed bool
 }
 
 // Authority is the metadata subset of Port. Reads conditionally reaffirm the
@@ -67,6 +68,10 @@ func AuthorityStreamConfig(name, prefix string, replicas int) jetstream.StreamCo
 	return jetstream.StreamConfig{Name: name, Subjects: []string{prefix + ".>"}, Storage: jetstream.FileStorage, Replicas: replicas, Retention: jetstream.LimitsPolicy, Discard: jetstream.DiscardOld, MaxMsgsPerSubject: 1, DenyDelete: true, DenyPurge: true}
 }
 func OpenNativeAuthority(ctx context.Context, js jetstream.JetStream, name, prefix string) (*NativeAuthority, error) {
+	return openNativeAuthority(ctx, js, name, prefix, false)
+}
+
+func openNativeAuthority(ctx context.Context, js jetstream.JetStream, name, prefix string, indexed bool) (*NativeAuthority, error) {
 	if name == "" || prefix == "" || !utf8.ValidString(name) || !utf8.ValidString(prefix) || strings.ContainsAny(prefix, "*> /\\\t\r\n") || strings.HasPrefix(prefix, ".") || strings.HasSuffix(prefix, ".") || strings.Contains(prefix, "..") {
 		return nil, errors.New("invalid authority namespace")
 	}
@@ -76,7 +81,7 @@ func OpenNativeAuthority(ctx context.Context, js jetstream.JetStream, name, pref
 		stream, err := js.Stream(lookup, name)
 		var p *NativeAuthority
 		if err == nil {
-			p = &NativeAuthority{js: js, stream: natsstream.Guard(stream), name: name, prefix: prefix, reads: &authorityReadCoordinator{}}
+			p = &NativeAuthority{js: js, stream: natsstream.Guard(stream), name: name, prefix: prefix, reads: &authorityReadCoordinator{}, ownerIndexed: indexed}
 			err = p.validate(lookup)
 		}
 		stop()
@@ -102,7 +107,16 @@ func (p *NativeAuthority) validate(ctx context.Context) error {
 		return err
 	}
 	c := info.Config
-	if c.Name != p.name || !reflect.DeepEqual(c.Subjects, []string{p.prefix + ".>"}) || c.Storage != jetstream.FileStorage || c.Retention != jetstream.LimitsPolicy || c.Discard != jetstream.DiscardOld || c.MaxMsgsPerSubject != 1 || c.MaxAge != 0 || c.MaxMsgs > 0 || c.MaxBytes > 0 || !c.DenyDelete || !c.DenyPurge || c.AllowDirect || c.AllowMsgTTL || c.SubjectDeleteMarkerTTL != 0 || c.AllowRollup || c.NoAck || c.Sealed || c.Mirror != nil || len(c.Sources) != 0 || c.SubjectTransform != nil || c.RePublish != nil || c.Replicas < 1 || c.DiscardNewPerSubject || c.AllowAtomicPublish || c.AllowMsgSchedules || c.PersistMode != jetstream.DefaultPersistMode {
+	wantSubjects := []string{p.prefix + ".>"}
+	wantIndex := ""
+	if p.ownerIndexed {
+		wantIndex = ownerIndexSchema
+		wantSubjects = []string{p.prefix + ".root.>", p.prefix + ".blob.>", p.prefix + ".owner.>"}
+	}
+	if c.Metadata[ownerIndexMetadata] != wantIndex {
+		return errors.New("graph authority owner-index mode mismatch")
+	}
+	if c.Name != p.name || !reflect.DeepEqual(c.Subjects, wantSubjects) || c.Storage != jetstream.FileStorage || c.Retention != jetstream.LimitsPolicy || c.Discard != jetstream.DiscardOld || c.MaxMsgsPerSubject != 1 || c.MaxAge != 0 || c.MaxMsgs > 0 || c.MaxBytes > 0 || !c.DenyDelete || !c.DenyPurge || c.AllowDirect || c.AllowMsgTTL || c.SubjectDeleteMarkerTTL != 0 || c.AllowRollup || c.NoAck || c.Sealed || c.Mirror != nil || len(c.Sources) != 0 || c.SubjectTransform != nil || c.RePublish != nil || c.Replicas < 1 || c.DiscardNewPerSubject || c.AllowAtomicPublish || c.AllowMsgSchedules || c.PersistMode != jetstream.DefaultPersistMode {
 		return errors.New("unsafe graph authority stream configuration")
 	}
 	return nil
@@ -397,6 +411,11 @@ func (p *NativeAuthority) CASBlob(ctx context.Context, k string, revision uint64
 		return Record{}, err
 	}
 	next = cloned
+	if p.ownerIndexed {
+		if err = p.ensureOwnerScope(ctx, next.Owner, k); err != nil {
+			return Record{}, err
+		}
+	}
 	err = p.publishMutation(ctx, "blob", k, v, seq, authorityValue{Schema: authoritySchema, Kind: "blob", Identity: k, Revision: revision + 1, Fence: &next})
 	if err != nil {
 		return Record{}, err
@@ -426,6 +445,9 @@ func (p *NativeAuthority) BlobKeys(ctx context.Context) ([]string, error) {
 				return nil, errors.New("invalid authority blob subject")
 			}
 			keys = append(keys, k)
+			continue
+		}
+		if p.ownerIndexed && p.validOwnerIndexSubject(subject) {
 			continue
 		}
 		rootPrefix := p.prefix + ".root."
@@ -462,6 +484,9 @@ func (p *NativeAuthority) RootKeys(ctx context.Context) ([]string, error) {
 			continue
 		}
 		if strings.HasPrefix(subject, blobPrefix) && validHash(strings.TrimPrefix(subject, blobPrefix)) {
+			continue
+		}
+		if p.ownerIndexed && p.validOwnerIndexSubject(subject) {
 			continue
 		}
 		return nil, errors.New("unexpected authority subject")

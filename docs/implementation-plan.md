@@ -1,5 +1,34 @@
 # JetStream Durable Workflow Runtime — Implementation Plan
 
+## Native owner index for newly provisioned namespaces — 2026-10-10
+
+An explicit native indexed adapter now registers every scope in the permanent
+file-backed authority stream before blob mutation. Conditional witness replies
+must be acknowledged; unknown registration stops the blob write and remains a
+recoverable reservation if committed. Owner-filtered discovery witnesses the
+canonical index bytes and returns no partial list after uncertainty. A distinct
+stream subject shape plus mode tag excludes both current legacy adapters and
+pre-index binaries. This is fresh isolated provisioning; existing streams are
+not upgraded. [Evidence](scale/graph-native-owner-index-2026-10-10/README.md).
+
+Restored race selection passes 21.711 seconds: four mode-admission controls,
+native R1/R3 indexed recovery, eleven model cases, seventeen renewal safety
+cases, two legacy persistence cases and eight mutation/witness cases. Each
+indexed native case restarts all peers, reopens fresh adapters, renews nine
+registered scopes including two uploading orphans and one absent reservation,
+reads no unrelated scopes, rejects a lost census witness and independently
+verifies/commits compaction afterward. Sixteen unrelated scopes remain outside
+the owner census. Removing registration fails R1/R3 controls. All 853 common
+pins pass 6.076 seconds.
+
+Next: explicit native journal/worker configuration and actual worker recovery;
+then large owned-grant census/registration cost and pagination qualification.
+Same-store in-process peer restart does not prove OS/VM/power-loss recovery.
+Existing namespaces still need a proven complete migration and retain full
+scan. The actual 100,000-entry gate, admission, collection and rollout remain
+open. Native indexing removes unrelated-history dependency only when this
+explicit adapter is used; it does not bound the publication's own grant count.
+
 ## Complete owner-scoped discovery primitive — 2026-10-10
 
 Compaction renewal now accepts optional OwnerScopePort discovery. Its authority

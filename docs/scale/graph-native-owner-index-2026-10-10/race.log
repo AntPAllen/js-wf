@@ -1,0 +1,130 @@
+=== RUN   TestGraphCompactionOwnerScopeDiscovery
+=== RUN   TestGraphCompactionOwnerScopeDiscovery/normal
+    compaction_owner_scope_test.go:165: OWNER_DISCOVERY mode=normal namespace=54 indexed=20 blobs=20 writes=20 elapsed=95.309753ms complete=true err=<nil>
+=== RUN   TestGraphCompactionOwnerScopeDiscovery/foreign100000
+    compaction_owner_scope_test.go:165: OWNER_DISCOVERY mode=foreign100000 namespace=100054 indexed=20 blobs=20 writes=20 elapsed=95.309753ms complete=true err=<nil>
+=== RUN   TestGraphCompactionOwnerScopeDiscovery/abandoned
+    compaction_owner_scope_test.go:165: OWNER_DISCOVERY mode=abandoned namespace=55 indexed=21 blobs=21 writes=21 elapsed=99.223964ms complete=true err=<nil>
+=== RUN   TestGraphCompactionOwnerScopeDiscovery/unknown-create
+    compaction_owner_scope_test.go:165: OWNER_DISCOVERY mode=unknown-create namespace=55 indexed=21 blobs=21 writes=21 elapsed=99.223964ms complete=true err=<nil>
+=== RUN   TestGraphCompactionOwnerScopeDiscovery/absent-reservation
+    compaction_owner_scope_test.go:165: OWNER_DISCOVERY mode=absent-reservation namespace=54 indexed=21 blobs=21 writes=20 elapsed=97.336269ms complete=true err=<nil>
+=== RUN   TestGraphCompactionOwnerScopeDiscovery/fresh-adapter
+    compaction_owner_scope_test.go:165: OWNER_DISCOVERY mode=fresh-adapter namespace=54 indexed=20 blobs=20 writes=20 elapsed=95.309753ms complete=true err=<nil>
+=== RUN   TestGraphCompactionOwnerScopeDiscovery/unknown-enumeration
+    compaction_owner_scope_test.go:165: OWNER_DISCOVERY mode=unknown-enumeration namespace=54 indexed=20 blobs=0 writes=0 elapsed=1.693634ms complete=false err=committed reply lost
+=== RUN   TestGraphCompactionOwnerScopeDiscovery/duplicate
+    compaction_owner_scope_test.go:165: OWNER_DISCOVERY mode=duplicate namespace=54 indexed=20 blobs=0 writes=0 elapsed=1.693634ms complete=false err=duplicate graph scope enumeration
+=== RUN   TestGraphCompactionOwnerScopeDiscovery/foreign-entry
+    compaction_owner_scope_test.go:165: OWNER_DISCOVERY mode=foreign-entry namespace=54 indexed=20 blobs=16 writes=15 elapsed=76.696112ms complete=false err=foreign scope in owner enumeration
+=== RUN   TestGraphCompactionOwnerScopeDiscovery/invalid-key
+    compaction_owner_scope_test.go:165: OWNER_DISCOVERY mode=invalid-key namespace=54 indexed=20 blobs=21 writes=20 elapsed=96.43843ms complete=false err=invalid graph object key
+=== RUN   TestGraphCompactionOwnerScopeDiscovery/source-change
+    compaction_owner_scope_test.go:165: OWNER_DISCOVERY mode=source-change namespace=54 indexed=20 blobs=0 writes=0 elapsed=2.306069ms complete=false err=blob publication CAS conflict
+--- PASS: TestGraphCompactionOwnerScopeDiscovery (1.54s)
+    --- PASS: TestGraphCompactionOwnerScopeDiscovery/normal (0.08s)
+    --- PASS: TestGraphCompactionOwnerScopeDiscovery/foreign100000 (0.98s)
+    --- PASS: TestGraphCompactionOwnerScopeDiscovery/abandoned (0.05s)
+    --- PASS: TestGraphCompactionOwnerScopeDiscovery/unknown-create (0.07s)
+    --- PASS: TestGraphCompactionOwnerScopeDiscovery/absent-reservation (0.06s)
+    --- PASS: TestGraphCompactionOwnerScopeDiscovery/fresh-adapter (0.05s)
+    --- PASS: TestGraphCompactionOwnerScopeDiscovery/unknown-enumeration (0.06s)
+    --- PASS: TestGraphCompactionOwnerScopeDiscovery/duplicate (0.04s)
+    --- PASS: TestGraphCompactionOwnerScopeDiscovery/foreign-entry (0.05s)
+    --- PASS: TestGraphCompactionOwnerScopeDiscovery/invalid-key (0.04s)
+    --- PASS: TestGraphCompactionOwnerScopeDiscovery/source-change (0.05s)
+=== RUN   TestGraphCompactionIntentRenewalScopesAndFences
+=== RUN   TestGraphCompactionIntentRenewalScopesAndFences/normal
+    compaction_renewal_test.go:239: COMPACTION_RENEWAL mode=normal examined=55 renewed=21 scope_budget=3 root_unchanged_after_old_expiry=true
+=== RUN   TestGraphCompactionIntentRenewalScopesAndFences/inherited
+    compaction_renewal_test.go:239: COMPACTION_RENEWAL mode=inherited examined=74 renewed=18 scope_budget=3 root_unchanged_after_old_expiry=true
+=== RUN   TestGraphCompactionIntentRenewalScopesAndFences/drop
+    compaction_renewal_test.go:239: COMPACTION_RENEWAL mode=drop examined=55 renewed=21 scope_budget=3 root_unchanged_after_old_expiry=true
+=== RUN   TestGraphCompactionIntentRenewalScopesAndFences/lost
+    compaction_renewal_test.go:239: COMPACTION_RENEWAL mode=lost examined=55 renewed=21 scope_budget=3 root_unchanged_after_old_expiry=true
+=== RUN   TestGraphCompactionIntentRenewalScopesAndFences/cancel
+    compaction_renewal_test.go:239: COMPACTION_RENEWAL mode=cancel examined=55 renewed=21 scope_budget=3 root_unchanged_after_old_expiry=true
+=== RUN   TestGraphCompactionIntentRenewalScopesAndFences/expired
+=== RUN   TestGraphCompactionIntentRenewalScopesAndFences/expiry-read
+=== RUN   TestGraphCompactionIntentRenewalScopesAndFences/expiry-after-cas
+=== RUN   TestGraphCompactionIntentRenewalScopesAndFences/append
+=== RUN   TestGraphCompactionIntentRenewalScopesAndFences/append-during-cas
+=== RUN   TestGraphCompactionIntentRenewalScopesAndFences/reader
+=== RUN   TestGraphCompactionIntentRenewalScopesAndFences/collector
+=== RUN   TestGraphCompactionIntentRenewalScopesAndFences/collector-during-cas
+=== RUN   TestGraphCompactionIntentRenewalScopesAndFences/revoked
+=== RUN   TestGraphCompactionIntentRenewalScopesAndFences/wrong-expiry
+=== RUN   TestGraphCompactionIntentRenewalScopesAndFences/input-ownership
+    compaction_renewal_test.go:239: COMPACTION_RENEWAL mode=input-ownership examined=55 renewed=21 scope_budget=3 root_unchanged_after_old_expiry=true
+=== RUN   TestGraphCompactionIntentRenewalScopesAndFences/result-ownership
+    compaction_renewal_test.go:239: COMPACTION_RENEWAL mode=result-ownership examined=55 renewed=21 scope_budget=3 root_unchanged_after_old_expiry=true
+--- PASS: TestGraphCompactionIntentRenewalScopesAndFences (1.50s)
+    --- PASS: TestGraphCompactionIntentRenewalScopesAndFences/normal (0.14s)
+    --- PASS: TestGraphCompactionIntentRenewalScopesAndFences/inherited (0.20s)
+    --- PASS: TestGraphCompactionIntentRenewalScopesAndFences/drop (0.13s)
+    --- PASS: TestGraphCompactionIntentRenewalScopesAndFences/lost (0.14s)
+    --- PASS: TestGraphCompactionIntentRenewalScopesAndFences/cancel (0.12s)
+    --- PASS: TestGraphCompactionIntentRenewalScopesAndFences/expired (0.03s)
+    --- PASS: TestGraphCompactionIntentRenewalScopesAndFences/expiry-read (0.05s)
+    --- PASS: TestGraphCompactionIntentRenewalScopesAndFences/expiry-after-cas (0.04s)
+    --- PASS: TestGraphCompactionIntentRenewalScopesAndFences/append (0.08s)
+    --- PASS: TestGraphCompactionIntentRenewalScopesAndFences/append-during-cas (0.04s)
+    --- PASS: TestGraphCompactionIntentRenewalScopesAndFences/reader (0.05s)
+    --- PASS: TestGraphCompactionIntentRenewalScopesAndFences/collector (0.07s)
+    --- PASS: TestGraphCompactionIntentRenewalScopesAndFences/collector-during-cas (0.07s)
+    --- PASS: TestGraphCompactionIntentRenewalScopesAndFences/revoked (0.04s)
+    --- PASS: TestGraphCompactionIntentRenewalScopesAndFences/wrong-expiry (0.05s)
+    --- PASS: TestGraphCompactionIntentRenewalScopesAndFences/input-ownership (0.12s)
+    --- PASS: TestGraphCompactionIntentRenewalScopesAndFences/result-ownership (0.13s)
+=== RUN   TestNativeGraphAuthorityPersistenceAndSchemaIsolation
+=== RUN   TestNativeGraphAuthorityPersistenceAndSchemaIsolation/R1
+=== RUN   TestNativeGraphAuthorityPersistenceAndSchemaIsolation/R3
+--- PASS: TestNativeGraphAuthorityPersistenceAndSchemaIsolation (3.22s)
+    --- PASS: TestNativeGraphAuthorityPersistenceAndSchemaIsolation/R1 (0.16s)
+    --- PASS: TestNativeGraphAuthorityPersistenceAndSchemaIsolation/R3 (3.06s)
+=== RUN   TestNativeGraphMutationAcrossReadWitnesses
+=== RUN   TestNativeGraphMutationAcrossReadWitnesses/R1/root/witness
+    nats_mutation_witness_test.go:132: mutation kind=root mode=witness publication_attempts=4
+=== RUN   TestNativeGraphMutationAcrossReadWitnesses/R1/root/replacement
+    nats_mutation_witness_test.go:132: mutation kind=root mode=replacement publication_attempts=1
+=== RUN   TestNativeGraphMutationAcrossReadWitnesses/R1/blob/witness
+    nats_mutation_witness_test.go:132: mutation kind=blob mode=witness publication_attempts=4
+=== RUN   TestNativeGraphMutationAcrossReadWitnesses/R1/blob/replacement
+    nats_mutation_witness_test.go:132: mutation kind=blob mode=replacement publication_attempts=1
+=== RUN   TestNativeGraphMutationAcrossReadWitnesses/R3/root/witness
+    nats_mutation_witness_test.go:132: mutation kind=root mode=witness publication_attempts=4
+=== RUN   TestNativeGraphMutationAcrossReadWitnesses/R3/root/replacement
+    nats_mutation_witness_test.go:132: mutation kind=root mode=replacement publication_attempts=1
+=== RUN   TestNativeGraphMutationAcrossReadWitnesses/R3/blob/witness
+    nats_mutation_witness_test.go:132: mutation kind=blob mode=witness publication_attempts=4
+=== RUN   TestNativeGraphMutationAcrossReadWitnesses/R3/blob/replacement
+    nats_mutation_witness_test.go:132: mutation kind=blob mode=replacement publication_attempts=1
+--- PASS: TestNativeGraphMutationAcrossReadWitnesses (2.19s)
+    --- PASS: TestNativeGraphMutationAcrossReadWitnesses/R1/root/witness (0.07s)
+    --- PASS: TestNativeGraphMutationAcrossReadWitnesses/R1/root/replacement (0.05s)
+    --- PASS: TestNativeGraphMutationAcrossReadWitnesses/R1/blob/witness (0.07s)
+    --- PASS: TestNativeGraphMutationAcrossReadWitnesses/R1/blob/replacement (0.06s)
+    --- PASS: TestNativeGraphMutationAcrossReadWitnesses/R3/root/witness (0.47s)
+    --- PASS: TestNativeGraphMutationAcrossReadWitnesses/R3/root/replacement (0.58s)
+    --- PASS: TestNativeGraphMutationAcrossReadWitnesses/R3/blob/witness (0.39s)
+    --- PASS: TestNativeGraphMutationAcrossReadWitnesses/R3/blob/replacement (0.49s)
+=== RUN   TestOwnerIndexedNativeNamespaceAdmission
+=== RUN   TestOwnerIndexedNativeNamespaceAdmission/legacy-on-legacy
+=== RUN   TestOwnerIndexedNativeNamespaceAdmission/indexed-on-indexed
+=== RUN   TestOwnerIndexedNativeNamespaceAdmission/legacy-on-indexed
+=== RUN   TestOwnerIndexedNativeNamespaceAdmission/indexed-on-legacy
+--- PASS: TestOwnerIndexedNativeNamespaceAdmission (0.00s)
+    --- PASS: TestOwnerIndexedNativeNamespaceAdmission/legacy-on-legacy (0.00s)
+    --- PASS: TestOwnerIndexedNativeNamespaceAdmission/indexed-on-indexed (0.00s)
+    --- PASS: TestOwnerIndexedNativeNamespaceAdmission/legacy-on-indexed (0.00s)
+    --- PASS: TestOwnerIndexedNativeNamespaceAdmission/indexed-on-legacy (0.00s)
+=== RUN   TestNativeGraphOwnerScopeIndexRecovery
+=== RUN   TestNativeGraphOwnerScopeIndexRecovery/R1
+    nats_owner_scope_test.go:275: NATIVE_OWNER_INDEX replicas=1 discovered=9 blob_reads=9 full_census=0 orphan_uploads=2 absent_reservations=1 restart=all_peers
+=== RUN   TestNativeGraphOwnerScopeIndexRecovery/R3
+    nats_owner_scope_test.go:275: NATIVE_OWNER_INDEX replicas=3 discovered=9 blob_reads=9 full_census=0 orphan_uploads=2 absent_reservations=1 restart=all_peers
+--- PASS: TestNativeGraphOwnerScopeIndexRecovery (12.23s)
+    --- PASS: TestNativeGraphOwnerScopeIndexRecovery/R1 (1.54s)
+    --- PASS: TestNativeGraphOwnerScopeIndexRecovery/R3 (10.69s)
+PASS
+ok  	js-wf/internal/graphpublication	21.711s
