@@ -1,0 +1,351 @@
+{
+  "source": "70eb819a1bca9e70a1f0a68a6d56ef85b25e2cd0",
+  "unit": "js-wf-partition-dispatch-gap-v2-20261010.service",
+  "invocation": "bf326e9bcccc469a8f5d86da1d28ea20",
+  "supervisor": {
+    "MainPID": "0",
+    "ExecMainStatus": "0",
+    "LoadState": "loaded",
+    "InvocationID": "bf326e9bcccc469a8f5d86da1d28ea20"
+  },
+  "git_verified_inputs": 3370,
+  "actual_original_processes_closed": true,
+  "native_outcome": "pass",
+  "native_exit": 0,
+  "faults": {
+    "seed": 2,
+    "duration": "35s",
+    "faults": [
+      {
+        "worker_ping_at": "0001-01-01T00:00:00Z",
+        "scheduled": "2026-10-10T12:52:12.404581575Z",
+        "killed": "2026-10-10T12:52:12.404930134Z",
+        "healed": "2026-10-10T12:52:31.749408791Z",
+        "node": 2,
+        "partition_routes": [
+          4,
+          4,
+          0
+        ],
+        "majority_sequence": 1,
+        "paused": "0001-01-01T00:00:00Z",
+        "resumed": "0001-01-01T00:00:00Z"
+      }
+    ]
+  },
+  "raw_latency_samples_verified": 924,
+  "raw_terminal_cells": {
+    "matrixshort": {
+      "invocations": 28,
+      "raw_terminal_p99_ns": 900550835
+    },
+    "matrixtimer": {
+      "invocations": 21,
+      "raw_terminal_p99_ns": 6045947831
+    },
+    "matrixsignal": {
+      "invocations": 14,
+      "raw_terminal_p99_ns": 4826558950
+    },
+    "matrixfanout": {
+      "invocations": 7,
+      "raw_terminal_p99_ns": 3638339736
+    },
+    "matrixchild": {
+      "invocations": 42,
+      "raw_terminal_p99_ns": 2708573919
+    },
+    "matrixgrandchild": {
+      "invocations": 84,
+      "raw_terminal_p99_ns": 71378844
+    }
+  },
+  "evidence_sha256": {
+    "state.json": "63a496d5b85271a2e098c5dc2f12dd21864897acbaf0a04b7d9ff6dd789dcc49",
+    "live-admission.json": "6f212a6081a82db8f57a81b17a4f4001947d75a64c7d9e17187a5381738cd17e",
+    "source-before.json": "a2e1ff180a181e7fce39f10df3e5de224dba06833cc26e965f951f4b5f8c2175",
+    "source-after.json": "a2e1ff180a181e7fce39f10df3e5de224dba06833cc26e965f951f4b5f8c2175",
+    "events.jsonl": "12bf96df73100cca2a56866f61cf72fe9408286862d064a19cb75dd66851815a",
+    "matrix-partition.jsonl": "18eec6cbe71626aa3a716c452852e492af8853fc6fd3889b7b194ccee3a75cb8",
+    "matrix-faults.json": "7a13bece3beedb9898ec998044de083c566c9fd07b7be20807da32104b775cba",
+    "matrix-latencies.json": "b61877a97041d5a507d2c56fab7b9af64d85a14eb75ce4e7756d48d3e4ebb558",
+    "matrix-dispatch.jsonl": "0bd399a14baa09a95fc0c9e8565ca5f520ebe2de14cb210eaabf544e9401c325",
+    "matrix-operations.jsonl": "8c7e7f58eb466ed5868850b67b539c27bdc0b92b13aaa7f65ec040e46fb25203",
+    "matrix-history.jsonl": "28b67f69f85012f285d7a952106fdeaad2d51e6335df6dd7776f4be6e9cd10fa",
+    "sdk-build-info.log": "7c5fc6e1b2d43d63d89e2fc6fe1544cfb1c829d2d5ac7732efa044db02f1380c",
+    "candidate-build-info.log": "ffcb6a528b199c9496d81aeee4b38fc3c7aab9593f77b2bce3af07ed9f493cf2"
+  },
+  "paired_operations": {
+    "slot_wait": 3729,
+    "pull": 3729
+  },
+  "longest_observations": {
+    "pull": [
+      {
+        "begin": {
+          "At": "2026-10-10T12:52:11.839831539Z",
+          "Duration": 0,
+          "Worker": "matrix-worker",
+          "Partition": 43,
+          "Attempt": 33,
+          "Operation": "pull",
+          "Phase": "begin",
+          "SlotsReserved": 1,
+          "Concurrency": 4,
+          "Error": ""
+        },
+        "end": {
+          "At": "2026-10-10T12:52:12.841785209Z",
+          "Duration": 1001953670,
+          "Worker": "matrix-worker",
+          "Partition": 43,
+          "Attempt": 33,
+          "Operation": "pull",
+          "Phase": "end",
+          "SlotsReserved": 0,
+          "Concurrency": 4,
+          "Error": "context deadline exceeded"
+        }
+      },
+      {
+        "begin": {
+          "At": "2026-10-10T12:52:11.94823501Z",
+          "Duration": 0,
+          "Worker": "matrix-worker",
+          "Partition": 56,
+          "Attempt": 34,
+          "Operation": "pull",
+          "Phase": "begin",
+          "SlotsReserved": 1,
+          "Concurrency": 4,
+          "Error": ""
+        },
+        "end": {
+          "At": "2026-10-10T12:52:12.949966232Z",
+          "Duration": 1001731222,
+          "Worker": "matrix-worker",
+          "Partition": 56,
+          "Attempt": 34,
+          "Operation": "pull",
+          "Phase": "end",
+          "SlotsReserved": 0,
+          "Concurrency": 4,
+          "Error": "context deadline exceeded"
+        }
+      },
+      {
+        "begin": {
+          "At": "2026-10-10T12:52:22.056472701Z",
+          "Duration": 0,
+          "Worker": "matrix-worker",
+          "Partition": 58,
+          "Attempt": 58,
+          "Operation": "pull",
+          "Phase": "begin",
+          "SlotsReserved": 1,
+          "Concurrency": 4,
+          "Error": ""
+        },
+        "end": {
+          "At": "2026-10-10T12:52:23.058097632Z",
+          "Duration": 1001624931,
+          "Worker": "matrix-worker",
+          "Partition": 58,
+          "Attempt": 58,
+          "Operation": "pull",
+          "Phase": "end",
+          "SlotsReserved": 0,
+          "Concurrency": 4,
+          "Error": "context deadline exceeded"
+        }
+      },
+      {
+        "begin": {
+          "At": "2026-10-10T12:52:11.642239589Z",
+          "Duration": 0,
+          "Worker": "matrix-worker",
+          "Partition": 57,
+          "Attempt": 36,
+          "Operation": "pull",
+          "Phase": "begin",
+          "SlotsReserved": 1,
+          "Concurrency": 4,
+          "Error": ""
+        },
+        "end": {
+          "At": "2026-10-10T12:52:12.643517753Z",
+          "Duration": 1001278164,
+          "Worker": "matrix-worker",
+          "Partition": 57,
+          "Attempt": 36,
+          "Operation": "pull",
+          "Phase": "end",
+          "SlotsReserved": 0,
+          "Concurrency": 4,
+          "Error": "context deadline exceeded"
+        }
+      },
+      {
+        "begin": {
+          "At": "2026-10-10T12:52:11.986715727Z",
+          "Duration": 0,
+          "Worker": "matrix-worker",
+          "Partition": 41,
+          "Attempt": 47,
+          "Operation": "pull",
+          "Phase": "begin",
+          "SlotsReserved": 1,
+          "Concurrency": 4,
+          "Error": ""
+        },
+        "end": {
+          "At": "2026-10-10T12:52:12.987991037Z",
+          "Duration": 1001275320,
+          "Worker": "matrix-worker",
+          "Partition": 41,
+          "Attempt": 47,
+          "Operation": "pull",
+          "Phase": "end",
+          "SlotsReserved": 0,
+          "Concurrency": 4,
+          "Error": "context deadline exceeded"
+        }
+      }
+    ],
+    "slot_wait": [
+      {
+        "begin": {
+          "At": "2026-10-10T12:52:04.66599554Z",
+          "Duration": 0,
+          "Worker": "matrix-worker",
+          "Partition": 46,
+          "Attempt": 32,
+          "Operation": "slot_wait",
+          "Phase": "begin",
+          "SlotsReserved": 4,
+          "Concurrency": 4,
+          "Error": ""
+        },
+        "end": {
+          "At": "2026-10-10T12:52:04.680566276Z",
+          "Duration": 14570736,
+          "Worker": "matrix-worker",
+          "Partition": 46,
+          "Attempt": 32,
+          "Operation": "slot_wait",
+          "Phase": "end",
+          "SlotsReserved": 4,
+          "Concurrency": 4,
+          "Error": ""
+        }
+      },
+      {
+        "begin": {
+          "At": "2026-10-10T12:51:47.689941678Z",
+          "Duration": 0,
+          "Worker": "matrix-worker",
+          "Partition": 6,
+          "Attempt": 21,
+          "Operation": "slot_wait",
+          "Phase": "begin",
+          "SlotsReserved": 4,
+          "Concurrency": 4,
+          "Error": ""
+        },
+        "end": {
+          "At": "2026-10-10T12:51:47.698586241Z",
+          "Duration": 8644563,
+          "Worker": "matrix-worker",
+          "Partition": 6,
+          "Attempt": 21,
+          "Operation": "slot_wait",
+          "Phase": "end",
+          "SlotsReserved": 4,
+          "Concurrency": 4,
+          "Error": ""
+        }
+      },
+      {
+        "begin": {
+          "At": "2026-10-10T12:51:52.835038022Z",
+          "Duration": 0,
+          "Worker": "matrix-worker",
+          "Partition": 29,
+          "Attempt": 26,
+          "Operation": "slot_wait",
+          "Phase": "begin",
+          "SlotsReserved": 4,
+          "Concurrency": 4,
+          "Error": ""
+        },
+        "end": {
+          "At": "2026-10-10T12:51:52.840491597Z",
+          "Duration": 5453575,
+          "Worker": "matrix-worker",
+          "Partition": 29,
+          "Attempt": 26,
+          "Operation": "slot_wait",
+          "Phase": "end",
+          "SlotsReserved": 4,
+          "Concurrency": 4,
+          "Error": ""
+        }
+      },
+      {
+        "begin": {
+          "At": "2026-10-10T12:51:47.715850217Z",
+          "Duration": 0,
+          "Worker": "matrix-worker",
+          "Partition": 6,
+          "Attempt": 24,
+          "Operation": "slot_wait",
+          "Phase": "begin",
+          "SlotsReserved": 4,
+          "Concurrency": 4,
+          "Error": ""
+        },
+        "end": {
+          "At": "2026-10-10T12:51:47.718486672Z",
+          "Duration": 2636455,
+          "Worker": "matrix-worker",
+          "Partition": 6,
+          "Attempt": 24,
+          "Operation": "slot_wait",
+          "Phase": "end",
+          "SlotsReserved": 4,
+          "Concurrency": 4,
+          "Error": ""
+        }
+      },
+      {
+        "begin": {
+          "At": "2026-10-10T12:52:04.747950932Z",
+          "Duration": 0,
+          "Worker": "matrix-worker",
+          "Partition": 46,
+          "Attempt": 35,
+          "Operation": "slot_wait",
+          "Phase": "begin",
+          "SlotsReserved": 4,
+          "Concurrency": 4,
+          "Error": ""
+        },
+        "end": {
+          "At": "2026-10-10T12:52:04.749978983Z",
+          "Duration": 2028051,
+          "Worker": "matrix-worker",
+          "Partition": 46,
+          "Attempt": 35,
+          "Operation": "slot_wait",
+          "Phase": "end",
+          "SlotsReserved": 4,
+          "Concurrency": 4,
+          "Error": ""
+        }
+      }
+    ]
+  },
+  "scope": "One short diagnostic on a shared VM, exact original candidate binary, current worker. Not original seed2 duration/source or full200 acceptance.",
+  "full200_accepted": false,
+  "original_seed2_failure_unchanged": true
+}

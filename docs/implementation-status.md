@@ -1,5 +1,19 @@
 # Implementation status against the supplied plan
 
+## Bounded seed2 partition diagnostic passes without reproducing gap — 2026-10-10
+
+Frozen `70eb819` with the exact original candidate server passes one35s workload
+and confirmed majority partition in57.146s. Independent review verifies3370 Git
+inputs, actual SDK/three-peer identities, loaded matching supervisor exit0,
+924 raw latency samples, complete196 terminal invocations and7458 paired
+partition observations. Maximum pull1.001953670s and slot wait14.570736ms;
+fanout raw terminal p99=3.638339736s over seven invocations.
+[Complete diagnostic evidence and limits](scale/partition-dispatch-gap-2026-10-10/README.md).
+This changes original worker source/duration and runs on the shared VM. The
+original30.188460653s failure remains failed and its cause unconfirmed; full200
+and all broader original gates stay open. The initial launch argument failure
+is preserved separately and executed no native workload.
+
 ## Partition wait and pull observations added — 2026-10-10
 
 Optional `WithPartitionObserver` exposes paired slot waits and complete pull
