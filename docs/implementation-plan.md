@@ -1,5 +1,36 @@
 # JetStream Durable Workflow Runtime — Implementation Plan
 
+## Worker persists and resumes archive maintenance across deliveries — 2026-10-10
+
+Workers with an explicitly configured descriptor port now save completed staging
+batches and requested renewal input under fresh owner checks and exact revisions.
+The delivery reader closes after suspension, before staging authority is captured;
+uncertain release is sticky. Recovery validates the canonical invocation and
+checkpoint boundary before opening another reader, resumes original-head staging,
+repeats all private verification and dispatches a fresh delivery after completion.
+Lost saves/deletes stop; later recovery uses committed storage/canonical state.
+Observed stale/expired input is deleted and that delivery stops before a later
+fresh stage. Corrupt incomplete input remains an error.
+[Evidence](scale/graph-worker-durable-maintenance-2026-10-10/README.md).
+
+The restored race selection passes36.317s:40 stored-delivery JSON/protobuf controls,
+3 release controls,32 existing maintenance controls,7 repair controls and native
+R1/R3 cases using actual invocation/lease/graph/object/descriptor/dispatch ports.
+Stage cuts resume5 batches; verification cuts repeat all10. Native fresh workers
+require staging[1,5,0], verification[0,10,0], unchanged saved source head, no
+readers/descriptors after recovery and one execution per stage. These are
+cancellation/fresh-construction cuts while servers stay running, not process
+kill, peer restart or VM/storage qualification. Seven deliberate bypasses fail
+2/2/2/8/2/2/2 controls. All853 common pins pass4.131s on restored source.
+
+The whole15-second handoff deadline remains, including the first full checkpoint
+scan and private final verification. Those scans cannot import a saved proof;
+healthy bounded work must continue under renewed ownership beyond that parent
+before actual100000-entry qualification can be attempted meaningfully. Public
+admission remains closed, collection remains off, and original full campaign,
+worker-termination, retention, majority/soak and rollout gates remain open.
+Older sections below retain the scope of their frozen source evidence.
+
 ## Durable journal compaction descriptor storage — 2026-10-10
 
 Journal graph configuration now accepts an optional dedicated revision-CAS

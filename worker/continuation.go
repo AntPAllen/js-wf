@@ -5,6 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"time"
 
 	"js-wf/identity"
 	"js-wf/journal"
@@ -111,7 +112,7 @@ func continuationAnchor(records []journal.Record, next, epoch uint64, info wf.Ch
 	return anchor, nil
 }
 
-func (w *Worker) publishContinuation(ctx context.Context, typ, id string, invSeq uint64, owner *lease.Lease, records []journal.Record, point wf.ContinuationCheckpoint, appendEntry func(journal.Kind, json.RawMessage) error, ops *deliveryOperations) error {
+func (w *Worker) publishContinuation(ctx context.Context, typ, id string, invSeq uint64, owner *lease.Lease, records []journal.Record, point wf.ContinuationCheckpoint, appendEntry func(journal.Kind, json.RawMessage) error, ops *deliveryOperations, releaseDelivery ...func(context.Context) error) error {
 	var sequence uint64
 	for _, record := range records {
 		if record.Index == point.Index {
@@ -172,6 +173,19 @@ func (w *Worker) publishContinuation(ctx context.Context, typ, id string, invSeq
 	// pins its original receipts and must not append through them afterward.
 	// The next delivery reconstructs references from the relocated checkpoint.
 	if w.graphJournal != nil && w.graphJournal.ArchiveCheckpoints() {
+		if w.graphJournal.HasCompactionCheckpointStorage() && len(releaseDelivery) > 0 {
+			if err := owner.Renew(ctx); err != nil {
+				return err
+			}
+			started := ops.begin()
+			releaseCtx, stopRelease := context.WithTimeout(ctx, 3*time.Second)
+			err := releaseDelivery[0](releaseCtx)
+			stopRelease()
+			ops.finish(started, "continuation_archive_delivery_release", point.Index, journal.StepCompleted, err)
+			if err != nil {
+				return err
+			}
+		}
 		started := ops.begin()
 		err := w.compactGraphCheckpointBatches(ctx, typ, id, owner, runtime, tail, ops)
 		ops.finish(started, "continuation_archive", point.Index, journal.StepCompleted, err)

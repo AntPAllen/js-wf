@@ -24,6 +24,39 @@ type CompactionCheckpointPort interface {
 
 type nativeCompactionCheckpointPort struct{ kv jetstream.KeyValue }
 
+func (s *GraphStore) HasCompactionCheckpointStorage() bool { return s.cfg.CompactionCheckpoints != nil }
+
+// CheckpointCompactionHandoff is a canonical scheduling hint, never a content
+// certificate. Recovery must independently verify saved staging before publish.
+type CheckpointCompactionHandoff struct {
+	Runtime  RuntimeCheckpoint
+	Tail     uint64
+	Complete bool
+}
+
+// InspectCheckpointCompactionHandoff observes an exact checkpoint/suspension
+// boundary without acquiring a reader and changing saved source authority.
+// Its invocation pointer must match the canonical Start before maintenance.
+func (s *GraphStore) InspectCheckpointCompactionHandoff(ctx context.Context, typ, id string, input *jetstream.RawStreamMsg) (*CheckpointCompactionHandoff, error) {
+	if !s.cfg.ArchiveCheckpoints || input == nil || input.Sequence == 0 {
+		return nil, ErrGap
+	}
+	_, _, cursor, err := s.observe(ctx, typ, id)
+	if err != nil {
+		return nil, err
+	}
+	if cursor == nil || cursor.Invocation != input.Sequence || cursor.Retired || cursor.Purging {
+		return nil, nil
+	}
+	if cursor.Start == nil || !cursor.Start.MatchesInvocation(input) {
+		return nil, ErrGap
+	}
+	if cursor.Kind != Suspended || cursor.Checkpoint == nil || cursor.Base+cursor.Count != cursor.Checkpoint.Runtime.Sequence+1 {
+		return nil, nil
+	}
+	return &CheckpointCompactionHandoff{Runtime: cursor.Checkpoint.Runtime, Tail: cursor.Base + cursor.Count, Complete: cursor.RetainedFrom == cursor.Checkpoint.RequestIndex}, nil
+}
+
 // NewCompactionCheckpointPort adapts a separately provisioned KV bucket. Use no
 // TTL if descriptors must survive process outages; grant expiry still limits
 // whether their original publication can resume. This does not provision a bucket.

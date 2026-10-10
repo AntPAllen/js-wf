@@ -894,6 +894,12 @@ func (w *Worker) execute(ctx context.Context, typ, id string, l *lease.Lease, wa
 		if !validGraphHash(input.Header.Get("Wf-Input-SHA256")) {
 			return wf.ErrCorruptJournal
 		}
+		if w.continuations[typ] != nil && w.graphJournal.HasCompactionCheckpointStorage() {
+			handled, recoveryErr := w.recoverStoredGraphCompaction(ctx, typ, id, l, input, ops)
+			if recoveryErr != nil || handled {
+				return recoveryErr
+			}
+		}
 		readCtx, stopRead := context.WithTimeout(ctx, 15*time.Second)
 		graph, err = openGraphDeliveryMode(readCtx, w.graphJournal, typ, id, input.Sequence, w.continuations[typ] != nil)
 		stopRead()
@@ -1097,7 +1103,12 @@ func (w *Worker) execute(ctx context.Context, typ, id string, l *lease.Lease, wa
 		publishCtx, stopPublish := context.WithTimeout(ctx, 15*time.Second)
 		defer stopPublish()
 		started := ops.begin()
-		err := w.publishContinuation(publishCtx, typ, id, input.Sequence, l, records, point, appendEntry, ops)
+		err := w.publishContinuation(publishCtx, typ, id, input.Sequence, l, records, point, appendEntry, ops, func(releaseCtx context.Context) error {
+			if graph != nil {
+				return graph.releaseForCompaction(releaseCtx)
+			}
+			return nil
+		})
 		ops.finish(started, "continuation_recovery_publish", r.Index, "", err)
 		return err
 	}
@@ -1348,7 +1359,12 @@ func (w *Worker) execute(ctx context.Context, typ, id string, l *lease.Lease, wa
 		ctx, stopPublication = context.WithTimeout(ctx, 15*time.Second)
 		defer stopPublication()
 		started := ops.begin()
-		err := w.publishContinuation(ctx, typ, id, input.Sequence, l, records, point, appendEntry, ops)
+		err := w.publishContinuation(ctx, typ, id, input.Sequence, l, records, point, appendEntry, ops, func(releaseCtx context.Context) error {
+			if graph != nil {
+				return graph.releaseForCompaction(releaseCtx)
+			}
+			return nil
+		})
 		ops.finish(started, "continuation_publish", 0, "", err)
 		return err
 	}

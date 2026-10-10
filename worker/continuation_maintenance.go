@@ -2,7 +2,10 @@ package worker
 
 import (
 	"context"
+	"errors"
+
 	"fmt"
+	"github.com/nats-io/nats.go/jetstream"
 	"time"
 
 	"js-wf/journal"
@@ -60,10 +63,30 @@ func (w *Worker) publishGraphCheckpointBatches(ctx context.Context, typ, id stri
 }
 
 func (w *Worker) compactGraphCheckpointBatches(ctx context.Context, typ, id string, owner *lease.Lease, runtime journal.RuntimeCheckpoint, tail uint64, ops *deliveryOperations) (err error) {
+	stored := w.graphJournal.HasCompactionCheckpointStorage()
+	var revision uint64
+	var operation *journal.CheckpointCompaction
 	openCtx, stopOpen := context.WithTimeout(ctx, 15*time.Second)
-	operation, err := w.graphJournal.BeginCheckpointCompaction(openCtx, typ, id, runtime, tail)
+	if stored {
+		renewCtx, stopRenew := context.WithTimeout(openCtx, 3*time.Second)
+		err = owner.Renew(renewCtx)
+		stopRenew()
+		if err == nil {
+			operation, revision, err = w.graphJournal.ResumeStoredCheckpointCompaction(openCtx, typ, id, runtime, tail)
+		}
+	}
+	if err == nil && operation == nil {
+		operation, err = w.graphJournal.BeginCheckpointCompaction(openCtx, typ, id, runtime, tail)
+	}
 	stopOpen()
 	if err != nil {
+		// Explicitly discard an observed obsolete descriptor, then stop. The
+		// next delivery can capture a fresh stage; unknown/corrupt input stays.
+		if stored && revision != 0 && errors.Is(err, journal.ErrStale) {
+			if cleanupErr := w.deleteGraphCompactionCheckpoint(ctx, typ, id, owner, runtime, tail, revision, ops); cleanupErr != nil {
+				return cleanupErr
+			}
+		}
 		return err
 	}
 	defer func() {
@@ -99,8 +122,14 @@ func (w *Worker) compactGraphCheckpointBatches(ctx context.Context, typ, id stri
 		if intentErr != nil {
 			return intentErr
 		}
+		if stored && intentStarted {
+			if revision, err = w.saveGraphCompactionCheckpoint(ctx, owner, operation, runtime, revision, ops); err != nil {
+				return err
+			}
+		}
 		started = ops.begin()
-		phase := "continuation_archive_" + operation.Phase() + "_batch"
+		before := operation.Phase()
+		phase := "continuation_archive_" + before + "_batch"
 		batchCtx, stopBatch := context.WithTimeout(ctx, 15*time.Second)
 		done, advanceErr := operation.Advance(batchCtx, budget, 2*budget)
 		stopBatch()
@@ -109,7 +138,92 @@ func (w *Worker) compactGraphCheckpointBatches(ctx context.Context, typ, id stri
 			return advanceErr
 		}
 		if done {
+			if stored && revision != 0 {
+				return w.deleteGraphCompactionCheckpoint(ctx, typ, id, owner, runtime, tail, revision, ops)
+			}
 			return nil
 		}
+		if stored && (before == "confirm" && operation.Phase() == "stage" || before == "stage" || before == "renew" && operation.Phase() != "renew") {
+			if revision, err = w.saveGraphCompactionCheckpoint(ctx, owner, operation, runtime, revision, ops); err != nil {
+				return err
+			}
+		}
 	}
+}
+
+func (w *Worker) saveGraphCompactionCheckpoint(ctx context.Context, owner *lease.Lease, operation *journal.CheckpointCompaction, runtime journal.RuntimeCheckpoint, revision uint64, ops *deliveryOperations) (uint64, error) {
+	started := ops.begin()
+	renewCtx, stopRenew := context.WithTimeout(ctx, 3*time.Second)
+	_, timing, err := ops.renew(renewCtx, owner, 0)
+	stopRenew()
+	ops.finish(started, "lease_renew_archive_checkpoint_save", runtime.Index, journal.StepCompleted, err, timing)
+	if err != nil {
+		return 0, err
+	}
+	started = ops.begin()
+	saveCtx, stopSave := context.WithTimeout(ctx, 3*time.Second)
+	next, err := operation.SaveCheckpoint(saveCtx, revision)
+	stopSave()
+	ops.finish(started, "continuation_archive_checkpoint_save", runtime.Index, journal.StepCompleted, err)
+	return next, err
+}
+
+func (w *Worker) deleteGraphCompactionCheckpoint(ctx context.Context, typ, id string, owner *lease.Lease, runtime journal.RuntimeCheckpoint, tail, revision uint64, ops *deliveryOperations) error {
+	started := ops.begin()
+	renewCtx, stopRenew := context.WithTimeout(ctx, 3*time.Second)
+	_, timing, err := ops.renew(renewCtx, owner, 0)
+	stopRenew()
+	ops.finish(started, "lease_renew_archive_checkpoint_delete", runtime.Index, journal.StepCompleted, err, timing)
+	if err != nil {
+		return err
+	}
+	started = ops.begin()
+	deleteCtx, stopDelete := context.WithTimeout(ctx, 3*time.Second)
+	err = w.graphJournal.DeleteCompactionCheckpoint(deleteCtx, typ, id, runtime, tail, revision)
+	stopDelete()
+	ops.finish(started, "continuation_archive_checkpoint_delete", runtime.Index, journal.StepCompleted, err)
+	return err
+}
+
+// Recover before opening the delivery reader, which would invalidate the saved
+// original head. A repaired archive dispatches a fresh delivery before execution.
+func (w *Worker) recoverStoredGraphCompaction(ctx context.Context, typ, id string, owner *lease.Lease, input *jetstream.RawStreamMsg, ops *deliveryOperations) (bool, error) {
+	lookupCtx, stopLookup := context.WithTimeout(ctx, 5*time.Second)
+	handoff, err := w.graphJournal.InspectCheckpointCompactionHandoff(lookupCtx, typ, id, input)
+	stopLookup()
+	if err != nil || handoff == nil {
+		return false, err
+	}
+	workCtx, stopWork := context.WithTimeout(ctx, 15*time.Second)
+	defer stopWork()
+	renewCtx, stopRenew := context.WithTimeout(workCtx, 3*time.Second)
+	err = owner.Renew(renewCtx)
+	stopRenew()
+	if err != nil {
+		return false, err
+	}
+	if handoff.Complete {
+		// Canonical publication is already complete. An observed descriptor is
+		// obsolete even if its bytes are malformed; never use it for execution.
+		_, revision, readErr := w.graphJournal.ResumeStoredCheckpointCompaction(workCtx, typ, id, handoff.Runtime, handoff.Tail)
+		if readErr != nil && !(revision != 0 && (errors.Is(readErr, journal.ErrStale) || errors.Is(readErr, journal.ErrGap))) {
+			return false, readErr
+		}
+		if revision != 0 {
+			if err := w.deleteGraphCompactionCheckpoint(workCtx, typ, id, owner, handoff.Runtime, handoff.Tail, revision, ops); err != nil {
+				return false, err
+			}
+		}
+		return false, nil
+	}
+	if err := w.compactGraphCheckpointBatches(workCtx, typ, id, owner, handoff.Runtime, handoff.Tail, ops); err != nil {
+		return true, err
+	}
+	renewCtx, stopRenew = context.WithTimeout(workCtx, 3*time.Second)
+	err = owner.Renew(renewCtx)
+	stopRenew()
+	if err != nil {
+		return true, err
+	}
+	return true, w.client.Enqueue(workCtx, typ, id, "")
 }

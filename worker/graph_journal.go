@@ -58,20 +58,22 @@ type graphPayload struct {
 	link  retainedgraph.Link
 }
 type graphDelivery struct {
-	store                  *journal.GraphStore
-	typ, id                string
-	invocation             uint64
-	view                   *journal.GraphView
-	records                []journal.Record
-	baseIndex              uint64
-	checkpoint             *journal.GraphCheckpointRead
-	signalBase, signalLast uint64
-	refs                   map[string]graphPayload
-	pending                map[string][]byte
-	input                  []byte
-	invocationPort         InvocationPort
-	childSignals           map[uint64]signalRecord
-	children               map[string]graphChildResult
+	store                      *journal.GraphStore
+	typ, id                    string
+	invocation                 uint64
+	view                       *journal.GraphView
+	records                    []journal.Record
+	baseIndex                  uint64
+	checkpoint                 *journal.GraphCheckpointRead
+	signalBase, signalLast     uint64
+	refs                       map[string]graphPayload
+	pending                    map[string][]byte
+	input                      []byte
+	invocationPort             InvocationPort
+	childSignals               map[uint64]signalRecord
+	children                   map[string]graphChildResult
+	compactionReleaseAttempted bool
+	compactionReleaseErr       error
 }
 
 func openGraphDelivery(ctx context.Context, s *journal.GraphStore, typ, id string, invocation uint64) (*graphDelivery, error) {
@@ -260,7 +262,26 @@ func (g *graphDelivery) refresh(ctx context.Context) error {
 	}
 	return nil
 }
-func (g *graphDelivery) close(ctx context.Context) error { return g.view.Close(ctx) }
+func (g *graphDelivery) close(ctx context.Context) error {
+	if g.compactionReleaseAttempted {
+		return g.compactionReleaseErr
+	}
+	return g.view.Close(ctx)
+}
+
+// Release before capturing portable staging authority. An uncertain release is
+// sticky so deferred cleanup cannot issue another mutation after this attempt.
+func (g *graphDelivery) releaseForCompaction(ctx context.Context) error {
+	if err := ctx.Err(); err != nil {
+		return err
+	}
+	if g.compactionReleaseAttempted {
+		return g.compactionReleaseErr
+	}
+	g.compactionReleaseAttempted = true
+	g.compactionReleaseErr = g.view.Close(ctx)
+	return g.compactionReleaseErr
+}
 func (g *graphDelivery) PutBytes(ctx context.Context, name string, data []byte) error {
 	if err := ctx.Err(); err != nil {
 		return err

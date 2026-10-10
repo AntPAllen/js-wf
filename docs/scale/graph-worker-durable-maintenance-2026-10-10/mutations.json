@@ -1,0 +1,107 @@
+[
+  {
+    "name": "omit-delivery-release",
+    "command": [
+      "go",
+      "test",
+      "-race",
+      "./worker",
+      "-run",
+      "^TestGraphContinuationStoredMaintenanceAcrossDeliveries$/(json|protobuf-v1)/(cut-stage)$",
+      "-count=1",
+      "-v"
+    ],
+    "exit_code": 1,
+    "failures": 2
+  },
+  {
+    "name": "skip-preopen-recovery",
+    "command": [
+      "go",
+      "test",
+      "-race",
+      "./worker",
+      "-run",
+      "^TestGraphContinuationStoredMaintenanceAcrossDeliveries$/(json|protobuf-v1)/(cut-stage)$",
+      "-count=1",
+      "-v"
+    ],
+    "exit_code": 1,
+    "failures": 2
+  },
+  {
+    "name": "discard-saved-prefix",
+    "command": [
+      "go",
+      "test",
+      "-race",
+      "./worker",
+      "-run",
+      "^TestGraphContinuationStoredMaintenanceAcrossDeliveries$/(json|protobuf-v1)/(cut-stage)$",
+      "-count=1",
+      "-v"
+    ],
+    "exit_code": 1,
+    "failures": 2
+  },
+  {
+    "name": "ignore-save-unknown",
+    "command": [
+      "go",
+      "test",
+      "-race",
+      "./worker",
+      "-run",
+      "^TestGraphContinuationStoredMaintenanceAcrossDeliveries$/(json|protobuf-v1)/(create-drop|create-lost|update-drop|update-lost)$",
+      "-count=1",
+      "-v"
+    ],
+    "exit_code": 1,
+    "failures": 8
+  },
+  {
+    "name": "ignore-save-owner-loss",
+    "command": [
+      "go",
+      "test",
+      "-race",
+      "./worker",
+      "-run",
+      "^TestGraphContinuationStoredMaintenanceAcrossDeliveries$/(json|protobuf-v1)/(owner-loss-save)$",
+      "-count=1",
+      "-v"
+    ],
+    "exit_code": 1,
+    "failures": 2
+  },
+  {
+    "name": "ignore-delete-owner-loss",
+    "command": [
+      "go",
+      "test",
+      "-race",
+      "./worker",
+      "-run",
+      "^TestGraphContinuationStoredMaintenanceAcrossDeliveries$/(json|protobuf-v1)/(owner-loss-delete)$",
+      "-count=1",
+      "-v"
+    ],
+    "exit_code": 1,
+    "failures": 2
+  },
+  {
+    "name": "retry-uncertain-release",
+    "command": [
+      "go",
+      "test",
+      "-race",
+      "./worker",
+      "-run",
+      "^TestGraphDeliveryCompactionReleaseUncertaintyIsSticky$/(drop|lost)$",
+      "-count=1",
+      "-v"
+    ],
+    "exit_code": 1,
+    "failures": 2
+  }
+]
