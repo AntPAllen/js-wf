@@ -1,5 +1,17 @@
 # Implementation status against the supplied plan
 
+## Partition wait and pull observations added — 2026-10-10
+
+Optional `WithPartitionObserver` exposes paired slot waits and complete pull
+lifetimes, cancellation and reserved-slot occupancy. The in-process mixed matrix
+can retain them with `WF_MATRIX_PARTITION_TIMINGS=1`. Full-slot/stalled-batch race
+controls exercise cancellation and worker option wiring; existing dispatch
+simulation families pass1000 seeds each with exact replay under race. Existing
+native fetch-context controls pass; integration compilation executes no matrix
+tests. [Instrumentation scope and limits](scale/corrected-partition200-2026-10-08/terminal-failure/README.md#optional-partition-observations).
+The majority-partition cause and raw p99 gate remain unresolved. No native
+campaign was restarted; broader latest-source and original gates stay open.
+
 ## Majority-partition outlier dispatch gap isolated — 2026-10-10
 
 Integer-nanosecond analysis of the retained seed2 projections verifies frozen

@@ -368,6 +368,8 @@ func runMixedMatrixLeaderWithChallenge(t *testing.T, row, mutationMode string) {
 	var dispatch []worker.DispatchEvent
 	var operationMu sync.Mutex
 	var operations []worker.OperationEvent
+	var partitionMu sync.Mutex
+	var partitionEvents []worker.PartitionEvent
 	var latencySamples []matrixLatencySample
 	var workerRoot string
 	var processWorkers []*matrixProcessWorker
@@ -419,6 +421,23 @@ func runMixedMatrixLeaderWithChallenge(t *testing.T, row, mutationMode string) {
 					}
 				}
 				operationMu.Unlock()
+				_ = file.Close()
+			}
+		}
+		if os.Getenv("WF_MATRIX_PARTITION_TIMINGS") == "1" {
+			file, err = os.Create(prefix + "-partition.jsonl")
+			if err != nil {
+				t.Errorf("partition artifact: %v", err)
+			} else {
+				partitionMu.Lock()
+				encoder := json.NewEncoder(file)
+				for _, event := range partitionEvents {
+					if err := encoder.Encode(event); err != nil {
+						t.Errorf("partition artifact: %v", err)
+						break
+					}
+				}
+				partitionMu.Unlock()
 				_ = file.Close()
 			}
 		}
@@ -551,6 +570,13 @@ func runMixedMatrixLeaderWithChallenge(t *testing.T, row, mutationMode string) {
 				operationMu.Lock()
 				operations = append(operations, event)
 				operationMu.Unlock()
+			}))
+		}
+		if os.Getenv("WF_MATRIX_PARTITION_TIMINGS") == "1" {
+			options = append(options, worker.WithPartitionObserver(func(event worker.PartitionEvent) {
+				partitionMu.Lock()
+				partitionEvents = append(partitionEvents, event)
+				partitionMu.Unlock()
 			}))
 		}
 		w, err := worker.New(ctx, js, "matrix-worker", handlers, options...)

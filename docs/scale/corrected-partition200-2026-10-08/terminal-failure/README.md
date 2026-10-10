@@ -27,4 +27,28 @@ NAK. They therefore locate the observed gap without establishing its cause.
 The next bounded reproduction needs those observations before another full
 campaign. Raw p99 remains failed; no gate change or native rerun was made.
 
+### Optional partition observations
+
+`worker.WithPartitionObserver` now records begin/end pairs for local slot waits
+and complete pulls, including batch-channel waiting and cancellation. Each pair
+carries worker, partition, per-loop attempt, duration, concurrency and reserved
+slot count. Reservations include the current pull, so they must not be reported
+as an active-handler count. With concurrency1, the full pull also includes
+synchronous handler execution. Attempt numbers are local to a RunPartition call;
+they are not persistent consumer delivery identifiers. Callbacks must be quick
+and concurrency-safe.
+
+Set `WF_MATRIX_PARTITION_TIMINGS=1` for an **in-process** mixed matrix worker to
+save `MATRIX_ARTIFACT_PREFIX-partition.jsonl`. This is separate from operation
+timings and remains disabled by default. Process-worker rows do not attach this
+observer. No server receipt/deadline evidence is implied by these local events.
+
+Development verification: race controls for full-slot and stalled-batch
+cancellation pass (`TestPartitionObserverSeparatesSlotWaitAndPull`, including
+the public worker transport option), as do existing partition cancellation and
+native fetch-context controls. Both existing dispatch simulation families pass
+1000 generated seeds each with exact replay under race (4.741s). The integration
+package compiles with `-run '^$'`; that command executes no matrix tests. No new
+native partition outcome or whole-plan qualification is claimed.
+
 The complete failed campaign, archive and registered clean source worktree are now S3-preserved and retired after fresh full remote byte/member verification, unchanged inventories and closure checks. Further store inspection requires a fresh restore. [Corrected storage accounting and removal ledger](../reclaimed/removal.json) records the original hardlink double-count and observed951947264-byte filesystem free-space increase; no exact per-fixture physical reclaim is claimed.

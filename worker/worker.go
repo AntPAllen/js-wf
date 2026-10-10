@@ -84,6 +84,7 @@ type Worker struct {
 	metrics                    metricsCounters
 	dispatchObserver           func(DispatchEvent)
 	operationObserver          func(OperationEvent)
+	partitionObserver          func(PartitionEvent)
 	operationNow               func() time.Time
 	cancelMu                   sync.Mutex
 	cancelWaiters              map[string]*cancelWaiter
@@ -356,23 +357,28 @@ func (w *Worker) consumer(ctx context.Context, partition uint32) (jetstream.Cons
 // RunPartition processes one partition until cancellation. Multiple workers
 // may share the consumer; the per-invocation lease fences concurrent delivery.
 func (w *Worker) RunPartition(ctx context.Context, partition uint32) error {
-	return RunPartitionWithPort(ctx, partition, jetStreamDispatchPort{worker: w}, w.handle, w.partitionConcurrency)
+	return runPartitionWithPort(ctx, partition, jetStreamDispatchPort{worker: w}, w.handle, w.partitionConcurrency, w.ID, w.partitionObserver)
 }
 
 // RunPartitionWithTransport executes the same worker handler over a supplied
 // durable consumer, including lease, journal, and result decisions.
 func (w *Worker) RunPartitionWithTransport(ctx context.Context, partition uint32, port DispatchPort) error {
-	return RunPartitionWithPort(ctx, partition, port, w.handle, w.partitionConcurrency)
+	return runPartitionWithPort(ctx, partition, port, w.handle, w.partitionConcurrency, w.ID, w.partitionObserver)
 }
 
 // RunPartitionWithPort runs the production dispatch loop over a supplied
 // consumer port and message handler. It is the Tier 1 dispatch simulation seam.
 func RunPartitionWithPort(ctx context.Context, partition uint32, port DispatchPort, handle func(context.Context, jetstream.Msg), concurrency int) error {
+	return runPartitionWithPort(ctx, partition, port, handle, concurrency, "", nil)
+}
+
+func runPartitionWithPort(ctx context.Context, partition uint32, port DispatchPort, handle func(context.Context, jetstream.Msg), concurrency int, worker string, observe func(PartitionEvent)) error {
 	if partition >= provision.Partitions || port == nil || handle == nil || concurrency < 1 || concurrency > 256 {
 		return fmt.Errorf("invalid dispatch configuration")
 	}
 	var slots chan struct{}
 	var active sync.WaitGroup
+	var attemptID uint64
 	retryDelay := 100 * time.Millisecond
 	backoff := func() bool {
 		delay := retryDelay
@@ -427,15 +433,21 @@ func RunPartitionWithPort(ctx context.Context, partition uint32, port DispatchPo
 			return err != nil || pending > 0 || ackPending > active
 		}
 		for ctx.Err() == nil {
+			attemptID++
 			if slots != nil {
+				finishSlot := partitionObservation(observe, worker, partition, attemptID, "slot_wait", concurrency, slots)
 				select {
 				case slots <- struct{}{}:
+					finishSlot(nil)
 				case <-ctx.Done():
+					finishSlot(ctx.Err())
 					return nil
 				}
 			}
+			finishPull := partitionObservation(observe, worker, partition, attemptID, "pull", concurrency, slots)
 			batch, err := c.FetchOne(ctx)
 			if err != nil {
+				finishPull(err)
 				if slots != nil {
 					<-slots
 				}
@@ -461,6 +473,7 @@ func RunPartitionWithPort(ctx context.Context, partition uint32, port DispatchPo
 			messages := batch.Messages()
 			for messages != nil {
 				if ctx.Err() != nil {
+					finishPull(ctx.Err())
 					if slots != nil && !dispatched {
 						<-slots
 					}
@@ -469,6 +482,7 @@ func RunPartitionWithPort(ctx context.Context, partition uint32, port DispatchPo
 				var msg jetstream.Msg
 				select {
 				case <-ctx.Done():
+					finishPull(ctx.Err())
 					if slots != nil && !dispatched {
 						<-slots
 					}
@@ -498,6 +512,7 @@ func RunPartitionWithPort(ctx context.Context, partition uint32, port DispatchPo
 				<-slots
 			}
 			batchErr := batch.Error()
+			finishPull(batchErr)
 			if !dispatched && (batchErr == nil || errors.Is(batchErr, context.DeadlineExceeded) || errors.Is(batchErr, nats.ErrTimeout) || errors.Is(batchErr, jetstream.ErrNoMessages)) && refreshAfterEmpty() {
 				break
 			}
