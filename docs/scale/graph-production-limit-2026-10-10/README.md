@@ -35,3 +35,19 @@ is inferred from starting the job or from a partial progress log.
 
 [Small development race result](padding20-race.log) and
 [actual command/source receipt](padding20-receipt.json) are preserved.
+
+## Actual run failed at the first continuation transition
+
+Original frozen `42058f2` closes native/supervisor exit1 at14:09:08 UTC,
+package12658.484s. It completes24996 of49992 real padding operations, then
+reports `context deadline exceeded`15.513s after that progress line; heartbeat
+and release errors are nil. The300-minute package watchdog did not fire.
+Source has a15-second continuation publication bound and first checkpoint
+confirmation scans from index0 without a prior pointer. The exact failing
+publication subphase and any server-side cause are unconfirmed because the
+original fixture recorded neither phase timings nor a final cursor snapshot.
+[Independent failure review](failed-first-checkpoint/failure-review.json) and
+retained source/binary/raw/terminal evidence preserve the failed actual gate.
+No checkpoint or terminal limit acceptance is inferred, and no rerun has
+started. The next work is a bounded reproduction of checkpoint publication
+cost/deadlines before another multi-hour production-cap campaign.

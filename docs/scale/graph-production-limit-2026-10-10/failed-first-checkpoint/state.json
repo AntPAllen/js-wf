@@ -1,0 +1,60 @@
+{
+  "source": "42058f2bb00657fe1786027f4b08e6a2e6e921ba",
+  "checkout": "/home/exedev/js-wf-graph-production-limit-qualification",
+  "root": "/home/exedev/js-wf-graph-production-limit-20261010",
+  "pid": 72307,
+  "invocation": "b51f09a401c64a38a58115f3ed82cd9a",
+  "started": "2026-10-10T10:37:51.060850+00:00",
+  "commands": [
+    {
+      "command": [
+        "go",
+        "test",
+        "-race",
+        "-c",
+        "-o",
+        "/home/exedev/js-wf-graph-production-limit-20261010/worker-race.test",
+        "./worker"
+      ],
+      "cwd": "/home/exedev/js-wf-graph-production-limit-qualification",
+      "started": "2026-10-10T10:37:51.286957+00:00",
+      "exit": 0,
+      "finished": "2026-10-10T10:38:09.594358+00:00"
+    },
+    {
+      "command": [
+        "go",
+        "tool",
+        "test2json",
+        "-t",
+        "-p",
+        "js-wf/worker",
+        "/home/exedev/js-wf-graph-production-limit-20261010/worker-race.test",
+        "-test.v=test2json",
+        "-test.run=^TestNativeGraphContinuationGlobalLimitAndTerminalSlot$/R1/archive=true$",
+        "-test.count=1",
+        "-test.timeout=300m"
+      ],
+      "cwd": "/home/exedev/js-wf-graph-production-limit-qualification/worker",
+      "started": "2026-10-10T10:38:09.673990+00:00",
+      "exit": 1,
+      "finished": "2026-10-10T14:09:08.244792+00:00"
+    }
+  ],
+  "accepted": false,
+  "environment": {
+    "GOMAXPROCS": "2",
+    "GOMEMLIMIT": "1536MiB",
+    "WF_GRAPH_CONTINUATION_LIMIT_BUDGET": "100000",
+    "GOTMPDIR": "/home/exedev/js-wf-graph-production-limit-20261010/go-tmp",
+    "TMPDIR": "/home/exedev/js-wf-graph-production-limit-20261010/native-tmp"
+  },
+  "phase": "closed",
+  "binary": {
+    "bytes": 48929734,
+    "sha256": "5f0398c69fec0f071d35ade18a43c9dd787fd51ef0478621f4a533a4b4a18519",
+    "build_info": "/home/exedev/js-wf-graph-production-limit-20261010/worker-race.test: go1.27.1\n\tpath\tjs-wf/worker.test\n\tmod\tjs-wf\t(devel)\t\n\tdep\tgithub.com/anishathalye/porcupine\tv1.3.1\th1:fBZ4/NGNPnIDdd6xNtrNk9/GiEQ0L4FO5+scINN+t0E=\n\tdep\tgithub.com/antithesishq/antithesis-sdk-go\tv0.8.0-default-no-op\th1:1BOWQJweNyvZMlpAHXGLiZQn9S+QXGcz3xh94lC0w6E=\n\tdep\tgithub.com/klauspost/compress\tv1.20.0\th1:a3C1ke2ohxFymNlb2HWAHjDeKCI90scRskErZkR0ezA=\n\tdep\tgithub.com/minio/highwayhash\tv1.0.4\th1:asJizugGgchQod2ja9NJlGOWq4s7KsAWr5XUc9Clgl4=\n\tdep\tgithub.com/nats-io/jwt/v2\tv2.8.2\th1:XXRgB60MSTnqsRwejQurVDs/hcv2dkt+86GjI+I/bMc=\n\tdep\tgithub.com/nats-io/nats-server/v2\tv2.15.0\th1:M99yf0y05rTr46/qc/Is6ZAowI58Ryp2SjufLCUeVJc=\n\tdep\tgithub.com/nats-io/nats.go\tv1.54.0\th1:vsXoOxjHp/GmPUN+EcI7uOf/uB+iAP+kEsAFNQN0yzA=\n\tdep\tgithub.com/nats-io/nkeys\tv0.4.16\th1:rd5oAuLOb8mnAycB0xleuEBNS1pVVnN0fv/FF34Eypg=\n\tdep\tgithub.com/nats-io/nuid\tv1.0.1\th1:5iA8DT8V7q8WK2EScv2padNa/rTESc1KdnPw4TC2paw=\n\tdep\tgolang.org/x/crypto\tv0.57.0\th1:3ZVCjf8Ggz7zneR/EHRVx68Ctf+2pmIMP2UFhh9cC6M=\n\tdep\tgolang.org/x/sys\tv0.48.0\th1:bbX/i/6MgT9BVLM9RT1thmxL04yeTAhbEz4SyadbXoo=\n\tdep\tgolang.org/x/time\tv0.16.0\th1:vMb6ptszcQMkcwiRTAuNNU50gom6++Q/6gY2hDM6VDE=\n\tdep\tgoogle.golang.org/protobuf\tv1.36.6\th1:z1NpPI8ku2WgiWnf+t9wTPsn6eP1L7ksHUlkfLvd9xY=\n\tbuild\t-buildmode=exe\n\tbuild\t-compiler=gc\n\tbuild\t-race=true\n\tbuild\tCGO_ENABLED=1\n\tbuild\tCGO_CFLAGS=\n\tbuild\tCGO_CPPFLAGS=\n\tbuild\tCGO_CXXFLAGS=\n\tbuild\tCGO_LDFLAGS=\n\tbuild\tGOARCH=amd64\n\tbuild\tGOOS=linux\n\tbuild\tGOAMD64=v1\n"
+  },
+  "finished": "2026-10-10T14:09:08.779103+00:00",
+  "exit": 1
+}

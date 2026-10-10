@@ -1,5 +1,26 @@
 # Implementation status against the supplied plan
 
+## Actual100000 boundary failed after initial padding — 2026-10-10
+
+Original frozen `42058f2` closes native/supervisor exit1 at14:09:08 UTC,
+package12658.484s. It completes24996 of49992 padding operations, then returns
+`context deadline exceeded`15.513s after that last progress line, with nil
+heartbeat/release errors. The300-minute package watchdog did not fire.
+3326 exact Git inputs, unchanged source, retained race binary and loaded
+matching terminal supervisor are independently verified.
+[Failed actual-cap evidence](scale/graph-production-limit-2026-10-10/failed-first-checkpoint/failure-review.json).
+
+Source bounds continuation publication to15 seconds and first checkpoint
+confirmation scans from0 without a prior pointer. The exact failing
+publication subphase and server-side cause remain unconfirmed; no final
+cursor/phase receipt exists. No checkpoint or terminal boundary is accepted.
+The next work is bounded checkpoint publication cost/deadline reproduction
+before another multi-hour actual-cap run; no rerun is active.
+
+Full latest158 normal remains live at frozen `0404fc0`; its first process
+group passes. Full normal/race/extended and all other original open gates
+remain incomplete. Earlier full156 race stays failed at its package watchdog.
+
 ## Latest158 full normal running in verified process groups — 2026-10-10
 
 Tier1 campaigns now support eight disjoint sequential package processes from

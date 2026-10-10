@@ -1,5 +1,22 @@
 # JetStream Durable Workflow Runtime — Implementation Plan
 
+## Actual-cap publication follow-through required — 2026-10-10
+
+The unchanged100000-entry native run now fails at its first continuation
+transition after24996 real padding operations. It reports a context deadline
+15.513s after final padding, before the300-minute package watchdog. Exact
+3326 source inputs/binary and terminal supervisor prove the failed gate.
+Publication has a15-second source bound and initial checkpoint confirmation
+reads the prefix from0; the precise subphase/cause was not recorded.
+[Preserved failure](scale/graph-production-limit-2026-10-10/failed-first-checkpoint/failure-review.json).
+
+Required next evidence:bounded in-memory reproduction of first checkpoint
+verification/publication work at large prefix size and short deadlines,
+phase/cursor evidence for native follow-through, then the actual100000
+ordered-record/terminal-slot/two-checkpoint gate with unchanged workload.
+Short or synthetic diagnostic histories cannot substitute for that gate.
+All original requirements below remain in scope.
+
 ## Complete simulation process grouping implemented — 2026-10-10
 
 Full-suite runner/checker now supports disjoint sequential package processes
