@@ -1,5 +1,16 @@
 # Implementation status against the supplied plan
 
+## Canonical polling model100000 qualification accepted — 2026-10-10
+
+Frozen `ecc78eb` passes independent review: 1,000 race and 100,000 normal seed
+bodies, exact trace replay for every body, all seven polling modes, all 848 normal
+saved traces and three required disabled-branch failures. The reviewer verifies
+3,357 exact Git inputs, both binary identities and actual retained supervisor
+exit0. [Accepted proof](scale/graph-running-cancel-poll-model-2026-10-10/review.json).
+This covers the canonical polling family. The full latest157 normal/race/extended
+suite and remaining original gates stay open. New worker epoch ownership
+qualification is live; both older broad campaigns remain live independently.
+
 ## Journal order qualified; replay worker epoch contradictions rejected — 2026-10-10
 
 Frozen `7d1a1de` passes independent review: retained supervisor exit0, 66 full

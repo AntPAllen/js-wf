@@ -24,3 +24,14 @@ production collection, rollout and every broader original requirement remain ope
 
 Frozen source `ecc78eb811f7f556a65c2b972948042a7b18024e` is confirmed live under `js-wf-graph-cancel-poll-20261010.service`.
 [Launch identity](launch.json) records the process and retained invocation.
+
+## Frozen polling model qualification accepted
+
+[Independent review](review.json) accepts source `ecc78eb`, 3,357 exact Git
+inputs, both retained binary identities and actual supervisor exit0. All 1,000
+race and 100,000 normal seed bodies complete with exact trace replay and all
+seven modes covered. All 848 normal saved traces pass; disabling canonical
+polling must fail three specified pins. [Raw extended events](qualified/normal100000-events.jsonl)
+preserve actual completed counts. This covers one polling family; the full
+latest157 normal/race/extended pipeline and every broader original gate remain
+open. Later ordering/epoch admission changes have separate source evidence.

@@ -1,0 +1,15 @@
+=== RUN   TestPinnedRegressionCorpus
+=== RUN   TestPinnedRegressionCorpus/graph-running-cancel-poll-bound_source_purged.json
+    journal_transport_test.go:788: pinned trace testdata/regressions/graph-running-cancel-poll-bound_source_purged.json seed=4: mode=bound_source_purged found=false error=<nil> entered=false
+=== RUN   TestPinnedRegressionCorpus/graph-running-cancel-poll-owned_read_unknown.json
+    journal_transport_test.go:788: pinned trace testdata/regressions/graph-running-cancel-poll-owned_read_unknown.json seed=2: mode=owned_read_unknown found=false error=<nil> entered=false
+=== RUN   TestPinnedRegressionCorpus/graph-running-cancel-poll-root_unknown.json
+    journal_transport_test.go:788: pinned trace testdata/regressions/graph-running-cancel-poll-root_unknown.json seed=1: mode=root_unknown found=false error=<nil> entered=false
+--- FAIL: TestPinnedRegressionCorpus (0.52s)
+    --- FAIL: TestPinnedRegressionCorpus/graph-running-cancel-poll-bound_source_purged.json (0.09s)
+    --- FAIL: TestPinnedRegressionCorpus/graph-running-cancel-poll-owned_read_unknown.json (0.09s)
+    --- FAIL: TestPinnedRegressionCorpus/graph-running-cancel-poll-root_unknown.json (0.10s)
+FAIL
+TIER1_COVERAGE model_version=3 seeds_per_workload=1000 generated_schedules=0 scheduler_choices=0 choices_per_second=0.0 transport_events=0 virtual_ms_max=0 virtual_buckets_zero=0 under_1s=0 under_1m=0 at_least_1m=0 elapsed=519.005431ms
+FAIL	js-wf/sim	0.533s
+FAIL

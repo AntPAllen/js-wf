@@ -1,0 +1,140 @@
+{
+  "source": "ecc78eb811f7f556a65c2b972948042a7b18024e",
+  "checkout": "/home/exedev/js-wf-graph-cancel-poll-qualification",
+  "root": "/home/exedev/js-wf-graph-cancel-poll-20261010",
+  "pid": 90495,
+  "invocation": "60cacbbbf3f1446a8ea196e2f6bb2316",
+  "started": "2026-10-10T12:04:53.162233+00:00",
+  "commands": [
+    {
+      "command": [
+        "go",
+        "test",
+        "-race",
+        "-c",
+        "-o",
+        "/home/exedev/js-wf-graph-cancel-poll-20261010/sim-race.test",
+        "./sim"
+      ],
+      "cwd": "/home/exedev/js-wf-graph-cancel-poll-qualification",
+      "started": "2026-10-10T12:04:53.162466+00:00",
+      "expected": 0,
+      "seeds": "1000",
+      "exit": 0,
+      "finished": "2026-10-10T12:05:29.762759+00:00"
+    },
+    {
+      "command": [
+        "go",
+        "test",
+        "-c",
+        "-o",
+        "/home/exedev/js-wf-graph-cancel-poll-20261010/sim-normal.test",
+        "./sim"
+      ],
+      "cwd": "/home/exedev/js-wf-graph-cancel-poll-qualification",
+      "started": "2026-10-10T12:05:29.763180+00:00",
+      "expected": 0,
+      "seeds": "1000",
+      "exit": 0,
+      "finished": "2026-10-10T12:05:57.375567+00:00"
+    },
+    {
+      "command": [
+        "go",
+        "tool",
+        "test2json",
+        "-t",
+        "-p",
+        "js-wf/sim",
+        "/home/exedev/js-wf-graph-cancel-poll-20261010/sim-race.test",
+        "-test.v=test2json",
+        "-test.run=^TestSeededGraphRunningCancelPollReplay$",
+        "-test.count=1",
+        "-test.timeout=120m"
+      ],
+      "cwd": "/home/exedev/js-wf-graph-cancel-poll-qualification/sim",
+      "started": "2026-10-10T12:05:57.375933+00:00",
+      "expected": 0,
+      "seeds": "1000",
+      "exit": 0,
+      "finished": "2026-10-10T12:07:55.659630+00:00"
+    },
+    {
+      "command": [
+        "go",
+        "tool",
+        "test2json",
+        "-t",
+        "-p",
+        "js-wf/sim",
+        "/home/exedev/js-wf-graph-cancel-poll-20261010/sim-normal.test",
+        "-test.v=test2json",
+        "-test.run=^TestPinnedRegressionCorpus$",
+        "-test.count=1",
+        "-test.timeout=120m"
+      ],
+      "cwd": "/home/exedev/js-wf-graph-cancel-poll-qualification/sim",
+      "started": "2026-10-10T12:07:55.660006+00:00",
+      "expected": 0,
+      "seeds": "1000",
+      "exit": 0,
+      "finished": "2026-10-10T12:08:06.733139+00:00"
+    },
+    {
+      "command": [
+        "go",
+        "test",
+        "-race",
+        "-v",
+        "-overlay=/home/exedev/js-wf-graph-cancel-poll-20261010/overlay.json",
+        "./sim",
+        "-run",
+        "^TestPinnedRegressionCorpus$/graph-running-cancel-poll-(bound_source_purged|root_unknown|owned_read_unknown).json$",
+        "-count=1",
+        "-timeout=5m"
+      ],
+      "cwd": "/home/exedev/js-wf-graph-cancel-poll-qualification",
+      "started": "2026-10-10T12:08:06.735331+00:00",
+      "expected": 1,
+      "seeds": "1000",
+      "exit": 1,
+      "finished": "2026-10-10T12:08:34.736239+00:00"
+    },
+    {
+      "command": [
+        "go",
+        "tool",
+        "test2json",
+        "-t",
+        "-p",
+        "js-wf/sim",
+        "/home/exedev/js-wf-graph-cancel-poll-20261010/sim-normal.test",
+        "-test.v=test2json",
+        "-test.run=^TestSeededGraphRunningCancelPollReplay$",
+        "-test.count=1",
+        "-test.timeout=120m"
+      ],
+      "cwd": "/home/exedev/js-wf-graph-cancel-poll-qualification/sim",
+      "started": "2026-10-10T12:08:34.736760+00:00",
+      "expected": 0,
+      "seeds": "100000",
+      "exit": 0,
+      "finished": "2026-10-10T12:27:30.952318+00:00"
+    }
+  ],
+  "accepted": false,
+  "phase": "closed",
+  "exit": 0,
+  "finished": "2026-10-10T12:27:31.170132+00:00",
+  "binaries": {
+    "sim-race.test": {
+      "bytes": 35721692,
+      "sha256": "ec96f832bd491751b5e64e6d4ac596c8094a02e7dd919d2ff9a731094280aa21"
+    },
+    "sim-normal.test": {
+      "bytes": 27191415,
+      "sha256": "9bc8718271451d50311a0c364797fffe0250cf619e5d3b85de426a3683e466e0"
+    }
+  }
+}
