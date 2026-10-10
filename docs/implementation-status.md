@@ -1,5 +1,9 @@
 # Implementation status against the supplied plan
 
+## Full native failed-child continuation matrix accepted — 2026-10-10
+
+Frozen d504a33 passes all eight R1/R3-domain × live/archive × cached/buffered failed-child cases under race in191.80 seconds, actual exit0. Independent review verifies3,293 exact Git/source inputs, the retained race binary, one child execution, preserved child failure, all three parent stages once, two effects/25 records/result43 and all four reclaimed child receipts plus both archive boundaries. The formerly failing R3 buffered/archive case passes39.70s; this does not establish the earlier server-side cause. [Closed raw evidence and executed review](scale/graph-d504-full-qualification-2026-10-10/README.md). The durable pipeline has advanced to complete156-family/841-pin normal1000; matching race remains conditional on normal success. Current full/extended simulation, cancellation/pending-child/limit/retention matrices, actual100,000-entry boundary, public continuation admission, production collection and every broader original gate remain open.
+
 ## Frozen current156 native/normal/race pipeline launched — 2026-10-10
 
 A durable user systemd pipeline is live on clean frozen d504a33: the complete eight-case failed-child native race matrix, followed by all156 families/all841 pins at1000 seeds in normal mode, then matching race only after actual normal success. Source inventories, retained binaries, raw output and actual exits are recorded separately. [Runner, launch identity and exact limits](scale/graph-d504-full-qualification-2026-10-10/README.md). Launch is not acceptance; independent terminal review and every broader original open gate remain required.

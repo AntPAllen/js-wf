@@ -1,0 +1,39 @@
+{
+  "stage": "native",
+  "source": "d504a337a8b9102a0b32673d457939c4b82fcc8f",
+  "observed": "2026-10-10T08:15:30.163178+00:00",
+  "repository_inputs_git_verified": 3293,
+  "pipeline_accepted": false,
+  "verdict": "PASS eight native failed-child continuation cases",
+  "cases": {
+    "R1/archive=false/buffered=false": 10.79,
+    "R1/archive=false/buffered=true": 11.67,
+    "R1/archive=true/buffered=false": 29.32,
+    "R1/archive=true/buffered=true": 28.39,
+    "R3Domain/archive=false/buffered=false": 19.68,
+    "R3Domain/archive=false/buffered=true": 17.1,
+    "R3Domain/archive=true/buffered=false": 35.15,
+    "R3Domain/archive=true/buffered=true": 39.7
+  },
+  "log_sha256": "ec3d933376554032ffbedff7013605d402bd98e2629f629ef6d4a5e23a184ba5",
+  "binary_sha256": "59e62a1c3b99d47a4470afff5eba1359c28a3aa56b9721f4256ddd07d7ff129a",
+  "command_receipt": {
+    "command": [
+      "/home/exedev/js-wf-d504-full-qualification-20261010/native/worker-race.test",
+      "-test.run=^TestNativeGraphContinuationFailedChildPromise$",
+      "-test.count=1",
+      "-test.timeout=10m",
+      "-test.v=true"
+    ],
+    "working_directory": "/home/exedev/js-wf-d504a33-qualification",
+    "started": "2026-10-10T08:12:08.371944+00:00",
+    "env": {
+      "GOMAXPROCS": "4",
+      "GOMEMLIMIT": "512MiB"
+    },
+    "pid": 52075,
+    "actual_exit_code": 0,
+    "finished": "2026-10-10T08:15:21.209927+00:00"
+  },
+  "scope": "Frozen eight-case functional race matrix only. No full simulation, broad fault/scale/soak, actual100000-entry boundary, public admission or production collection acceptance."
+}

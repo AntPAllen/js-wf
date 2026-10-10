@@ -1,0 +1,351 @@
+=== RUN   TestNativeGraphContinuationFailedChildPromise
+=== RUN   TestNativeGraphContinuationFailedChildPromise/R1/archive=false/buffered=false
+    graph_continuation_sdk_test.go:401: SDK_PHASE name=execute_begin_next elapsed=315.811629ms remaining=59.68418792s sdk_requests=171
+    graph_continuation_sdk_test.go:255: SDK_OPERATION op=journal_append type=test index=0 kind=Started duration=168.498083ms error="" sdk_requests=299
+    graph_continuation_sdk_test.go:255: SDK_OPERATION op=journal_append type=test index=1 kind=StepRequested duration=190.967993ms error="" sdk_requests=446
+    graph_continuation_sdk_test.go:255: SDK_OPERATION op=journal_append type=test index=2 kind=StepCompleted duration=124.457048ms error="" sdk_requests=522
+    graph_continuation_sdk_test.go:255: SDK_OPERATION op=journal_append type=test index=3 kind=StepRequested duration=207.698955ms error="" sdk_requests=662
+    graph_continuation_sdk_test.go:255: SDK_OPERATION op=journal_append type=test index=4 kind=StepCompleted duration=113.778943ms error="" sdk_requests=738
+    graph_continuation_sdk_test.go:255: SDK_OPERATION op=journal_append type=test index=5 kind=StepRequested duration=188.524021ms error="" sdk_requests=846
+    graph_continuation_sdk_test.go:255: SDK_OPERATION op=journal_append type=test index=6 kind=StepCompleted duration=114.71765ms error="" sdk_requests=1045
+    graph_continuation_sdk_test.go:255: SDK_OPERATION op=journal_append type=test index=7 kind=StepRequested duration=296.113261ms error="" sdk_requests=1217
+    graph_continuation_sdk_test.go:255: SDK_OPERATION op=journal_append type=test index=8 kind=StepCompleted duration=195.6582ms error="" sdk_requests=1333
+    graph_continuation_sdk_test.go:255: SDK_OPERATION op=journal_append type=test index=9 kind=Suspended duration=150.895679ms error="" sdk_requests=1613
+    graph_continuation_sdk_test.go:403: SDK_PHASE name=execute_end_next elapsed=2.811046151s remaining=57.188953468s sdk_requests=1622
+    graph_continuation_sdk_test.go:537: SDK_PHASE name=boundary_scan_end_next elapsed=2.843218513s remaining=57.156781136s sdk_requests=1650
+    graph_continuation_sdk_test.go:255: SDK_OPERATION op=journal_append type=testchild index=0 kind=Started duration=173.993525ms error="" sdk_requests=1778
+    graph_continuation_sdk_test.go:255: SDK_OPERATION op=journal_append type=testchild index=1 kind=Failed duration=182.162205ms error="" sdk_requests=1925
+    graph_continuation_sdk_test.go:541: SDK_PHASE name=child_execute_end elapsed=3.926897658s remaining=56.073101932s sdk_requests=2188
+    graph_continuation_sdk_test.go:401: SDK_PHASE name=execute_begin_finish elapsed=3.926962216s remaining=56.073037564s sdk_requests=2188
+    graph_continuation_sdk_test.go:255: SDK_OPERATION op=journal_append type=test index=10 kind=SignalConsumed duration=329.354336ms error="" sdk_requests=2541
+    graph_continuation_sdk_test.go:255: SDK_OPERATION op=journal_append type=test index=11 kind=StepRequested duration=266.514308ms error="" sdk_requests=2691
+    graph_continuation_sdk_test.go:255: SDK_OPERATION op=journal_append type=test index=12 kind=StepCompleted duration=128.381581ms error="" sdk_requests=2767
+    graph_continuation_sdk_test.go:255: SDK_OPERATION op=journal_append type=test index=13 kind=StepRequested duration=189.328643ms error="" sdk_requests=2875
+    graph_continuation_sdk_test.go:255: SDK_OPERATION op=journal_append type=test index=14 kind=StepCompleted duration=143.257232ms error="" sdk_requests=2951
+    graph_continuation_sdk_test.go:255: SDK_OPERATION op=journal_append type=test index=15 kind=StepRequested duration=372.661827ms error="" sdk_requests=3155
+    graph_continuation_sdk_test.go:255: SDK_OPERATION op=journal_append type=test index=16 kind=StepCompleted duration=180.669005ms error="" sdk_requests=3231
+    graph_continuation_sdk_test.go:255: SDK_OPERATION op=journal_append type=test index=17 kind=StepRequested duration=200.705689ms error="" sdk_requests=3339
+    graph_continuation_sdk_test.go:255: SDK_OPERATION op=journal_append type=test index=18 kind=StepCompleted duration=202.889247ms error="" sdk_requests=3415
+    graph_continuation_sdk_test.go:255: SDK_OPERATION op=journal_append type=test index=19 kind=StepRequested duration=326.026539ms error="" sdk_requests=3555
+    graph_continuation_sdk_test.go:255: SDK_OPERATION op=journal_append type=test index=20 kind=StepCompleted duration=206.548837ms error="" sdk_requests=3671
+    graph_continuation_sdk_test.go:255: SDK_OPERATION op=journal_append type=test index=21 kind=Suspended duration=227.774917ms error="" sdk_requests=4085
+    graph_continuation_sdk_test.go:403: SDK_PHASE name=execute_end_finish elapsed=7.869858592s remaining=52.130141008s sdk_requests=4094
+    graph_continuation_sdk_test.go:431: SDK_PHASE name=child_retire_end elapsed=7.907504179s remaining=52.09249544s sdk_requests=4109
+    graph_continuation_sdk_test.go:537: SDK_PHASE name=boundary_scan_end_finish elapsed=7.95534579s remaining=52.04465383s sdk_requests=4133
+    graph_continuation_sdk_test.go:255: SDK_OPERATION op=journal_append type=test index=22 kind=StepRequested duration=155.108891ms error="" sdk_requests=4422
+    graph_continuation_sdk_test.go:255: SDK_OPERATION op=journal_append type=test index=23 kind=StepCompleted duration=302.320932ms error="" sdk_requests=4594
+    graph_continuation_sdk_test.go:255: SDK_OPERATION op=journal_append type=test index=24 kind=Completed duration=184.287153ms error="" sdk_requests=4670
+    graph_continuation_sdk_test.go:584: SDK initial/next/finish=map[finish:1 initial:1 next:1] effects=2 records=25 result=43
+    graph_continuation_sdk_test.go:586: GRAPH_FAILED_CHILD buffered=false archive=false child_calls=1 preserved_error=planned_child_failure parent_result=43
+    graph_continuation_sdk_test.go:588: SDK_PHASE name=finished elapsed=10.733102549s remaining=49.266897071s sdk_requests=5422
+=== RUN   TestNativeGraphContinuationFailedChildPromise/R1/archive=false/buffered=true
+    graph_continuation_sdk_test.go:401: SDK_PHASE name=execute_begin_next elapsed=355.887849ms remaining=59.6441115s sdk_requests=171
+    graph_continuation_sdk_test.go:255: SDK_OPERATION op=journal_append type=test index=0 kind=Started duration=156.566013ms error="" sdk_requests=299
+    graph_continuation_sdk_test.go:255: SDK_OPERATION op=journal_append type=test index=1 kind=StepRequested duration=251.235144ms error="" sdk_requests=446
+    graph_continuation_sdk_test.go:255: SDK_OPERATION op=journal_append type=test index=2 kind=StepCompleted duration=134.986706ms error="" sdk_requests=522
+    graph_continuation_sdk_test.go:255: SDK_OPERATION op=journal_append type=test index=3 kind=StepRequested duration=290.778885ms error="" sdk_requests=662
+    graph_continuation_sdk_test.go:255: SDK_OPERATION op=journal_append type=test index=4 kind=StepCompleted duration=178.488943ms error="" sdk_requests=738
+    graph_continuation_sdk_test.go:255: SDK_OPERATION op=journal_append type=test index=5 kind=StepRequested duration=208.626734ms error="" sdk_requests=846
+    graph_continuation_sdk_test.go:255: SDK_OPERATION op=journal_append type=test index=6 kind=StepCompleted duration=127.682589ms error="" sdk_requests=1045
+    graph_continuation_sdk_test.go:255: SDK_OPERATION op=journal_append type=test index=7 kind=StepRequested duration=310.050646ms error="" sdk_requests=1217
+    graph_continuation_sdk_test.go:255: SDK_OPERATION op=journal_append type=test index=8 kind=StepCompleted duration=182.725771ms error="" sdk_requests=1333
+    graph_continuation_sdk_test.go:255: SDK_OPERATION op=journal_append type=test index=9 kind=Suspended duration=184.631216ms error="" sdk_requests=1613
+    graph_continuation_sdk_test.go:403: SDK_PHASE name=execute_end_next elapsed=3.105037293s remaining=56.894962316s sdk_requests=1622
+    graph_continuation_sdk_test.go:537: SDK_PHASE name=boundary_scan_end_next elapsed=3.159703543s remaining=56.840296077s sdk_requests=1650
+    graph_continuation_sdk_test.go:255: SDK_OPERATION op=journal_append type=testchild index=0 kind=Started duration=160.358636ms error="" sdk_requests=1778
+    graph_continuation_sdk_test.go:255: SDK_OPERATION op=journal_append type=testchild index=1 kind=Failed duration=250.707301ms error="" sdk_requests=1925
+    graph_continuation_sdk_test.go:541: SDK_PHASE name=child_execute_end elapsed=4.40157947s remaining=55.59842018s sdk_requests=2188
+    graph_continuation_sdk_test.go:401: SDK_PHASE name=execute_begin_finish elapsed=4.401688996s remaining=55.598310613s sdk_requests=2188
+    graph_continuation_sdk_test.go:255: SDK_OPERATION op=journal_append type=test index=10 kind=SignalConsumed duration=331.264547ms error="" sdk_requests=2541
+    graph_continuation_sdk_test.go:255: SDK_OPERATION op=journal_append type=test index=11 kind=StepRequested duration=273.20271ms error="" sdk_requests=2691
+    graph_continuation_sdk_test.go:255: SDK_OPERATION op=journal_append type=test index=12 kind=StepCompleted duration=183.531595ms error="" sdk_requests=2767
+    graph_continuation_sdk_test.go:255: SDK_OPERATION op=journal_append type=test index=13 kind=StepRequested duration=200.29151ms error="" sdk_requests=2875
+    graph_continuation_sdk_test.go:255: SDK_OPERATION op=journal_append type=test index=14 kind=StepCompleted duration=145.36782ms error="" sdk_requests=2951
+    graph_continuation_sdk_test.go:255: SDK_OPERATION op=journal_append type=test index=15 kind=StepRequested duration=380.329056ms error="" sdk_requests=3155
+    graph_continuation_sdk_test.go:255: SDK_OPERATION op=journal_append type=test index=16 kind=StepCompleted duration=157.341362ms error="" sdk_requests=3231
+    graph_continuation_sdk_test.go:255: SDK_OPERATION op=journal_append type=test index=17 kind=StepRequested duration=222.317415ms error="" sdk_requests=3339
+    graph_continuation_sdk_test.go:255: SDK_OPERATION op=journal_append type=test index=18 kind=StepCompleted duration=318.74729ms error="" sdk_requests=3501
+    graph_continuation_sdk_test.go:255: SDK_OPERATION op=journal_append type=test index=19 kind=Suspended duration=251.060947ms error="" sdk_requests=3917
+    graph_continuation_sdk_test.go:403: SDK_PHASE name=execute_end_finish elapsed=8.064964928s remaining=51.935034692s sdk_requests=3926
+    graph_continuation_sdk_test.go:431: SDK_PHASE name=child_retire_end elapsed=8.095401693s remaining=51.904597666s sdk_requests=3941
+    graph_continuation_sdk_test.go:537: SDK_PHASE name=boundary_scan_end_finish elapsed=8.158255932s remaining=51.841743307s sdk_requests=3965
+    graph_continuation_sdk_test.go:255: SDK_OPERATION op=journal_append type=test index=20 kind=StepRequested duration=187.379782ms error="" sdk_requests=4308
+    graph_continuation_sdk_test.go:255: SDK_OPERATION op=journal_append type=test index=21 kind=StepCompleted duration=198.460678ms error="" sdk_requests=4416
+    graph_continuation_sdk_test.go:255: SDK_OPERATION op=journal_append type=test index=22 kind=StepRequested duration=187.629351ms error="" sdk_requests=4492
+    graph_continuation_sdk_test.go:255: SDK_OPERATION op=journal_append type=test index=23 kind=StepCompleted duration=305.408712ms error="" sdk_requests=4664
+    graph_continuation_sdk_test.go:255: SDK_OPERATION op=journal_append type=test index=24 kind=Completed duration=157.927953ms error="" sdk_requests=4740
+    graph_continuation_sdk_test.go:584: SDK initial/next/finish=map[finish:1 initial:1 next:1] effects=2 records=25 result=43
+    graph_continuation_sdk_test.go:586: GRAPH_FAILED_CHILD buffered=true archive=false child_calls=1 preserved_error=planned_child_failure parent_result=43
+    graph_continuation_sdk_test.go:588: SDK_PHASE name=finished elapsed=11.638134192s remaining=48.361865457s sdk_requests=5586
+=== RUN   TestNativeGraphContinuationFailedChildPromise/R1/archive=true/buffered=false
+    graph_continuation_sdk_test.go:401: SDK_PHASE name=execute_begin_next elapsed=301.387032ms remaining=1m59.698612607s sdk_requests=171
+    graph_continuation_sdk_test.go:255: SDK_OPERATION op=journal_append type=test index=0 kind=Started duration=210.219353ms error="" sdk_requests=299
+    graph_continuation_sdk_test.go:255: SDK_OPERATION op=journal_append type=test index=1 kind=StepRequested duration=171.434905ms error="" sdk_requests=446
+    graph_continuation_sdk_test.go:255: SDK_OPERATION op=journal_append type=test index=2 kind=StepCompleted duration=125.157713ms error="" sdk_requests=522
+    graph_continuation_sdk_test.go:255: SDK_OPERATION op=journal_append type=test index=3 kind=StepRequested duration=228.007942ms error="" sdk_requests=662
+    graph_continuation_sdk_test.go:255: SDK_OPERATION op=journal_append type=test index=4 kind=StepCompleted duration=166.957703ms error="" sdk_requests=738
+    graph_continuation_sdk_test.go:255: SDK_OPERATION op=journal_append type=test index=5 kind=StepRequested duration=202.687591ms error="" sdk_requests=846
+    graph_continuation_sdk_test.go:255: SDK_OPERATION op=journal_append type=test index=6 kind=StepCompleted duration=130.27041ms error="" sdk_requests=1045
+    graph_continuation_sdk_test.go:255: SDK_OPERATION op=journal_append type=test index=7 kind=StepRequested duration=267.751176ms error="" sdk_requests=1217
+    graph_continuation_sdk_test.go:255: SDK_OPERATION op=journal_append type=test index=8 kind=StepCompleted duration=202.218307ms error="" sdk_requests=1333
+    graph_continuation_sdk_test.go:255: SDK_OPERATION op=journal_append type=test index=9 kind=Suspended duration=271.143411ms error="" sdk_requests=1613
+    graph_continuation_sdk_test.go:403: SDK_PHASE name=execute_end_next elapsed=5.967225738s remaining=1m54.032773792s sdk_requests=3451
+    graph_continuation_sdk_test.go:464: SDK_PHASE name=parent_sweep_end_next elapsed=7.925108583s remaining=1m52.074890956s sdk_requests=4570
+    graph_continuation_sdk_test.go:520: ARCHIVE_COLLECTION stage=next original_entry_receipts_removed=10 live_records=3 logical_records=10
+    graph_continuation_sdk_test.go:524: SDK_PHASE name=parent_audit_end_next elapsed=8.425674223s remaining=1m51.574325356s sdk_requests=4817
+    graph_continuation_sdk_test.go:537: SDK_PHASE name=boundary_scan_end_next elapsed=8.485111081s remaining=1m51.514888509s sdk_requests=4842
+    graph_continuation_sdk_test.go:255: SDK_OPERATION op=journal_append type=testchild index=0 kind=Started duration=167.054349ms error="" sdk_requests=4970
+    graph_continuation_sdk_test.go:255: SDK_OPERATION op=journal_append type=testchild index=1 kind=Failed duration=189.716332ms error="" sdk_requests=5117
+    graph_continuation_sdk_test.go:541: SDK_PHASE name=child_execute_end elapsed=9.770012928s remaining=1m50.229986501s sdk_requests=5380
+    graph_continuation_sdk_test.go:401: SDK_PHASE name=execute_begin_finish elapsed=9.770071187s remaining=1m50.229928593s sdk_requests=5380
+    graph_continuation_sdk_test.go:255: SDK_OPERATION op=journal_append type=test index=10 kind=SignalConsumed duration=376.937732ms error="" sdk_requests=5785
+    graph_continuation_sdk_test.go:255: SDK_OPERATION op=journal_append type=test index=11 kind=StepRequested duration=160.594655ms error="" sdk_requests=5871
+    graph_continuation_sdk_test.go:255: SDK_OPERATION op=journal_append type=test index=12 kind=StepCompleted duration=248.970732ms error="" sdk_requests=5979
+    graph_continuation_sdk_test.go:255: SDK_OPERATION op=journal_append type=test index=13 kind=StepRequested duration=226.61866ms error="" sdk_requests=6055
+    graph_continuation_sdk_test.go:255: SDK_OPERATION op=journal_append type=test index=14 kind=StepCompleted duration=305.505509ms error="" sdk_requests=6227
+    graph_continuation_sdk_test.go:255: SDK_OPERATION op=journal_append type=test index=15 kind=StepRequested duration=172.923026ms error="" sdk_requests=6303
+    graph_continuation_sdk_test.go:255: SDK_OPERATION op=journal_append type=test index=16 kind=StepCompleted duration=238.409946ms error="" sdk_requests=6411
+    graph_continuation_sdk_test.go:255: SDK_OPERATION op=journal_append type=test index=17 kind=StepRequested duration=214.402019ms error="" sdk_requests=6487
+    graph_continuation_sdk_test.go:255: SDK_OPERATION op=journal_append type=test index=18 kind=StepCompleted duration=328.51538ms error="" sdk_requests=6627
+    graph_continuation_sdk_test.go:255: SDK_OPERATION op=journal_append type=test index=19 kind=StepRequested duration=220.90555ms error="" sdk_requests=6703
+    graph_continuation_sdk_test.go:255: SDK_OPERATION op=journal_append type=test index=20 kind=StepCompleted duration=348.283827ms error="" sdk_requests=6851
+    graph_continuation_sdk_test.go:255: SDK_OPERATION op=journal_append type=test index=21 kind=Suspended duration=203.752158ms error="" sdk_requests=7221
+    graph_continuation_sdk_test.go:403: SDK_PHASE name=execute_end_finish elapsed=19.471039093s remaining=1m40.528960517s sdk_requests=10427
+    graph_continuation_sdk_test.go:431: SDK_PHASE name=child_retire_end elapsed=19.589618561s remaining=1m40.410381069s sdk_requests=10475
+    graph_continuation_sdk_test.go:462: ARCHIVE_CHILD_RECLAIMED terminal_receipts=1 result_bytes=0
+    graph_continuation_sdk_test.go:464: SDK_PHASE name=parent_sweep_end_finish elapsed=24.917229449s remaining=1m35.08276994s sdk_requests=13294
+    graph_continuation_sdk_test.go:520: ARCHIVE_COLLECTION stage=finish original_entry_receipts_removed=15 live_records=3 logical_records=22
+    graph_continuation_sdk_test.go:524: SDK_PHASE name=parent_audit_end_finish elapsed=25.979070792s remaining=1m34.020928838s sdk_requests=13731
+    graph_continuation_sdk_test.go:537: SDK_PHASE name=boundary_scan_end_finish elapsed=26.021235136s remaining=1m33.978764474s sdk_requests=13755
+    graph_continuation_sdk_test.go:255: SDK_OPERATION op=journal_append type=test index=22 kind=StepRequested duration=268.70096ms error="" sdk_requests=14100
+    graph_continuation_sdk_test.go:255: SDK_OPERATION op=journal_append type=test index=23 kind=StepCompleted duration=191.521726ms error="" sdk_requests=14176
+    graph_continuation_sdk_test.go:255: SDK_OPERATION op=journal_append type=test index=24 kind=Completed duration=238.554805ms error="" sdk_requests=14284
+    graph_continuation_sdk_test.go:584: SDK initial/next/finish=map[finish:1 initial:1 next:1] effects=2 records=25 result=43
+    graph_continuation_sdk_test.go:586: GRAPH_FAILED_CHILD buffered=false archive=true child_calls=1 preserved_error=planned_child_failure parent_result=43
+    graph_continuation_sdk_test.go:588: SDK_PHASE name=finished elapsed=29.286095469s remaining=1m30.713904081s sdk_requests=15011
+=== RUN   TestNativeGraphContinuationFailedChildPromise/R1/archive=true/buffered=true
+    graph_continuation_sdk_test.go:401: SDK_PHASE name=execute_begin_next elapsed=285.426452ms remaining=1m59.714573187s sdk_requests=171
+    graph_continuation_sdk_test.go:255: SDK_OPERATION op=journal_append type=test index=0 kind=Started duration=179.205502ms error="" sdk_requests=299
+    graph_continuation_sdk_test.go:255: SDK_OPERATION op=journal_append type=test index=1 kind=StepRequested duration=205.746798ms error="" sdk_requests=446
+    graph_continuation_sdk_test.go:255: SDK_OPERATION op=journal_append type=test index=2 kind=StepCompleted duration=145.939499ms error="" sdk_requests=522
+    graph_continuation_sdk_test.go:255: SDK_OPERATION op=journal_append type=test index=3 kind=StepRequested duration=258.918407ms error="" sdk_requests=662
+    graph_continuation_sdk_test.go:255: SDK_OPERATION op=journal_append type=test index=4 kind=StepCompleted duration=181.871473ms error="" sdk_requests=738
+    graph_continuation_sdk_test.go:255: SDK_OPERATION op=journal_append type=test index=5 kind=StepRequested duration=192.1173ms error="" sdk_requests=846
+    graph_continuation_sdk_test.go:255: SDK_OPERATION op=journal_append type=test index=6 kind=StepCompleted duration=135.422608ms error="" sdk_requests=1045
+    graph_continuation_sdk_test.go:255: SDK_OPERATION op=journal_append type=test index=7 kind=StepRequested duration=277.806565ms error="" sdk_requests=1217
+    graph_continuation_sdk_test.go:255: SDK_OPERATION op=journal_append type=test index=8 kind=StepCompleted duration=186.385732ms error="" sdk_requests=1333
+    graph_continuation_sdk_test.go:255: SDK_OPERATION op=journal_append type=test index=9 kind=Suspended duration=206.971208ms error="" sdk_requests=1613
+    graph_continuation_sdk_test.go:403: SDK_PHASE name=execute_end_next elapsed=5.690630885s remaining=1m54.309368715s sdk_requests=3451
+    graph_continuation_sdk_test.go:464: SDK_PHASE name=parent_sweep_end_next elapsed=7.937967548s remaining=1m52.062031661s sdk_requests=4570
+    graph_continuation_sdk_test.go:520: ARCHIVE_COLLECTION stage=next original_entry_receipts_removed=10 live_records=3 logical_records=10
+    graph_continuation_sdk_test.go:524: SDK_PHASE name=parent_audit_end_next elapsed=8.570196605s remaining=1m51.429802644s sdk_requests=4817
+    graph_continuation_sdk_test.go:537: SDK_PHASE name=boundary_scan_end_next elapsed=8.652573406s remaining=1m51.347425923s sdk_requests=4842
+    graph_continuation_sdk_test.go:255: SDK_OPERATION op=journal_append type=testchild index=0 kind=Started duration=219.590962ms error="" sdk_requests=4970
+    graph_continuation_sdk_test.go:255: SDK_OPERATION op=journal_append type=testchild index=1 kind=Failed duration=204.488786ms error="" sdk_requests=5117
+    graph_continuation_sdk_test.go:541: SDK_PHASE name=child_execute_end elapsed=10.028177595s remaining=1m49.971822185s sdk_requests=5380
+    graph_continuation_sdk_test.go:401: SDK_PHASE name=execute_begin_finish elapsed=10.028242944s remaining=1m49.971756846s sdk_requests=5380
+    graph_continuation_sdk_test.go:255: SDK_OPERATION op=journal_append type=test index=10 kind=SignalConsumed duration=433.968404ms error="" sdk_requests=5785
+    graph_continuation_sdk_test.go:255: SDK_OPERATION op=journal_append type=test index=11 kind=StepRequested duration=198.038206ms error="" sdk_requests=5871
+    graph_continuation_sdk_test.go:255: SDK_OPERATION op=journal_append type=test index=12 kind=StepCompleted duration=228.44115ms error="" sdk_requests=5979
+    graph_continuation_sdk_test.go:255: SDK_OPERATION op=journal_append type=test index=13 kind=StepRequested duration=234.027347ms error="" sdk_requests=6055
+    graph_continuation_sdk_test.go:255: SDK_OPERATION op=journal_append type=test index=14 kind=StepCompleted duration=363.729674ms error="" sdk_requests=6227
+    graph_continuation_sdk_test.go:255: SDK_OPERATION op=journal_append type=test index=15 kind=StepRequested duration=182.268546ms error="" sdk_requests=6303
+    graph_continuation_sdk_test.go:255: SDK_OPERATION op=journal_append type=test index=16 kind=StepCompleted duration=244.63828ms error="" sdk_requests=6411
+    graph_continuation_sdk_test.go:255: SDK_OPERATION op=journal_append type=test index=17 kind=StepRequested duration=205.847852ms error="" sdk_requests=6487
+    graph_continuation_sdk_test.go:255: SDK_OPERATION op=journal_append type=test index=18 kind=StepCompleted duration=386.80891ms error="" sdk_requests=6705
+    graph_continuation_sdk_test.go:255: SDK_OPERATION op=journal_append type=test index=19 kind=Suspended duration=218.639097ms error="" sdk_requests=7053
+    graph_continuation_sdk_test.go:403: SDK_PHASE name=execute_end_finish elapsed=18.793775748s remaining=1m41.206223801s sdk_requests=10132
+    graph_continuation_sdk_test.go:431: SDK_PHASE name=child_retire_end elapsed=18.890285212s remaining=1m41.109714467s sdk_requests=10180
+    graph_continuation_sdk_test.go:462: ARCHIVE_CHILD_RECLAIMED terminal_receipts=1 result_bytes=0
+    graph_continuation_sdk_test.go:464: SDK_PHASE name=parent_sweep_end_finish elapsed=23.746907662s remaining=1m36.253091737s sdk_requests=12835
+    graph_continuation_sdk_test.go:520: ARCHIVE_COLLECTION stage=finish original_entry_receipts_removed=13 live_records=3 logical_records=20
+    graph_continuation_sdk_test.go:524: SDK_PHASE name=parent_audit_end_finish elapsed=24.56535767s remaining=1m35.434641969s sdk_requests=13242
+    graph_continuation_sdk_test.go:537: SDK_PHASE name=boundary_scan_end_finish elapsed=24.63418157s remaining=1m35.365817999s sdk_requests=13266
+    graph_continuation_sdk_test.go:255: SDK_OPERATION op=journal_append type=test index=20 kind=StepRequested duration=264.842577ms error="" sdk_requests=13637
+    graph_continuation_sdk_test.go:255: SDK_OPERATION op=journal_append type=test index=21 kind=StepCompleted duration=178.122466ms error="" sdk_requests=13713
+    graph_continuation_sdk_test.go:255: SDK_OPERATION op=journal_append type=test index=22 kind=StepRequested duration=201.669963ms error="" sdk_requests=13821
+    graph_continuation_sdk_test.go:255: SDK_OPERATION op=journal_append type=test index=23 kind=StepCompleted duration=168.913313ms error="" sdk_requests=13897
+    graph_continuation_sdk_test.go:255: SDK_OPERATION op=journal_append type=test index=24 kind=Completed duration=352.701809ms error="" sdk_requests=14069
+    graph_continuation_sdk_test.go:584: SDK initial/next/finish=map[finish:1 initial:1 next:1] effects=2 records=25 result=43
+    graph_continuation_sdk_test.go:586: GRAPH_FAILED_CHILD buffered=true archive=true child_calls=1 preserved_error=planned_child_failure parent_result=43
+    graph_continuation_sdk_test.go:588: SDK_PHASE name=finished elapsed=28.344735315s remaining=1m31.655263814s sdk_requests=14934
+=== RUN   TestNativeGraphContinuationFailedChildPromise/R3Domain/archive=false/buffered=false
+    graph_continuation_sdk_test.go:401: SDK_PHASE name=execute_begin_next elapsed=1.887309462s remaining=58.112690167s sdk_requests=171
+    graph_continuation_sdk_test.go:255: SDK_OPERATION op=journal_append type=test index=0 kind=Started duration=223.05178ms error="" sdk_requests=299
+    graph_continuation_sdk_test.go:255: SDK_OPERATION op=journal_append type=test index=1 kind=StepRequested duration=249.601031ms error="" sdk_requests=446
+    graph_continuation_sdk_test.go:255: SDK_OPERATION op=journal_append type=test index=2 kind=StepCompleted duration=195.735126ms error="" sdk_requests=522
+    graph_continuation_sdk_test.go:255: SDK_OPERATION op=journal_append type=test index=3 kind=StepRequested duration=392.764891ms error="" sdk_requests=662
+    graph_continuation_sdk_test.go:255: SDK_OPERATION op=journal_append type=test index=4 kind=StepCompleted duration=276.225321ms error="" sdk_requests=738
+    graph_continuation_sdk_test.go:255: SDK_OPERATION op=journal_append type=test index=5 kind=StepRequested duration=278.873475ms error="" sdk_requests=846
+    graph_continuation_sdk_test.go:255: SDK_OPERATION op=journal_append type=test index=6 kind=StepCompleted duration=247.004684ms error="" sdk_requests=1045
+    graph_continuation_sdk_test.go:255: SDK_OPERATION op=journal_append type=test index=7 kind=StepRequested duration=446.639225ms error="" sdk_requests=1217
+    graph_continuation_sdk_test.go:255: SDK_OPERATION op=journal_append type=test index=8 kind=StepCompleted duration=349.917296ms error="" sdk_requests=1333
+    graph_continuation_sdk_test.go:255: SDK_OPERATION op=journal_append type=test index=9 kind=Suspended duration=311.389109ms error="" sdk_requests=1613
+    graph_continuation_sdk_test.go:403: SDK_PHASE name=execute_end_next elapsed=5.866122166s remaining=54.133877473s sdk_requests=1622
+    graph_continuation_sdk_test.go:537: SDK_PHASE name=boundary_scan_end_next elapsed=5.988081048s remaining=54.011918522s sdk_requests=1650
+    graph_continuation_sdk_test.go:255: SDK_OPERATION op=journal_append type=testchild index=0 kind=Started duration=243.000961ms error="" sdk_requests=1778
+    graph_continuation_sdk_test.go:255: SDK_OPERATION op=journal_append type=testchild index=1 kind=Failed duration=292.218421ms error="" sdk_requests=1924
+    graph_continuation_sdk_test.go:541: SDK_PHASE name=child_execute_end elapsed=7.608652734s remaining=52.391347025s sdk_requests=2187
+    graph_continuation_sdk_test.go:401: SDK_PHASE name=execute_begin_finish elapsed=7.608708429s remaining=52.391291411s sdk_requests=2187
+    graph_continuation_sdk_test.go:255: SDK_OPERATION op=journal_append type=test index=10 kind=SignalConsumed duration=463.712016ms error="" sdk_requests=2540
+    graph_continuation_sdk_test.go:255: SDK_OPERATION op=journal_append type=test index=11 kind=StepRequested duration=418.060994ms error="" sdk_requests=2690
+    graph_continuation_sdk_test.go:255: SDK_OPERATION op=journal_append type=test index=12 kind=StepCompleted duration=488.171817ms error="" sdk_requests=2766
+    graph_continuation_sdk_test.go:255: SDK_OPERATION op=journal_append type=test index=13 kind=StepRequested duration=562.171832ms error="" sdk_requests=2874
+    graph_continuation_sdk_test.go:255: SDK_OPERATION op=journal_append type=test index=14 kind=StepCompleted duration=235.767551ms error="" sdk_requests=2950
+    graph_continuation_sdk_test.go:255: SDK_OPERATION op=journal_append type=test index=15 kind=StepRequested duration=583.642375ms error="" sdk_requests=3154
+    graph_continuation_sdk_test.go:255: SDK_OPERATION op=journal_append type=test index=16 kind=StepCompleted duration=217.010391ms error="" sdk_requests=3230
+    graph_continuation_sdk_test.go:255: SDK_OPERATION op=journal_append type=test index=17 kind=StepRequested duration=288.969815ms error="" sdk_requests=3338
+    graph_continuation_sdk_test.go:255: SDK_OPERATION op=journal_append type=test index=18 kind=StepCompleted duration=215.975339ms error="" sdk_requests=3414
+    graph_continuation_sdk_test.go:255: SDK_OPERATION op=journal_append type=test index=19 kind=StepRequested duration=432.861862ms error="" sdk_requests=3554
+    graph_continuation_sdk_test.go:255: SDK_OPERATION op=journal_append type=test index=20 kind=StepCompleted duration=316.738498ms error="" sdk_requests=3670
+    graph_continuation_sdk_test.go:255: SDK_OPERATION op=journal_append type=test index=21 kind=Suspended duration=332.084203ms error="" sdk_requests=4084
+    graph_continuation_sdk_test.go:403: SDK_PHASE name=execute_end_finish elapsed=15.075290496s remaining=44.924709143s sdk_requests=4093
+    graph_continuation_sdk_test.go:431: SDK_PHASE name=child_retire_end elapsed=15.360522302s remaining=44.639477327s sdk_requests=4108
+    graph_continuation_sdk_test.go:537: SDK_PHASE name=boundary_scan_end_finish elapsed=15.443993608s remaining=44.556005982s sdk_requests=4132
+    graph_continuation_sdk_test.go:255: SDK_OPERATION op=journal_append type=test index=22 kind=StepRequested duration=279.94371ms error="" sdk_requests=4421
+    graph_continuation_sdk_test.go:255: SDK_OPERATION op=journal_append type=test index=23 kind=StepCompleted duration=478.084422ms error="" sdk_requests=4593
+    graph_continuation_sdk_test.go:255: SDK_OPERATION op=journal_append type=test index=24 kind=Completed duration=223.161027ms error="" sdk_requests=4669
+    graph_continuation_sdk_test.go:584: SDK initial/next/finish=map[finish:1 initial:1 next:1] effects=2 records=25 result=43
+    graph_continuation_sdk_test.go:586: GRAPH_FAILED_CHILD buffered=false archive=false child_calls=1 preserved_error=planned_child_failure parent_result=43
+    graph_continuation_sdk_test.go:588: SDK_PHASE name=finished elapsed=19.059733321s remaining=40.940266089s sdk_requests=5421
+=== RUN   TestNativeGraphContinuationFailedChildPromise/R3Domain/archive=false/buffered=true
+    graph_continuation_sdk_test.go:401: SDK_PHASE name=execute_begin_next elapsed=2.00401575s remaining=57.995983939s sdk_requests=171
+    graph_continuation_sdk_test.go:255: SDK_OPERATION op=journal_append type=test index=0 kind=Started duration=228.384092ms error="" sdk_requests=299
+    graph_continuation_sdk_test.go:255: SDK_OPERATION op=journal_append type=test index=1 kind=StepRequested duration=248.29775ms error="" sdk_requests=446
+    graph_continuation_sdk_test.go:255: SDK_OPERATION op=journal_append type=test index=2 kind=StepCompleted duration=238.481923ms error="" sdk_requests=522
+    graph_continuation_sdk_test.go:255: SDK_OPERATION op=journal_append type=test index=3 kind=StepRequested duration=324.068463ms error="" sdk_requests=662
+    graph_continuation_sdk_test.go:255: SDK_OPERATION op=journal_append type=test index=4 kind=StepCompleted duration=200.179809ms error="" sdk_requests=738
+    graph_continuation_sdk_test.go:255: SDK_OPERATION op=journal_append type=test index=5 kind=StepRequested duration=285.139494ms error="" sdk_requests=846
+    graph_continuation_sdk_test.go:255: SDK_OPERATION op=journal_append type=test index=6 kind=StepCompleted duration=206.729ms error="" sdk_requests=1045
+    graph_continuation_sdk_test.go:255: SDK_OPERATION op=journal_append type=test index=7 kind=StepRequested duration=407.743979ms error="" sdk_requests=1217
+    graph_continuation_sdk_test.go:255: SDK_OPERATION op=journal_append type=test index=8 kind=StepCompleted duration=375.135131ms error="" sdk_requests=1333
+    graph_continuation_sdk_test.go:255: SDK_OPERATION op=journal_append type=test index=9 kind=Suspended duration=271.15656ms error="" sdk_requests=1613
+    graph_continuation_sdk_test.go:403: SDK_PHASE name=execute_end_next elapsed=5.790451313s remaining=54.209548296s sdk_requests=1622
+    graph_continuation_sdk_test.go:537: SDK_PHASE name=boundary_scan_end_next elapsed=5.867332295s remaining=54.132667324s sdk_requests=1650
+    graph_continuation_sdk_test.go:255: SDK_OPERATION op=journal_append type=testchild index=0 kind=Started duration=248.953754ms error="" sdk_requests=1778
+    graph_continuation_sdk_test.go:255: SDK_OPERATION op=journal_append type=testchild index=1 kind=Failed duration=280.533067ms error="" sdk_requests=1925
+    graph_continuation_sdk_test.go:541: SDK_PHASE name=child_execute_end elapsed=7.514823292s remaining=52.485176228s sdk_requests=2188
+    graph_continuation_sdk_test.go:401: SDK_PHASE name=execute_begin_finish elapsed=7.514900779s remaining=52.48509894s sdk_requests=2188
+    graph_continuation_sdk_test.go:255: SDK_OPERATION op=journal_append type=test index=10 kind=SignalConsumed duration=405.93539ms error="" sdk_requests=2541
+    graph_continuation_sdk_test.go:255: SDK_OPERATION op=journal_append type=test index=11 kind=StepRequested duration=400.306777ms error="" sdk_requests=2691
+    graph_continuation_sdk_test.go:255: SDK_OPERATION op=journal_append type=test index=12 kind=StepCompleted duration=248.12755ms error="" sdk_requests=2767
+    graph_continuation_sdk_test.go:255: SDK_OPERATION op=journal_append type=test index=13 kind=StepRequested duration=307.835069ms error="" sdk_requests=2875
+    graph_continuation_sdk_test.go:255: SDK_OPERATION op=journal_append type=test index=14 kind=StepCompleted duration=263.412434ms error="" sdk_requests=2951
+    graph_continuation_sdk_test.go:255: SDK_OPERATION op=journal_append type=test index=15 kind=StepRequested duration=525.890668ms error="" sdk_requests=3155
+    graph_continuation_sdk_test.go:255: SDK_OPERATION op=journal_append type=test index=16 kind=StepCompleted duration=209.675346ms error="" sdk_requests=3231
+    graph_continuation_sdk_test.go:255: SDK_OPERATION op=journal_append type=test index=17 kind=StepRequested duration=285.078132ms error="" sdk_requests=3339
+    graph_continuation_sdk_test.go:255: SDK_OPERATION op=journal_append type=test index=18 kind=StepCompleted duration=407.165539ms error="" sdk_requests=3501
+    graph_continuation_sdk_test.go:255: SDK_OPERATION op=journal_append type=test index=19 kind=Suspended duration=450.94072ms error="" sdk_requests=3917
+    graph_continuation_sdk_test.go:403: SDK_PHASE name=execute_end_finish elapsed=12.516110588s remaining=47.483889111s sdk_requests=3926
+    graph_continuation_sdk_test.go:431: SDK_PHASE name=child_retire_end elapsed=12.574724074s remaining=47.425275635s sdk_requests=3941
+    graph_continuation_sdk_test.go:537: SDK_PHASE name=boundary_scan_end_finish elapsed=12.617851241s remaining=47.382148459s sdk_requests=3965
+    graph_continuation_sdk_test.go:255: SDK_OPERATION op=journal_append type=test index=20 kind=StepRequested duration=260.46253ms error="" sdk_requests=4308
+    graph_continuation_sdk_test.go:255: SDK_OPERATION op=journal_append type=test index=21 kind=StepCompleted duration=254.209111ms error="" sdk_requests=4416
+    graph_continuation_sdk_test.go:255: SDK_OPERATION op=journal_append type=test index=22 kind=StepRequested duration=226.876883ms error="" sdk_requests=4492
+    graph_continuation_sdk_test.go:255: SDK_OPERATION op=journal_append type=test index=23 kind=StepCompleted duration=407.233272ms error="" sdk_requests=4664
+    graph_continuation_sdk_test.go:255: SDK_OPERATION op=journal_append type=test index=24 kind=Completed duration=207.221789ms error="" sdk_requests=4740
+    graph_continuation_sdk_test.go:584: SDK initial/next/finish=map[finish:1 initial:1 next:1] effects=2 records=25 result=43
+    graph_continuation_sdk_test.go:586: GRAPH_FAILED_CHILD buffered=true archive=false child_calls=1 preserved_error=planned_child_failure parent_result=43
+    graph_continuation_sdk_test.go:588: SDK_PHASE name=finished elapsed=16.781790888s remaining=43.218208761s sdk_requests=5586
+=== RUN   TestNativeGraphContinuationFailedChildPromise/R3Domain/archive=true/buffered=false
+    graph_continuation_sdk_test.go:401: SDK_PHASE name=execute_begin_next elapsed=1.570767621s remaining=1m58.429232079s sdk_requests=171
+    graph_continuation_sdk_test.go:255: SDK_OPERATION op=journal_append type=test index=0 kind=Started duration=210.746043ms error="" sdk_requests=299
+    graph_continuation_sdk_test.go:255: SDK_OPERATION op=journal_append type=test index=1 kind=StepRequested duration=207.995256ms error="" sdk_requests=446
+    graph_continuation_sdk_test.go:255: SDK_OPERATION op=journal_append type=test index=2 kind=StepCompleted duration=189.398678ms error="" sdk_requests=522
+    graph_continuation_sdk_test.go:255: SDK_OPERATION op=journal_append type=test index=3 kind=StepRequested duration=263.630313ms error="" sdk_requests=662
+    graph_continuation_sdk_test.go:255: SDK_OPERATION op=journal_append type=test index=4 kind=StepCompleted duration=186.532284ms error="" sdk_requests=738
+    graph_continuation_sdk_test.go:255: SDK_OPERATION op=journal_append type=test index=5 kind=StepRequested duration=216.992684ms error="" sdk_requests=846
+    graph_continuation_sdk_test.go:255: SDK_OPERATION op=journal_append type=test index=6 kind=StepCompleted duration=192.99297ms error="" sdk_requests=1045
+    graph_continuation_sdk_test.go:255: SDK_OPERATION op=journal_append type=test index=7 kind=StepRequested duration=375.807706ms error="" sdk_requests=1217
+    graph_continuation_sdk_test.go:255: SDK_OPERATION op=journal_append type=test index=8 kind=StepCompleted duration=296.632276ms error="" sdk_requests=1333
+    graph_continuation_sdk_test.go:255: SDK_OPERATION op=journal_append type=test index=9 kind=Suspended duration=233.197738ms error="" sdk_requests=1613
+    graph_continuation_sdk_test.go:403: SDK_PHASE name=execute_end_next elapsed=8.084481832s remaining=1m51.915517838s sdk_requests=3451
+    graph_continuation_sdk_test.go:464: SDK_PHASE name=parent_sweep_end_next elapsed=10.537405904s remaining=1m49.462593766s sdk_requests=4570
+    graph_continuation_sdk_test.go:520: ARCHIVE_COLLECTION stage=next original_entry_receipts_removed=10 live_records=3 logical_records=10
+    graph_continuation_sdk_test.go:524: SDK_PHASE name=parent_audit_end_next elapsed=11.173212041s remaining=1m48.826787669s sdk_requests=4817
+    graph_continuation_sdk_test.go:537: SDK_PHASE name=boundary_scan_end_next elapsed=11.268915234s remaining=1m48.731084396s sdk_requests=4842
+    graph_continuation_sdk_test.go:255: SDK_OPERATION op=journal_append type=testchild index=0 kind=Started duration=276.036324ms error="" sdk_requests=4970
+    graph_continuation_sdk_test.go:255: SDK_OPERATION op=journal_append type=testchild index=1 kind=Failed duration=271.421994ms error="" sdk_requests=5117
+    graph_continuation_sdk_test.go:541: SDK_PHASE name=child_execute_end elapsed=12.927811009s remaining=1m47.072188651s sdk_requests=5380
+    graph_continuation_sdk_test.go:401: SDK_PHASE name=execute_begin_finish elapsed=12.927868306s remaining=1m47.072131494s sdk_requests=5380
+    graph_continuation_sdk_test.go:255: SDK_OPERATION op=journal_append type=test index=10 kind=SignalConsumed duration=601.905182ms error="" sdk_requests=5785
+    graph_continuation_sdk_test.go:255: SDK_OPERATION op=journal_append type=test index=11 kind=StepRequested duration=224.786545ms error="" sdk_requests=5871
+    graph_continuation_sdk_test.go:255: SDK_OPERATION op=journal_append type=test index=12 kind=StepCompleted duration=258.252996ms error="" sdk_requests=5979
+    graph_continuation_sdk_test.go:255: SDK_OPERATION op=journal_append type=test index=13 kind=StepRequested duration=233.491779ms error="" sdk_requests=6055
+    graph_continuation_sdk_test.go:255: SDK_OPERATION op=journal_append type=test index=14 kind=StepCompleted duration=408.787314ms error="" sdk_requests=6227
+    graph_continuation_sdk_test.go:255: SDK_OPERATION op=journal_append type=test index=15 kind=StepRequested duration=224.38009ms error="" sdk_requests=6303
+    graph_continuation_sdk_test.go:255: SDK_OPERATION op=journal_append type=test index=16 kind=StepCompleted duration=276.470072ms error="" sdk_requests=6411
+    graph_continuation_sdk_test.go:255: SDK_OPERATION op=journal_append type=test index=17 kind=StepRequested duration=209.551329ms error="" sdk_requests=6487
+    graph_continuation_sdk_test.go:255: SDK_OPERATION op=journal_append type=test index=18 kind=StepCompleted duration=325.835839ms error="" sdk_requests=6627
+    graph_continuation_sdk_test.go:255: SDK_OPERATION op=journal_append type=test index=19 kind=StepRequested duration=189.989355ms error="" sdk_requests=6703
+    graph_continuation_sdk_test.go:255: SDK_OPERATION op=journal_append type=test index=20 kind=StepCompleted duration=555.152548ms error="" sdk_requests=6851
+    graph_continuation_sdk_test.go:255: SDK_OPERATION op=journal_append type=test index=21 kind=Suspended duration=244.141632ms error="" sdk_requests=7221
+    graph_continuation_sdk_test.go:403: SDK_PHASE name=execute_end_finish elapsed=24.196064911s remaining=1m35.803934829s sdk_requests=10427
+    graph_continuation_sdk_test.go:431: SDK_PHASE name=child_retire_end elapsed=24.309290354s remaining=1m35.690709346s sdk_requests=10475
+    graph_continuation_sdk_test.go:462: ARCHIVE_CHILD_RECLAIMED terminal_receipts=1 result_bytes=0
+    graph_continuation_sdk_test.go:464: SDK_PHASE name=parent_sweep_end_finish elapsed=30.374790991s remaining=1m29.625208688s sdk_requests=13294
+    graph_continuation_sdk_test.go:520: ARCHIVE_COLLECTION stage=finish original_entry_receipts_removed=15 live_records=3 logical_records=22
+    graph_continuation_sdk_test.go:524: SDK_PHASE name=parent_audit_end_finish elapsed=31.420805719s remaining=1m28.579193921s sdk_requests=13731
+    graph_continuation_sdk_test.go:537: SDK_PHASE name=boundary_scan_end_finish elapsed=31.489723261s remaining=1m28.510276369s sdk_requests=13755
+    graph_continuation_sdk_test.go:255: SDK_OPERATION op=journal_append type=test index=22 kind=StepRequested duration=319.802111ms error="" sdk_requests=14100
+    graph_continuation_sdk_test.go:255: SDK_OPERATION op=journal_append type=test index=23 kind=StepCompleted duration=208.644299ms error="" sdk_requests=14176
+    graph_continuation_sdk_test.go:255: SDK_OPERATION op=journal_append type=test index=24 kind=Completed duration=273.444766ms error="" sdk_requests=14284
+    graph_continuation_sdk_test.go:584: SDK initial/next/finish=map[finish:1 initial:1 next:1] effects=2 records=25 result=43
+    graph_continuation_sdk_test.go:586: GRAPH_FAILED_CHILD buffered=false archive=true child_calls=1 preserved_error=planned_child_failure parent_result=43
+    graph_continuation_sdk_test.go:588: SDK_PHASE name=finished elapsed=34.807412194s remaining=1m25.192587435s sdk_requests=15011
+=== RUN   TestNativeGraphContinuationFailedChildPromise/R3Domain/archive=true/buffered=true
+    graph_continuation_sdk_test.go:401: SDK_PHASE name=execute_begin_next elapsed=1.764102919s remaining=1m58.235896751s sdk_requests=171
+    graph_continuation_sdk_test.go:255: SDK_OPERATION op=journal_append type=test index=0 kind=Started duration=263.041059ms error="" sdk_requests=299
+    graph_continuation_sdk_test.go:255: SDK_OPERATION op=journal_append type=test index=1 kind=StepRequested duration=349.499574ms error="" sdk_requests=446
+    graph_continuation_sdk_test.go:255: SDK_OPERATION op=journal_append type=test index=2 kind=StepCompleted duration=207.759875ms error="" sdk_requests=522
+    graph_continuation_sdk_test.go:255: SDK_OPERATION op=journal_append type=test index=3 kind=StepRequested duration=396.753308ms error="" sdk_requests=662
+    graph_continuation_sdk_test.go:255: SDK_OPERATION op=journal_append type=test index=4 kind=StepCompleted duration=230.230548ms error="" sdk_requests=738
+    graph_continuation_sdk_test.go:255: SDK_OPERATION op=journal_append type=test index=5 kind=StepRequested duration=302.080324ms error="" sdk_requests=846
+    graph_continuation_sdk_test.go:255: SDK_OPERATION op=journal_append type=test index=6 kind=StepCompleted duration=210.188455ms error="" sdk_requests=1045
+    graph_continuation_sdk_test.go:255: SDK_OPERATION op=journal_append type=test index=7 kind=StepRequested duration=520.276876ms error="" sdk_requests=1217
+    graph_continuation_sdk_test.go:255: SDK_OPERATION op=journal_append type=test index=8 kind=StepCompleted duration=311.897892ms error="" sdk_requests=1333
+    graph_continuation_sdk_test.go:255: SDK_OPERATION op=journal_append type=test index=9 kind=Suspended duration=244.036864ms error="" sdk_requests=1613
+    graph_continuation_sdk_test.go:403: SDK_PHASE name=execute_end_next elapsed=9.858652947s remaining=1m50.141346763s sdk_requests=3451
+    graph_continuation_sdk_test.go:464: SDK_PHASE name=parent_sweep_end_next elapsed=12.765343778s remaining=1m47.234655841s sdk_requests=4570
+    graph_continuation_sdk_test.go:520: ARCHIVE_COLLECTION stage=next original_entry_receipts_removed=10 live_records=3 logical_records=10
+    graph_continuation_sdk_test.go:524: SDK_PHASE name=parent_audit_end_next elapsed=13.425924699s remaining=1m46.57407497s sdk_requests=4817
+    graph_continuation_sdk_test.go:537: SDK_PHASE name=boundary_scan_end_next elapsed=13.503590584s remaining=1m46.496408975s sdk_requests=4842
+    graph_continuation_sdk_test.go:255: SDK_OPERATION op=journal_append type=testchild index=0 kind=Started duration=264.889977ms error="" sdk_requests=4970
+    graph_continuation_sdk_test.go:255: SDK_OPERATION op=journal_append type=testchild index=1 kind=Failed duration=325.399865ms error="" sdk_requests=5117
+    graph_continuation_sdk_test.go:541: SDK_PHASE name=child_execute_end elapsed=15.142877978s remaining=1m44.857121752s sdk_requests=5380
+    graph_continuation_sdk_test.go:401: SDK_PHASE name=execute_begin_finish elapsed=15.142934413s remaining=1m44.857065406s sdk_requests=5380
+    graph_continuation_sdk_test.go:255: SDK_OPERATION op=journal_append type=test index=10 kind=SignalConsumed duration=588.479152ms error="" sdk_requests=5785
+    graph_continuation_sdk_test.go:255: SDK_OPERATION op=journal_append type=test index=11 kind=StepRequested duration=263.216866ms error="" sdk_requests=5871
+    graph_continuation_sdk_test.go:255: SDK_OPERATION op=journal_append type=test index=12 kind=StepCompleted duration=339.523574ms error="" sdk_requests=5979
+    graph_continuation_sdk_test.go:255: SDK_OPERATION op=journal_append type=test index=13 kind=StepRequested duration=252.503919ms error="" sdk_requests=6055
+    graph_continuation_sdk_test.go:255: SDK_OPERATION op=journal_append type=test index=14 kind=StepCompleted duration=473.963881ms error="" sdk_requests=6227
+    graph_continuation_sdk_test.go:255: SDK_OPERATION op=journal_append type=test index=15 kind=StepRequested duration=249.475396ms error="" sdk_requests=6303
+    graph_continuation_sdk_test.go:255: SDK_OPERATION op=journal_append type=test index=16 kind=StepCompleted duration=309.263989ms error="" sdk_requests=6411
+    graph_continuation_sdk_test.go:255: SDK_OPERATION op=journal_append type=test index=17 kind=StepRequested duration=252.782553ms error="" sdk_requests=6487
+    graph_continuation_sdk_test.go:255: SDK_OPERATION op=journal_append type=test index=18 kind=StepCompleted duration=556.844797ms error="" sdk_requests=6705
+    graph_continuation_sdk_test.go:255: SDK_OPERATION op=journal_append type=test index=19 kind=Suspended duration=258.953659ms error="" sdk_requests=7053
+    graph_continuation_sdk_test.go:403: SDK_PHASE name=execute_end_finish elapsed=26.826399655s remaining=1m33.173600014s sdk_requests=10132
+    graph_continuation_sdk_test.go:431: SDK_PHASE name=child_retire_end elapsed=26.954924533s remaining=1m33.045075136s sdk_requests=10180
+    graph_continuation_sdk_test.go:462: ARCHIVE_CHILD_RECLAIMED terminal_receipts=1 result_bytes=0
+    graph_continuation_sdk_test.go:464: SDK_PHASE name=parent_sweep_end_finish elapsed=33.308682302s remaining=1m26.691317277s sdk_requests=12835
+    graph_continuation_sdk_test.go:520: ARCHIVE_COLLECTION stage=finish original_entry_receipts_removed=13 live_records=3 logical_records=20
+    graph_continuation_sdk_test.go:524: SDK_PHASE name=parent_audit_end_finish elapsed=34.31684336s remaining=1m25.683156309s sdk_requests=13242
+    graph_continuation_sdk_test.go:537: SDK_PHASE name=boundary_scan_end_finish elapsed=34.364332664s remaining=1m25.635667015s sdk_requests=13266
+    graph_continuation_sdk_test.go:255: SDK_OPERATION op=journal_append type=test index=20 kind=StepRequested duration=443.979991ms error="" sdk_requests=13637
+    graph_continuation_sdk_test.go:255: SDK_OPERATION op=journal_append type=test index=21 kind=StepCompleted duration=204.273298ms error="" sdk_requests=13713
+    graph_continuation_sdk_test.go:255: SDK_OPERATION op=journal_append type=test index=22 kind=StepRequested duration=392.764307ms error="" sdk_requests=13821
+    graph_continuation_sdk_test.go:255: SDK_OPERATION op=journal_append type=test index=23 kind=StepCompleted duration=220.907312ms error="" sdk_requests=13897
+    graph_continuation_sdk_test.go:255: SDK_OPERATION op=journal_append type=test index=24 kind=Completed duration=465.871655ms error="" sdk_requests=14069
+    graph_continuation_sdk_test.go:584: SDK initial/next/finish=map[finish:1 initial:1 next:1] effects=2 records=25 result=43
+    graph_continuation_sdk_test.go:586: GRAPH_FAILED_CHILD buffered=true archive=true child_calls=1 preserved_error=planned_child_failure parent_result=43
+    graph_continuation_sdk_test.go:588: SDK_PHASE name=finished elapsed=39.355275928s remaining=1m20.644723781s sdk_requests=14934
+--- PASS: TestNativeGraphContinuationFailedChildPromise (191.80s)
+    --- PASS: TestNativeGraphContinuationFailedChildPromise/R1/archive=false/buffered=false (10.79s)
+    --- PASS: TestNativeGraphContinuationFailedChildPromise/R1/archive=false/buffered=true (11.67s)
+    --- PASS: TestNativeGraphContinuationFailedChildPromise/R1/archive=true/buffered=false (29.32s)
+    --- PASS: TestNativeGraphContinuationFailedChildPromise/R1/archive=true/buffered=true (28.39s)
+    --- PASS: TestNativeGraphContinuationFailedChildPromise/R3Domain/archive=false/buffered=false (19.68s)
+    --- PASS: TestNativeGraphContinuationFailedChildPromise/R3Domain/archive=false/buffered=true (17.10s)
+    --- PASS: TestNativeGraphContinuationFailedChildPromise/R3Domain/archive=true/buffered=false (35.15s)
+    --- PASS: TestNativeGraphContinuationFailedChildPromise/R3Domain/archive=true/buffered=true (39.70s)
+PASS
