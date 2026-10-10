@@ -132,7 +132,7 @@ func (w *Worker) publishContinuation(ctx context.Context, typ, id string, invSeq
 		operation := "continuation_checkpoint_confirm"
 		if w.graphJournal.CheckpointIndex() {
 			operation = "continuation_checkpoint_publish"
-			err = w.graphJournal.PublishCheckpoint(ctx, typ, id, runtime, records[len(records)-1].Sequence)
+			err = w.publishGraphCheckpointBatches(ctx, typ, id, owner, runtime, records[len(records)-1].Sequence, ops)
 		} else {
 			err = w.graphJournal.ConfirmCheckpoint(ctx, typ, id, runtime, records[len(records)-1].Sequence)
 		}
@@ -173,7 +173,7 @@ func (w *Worker) publishContinuation(ctx context.Context, typ, id string, invSeq
 	// The next delivery reconstructs references from the relocated checkpoint.
 	if w.graphJournal != nil && w.graphJournal.ArchiveCheckpoints() {
 		started := ops.begin()
-		err := w.graphJournal.CompactCheckpoint(ctx, typ, id, runtime, tail)
+		err := w.compactGraphCheckpointBatches(ctx, typ, id, owner, runtime, tail, ops)
 		ops.finish(started, "continuation_archive", point.Index, journal.StepCompleted, err)
 		if err != nil {
 			return err

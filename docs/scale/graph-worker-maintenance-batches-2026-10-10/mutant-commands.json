@@ -1,0 +1,30 @@
+{
+  "lease-renew-bypass": {
+    "command": [
+      "go",
+      "test",
+      "-p=1",
+      "./worker",
+      "-run",
+      "^TestGraphContinuationMaintenanceLeaseAndCancellation$",
+      "-count=1",
+      "-v"
+    ],
+    "exit_code": 1,
+    "race": false
+  },
+  "budget-bypass": {
+    "command": [
+      "go",
+      "test",
+      "-p=1",
+      "./worker",
+      "-run",
+      "^TestGraphContinuationMaintenanceLeaseAndCancellation$",
+      "-count=1",
+      "-v"
+    ],
+    "exit_code": 1,
+    "race": false
+  }
+}

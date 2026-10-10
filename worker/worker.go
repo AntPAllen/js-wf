@@ -74,6 +74,7 @@ type Worker struct {
 	ID                         string
 	Handlers                   map[string]Handler
 	continuations              map[string]map[string]ContinuationHandler
+	continuationVerifyBatch    uint64
 	maxEntries                 uint64
 	maxPanicAttempts           int
 	partitionConcurrency       int

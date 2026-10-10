@@ -1,0 +1,71 @@
+=== RUN   TestGraphContinuationMaintenanceLeaseAndCancellation
+=== RUN   TestGraphContinuationMaintenanceLeaseAndCancellation/json/normal
+    continuation_maintenance_test.go:184: WORKER_MAINTENANCE mode=normal pointer_batches=6 confirm_batches=1 stage_batches=6 verify_batches=10 readers=0 initial_calls=1 stage_calls=1 retained_from=9
+=== RUN   TestGraphContinuationMaintenanceLeaseAndCancellation/json/owner-loss-pointer
+    continuation_maintenance_test.go:153: partial verification published handoff {{"runtime":{"inv_seq":1,"stage":"next","sequence":11,"index":10,"epoch":1,"step_position":10,"object":"step-result-3c5e64ba28ce52927eb57adf29806f3d5425192b8400ca16a70ee0aa050b038c","sha256":"3c5e64ba28ce52927eb57adf29806f3d5425192b8400ca16a70ee0aa050b038c"},"request_index":9} 0 StepCompleted}
+=== RUN   TestGraphContinuationMaintenanceLeaseAndCancellation/json/owner-loss-confirm
+    continuation_maintenance_test.go:157: abandoned archive published relocation {{"runtime":{"inv_seq":1,"stage":"next","sequence":11,"index":10,"epoch":1,"step_position":10,"object":"step-result-3c5e64ba28ce52927eb57adf29806f3d5425192b8400ca16a70ee0aa050b038c","sha256":"3c5e64ba28ce52927eb57adf29806f3d5425192b8400ca16a70ee0aa050b038c"},"request_index":9} 9 Suspended}
+=== RUN   TestGraphContinuationMaintenanceLeaseAndCancellation/json/owner-loss-stage
+    continuation_maintenance_test.go:157: abandoned archive published relocation {{"runtime":{"inv_seq":1,"stage":"next","sequence":11,"index":10,"epoch":1,"step_position":10,"object":"step-result-3c5e64ba28ce52927eb57adf29806f3d5425192b8400ca16a70ee0aa050b038c","sha256":"3c5e64ba28ce52927eb57adf29806f3d5425192b8400ca16a70ee0aa050b038c"},"request_index":9} 9 Suspended}
+=== RUN   TestGraphContinuationMaintenanceLeaseAndCancellation/json/owner-loss-verify
+    continuation_maintenance_test.go:157: abandoned archive published relocation {{"runtime":{"inv_seq":1,"stage":"next","sequence":11,"index":10,"epoch":1,"step_position":10,"object":"step-result-3c5e64ba28ce52927eb57adf29806f3d5425192b8400ca16a70ee0aa050b038c","sha256":"3c5e64ba28ce52927eb57adf29806f3d5425192b8400ca16a70ee0aa050b038c"},"request_index":9} 9 Suspended}
+=== RUN   TestGraphContinuationMaintenanceLeaseAndCancellation/json/owner-loss-nodes
+    continuation_maintenance_test.go:157: abandoned archive published relocation {{"runtime":{"inv_seq":1,"stage":"next","sequence":11,"index":10,"epoch":1,"step_position":10,"object":"step-result-3c5e64ba28ce52927eb57adf29806f3d5425192b8400ca16a70ee0aa050b038c","sha256":"3c5e64ba28ce52927eb57adf29806f3d5425192b8400ca16a70ee0aa050b038c"},"request_index":9} 9 Suspended}
+=== RUN   TestGraphContinuationMaintenanceLeaseAndCancellation/json/cancel-pointer
+    continuation_maintenance_test.go:184: WORKER_MAINTENANCE mode=cancel-pointer pointer_batches=1 confirm_batches=0 stage_batches=0 verify_batches=0 readers=0 initial_calls=1 stage_calls=0 retained_from=0
+=== RUN   TestGraphContinuationMaintenanceLeaseAndCancellation/json/cancel-confirm
+    continuation_maintenance_test.go:184: WORKER_MAINTENANCE mode=cancel-confirm pointer_batches=6 confirm_batches=1 stage_batches=0 verify_batches=0 readers=0 initial_calls=1 stage_calls=0 retained_from=0
+=== RUN   TestGraphContinuationMaintenanceLeaseAndCancellation/json/cancel-stage
+    continuation_maintenance_test.go:184: WORKER_MAINTENANCE mode=cancel-stage pointer_batches=6 confirm_batches=1 stage_batches=1 verify_batches=0 readers=0 initial_calls=1 stage_calls=0 retained_from=0
+=== RUN   TestGraphContinuationMaintenanceLeaseAndCancellation/json/cancel-verify
+    continuation_maintenance_test.go:184: WORKER_MAINTENANCE mode=cancel-verify pointer_batches=6 confirm_batches=1 stage_batches=6 verify_batches=1 readers=0 initial_calls=1 stage_calls=0 retained_from=0
+=== RUN   TestGraphContinuationMaintenanceLeaseAndCancellation/json/cancel-nodes
+    continuation_maintenance_test.go:184: WORKER_MAINTENANCE mode=cancel-nodes pointer_batches=6 confirm_batches=1 stage_batches=6 verify_batches=6 readers=0 initial_calls=1 stage_calls=0 retained_from=0
+=== RUN   TestGraphContinuationMaintenanceLeaseAndCancellation/protobuf-v1/normal
+    continuation_maintenance_test.go:184: WORKER_MAINTENANCE mode=normal pointer_batches=6 confirm_batches=1 stage_batches=6 verify_batches=10 readers=0 initial_calls=1 stage_calls=1 retained_from=9
+=== RUN   TestGraphContinuationMaintenanceLeaseAndCancellation/protobuf-v1/owner-loss-pointer
+    continuation_maintenance_test.go:153: partial verification published handoff {{"runtime":{"inv_seq":1,"stage":"next","sequence":11,"index":10,"epoch":1,"step_position":10,"object":"step-result-3c5e64ba28ce52927eb57adf29806f3d5425192b8400ca16a70ee0aa050b038c","sha256":"3c5e64ba28ce52927eb57adf29806f3d5425192b8400ca16a70ee0aa050b038c"},"request_index":9} 0 StepCompleted}
+=== RUN   TestGraphContinuationMaintenanceLeaseAndCancellation/protobuf-v1/owner-loss-confirm
+    continuation_maintenance_test.go:157: abandoned archive published relocation {{"runtime":{"inv_seq":1,"stage":"next","sequence":11,"index":10,"epoch":1,"step_position":10,"object":"step-result-3c5e64ba28ce52927eb57adf29806f3d5425192b8400ca16a70ee0aa050b038c","sha256":"3c5e64ba28ce52927eb57adf29806f3d5425192b8400ca16a70ee0aa050b038c"},"request_index":9} 9 Suspended}
+=== RUN   TestGraphContinuationMaintenanceLeaseAndCancellation/protobuf-v1/owner-loss-stage
+    continuation_maintenance_test.go:157: abandoned archive published relocation {{"runtime":{"inv_seq":1,"stage":"next","sequence":11,"index":10,"epoch":1,"step_position":10,"object":"step-result-3c5e64ba28ce52927eb57adf29806f3d5425192b8400ca16a70ee0aa050b038c","sha256":"3c5e64ba28ce52927eb57adf29806f3d5425192b8400ca16a70ee0aa050b038c"},"request_index":9} 9 Suspended}
+=== RUN   TestGraphContinuationMaintenanceLeaseAndCancellation/protobuf-v1/owner-loss-verify
+    continuation_maintenance_test.go:157: abandoned archive published relocation {{"runtime":{"inv_seq":1,"stage":"next","sequence":11,"index":10,"epoch":1,"step_position":10,"object":"step-result-3c5e64ba28ce52927eb57adf29806f3d5425192b8400ca16a70ee0aa050b038c","sha256":"3c5e64ba28ce52927eb57adf29806f3d5425192b8400ca16a70ee0aa050b038c"},"request_index":9} 9 Suspended}
+=== RUN   TestGraphContinuationMaintenanceLeaseAndCancellation/protobuf-v1/owner-loss-nodes
+    continuation_maintenance_test.go:157: abandoned archive published relocation {{"runtime":{"inv_seq":1,"stage":"next","sequence":11,"index":10,"epoch":1,"step_position":10,"object":"step-result-3c5e64ba28ce52927eb57adf29806f3d5425192b8400ca16a70ee0aa050b038c","sha256":"3c5e64ba28ce52927eb57adf29806f3d5425192b8400ca16a70ee0aa050b038c"},"request_index":9} 9 Suspended}
+=== RUN   TestGraphContinuationMaintenanceLeaseAndCancellation/protobuf-v1/cancel-pointer
+    continuation_maintenance_test.go:184: WORKER_MAINTENANCE mode=cancel-pointer pointer_batches=1 confirm_batches=0 stage_batches=0 verify_batches=0 readers=0 initial_calls=1 stage_calls=0 retained_from=0
+=== RUN   TestGraphContinuationMaintenanceLeaseAndCancellation/protobuf-v1/cancel-confirm
+    continuation_maintenance_test.go:184: WORKER_MAINTENANCE mode=cancel-confirm pointer_batches=6 confirm_batches=1 stage_batches=0 verify_batches=0 readers=0 initial_calls=1 stage_calls=0 retained_from=0
+=== RUN   TestGraphContinuationMaintenanceLeaseAndCancellation/protobuf-v1/cancel-stage
+    continuation_maintenance_test.go:184: WORKER_MAINTENANCE mode=cancel-stage pointer_batches=6 confirm_batches=1 stage_batches=1 verify_batches=0 readers=0 initial_calls=1 stage_calls=0 retained_from=0
+=== RUN   TestGraphContinuationMaintenanceLeaseAndCancellation/protobuf-v1/cancel-verify
+    continuation_maintenance_test.go:184: WORKER_MAINTENANCE mode=cancel-verify pointer_batches=6 confirm_batches=1 stage_batches=6 verify_batches=1 readers=0 initial_calls=1 stage_calls=0 retained_from=0
+=== RUN   TestGraphContinuationMaintenanceLeaseAndCancellation/protobuf-v1/cancel-nodes
+    continuation_maintenance_test.go:184: WORKER_MAINTENANCE mode=cancel-nodes pointer_batches=6 confirm_batches=1 stage_batches=6 verify_batches=6 readers=0 initial_calls=1 stage_calls=0 retained_from=0
+--- FAIL: TestGraphContinuationMaintenanceLeaseAndCancellation (0.62s)
+    --- PASS: TestGraphContinuationMaintenanceLeaseAndCancellation/json/normal (0.03s)
+    --- FAIL: TestGraphContinuationMaintenanceLeaseAndCancellation/json/owner-loss-pointer (0.01s)
+    --- FAIL: TestGraphContinuationMaintenanceLeaseAndCancellation/json/owner-loss-confirm (0.06s)
+    --- FAIL: TestGraphContinuationMaintenanceLeaseAndCancellation/json/owner-loss-stage (0.02s)
+    --- FAIL: TestGraphContinuationMaintenanceLeaseAndCancellation/json/owner-loss-verify (0.01s)
+    --- FAIL: TestGraphContinuationMaintenanceLeaseAndCancellation/json/owner-loss-nodes (0.02s)
+    --- PASS: TestGraphContinuationMaintenanceLeaseAndCancellation/json/cancel-pointer (0.01s)
+    --- PASS: TestGraphContinuationMaintenanceLeaseAndCancellation/json/cancel-confirm (0.05s)
+    --- PASS: TestGraphContinuationMaintenanceLeaseAndCancellation/json/cancel-stage (0.01s)
+    --- PASS: TestGraphContinuationMaintenanceLeaseAndCancellation/json/cancel-verify (0.02s)
+    --- PASS: TestGraphContinuationMaintenanceLeaseAndCancellation/json/cancel-nodes (0.06s)
+    --- PASS: TestGraphContinuationMaintenanceLeaseAndCancellation/protobuf-v1/normal (0.03s)
+    --- FAIL: TestGraphContinuationMaintenanceLeaseAndCancellation/protobuf-v1/owner-loss-pointer (0.01s)
+    --- FAIL: TestGraphContinuationMaintenanceLeaseAndCancellation/protobuf-v1/owner-loss-confirm (0.06s)
+    --- FAIL: TestGraphContinuationMaintenanceLeaseAndCancellation/protobuf-v1/owner-loss-stage (0.02s)
+    --- FAIL: TestGraphContinuationMaintenanceLeaseAndCancellation/protobuf-v1/owner-loss-verify (0.03s)
+    --- FAIL: TestGraphContinuationMaintenanceLeaseAndCancellation/protobuf-v1/owner-loss-nodes (0.07s)
+    --- PASS: TestGraphContinuationMaintenanceLeaseAndCancellation/protobuf-v1/cancel-pointer (0.01s)
+    --- PASS: TestGraphContinuationMaintenanceLeaseAndCancellation/protobuf-v1/cancel-confirm (0.01s)
+    --- PASS: TestGraphContinuationMaintenanceLeaseAndCancellation/protobuf-v1/cancel-stage (0.01s)
+    --- PASS: TestGraphContinuationMaintenanceLeaseAndCancellation/protobuf-v1/cancel-verify (0.06s)
+    --- PASS: TestGraphContinuationMaintenanceLeaseAndCancellation/protobuf-v1/cancel-nodes (0.02s)
+FAIL
+FAIL	js-wf/worker	0.629s
+FAIL

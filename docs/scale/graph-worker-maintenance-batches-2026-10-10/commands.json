@@ -1,0 +1,18 @@
+[
+  {
+    "command": "GOMAXPROCS=2 GOMEMLIMIT=1536MiB go test -p=1 -race ./worker -run '^TestGraphContinuationMaintenanceLeaseAndCancellation$' -count=1 -v",
+    "exit_code": 0
+  },
+  {
+    "command": "GOMAXPROCS=2 GOMEMLIMIT=1536MiB go test -p=1 ./sim -run '^TestPinnedRegressionCorpus$' -count=1 -v",
+    "exit_code": 0
+  },
+  {
+    "command": "WF_GRAPH_CONTINUATION_LIMIT_BUDGET=20 GOMAXPROCS=2 GOMEMLIMIT=1536MiB go test -p=1 -race ./worker -run '^TestNativeGraphContinuationGlobalLimitAndTerminalSlot/R1/archive=true$|^TestGraphContinuationMaintenanceLeaseAndCancellation$|^TestGraphContinuationRepairsArchiveBeforeStage$' -count=1 -v",
+    "exit_code": 0
+  },
+  {
+    "command": "GOMAXPROCS=2 GOMEMLIMIT=1536MiB go test -p=1 -race ./journal -run '^TestGraphCheckpoint|^TestGraphCompaction|^TestGraphArchive' -count=1 -v",
+    "exit_code": 0
+  }
+]

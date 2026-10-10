@@ -1,5 +1,33 @@
 # JetStream Durable Workflow Runtime — Implementation Plan
 
+## Worker maintenance now renews ownership between bounded phases — 2026-10-10
+
+Indexed graph continuation publication now uses bounded checkpoint verification;
+archive maintenance separates confirmation, unpublished staging and original-head
+record/node verification. Every phase batch checks cancellation and renews the
+delivery lease. Defaults are128 records/256 node visits; anchors, constructors,
+finalization and callback RPCs have additional work. The whole handoff retains
+its15-second deadline, fixed intent expiry and process-local progress.
+[Development evidence](scale/graph-worker-maintenance-batches-2026-10-10/README.md).
+
+All22 JSON/protobuf maintenance controls pass under race8.573s. They cover
+healthy relocation/resume and cancellation or replacement ownership at pointer,
+archive confirmation, staging, record and node verification boundaries. The
+lease-renewal bypass fails precisely10 owner-loss cases by publishing after lost
+ownership; ignoring the test item budget fails22. The full853 saved corpus passes
+unchanged11.560s after fixing a cleanup regression found in two uncertain-release
+pins: failed archive reader release is retained without a second cleanup mutation.
+Final restored-source native R1/archive20,22 maintenance and7 handoff-repair
+controls pass under race30.542s; the journal checkpoint/compaction/archive race
+selection passes89.628s. These are component development checks.
+
+Worker batching integration is now present. Durable runtime progress/binding,
+maintenance across request deadlines, reader/intent lifetime management and the
+failed actual100000 native gate remain open. Every broader original simulation,
+native/fault/scale/soak/retention/import/admission/collector/rollout gate remains
+open. Public graph continuation admission stays closed, production collection
+stays off, and the older sharded race source cannot qualify these changes.
+
 ## Final compaction verification supports private record/node batches — 2026-10-10
 
 `BeginCompactionCommit` now owns copied verification state for an original-head
