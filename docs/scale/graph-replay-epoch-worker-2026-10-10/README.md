@@ -20,3 +20,6 @@ invocations. [Reviewer](review.py) requires retained terminal supervisor exit0,
 exact source/binary identities and every control. Qualification remains pending.
 Full original/latest157 seeded/extended, faults, retention, import, public
 admission, production collection and rollout gates remain open.
+
+Frozen source `b9380dbd03799b9af53b6cf8dcc0781333e069c7` is confirmed live under `js-wf-replay-epoch-worker-20261010.service`.
+[Launch identity](launch.json) records its process and retained invocation.
