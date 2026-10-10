@@ -1,0 +1,25 @@
+=== RUN   TestGraphReplaySnapshotRangeAndSlowAcquisition
+=== RUN   TestGraphReplaySnapshotRangeAndSlowAcquisition/census
+    graph_replay_range_test.go:145: REPLAY_RANGE records=33 range_gets=108 point_gets=237 elapsed=0s pin_ttl=4s pin_writes=1
+=== RUN   TestGraphReplaySnapshotRangeAndSlowAcquisition/slow-acquisition
+    graph_replay_range_test.go:145: REPLAY_RANGE records=33 range_gets=108 point_gets=237 elapsed=24.6s pin_ttl=4s pin_writes=11
+--- PASS: TestGraphReplaySnapshotRangeAndSlowAcquisition (0.80s)
+    --- PASS: TestGraphReplaySnapshotRangeAndSlowAcquisition/census (0.40s)
+    --- PASS: TestGraphReplaySnapshotRangeAndSlowAcquisition/slow-acquisition (0.40s)
+=== RUN   TestGraphReplaySnapshotOwnsInputsAndRejectedSignals
+=== RUN   TestGraphReplaySnapshotOwnsInputsAndRejectedSignals/consumed
+    graph_replay_test.go:127: mode=consumed source deleted; owned body reads=1
+=== RUN   TestGraphReplaySnapshotOwnsInputsAndRejectedSignals/rejected
+    graph_replay_test.go:127: mode=rejected source deleted; owned body reads=1
+=== RUN   TestGraphReplaySnapshotOwnsInputsAndRejectedSignals/unreadable
+=== RUN   TestGraphReplaySnapshotOwnsInputsAndRejectedSignals/forged-source
+=== RUN   TestGraphReplaySnapshotOwnsInputsAndRejectedSignals/release-unknown
+=== RUN   TestGraphReplaySnapshotOwnsInputsAndRejectedSignals/forged-terminal
+--- PASS: TestGraphReplaySnapshotOwnsInputsAndRejectedSignals (0.40s)
+    --- PASS: TestGraphReplaySnapshotOwnsInputsAndRejectedSignals/consumed (0.05s)
+    --- PASS: TestGraphReplaySnapshotOwnsInputsAndRejectedSignals/rejected (0.08s)
+    --- PASS: TestGraphReplaySnapshotOwnsInputsAndRejectedSignals/unreadable (0.08s)
+    --- PASS: TestGraphReplaySnapshotOwnsInputsAndRejectedSignals/forged-source (0.04s)
+    --- PASS: TestGraphReplaySnapshotOwnsInputsAndRejectedSignals/release-unknown (0.08s)
+    --- PASS: TestGraphReplaySnapshotOwnsInputsAndRejectedSignals/forged-terminal (0.07s)
+PASS

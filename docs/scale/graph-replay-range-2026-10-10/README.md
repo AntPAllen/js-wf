@@ -9,3 +9,9 @@ The operator fixture is extended to verify canonical replay bundles for v4/v5/v6
 ## Frozen qualification launched
 
 The durable user systemd [runner](run-qualified.py) binds clean frozen b3b9ce5, retains actual race worker/operator binaries and a normal simulation binary, and records compile/test exits and unchanged source inventories. It runs directed export/uncertainty race controls, all six v4/v5/v6 R1/R3-domain cursor/export cases (existing2-minute case/10-minute package watchdogs), then all841 normal pins from the same source. [Launch identity](qualified-launch.json) records its actual process/invocation. Terminal independent review is required. This staged run excludes the complete156 seeded/default/extended suites.
+
+## Frozen component accepted
+
+[Independent executed review](qualified-review.json) verifies3,302 unchanged Git inputs, all six actual compile/test exits and retained binary hashes. Both race worker export controls and all six native cursor/history/replay export cases pass; native package42.25s. v6 confirms original entry receipt collection before export. Each bundle retains all eight absolute logical records, its owned frame and input, with no reader leaks. All841 normal saved traces pass on this exact frozen b3b9ce5 source. [Closed raw evidence](qualified/native-cursor-race.log) and source inventories are preserved; binaries remain in the retained root.
+
+This accepts the export component, not SDK-produced whole-workflow offline replay/import/rollout, complete current seeded/default/extended simulation, whole-package race, broad native faults/scale/soak or public/default admission/collection. The separate full d504a33 normal campaign is now accepted and its matching race remains active; it excludes these export changes.

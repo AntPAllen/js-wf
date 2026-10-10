@@ -1,0 +1,33 @@
+{
+  "verdict": "PASS frozen ordered replay-export component",
+  "source": "b3b9ce5894c6dacd1e197729a3c01eb5dee06422",
+  "repository_inputs_git_verified_unchanged": 3302,
+  "native_cases": {
+    "v4/R1-domain": 3.23,
+    "v4/R3-domain": 6.38,
+    "v5/R1-domain": 3.93,
+    "v5/R3-domain": 7.67,
+    "v6/R1-domain": 7.92,
+    "v6/R3-domain": 13.13
+  },
+  "records": 33,
+  "range_gets": 108,
+  "point_gets": 237,
+  "acquisition_delay_seconds": 3,
+  "simulated_total_seconds": 24.6,
+  "pin_ttl_seconds": 4,
+  "pin_writes": 11,
+  "saved_regressions_normal": 841,
+  "retained_binary_hashes": {
+    "worker-race.test": "e6d37fff7bab1e26332d67156bf6fb568ae662b377cad6efe362310821f70685",
+    "cli-race.test": "5bee1120a31c627680de08efe45f885d412d02f5df4a5d4d3f9be7e7efb854cc",
+    "sim-normal.test": "a2fc22865bcb7002c6216c1a1769a89bb9d303935abea526eac10505b0569c2a"
+  },
+  "raw_log_hashes": {
+    "worker-race.log": "45d4adf51dba254fedd23ca6a8b5a84cb33bddd2e6f0016779e14c4c6e1867e8",
+    "native-cursor-race.log": "9b8eaae08baf96b9814bd7fd9de12414324f19e54efdaa336832d67d9554c7a8",
+    "corpus-normal.log": "3eb723c523fab547e29bff4c9b6d36b2d4932e253d129492b49a3b60617e2120"
+  },
+  "old_negative_required_failures": true,
+  "scope": "Directed exporter/uncertainty race controls, all six v4/v5/v6 R1/R3-domain native prepared-checkpoint history and owned frame/input replay exports, plus all841 normal pins at one frozen source. No SDK-produced whole-workflow offline replay/import/rollout or complete seeded/default/extended/whole-package race/native faults/scale/soak/public admission/collection/full goal acceptance."
+}

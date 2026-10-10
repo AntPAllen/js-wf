@@ -17,3 +17,9 @@ After a stage actually closes successfully, run `python3 docs/scale/graph-d504-f
 ## Native matrix accepted
 
 The actual native child closed with exit0 at08:15:21 UTC, all eight cases passing in191.80 seconds. Independent review checks3,293 exact Git/source inputs and retained race binary SHA256 `59e62a1c3b99d47a4470afff5eba1359c28a3aa56b9721f4256ddd07d7ff129a`. R3 buffered/archive now passes in39.70 seconds; its original internal append failure remains preserved and its cause is not inferred from this passing run. [Executed review](native-review.json), [raw output](native-race.log), [binary provenance](native-binary.json) and [source inventory](source-before.json) preserve the closed evidence. The complete simulation pipeline remains live and unaccepted.
+
+## Complete frozen156 normal accepted; race active
+
+The normal child actually closes exit0 at08:52:58 UTC, package2235.589s. [Independent executed review](normal1000-review.json) checks3,293 exact Git/source inputs, the retained normal binary, unchanged stage inventories and independent complete-suite checker equality. All156,000 contiguous seeded bodies, all841 saved traces and223 top groups pass; only the two documented trace-input helper skips occur. [Closed raw events](complete-normal1000/tier1-events.jsonl), source/binary/checker/command receipts preserve the result. Binary SHA256 `d70e16a638f4128f4b981e8f28f74ac47e4129403944100893de5ef1ad044b2f` remains in the retained root. Matching full race starts from the same source at08:52:58 UTC and is live; it is not accepted yet.
+
+This qualifies frozen d504a33 normal only. Later native-only fixtures and b3b9ce5 export/shared-renewal changes, extended seeds and every original broader requirement remain outside that accepted result. The full goal remains active.

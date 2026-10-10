@@ -1,0 +1,27 @@
+=== RUN   TestNativeGraphCursorOperatorHistory
+=== RUN   TestNativeGraphCursorOperatorHistory/v4/R1-domain
+    graph_cursor_test.go:258: CURSOR_REPLAY_EXPORT version=4 replicas=1 records=8 frame_bytes=254 input=7 readers=0
+    graph_cursor_test.go:262: NATIVE_CURSOR_OPERATOR version=4 records=8 retained_from=0 original_entry_collected=false incorrect_schemas_rejected=2 domain_errors=0 legacy_journal_requests=0 readers_after=0
+=== RUN   TestNativeGraphCursorOperatorHistory/v4/R3-domain
+    graph_cursor_test.go:258: CURSOR_REPLAY_EXPORT version=4 replicas=3 records=8 frame_bytes=254 input=7 readers=0
+    graph_cursor_test.go:262: NATIVE_CURSOR_OPERATOR version=4 records=8 retained_from=0 original_entry_collected=false incorrect_schemas_rejected=2 domain_errors=0 legacy_journal_requests=0 readers_after=0
+=== RUN   TestNativeGraphCursorOperatorHistory/v5/R1-domain
+    graph_cursor_test.go:258: CURSOR_REPLAY_EXPORT version=5 replicas=1 records=8 frame_bytes=254 input=7 readers=0
+    graph_cursor_test.go:262: NATIVE_CURSOR_OPERATOR version=5 records=8 retained_from=0 original_entry_collected=false incorrect_schemas_rejected=2 domain_errors=0 legacy_journal_requests=0 readers_after=0
+=== RUN   TestNativeGraphCursorOperatorHistory/v5/R3-domain
+    graph_cursor_test.go:258: CURSOR_REPLAY_EXPORT version=5 replicas=3 records=8 frame_bytes=254 input=7 readers=0
+    graph_cursor_test.go:262: NATIVE_CURSOR_OPERATOR version=5 records=8 retained_from=0 original_entry_collected=false incorrect_schemas_rejected=2 domain_errors=0 legacy_journal_requests=0 readers_after=0
+=== RUN   TestNativeGraphCursorOperatorHistory/v6/R1-domain
+    graph_cursor_test.go:258: CURSOR_REPLAY_EXPORT version=6 replicas=1 records=8 frame_bytes=254 input=7 readers=0
+    graph_cursor_test.go:262: NATIVE_CURSOR_OPERATOR version=6 records=8 retained_from=5 original_entry_collected=true incorrect_schemas_rejected=2 domain_errors=0 legacy_journal_requests=0 readers_after=0
+=== RUN   TestNativeGraphCursorOperatorHistory/v6/R3-domain
+    graph_cursor_test.go:258: CURSOR_REPLAY_EXPORT version=6 replicas=3 records=8 frame_bytes=254 input=7 readers=0
+    graph_cursor_test.go:262: NATIVE_CURSOR_OPERATOR version=6 records=8 retained_from=5 original_entry_collected=true incorrect_schemas_rejected=2 domain_errors=0 legacy_journal_requests=0 readers_after=0
+--- PASS: TestNativeGraphCursorOperatorHistory (42.25s)
+    --- PASS: TestNativeGraphCursorOperatorHistory/v4/R1-domain (3.23s)
+    --- PASS: TestNativeGraphCursorOperatorHistory/v4/R3-domain (6.38s)
+    --- PASS: TestNativeGraphCursorOperatorHistory/v5/R1-domain (3.93s)
+    --- PASS: TestNativeGraphCursorOperatorHistory/v5/R3-domain (7.67s)
+    --- PASS: TestNativeGraphCursorOperatorHistory/v6/R1-domain (7.92s)
+    --- PASS: TestNativeGraphCursorOperatorHistory/v6/R3-domain (13.13s)
+PASS
