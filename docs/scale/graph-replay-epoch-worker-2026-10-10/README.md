@@ -23,3 +23,14 @@ admission, production collection and rollout gates remain open.
 
 Frozen source `b9380dbd03799b9af53b6cf8dcc0781333e069c7` is confirmed live under `js-wf-replay-epoch-worker-20261010.service`.
 [Launch identity](launch.json) records its process and retained invocation.
+
+## Frozen epoch ownership qualification accepted
+
+[Independent review](review.json) accepts source `b9380db`, 67 full SDK race
+tests, 848 normal saved traces, eight SDK ownership and two CLI ownership
+controls, all earlier replay controls, six native exports, eight worker exports,
+37 required mutant failures and 209 actual offline CLI invocations. It verifies
+exact Git inputs, all six binary identities and actual retained supervisor exit0.
+[Retained proof](qualified/state.json) preserves the complete command matrix.
+This rejects declared ownership contradictions; full original/latest157/fault/
+retention/import/admission/rollout acceptance remains open.

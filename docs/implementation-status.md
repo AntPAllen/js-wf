@@ -1,5 +1,18 @@
 # Implementation status against the supplied plan
 
+## Replay epoch ownership qualification accepted — 2026-10-10
+
+Frozen `b9380db` passes independent review: 67 full SDK race tests, 848 normal
+saved traces, eight SDK and two CLI ownership controls, all earlier replay
+controls, six native exports, eight worker exports, 37 required mutant failures
+and 209 offline CLI outcomes. Exact Git inputs, six binary identities and
+actual retained supervisor exit0 are verified.
+[Accepted proof](scale/graph-replay-epoch-worker-2026-10-10/review.json).
+The separate polling family100000 qualification is also accepted on its source.
+Full latest157 normal/race/extended, remaining original faults, retention,
+import, public admission, production collection and rollout stay open. Both
+older broad campaigns are confirmed live and retain their original scope.
+
 ## Canonical polling model100000 qualification accepted — 2026-10-10
 
 Frozen `ecc78eb` passes independent review: 1,000 race and 100,000 normal seed
