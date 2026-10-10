@@ -1,0 +1,42 @@
+package wf
+
+import (
+	"encoding/json"
+
+	"js-wf/journal"
+)
+
+// validateReplayRecordOrder admits the complete logical history before a plugin
+// or handler can run. Physical stream sequence gaps are valid; logical index
+// gaps, backwards epochs and records after a terminal are not.
+func validateReplayRecordOrder(records []journal.Record, invocation uint64) error {
+	if len(records) == 0 || len(records) > journal.MaxEntries {
+		return ErrCorruptJournal
+	}
+	for i, record := range records {
+		if record.Index != uint64(i) || record.Sequence == 0 || i == 0 && record.Kind != journal.Started {
+			return ErrCorruptJournal
+		}
+		if i > 0 {
+			prev := records[i-1]
+			if record.Sequence <= prev.Sequence || record.Epoch < prev.Epoch || prev.Kind == journal.Completed || prev.Kind == journal.Failed || record.Kind == journal.Started {
+				return ErrCorruptJournal
+			}
+		}
+		switch record.Kind {
+		case journal.Started, journal.StepRequested, journal.StepCompleted, journal.SignalConsumed, journal.Suspended, journal.Attempt, journal.Completed, journal.Failed:
+		default:
+			return ErrCorruptJournal
+		}
+	}
+	if invocation != 0 {
+		last := records[len(records)-1]
+		if last.Kind == journal.Completed || last.Kind == journal.Failed {
+			var outcome Outcome
+			if json.Unmarshal(last.Payload, &outcome) != nil || outcome.InvSeq != invocation || last.Kind == journal.Failed && outcome.Error == "" {
+				return ErrCorruptJournal
+			}
+		}
+	}
+	return nil
+}

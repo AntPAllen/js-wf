@@ -100,20 +100,8 @@ func replayWithStages[T any](journalBytes []byte, fn func(*Context) (T, error), 
 	if err := json.Unmarshal(journalBytes, &records); err != nil {
 		return result, fmt.Errorf("decode journal: %w", err)
 	}
-	if len(records) == 0 || len(records) > journal.MaxEntries {
-		return result, ErrCorruptJournal
-	}
-	// Bind terminal records before invoking user code. In particular, a Failed
-	// tail can legitimately end at a pending effect; returning that pending-step
-	// error must not hide a terminal outcome from another invocation generation.
-	if opts.InvSeq != 0 {
-		last := records[len(records)-1]
-		if last.Kind == journal.Completed || last.Kind == journal.Failed {
-			var outcome Outcome
-			if json.Unmarshal(last.Payload, &outcome) != nil || outcome.InvSeq != opts.InvSeq || last.Kind == journal.Failed && outcome.Error == "" {
-				return result, ErrCorruptJournal
-			}
-		}
+	if err := validateReplayRecordOrder(records, opts.InvSeq); err != nil {
+		return result, err
 	}
 	if stages != nil {
 		subject := identity.JournalSubject(opts.Type, opts.ID)
@@ -152,15 +140,7 @@ func replayWithStages[T any](journalBytes []byte, fn func(*Context) (T, error), 
 		return data, nil
 	}
 	for i, record := range records {
-		if record.Index != uint64(i) || record.Sequence == 0 || i == 0 && record.Kind != journal.Started {
-			return result, ErrCorruptJournal
-		}
-		if i > 0 {
-			prev := records[i-1]
-			if record.Sequence <= prev.Sequence || record.Epoch < prev.Epoch || prev.Kind == journal.Completed || prev.Kind == journal.Failed || record.Kind == journal.Started {
-				return result, ErrCorruptJournal
-			}
-		}
+
 		switch record.Kind {
 		case journal.Started, journal.Suspended, journal.Completed, journal.Failed:
 		case journal.Attempt:

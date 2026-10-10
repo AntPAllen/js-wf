@@ -40,8 +40,10 @@ func ValidateReplayGraphHistory(records []journal.Record, objects map[string][]b
 	if err := ValidateReplayGraphCheckpoints(records, objects, typ, id, invocation); err != nil {
 		return err
 	}
-	_, err := replayGraphChildValidator(records, objects, format == ReplayFormatGraphV1)
-	return err
+	if _, err := replayGraphChildValidator(records, objects, format == ReplayFormatGraphV1); err != nil {
+		return err
+	}
+	return validateReplayRecordOrder(records, invocation)
 }
 
 func validateReplayGraphFormat(records []journal.Record, objects map[string][]byte, format string) error {

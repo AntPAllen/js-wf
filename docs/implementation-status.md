@@ -1,5 +1,20 @@
 # Implementation status against the supplied plan
 
+## Shared journal ordering checked before replay plugin admission — 2026-10-10
+
+SDK record ordering and terminal invocation binding now run through a shared
+validator before CLI plugin loading or worker export admission. Logical indices,
+physical sequence order, fencing epochs, initial Started, terminal position,
+known kinds, entry cap and terminal generation are checked. Physical stream
+sequence gaps and legacy zero epochs stay compatible. Fifteen SDK and 18 CLI
+race controls pass with earlier format/input/provenance/legacy controls; disabling
+the validator must fail all 31 rejecting leaves. A first no-test selector is
+preserved as invalid, with no acceptance inferred from its exit0.
+[Evidence and qualification](scale/graph-replay-record-order-2026-10-10/README.md).
+Frozen full SDK/export/848-corpus/209-replay qualification is prepared. The
+separate 100,000 normal cancellation model and both older broad campaigns remain
+live. All remaining original gates stay open.
+
 ## Native running cancellation accepted; Tier 1 polling coverage added — 2026-10-10
 
 Frozen `78dc5c2` passes all eight native race cases: R1/R3 domain × live/archive
