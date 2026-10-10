@@ -8,13 +8,13 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io"
 	"os"
 	"plugin"
 	"strconv"
 
 	"js-wf/client"
 	"js-wf/identity"
+	"js-wf/internal/checkpoint"
 	"js-wf/journal"
 	"js-wf/wf"
 	"js-wf/worker"
@@ -65,22 +65,31 @@ func replayInvocation(ctx context.Context, js jetstream.JetStream, typ, id, plug
 
 func loadReplayBundle(path string) (replayBundle, error) {
 	var bundle replayBundle
-	file, err := os.Open(path)
+	raw, err := os.ReadFile(path)
 	if err != nil {
 		return bundle, err
 	}
-	defer file.Close()
-	decoder := json.NewDecoder(file)
+	// Journal payloads remain opaque workflow bytes. Inspect the import
+	// envelope separately so duplicate keys cannot downgrade its format or
+	// replace identity, input, object bodies or pending signal provenance.
+	var envelope struct {
+		Format        string               `json:"format,omitempty"`
+		Type          string               `json:"type"`
+		ID            string               `json:"id"`
+		InvSeq        uint64               `json:"inv_seq"`
+		Input         []byte               `json:"input"`
+		InputHash     string               `json:"input_hash"`
+		Journal       json.RawMessage      `json:"journal"`
+		Objects       map[string][]byte    `json:"objects"`
+		PendingSignal *replayPendingSignal `json:"pending_signal,omitempty"`
+	}
+	if err := checkpoint.DecodeUnambiguous(raw, &envelope); err != nil {
+		return replayBundle{}, fmt.Errorf("decode replay bundle: %w", err)
+	}
+	decoder := json.NewDecoder(bytes.NewReader(raw))
 	decoder.DisallowUnknownFields()
 	if err := decoder.Decode(&bundle); err != nil {
 		return replayBundle{}, fmt.Errorf("decode replay bundle: %w", err)
-	}
-	var trailing any
-	if err := decoder.Decode(&trailing); err != io.EOF {
-		if err == nil {
-			return replayBundle{}, fmt.Errorf("trailing replay bundle data")
-		}
-		return replayBundle{}, fmt.Errorf("trailing replay bundle data: %w", err)
 	}
 	return bundle, nil
 }

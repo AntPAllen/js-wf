@@ -1,5 +1,17 @@
 # JetStream Durable Workflow Runtime — Implementation Plan
 
+## Replay envelope ambiguity admission fixed — 2026-10-10
+
+Offline import now rejects duplicate format/identity/input keys, typed case
+aliases and duplicate object/pending signal header names before plugin loading.
+Fourteen development race controls and all 76 retained native export loads pass,
+alongside existing provenance/input/format/legacy plugin controls. The old
+132d3fa decoder must fail eight ambiguity controls; actual exit 1 is preserved.
+[Evidence and scope](scale/graph-replay-envelope-2026-10-10/README.md).
+This is development evidence only; the earlier frozen input-binding campaign
+and broader campaigns remain independently live, and do not cover this source.
+Full journal/import/authenticity/fault/retention/admission/rollout gates remain open.
+
 ## Input-binding legacy regression repaired; new qualification pending — 2026-10-10
 
 Frozen `dab8be3` qualification failed with retained supervisor exit 1. Full SDK
