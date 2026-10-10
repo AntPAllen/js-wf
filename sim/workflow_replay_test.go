@@ -92,7 +92,14 @@ func runSeededWorkflowReplay(seed int64, replay *Trace) (trace Trace, runErr err
 		if err != nil || effects != 3 || index != 7 {
 			return trace, fmt.Errorf("seed %d handler %s result=%d effects=%d next_index=%d err=%v", seed, id, result, effects, index, err)
 		}
-		terminal := []byte(fmt.Sprintf(`{"inv_seq":%d,"result":%d}`, handle.InvSeq, result))
+		resultBytes, err := json.Marshal(result)
+		if err != nil {
+			return trace, err
+		}
+		terminal, err := json.Marshal(wf.Outcome{InvSeq: handle.InvSeq, Result: resultBytes})
+		if err != nil {
+			return trace, err
+		}
 		if _, err := store.Append(ctx, "test", id, journal.Entry{Epoch: 1, Index: index, Kind: journal.Completed, Payload: terminal, WorkerID: "worker-a"}, tail); err != nil {
 			return trace, err
 		}
@@ -118,7 +125,8 @@ func runSeededWorkflowReplay(seed int64, replay *Trace) (trace Trace, runErr err
 		if err != nil {
 			return trace, err
 		}
-		replayed, err := wf.Replay(journalBytes, func(c *wf.Context) (int, error) { return handler(c, false, false) })
+		replayOptions := wf.ReplayOptions{Type: "test", ID: id, InvSeq: handle.InvSeq}
+		replayed, err := wf.Replay(journalBytes, func(c *wf.Context) (int, error) { return handler(c, false, false) }, replayOptions)
 		if err != nil || replayed != result || effects != 3 {
 			return trace, fmt.Errorf("seed %d replay %s result=%d want=%d effects=%d err=%v", seed, id, replayed, result, effects, err)
 		}
@@ -131,7 +139,7 @@ func runSeededWorkflowReplay(seed int64, replay *Trace) (trace Trace, runErr err
 		} {
 			_, err := wf.Replay(journalBytes, func(c *wf.Context) (int, error) {
 				return handler(c, !mutation.input, mutation.input)
-			})
+			}, replayOptions)
 			if !errors.Is(err, wf.ErrNonDeterministic) || effects != 3 {
 				return trace, fmt.Errorf("seed %d mutation %s %s escaped guard: effects=%d err=%v", seed, id, mutation.name, effects, err)
 			}

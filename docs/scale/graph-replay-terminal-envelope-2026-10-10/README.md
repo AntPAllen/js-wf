@@ -1,5 +1,11 @@
 # Terminal envelope admission before replay
 
+Frozen `c57dffa` qualification fails at the normal saved corpus, after70 SDK
+race roots pass. The offending model encoded terminal result as numeric JSON,
+not runtime byte-envelope JSON. [Original failure](failed-c57dffa/review.json)
+and [corrected retry with lifecycle controls](../graph-replay-terminal-lifecycle-2026-10-10/README.md)
+are separate. No acceptance is inferred from the SDK subset.
+
 Shared SDK/CLI/export record admission now checks present Completed and Failed
 envelopes with the typed ambiguity decoder before user code or plugin load.
 Identity, result/reference/hash, error and limit headers reject duplicate keys,

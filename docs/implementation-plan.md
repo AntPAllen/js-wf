@@ -1,5 +1,23 @@
 # JetStream Durable Workflow Runtime — Implementation Plan
 
+## Current replay admission and qualification follow-through — 2026-10-10
+
+CLI journal-header admission is qualified at `78e2a0c`. The later shared SDK
+header qualifier is unaccepted because a negative mutant failed compilation;
+terminal qualification at `c57dffa` fails a numeric-terminal simulation fixture.
+Both failures remain evidence, not cleared by passing subsets. The corrected
+model uses runtime terminal envelopes, and four directed snapshot lifecycle
+cuts verify generation isolation around pin acquisition, retirement and ID
+reuse. [Current correction and qualification scope](scale/graph-replay-terminal-lifecycle-2026-10-10/README.md).
+
+Next required evidence includes the full frozen replay retry, complete latest
+157-family simulation/extended campaigns, original13×200/16×200 native matrices,
+unchanged majority raw-p99 gate, actual100000-entry boundary, actual24h/million
+physical drain, complete retention/import/collection and public admission/rollout.
+The live older full156 race and actual-cap jobs keep their source, process and
+300-minute watchdogs; partial progress is not acceptance. Existing historical
+sections below retain their recorded source scopes.
+
 ## Replay epoch ownership qualification accepted — 2026-10-10
 
 Frozen `b9380db` passes independent review: 67 full SDK race tests, 848 normal

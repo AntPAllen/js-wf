@@ -1,5 +1,18 @@
 # Implementation status against the supplied plan
 
+## Terminal qualifier failed fixture schema; lifecycle cuts verified — 2026-10-10
+
+Frozen `c57dffa` closes exit1:70 SDK race roots pass, but its normal848 corpus
+fails one numeric-terminal model fixture;847 pins pass. Failure is preserved,
+with no native/offline matrix execution or qualification acceptance. The model
+now emits actual `wf.Outcome` bytes and binds SDK replay identity. Its1000 race
+seeds and full848 normal corpus pass; regenerated pin changes only15 terminal
+hashes, retaining decisions/event order. Four production snapshot lifecycle
+cuts verify whole old/new generation captures and empty stale admission around
+retirement/replacement. [Failure, correction and prepared retry](scale/graph-replay-terminal-lifecycle-2026-10-10/README.md).
+Original full157 simulation, majority raw-p99 failure, actual100000 cap and all
+broader native/retention/import/admission/collector/rollout gates remain open.
+
 ## Shared-header qualification review rejected; terminal mutant corrected — 2026-10-10
 
 The `3c9ba8b` retained supervisor closes exit0, but independent review rejects
