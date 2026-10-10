@@ -561,6 +561,8 @@ func replayTrace(loaded Trace) (Trace, error) {
 		replayed, err = runGraphSignalExpiryActors(loaded.Seed, &loaded)
 	case "graph_signal_operation_actors":
 		replayed, err = runGraphSignalActors(loaded.Seed, &loaded)
+	case "graph_signal_caller_retry":
+		replayed, err = runGraphSignalActorsSchedule(loaded.Seed, &loaded, false, true)
 	case "graph_canonical_signal_runtime_combined":
 		replayed, err = runGraphSignalRuntimeCombined(loaded.Seed, &loaded)
 	case "graph_canonical_signal_runtime":

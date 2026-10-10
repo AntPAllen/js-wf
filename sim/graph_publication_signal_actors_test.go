@@ -34,7 +34,8 @@ func runGraphSignalActors(seed int64, replay *Trace) (Trace, error) {
 func runGraphSignalExpiryActors(seed int64, replay *Trace) (Trace, error) {
 	return runGraphSignalActorsSchedule(seed, replay, true)
 }
-func runGraphSignalActorsSchedule(seed int64, replay *Trace, combined bool) (trace Trace, runErr error) {
+func runGraphSignalActorsSchedule(seed int64, replay *Trace, combined bool, forceCallerRetry ...bool) (trace Trace, runErr error) {
+	forced := len(forceCallerRetry) != 0 && forceCallerRetry[0]
 	s := NewScheduler(seed)
 	if replay != nil {
 		var e error
@@ -46,6 +47,9 @@ func runGraphSignalActorsSchedule(seed int64, replay *Trace, combined bool) (tra
 	workload := "graph_signal_operation_actors"
 	if combined {
 		workload = "graph_signal_expiry_actors"
+	}
+	if forced {
+		workload = "graph_signal_caller_retry"
 	}
 	if e := s.SetWorkload(workload); e != nil {
 		return trace, e
@@ -73,10 +77,13 @@ func runGraphSignalActorsSchedule(seed int64, replay *Trace, combined bool) (tra
 	model := NewGraphPublicationTransport(s)
 	transport := NewWorkerTransport(s, 3*time.Second)
 	now := func() time.Time { return time.UnixMilli(s.NowMillis()).UTC() }
-	store := func(y YieldFunc) (*journal.GraphStore, error) {
+	store := func(y YieldFunc, rejectAdmission ...bool) (*journal.GraphStore, error) {
 		p := model.Protocol()
 		if y != nil {
 			p = GraphProtocolWithYield(model, y)
+			if len(rejectAdmission) != 0 && rejectAdmission[0] {
+				p.Port = callerAdmissionConflictPort{yieldingGraphPort: p.Port.(yieldingGraphPort), scheduler: s}
+			}
 		}
 		return journal.NewGraphStore(journal.GraphConfig{Protocol: p, Now: now, PinTTL: 30 * time.Second, IntentTTL: time.Second, CanonicalStarts: true, CanonicalSignals: true})
 	}
@@ -173,7 +180,7 @@ func runGraphSignalActorsSchedule(seed int64, replay *Trace, combined bool) (tra
 		actors = append(actors, CooperativeActor{Name: name, Run: func(ctx context.Context, y YieldFunc) error {
 			var last error
 			for attempt := 0; attempt < 8; attempt++ {
-				g, e := store(y)
+				g, e := store(y, forced && name == "second")
 				if e != nil {
 					return e
 				}
@@ -430,12 +437,12 @@ func TestSeededGraphSignalOperationActorsReplay(t *testing.T) {
 	t.Logf("operation-level actors: %v; five actors reached per schedule, all selected faults consumed, effect one, two bindings/consumptions, terminal equality and graph/dispatch drain", observed)
 }
 
-// Seed 926 exhausted all in-contention attempts without reserving the second
-// input. The generation remains active: a fresh caller retry must admit it,
-// while canonical repair handles any already reserved inputs without the caller.
+// Reject the second caller's admission CAS for its complete finite attempt
+// budget. The later independent caller retry uses an ordinary adapter. This
+// preserves the absent-reservation branch as transport call sequences evolve.
 func TestGraphSignalCallerRetryAfterContention(t *testing.T) {
 	const seed int64 = 926
-	generated, e := runGraphSignalActors(seed, nil)
+	generated, e := runGraphSignalActorsSchedule(seed, nil, false, true)
 	if e != nil {
 		path, _ := saveSeedFailureTrace(t.Name(), seed, generated)
 		t.Fatalf("FAULT_TRACE=%s: %v", path, e)
@@ -452,7 +459,7 @@ func TestGraphSignalCallerRetryAfterContention(t *testing.T) {
 	if !pending || !recovered {
 		t.Fatalf("contention branch not reached: pending=%v recovered=%v", pending, recovered)
 	}
-	replayed, e := runGraphSignalActors(seed, &generated)
+	replayed, e := runGraphSignalActorsSchedule(seed, &generated, false, true)
 	if e != nil || !reflect.DeepEqual(generated, replayed) {
 		t.Fatalf("contention recovery replay differs: %v", e)
 	}

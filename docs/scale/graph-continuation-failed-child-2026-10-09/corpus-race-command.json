@@ -1,0 +1,35 @@
+{
+  "head": "b7d3a14c2b3b3f77e5296766097383777626002b",
+  "started": "2026-10-10T00:17:26.982213+00:00",
+  "env": {
+    "GOMAXPROCS": "2",
+    "GOMEMLIMIT": "512MiB"
+  },
+  "commands": [
+    {
+      "command": [
+        "go",
+        "test",
+        "-c",
+        "-race",
+        "./sim",
+        "-o",
+        "/home/exedev/js-wf-failed-child-native-20261010/corpus-race.test"
+      ],
+      "actual_exit_code": 0
+    },
+    {
+      "command": [
+        "/home/exedev/js-wf-failed-child-native-20261010/corpus-race.test",
+        "-test.run=^(TestPinnedRegressionCorpus|TestGraphSignalCallerRetryAfterContention)$",
+        "-test.count=1",
+        "-test.timeout=5m",
+        "-test.v=true"
+      ],
+      "actual_exit_code": 0
+    }
+  ],
+  "binary_sha256": "75e097a3470a918978329a7e6a1e7cd632625ccf2237ac5ee49aea0bea5d27fe",
+  "build_info": "/home/exedev/js-wf-failed-child-native-20261010/corpus-race.test: go1.27.1\n\tpath\tjs-wf/sim.test\n\tmod\tjs-wf\t(devel)\t\n\tdep\tgithub.com/anishathalye/porcupine\tv1.3.1\th1:fBZ4/NGNPnIDdd6xNtrNk9/GiEQ0L4FO5+scINN+t0E=\n\tdep\tgithub.com/klauspost/compress\tv1.20.0\th1:a3C1ke2ohxFymNlb2HWAHjDeKCI90scRskErZkR0ezA=\n\tdep\tgithub.com/nats-io/nats.go\tv1.54.0\th1:vsXoOxjHp/GmPUN+EcI7uOf/uB+iAP+kEsAFNQN0yzA=\n\tdep\tgithub.com/nats-io/nkeys\tv0.4.16\th1:rd5oAuLOb8mnAycB0xleuEBNS1pVVnN0fv/FF34Eypg=\n\tdep\tgithub.com/nats-io/nuid\tv1.0.1\th1:5iA8DT8V7q8WK2EScv2padNa/rTESc1KdnPw4TC2paw=\n\tdep\tgolang.org/x/crypto\tv0.57.0\th1:3ZVCjf8Ggz7zneR/EHRVx68Ctf+2pmIMP2UFhh9cC6M=\n\tdep\tgolang.org/x/sys\tv0.48.0\th1:bbX/i/6MgT9BVLM9RT1thmxL04yeTAhbEz4SyadbXoo=\n\tdep\tgoogle.golang.org/protobuf\tv1.36.6\th1:z1NpPI8ku2WgiWnf+t9wTPsn6eP1L7ksHUlkfLvd9xY=\n\tbuild\t-buildmode=exe\n\tbuild\t-compiler=gc\n\tbuild\t-race=true\n\tbuild\tCGO_ENABLED=1\n\tbuild\tCGO_CFLAGS=\n\tbuild\tCGO_CPPFLAGS=\n\tbuild\tCGO_CXXFLAGS=\n\tbuild\tCGO_LDFLAGS=\n\tbuild\tGOARCH=amd64\n\tbuild\tGOOS=linux\n\tbuild\tGOAMD64=v1\n",
+  "finished": "2026-10-10T00:20:31.765061+00:00"
+}

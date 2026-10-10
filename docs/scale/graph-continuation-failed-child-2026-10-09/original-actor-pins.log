@@ -1,0 +1,21 @@
+=== RUN   TestPinnedRegressionCorpus
+=== RUN   TestPinnedRegressionCorpus/graph-signal-actors-caller-retry.json
+    journal_transport_test.go:784: pinned trace testdata/regressions/graph-signal-actors-caller-retry.json seed=926: simulation decision 2464 diverged: at=2440 enabled=[first:graph_read_root second:graph_get worker:graph_get]; trace at=2440 enabled=[first:graph_read_root second:graph_get worker:graph_read_root]
+=== RUN   TestPinnedRegressionCorpus/graph-signal-actors-enqueue-drop.json
+    journal_transport_test.go:784: pinned trace testdata/regressions/graph-signal-actors-enqueue-drop.json seed=11: simulation decision 807 diverged: at=70 enabled=[worker:graph_get]; trace at=70 enabled=[worker:graph_read_root]
+=== RUN   TestPinnedRegressionCorpus/graph-signal-actors-enqueue-lost-ack.json
+    journal_transport_test.go:784: pinned trace testdata/regressions/graph-signal-actors-enqueue-lost-ack.json seed=1: simulation decision 1555 diverged: at=1230 enabled=[second:graph_read_root worker:graph_get]; trace at=1230 enabled=[second:graph_read_root worker:graph_read_root]
+=== RUN   TestPinnedRegressionCorpus/graph-signal-actors-healthy.json
+    journal_transport_test.go:784: pinned trace testdata/regressions/graph-signal-actors-healthy.json seed=13: simulation decision 943 diverged: at=100 enabled=[worker:graph_get]; trace at=100 enabled=[worker:graph_read_root]
+=== RUN   TestPinnedRegressionCorpus/graph-signal-actors-source-drop.json
+    journal_transport_test.go:784: pinned trace testdata/regressions/graph-signal-actors-source-drop.json seed=3: simulation decision 751 diverged: at=90 enabled=[first:graph_read_blob worker:graph_get]; trace at=90 enabled=[first:graph_read_blob worker:graph_read_root]
+=== RUN   TestPinnedRegressionCorpus/graph-signal-actors-source-lost-ack.json
+    journal_transport_test.go:784: pinned trace testdata/regressions/graph-signal-actors-source-lost-ack.json seed=4: simulation decision 3559 diverged: at=3590 enabled=[first:graph_read_root worker:graph_get]; trace at=3590 enabled=[first:graph_read_root worker:graph_read_root]
+--- FAIL: TestPinnedRegressionCorpus (1.01s)
+    --- FAIL: TestPinnedRegressionCorpus/graph-signal-actors-caller-retry.json (0.36s)
+    --- FAIL: TestPinnedRegressionCorpus/graph-signal-actors-enqueue-drop.json (0.04s)
+    --- FAIL: TestPinnedRegressionCorpus/graph-signal-actors-enqueue-lost-ack.json (0.17s)
+    --- FAIL: TestPinnedRegressionCorpus/graph-signal-actors-healthy.json (0.09s)
+    --- FAIL: TestPinnedRegressionCorpus/graph-signal-actors-source-drop.json (0.04s)
+    --- FAIL: TestPinnedRegressionCorpus/graph-signal-actors-source-lost-ack.json (0.29s)
+FAIL
