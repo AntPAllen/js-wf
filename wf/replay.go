@@ -122,6 +122,10 @@ func replayWithStages[T any](journalBytes []byte, fn func(*Context) (T, error), 
 			return result, fmt.Errorf("%w: %v", ErrCorruptJournal, checkErr)
 		}
 	}
+	childValidator, err := replayGraphChildValidator(records, opts.Objects)
+	if err != nil {
+		return result, err
+	}
 	anchors := make([]ContinuationAnchor, len(records))
 	var entries []Entry
 	var signals []Signal
@@ -229,6 +233,7 @@ func replayWithStages[T any](journalBytes []byte, fn func(*Context) (T, error), 
 	c := NewContext(context.Background(), entries, nil, signals...)
 	configure := func(c *Context) {
 		c.replay = true
+		c.SetChildResultValidator(childValidator)
 		c.SetResultStore(nil, loadObject)
 		// Recorded waits never publish a schedule or start a child offline.
 		c.SetTimerSupport(time.Time{}, nil, func(context.Context, uint64, time.Time) error { return nil })
