@@ -1,5 +1,21 @@
 # JetStream Durable Workflow Runtime — Implementation Plan
 
+## Native running cancellation accepted; Tier 1 polling coverage added — 2026-10-10
+
+Frozen `78dc5c2` passes all eight native race cases: R1/R3 domain × live/archive
+× cooperative error/late success, with notifications disabled and source pointer
+removal confirmed. Required retry publishes one cancelled terminal and leaves
+history unchanged on duplicate. Independent review verifies 3,347 exact Git
+inputs, binary identity and actual retained supervisor exit0.
+[Native review](scale/graph-continuation-running-effect-cancel-2026-10-10/review.json).
+
+A new seeded production polling workload passes 1,000 race seeds with exact
+replays and seven saved regression traces; disabling the graph branch must fail
+three pins. Current inventory becomes 157 seeded families and 848 saved traces.
+[Model evidence and frozen qualification](scale/graph-running-cancel-poll-model-2026-10-10/README.md).
+Full latest157 and the extended 100,000-seed model qualification remain pending.
+Both older broad campaigns remain live; all broader original gates stay open.
+
 ## Restored running-effect cancellation recovery added — 2026-10-10
 
 The canonical running cancellation poll now verifies the graph-owned queue

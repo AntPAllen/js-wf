@@ -1,0 +1,50 @@
+{
+  "source": "78dc5c270cb86c4b82fd1494c800bc6e6ba817e6",
+  "checkout": "/home/exedev/js-wf-running-effect-cancel-qualification",
+  "root": "/home/exedev/js-wf-running-effect-cancel-20261010",
+  "pid": 89311,
+  "invocation": "e291c70150174bd88184bfecec5d63b6",
+  "started": "2026-10-10T11:54:31.551513+00:00",
+  "commands": [
+    {
+      "command": [
+        "go",
+        "test",
+        "-race",
+        "-c",
+        "-o",
+        "/home/exedev/js-wf-running-effect-cancel-20261010/worker-race.test",
+        "./worker"
+      ],
+      "started": "2026-10-10T11:54:31.551811+00:00",
+      "exit": 0,
+      "finished": "2026-10-10T11:54:54.873911+00:00"
+    },
+    {
+      "command": [
+        "go",
+        "tool",
+        "test2json",
+        "-t",
+        "-p",
+        "js-wf/worker",
+        "/home/exedev/js-wf-running-effect-cancel-20261010/worker-race.test",
+        "-test.v=test2json",
+        "-test.run=^TestNativeGraphContinuationCancelRunningEffect$",
+        "-test.count=1",
+        "-test.timeout=25m"
+      ],
+      "started": "2026-10-10T11:54:54.874344+00:00",
+      "exit": 0,
+      "finished": "2026-10-10T12:02:05.155316+00:00"
+    }
+  ],
+  "accepted": false,
+  "phase": "closed",
+  "exit": 0,
+  "finished": "2026-10-10T12:02:05.433641+00:00",
+  "binary": {
+    "bytes": 49010638,
+    "sha256": "93a90e05f478a8603bdd2d2d217aa172674179f8dcc15fa16d6416e15285aa08"
+  }
+}

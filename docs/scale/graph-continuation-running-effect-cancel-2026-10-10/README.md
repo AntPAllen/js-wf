@@ -44,3 +44,12 @@ confirmed and the required retry. The frozen eight-case matrix remains pending.
 
 Frozen source `78dc5c270cb86c4b82fd1494c800bc6e6ba817e6` is live under `js-wf-running-effect-cancel-20261010.service`.
 [Launch identity](launch.json) records the retained process and invocation.
+
+## Frozen native matrix accepted
+
+Independent [review](review.json) verifies source `78dc5c2`, 3,347 exact Git
+inputs, retained race binary and actual supervisor exit 0. All eight required
+native cases pass with notifications disabled, confirmed source removal and
+required retry. [Raw events](qualified/events.jsonl) preserve the per-case
+terminal/consumption/effect counts and immutable duplicate checks. Broader
+fault/uncooperative-effect/retention/import/admission/original gates remain open.
