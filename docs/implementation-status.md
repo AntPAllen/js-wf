@@ -1,5 +1,9 @@
 # Implementation status against the supplied plan
 
+## Frozen current156 native/normal/race pipeline launched — 2026-10-10
+
+A durable user systemd pipeline is live on clean frozen d504a33: the complete eight-case failed-child native race matrix, followed by all156 families/all841 pins at1000 seeds in normal mode, then matching race only after actual normal success. Source inventories, retained binaries, raw output and actual exits are recorded separately. [Runner, launch identity and exact limits](scale/graph-d504-full-qualification-2026-10-10/README.md). Launch is not acceptance; independent terminal review and every broader original open gate remain required.
+
 ## Frozen151 full race accepted; frozen156 normal failure reviewed — 2026-10-10
 
 The original frozen fb4f086 race run closes successfully:151,000 completed seeded bodies, all810 pins,214 top groups and336 directed combinations, with3,183 unchanged Git-verified inputs and16,811.303s package elapsed. [Executed independent review](scale/graph-current151-qualification-2026-10-09/complete-race1000-systemd/review.json). It qualifies frozen151; five later families and newer migration/reader/caller-retry changes remain outside that result. Frozen fd95754 normal closes failed after3336.913s: all156,000 seeded bodies complete, but the caller-retry control and110 saved traces fail,731 pins pass;3,277 before/after inputs are unchanged. [Failed raw evidence and review](scale/graph-current156-qualification-2026-10-09/failed-normal1000/review.json). It is not current-source acceptance.
