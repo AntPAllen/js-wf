@@ -1,5 +1,19 @@
 # Unambiguous imported journal headers
 
+## Frozen qualification accepted
+
+Source `78e2a0ccac857de9c1ea994e57ed34061250f01b` passes independent
+[review](review.json): 3374 exact Git inputs, six binary identities,67 full SDK
+race tests,848 normal saved traces,15 CLI header controls and all earlier replay
+controls, six native exports, eight worker exports,50 required mutant failures
+and209 offline CLI outcomes. The loaded retained supervisor has matching
+invocation `85006f612d4946dc956531bbb3067085`, PID0 and actual exit0.
+[Compressed original evidence](qualified/) includes inventories, events, all
+negative logs, exact mutants, supervisor exit and full replay state. Original
+external executable/fixture inputs remain retained. This source proves CLI
+header admission; the later shared SDK decoder extension has separate pending
+qualification. Earlier preparation notes below describe the original launch.
+
 Offline CLI admission now checks a flat wire DTO for epoch, logical index, kind,
 payload field, worker ID and physical sequence. Duplicate keys, escaped duplicate
 names and case aliases reject before any plugin load. Nested journal payload

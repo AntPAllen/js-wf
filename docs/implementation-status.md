@@ -1,5 +1,18 @@
 # Implementation status against the supplied plan
 
+## CLI journal headers qualified; shared SDK extension running — 2026-10-10
+
+Frozen `78e2a0c` passes independent review:3374 exact Git inputs,67 full SDK race
+tests,848 normal saved traces,15 CLI header controls, all prior replay controls,
+six native/eight worker exports,50 required mutant failures and209 offline CLI
+outcomes, with actual loaded matching supervisor exit0.
+[Accepted evidence](scale/graph-replay-journal-header-2026-10-10/review.json).
+This qualifies the CLI-only source. The shared SDK/CLI extension is separately
+running at frozen `3c9ba8b`, supervisor PID105426/invocation
+`81d8ac67c5c34121b71a6943a142d788`; no acceptance is inferred yet. Both older
+broad jobs remain live. Terminal payload admission, latest full157 simulation,
+original fault/soak/drain/retention/admission/collection/rollout gates stay open.
+
 ## SDK and CLI share journal header admission — 2026-10-10
 
 Raw SDK replay now uses the same strict flat journal wire schema as CLI import,
