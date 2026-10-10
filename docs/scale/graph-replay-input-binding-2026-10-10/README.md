@@ -60,3 +60,6 @@ SDK, CLI and legacy plugin race tests pass in [development log](development-lega
 The revised runner uses a separate checkout, artifact root and retained service;
 its reviewer requires all 15 SDK input controls and the complete prior matrix.
 Qualification remains pending.
+
+Retry source `66fe5bc8e49b52b07ff098c9a8be2c8246e14187` is confirmed live under `js-wf-replay-input-binding-legacy-20261010.service`.
+[Retry launch identity](launch.json) records its process and invocation.
