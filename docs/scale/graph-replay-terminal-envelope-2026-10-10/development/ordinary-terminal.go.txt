@@ -3,7 +3,7 @@ package wf
 import (
 	"bytes"
 
-	"js-wf/internal/checkpoint"
+	"encoding/json"
 	"js-wf/journal"
 )
 
@@ -62,5 +62,5 @@ func decodeReplayTerminal(raw []byte, outcome *Outcome) error {
 	if len(bytes.TrimSpace(raw)) == 0 || bytes.Equal(bytes.TrimSpace(raw), []byte("null")) {
 		return ErrCorruptJournal
 	}
-	return checkpoint.DecodeUnambiguous(raw, outcome)
+	return json.Unmarshal(raw, outcome)
 }

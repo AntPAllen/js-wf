@@ -1,5 +1,16 @@
 # Implementation status against the supplied plan
 
+## Present terminal envelopes checked before replay code — 2026-10-10
+
+Shared SDK/CLI/export admission now rejects ambiguous terminal identity,
+result/reference/hash, error and limit headers, including typed LimitEntry
+headers. User result/limit payload contents remain opaque. Missing identity-free
+legacy terminal markers stay compatible; present envelopes are always checked.
+Full SDK race passes29.412s, with16 SDK/13 typed/32 preplugin controls. Restoring
+ordinary decoding fails all53 required leaves. [Evidence and prepared qualification](scale/graph-replay-terminal-envelope-2026-10-10/README.md).
+The shared-header qualifier remains live on its frozen source. Terminal full
+qualification is prepared, not accepted; all broader original gates remain open.
+
 ## CLI journal headers qualified; shared SDK extension running — 2026-10-10
 
 Frozen `78e2a0c` passes independent review:3374 exact Git inputs,67 full SDK race
