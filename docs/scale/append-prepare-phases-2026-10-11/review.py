@@ -4,6 +4,7 @@ from pathlib import Path
 out=Path(__file__).resolve().parent;repo=out.parents[2]
 sha=lambda b:hashlib.sha256(b).hexdigest()
 inputs=json.loads((out/'source-inputs.json').read_text())
+for n,h in json.loads((out/'qualification-inputs.json').read_text()).items():assert sha(Path(n).read_bytes())==h,n
 for n,h in inputs.items():assert sha((repo/n).read_bytes())==h,n
 unchanged=[n for n in inputs if n.startswith('sim/') and (n.endswith('.go') or n.startswith('sim/testdata/regressions/'))]
 stream=io.BytesIO(subprocess.check_output(['git','cat-file','--batch'],cwd=repo,input=''.join('d322671:'+n+'\n' for n in unchanged).encode()))
