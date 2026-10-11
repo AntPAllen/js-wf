@@ -456,7 +456,7 @@ func rawJournalCheckpointFixture(t *testing.T, encoding journal.Encoding, archiv
 	}
 	root.Application, _ = json.Marshal(cursor)
 	graph.Roots[destination] = root
-	return GraphJournalSnapshot{Graph: graph, Invocations: map[string]*jetstream.RawStreamMsg{"kind.id": source}, ReadProjection: func(ctx context.Context, key string) ([]byte, error) {
+	return GraphJournalSnapshot{Graph: graph, Invocations: map[string]*jetstream.RawStreamMsg{"kind.id": source}, Projections: projections, ReadProjection: func(ctx context.Context, key string) ([]byte, error) {
 		v, ok := projections[key]
 		if !ok {
 			return nil, fmt.Errorf("missing projection")

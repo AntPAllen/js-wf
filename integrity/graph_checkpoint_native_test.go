@@ -128,6 +128,18 @@ func TestNativeRawGraphCheckpointAudit(t *testing.T) {
 					t.Fatal(err)
 				}
 				audit("terminal", 1)
+				if _, err := state.Put(ctx, "orphan.id", []byte(`{"inv_seq":99}`)); err != nil {
+					t.Fatal(err)
+				}
+				if _, err := integrity.CheckNativeGraphJournals(ctx, js, ns); err == nil {
+					t.Fatal("native orphan projection accepted")
+				}
+				t.Logf("RAW_PROJECTION_CENSUS orphan=rejected R%d indexed=%v", replicas, indexed)
+				if err := state.Delete(ctx, "orphan.id"); err != nil {
+					t.Fatal(err)
+				}
+				audit("projection-tombstone", 1)
+
 			})
 		}
 	}

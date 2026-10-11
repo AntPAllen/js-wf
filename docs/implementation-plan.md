@@ -1,5 +1,32 @@
 # JetStream Durable Workflow Runtime — Implementation Plan
 
+## Complete isolated canonical projection census — 2026-10-11
+
+Raw snapshots now require a complete retained WF_STATE projection map. Native
+audits enumerate every live KV key/value before traversal, preserving stream
+stability checks. Each projection must have a live terminal or retired canonical
+generation witness, and required reader bytes must match the captured census.
+Orphans and projections on nonterminal journals are rejected. Surviving retired
+projections after source deletion receive metadata admission, still explicitly
+RetiredProjectionOnly. Logical delete tombstones are excluded.
+
+Baseline ca3f98b plus a test exposed an ignored orphan. Final race exit0 in34.422s
+passes all34 raw graph top-level tests,48 new physical census controls (16 positive/
+32 negative), the original orphan regression, and four real R1/R3 orphan-injection/
+delete-tombstone flows. A development run exposed stale Completed projections in
+two nonterminal signal fixtures and two new empty-input setup mistakes; failures
+and exact sources were retained before fixture corrections.
+
+Four native child/buffered-child race cases pass in73.719s, checking eight
+parent frames and four retired-child projections through the new census.424
+pre-run source inputs stayed unchanged across both commands; both actual test
+executables were captured and exact new CI guards passed locally. See [projection
+census evidence](scale/raw-projection-census-2026-10-11/README.md).
+
+Caller-provided completeness and full quiescence remain necessary; online namespace
+completeness, retired causal history, physical tombstone GC, all-peer/power and
+original broad acceptance remain open. Four live long campaigns predate the audit.
+
 ## Independent terminal outcome field presence — 2026-10-11
 
 The raw audit requires canonical outcome generation and rejects explicit null in

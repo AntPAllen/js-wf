@@ -1,0 +1,94 @@
+package integrity
+
+import (
+	"context"
+	"encoding/json"
+	"fmt"
+	"js-wf/internal/retainedgraph"
+	"js-wf/journal"
+	"strings"
+	"testing"
+)
+
+func TestRawGraphOrphanProjectionBaseline(t *testing.T) {
+	s, projections := rawJournalFixture(t, journal.JSON, false, nil, false, false)
+	projections["orphan.id"] = []byte(`{"inv_seq":99}`)
+	assertRawEnvelopeVerdict(t, s, false)
+}
+
+func TestRawGraphProjectionCensus(t *testing.T) {
+	for _, enc := range []journal.Encoding{journal.JSON, journal.ProtobufV1} {
+		for _, archive := range []bool{false, true} {
+			for _, control := range []string{"valid", "orphan", "bad-key", "missing-census", "reader-differs", "reader-missing", "missing-terminal", "empty-running", "running-projection", "retired-survivor", "retired-survivor-wrong-generation", "retired-cleared"} {
+				t.Run(fmt.Sprintf("%s/archive=%t/%s", enc, archive, control), func(t *testing.T) {
+					s, projections := rawJournalFixture(t, enc, archive, nil, false, false)
+					switch control {
+					case "orphan":
+						projections["orphan.id"] = []byte(`{"inv_seq":99}`)
+					case "bad-key":
+						projections["invalid.key.extra"] = []byte(`{"inv_seq":99}`)
+					case "missing-census":
+						s.Projections = nil
+					case "reader-differs":
+						s.ReadProjection = func(context.Context, string) ([]byte, error) { return []byte(`{"inv_seq":11}`), nil }
+					case "reader-missing":
+						s.ReadProjection = func(context.Context, string) ([]byte, error) { return nil, fmt.Errorf("missing") }
+					case "missing-terminal":
+						delete(projections, "kind.id")
+					}
+					if control == "empty-running" || control == "running-projection" || strings.HasPrefix(control, "retired-") {
+						for name, root := range s.Graph.Roots {
+							var c auditedGraphCursor
+							if err := json.Unmarshal(root.Application, &c); err != nil {
+								t.Fatal(err)
+							}
+							empty := retainedgraph.Root{Schema: retainedgraph.Schema, Frontier: []retainedgraph.Tree{}}
+							var retainedInput retainedgraph.Root
+							for _, stream := range root.Streams {
+								if stream.Name == "input" {
+									retainedInput = stream.Graph
+								}
+							}
+							root.Graph = empty
+							for i := range root.Streams {
+								root.Streams[i].Graph = empty
+							}
+							if strings.HasPrefix(control, "retired-") {
+								c.Retired = true
+								c.Purging = true
+								root.Token = ""
+								delete(s.Invocations, "kind.id")
+								if control == "retired-cleared" {
+									delete(projections, "kind.id")
+								}
+								if control == "retired-survivor-wrong-generation" {
+									projections["kind.id"] = []byte(`{"inv_seq":11}`)
+								}
+							} else {
+								c.Count = 0
+								c.Epoch = 0
+								c.Kind = ""
+								c.RetainedFrom = 0
+								c.Checkpoint = nil
+								if archive {
+									for i := range root.Streams {
+										if root.Streams[i].Name == "input" {
+											root.Streams[i].Graph = retainedInput
+										}
+									}
+								}
+								if control == "empty-running" {
+									delete(projections, "kind.id")
+								}
+							}
+							root.Application, _ = json.Marshal(c)
+							s.Graph.Roots[name] = root
+						}
+					}
+					valid := control == "valid" || control == "empty-running" || control == "retired-survivor" || control == "retired-cleared"
+					assertRawEnvelopeVerdict(t, s, valid)
+				})
+			}
+		}
+	}
+}

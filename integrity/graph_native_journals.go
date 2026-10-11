@@ -2,6 +2,7 @@ package integrity
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"strings"
 
@@ -54,9 +55,24 @@ func CheckNativeGraphJournals(ctx context.Context, js jetstream.JetStream, ns Gr
 	if err != nil {
 		return report, err
 	}
+	projections := map[string][]byte{}
+	projectionKeys, err := state.Keys(ctx)
+	if err != nil && !errors.Is(err, jetstream.ErrNoKeysFound) {
+		return report, err
+	}
+	for _, key := range projectionKeys {
+		if _, found := projections[key]; found {
+			return report, fmt.Errorf("duplicate/moving canonical projection key")
+		}
+		value, err := state.Get(ctx, key)
+		if err != nil {
+			return report, err
+		}
+		projections[key] = append([]byte(nil), value.Value()...)
+	}
 	_, err = checkNativeGraphSnapshot(ctx, js, ns, func(call context.Context, graph GraphReferenceSnapshot) (GraphReferenceReport, error) {
 		var checkErr error
-		report, checkErr = CheckGraphJournals(call, GraphJournalSnapshot{Graph: graph, Invocations: sources, ReadProjection: func(read context.Context, key string) ([]byte, error) {
+		report, checkErr = CheckGraphJournals(call, GraphJournalSnapshot{Graph: graph, Invocations: sources, Projections: projections, ReadProjection: func(read context.Context, key string) ([]byte, error) {
 			value, err := state.Get(read, key)
 			if err != nil {
 				return nil, err

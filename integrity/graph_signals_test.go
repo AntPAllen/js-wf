@@ -109,6 +109,8 @@ func rawSignalFixture(t *testing.T, enc journal.Encoding, control string) GraphJ
 		r.Streams = append(r.Streams, graphpublication.StreamGraph{Name: stream, Graph: retainedgraph.Root{Schema: retainedgraph.Schema, Count: 1, Frontier: []retainedgraph.Tree{{Link: put(node, stream, "node", 0)}}}})
 	}
 	if strings.HasPrefix(control, "consumed-") {
+		// This fixture replaces Completed with SignalConsumed. It has no terminal projection.
+		delete(s.Projections, "kind.id")
 		event := auditedCheckpointSignal{Sequence: 7, Name: "gate", Ref: "graph-signal-" + input.InputSHA256, Hash: input.InputSHA256}
 		event.Canonical = &struct {
 			Index uint64 `json:"index"`

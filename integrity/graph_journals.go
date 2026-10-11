@@ -22,6 +22,7 @@ import (
 type GraphJournalSnapshot struct {
 	Graph          GraphReferenceSnapshot
 	Invocations    map[string]*jetstream.RawStreamMsg // keys are type.id
+	Projections    map[string][]byte                  // complete retained WF_STATE census, keys type.id
 	ReadProjection func(context.Context, string) ([]byte, error)
 }
 
@@ -97,11 +98,34 @@ func graphDestinationForKey(key string) string { return "journal/" + digest([]by
 // history, signal binding/index semantics, orphan projections,
 // lease history, client linearizability and I4/I5 remain separate audits.
 func CheckGraphJournals(ctx context.Context, snapshot GraphJournalSnapshot) (report GraphJournalReport, err error) {
-	if snapshot.Invocations == nil || snapshot.ReadProjection == nil {
+	if snapshot.Invocations == nil || snapshot.Projections == nil || snapshot.ReadProjection == nil {
 		return report, fmt.Errorf("missing graph journal source/projection reader")
 	}
 	sources := map[string]*jetstream.RawStreamMsg{}
 	keys := map[string]string{}
+	projectionReads := map[string]bool{}
+	for key := range snapshot.Projections {
+		parts := strings.Split(key, ".")
+		if len(parts) != 2 || identity.Validate(parts[0], parts[1]) != nil {
+			return report, fmt.Errorf("invalid graph projection key")
+		}
+		keys[graphDestinationForKey(key)] = key
+	}
+	readProjection := func(call context.Context, key string) ([]byte, error) {
+		captured, ok := snapshot.Projections[key]
+		if !ok {
+			return nil, fmt.Errorf("projection absent from census: %s", key)
+		}
+		current, err := snapshot.ReadProjection(call, key)
+		if err != nil {
+			return nil, err
+		}
+		if !bytes.Equal(current, captured) {
+			return nil, fmt.Errorf("projection changed from census: %s", key)
+		}
+		projectionReads[key] = true
+		return captured, nil
+	}
 	for key, source := range snapshot.Invocations {
 		parts := strings.Split(key, ".")
 		if len(parts) != 2 || identity.Validate(parts[0], parts[1]) != nil || source == nil || source.Sequence == 0 || source.Subject != "wf.inv."+key {
@@ -159,17 +183,19 @@ func CheckGraphJournals(ctx context.Context, snapshot GraphJournalSnapshot) (rep
 				if c.Purging || source.Sequence != c.Invocation || c.Start != nil && !auditStartSource(*c.Start, source) {
 					return report, fmt.Errorf("%s: invalid retired invocation source", destination)
 				}
+				consumed[destination] = true
+			}
+			if sources[destination] != nil || snapshot.Projections[key] != nil {
 				// Direct terminal Retire clears forests without purging source
 				// or result. Exact terminal bytes no longer have a live journal
 				// witness: report projection-only verification explicitly.
-				raw, err := snapshot.ReadProjection(ctx, key)
+				raw, err := readProjection(ctx, key)
 				if err != nil {
 					return report, err
 				}
 				if err := auditRetiredProjection(raw, c.Invocation, c.Kind); err != nil {
 					return report, fmt.Errorf("%s: invalid retired projection: %w", destination, err)
 				}
-				consumed[destination] = true
 				report.RetiredProjectionOnly++
 			}
 			report.Retired++
@@ -428,7 +454,7 @@ func CheckGraphJournals(ctx context.Context, snapshot GraphJournalSnapshot) (rep
 		if state.cursor.Count == 0 && (state.cursor.Epoch != 0 || state.cursor.Kind != "") {
 			return report, fmt.Errorf("%s: invalid empty canonical journal", destination)
 		}
-		_, terminal, err := state.journal.finish(destination, func() ([]byte, error) { return snapshot.ReadProjection(ctx, state.key) })
+		_, terminal, err := state.journal.finish(destination, func() ([]byte, error) { return readProjection(ctx, state.key) })
 		if err != nil {
 			return report, err
 		}
@@ -436,6 +462,11 @@ func CheckGraphJournals(ctx context.Context, snapshot GraphJournalSnapshot) (rep
 		report.Entries += state.journal.count
 		if terminal {
 			report.Terminal++
+		}
+	}
+	for key := range snapshot.Projections {
+		if !projectionReads[key] {
+			return report, fmt.Errorf("projection without canonical terminal witness: %s", key)
 		}
 	}
 	return report, nil
