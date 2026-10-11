@@ -1,5 +1,16 @@
 # Full current-source Tier-1 qualification — 2026-10-11
 
+## Same-source full race launched — 2026-10-11
+
+Following independently accepted normal1000 atb4fe445, the separate prepared race
+unit started with InvocationID4505c4a1f7f64518a77d6a0a83c41a4c,
+supervisor229401 and driver229425. race-launch.json binds the loaded command,
+service limits and supervisor bytes. Eight sequential disjoint package processes
+use1000 seeds,159 families and860 saved traces with GOMAXPROCS2/GOMEMLIMIT512MiB,
+one-core quota,2GB service memory and per-process300m watchdog. The prior-source
+race and classified100000-entry race remain live; no result is claimed at launch.
+Terminal review uses qualification-review.py race against this same unit.
+
 ## Accepted frozen normal1000 — 2026-10-11
 
 The prepared unit finished with actual driver/supervisor exit0 at02:51:48UTC,
