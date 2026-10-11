@@ -119,6 +119,9 @@ func auditCheckpointFrame(ctx context.Context, graph GraphReferenceSnapshot, sta
 		if err := auditSDKCheckpointPromises(ctx, graph, state, frame); err != nil {
 			return err
 		}
+		if err := auditSDKCheckpointTimers(state, frame); err != nil {
+			return err
+		}
 		if err := auditSDKCheckpointSignals(state, frame); err != nil {
 			return err
 		}

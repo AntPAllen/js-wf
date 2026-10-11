@@ -1,5 +1,19 @@
 # JetStream Durable Workflow Runtime — Implementation Plan
 
+## SDK cancelled timer sets reconstructed from history — 2026-10-11
+
+The independent auditor binds timer handle actions to creation at their absolute
+SDK position, name, deadline and clock domain, rejects actions after cancellation
+or firing, and verifies the exact checkpoint cancellation set with no live timer.
+Eight component positives and14 corruption controls pass race in1.031s;
+combined state/promise/signal/metadata regressions pass in1.231s.
+Native R1/R3Domain SDK flows pass in26.987s with no handle timers:
+compatibility evidence only. CI requires every new timer component case.
+[Evidence and remaining scope](scale/raw-graph-sdk-timer-history-2026-10-11/README.md).
+
+Clock readiness, native timer workflows, physical timer corruption fixtures and
+original acceptance remain open. Both frozen campaigns retain earlier sources.
+
 ## SDK checkpoint signal sets reconstructed from history — 2026-10-11
 
 The raw auditor now distinguishes worker delivery from SDK use, verifies oldest

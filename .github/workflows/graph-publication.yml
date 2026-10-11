@@ -211,7 +211,7 @@ jobs:
         shell: bash
         run: |
           set -o pipefail
-          go test -race -p=1 ./integrity -run '^(TestRawGraphReferencesAndIndependentCorruptionControls|TestNativeRawGraphReferenceAuditQuiescentReaders|TestRawGraphJournalGenerationsOutcomesAndArchive|TestRawGraphCheckpointPointerAndFrameBindings|TestNativeRawGraphCheckpointAudit|TestRawGraphCheckpointMaterializedState|TestRawGraphCheckpointPromiseOwnership|TestRawGraphCheckpointMetadataBindings|TestRawGraphRetiredSourceProjectionScope|TestRawGraphSignalReservationAndBinding|TestRawGraphSignalIndexIndependentPrefixes|TestRawGraphSignalIndexProductionPackets|TestRawGraphCheckpointSDKStateHistory|TestRawGraphCheckpointPromiseHistory|TestRawGraphCheckpointSDKSignalHistory)$' -count=1 -v -timeout=5m 2>&1 | tee raw-graph-audit.log
+          go test -race -p=1 ./integrity -run '^(TestRawGraphReferencesAndIndependentCorruptionControls|TestNativeRawGraphReferenceAuditQuiescentReaders|TestRawGraphJournalGenerationsOutcomesAndArchive|TestRawGraphCheckpointPointerAndFrameBindings|TestNativeRawGraphCheckpointAudit|TestRawGraphCheckpointMaterializedState|TestRawGraphCheckpointPromiseOwnership|TestRawGraphCheckpointMetadataBindings|TestRawGraphRetiredSourceProjectionScope|TestRawGraphSignalReservationAndBinding|TestRawGraphSignalIndexIndependentPrefixes|TestRawGraphSignalIndexProductionPackets|TestRawGraphCheckpointSDKStateHistory|TestRawGraphCheckpointPromiseHistory|TestRawGraphCheckpointSDKSignalHistory|TestRawGraphCheckpointSDKTimerHistory)$' -count=1 -v -timeout=5m 2>&1 | tee raw-graph-audit.log
           python3 - <<'PY'
           import pathlib, re
           log = pathlib.Path('raw-graph-audit.log').read_text()
@@ -227,6 +227,9 @@ jobs:
           assert '--- PASS: TestRawGraphCheckpointMetadataBindings ' in log
           assert '--- PASS: TestRawGraphCheckpointSDKStateHistory ' in log
           assert '--- PASS: TestRawGraphCheckpointPromiseHistory ' in log
+          assert '--- PASS: TestRawGraphCheckpointSDKTimerHistory ' in log
+          for mode in ('absolute-position-and-deadline', 'cancel', 'await', 'timer-select', 'many-select', 'signal-then-cancel', 'carried-cancel', 'empty', 'missing-creation', 'wrong-name', 'wrong-deadline', 'wrong-domain', 'unconfirmed-cancel', 'cancel-after-fire', 'await-after-cancel', 'duplicate-cancel', 'live-checkpoint', 'omitted-cancel', 'fabricated-cancel', 'duplicate-cancel-id', 'bad-select-index', 'unselected-dead-timer'):
+              assert f'--- PASS: TestRawGraphCheckpointSDKTimerHistory/{mode} ' in log
           assert '--- PASS: TestRawGraphCheckpointSDKSignalHistory ' in log
           for mode in ('signal', 'call', 'timer_signal_select', 'select_many', 'timer-branch', 'many-timer-branch', 'cached-promise', 'different-name-order', 'cursor-advanced', 'cursor-regressed', 'consumed-omitted', 'consumed-fabricated', 'consumed-duplicate', 'pending-omitted', 'pending-extra', 'pending-used', 'pending-name', 'pending-inline-bytes', 'pending-owned-bytes', 'pending-duplicate', 'pending-not-arrived', 'selection-missing', 'selection-name', 'selection-reused', 'selection-skips-oldest', 'timer-branch-invalid', 'timer-with-signal', 'case-index-missing', 'case-index-invalid', 'case-kind-invalid', 'many-timer-with-signal'):
               assert f'--- PASS: TestRawGraphCheckpointSDKSignalHistory/{mode} ' in log

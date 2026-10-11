@@ -73,6 +73,7 @@ type auditedGraphJournal struct {
 	sdkState            map[string]json.RawMessage
 	sdkSignals          map[uint64]auditedPromiseSignal
 	sdkUsedSignals      map[uint64]bool
+	sdkTimers           map[uint64]auditedSDKTimer
 	sdkArrivalQueue     map[string][]uint64
 	sdkArrivalPositions map[string]int
 	promiseCandidates   map[string][]auditedPromiseSignal
@@ -297,6 +298,9 @@ func CheckGraphJournals(ctx context.Context, snapshot GraphJournalSnapshot) (rep
 			return err
 		}
 		if err := observeSDKSignalSelection(state, entry); err != nil {
+			return err
+		}
+		if err := observeSDKTimerOperation(state, entry); err != nil {
 			return err
 		}
 		if entry.Kind == journal.StepRequested || entry.Kind == journal.StepCompleted {
