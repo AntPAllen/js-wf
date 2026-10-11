@@ -1,5 +1,28 @@
 # Implementation status against the supplied plan
 
+## Reject conflicting retained worker ownership before handlers — 2026-10-11
+
+Worker admission now rejects different named workers within the same nonzero
+epoch. Omitted worker IDs do not erase prior ownership evidence; zero-epoch and
+legacy omitted-ID histories remain compatible. This applies existing offline
+replay/integrity semantics to the actual worker execution path.
+
+Baseline8c22778 admits all ten legacy/canonical ownership conflicts to handlers;
+12 positive histories pass. Final normal/race commands cover22 ownership controls
+plus all60 prior metadata controls, with exact CI assertions. Modeled leases are
+actually acquired/released before positive takeover; negative histories produce
+zero handler/effect calls and unchanged journal lengths. Native R1/R3 child/
+buffered-child compatibility uses independent raw SDK auditing. Source inputs,
+actual exits and final executables are independently reviewed; a rejected normal
+observer binding and its corrected parent-PID observation are retained. See
+[epoch ownership evidence](scale/worker-epoch-owner-admission-2026-10-11/README.md).
+
+The corpus remains162 families/922 pins. Five older campaigns remain active and
+predate this change. Contradictory retained owner IDs are now rejected, but lease
+authority, missing/compacted ownership evidence, complete I1–I6 causality, full
+current qualification and original fault/scale/soak/power/client/rollout gates
+remain open.
+
 ## Worker SDK envelopes admitted before handler execution — 2026-10-11
 
 Worker.execute now preflights retained StepRequested/StepCompleted envelopes

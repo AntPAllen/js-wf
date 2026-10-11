@@ -949,7 +949,16 @@ func (w *Worker) execute(ctx context.Context, typ, id string, l *lease.Lease, wa
 	// Admit all retained SDK envelopes before terminal repair, signal draining,
 	// or user code. Per-step replay checks alone run after handler admission and
 	// cannot protect side effects outside SDK callbacks.
+	epochWorkers := make(map[uint64]string)
 	for _, record := range records {
+		// An omitted legacy worker ID supplies no ownership evidence, but must
+		// not erase a prior named owner within the same nonzero epoch.
+		if record.Epoch != 0 && record.WorkerID != "" {
+			if prior := epochWorkers[record.Epoch]; prior != "" && prior != record.WorkerID {
+				return wf.ErrCorruptJournal
+			}
+			epochWorkers[record.Epoch] = record.WorkerID
+		}
 		switch record.Kind {
 		case journal.StepRequested:
 			var request stepwire.Request
