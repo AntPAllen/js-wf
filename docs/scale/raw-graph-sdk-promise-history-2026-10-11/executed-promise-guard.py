@@ -1,0 +1,3 @@
+assert '--- PASS: TestRawGraphCheckpointPromiseHistory ' in log
+for mode in ('signal-inline', 'signal-external', 'explicit-inline', 'explicit-external', 'ambiguous-cache-omitted', 'cached-select-reuse', 'compacted-outcome', 'multiple-ambiguous-candidates', 'multiple-ambiguous-later', 'outcome-changed', 'name-changed', 'no-selection', 'child-declaration', 'child-generation', 'source-unowned', 'source-wrong-bytes', 'source-missing', 'external-unowned', 'explicit-cache-omitted', 'case-index-missing', 'cached-without-history', 'explicit-cache-reconsumed', 'arrival-missing'):
+    assert f'--- PASS: TestRawGraphCheckpointPromiseHistory/{mode} ' in log

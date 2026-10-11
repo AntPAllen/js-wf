@@ -71,6 +71,9 @@ type auditedGraphJournal struct {
 	signalKeys        map[journal.GraphSignalRequest]bool
 	signalTokens      map[string]bool
 	sdkState          map[string]json.RawMessage
+	sdkSignals        map[uint64]auditedPromiseSignal
+	promiseCandidates map[string][]auditedPromiseSignal
+	requiredPromises  map[string][]auditedPromiseSignal
 	inputIndex        auditedSignalIndex
 	queueIndex        auditedSignalIndex
 }
@@ -287,6 +290,9 @@ func CheckGraphJournals(ctx context.Context, snapshot GraphJournalSnapshot) (rep
 		if err := auditSDKStateOperation(call, graph, state, entry, record.Record.Blobs); err != nil {
 			return err
 		}
+		if err := observeSDKPromiseSelection(state, entry); err != nil {
+			return err
+		}
 		if entry.Kind == journal.StepRequested || entry.Kind == journal.StepCompleted {
 			state.sdkPosition++
 		}
@@ -323,6 +329,7 @@ func CheckGraphJournals(ctx context.Context, snapshot GraphJournalSnapshot) (rep
 				}
 				state.signalEvents = append(state.signalEvents, signal)
 			}
+			observeSDKPromiseSignal(state, signal, record.Record.Blobs)
 			if signal.Child != nil {
 				state.childSignals[signal.Sequence] = signal
 			}

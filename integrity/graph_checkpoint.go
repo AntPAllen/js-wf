@@ -116,6 +116,9 @@ func auditCheckpointFrame(ctx context.Context, graph GraphReferenceSnapshot, sta
 		if err := auditSDKCheckpointState(state.sdkState, frame.State); err != nil {
 			return err
 		}
+		if err := auditSDKCheckpointPromises(ctx, graph, state, frame); err != nil {
+			return err
+		}
 	}
 	// The checkpoint completion must own the transitive promise payloads, not
 	// merely mention hashes previously reachable somewhere in the journal.

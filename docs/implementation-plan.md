@@ -1,5 +1,21 @@
 # JetStream Durable Workflow Runtime — Implementation Plan
 
+## SDK checkpoint promise provenance audited — 2026-10-11
+
+Saved promise outcomes now require a preceding selected child signal, matching
+owned original bytes, child declaration/generation and original result ownership.
+Explicit select_many promise selections require a cache entry and preserve its
+provenance across reuse. Nine component positives and14 negative controls pass
+race in1.028s; six actual SDK R1/R3Domain cases pass in85.974s.
+[Evidence and observability limit](scale/raw-graph-sdk-promise-history-2026-10-11/README.md).
+
+AwaitPromise and ordinary AwaitSignal share journal kind signal. Complete cache
+census for those ambiguous requests still requires workflow-level replay evidence
+or a durable semantic distinction. The auditor preserves that ambiguity and does
+not claim full I4. Full signal/timer history, historical checkpoints and original
+acceptance remain open. Both frozen qualification services remain live.
+
+
 ## SDK checkpoint state reconstructed from journal history — 2026-10-11
 
 The independent checker now reconstructs completed state writes and validates
