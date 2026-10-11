@@ -25,6 +25,16 @@ type GraphReferenceSnapshot struct {
 	Fences       map[string]graphpublication.Fence
 	LoadObject   func(context.Context, string, int) ([]byte, error)
 	PayloadLimit int
+	// VisitRecord runs after validating each raw leaf and its payload grants.
+	// ReaderID is empty for the current live forest. Archive precedes the live
+	// journal, so callers can reduce logical journal order without prefix buffers.
+	VisitRecord func(context.Context, GraphAuditRecord) error
+}
+
+type GraphAuditRecord struct {
+	Destination, Stream, ReaderID string
+	Index                         uint64
+	Record                        retainedgraph.Record
 }
 
 type GraphReferenceReport struct {
@@ -79,8 +89,14 @@ func checkGraphReferences(ctx context.Context, snapshot GraphReferenceSnapshot, 
 		if err := checkGraphStreams(root.Streams, root.Schema); err != nil {
 			return err
 		}
-		graphs := []graphpublication.StreamGraph{{Graph: root.Graph}}
-		graphs = append(graphs, root.Streams...)
+		type auditForest struct {
+			graphpublication.StreamGraph
+			reader string
+		}
+		graphs := []auditForest{{StreamGraph: graphpublication.StreamGraph{Graph: root.Graph}}}
+		for _, stream := range root.Streams {
+			graphs = append(graphs, auditForest{StreamGraph: stream})
+		}
 		seenReaders := map[string]bool{}
 		for _, pin := range root.Readers {
 			report.ReaderPins++
@@ -91,9 +107,17 @@ func checkGraphReferences(ctx context.Context, snapshot GraphReferenceSnapshot, 
 			if err := checkGraphStreams(pin.Streams, root.Schema); err != nil {
 				return err
 			}
-			graphs = append(graphs, graphpublication.StreamGraph{Graph: pin.Graph})
-			graphs = append(graphs, pin.Streams...)
+			graphs = append(graphs, auditForest{StreamGraph: graphpublication.StreamGraph{Graph: pin.Graph}, reader: pin.ID})
+			for _, stream := range pin.Streams {
+				graphs = append(graphs, auditForest{StreamGraph: stream, reader: pin.ID})
+			}
 		}
+		sort.SliceStable(graphs, func(i, j int) bool {
+			if graphs[i].reader != graphs[j].reader {
+				return graphs[i].reader < graphs[j].reader
+			}
+			return graphs[i].Name == "archive" && graphs[j].Name != "archive"
+		})
 		for _, forest := range graphs {
 			report.Forests++
 			graph := forest.Graph
@@ -180,6 +204,11 @@ func checkGraphReferences(ctx context.Context, snapshot GraphReferenceSnapshot, 
 							edges[node.First] = map[retainedgraph.Link]bool{}
 						}
 						edges[node.First][link] = true
+					}
+					if snapshot.VisitRecord != nil {
+						if err := snapshot.VisitRecord(ctx, GraphAuditRecord{Destination: destination, Stream: forest.Name, ReaderID: forest.reader, Index: node.First, Record: *node.Record}); err != nil {
+							return err
+						}
 					}
 					report.Records++
 					leaves++

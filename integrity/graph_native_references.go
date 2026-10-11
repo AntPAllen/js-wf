@@ -26,6 +26,11 @@ type GraphAuditNamespace struct {
 // the whole audit. A changed authority high-water mark rejects the observation;
 // stability alone does not certify quiescence, quorum or VM disk durability.
 func CheckNativeGraphReferences(ctx context.Context, js jetstream.JetStream, ns GraphAuditNamespace) (GraphReferenceReport, error) {
+	return checkNativeGraphSnapshot(ctx, js, ns, CheckGraphReferences)
+}
+
+// The callback runs inside the same raw authority/object high-water window.
+func checkNativeGraphSnapshot(ctx context.Context, js jetstream.JetStream, ns GraphAuditNamespace, check func(context.Context, GraphReferenceSnapshot) (GraphReferenceReport, error)) (GraphReferenceReport, error) {
 	var report GraphReferenceReport
 	if js == nil || ns.AuthorityStream == "" || ns.AuthorityPrefix == "" || ns.ObjectBucket == "" || ns.PayloadLimit <= 0 || ns.PayloadLimit == math.MaxInt {
 		return report, fmt.Errorf("invalid native graph audit namespace/bounds")
@@ -164,7 +169,7 @@ func CheckNativeGraphReferences(ctx context.Context, js jetstream.JetStream, ns 
 		}
 		return data, nil
 	}
-	report, err = CheckGraphReferences(ctx, snapshot)
+	report, err = check(ctx, snapshot)
 	if err != nil {
 		return report, err
 	}

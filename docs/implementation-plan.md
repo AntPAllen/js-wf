@@ -1,5 +1,27 @@
 # JetStream Durable Workflow Runtime — Implementation Plan
 
+## Raw canonical journal invariants added — 2026-10-11
+
+The independent raw graph audit now verifies canonical invocation/Start input,
+logical archive/live journal ordering, epoch/worker and step outcomes, terminal
+generation/result ownership, and exact terminal projections. All six native R3
+retention worker SIGKILL cases pass with journal and reference receipts. Focused
+race also passes four JSON/protobuf whole/archive cases and sixteen semantic
+corruption controls; CI requires these cases and all six receipts.
+[Contract, evidence and limits](scale/raw-graph-journal-audit-2026-10-11/README.md).
+
+Checkpoint frame/pointer validation, protected-reader semantic replay, signal
+binding/index contents, orphan projections, lease/client histories and complete
+native scale/disk audits remain open. This is not full cursor schema validation,
+I1–I6 coverage, phase completion, or admission/online-collection enablement.
+
+The frozen f15a573 complete159 normal is independently accepted: 159,000 seed
+bodies, 860 traces, 226 top-level passes, eight package processes and actual exit0.
+This source predates the new auditor; current-source complete race and extended
+campaigns remain open. The original actual100000-entry normal is still live,
+verifying its second archive under its unchanged invocation; no acceptance or
+race result is claimed.
+
 ## Raw canonical graph reference audits integrated — 2026-10-11
 
 A new integrity API independently walks raw frontiers/nodes/physical receipts and

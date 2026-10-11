@@ -329,10 +329,12 @@ func retentionSDKKill(t *testing.T, cut uint64, reuse bool) {
 			t.Fatal("source not retired", retired, err)
 		}
 	}
-	audit, err := integrity.CheckNativeGraphReferences(ctx, js, integrity.GraphAuditNamespace{AuthorityStream: cfg.AuthorityStream, AuthorityPrefix: cfg.AuthorityPrefix, ObjectBucket: cfg.ObjectBucket, PayloadLimit: journal.DefaultGraphPayloadLimit})
+	runtimeAudit, err := integrity.CheckNativeGraphJournals(ctx, js, integrity.GraphAuditNamespace{AuthorityStream: cfg.AuthorityStream, AuthorityPrefix: cfg.AuthorityPrefix, ObjectBucket: cfg.ObjectBucket, PayloadLimit: journal.DefaultGraphPayloadLimit})
 	if err != nil {
 		t.Fatal("raw canonical reference audit", err)
 	}
+	audit := runtimeAudit.References
 	t.Logf("RAW_GRAPH_AUDIT roots=%d forests=%d records=%d nodes=%d payload_edges=%d", audit.Roots, audit.Forests, audit.Records, audit.Nodes, audit.PayloadEdges)
+	t.Logf("RAW_JOURNAL_AUDIT invocations=%d journals=%d entries=%d terminals=%d retired=%d pending=%d", runtimeAudit.Invocations, runtimeAudit.Journals, runtimeAudit.Entries, runtimeAudit.Terminal, runtimeAudit.Retired, runtimeAudit.Pending)
 	t.Logf("SIGKILL pid=%d cut=%d kind=%s reuse=%v leaseTTL=%s ackWait=%s accepted_prefix=%d final_entries=%d", child.Process.Pid, cut, wantKind, reuse, provision.LeaseTTL, worker.DefaultAckWait, len(before), len(after))
 }

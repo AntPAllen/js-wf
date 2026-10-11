@@ -137,7 +137,7 @@ jobs:
         shell: bash
         run: |
           set -o pipefail
-          go test -race -p=1 ./integrity -run '^(TestRawGraphReferencesAndIndependentCorruptionControls|TestNativeRawGraphReferenceAuditQuiescentReaders)$' -count=1 -v -timeout=5m 2>&1 | tee raw-graph-audit.log
+          go test -race -p=1 ./integrity -run '^(TestRawGraphReferencesAndIndependentCorruptionControls|TestNativeRawGraphReferenceAuditQuiescentReaders|TestRawGraphJournalGenerationsOutcomesAndArchive)$' -count=1 -v -timeout=5m 2>&1 | tee raw-graph-audit.log
           python3 - <<'PY'
           import pathlib, re
           log = pathlib.Path('raw-graph-audit.log').read_text()
@@ -146,6 +146,10 @@ jobs:
               for indexed in ('false', 'true'):
                   assert f'--- PASS: TestNativeRawGraphReferenceAuditQuiescentReaders/R{replicas}/indexed{indexed} ' in log
           assert '--- PASS: TestRawGraphReferencesAndIndependentCorruptionControls ' in log
+          assert '--- PASS: TestRawGraphJournalGenerationsOutcomesAndArchive ' in log
+          for encoding in ('json', 'protobuf-v1'):
+              for archived in ('false', 'true'):
+                  assert f'--- PASS: TestRawGraphJournalGenerationsOutcomesAndArchive/{encoding}/archive{archived} ' in log
           PY
       - if: always()
         uses: actions/upload-artifact@v4
@@ -180,6 +184,7 @@ jobs:
           receipts = re.findall(r'SIGKILL pid=\d+ cut=([1-4]) kind=\w+ reuse=(false|true) leaseTTL=\S+ ackWait=\S+ accepted_prefix=\d+ final_entries=\d+', log)
           assert len(receipts) == 6 and {(int(cut), reuse) for cut, reuse in receipts} == expected
           assert len(re.findall(r'RAW_GRAPH_AUDIT roots=\d+ forests=\d+ records=\d+ nodes=\d+ payload_edges=\d+', log)) == 6
+          assert len(re.findall(r'RAW_JOURNAL_AUDIT invocations=\d+ journals=\d+ entries=\d+ terminals=\d+ retired=\d+ pending=0', log)) == 6
           PY
       - if: always()
         uses: actions/upload-artifact@v4
