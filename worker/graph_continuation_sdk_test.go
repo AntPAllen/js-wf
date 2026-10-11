@@ -439,7 +439,7 @@ func testNativeGraphContinuationSDKFlow(t *testing.T, domain string, partition, 
 		}
 	}
 	var observe func(OperationEvent)
-	if childFailure || pendingChild {
+	if childPromiseFlow || pendingChild {
 		observe = func(event OperationEvent) {
 			if event.Operation == "journal_append" || event.Error != "" {
 				t.Logf("SDK_OPERATION op=%s type=%s index=%d kind=%s duration=%s error=%q sdk_requests=%d", event.Operation, event.Type, event.JournalIndex, event.JournalKind, event.Duration, event.Error, requests.Load())

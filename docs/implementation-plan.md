@@ -1,5 +1,34 @@
 # JetStream Durable Workflow Runtime — Implementation Plan
 
+## Frozen full159 race qualification accepted — 2026-10-11
+
+Source 00eeb130 completed full race1000 at 06:55:48 UTC with actual exits 0.
+Independent review verifies 3532 Git inputs, one retained race executable,
+eight sequential disjoint package processes, 159,000 seed bodies, 860 saved traces
+and 226 top-level passes (two trace-only inventory skips). Compressed terminal
+receipts are preserved. See [frozen full159 race evidence](scale/raw-graph-journal-audit-2026-10-11/README.md).
+
+This qualifies that frozen source only; later admission fixes and full162 remain
+unqualified. Three newer full-family race jobs and full162 normal remain running.
+Original native release gates and uncertain append investigations remain open.
+
+## Append request deadline cuts distinguish publication states — 2026-10-11
+
+Six deterministic in-memory component controls now cover grant-read failure,
+precommit CAS failure, committed acknowledgment loss with exact readback,
+unavailable readback, cancellation after commit and replacement before readback.
+Normal/race pass these controls and four existing protocol groups (22 named PASS
+records each). Two exact guard-removal overlays fail the intended negative controls.
+The production append protocol remains unchanged; no automatic uncertain retry
+was added. The native SDK fixture now traces successful-child operations as well
+as failures, and compiles; native rerun and failure-cause confirmation remain open.
+
+See [request deadline evidence](scale/graph-append-request-deadline-2026-10-11/README.md).
+This is component coverage, not another seeded family or native conformance proof.
+Worker fresh-delivery recovery, archived-child native compatibility, 100,000-entry
+race qualification and the original release gates remain open. Public continuation
+remains off. Historical SDK admission evidence binds the pre-observer 7fffe3a snapshot.
+
 ## SDK child consumption guarded; native compatibility open — 2026-10-11
 
 Call, AwaitPromise and Select validate child metadata and result references before

@@ -1,0 +1,18 @@
+=== RUN   TestGraphAppendRequestDeadlineRecovery
+=== RUN   TestGraphAppendRequestDeadlineRecovery/grant_read
+    append_deadline_test.go:63: uncertain request incorrectly accepted {js-wf-graph-publication-v1 1 grant-read-1 {js-wf-retained-append-graph-v1 1 [{0 0 {07ea4cf207977b5ac822d3b02d96581d2e343702e2c61ced81be42018edf934b {1 07ea4cf207977b5ac822d3b02d96581d2e343702e2c61ced81be42018edf934b/1/6772616e742d726561642d31-6772616e742d726561642d33}}}]} [] [] []} <nil>
+=== RUN   TestGraphAppendRequestDeadlineRecovery/cas_not_committed
+=== RUN   TestGraphAppendRequestDeadlineRecovery/cas_committed_readback
+=== RUN   TestGraphAppendRequestDeadlineRecovery/cas_committed_unknown
+=== RUN   TestGraphAppendRequestDeadlineRecovery/cas_committed_cancelled
+=== RUN   TestGraphAppendRequestDeadlineRecovery/cas_committed_replaced
+--- FAIL: TestGraphAppendRequestDeadlineRecovery (0.00s)
+    --- FAIL: TestGraphAppendRequestDeadlineRecovery/grant_read (0.00s)
+    --- PASS: TestGraphAppendRequestDeadlineRecovery/cas_not_committed (0.00s)
+    --- PASS: TestGraphAppendRequestDeadlineRecovery/cas_committed_readback (0.00s)
+    --- PASS: TestGraphAppendRequestDeadlineRecovery/cas_committed_unknown (0.00s)
+    --- PASS: TestGraphAppendRequestDeadlineRecovery/cas_committed_cancelled (0.00s)
+    --- PASS: TestGraphAppendRequestDeadlineRecovery/cas_committed_replaced (0.00s)
+FAIL
+FAIL	js-wf/internal/graphpublication	0.034s
+FAIL

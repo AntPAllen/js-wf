@@ -1,5 +1,21 @@
 # Raw canonical journal audit — 2026-10-11
 
+## Frozen full159 race accepted — 2026-10-11
+
+The unit closed at 06:55:48 UTC with actual driver/supervisor exit 0 and
+InvocationID f659459b2143405780de06e6d65159ee. Independent review verifies
+3532 exact Git inputs, the retained race executable, all eight sequential disjoint
+package processes, 159,000 completed bodies, 860 saved traces and 226 top-level
+passes. Two trace-only inventory skips are recorded by the inventory checker.
+The frozen source is 00eeb1306ed0264a7f50e6eb3014b4a58780aebb; later admission
+changes and the additional three seeded families are outside this proof.
+
+Compressed nonbinary terminal receipts are preserved in race-terminal and bound
+by race-terminal-files.json. The executable and frozen checkout remain local.
+Re-run qualification-review.py race against the original closed campaign; no
+replacement race was launched. Native fault/scale/soak/adoption and the current
+source release gates remain separate.
+
 `integrity.CheckGraphJournals` extends the independent raw reference walk with
 canonical invocation sources, Start input bytes/pointer headers, generation,
 contiguous logical journal indices across archive and live forests, epoch/worker
