@@ -1,0 +1,153 @@
+package worker_test
+
+import (
+	"bytes"
+	"context"
+	"crypto/sha256"
+	"encoding/hex"
+	"encoding/json"
+	"testing"
+	"time"
+
+	"github.com/nats-io/nats.go"
+	"js-wf/client"
+	"js-wf/identity"
+	"js-wf/journal"
+	"js-wf/lease"
+	"js-wf/provision"
+	"js-wf/sim"
+	"js-wf/wf"
+	"js-wf/worker"
+)
+
+func TestLegacyHeldTerminalResultBeforeAck(t *testing.T) {
+	for _, mode := range []string{"healthy", "unavailable", "wrong_bytes", "inline_conflict", "missing_hash", "hash_without_ref", "failed_external", "failed_inline", "failed_empty"} {
+		t.Run(mode, func(t *testing.T) {
+			ctx := context.Background()
+			schedule := sim.NewScheduler(1)
+			transport := sim.NewWorkerTransport(schedule, 3*time.Second)
+			c := client.NewWithSignalPorts(transport.SignalTransport, transport.SignalTransport)
+			parentID := "result_parent"
+			for identity.Partition("parent", parentID, provision.Partitions) == identity.Partition("test", "held_result", provision.Partitions) {
+				parentID += "x"
+			}
+			parentSeq, err := transport.PublishInvocation(ctx, &nats.Msg{Subject: identity.InvocationSubject("parent", parentID), Data: []byte(`7`)})
+			if err != nil {
+				t.Fatal(err)
+			}
+			h, err := c.StartChild(ctx, "test", "held_result", []byte(`7`), "parent", parentID, parentSeq, "done")
+			if err != nil {
+				t.Fatal(err)
+			}
+			body := []byte(`42`)
+			sum := sha256.Sum256(body)
+			hash := hex.EncodeToString(sum[:])
+			ref := "held-result-" + hash
+			blobs := &terminalResultBlobPort{ResultBlobTransport: sim.NewResultBlobTransport(schedule)}
+			if err = blobs.PutBytes(ctx, ref, body); err != nil {
+				t.Fatal(err)
+			}
+			outcome := wf.Outcome{InvSeq: h.InvSeq, ResultRef: ref, ResultHash: hash}
+			switch mode {
+			case "inline_conflict":
+				outcome.Result = body
+			case "missing_hash":
+				outcome.ResultHash = ""
+			case "hash_without_ref":
+				outcome.ResultRef = ""
+			case "failed_external":
+				outcome.Error = "failed"
+			case "failed_inline":
+				outcome = wf.Outcome{InvSeq: h.InvSeq, Error: "failed", Result: body}
+			case "failed_empty":
+				outcome = wf.Outcome{InvSeq: h.InvSeq, Error: "failed"}
+			}
+			raw, err := json.Marshal(outcome)
+			if err != nil {
+				t.Fatal(err)
+			}
+			outcomes := sim.NewKVTransport(schedule, 0)
+			if _, err = outcomes.Create(ctx, identity.Key(h.Type, h.ID), raw); err != nil {
+				t.Fatal(err)
+			}
+			leaseKV := sim.NewKVTransport(schedule, 30*time.Second)
+			leases := lease.NewWithKVPort(leaseKV)
+			held, err := leases.Acquire(ctx, h.Type, h.ID, "other")
+			if err != nil {
+				t.Fatal(err)
+			}
+			defer held.Release(ctx)
+			owner, err := leaseKV.Get(ctx, identity.Key(h.Type, h.ID))
+			if err != nil {
+				t.Fatal(err)
+			}
+			legacy := sim.NewJournalTransport(schedule)
+			jrn := journal.NewWithPorts(legacy, legacy)
+			deliver := func(fault string, valid bool) {
+				blobs.mode = fault
+				blobs.reads = 0
+				handlers, acks, naks := 0, 0, 0
+				w, err := worker.NewWithPorts("contender", map[string]worker.Handler{h.Type: func(*wf.Context, json.RawMessage) (json.RawMessage, error) { handlers++; return nil, nil }}, worker.ModeledWorkerPorts{Journal: jrn, Leases: leases, Outcome: outcomes, Invocation: transport.SignalTransport, Signals: transport.SignalTransport, Client: c, ResultBlobs: blobs, HeartbeatTicks: make(chan time.Time)}, worker.WithDispatchObserver(func(e worker.DispatchEvent) {
+					if e.Stage == "ack" {
+						acks++
+					}
+					if e.Stage == "nak" {
+						naks++
+					}
+				}))
+				if err != nil {
+					t.Fatal(err)
+				}
+				runCtx, cancel := context.WithTimeout(ctx, 5*time.Second)
+				defer cancel()
+				transport.Dispatch.StopAfterNextAck(cancel)
+				transport.Dispatch.StopAfterNextNak(cancel)
+				if err = w.RunPartitionWithTransport(runCtx, identity.Partition(h.Type, h.ID, provision.Partitions), transport.Dispatch); err != nil {
+					t.Fatal(err)
+				}
+				wantAck, wantNak := 0, 1
+				if valid {
+					wantAck, wantNak = 1, 0
+				}
+				if handlers != 0 || acks != wantAck || naks != wantNak {
+					t.Fatalf("held result handlers=%d acks=%d want=%d naks=%d want=%d", handlers, acks, wantAck, naks, wantNak)
+				}
+				signalSeq, err := transport.LastSignalSequence(ctx)
+				if err != nil {
+					t.Fatal(err)
+				}
+				if valid {
+					signal, err := transport.GetSignal(ctx, signalSeq)
+					if err != nil || signalSeq != 1 || !bytes.Equal(signal.Data, raw) || signal.Subject != "wf.sig.parent."+parentID+".done" {
+						t.Fatal("parent notification differs", signalSeq, signal, err)
+					}
+				} else if signalSeq != 0 {
+					t.Fatal("unverified result notified parent", signalSeq)
+				}
+				wantReads := 0
+				if fault == "healthy" || fault == "unavailable" || fault == "wrong_bytes" {
+					wantReads = 1
+				}
+				if blobs.reads != wantReads {
+					t.Fatalf("held result reads=%d want=%d", blobs.reads, wantReads)
+				}
+				state, err := outcomes.Get(ctx, identity.Key(h.Type, h.ID))
+				if err != nil || !bytes.Equal(state.Value, raw) {
+					t.Fatal("held delivery changed outcome", err)
+				}
+				current, err := leaseKV.Get(ctx, identity.Key(h.Type, h.ID))
+				if err != nil || current.Revision != owner.Revision || !bytes.Equal(current.Value, owner.Value) {
+					t.Fatal("held delivery changed owner", err)
+				}
+				records, _, err := jrn.Read(ctx, h.Type, h.ID)
+				if err != nil || len(records) != 0 {
+					t.Fatal("held delivery changed journal", len(records), err)
+				}
+			}
+			deliver(mode, mode == "healthy" || mode == "failed_empty")
+			if mode == "unavailable" || mode == "wrong_bytes" {
+				deliver("healthy", true)
+			}
+		})
+	}
+}

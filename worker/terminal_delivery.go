@@ -98,6 +98,23 @@ func (w *Worker) terminalHeldDelivery(ctx context.Context, typ, id string, timer
 	if input == nil || input.Sequence != outcome.InvSeq {
 		return false, false, nil
 	}
+	// A terminal mirror cannot authorize ACK or parent notification until its
+	// external result is available and verified. Failed outcomes carry no result.
+	if outcome.Error != "" && (len(outcome.Result) != 0 || outcome.ResultRef != "" || outcome.ResultHash != "") {
+		return false, false, wf.ErrCorruptJournal
+	}
+	resultBlobs := w.resultBlobs()
+	if resultBlobs != nil {
+		resultBlobs = boundedResultBlobPort{ResultBlobPort: resultBlobs, operations: ops}
+	}
+	if _, err := outcome.ResultBytes(ctx, func(ctx context.Context, name string) ([]byte, error) {
+		if resultBlobs == nil {
+			return nil, ErrResultBlobUnavailable
+		}
+		return resultBlobs.GetBytes(ctx, name)
+	}); err != nil {
+		return false, false, err
+	}
 	canceledTimer := false
 	// Preserve the existing canceled-timer no-op metric. Terminal state alone
 	// cannot tell whether this particular timer had been canceled.

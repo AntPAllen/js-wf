@@ -1,5 +1,24 @@
 # JetStream Durable Workflow Runtime — Implementation Plan
 
+## Legacy held-lease terminal result validation — 2026-10-11
+
+The legacy terminal shortcut now verifies external result bytes and rejects Failed
+outcomes containing results before parent notification or ACK. Nine new modeled
+controls prove ACK/NAK, parent signal admission, unchanged outcome/held owner,
+zero handlers and two fresh deliveries after read recovery. Baseline source
+2e8c8ea ACKed all seven invalid/unavailable cases without validation. Normal and
+race pass all 72 metadata/result controls and the selected replay/retention tests.
+Native race passes four timer/external-result controls: 128 duplicate ACKs, including
+64 with spilled 1 MiB results, with unchanged owner, state and journal. A large
+terminal spill/corruption check also passes. The independent reviewer binds 1154
+unchanged inputs and records the missed short normal worker executable explicitly.
+
+See [held terminal result evidence](scale/legacy-held-terminal-result-2026-10-11/README.md).
+This closes the previously listed legacy held-body gap. Native negative-result
+fault histories, full shortcut lifecycle/journal causality, maintenance paths,
+full current qualification and original release gates remain open. Frozen long
+campaigns are unchanged; public continuation remains off.
+
 ## Active worker terminal result verification — 2026-10-11
 
 The worker resolves and checks Completed external result bytes before terminal

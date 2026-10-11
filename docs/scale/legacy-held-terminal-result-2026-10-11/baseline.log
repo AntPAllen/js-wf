@@ -1,0 +1,31 @@
+=== RUN   TestLegacyHeldTerminalResultBeforeAck
+=== RUN   TestLegacyHeldTerminalResultBeforeAck/healthy
+    held_terminal_result_test.go:132: held result reads=0 want=1
+=== RUN   TestLegacyHeldTerminalResultBeforeAck/unavailable
+    held_terminal_result_test.go:113: held result handlers=0 acks=1 want=0 naks=0 want=1
+=== RUN   TestLegacyHeldTerminalResultBeforeAck/wrong_bytes
+    held_terminal_result_test.go:113: held result handlers=0 acks=1 want=0 naks=0 want=1
+=== RUN   TestLegacyHeldTerminalResultBeforeAck/inline_conflict
+    held_terminal_result_test.go:113: held result handlers=0 acks=1 want=0 naks=0 want=1
+=== RUN   TestLegacyHeldTerminalResultBeforeAck/missing_hash
+    held_terminal_result_test.go:113: held result handlers=0 acks=1 want=0 naks=0 want=1
+=== RUN   TestLegacyHeldTerminalResultBeforeAck/hash_without_ref
+    held_terminal_result_test.go:113: held result handlers=0 acks=1 want=0 naks=0 want=1
+=== RUN   TestLegacyHeldTerminalResultBeforeAck/failed_external
+    held_terminal_result_test.go:113: held result handlers=0 acks=1 want=0 naks=0 want=1
+=== RUN   TestLegacyHeldTerminalResultBeforeAck/failed_inline
+    held_terminal_result_test.go:113: held result handlers=0 acks=1 want=0 naks=0 want=1
+=== RUN   TestLegacyHeldTerminalResultBeforeAck/failed_empty
+--- FAIL: TestLegacyHeldTerminalResultBeforeAck (0.00s)
+    --- FAIL: TestLegacyHeldTerminalResultBeforeAck/healthy (0.00s)
+    --- FAIL: TestLegacyHeldTerminalResultBeforeAck/unavailable (0.00s)
+    --- FAIL: TestLegacyHeldTerminalResultBeforeAck/wrong_bytes (0.00s)
+    --- FAIL: TestLegacyHeldTerminalResultBeforeAck/inline_conflict (0.00s)
+    --- FAIL: TestLegacyHeldTerminalResultBeforeAck/missing_hash (0.00s)
+    --- FAIL: TestLegacyHeldTerminalResultBeforeAck/hash_without_ref (0.00s)
+    --- FAIL: TestLegacyHeldTerminalResultBeforeAck/failed_external (0.00s)
+    --- FAIL: TestLegacyHeldTerminalResultBeforeAck/failed_inline (0.00s)
+    --- PASS: TestLegacyHeldTerminalResultBeforeAck/failed_empty (0.00s)
+FAIL
+FAIL	js-wf/worker	0.009s
+FAIL

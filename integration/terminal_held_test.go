@@ -17,6 +17,7 @@ import (
 	"js-wf/worker"
 	"reflect"
 	"strconv"
+	"strings"
 	"sync/atomic"
 	"testing"
 	"time"
@@ -24,16 +25,22 @@ import (
 
 func TestTerminalWakeupsDrainWhileHealthyLeaseHeld(t *testing.T) {
 	for _, timer := range []bool{false, true} {
-		t.Run(fmt.Sprintf("timer=%t", timer), func(t *testing.T) { runTerminalWakeupsDrainWhileHealthyLeaseHeld(t, timer) })
+		for _, external := range []bool{false, true} {
+			t.Run(fmt.Sprintf("timer=%t/external=%t", timer, external), func(t *testing.T) { runTerminalWakeupsDrainWhileHealthyLeaseHeld(t, timer, external) })
+		}
 	}
 }
 
-func runTerminalWakeupsDrainWhileHealthyLeaseHeld(t *testing.T, timer bool) {
+func runTerminalWakeupsDrainWhileHealthyLeaseHeld(t *testing.T, timer, external bool) {
 	all, _ := setup(t)
 	ctx, cancel := context.WithTimeout(context.Background(), 35*time.Second)
 	defer cancel()
 	const typ, id = "terminal-held", "completed"
 	var effects, fastAcks atomic.Int64
+	expected := []byte(`42`)
+	if external {
+		expected = []byte(`"` + strings.Repeat("q", 1024*1024) + `"`)
+	}
 	w, err := worker.New(ctx, all[1], "terminal-drain", map[string]worker.Handler{typ: func(c *wf.Context, _ json.RawMessage) (json.RawMessage, error) {
 		if timer {
 			handle, err := c.Timer("late", 50*time.Millisecond)
@@ -45,8 +52,10 @@ func runTerminalWakeupsDrainWhileHealthyLeaseHeld(t *testing.T, timer bool) {
 			}
 		}
 		v, err := wf.Run(c, "effect", 42, func(context.Context) (int, error) { effects.Add(1); return 42, nil })
-		raw, _ := json.Marshal(v)
-		return raw, err
+		if v != 42 {
+			return nil, fmt.Errorf("effect result=%d", v)
+		}
+		return json.RawMessage(expected), err
 	}}, worker.WithDispatchObserver(func(e worker.DispatchEvent) {
 		if e.Stage == "terminal_held" {
 			fastAcks.Add(1)
@@ -68,7 +77,7 @@ func runTerminalWakeupsDrainWhileHealthyLeaseHeld(t *testing.T, timer bool) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if result, err := c.Await(ctx, typ, id); err != nil || string(result) != "42" {
+	if result, err := c.Await(ctx, typ, id); err != nil || !bytes.Equal(result, expected) {
 		t.Fatalf("result=%s err=%v", result, err)
 	}
 	stream, err := all[0].Stream(ctx, "WF_RUN")
@@ -120,6 +129,13 @@ func runTerminalWakeupsDrainWhileHealthyLeaseHeld(t *testing.T, timer bool) {
 	terminal, err := state.Get(ctx, identity.Key(typ, id))
 	if err != nil {
 		t.Fatal(err)
+	}
+	var outcome wf.Outcome
+	if err := wf.DecodeOutcome(terminal.Value(), &outcome); err != nil {
+		t.Fatal(err)
+	}
+	if external && (outcome.ResultRef == "" || outcome.ResultHash == "" || len(outcome.Result) != 0) {
+		t.Fatal("external terminal fixture not spilled")
 	}
 	noOpsBefore := w.Metrics().CancelledTimerNoOps
 	const count = 32

@@ -1,0 +1,32 @@
+=== RUN   TestLegacyHeldTerminalResultBeforeAck
+=== RUN   TestLegacyHeldTerminalResultBeforeAck/healthy
+    held_terminal_result_test.go:132: held result reads=0 want=1
+=== RUN   TestLegacyHeldTerminalResultBeforeAck/unavailable
+    held_terminal_result_test.go:113: held result handlers=0 acks=1 want=0 naks=0 want=1
+=== RUN   TestLegacyHeldTerminalResultBeforeAck/wrong_bytes
+    held_terminal_result_test.go:113: held result handlers=0 acks=1 want=0 naks=0 want=1
+=== RUN   TestLegacyHeldTerminalResultBeforeAck/inline_conflict
+    held_terminal_result_test.go:113: held result handlers=0 acks=1 want=0 naks=0 want=1
+=== RUN   TestLegacyHeldTerminalResultBeforeAck/missing_hash
+    held_terminal_result_test.go:113: held result handlers=0 acks=1 want=0 naks=0 want=1
+=== RUN   TestLegacyHeldTerminalResultBeforeAck/hash_without_ref
+    held_terminal_result_test.go:113: held result handlers=0 acks=1 want=0 naks=0 want=1
+=== RUN   TestLegacyHeldTerminalResultBeforeAck/failed_external
+    held_terminal_result_test.go:113: held result handlers=0 acks=1 want=0 naks=0 want=1
+=== RUN   TestLegacyHeldTerminalResultBeforeAck/failed_inline
+    held_terminal_result_test.go:113: held result handlers=0 acks=1 want=0 naks=0 want=1
+=== RUN   TestLegacyHeldTerminalResultBeforeAck/failed_empty
+    held_terminal_result_test.go:140: held delivery changed owner nats: key not found
+--- FAIL: TestLegacyHeldTerminalResultBeforeAck (46.01s)
+    --- FAIL: TestLegacyHeldTerminalResultBeforeAck/healthy (5.03s)
+    --- FAIL: TestLegacyHeldTerminalResultBeforeAck/unavailable (5.08s)
+    --- FAIL: TestLegacyHeldTerminalResultBeforeAck/wrong_bytes (5.48s)
+    --- FAIL: TestLegacyHeldTerminalResultBeforeAck/inline_conflict (5.39s)
+    --- FAIL: TestLegacyHeldTerminalResultBeforeAck/missing_hash (5.00s)
+    --- FAIL: TestLegacyHeldTerminalResultBeforeAck/hash_without_ref (5.03s)
+    --- FAIL: TestLegacyHeldTerminalResultBeforeAck/failed_external (5.00s)
+    --- FAIL: TestLegacyHeldTerminalResultBeforeAck/failed_inline (5.00s)
+    --- FAIL: TestLegacyHeldTerminalResultBeforeAck/failed_empty (5.00s)
+FAIL
+FAIL	js-wf/worker	46.313s
+FAIL
