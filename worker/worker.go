@@ -978,8 +978,13 @@ func (w *Worker) execute(ctx context.Context, typ, id string, l *lease.Lease, wa
 				return wf.ErrCorruptJournal
 			}
 			outstandingStep = false
-		case journal.Completed:
-			if outstandingStep {
+		case journal.Completed, journal.Failed:
+			var outcome wf.Outcome
+			if wf.DecodeOutcome(record.Payload, &outcome) != nil || outcome.InvSeq != input.Sequence {
+				return wf.ErrCorruptJournal
+			}
+			if record.Kind == journal.Completed && (outstandingStep || outcome.Error != "") ||
+				record.Kind == journal.Failed && (outcome.Error == "" || len(outcome.Result) != 0 || outcome.ResultRef != "" || outcome.ResultHash != "") {
 				return wf.ErrCorruptJournal
 			}
 		}

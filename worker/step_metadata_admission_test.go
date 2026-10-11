@@ -1,6 +1,7 @@
 package worker_test
 
 import (
+	"bytes"
 	"context"
 	"crypto/sha256"
 	"encoding/hex"
@@ -175,6 +176,12 @@ func runWorkerStepAdmission(t *testing.T, backend, level, field string, mutate f
 			t.Fatal(e)
 		}
 		count = len(records)
+	}
+	if valid && (level == "terminal" || level == "failed_pending") {
+		projected, e := outcomes.Get(ctx, identity.Key(h.Type, h.ID))
+		if e != nil || !bytes.Equal(projected.Value, entries[len(entries)-1].Payload) {
+			t.Fatalf("valid terminal projection differs: %s err=%v", projected.Value, e)
+		}
 	}
 	if !valid {
 		keys, e := outcomes.Keys(ctx)

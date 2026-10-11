@@ -1,5 +1,28 @@
 # Implementation status against the supplied plan
 
+## Active worker admits outcomes before terminal repair — 2026-10-11
+
+Worker.execute now uses wf.DecodeOutcome on retained Completed/Failed records
+before outcome repair. Generation must match the actual invocation; successful
+terminals require no error or outstanding request, and failed terminals require
+an error with no inline/external result. Valid failed pending requests remain
+accepted. External successful result resolution and program equivalence remain
+separate requirements.
+
+Baseline10e22ab copies48 invalid legacy/canonical outcomes into KV; all14 valid
+outcomes pass. Final normal/race commands cover62 new terminal controls plus
+102 existing worker controls, with exact CI assertions. Positive repairs require
+exact projection bytes; negatives require no handler/effect/projection and an
+unchanged journal. Native R1/R3 child/buffered-child compatibility passes in
+66.770s with four witness pairs/eight frames. Three actual executables and1152
+unchanged prelaunch Go/module/workflow inputs are independently reviewed. See
+[active worker terminal evidence](scale/worker-terminal-repair-admission-2026-10-11/README.md).
+
+The corpus remains162 families/922 pins. Five older frozen race/scale campaigns
+remain live. Separate maintenance paths, full result/dependency/program/causal
+semantics, full current qualification and original fault/scale/soak/power/client/
+retention/import/admission/rollout gates remain open.
+
 ## Runtime terminal envelope admission shared across readers — 2026-10-11
 
 Graph terminal reads, offline replay terminal envelopes and the legacy held-lease

@@ -32,6 +32,7 @@ on:
       - 'worker/step_metadata_admission_test.go'
       - 'worker/epoch_owner_admission_test.go'
       - 'worker/step_order_admission_test.go'
+      - 'worker/terminal_repair_admission_test.go'
       - 'worker/terminal_delivery.go'
       - 'worker/continuation.go'
       - 'client/graph_journal*.go'
@@ -109,6 +110,7 @@ on:
       - 'worker/step_metadata_admission_test.go'
       - 'worker/epoch_owner_admission_test.go'
       - 'worker/step_order_admission_test.go'
+      - 'worker/terminal_repair_admission_test.go'
       - 'worker/terminal_delivery.go'
       - 'worker/continuation.go'
       - 'client/graph_journal*.go'
@@ -1032,7 +1034,7 @@ jobs:
           set -o pipefail
           worker_flags=()
           if [ "$WORKER_MODE" = race ]; then worker_flags=(-race); fi
-          go test "${worker_flags[@]}" ./worker -run '^(TestWorkerStepMetadataBeforeHandler|TestWorkerEpochOwnerBeforeHandler|TestWorkerStepOrderBeforeHandler)$' -count=1 -v -timeout=2m 2>&1 | tee worker-step-metadata.log
+          go test "${worker_flags[@]}" ./worker -run '^(TestWorkerStepMetadataBeforeHandler|TestWorkerEpochOwnerBeforeHandler|TestWorkerStepOrderBeforeHandler|TestWorkerTerminalOutcomeBeforeRepair)$' -count=1 -v -timeout=2m 2>&1 | tee worker-step-metadata.log
           python3 - <<'PY'
           import pathlib, re
           log = pathlib.Path('worker-step-metadata.log').read_text()
@@ -1040,6 +1042,10 @@ jobs:
           assert '--- PASS: TestWorkerStepMetadataBeforeHandler ' in log
           assert '--- PASS: TestWorkerEpochOwnerBeforeHandler ' in log
           assert '--- PASS: TestWorkerStepOrderBeforeHandler ' in log
+          assert '--- PASS: TestWorkerTerminalOutcomeBeforeRepair ' in log
+          for backend in ('legacy', 'canonical'):
+              for case in ('inline', 'user_null', 'opaque_user_duplicates', 'explicit_empty_error', 'duplicate_invocation', 'alias_invocation', 'escaped_duplicate_invocation', 'duplicate_result', 'alias_result', 'duplicate_error', 'alias_error', 'unknown_field', 'null_limit_kind', 'null_limit_payload', 'duplicate_limit_kind', 'null_result_ref', 'null_result_hash', 'null_error', 'null_limit_request', 'null_limit_entry', 'null_result', 'foreign_generation', 'zero_generation', 'absent_generation', 'null_generation', 'completed_error', 'failed_empty_error', 'failed_inline_result', 'valid_failed', 'valid_failed_opaque_request', 'valid_empty_result'):
+                  assert f'--- PASS: TestWorkerTerminalOutcomeBeforeRepair/{backend}/{case} ' in log
           for backend in ('legacy', 'canonical'):
               for case in ('balanced', 'suspended_between_pair', 'pending_request', 'orphan_completion', 'overlapping_requests', 'completion_then_request', 'duplicate_completion', 'completed_pending', 'balanced_terminal', 'failed_pending'):
                   assert f'--- PASS: TestWorkerStepOrderBeforeHandler/{backend}/{case} ' in log
