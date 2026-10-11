@@ -1,5 +1,18 @@
 # Implementation status against the supplied plan
 
+## Fresh race passes active population; Signal preparation still fails — 2026-10-11
+
+The frozen5285012 R3 active10/10/1 race diagnostic is terminal, SDKexit1 after
+86.878seconds. Distinct active population and purge/reuse overlap both pass.
+Signal release for live-00000/invocation16 fails with a healthy parent context:
+`prepare signal binding: journal append outcome unknown: context deadline exceeded`.
+This failing call did not reach Commit; an acquire/upload subphase and native
+cause remain unconfirmed. No Signal-release completion or raw-audit pass is
+claimed. Independent closure binds1169 Git inputs, actual race executable and
+2159files/16,881,838bytes. Earlier native stores and frozen sources are unchanged.
+[Terminal diagnostic receipts](scale/native-expired-pull-fix-2026-10-11/README.md).
+The full10k/10k/1k gate and remaining original plan stay open.
+
 ## Expired pull classification reproduced and repaired — 2026-10-11
 
 A real SDK control reproduces the exact context-deadline-invalid-option error:

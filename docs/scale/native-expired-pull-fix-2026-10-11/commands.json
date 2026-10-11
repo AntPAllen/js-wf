@@ -1,0 +1,53 @@
+[
+  {
+    "label": "build",
+    "argv": [
+      "go",
+      "test",
+      "-c",
+      "-race",
+      "-p=1",
+      "-o",
+      "/home/exedev/js-wf-native-expired-pull-fix-20261011/integration-race.test",
+      "./integration"
+    ],
+    "pid": 326377,
+    "start_ns": 1791716450768417435,
+    "environment": {
+      "GOMAXPROCS": "2",
+      "GOMEMLIMIT": "512MiB",
+      "WF_GRAPH_PURGE_REUSE_SCALE": "1",
+      "WF_GRAPH_PURGE_REUSE_NATIVE_ROOT": "/home/exedev/js-wf-native-expired-pull-fix-20261011/native-active10-race",
+      "WF_PURGE_REUSE_ACTIVE": "1",
+      "WF_PURGE_REUSE_COUNT": "10"
+    },
+    "actual_exit": 0,
+    "end_ns": 1791716536540948450,
+    "source_unchanged": true
+  },
+  {
+    "label": "test",
+    "argv": [
+      "/home/exedev/js-wf-native-expired-pull-fix-20261011/integration-race.test",
+      "-test.run=^TestCanonicalGraphTenThousandConcurrentPurgesAndThousandReusedIDs$",
+      "-test.count=1",
+      "-test.v",
+      "-test.timeout=22m"
+    ],
+    "pid": 326799,
+    "start_ns": 1791716536575799711,
+    "environment": {
+      "GOMAXPROCS": "2",
+      "GOMEMLIMIT": "512MiB",
+      "WF_GRAPH_PURGE_REUSE_SCALE": "1",
+      "WF_GRAPH_PURGE_REUSE_NATIVE_ROOT": "/home/exedev/js-wf-native-expired-pull-fix-20261011/native-active10-race",
+      "WF_PURGE_REUSE_ACTIVE": "1",
+      "WF_PURGE_REUSE_COUNT": "10"
+    },
+    "binary_sha256": "2d119edd687341521311bc8be4960e21ec6e95f54fbbb1a7709da1899286d40c",
+    "binary_bytes": 71011263,
+    "actual_exit": 1,
+    "end_ns": 1791716623453547796,
+    "source_unchanged": true
+  }
+]

@@ -1,0 +1,9 @@
+=== RUN   TestCanonicalGraphTenThousandConcurrentPurgesAndThousandReusedIDs
+    purge_reuse_scale_test.go:82: retained canonical purge/reuse native root=/home/exedev/js-wf-native-expired-pull-fix-20261011/native-active10-race
+    purge_reuse_scale_test.go:108: purge/reuse profile canonical=true count=10 reuse=1 active=true full_scale=false
+    purge_reuse_scale_test.go:273: completed 10 old invocations in 31.435154637s
+    purge_reuse_scale_test.go:351: kept 10 other handlers executing before purge at 41.697262814s
+    purge_reuse_scale_test.go:421: purged 10 while 10 remained live; reused 1 ids in 44.55766634s
+    purge_reuse_scale_test.go:458: release Signal purge-scale/live-00000 invocation=16 (parent context: <nil>): signal publish outcome unknown: bind ordered signal through 6: prepare signal binding: journal append outcome unknown: context deadline exceeded
+--- FAIL: TestCanonicalGraphTenThousandConcurrentPurgesAndThousandReusedIDs (86.64s)
+FAIL
