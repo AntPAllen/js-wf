@@ -1,5 +1,21 @@
 # Implementation status against the supplied plan
 
+## Selection priority from retained readiness — 2026-10-11
+
+The independent auditor now rejects timer branches that skip a buffered signal,
+and select-many choices that skip an earlier unused signal, established promise
+cache or live zero-deadline timer. It validates all case kinds/names/child identities
+before observers mutate selection state. Six positive/six negative physical
+JSON/protobuf fixtures,15 readiness controls and history regressions pass under
+race (actual exit0,17.092s). The four current-source R1/R3 native timer-history
+cases with/without archive pass with raw auditing enabled (actual exit0,18.971s),
+including eight historical frames. CI requires every new control.
+[Evidence and scope](scale/raw-selection-priority-2026-10-11/README.md).
+
+Positive-deadline readiness and ambiguous promise-cache completeness remain open.
+The earlier failed native campaign remains preserved with cause unconfirmed;
+original full qualification remains incomplete. Both larger frozen jobs remain live.
+
 ## Rejected limit operations checked against history — 2026-10-11
 
 The independent raw auditor now checks rejected requests, attempts, signals and

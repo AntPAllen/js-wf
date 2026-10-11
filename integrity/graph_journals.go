@@ -301,6 +301,9 @@ func CheckGraphJournals(ctx context.Context, snapshot GraphJournalSnapshot) (rep
 		if err := auditSDKStateOperation(call, graph, state, entry, record.Record.Blobs); err != nil {
 			return err
 		}
+		if err := auditSDKSelectionPriority(state, entry); err != nil {
+			return err
+		}
 		if err := observeSDKPromiseSelection(state, entry); err != nil {
 			return err
 		}

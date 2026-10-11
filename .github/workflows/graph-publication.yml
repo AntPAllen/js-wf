@@ -271,7 +271,7 @@ jobs:
         shell: bash
         run: |
           set -o pipefail
-          go test -race -p=1 ./integrity -run '^(TestRawGraphReferencesAndIndependentCorruptionControls|TestNativeRawGraphReferenceAuditQuiescentReaders|TestRawGraphJournalGenerationsOutcomesAndArchive|TestRawGraphCheckpointPointerAndFrameBindings|TestNativeRawGraphCheckpointAudit|TestRawGraphCheckpointMaterializedState|TestRawGraphCheckpointPromiseOwnership|TestRawGraphCheckpointMetadataBindings|TestRawGraphRetiredSourceProjectionScope|TestRawGraphSignalReservationAndBinding|TestRawGraphSignalIndexIndependentPrefixes|TestRawGraphSignalIndexProductionPackets|TestRawGraphCheckpointSDKStateHistory|TestRawGraphCheckpointPromiseHistory|TestRawGraphCheckpointSDKSignalHistory|TestRawGraphCheckpointSDKTimerHistory|TestRawGraphEveryCheckpointHistory|TestRawGraphSDKStepEnvelope|TestRawGraphCanonicalEnvelope|TestRawGraphTerminalEnvelope|TestRawGraphRejectedLimitBoundary|TestRawGraphRejectedLimitPrefix|TestRawGraphRejectedLimitContinuation)$' -count=1 -v -timeout=5m 2>&1 | tee raw-graph-audit.log
+          go test -race -p=1 ./integrity -run '^(TestRawGraphReferencesAndIndependentCorruptionControls|TestNativeRawGraphReferenceAuditQuiescentReaders|TestRawGraphJournalGenerationsOutcomesAndArchive|TestRawGraphCheckpointPointerAndFrameBindings|TestNativeRawGraphCheckpointAudit|TestRawGraphCheckpointMaterializedState|TestRawGraphCheckpointPromiseOwnership|TestRawGraphCheckpointMetadataBindings|TestRawGraphRetiredSourceProjectionScope|TestRawGraphSignalReservationAndBinding|TestRawGraphSignalIndexIndependentPrefixes|TestRawGraphSignalIndexProductionPackets|TestRawGraphCheckpointSDKStateHistory|TestRawGraphCheckpointPromiseHistory|TestRawGraphCheckpointSDKSignalHistory|TestRawGraphCheckpointSDKTimerHistory|TestRawGraphEveryCheckpointHistory|TestRawGraphSDKStepEnvelope|TestRawGraphCanonicalEnvelope|TestRawGraphTerminalEnvelope|TestRawGraphRejectedLimitBoundary|TestRawGraphRejectedLimitPrefix|TestRawGraphRejectedLimitContinuation|TestRawGraphSelectionPriority|TestRawGraphSelectionReadiness)$' -count=1 -v -timeout=5m 2>&1 | tee raw-graph-audit.log
           python3 - <<'PY'
           import pathlib, re
           log = pathlib.Path('raw-graph-audit.log').read_text()
@@ -287,6 +287,13 @@ jobs:
           assert '--- PASS: TestRawGraphCheckpointMetadataBindings ' in log
           assert '--- PASS: TestRawGraphCheckpointSDKStateHistory ' in log
           assert '--- PASS: TestRawGraphCheckpointPromiseHistory ' in log
+          assert '--- PASS: TestRawGraphSelectionPriority ' in log
+          for encoding in ('json', 'protobuf-v1'):
+              for mode in ('first', 'reordered', 'earlier-absent', 'skipped-ready', 'invalid-unselected-kind', 'invalid-unselected-name'):
+                  assert f'--- PASS: TestRawGraphSelectionPriority/{encoding}/{mode} ' in log
+          assert '--- PASS: TestRawGraphSelectionReadiness ' in log
+          for mode in ('signal-first', 'signal-skipped', 'signal-used', 'promise-buffered-skipped', 'promise-cached-skipped', 'promise-ambiguous', 'timer-zero-skipped', 'timer-positive-unknown', 'timer-cancelled', 'timer-fired', 'timer-signal-buffered', 'timer-signal-used', 'timer-signal-absent', 'timer-before-signal', 'invalid-child'):
+              assert f'--- PASS: TestRawGraphSelectionReadiness/{mode} ' in log
           assert '--- PASS: TestRawGraphRejectedLimitBoundary ' in log
           for encoding in ('json', 'protobuf-v1'):
               for mode in ('request', 'attempt', 'signal', 'suspension', 'overlap', 'completed', 'both', 'request-null', 'request-empty', 'request-unknown', 'request-duplicate', 'entry-kind', 'entry-null', 'attempt-gap', 'attempt-empty-error', 'attempt-alias', 'attempt-duplicate', 'signal-zero', 'signal-name', 'signal-alias', 'suspension-unresolved', 'suspension-empty', 'suspension-unknown', 'wrong-error'):

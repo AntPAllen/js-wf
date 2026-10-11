@@ -263,6 +263,16 @@ func rawJournalCheckpointFixture(t *testing.T, encoding journal.Encoding, archiv
 		pointer.RequestIndex = 7
 		pointer.Runtime.Stage, pointer.Runtime.Index, pointer.Runtime.Sequence, pointer.Runtime.StepPosition, pointer.Runtime.Object, pointer.Runtime.SHA256 = "finish", 8, 109, 8, "step-result-"+digest(frameBytes), digest(frameBytes)
 	}
+	if strings.HasPrefix(control, "selection-") {
+		entries = []journal.Entry{
+			entries[0],
+			{Index: 1, Epoch: 1, WorkerID: "worker", Kind: journal.SignalConsumed, Payload: json.RawMessage(`{"sig_seq":7,"name":"first","payload":"NDI="}`)},
+			{Index: 2, Epoch: 1, WorkerID: "worker", Kind: journal.SignalConsumed, Payload: json.RawMessage(`{"sig_seq":9,"name":"second","payload":"NDM="}`)},
+			{Index: 3, Epoch: 1, WorkerID: "worker", Kind: journal.StepRequested, Payload: json.RawMessage(`{"kind":"select_many","cases":[{"kind":"signal","name":"first"},{"kind":"signal","name":"second"}]}`)},
+			{Index: 4, Epoch: 1, WorkerID: "worker", Kind: journal.StepCompleted, Payload: json.RawMessage(`{"case_index":0,"signal_seq":7}`)},
+			{Index: 5, Epoch: 1, WorkerID: "worker", Kind: journal.Completed, Payload: entries[3].Payload},
+		}
+	}
 	if alter != nil {
 		alter(entries)
 	}
@@ -368,6 +378,9 @@ func rawJournalCheckpointFixture(t *testing.T, encoding journal.Encoding, archiv
 	}
 	cursor := auditedGraphCursor{Schema: "js-wf-graph-journal-cursor-v1", Invocation: 10, Base: 100, Count: uint64(len(entries)), Epoch: 1, Kind: entries[len(entries)-1].Kind}
 	root := graphpublication.Root{Schema: graphpublication.ApplicationSchema, Head: 20, Token: "owner", Graph: retainedgraph.Root{Schema: retainedgraph.Schema, Count: 4, Frontier: []retainedgraph.Tree{tree(0, 0, 2, "")}}}
+	if strings.HasPrefix(control, "selection-") {
+		root.Graph = retainedgraph.Root{Schema: retainedgraph.Schema, Count: 6, Frontier: []retainedgraph.Tree{tree(0, 0, 2, ""), tree(4, 4, 1, "")}}
+	}
 	source := &jetstream.RawStreamMsg{Sequence: 10, Subject: "wf.inv.kind.id", Data: []byte("input")}
 	if archive {
 		// Rebuild physical forests with their actual per-forest coordinates.
