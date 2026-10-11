@@ -1,5 +1,22 @@
 # JetStream Durable Workflow Runtime — Implementation Plan
 
+## Canonical replay export terminal admission confirmed — 2026-10-11
+
+A suspected export decoder gap was disproved by the actual baseline: the final
+ValidateReplayGraphHistory call already rejects malformed terminal envelopes.
+No production export change was needed. New JSON/protobuf-v1 coverage verifies
+42 cases: eight exact valid exports and 34 rejections with no partial snapshot,
+intact physical references and unchanged journals. Disabling only that final
+validator in a Go overlay makes all 34 negative controls fail while positives pass.
+Final normal/race commands pass all 114 metadata/result/export controls plus the
+selected replay/retention tests; the reviewer binds 1155 unchanged inputs and four
+actual executables. CI now requires each export case explicitly.
+
+See [export terminal admission evidence](scale/graph-replay-terminal-admission-2026-10-11/README.md).
+Checkpointed promise envelope validation remains separate. Native fault histories,
+full current qualification and the original release gates remain open. Public
+continuation remains off; frozen long campaigns are unchanged.
+
 ## Legacy held-lease terminal result validation — 2026-10-11
 
 The legacy terminal shortcut now verifies external result bytes and rejects Failed

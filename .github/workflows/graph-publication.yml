@@ -27,6 +27,7 @@ on:
       - 'wf/replay_record_order.go'
       - 'worker/held_terminal_metadata_test.go'
       - 'worker/held_terminal_result_test.go'
+      - 'worker/graph_replay_terminal_metadata_test.go'
       - 'wf/graph_child_retention*.go'
       - 'wf/context.go'
       - 'worker/worker.go'
@@ -107,6 +108,7 @@ on:
       - 'wf/replay_record_order.go'
       - 'worker/held_terminal_metadata_test.go'
       - 'worker/held_terminal_result_test.go'
+      - 'worker/graph_replay_terminal_metadata_test.go'
       - 'wf/graph_child_retention*.go'
       - 'wf/context.go'
       - 'worker/worker.go'
@@ -1093,12 +1095,12 @@ jobs:
           set -o pipefail
           terminal_flags=()
           if [ "$TERMINAL_MODE" = race ]; then terminal_flags=(-race); fi
-          go test "${terminal_flags[@]}" ./wf ./worker -run '^(TestReadGraphTerminalMetadataAdmission|TestLegacyHeldTerminalMetadataAdmission|TestLegacyHeldTerminalResultBeforeAck|TestReplayTerminalEnvelopeBeforeHandler|TestReplayTerminalEnvelopeTypedBoundary|TestGraphChildRetentionRequiresExactParentOwnership)$' -count=1 -v -timeout=3m 2>&1 | tee terminal-outcome-admission.log
+          go test "${terminal_flags[@]}" ./wf ./worker -run '^(TestReadGraphTerminalMetadataAdmission|TestLegacyHeldTerminalMetadataAdmission|TestLegacyHeldTerminalResultBeforeAck|TestGraphReplaySnapshotTerminalMetadataAdmission|TestReplayTerminalEnvelopeBeforeHandler|TestReplayTerminalEnvelopeTypedBoundary|TestGraphChildRetentionRequiresExactParentOwnership)$' -count=1 -v -timeout=3m 2>&1 | tee terminal-outcome-admission.log
           python3 - <<'PY'
           import pathlib, re
           log = pathlib.Path('terminal-outcome-admission.log').read_text()
           assert not re.search(r'^--- (FAIL|SKIP):', log, re.M)
-          for test in ('TestReadGraphTerminalMetadataAdmission', 'TestLegacyHeldTerminalMetadataAdmission', 'TestLegacyHeldTerminalResultBeforeAck', 'TestReplayTerminalEnvelopeBeforeHandler', 'TestReplayTerminalEnvelopeTypedBoundary', 'TestGraphChildRetentionRequiresExactParentOwnership'):
+          for test in ('TestReadGraphTerminalMetadataAdmission', 'TestLegacyHeldTerminalMetadataAdmission', 'TestLegacyHeldTerminalResultBeforeAck', 'TestGraphReplaySnapshotTerminalMetadataAdmission', 'TestReplayTerminalEnvelopeBeforeHandler', 'TestReplayTerminalEnvelopeTypedBoundary', 'TestGraphChildRetentionRequiresExactParentOwnership'):
               assert f'--- PASS: {test} ' in log
           for case in ('healthy', 'unavailable', 'wrong_bytes', 'inline_conflict', 'missing_hash', 'hash_without_ref', 'failed_external', 'failed_inline', 'failed_empty'):
               assert f'--- PASS: TestLegacyHeldTerminalResultBeforeAck/{case} ' in log
@@ -1106,6 +1108,7 @@ jobs:
               assert f'--- PASS: TestLegacyHeldTerminalMetadataAdmission/{case} ' in log
               for codec in ('json', 'protobuf-v1'):
                   assert f'--- PASS: TestReadGraphTerminalMetadataAdmission/{codec}/{case} ' in log
+                  assert f'--- PASS: TestGraphReplaySnapshotTerminalMetadataAdmission/{codec}/{case} ' in log
           PY
       - uses: actions/upload-artifact@v4
         if: always()

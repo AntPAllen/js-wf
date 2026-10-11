@@ -1,0 +1,123 @@
+=== RUN   TestGraphReplaySnapshotTerminalMetadataAdmission
+=== RUN   TestGraphReplaySnapshotTerminalMetadataAdmission/json/duplicate_result
+    graph_replay_terminal_metadata_test.go:77: malformed terminal exported or partial snapshot leaked {graph-v1 7902699be42c8a8e46fbbb4501726517e86b22c56a189f7625a6da49081b2451 [55] [{{0 0 Started {"input_sha256":"7902699be42c8a8e46fbbb4501726517e86b22c56a189f7625a6da49081b2451"} } 1} {{0 1 Completed {"inv_seq":1,"result":"Nw==","result":"NDI="} } 2}] map[input:7902699be42c8a8e46fbbb4501726517e86b22c56a189f7625a6da49081b2451:[55]] <nil>} <nil>
+=== RUN   TestGraphReplaySnapshotTerminalMetadataAdmission/json/unknown_field
+    graph_replay_terminal_metadata_test.go:77: malformed terminal exported or partial snapshot leaked {graph-v1 7902699be42c8a8e46fbbb4501726517e86b22c56a189f7625a6da49081b2451 [55] [{{0 0 Started {"input_sha256":"7902699be42c8a8e46fbbb4501726517e86b22c56a189f7625a6da49081b2451"} } 1} {{0 1 Completed {"inv_seq":1,"foreign":true,"result":"NDI="} } 2}] map[input:7902699be42c8a8e46fbbb4501726517e86b22c56a189f7625a6da49081b2451:[55]] <nil>} <nil>
+=== RUN   TestGraphReplaySnapshotTerminalMetadataAdmission/json/null_limit_request
+    graph_replay_terminal_metadata_test.go:77: malformed terminal exported or partial snapshot leaked {graph-v1 7902699be42c8a8e46fbbb4501726517e86b22c56a189f7625a6da49081b2451 [55] [{{0 0 Started {"input_sha256":"7902699be42c8a8e46fbbb4501726517e86b22c56a189f7625a6da49081b2451"} } 1} {{0 1 Completed {"inv_seq":1,"result":"NDI=","limit_request":null} } 2}] map[input:7902699be42c8a8e46fbbb4501726517e86b22c56a189f7625a6da49081b2451:[55]] <nil>} <nil>
+=== RUN   TestGraphReplaySnapshotTerminalMetadataAdmission/json/explicit_empty_error
+=== RUN   TestGraphReplaySnapshotTerminalMetadataAdmission/json/escaped_duplicate_invocation
+    graph_replay_terminal_metadata_test.go:77: malformed terminal exported or partial snapshot leaked {graph-v1 7902699be42c8a8e46fbbb4501726517e86b22c56a189f7625a6da49081b2451 [55] [{{0 0 Started {"input_sha256":"7902699be42c8a8e46fbbb4501726517e86b22c56a189f7625a6da49081b2451"} } 1} {{0 1 Completed {"\u0069nv_seq":9,"inv_seq":1,"result":"NDI="} } 2}] map[input:7902699be42c8a8e46fbbb4501726517e86b22c56a189f7625a6da49081b2451:[55]] <nil>} <nil>
+=== RUN   TestGraphReplaySnapshotTerminalMetadataAdmission/json/null_limit_kind
+    graph_replay_terminal_metadata_test.go:77: malformed terminal exported or partial snapshot leaked {graph-v1 7902699be42c8a8e46fbbb4501726517e86b22c56a189f7625a6da49081b2451 [55] [{{0 0 Started {"input_sha256":"7902699be42c8a8e46fbbb4501726517e86b22c56a189f7625a6da49081b2451"} } 1} {{0 1 Completed {"inv_seq":1,"result":"NDI=","limit_entry":{"kind":null,"payload":{}}} } 2}] map[input:7902699be42c8a8e46fbbb4501726517e86b22c56a189f7625a6da49081b2451:[55]] <nil>} <nil>
+=== RUN   TestGraphReplaySnapshotTerminalMetadataAdmission/json/null_error
+    graph_replay_terminal_metadata_test.go:77: malformed terminal exported or partial snapshot leaked {graph-v1 7902699be42c8a8e46fbbb4501726517e86b22c56a189f7625a6da49081b2451 [55] [{{0 0 Started {"input_sha256":"7902699be42c8a8e46fbbb4501726517e86b22c56a189f7625a6da49081b2451"} } 1} {{0 1 Completed {"inv_seq":1,"result":"NDI=","error":null} } 2}] map[input:7902699be42c8a8e46fbbb4501726517e86b22c56a189f7625a6da49081b2451:[55]] <nil>} <nil>
+=== RUN   TestGraphReplaySnapshotTerminalMetadataAdmission/json/null_limit_entry
+    graph_replay_terminal_metadata_test.go:77: malformed terminal exported or partial snapshot leaked {graph-v1 7902699be42c8a8e46fbbb4501726517e86b22c56a189f7625a6da49081b2451 [55] [{{0 0 Started {"input_sha256":"7902699be42c8a8e46fbbb4501726517e86b22c56a189f7625a6da49081b2451"} } 1} {{0 1 Completed {"inv_seq":1,"result":"NDI=","limit_entry":null} } 2}] map[input:7902699be42c8a8e46fbbb4501726517e86b22c56a189f7625a6da49081b2451:[55]] <nil>} <nil>
+=== RUN   TestGraphReplaySnapshotTerminalMetadataAdmission/json/null_result
+    graph_replay_terminal_metadata_test.go:77: malformed terminal exported or partial snapshot leaked {graph-v1 7902699be42c8a8e46fbbb4501726517e86b22c56a189f7625a6da49081b2451 [55] [{{0 0 Started {"input_sha256":"7902699be42c8a8e46fbbb4501726517e86b22c56a189f7625a6da49081b2451"} } 1} {{0 1 Completed {"inv_seq":1,"result":null} } 2}] map[input:7902699be42c8a8e46fbbb4501726517e86b22c56a189f7625a6da49081b2451:[55]] <nil>} <nil>
+=== RUN   TestGraphReplaySnapshotTerminalMetadataAdmission/json/alias_invocation
+    graph_replay_terminal_metadata_test.go:77: malformed terminal exported or partial snapshot leaked {graph-v1 7902699be42c8a8e46fbbb4501726517e86b22c56a189f7625a6da49081b2451 [55] [{{0 0 Started {"input_sha256":"7902699be42c8a8e46fbbb4501726517e86b22c56a189f7625a6da49081b2451"} } 1} {{0 1 Completed {"Inv_seq":9,"inv_seq":1,"result":"NDI="} } 2}] map[input:7902699be42c8a8e46fbbb4501726517e86b22c56a189f7625a6da49081b2451:[55]] <nil>} <nil>
+=== RUN   TestGraphReplaySnapshotTerminalMetadataAdmission/json/alias_result
+    graph_replay_terminal_metadata_test.go:77: malformed terminal exported or partial snapshot leaked {graph-v1 7902699be42c8a8e46fbbb4501726517e86b22c56a189f7625a6da49081b2451 [55] [{{0 0 Started {"input_sha256":"7902699be42c8a8e46fbbb4501726517e86b22c56a189f7625a6da49081b2451"} } 1} {{0 1 Completed {"inv_seq":1,"Result":"Nw==","result":"NDI="} } 2}] map[input:7902699be42c8a8e46fbbb4501726517e86b22c56a189f7625a6da49081b2451:[55]] <nil>} <nil>
+=== RUN   TestGraphReplaySnapshotTerminalMetadataAdmission/json/duplicate_error
+    graph_replay_terminal_metadata_test.go:77: malformed terminal exported or partial snapshot leaked {graph-v1 7902699be42c8a8e46fbbb4501726517e86b22c56a189f7625a6da49081b2451 [55] [{{0 0 Started {"input_sha256":"7902699be42c8a8e46fbbb4501726517e86b22c56a189f7625a6da49081b2451"} } 1} {{0 1 Completed {"inv_seq":1,"error":"bad","error":"","result":"NDI="} } 2}] map[input:7902699be42c8a8e46fbbb4501726517e86b22c56a189f7625a6da49081b2451:[55]] <nil>} <nil>
+=== RUN   TestGraphReplaySnapshotTerminalMetadataAdmission/json/null_limit_payload
+    graph_replay_terminal_metadata_test.go:77: malformed terminal exported or partial snapshot leaked {graph-v1 7902699be42c8a8e46fbbb4501726517e86b22c56a189f7625a6da49081b2451 [55] [{{0 0 Started {"input_sha256":"7902699be42c8a8e46fbbb4501726517e86b22c56a189f7625a6da49081b2451"} } 1} {{0 1 Completed {"inv_seq":1,"result":"NDI=","limit_entry":{"kind":"Suspended","payload":null}} } 2}] map[input:7902699be42c8a8e46fbbb4501726517e86b22c56a189f7625a6da49081b2451:[55]] <nil>} <nil>
+=== RUN   TestGraphReplaySnapshotTerminalMetadataAdmission/json/null_result_ref
+    graph_replay_terminal_metadata_test.go:77: malformed terminal exported or partial snapshot leaked {graph-v1 7902699be42c8a8e46fbbb4501726517e86b22c56a189f7625a6da49081b2451 [55] [{{0 0 Started {"input_sha256":"7902699be42c8a8e46fbbb4501726517e86b22c56a189f7625a6da49081b2451"} } 1} {{0 1 Completed {"inv_seq":1,"result":"NDI=","result_ref":null} } 2}] map[input:7902699be42c8a8e46fbbb4501726517e86b22c56a189f7625a6da49081b2451:[55]] <nil>} <nil>
+=== RUN   TestGraphReplaySnapshotTerminalMetadataAdmission/json/null_result_hash
+    graph_replay_terminal_metadata_test.go:77: malformed terminal exported or partial snapshot leaked {graph-v1 7902699be42c8a8e46fbbb4501726517e86b22c56a189f7625a6da49081b2451 [55] [{{0 0 Started {"input_sha256":"7902699be42c8a8e46fbbb4501726517e86b22c56a189f7625a6da49081b2451"} } 1} {{0 1 Completed {"inv_seq":1,"result":"NDI=","result_hash":null} } 2}] map[input:7902699be42c8a8e46fbbb4501726517e86b22c56a189f7625a6da49081b2451:[55]] <nil>} <nil>
+=== RUN   TestGraphReplaySnapshotTerminalMetadataAdmission/json/inline
+=== RUN   TestGraphReplaySnapshotTerminalMetadataAdmission/json/user_null
+=== RUN   TestGraphReplaySnapshotTerminalMetadataAdmission/json/alias_error
+    graph_replay_terminal_metadata_test.go:77: malformed terminal exported or partial snapshot leaked {graph-v1 7902699be42c8a8e46fbbb4501726517e86b22c56a189f7625a6da49081b2451 [55] [{{0 0 Started {"input_sha256":"7902699be42c8a8e46fbbb4501726517e86b22c56a189f7625a6da49081b2451"} } 1} {{0 1 Completed {"inv_seq":1,"Error":"bad","error":"","result":"NDI="} } 2}] map[input:7902699be42c8a8e46fbbb4501726517e86b22c56a189f7625a6da49081b2451:[55]] <nil>} <nil>
+=== RUN   TestGraphReplaySnapshotTerminalMetadataAdmission/json/duplicate_limit_kind
+    graph_replay_terminal_metadata_test.go:77: malformed terminal exported or partial snapshot leaked {graph-v1 7902699be42c8a8e46fbbb4501726517e86b22c56a189f7625a6da49081b2451 [55] [{{0 0 Started {"input_sha256":"7902699be42c8a8e46fbbb4501726517e86b22c56a189f7625a6da49081b2451"} } 1} {{0 1 Completed {"inv_seq":1,"result":"NDI=","limit_entry":{"kind":"Failed","kind":"Suspended","payload":{}}} } 2}] map[input:7902699be42c8a8e46fbbb4501726517e86b22c56a189f7625a6da49081b2451:[55]] <nil>} <nil>
+=== RUN   TestGraphReplaySnapshotTerminalMetadataAdmission/json/opaque_user_duplicates
+=== RUN   TestGraphReplaySnapshotTerminalMetadataAdmission/json/duplicate_invocation
+    graph_replay_terminal_metadata_test.go:77: malformed terminal exported or partial snapshot leaked {graph-v1 7902699be42c8a8e46fbbb4501726517e86b22c56a189f7625a6da49081b2451 [55] [{{0 0 Started {"input_sha256":"7902699be42c8a8e46fbbb4501726517e86b22c56a189f7625a6da49081b2451"} } 1} {{0 1 Completed {"inv_seq":9,"inv_seq":1,"result":"NDI="} } 2}] map[input:7902699be42c8a8e46fbbb4501726517e86b22c56a189f7625a6da49081b2451:[55]] <nil>} <nil>
+=== RUN   TestGraphReplaySnapshotTerminalMetadataAdmission/protobuf-v1/duplicate_result
+    graph_replay_terminal_metadata_test.go:77: malformed terminal exported or partial snapshot leaked {graph-v1 7902699be42c8a8e46fbbb4501726517e86b22c56a189f7625a6da49081b2451 [55] [{{0 0 Started {"input_sha256":"7902699be42c8a8e46fbbb4501726517e86b22c56a189f7625a6da49081b2451"} } 1} {{0 1 Completed {"inv_seq":1,"result":"Nw==","result":"NDI="} } 2}] map[input:7902699be42c8a8e46fbbb4501726517e86b22c56a189f7625a6da49081b2451:[55]] <nil>} <nil>
+=== RUN   TestGraphReplaySnapshotTerminalMetadataAdmission/protobuf-v1/alias_result
+    graph_replay_terminal_metadata_test.go:77: malformed terminal exported or partial snapshot leaked {graph-v1 7902699be42c8a8e46fbbb4501726517e86b22c56a189f7625a6da49081b2451 [55] [{{0 0 Started {"input_sha256":"7902699be42c8a8e46fbbb4501726517e86b22c56a189f7625a6da49081b2451"} } 1} {{0 1 Completed {"inv_seq":1,"Result":"Nw==","result":"NDI="} } 2}] map[input:7902699be42c8a8e46fbbb4501726517e86b22c56a189f7625a6da49081b2451:[55]] <nil>} <nil>
+=== RUN   TestGraphReplaySnapshotTerminalMetadataAdmission/protobuf-v1/unknown_field
+    graph_replay_terminal_metadata_test.go:77: malformed terminal exported or partial snapshot leaked {graph-v1 7902699be42c8a8e46fbbb4501726517e86b22c56a189f7625a6da49081b2451 [55] [{{0 0 Started {"input_sha256":"7902699be42c8a8e46fbbb4501726517e86b22c56a189f7625a6da49081b2451"} } 1} {{0 1 Completed {"inv_seq":1,"foreign":true,"result":"NDI="} } 2}] map[input:7902699be42c8a8e46fbbb4501726517e86b22c56a189f7625a6da49081b2451:[55]] <nil>} <nil>
+=== RUN   TestGraphReplaySnapshotTerminalMetadataAdmission/protobuf-v1/null_result_hash
+    graph_replay_terminal_metadata_test.go:77: malformed terminal exported or partial snapshot leaked {graph-v1 7902699be42c8a8e46fbbb4501726517e86b22c56a189f7625a6da49081b2451 [55] [{{0 0 Started {"input_sha256":"7902699be42c8a8e46fbbb4501726517e86b22c56a189f7625a6da49081b2451"} } 1} {{0 1 Completed {"inv_seq":1,"result":"NDI=","result_hash":null} } 2}] map[input:7902699be42c8a8e46fbbb4501726517e86b22c56a189f7625a6da49081b2451:[55]] <nil>} <nil>
+=== RUN   TestGraphReplaySnapshotTerminalMetadataAdmission/protobuf-v1/null_limit_payload
+    graph_replay_terminal_metadata_test.go:77: malformed terminal exported or partial snapshot leaked {graph-v1 7902699be42c8a8e46fbbb4501726517e86b22c56a189f7625a6da49081b2451 [55] [{{0 0 Started {"input_sha256":"7902699be42c8a8e46fbbb4501726517e86b22c56a189f7625a6da49081b2451"} } 1} {{0 1 Completed {"inv_seq":1,"result":"NDI=","limit_entry":{"kind":"Suspended","payload":null}} } 2}] map[input:7902699be42c8a8e46fbbb4501726517e86b22c56a189f7625a6da49081b2451:[55]] <nil>} <nil>
+=== RUN   TestGraphReplaySnapshotTerminalMetadataAdmission/protobuf-v1/duplicate_limit_kind
+    graph_replay_terminal_metadata_test.go:77: malformed terminal exported or partial snapshot leaked {graph-v1 7902699be42c8a8e46fbbb4501726517e86b22c56a189f7625a6da49081b2451 [55] [{{0 0 Started {"input_sha256":"7902699be42c8a8e46fbbb4501726517e86b22c56a189f7625a6da49081b2451"} } 1} {{0 1 Completed {"inv_seq":1,"result":"NDI=","limit_entry":{"kind":"Failed","kind":"Suspended","payload":{}}} } 2}] map[input:7902699be42c8a8e46fbbb4501726517e86b22c56a189f7625a6da49081b2451:[55]] <nil>} <nil>
+=== RUN   TestGraphReplaySnapshotTerminalMetadataAdmission/protobuf-v1/null_result
+    graph_replay_terminal_metadata_test.go:77: malformed terminal exported or partial snapshot leaked {graph-v1 7902699be42c8a8e46fbbb4501726517e86b22c56a189f7625a6da49081b2451 [55] [{{0 0 Started {"input_sha256":"7902699be42c8a8e46fbbb4501726517e86b22c56a189f7625a6da49081b2451"} } 1} {{0 1 Completed {"inv_seq":1,"result":null} } 2}] map[input:7902699be42c8a8e46fbbb4501726517e86b22c56a189f7625a6da49081b2451:[55]] <nil>} <nil>
+=== RUN   TestGraphReplaySnapshotTerminalMetadataAdmission/protobuf-v1/inline
+=== RUN   TestGraphReplaySnapshotTerminalMetadataAdmission/protobuf-v1/user_null
+=== RUN   TestGraphReplaySnapshotTerminalMetadataAdmission/protobuf-v1/alias_invocation
+    graph_replay_terminal_metadata_test.go:77: malformed terminal exported or partial snapshot leaked {graph-v1 7902699be42c8a8e46fbbb4501726517e86b22c56a189f7625a6da49081b2451 [55] [{{0 0 Started {"input_sha256":"7902699be42c8a8e46fbbb4501726517e86b22c56a189f7625a6da49081b2451"} } 1} {{0 1 Completed {"Inv_seq":9,"inv_seq":1,"result":"NDI="} } 2}] map[input:7902699be42c8a8e46fbbb4501726517e86b22c56a189f7625a6da49081b2451:[55]] <nil>} <nil>
+=== RUN   TestGraphReplaySnapshotTerminalMetadataAdmission/protobuf-v1/escaped_duplicate_invocation
+    graph_replay_terminal_metadata_test.go:77: malformed terminal exported or partial snapshot leaked {graph-v1 7902699be42c8a8e46fbbb4501726517e86b22c56a189f7625a6da49081b2451 [55] [{{0 0 Started {"input_sha256":"7902699be42c8a8e46fbbb4501726517e86b22c56a189f7625a6da49081b2451"} } 1} {{0 1 Completed {"\u0069nv_seq":9,"inv_seq":1,"result":"NDI="} } 2}] map[input:7902699be42c8a8e46fbbb4501726517e86b22c56a189f7625a6da49081b2451:[55]] <nil>} <nil>
+=== RUN   TestGraphReplaySnapshotTerminalMetadataAdmission/protobuf-v1/null_result_ref
+    graph_replay_terminal_metadata_test.go:77: malformed terminal exported or partial snapshot leaked {graph-v1 7902699be42c8a8e46fbbb4501726517e86b22c56a189f7625a6da49081b2451 [55] [{{0 0 Started {"input_sha256":"7902699be42c8a8e46fbbb4501726517e86b22c56a189f7625a6da49081b2451"} } 1} {{0 1 Completed {"inv_seq":1,"result":"NDI=","result_ref":null} } 2}] map[input:7902699be42c8a8e46fbbb4501726517e86b22c56a189f7625a6da49081b2451:[55]] <nil>} <nil>
+=== RUN   TestGraphReplaySnapshotTerminalMetadataAdmission/protobuf-v1/null_error
+    graph_replay_terminal_metadata_test.go:77: malformed terminal exported or partial snapshot leaked {graph-v1 7902699be42c8a8e46fbbb4501726517e86b22c56a189f7625a6da49081b2451 [55] [{{0 0 Started {"input_sha256":"7902699be42c8a8e46fbbb4501726517e86b22c56a189f7625a6da49081b2451"} } 1} {{0 1 Completed {"inv_seq":1,"result":"NDI=","error":null} } 2}] map[input:7902699be42c8a8e46fbbb4501726517e86b22c56a189f7625a6da49081b2451:[55]] <nil>} <nil>
+=== RUN   TestGraphReplaySnapshotTerminalMetadataAdmission/protobuf-v1/null_limit_request
+    graph_replay_terminal_metadata_test.go:77: malformed terminal exported or partial snapshot leaked {graph-v1 7902699be42c8a8e46fbbb4501726517e86b22c56a189f7625a6da49081b2451 [55] [{{0 0 Started {"input_sha256":"7902699be42c8a8e46fbbb4501726517e86b22c56a189f7625a6da49081b2451"} } 1} {{0 1 Completed {"inv_seq":1,"result":"NDI=","limit_request":null} } 2}] map[input:7902699be42c8a8e46fbbb4501726517e86b22c56a189f7625a6da49081b2451:[55]] <nil>} <nil>
+=== RUN   TestGraphReplaySnapshotTerminalMetadataAdmission/protobuf-v1/opaque_user_duplicates
+=== RUN   TestGraphReplaySnapshotTerminalMetadataAdmission/protobuf-v1/duplicate_invocation
+    graph_replay_terminal_metadata_test.go:77: malformed terminal exported or partial snapshot leaked {graph-v1 7902699be42c8a8e46fbbb4501726517e86b22c56a189f7625a6da49081b2451 [55] [{{0 0 Started {"input_sha256":"7902699be42c8a8e46fbbb4501726517e86b22c56a189f7625a6da49081b2451"} } 1} {{0 1 Completed {"inv_seq":9,"inv_seq":1,"result":"NDI="} } 2}] map[input:7902699be42c8a8e46fbbb4501726517e86b22c56a189f7625a6da49081b2451:[55]] <nil>} <nil>
+=== RUN   TestGraphReplaySnapshotTerminalMetadataAdmission/protobuf-v1/duplicate_error
+    graph_replay_terminal_metadata_test.go:77: malformed terminal exported or partial snapshot leaked {graph-v1 7902699be42c8a8e46fbbb4501726517e86b22c56a189f7625a6da49081b2451 [55] [{{0 0 Started {"input_sha256":"7902699be42c8a8e46fbbb4501726517e86b22c56a189f7625a6da49081b2451"} } 1} {{0 1 Completed {"inv_seq":1,"error":"bad","error":"","result":"NDI="} } 2}] map[input:7902699be42c8a8e46fbbb4501726517e86b22c56a189f7625a6da49081b2451:[55]] <nil>} <nil>
+=== RUN   TestGraphReplaySnapshotTerminalMetadataAdmission/protobuf-v1/alias_error
+    graph_replay_terminal_metadata_test.go:77: malformed terminal exported or partial snapshot leaked {graph-v1 7902699be42c8a8e46fbbb4501726517e86b22c56a189f7625a6da49081b2451 [55] [{{0 0 Started {"input_sha256":"7902699be42c8a8e46fbbb4501726517e86b22c56a189f7625a6da49081b2451"} } 1} {{0 1 Completed {"inv_seq":1,"Error":"bad","error":"","result":"NDI="} } 2}] map[input:7902699be42c8a8e46fbbb4501726517e86b22c56a189f7625a6da49081b2451:[55]] <nil>} <nil>
+=== RUN   TestGraphReplaySnapshotTerminalMetadataAdmission/protobuf-v1/null_limit_kind
+    graph_replay_terminal_metadata_test.go:77: malformed terminal exported or partial snapshot leaked {graph-v1 7902699be42c8a8e46fbbb4501726517e86b22c56a189f7625a6da49081b2451 [55] [{{0 0 Started {"input_sha256":"7902699be42c8a8e46fbbb4501726517e86b22c56a189f7625a6da49081b2451"} } 1} {{0 1 Completed {"inv_seq":1,"result":"NDI=","limit_entry":{"kind":null,"payload":{}}} } 2}] map[input:7902699be42c8a8e46fbbb4501726517e86b22c56a189f7625a6da49081b2451:[55]] <nil>} <nil>
+=== RUN   TestGraphReplaySnapshotTerminalMetadataAdmission/protobuf-v1/null_limit_entry
+    graph_replay_terminal_metadata_test.go:77: malformed terminal exported or partial snapshot leaked {graph-v1 7902699be42c8a8e46fbbb4501726517e86b22c56a189f7625a6da49081b2451 [55] [{{0 0 Started {"input_sha256":"7902699be42c8a8e46fbbb4501726517e86b22c56a189f7625a6da49081b2451"} } 1} {{0 1 Completed {"inv_seq":1,"result":"NDI=","limit_entry":null} } 2}] map[input:7902699be42c8a8e46fbbb4501726517e86b22c56a189f7625a6da49081b2451:[55]] <nil>} <nil>
+=== RUN   TestGraphReplaySnapshotTerminalMetadataAdmission/protobuf-v1/explicit_empty_error
+--- FAIL: TestGraphReplaySnapshotTerminalMetadataAdmission (0.16s)
+    --- FAIL: TestGraphReplaySnapshotTerminalMetadataAdmission/json/duplicate_result (0.00s)
+    --- FAIL: TestGraphReplaySnapshotTerminalMetadataAdmission/json/unknown_field (0.00s)
+    --- FAIL: TestGraphReplaySnapshotTerminalMetadataAdmission/json/null_limit_request (0.00s)
+    --- PASS: TestGraphReplaySnapshotTerminalMetadataAdmission/json/explicit_empty_error (0.01s)
+    --- FAIL: TestGraphReplaySnapshotTerminalMetadataAdmission/json/escaped_duplicate_invocation (0.00s)
+    --- FAIL: TestGraphReplaySnapshotTerminalMetadataAdmission/json/null_limit_kind (0.01s)
+    --- FAIL: TestGraphReplaySnapshotTerminalMetadataAdmission/json/null_error (0.00s)
+    --- FAIL: TestGraphReplaySnapshotTerminalMetadataAdmission/json/null_limit_entry (0.00s)
+    --- FAIL: TestGraphReplaySnapshotTerminalMetadataAdmission/json/null_result (0.00s)
+    --- FAIL: TestGraphReplaySnapshotTerminalMetadataAdmission/json/alias_invocation (0.00s)
+    --- FAIL: TestGraphReplaySnapshotTerminalMetadataAdmission/json/alias_result (0.00s)
+    --- FAIL: TestGraphReplaySnapshotTerminalMetadataAdmission/json/duplicate_error (0.01s)
+    --- FAIL: TestGraphReplaySnapshotTerminalMetadataAdmission/json/null_limit_payload (0.00s)
+    --- FAIL: TestGraphReplaySnapshotTerminalMetadataAdmission/json/null_result_ref (0.00s)
+    --- FAIL: TestGraphReplaySnapshotTerminalMetadataAdmission/json/null_result_hash (0.00s)
+    --- PASS: TestGraphReplaySnapshotTerminalMetadataAdmission/json/inline (0.00s)
+    --- PASS: TestGraphReplaySnapshotTerminalMetadataAdmission/json/user_null (0.00s)
+    --- FAIL: TestGraphReplaySnapshotTerminalMetadataAdmission/json/alias_error (0.00s)
+    --- FAIL: TestGraphReplaySnapshotTerminalMetadataAdmission/json/duplicate_limit_kind (0.00s)
+    --- PASS: TestGraphReplaySnapshotTerminalMetadataAdmission/json/opaque_user_duplicates (0.00s)
+    --- FAIL: TestGraphReplaySnapshotTerminalMetadataAdmission/json/duplicate_invocation (0.01s)
+    --- FAIL: TestGraphReplaySnapshotTerminalMetadataAdmission/protobuf-v1/duplicate_result (0.00s)
+    --- FAIL: TestGraphReplaySnapshotTerminalMetadataAdmission/protobuf-v1/alias_result (0.00s)
+    --- FAIL: TestGraphReplaySnapshotTerminalMetadataAdmission/protobuf-v1/unknown_field (0.00s)
+    --- FAIL: TestGraphReplaySnapshotTerminalMetadataAdmission/protobuf-v1/null_result_hash (0.00s)
+    --- FAIL: TestGraphReplaySnapshotTerminalMetadataAdmission/protobuf-v1/null_limit_payload (0.00s)
+    --- FAIL: TestGraphReplaySnapshotTerminalMetadataAdmission/protobuf-v1/duplicate_limit_kind (0.00s)
+    --- FAIL: TestGraphReplaySnapshotTerminalMetadataAdmission/protobuf-v1/null_result (0.01s)
+    --- PASS: TestGraphReplaySnapshotTerminalMetadataAdmission/protobuf-v1/inline (0.00s)
+    --- PASS: TestGraphReplaySnapshotTerminalMetadataAdmission/protobuf-v1/user_null (0.01s)
+    --- FAIL: TestGraphReplaySnapshotTerminalMetadataAdmission/protobuf-v1/alias_invocation (0.00s)
+    --- FAIL: TestGraphReplaySnapshotTerminalMetadataAdmission/protobuf-v1/escaped_duplicate_invocation (0.00s)
+    --- FAIL: TestGraphReplaySnapshotTerminalMetadataAdmission/protobuf-v1/null_result_ref (0.00s)
+    --- FAIL: TestGraphReplaySnapshotTerminalMetadataAdmission/protobuf-v1/null_error (0.00s)
+    --- FAIL: TestGraphReplaySnapshotTerminalMetadataAdmission/protobuf-v1/null_limit_request (0.00s)
+    --- PASS: TestGraphReplaySnapshotTerminalMetadataAdmission/protobuf-v1/opaque_user_duplicates (0.00s)
+    --- FAIL: TestGraphReplaySnapshotTerminalMetadataAdmission/protobuf-v1/duplicate_invocation (0.00s)
+    --- FAIL: TestGraphReplaySnapshotTerminalMetadataAdmission/protobuf-v1/duplicate_error (0.01s)
+    --- FAIL: TestGraphReplaySnapshotTerminalMetadataAdmission/protobuf-v1/alias_error (0.00s)
+    --- FAIL: TestGraphReplaySnapshotTerminalMetadataAdmission/protobuf-v1/null_limit_kind (0.01s)
+    --- FAIL: TestGraphReplaySnapshotTerminalMetadataAdmission/protobuf-v1/null_limit_entry (0.00s)
+    --- PASS: TestGraphReplaySnapshotTerminalMetadataAdmission/protobuf-v1/explicit_empty_error (0.00s)
+FAIL
+FAIL	js-wf/worker	0.165s
+FAIL

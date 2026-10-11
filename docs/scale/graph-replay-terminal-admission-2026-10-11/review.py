@@ -1,0 +1,45 @@
+import hashlib,json,re,subprocess
+from pathlib import Path
+import yaml
+out=Path(__file__).resolve().parent
+inputs=json.loads((out/'source-inputs.json').read_text())
+for name,sha in inputs.items():
+ assert hashlib.sha256(Path(name).read_bytes()).hexdigest()==sha,name
+baseline=json.loads((out/'baseline-command.json').read_text())
+assert baseline['actual_exit_code']==0
+original=subprocess.check_output(['git','show',baseline['source_revision']+':worker/graph_replay.go'])
+assert original==(out/'baseline-graph-replay.go.txt').read_bytes()==Path('worker/graph_replay.go').read_bytes()
+for name in ('wf/replay_graph_format.go','wf/replay_record_order.go','wf/outcome.go'):
+ assert subprocess.check_output(['git','show',baseline['source_revision']+':'+name])==Path(name).read_bytes(),name
+mutant=json.loads((out/'mutant-command.json').read_text())
+assert mutant['actual_exit_code']==1
+needle=b'if err = wf.ValidateReplayGraphHistory(snapshot.Records, snapshot.Objects, typ, id, invocation.Sequence, wf.ReplayFormatGraphV1, snapshot.InputHash); err != nil {'
+assert original.count(needle)==1
+assert original.replace(needle,b'if err = nil; err != nil {')==(out/'without-final-validator.go.txt').read_bytes()
+overlay=json.loads((out/'mutant-overlay.json').read_text())['Replace']
+assert overlay=={str(Path('worker/graph_replay.go').resolve()):str((out/'without-final-validator.go.txt').resolve())}
+log=(out/'mutant.log').read_text()
+assert log.count('malformed terminal exported or partial snapshot leaked')==34
+for codec in ('json','protobuf-v1'):
+ for case in ('inline','user_null','opaque_user_duplicates','explicit_empty_error'):
+  assert f'--- PASS: TestGraphReplaySnapshotTerminalMetadataAdmission/{codec}/{case} ' in log
+workflow=yaml.safe_load(Path('.github/workflows/graph-publication.yml').read_text())
+run=next(s['run'] for s in workflow['jobs']['terminal-outcome-admission']['steps'] if 'run' in s)
+guard=run.split("python3 - <<'PY'\n",1)[1].rsplit('\nPY',1)[0]
+seconds={}
+for mode in ('normal','race'):
+ receipt=json.loads((out/(mode+'-command.json')).read_text())
+ assert receipt['actual_exit_code']==0 and receipt['end_ns']>receipt['start_ns']
+ log=(out/(mode+'.log')).read_text()
+ assert not re.search(r'^\s*--- (FAIL|SKIP):',log,re.M)
+ exec(guard.replace("pathlib.Path('terminal-outcome-admission.log').read_text()",'log'),{'log':log})
+ executables=json.loads((out/(mode+'-executables.json')).read_text())
+ assert set(executables)=={'wf','worker'}
+ for name,exe in executables.items():
+  assert exe['parent_pid']==receipt['driver_pid']
+  assert receipt['start_ns']<=exe['captured_ns']<=receipt['end_ns']
+  assert ('-race=true' in exe['build'])==(mode=='race')
+  assert f'/{name}.test ' in exe['command']
+ seconds[mode]={pkg:float(elapsed) for pkg,elapsed in re.findall(r'ok\s+(js-wf/\w+)\s+([\d.]+)s',log)}
+result={'accepted':True,'source_inputs_unchanged':len(inputs),'production_export_and_validation_sources_unchanged':True,'new_export_controls':42,'positive_controls':8,'negative_controls':34,'prior_metadata_result_controls':72,'total_metadata_result_export_controls':114,'baseline_actual_exit':0,'mutant_actual_exit':1,'mutant_malformed_exports_detected':34,'exact_current_terminal_ci_guards':True,'actual_final_executables_captured':4,'test_seconds':seconds}
+(out/'review.json').write_text(json.dumps(result,indent=2)+'\n');print(json.dumps(result))
