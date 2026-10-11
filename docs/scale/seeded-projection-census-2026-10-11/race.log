@@ -1,0 +1,43 @@
+=== RUN   TestSeededGraphProjectionCensusReplay
+    graph_projection_census_test.go:272: PROJECTION_CENSUS modes=map[live_create_drop:69 live_create_lost_ack:78 live_healthy:67 live_missing:73 live_orphan:57 live_stale_reader:69 live_wrong_generation:69 retired_create_drop:67 retired_create_lost_ack:83 retired_healthy:83 retired_missing:82 retired_orphan:63 retired_stale_reader:66 retired_wrong_generation:74]; complete raw model audit, same-generation heal, retired projection scope and zero owned objects
+    seed_count_test.go:32: TIER1_SEEDS test=TestSeededGraphProjectionCensusReplay first=1 last=1000 completed=1000 requested=1000
+--- PASS: TestSeededGraphProjectionCensusReplay (48.58s)
+=== RUN   TestGraphStartHeaderFailureTracePersistence
+=== RUN   TestGraphStartHeaderFailureTracePersistence/default
+=== RUN   TestGraphStartHeaderFailureTracePersistence/explicit
+--- PASS: TestGraphStartHeaderFailureTracePersistence (0.07s)
+    --- PASS: TestGraphStartHeaderFailureTracePersistence/default (0.02s)
+    --- PASS: TestGraphStartHeaderFailureTracePersistence/explicit (0.03s)
+=== RUN   TestPinnedRegressionCorpus
+=== RUN   TestPinnedRegressionCorpus/graph_projection_census_live_create_drop.json
+=== RUN   TestPinnedRegressionCorpus/graph_projection_census_live_create_lost_ack.json
+=== RUN   TestPinnedRegressionCorpus/graph_projection_census_live_healthy.json
+=== RUN   TestPinnedRegressionCorpus/graph_projection_census_live_missing.json
+=== RUN   TestPinnedRegressionCorpus/graph_projection_census_live_orphan.json
+=== RUN   TestPinnedRegressionCorpus/graph_projection_census_live_stale_reader.json
+=== RUN   TestPinnedRegressionCorpus/graph_projection_census_live_wrong_generation.json
+=== RUN   TestPinnedRegressionCorpus/graph_projection_census_retired_create_drop.json
+=== RUN   TestPinnedRegressionCorpus/graph_projection_census_retired_create_lost_ack.json
+=== RUN   TestPinnedRegressionCorpus/graph_projection_census_retired_healthy.json
+=== RUN   TestPinnedRegressionCorpus/graph_projection_census_retired_missing.json
+=== RUN   TestPinnedRegressionCorpus/graph_projection_census_retired_orphan.json
+=== RUN   TestPinnedRegressionCorpus/graph_projection_census_retired_stale_reader.json
+=== RUN   TestPinnedRegressionCorpus/graph_projection_census_retired_wrong_generation.json
+--- PASS: TestPinnedRegressionCorpus (0.87s)
+    --- PASS: TestPinnedRegressionCorpus/graph_projection_census_live_create_drop.json (0.04s)
+    --- PASS: TestPinnedRegressionCorpus/graph_projection_census_live_create_lost_ack.json (0.04s)
+    --- PASS: TestPinnedRegressionCorpus/graph_projection_census_live_healthy.json (0.03s)
+    --- PASS: TestPinnedRegressionCorpus/graph_projection_census_live_missing.json (0.04s)
+    --- PASS: TestPinnedRegressionCorpus/graph_projection_census_live_orphan.json (0.06s)
+    --- PASS: TestPinnedRegressionCorpus/graph_projection_census_live_stale_reader.json (0.05s)
+    --- PASS: TestPinnedRegressionCorpus/graph_projection_census_live_wrong_generation.json (0.04s)
+    --- PASS: TestPinnedRegressionCorpus/graph_projection_census_retired_create_drop.json (0.03s)
+    --- PASS: TestPinnedRegressionCorpus/graph_projection_census_retired_create_lost_ack.json (0.03s)
+    --- PASS: TestPinnedRegressionCorpus/graph_projection_census_retired_healthy.json (0.04s)
+    --- PASS: TestPinnedRegressionCorpus/graph_projection_census_retired_missing.json (0.03s)
+    --- PASS: TestPinnedRegressionCorpus/graph_projection_census_retired_orphan.json (0.03s)
+    --- PASS: TestPinnedRegressionCorpus/graph_projection_census_retired_stale_reader.json (0.04s)
+    --- PASS: TestPinnedRegressionCorpus/graph_projection_census_retired_wrong_generation.json (0.04s)
+PASS
+TIER1_COVERAGE model_version=3 seeds_per_workload=1000 generated_schedules=1000 scheduler_choices=2000 choices_per_second=40.4 transport_events=154261 virtual_ms_max=60000 virtual_buckets_zero=0 under_1s=0 under_1m=0 at_least_1m=1000 elapsed=49.522661938s
+ok  	js-wf/sim	50.544s

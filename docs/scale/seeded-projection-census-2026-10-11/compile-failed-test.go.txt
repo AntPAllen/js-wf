@@ -1,0 +1,274 @@
+package sim
+
+import (
+	"context"
+	"encoding/json"
+	"errors"
+	"fmt"
+	"os"
+	"path/filepath"
+	"reflect"
+	"testing"
+	"time"
+
+	"github.com/nats-io/nats.go"
+	"github.com/nats-io/nats.go/jetstream"
+	"js-wf/identity"
+	"js-wf/integrity"
+	"js-wf/internal/graphpublication"
+	"js-wf/journal"
+)
+
+var graphProjectionCensusModes = []string{"healthy", "orphan", "missing", "wrong_generation", "stale_reader", "create_drop", "create_lost_ack"}
+
+func runGraphProjectionCensus(seed int64, replay *Trace) (trace Trace, runErr error) {
+	s := NewScheduler(seed)
+	if replay != nil {
+		var e error
+		s, e = ReplayScheduler(*replay)
+		if e != nil {
+			return trace, e
+		}
+	}
+	if e := s.SetWorkload("graph_projection_census"); e != nil {
+		return trace, e
+	}
+	defer func() { trace = s.Trace() }()
+	stage, e := s.Choose([]string{"live", "retired"})
+	if e != nil {
+		return trace, e
+	}
+	mode, e := s.Choose(graphProjectionCensusModes)
+	if e != nil {
+		return trace, e
+	}
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+	m := NewGraphPublicationTransport(s)
+	now := func() time.Time { return time.UnixMilli(s.NowMillis()).UTC() }
+	store, e := journal.NewGraphStore(journal.GraphConfig{Protocol: m.Protocol(), Now: now, CanonicalStarts: true, PinTTL: 30 * time.Second, IntentTTL: time.Second})
+	if e != nil {
+		return trace, e
+	}
+	source := NewSignalTransport(s)
+	outcomes := NewKVTransport(s, 0)
+	const typ, id = "test", "projection"
+	key := identity.Key(typ, id)
+	subject := identity.InvocationSubject(typ, id)
+	start, e := store.ReserveStart(ctx, journal.GraphStartRequest{Type: typ, ID: id}, []byte(`7`))
+	if e != nil {
+		return trace, e
+	}
+	seq, e := source.PublishInvocation(ctx, &nats.Msg{Subject: subject, Data: start.Start.PointerBytes(), Header: nats.Header{journal.GraphStartTokenHeader: []string{start.Start.Token}, "Wf-Input-SHA256": []string{start.Start.InputSHA256}}})
+	if e != nil {
+		return trace, e
+	}
+	if e = store.BindStart(ctx, typ, id, start.Start.Token, seq); e != nil {
+		return trace, e
+	}
+	tail, e := store.Begin(ctx, typ, id, seq)
+	if e != nil {
+		return trace, e
+	}
+	tail, e = store.Append(ctx, typ, id, seq, journal.Entry{Kind: journal.Started, Epoch: 1, WorkerID: "owner"}, tail, nil, nil)
+	if e != nil {
+		return trace, e
+	}
+	body := []byte(fmt.Sprintf(`{"inv_seq":%d,"result":"NDI="}`, seq))
+	tail, e = store.Append(ctx, typ, id, seq, journal.Entry{Index: 1, Kind: journal.Completed, Epoch: 1, WorkerID: "owner", Payload: body}, tail, nil, nil)
+	if e != nil {
+		return trace, e
+	}
+	if mode == "create_drop" || mode == "create_lost_ack" {
+		fault := KVDropBeforeCommit
+		if mode == "create_lost_ack" {
+			fault = KVLoseAckAfterCommit
+		}
+		if e = outcomes.QueueFault(KVFault{Operation: "create", Kind: fault}); e != nil {
+			return trace, e
+		}
+	}
+	_, e = outcomes.Create(ctx, key, body)
+	if mode == "create_drop" || mode == "create_lost_ack" {
+		if !errors.Is(e, ErrTransportLost) {
+			return trace, fmt.Errorf("missing create uncertainty: %v", e)
+		}
+	} else if e != nil {
+		return trace, e
+	}
+	if stage == "retired" {
+		if e = store.Retire(ctx, typ, id, seq, tail); e != nil {
+			return trace, e
+		}
+	}
+	wrong := []byte(fmt.Sprintf(`{"inv_seq":%d,"result":"NDI="}`, seq+1))
+	switch mode {
+	case "orphan":
+		_, e = outcomes.Create(ctx, "orphan.id", wrong)
+	}
+	if e != nil && mode != "create_drop" && mode != "create_lost_ack" {
+		return trace, e
+	}
+	if mode == "missing" {
+		v, err := outcomes.Get(ctx, key)
+		if err != nil {
+			return trace, err
+		}
+		if e = outcomes.Delete(ctx, key, v.Revision); e != nil {
+			return trace, e
+		}
+	}
+	if mode == "wrong_generation" || mode == "stale_reader" {
+		if _, e = outcomes.Put(ctx, key, wrong); e != nil {
+			return trace, e
+		}
+	}
+	if mode == "stale_reader" {
+		if _, e = outcomes.Put(ctx, key, body); e != nil {
+			return trace, e
+		}
+	}
+	snapshot := func() (integrity.GraphJournalSnapshot, error) {
+		roots := map[string]graphpublication.Root{}
+		fences := map[string]graphpublication.Fence{}
+		m.mu.Lock()
+		for k, v := range m.roots {
+			roots[k] = graphRootCopy(v)
+		}
+		for k, v := range m.blobs {
+			fences[k] = graphFenceCopy(v.Fence)
+		}
+		m.mu.Unlock()
+		graph := integrity.GraphReferenceSnapshot{Roots: roots, Fences: fences, PayloadLimit: journal.MaxGraphEntryBytes, LoadObject: func(call context.Context, name string, limit int) ([]byte, error) {
+			if err := call.Err(); err != nil {
+				return nil, err
+			}
+			m.mu.Lock()
+			defer m.mu.Unlock()
+			data, ok := m.objects[name]
+			if !ok || len(data) > limit {
+				return nil, fmt.Errorf("missing/oversize raw model object")
+			}
+			m.event("audit_object", name, 0, 0, data, "ok")
+			return append([]byte(nil), data...), nil
+		}}
+		projection := map[string][]byte{}
+		keys, err := outcomes.Keys(ctx)
+		if err != nil && !errors.Is(err, jetstream.ErrNoKeysFound) {
+			return integrity.GraphJournalSnapshot{}, err
+		}
+		for _, k := range keys {
+			v, err := outcomes.Get(ctx, k)
+			if err != nil {
+				return integrity.GraphJournalSnapshot{}, err
+			}
+			projection[k] = append([]byte(nil), v.Value...)
+		}
+		inv, err := source.GetInvocation(ctx, seq)
+		if err != nil {
+			return integrity.GraphJournalSnapshot{}, err
+		}
+		return integrity.GraphJournalSnapshot{Graph: graph, Invocations: map[string]*jetstream.RawStreamMsg{key: inv}, Projections: projection, ReadProjection: func(call context.Context, k string) ([]byte, error) {
+			v, err := outcomes.Get(call, k)
+			return v.Value, err
+		}}, nil
+	}
+	snap, e := snapshot()
+	if e != nil {
+		return trace, e
+	}
+	if mode == "stale_reader" {
+		if e = outcomes.QueueFault(KVFault{Operation: "get", Kind: KVStaleRead}); e != nil {
+			return trace, e
+		}
+	}
+	_, e = integrity.CheckGraphJournals(ctx, snap)
+	valid := mode == "healthy" || mode == "create_lost_ack"
+	if (e == nil) != valid {
+		return trace, fmt.Errorf("projection audit mode=%s stage=%s error=%v", mode, stage, e)
+	}
+	s.RecordTransport(TransportEvent{Operation: "check_projection_census", Subject: key, Sequence: seq, Outcome: fmt.Sprintf("%s_%s_valid=%t", stage, mode, valid)})
+	if mode == "orphan" {
+		v, err := outcomes.Get(ctx, "orphan.id")
+		if err != nil {
+			return trace, err
+		}
+		if e = outcomes.Delete(ctx, "orphan.id", v.Revision); e != nil {
+			return trace, e
+		}
+	}
+	if _, e = outcomes.Put(ctx, key, body); e != nil {
+		return trace, e
+	}
+	snap, e = snapshot()
+	if e != nil {
+		return trace, e
+	}
+	report, e := integrity.CheckGraphJournals(ctx, snap)
+	if e != nil {
+		return trace, e
+	}
+	if stage == "live" && report.Entries != 2 || stage == "retired" && report.RetiredProjectionOnly != 1 {
+		return trace, fmt.Errorf("healed audit scope differs: %+v", report)
+	}
+	if stage == "live" {
+		if e = store.Retire(ctx, typ, id, seq, tail); e != nil {
+			return trace, e
+		}
+	}
+	source.PurgeInvocation(subject)
+	v, e := outcomes.Get(ctx, key)
+	if e != nil {
+		return trace, e
+	}
+	if e = outcomes.Delete(ctx, key, v.Revision); e != nil {
+		return trace, e
+	}
+	if e = s.AdvanceMillis(60000); e != nil {
+		return trace, e
+	}
+	if _, e = m.Protocol().SweepWithReaders(ctx, now()); e != nil {
+		return trace, e
+	}
+	objects, e := m.Objects(ctx)
+	if e != nil || len(objects) != 0 {
+		return trace, fmt.Errorf("owned graph drain=%d: %v", len(objects), e)
+	}
+	if e = m.CheckReferences(); e != nil {
+		return trace, e
+	}
+	s.RecordTransport(TransportEvent{Operation: "check_projection_census_heal_and_drain", Subject: key, Sequence: seq, Outcome: stage + "_" + mode})
+	return trace, s.Finish()
+}
+
+func TestSeededGraphProjectionCensusReplay(t *testing.T) {
+	seen := map[string]int{}
+	fail := func(seed int64, trace Trace, cause error) {
+		path, err := saveStartSourceHeaderFailure(trace, os.Getenv("FAULT_TRACE_OUT"))
+		if err != nil {
+			t.Fatal(err)
+		}
+		t.Fatalf("FAULT_SEED=%d FAULT_TRACE=%s: %v", seed, path, cause)
+	}
+	for seed := range seededSchedules(t) {
+		generated, e := runGraphProjectionCensus(seed, nil)
+		if e != nil {
+			fail(seed, generated, e)
+		}
+		replayed, e := runGraphProjectionCensus(seed, &generated)
+		if e != nil || !reflect.DeepEqual(generated, replayed) {
+			fail(seed, generated, fmt.Errorf("replay differs: %v", e))
+		}
+		mode := generated.Decisions[0].Chosen + "_" + generated.Decisions[1].Chosen
+		seen[mode]++
+		if root := os.Getenv("SIM_GRAPH_PROJECTION_CENSUS_ROOT"); root != "" && seen[mode] == 1 {
+			if e = generated.Save(filepath.Join(root, "graph_projection_census_"+mode+".json")); e != nil {
+				t.Fatal(e)
+			}
+		}
+	}
+	if len(seen) != 2*len(graphProjectionCensusModes) {
+		t.Fatalf("coverage=%v", seen)
+	}
+	t.Logf("PROJECTION_CENSUS modes=%v; complete raw model audit, same-generation heal, retired projection scope and zero owned objects", seen)
+}

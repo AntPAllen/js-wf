@@ -573,6 +573,8 @@ func replayTrace(loaded Trace) (Trace, error) {
 		replayed, err = runGraphReplayLifecycle(loaded.Seed, &loaded)
 	case "graph_canonical_signal_runtime":
 		replayed, err = runGraphSignalRuntime(loaded.Seed, &loaded)
+	case "graph_projection_census":
+		replayed, err = runGraphProjectionCensus(loaded.Seed, &loaded)
 	case "graph_start_source_headers":
 		replayed, err = runGraphStartSourceHeaders(loaded.Seed, &loaded)
 	case "graph_canonical_start_repair":

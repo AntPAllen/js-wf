@@ -1,5 +1,27 @@
 # JetStream Durable Workflow Runtime — Implementation Plan
 
+## Tier1 raw projection census model — 2026-10-11
+
+A new seeded graph_projection_census workload builds canonical owned inputs and
+two-entry terminal journals on in-memory graph/start/KV ports. Live and retired
+states cover healthy, orphan, missing, wrong-generation, stale-reader, create
+before-commit drop and lost-after-commit acknowledgement modes. The independent
+raw auditor checks complete roots/fences/objects, invocation sources and captured
+projection keys/bytes. Invalid observations must fail, committed lost-ACK state
+must pass, and fixture healing within the same generation must pass before
+source/projection deletion and zero owned graph object drain. No user effects or
+NATS conformance are claimed by this workload.
+
+Normal exit0 in4.571s and race exit0 in50.544s each
+prove1000 generated bodies with exact replay, all14 new pins and two failure-trace
+persistence controls. Both actual executables were captured; 2025 pre-run
+source/corpus/CI inputs remained unchanged. Exact CI receipt guards passed locally.
+Discovery now finds161 seed families and894 pins. See [seeded census evidence](scale/seeded-projection-census-2026-10-11/README.md).
+
+This qualifies the new family. Full161 normal/race/extended qualification and all
+original native/fault/soak/scale/rollout gates remain open. Four live frozen
+campaigns predate the new family; their source-bound acceptance remains separate.
+
 ## Complete isolated canonical projection census — 2026-10-11
 
 Raw snapshots now require a complete retained WF_STATE projection map. Native
