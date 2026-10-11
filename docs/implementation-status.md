@@ -1,5 +1,18 @@
 # Implementation status against the supplied plan
 
+## Strict complete canonical terminal envelopes — 2026-10-11
+
+The raw auditor now admits terminal metadata through own complete wire fields,
+rejecting unknown, aliased and duplicate terminal fields and typed limit_entry
+headers before canonical outcome checks. User result/rejected payload bytes stay
+opaque. Ten JSON/protobuf physical positives and22 corruption controls pass with
+outer-envelope/historical-frame regressions and four R1/R3 native checkpoint
+cases; actual race exit0 in18.222s. CI requires every new fixture.
+[Evidence and scope](scale/raw-terminal-envelope-2026-10-11/README.md).
+
+Rejected limit boundary semantics and original full acceptance remain open. Both
+larger frozen campaigns continue under their original invocations.
+
 ## Strict canonical journal outer envelopes — 2026-10-11
 
 The raw auditor now rejects unknown, aliased and duplicate outer journal envelope

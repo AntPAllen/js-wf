@@ -368,14 +368,8 @@ func CheckGraphJournals(ctx context.Context, snapshot GraphJournalSnapshot) (rep
 		}
 
 		if entry.Kind == journal.Completed || entry.Kind == journal.Failed {
-			var outcome struct {
-				InvSeq     uint64 `json:"inv_seq"`
-				Result     []byte `json:"result"`
-				ResultRef  string `json:"result_ref"`
-				ResultHash string `json:"result_hash"`
-				Error      string `json:"error"`
-			}
-			if json.Unmarshal(entry.Payload, &outcome) != nil || outcome.InvSeq != c.Invocation || entry.Kind == journal.Completed && outcome.Error != "" || entry.Kind == journal.Failed && (outcome.Error == "" || len(outcome.Result) != 0 || outcome.ResultRef != "" || outcome.ResultHash != "") {
+			var outcome auditedGraphOutcome
+			if checkpoint.DecodeUnambiguous(entry.Payload, &outcome) != nil || outcome.InvSeq != c.Invocation || entry.Kind == journal.Completed && outcome.Error != "" || entry.Kind == journal.Failed && (outcome.Error == "" || len(outcome.Result) != 0 || outcome.ResultRef != "" || outcome.ResultHash != "") {
 				return fmt.Errorf("%s: invalid canonical terminal", record.Destination)
 			}
 			if outcome.ResultRef != "" {

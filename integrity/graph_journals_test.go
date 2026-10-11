@@ -366,7 +366,7 @@ func rawJournalCheckpointFixture(t *testing.T, encoding journal.Encoding, archiv
 		}{retainedgraph.Schema, first, height, []retainedgraph.Link{left.Link, right.Link}})
 		return retainedgraph.Tree{First: first, Height: height, Link: put(data, graphpublication.Location{Kind: "node", First: first, Height: height, Stream: stream})}
 	}
-	cursor := auditedGraphCursor{Schema: "js-wf-graph-journal-cursor-v1", Invocation: 10, Base: 100, Count: uint64(len(entries)), Epoch: 1, Kind: journal.Completed}
+	cursor := auditedGraphCursor{Schema: "js-wf-graph-journal-cursor-v1", Invocation: 10, Base: 100, Count: uint64(len(entries)), Epoch: 1, Kind: entries[len(entries)-1].Kind}
 	root := graphpublication.Root{Schema: graphpublication.ApplicationSchema, Head: 20, Token: "owner", Graph: retainedgraph.Root{Schema: retainedgraph.Schema, Count: 4, Frontier: []retainedgraph.Tree{tree(0, 0, 2, "")}}}
 	source := &jetstream.RawStreamMsg{Sequence: 10, Subject: "wf.inv.kind.id", Data: []byte("input")}
 	if archive {
