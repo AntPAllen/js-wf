@@ -6,7 +6,9 @@ here=Path(__file__).resolve().parent
 repo=here.parents[2]
 sys.path.insert(0,str(repo/"scripts"))
 from graph_limit_profile import audit_profile
-parser=argparse.ArgumentParser();parser.add_argument('root',type=Path);a=parser.parse_args()
+parser=argparse.ArgumentParser();parser.add_argument('root',type=Path);parser.add_argument('--native-root',type=Path,help='Restored native store checked against the original full census');parser.add_argument('--output',type=Path,help='Separate verdict output preserving the original review receipt');a=parser.parse_args()
+native_root=a.native_root if a.native_root is not None else a.root/'native'
+review_output=a.output if a.output is not None else a.root/'review.json'
 state=json.loads((a.root/'state.json').read_text())
 props=dict(line.split('=',1) for line in subprocess.check_output(['systemctl','--user','show',state['unit'],
     '-p','LoadState','-p','MainPID','-p','InvocationID','-p','RemainAfterExit','-p','ExecMainStatus',
@@ -16,7 +18,7 @@ result=dict(observed_utc=datetime.datetime.now(datetime.timezone.utc).isoformat(
     root=str(a.root),source=state['source'],mode=state['mode'],kind=state['kind'],properties=props,
     accepted=False,actual_100000_entries_qualified=False)
 def save():
-    (a.root/'review.json').write_text(json.dumps(result,indent=2)+'\n')
+    review_output.write_text(json.dumps(result,indent=2)+'\n')
 assert props['LoadState']=='loaded' and props['InvocationID']==state['invocation']
 assert props['RemainAfterExit']=='yes'
 if not state['terminal'] or props['MainPID']!='0' or not props['ExecMainExitTimestamp']:
@@ -88,9 +90,11 @@ result['no_unexpected_profile_errors_gate'] = not unexpected_errors
 files=json.loads(gzip.decompress((a.root/'native-files.json.gz').read_bytes()))
 assert files and len(files)==state['native_files']
 assert sum(x['bytes'] for x in files.values())==state['native_bytes']
-assert set(files)=={str(p.relative_to(a.root/'native')) for p in (a.root/'native').rglob('*') if p.is_file()}
+assert native_root.is_dir() and not native_root.is_symlink()
+assert not any(p.is_symlink() for p in native_root.rglob('*'))
+assert set(files)=={str(p.relative_to(native_root)) for p in native_root.rglob('*') if p.is_file()}
 for name,item in files.items():
-    path=a.root/'native'/name
+    path=native_root/name
     assert path.stat().st_size==item['bytes']
     digest=hashlib.sha256()
     with path.open('rb') as f:
@@ -98,7 +102,7 @@ for name,item in files.items():
     assert digest.hexdigest()==item['sha256'],name
 result.update(accepted=not unexpected_errors,functional_limit_assertions_verified=True,source_inputs=len(before),budget=budget,entries=budget,
     checkpoints=2,terminal_slot=budget-1,padding_operations=padding,native_files=len(files),
-    native_bytes=state['native_bytes'],child_wall_seconds=state['child_wall_seconds'],
+    native_bytes=state['native_bytes'],native_storage_path=str(native_root),fresh_restored_storage=a.native_root is not None,child_wall_seconds=state['child_wall_seconds'],
     actual_100000_entries_qualified=budget==100000 and not unexpected_errors,log_sha256=state['log_sha256'])
 if unexpected_errors:
     result['remaining_gate'] = 'Unclassified/uncertain/non-CAS errors remain unaccepted; only fully accounted definite CAS conflicts are eligible. Functional assertions/source/binary/native-file verification passed separately.'
