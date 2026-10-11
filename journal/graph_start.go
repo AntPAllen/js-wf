@@ -300,18 +300,38 @@ func (v *GraphView) StartInput(ctx context.Context) ([]byte, error) {
 // caller must establish the exact acknowledged/write-once source pointer using
 // GraphStart.MatchesInvocation. Presence of an arbitrary source message or
 // object is insufficient. Every retry reobserves the original pending token.
-func (s *GraphStore) BindStart(ctx context.Context, typ, id, token string, invocation uint64) error {
+func (s *GraphStore) BindStart(ctx context.Context, typ, id, token string, invocation uint64) (err error) {
 	if !s.cfg.CanonicalStarts || invocation == 0 {
 		return ErrStale
 	}
-	validated, _, err := s.ReadStart(ctx, typ, id)
+	v, err := s.OpenStart(ctx, typ, id)
 	if err != nil {
 		return err
+	}
+	if v == nil {
+		return ErrStale
+	}
+	defer func() {
+		if v.closed {
+			return
+		}
+		cleanup, stop := context.WithTimeout(context.WithoutCancel(ctx), 3*time.Second)
+		defer stop()
+		if e := v.Close(cleanup); err == nil && e != nil {
+			err = fmt.Errorf("release start binding reader: %w", e)
+		}
+	}()
+	validated, err := v.StartState()
+	if err != nil {
+		return err
+	}
+	if _, err = v.StartInput(ctx); err != nil {
+		return fmt.Errorf("read start binding input: %w", err)
 	}
 	if validated.Start.Token != token {
 		return ErrStale
 	}
-	destination, root, c, err := s.observe(ctx, typ, id)
+	_, root, c, err := s.observe(ctx, typ, id)
 	if err != nil {
 		return err
 	}
@@ -327,7 +347,12 @@ func (s *GraphStore) BindStart(ctx context.Context, typ, id, token string, invoc
 	next := *c
 	next.Invocation = invocation
 	data, _ := json.Marshal(next)
-	_, err = s.cfg.Protocol.UpdateApplication(ctx, destination, root.Head, data)
+	// Keep the validated input pinned until the source binding and pin removal
+	// commit together. No separate reader-release transaction precedes binding.
+	_, err = s.cfg.Protocol.UpdateApplicationAndReleaseReader(ctx, v.reader, root.Head, data)
+	if err == nil {
+		v.closed = true
+	}
 	return graphMutationError(err)
 }
 

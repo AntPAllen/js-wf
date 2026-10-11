@@ -1,5 +1,28 @@
 # Implementation status against the supplied plan
 
+## Start binding now releases its validated reader in the same CAS — 2026-10-11
+
+Pending BindStart validates the owned input, token and current lifecycle, then
+binds the source invocation and removes its reader atomically at the original
+observed head. Forests and foreign pins survive; exact expected+1 readback can
+resolve a lost acknowledgement, and uncertain publication is not retried. This
+removes the separate pre-binding cleanup transaction seen in the full native
+failure, without changing deadlines or relaxing ownership/input checks.
+
+Twelve protocol cuts and eight binding controls pass in normal/race. All946 pins
+replay exactly after208 transport-sequence migrations, preserving every seed and
+scheduler decision. The existing three binding faults are retargeted to the
+combined CAS, with their modes and assertions unchanged. Eight actual SDK exits0
+bind3882 inputs:123 protocol,28 client,2 journal and972 sim cases per mode.
+[Atomic binding evidence](scale/atomic-start-binding-2026-10-11/README.md).
+Native full-scale acceptance and the remaining original plan stay open.
+
+The older frozen50e4f9b full160-family race campaign is independently accepted:
+160000 seed bodies/880 pins/228 top-level passes/8 actual processes/3631 Git
+inputs. Its matching normal/race pair is complete, but does not qualify later
+runtime or163-family source.47 compressed terminal artifacts are verified.
+[Full160 race closure](scale/current-main160-tier1-2026-10-11/README.md).
+
 ## Full native gate stops at Start reader-release observation — 2026-10-11
 
 The frozenac85566 R3 full canonical active10000/10000/1000 normal run is terminal,

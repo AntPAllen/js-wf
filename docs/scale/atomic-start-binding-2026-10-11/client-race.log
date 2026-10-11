@@ -1,0 +1,58 @@
+=== RUN   TestCanonicalSignalConflictIsNotGenerationReplacement
+--- PASS: TestCanonicalSignalConflictIsNotGenerationReplacement (0.00s)
+=== RUN   TestGraphCanonicalSignalBindingBudgetRecovery
+=== RUN   TestGraphCanonicalSignalBindingBudgetRecovery/fast
+=== RUN   TestGraphCanonicalSignalBindingBudgetRecovery/over-budget
+=== RUN   TestGraphCanonicalSignalBindingBudgetRecovery/corrupt
+--- PASS: TestGraphCanonicalSignalBindingBudgetRecovery (10.82s)
+    --- PASS: TestGraphCanonicalSignalBindingBudgetRecovery/fast (3.13s)
+    --- PASS: TestGraphCanonicalSignalBindingBudgetRecovery/over-budget (3.51s)
+    --- PASS: TestGraphCanonicalSignalBindingBudgetRecovery/corrupt (4.19s)
+=== RUN   TestGraphCanonicalSignalBindingActualDeadlineRecovery
+--- PASS: TestGraphCanonicalSignalBindingActualDeadlineRecovery (3.11s)
+=== RUN   TestCanonicalSignalRecoveryAfterDedupExpiry
+=== RUN   TestCanonicalSignalRecoveryAfterDedupExpiry/binding_commit
+=== RUN   TestCanonicalSignalRecoveryAfterDedupExpiry/binding_commit/within
+=== RUN   TestCanonicalSignalRecoveryAfterDedupExpiry/binding_commit/boundary
+=== RUN   TestCanonicalSignalRecoveryAfterDedupExpiry/binding_commit_unknown
+=== RUN   TestCanonicalSignalRecoveryAfterDedupExpiry/binding_commit_unknown/within
+=== RUN   TestCanonicalSignalRecoveryAfterDedupExpiry/binding_commit_unknown/boundary
+--- PASS: TestCanonicalSignalRecoveryAfterDedupExpiry (0.59s)
+    --- PASS: TestCanonicalSignalRecoveryAfterDedupExpiry/binding_commit (0.35s)
+        --- PASS: TestCanonicalSignalRecoveryAfterDedupExpiry/binding_commit/within (0.17s)
+        --- PASS: TestCanonicalSignalRecoveryAfterDedupExpiry/binding_commit/boundary (0.18s)
+    --- PASS: TestCanonicalSignalRecoveryAfterDedupExpiry/binding_commit_unknown (0.24s)
+        --- PASS: TestCanonicalSignalRecoveryAfterDedupExpiry/binding_commit_unknown/within (0.11s)
+        --- PASS: TestCanonicalSignalRecoveryAfterDedupExpiry/binding_commit_unknown/boundary (0.13s)
+=== RUN   TestCanonicalSignalMutationErrorPhases
+=== RUN   TestCanonicalSignalMutationErrorPhases/reserve_prepare
+=== RUN   TestCanonicalSignalMutationErrorPhases/reserve_commit
+=== RUN   TestCanonicalSignalMutationErrorPhases/reserve_commit_lost
+=== RUN   TestCanonicalSignalMutationErrorPhases/reserve_commit_unknown
+=== RUN   TestCanonicalSignalMutationErrorPhases/binding_prepare
+=== RUN   TestCanonicalSignalMutationErrorPhases/binding_commit
+=== RUN   TestCanonicalSignalMutationErrorPhases/binding_commit_lost
+=== RUN   TestCanonicalSignalMutationErrorPhases/binding_commit_unknown
+--- PASS: TestCanonicalSignalMutationErrorPhases (0.67s)
+    --- PASS: TestCanonicalSignalMutationErrorPhases/reserve_prepare (0.06s)
+    --- PASS: TestCanonicalSignalMutationErrorPhases/reserve_commit (0.02s)
+    --- PASS: TestCanonicalSignalMutationErrorPhases/reserve_commit_lost (0.09s)
+    --- PASS: TestCanonicalSignalMutationErrorPhases/reserve_commit_unknown (0.09s)
+    --- PASS: TestCanonicalSignalMutationErrorPhases/binding_prepare (0.10s)
+    --- PASS: TestCanonicalSignalMutationErrorPhases/binding_commit (0.10s)
+    --- PASS: TestCanonicalSignalMutationErrorPhases/binding_commit_lost (0.11s)
+    --- PASS: TestCanonicalSignalMutationErrorPhases/binding_commit_unknown (0.10s)
+=== RUN   TestCanonicalStartRecoveryCannotReserveReplacementAfterRetirement
+--- PASS: TestCanonicalStartRecoveryCannotReserveReplacementAfterRetirement (0.02s)
+=== RUN   TestCanonicalStartAwaitPendingReplacementAndMissingReadyPointer
+--- PASS: TestCanonicalStartAwaitPendingReplacementAndMissingReadyPointer (0.02s)
+=== RUN   TestCanonicalStartAwaitSourceCommittedBeforeBinding
+--- PASS: TestCanonicalStartAwaitSourceCommittedBeforeBinding (0.00s)
+=== RUN   TestCanonicalStartAwaitMissingSourceCannotProvePurge
+--- PASS: TestCanonicalStartAwaitMissingSourceCannotProvePurge (0.05s)
+=== RUN   TestCanonicalBoundStartRepairRequiresExactSourceAndGeneration
+--- PASS: TestCanonicalBoundStartRepairRequiresExactSourceAndGeneration (0.01s)
+=== RUN   TestCanonicalBoundStartRepairDoesNotDeduplicateRecovery
+--- PASS: TestCanonicalBoundStartRepairDoesNotDeduplicateRecovery (0.01s)
+PASS
+ok  	js-wf/client	16.514s

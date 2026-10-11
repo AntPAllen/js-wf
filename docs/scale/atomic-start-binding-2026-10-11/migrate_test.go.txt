@@ -1,0 +1,46 @@
+package sim
+import (
+ "crypto/sha256"
+ "encoding/hex"
+ "encoding/json"
+ "os"
+ "path/filepath"
+ "reflect"
+ "strings"
+ "testing"
+)
+func TestMigrateAtomicStartBinding(t *testing.T) {
+ if os.Getenv("MIGRATE_ATOMIC_START_BINDING")!="1" {t.Fatal("explicit migration required")}
+ paths,e:=filepath.Glob("testdata/regressions/*.json");if e!=nil||len(paths)!=946{t.Fatal("inventory",e,len(paths))}
+ type change struct {Path,Workload,BeforeSHA256,AfterSHA256 string;Removed,CatalogCounters int;ActorScheduleChanged bool}
+ changes:=[]change{};pending:=map[string]Trace{}
+ digest:=func(b []byte)string{h:=sha256.Sum256(b);return hex.EncodeToString(h[:])}
+ control:=func(trace Trace)[]Decision{out:=[]Decision{};for _,d:=range trace.Decisions {actors:=false;for _,x:=range d.Enabled{if strings.Contains(x,":"){actors=true}};if !actors{out=append(out,d)}};return out}
+ sameMeta:=func(a,b Trace)bool{a.Transport=nil;b.Transport=nil;a.Decisions=nil;b.Decisions=nil;a.GuidanceMask=nil;b.GuidanceMask=nil;return reflect.DeepEqual(a,b)}
+
+ for _,path:=range paths {
+  raw,e:=os.ReadFile(path);if e!=nil{t.Fatal(e)};old,e:=LoadTrace(path);if e!=nil{t.Fatal(e)}
+  guided:=old;guided.GuidanceMask=make([]bool,len(old.Decisions));for i:=range guided.GuidanceMask{guided.GuidanceMask[i]=true}
+  fresh,e:=replayTrace(guided);removed,catalog:=0,0
+  actorChanged:=false
+  if e!=nil||!reflect.DeepEqual(old.Decisions,fresh.Decisions) {
+   // Fresh scheduler choices are necessary when combining yielded metadata operations.
+   // Explicit mode/fault/clock decisions, identity and runner assertions stay fixed.
+   if len(control(old))==len(old.Decisions){t.Fatalf("nonactor decision changed: %s %v",path,e)}
+   guided=old;guided.GuidanceMask=make([]bool,len(old.Decisions))
+   fresh,e=replayTrace(guided);if e!=nil{t.Fatalf("new actor schedule invariant: %s %v",path,e)}
+   if !reflect.DeepEqual(control(old),control(fresh)){t.Fatalf("actor fault controls changed: %s",path)}
+   actorChanged=true;removed=0;catalog=0
+  }
+  if !sameMeta(old,fresh){t.Fatalf("trace identity/budget changed: %s",path)}
+  exact,e:=replayTrace(fresh);if e!=nil||!reflect.DeepEqual(fresh,exact){t.Fatalf("new exact replay failed: %s %v",path,e)}
+  if !reflect.DeepEqual(old,fresh) {
+   bytes,e:=fresh.Marshal();if e!=nil{t.Fatal(e)};pending[path]=fresh
+   changes=append(changes,change{path,old.Workload,digest(raw),digest(append(bytes,'\n')),removed,catalog,actorChanged})
+  }
+ }
+ // Commit only after the entire inventory validates; a failed pass writes no pin.
+ for path,trace:=range pending{if e:=trace.Save(path);e!=nil{t.Fatal(e)}}
+ raw,_:=json.MarshalIndent(changes,"","  ");if e=os.WriteFile(os.Getenv("MIGRATE_REPORT"),append(raw,'\n'),0600);e!=nil{t.Fatal(e)}
+ t.Logf("verified all 946 identities, explicit fault controls, original invariants and new exact replays; migrated %d files",len(changes))
+}

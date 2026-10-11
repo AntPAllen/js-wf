@@ -152,22 +152,20 @@ func runGraphStartWithRecovery(seed int64, replay *Trace, repair bool) (trace Tr
 		err = port.QueueFault(StartFault{Operation: "enqueue_run", Kind: "lose_ack_after_commit"})
 	case "bind_drop", "bind_lost", "unknown_bind":
 		port.afterPublish = func() error {
-			// Bind validates input under an acquire/release pair before its CAS.
+			// Reader acquisition precedes the combined binding/release CAS.
+			// Keep these faults on binding, not on reader acquisition or cleanup.
 			m.PauseBefore("cas_root", func() error {
 				m.PauseBefore("cas_root", func() error {
-					m.PauseBefore("cas_root", func() error {
-						fault := LoseAckAfterCommit
-						if mode == "bind_drop" {
-							fault = DropBeforeCommit
-						}
-						if e := m.QueueFault("cas_root", fault); e != nil {
-							return e
-						}
-						if mode == "unknown_bind" {
-							return m.QueueFault("read_root", DropBeforeCommit)
-						}
-						return nil
-					})
+					fault := LoseAckAfterCommit
+					if mode == "bind_drop" {
+						fault = DropBeforeCommit
+					}
+					if e := m.QueueFault("cas_root", fault); e != nil {
+						return e
+					}
+					if mode == "unknown_bind" {
+						return m.QueueFault("read_root", DropBeforeCommit)
+					}
 					return nil
 				})
 				return nil

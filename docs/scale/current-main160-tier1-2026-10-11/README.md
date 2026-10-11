@@ -1,5 +1,18 @@
 # Full frozen160 qualification launch — 2026-10-11
 
+## Race terminal acceptance — 2026-10-11
+
+Frozen50e4f9b race1000 is terminal and independently accepted:160families,
+160000 completed seed bodies,880 exact pins,228 top-level passes and8 real
+package processes. All SDK/driver exits are0. Review binds3631 Git inputs and
+actual executable b6d93a7c3f2f5f77866615c91350b1fcbb51356230368f011cc7817fa81da297.
+The supervisor closed at11:23:29UTC; MainPID0/ExecMainStatus0 is verified.
+47 compressed terminal files (512471bytes) decompress to original receipts
+(3158117bytes) and match their retained sources. This completes the matching
+normal/race160-family pair. It does not qualify later163-family/current runtime
+source, extended campaigns or native gates.
+
+
 Source50e4f9bee0931ba4474b68574a08da3bfbaafe52 includes the production source-header
 fix and the new seeded recovery/repair/worker family. The sparse checkout retains
 all3631 required Git inputs and3666 selected paths, verified against frozen Git

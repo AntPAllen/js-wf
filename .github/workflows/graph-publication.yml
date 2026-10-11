@@ -627,12 +627,14 @@ jobs:
           for test in ('TestGraphCanonicalSignalBindingBudgetRecovery', 'TestGraphCanonicalSignalBindingActualDeadlineRecovery', 'TestCanonicalSignalConflictIsNotGenerationReplacement'):
               assert f'--- PASS: {test} ' in log
           PYCONTROL
-          go test "${graph_flags[@]}" ./sim -run '^(TestGraphStartReadErrorPhases|TestGraphViewCloseSingleAuthorityObservation)$' -count=1 -v -timeout=2m 2>&1 | tee start-read-phases.log
-          go test "${graph_flags[@]}" ./internal/graphpublication -run '^(TestGraphAppendPreparationErrorPhases|TestGraphAppendCommitErrorPhases|TestGraphAppendRequestDeadlineRecovery)$' -count=1 -v -timeout=2m 2>&1 | tee append-commit-phases.log
+          go test "${graph_flags[@]}" ./sim -run '^(TestGraphStartBindingAndReaderReleaseAtomic|TestGraphStartReadErrorPhases|TestGraphViewCloseSingleAuthorityObservation)$' -count=1 -v -timeout=2m 2>&1 | tee start-read-phases.log
+          go test "${graph_flags[@]}" ./internal/graphpublication -run '^(TestGraphApplicationAndReaderReleaseAtomic|TestGraphAppendPreparationErrorPhases|TestGraphAppendCommitErrorPhases|TestGraphAppendRequestDeadlineRecovery)$' -count=1 -v -timeout=2m 2>&1 | tee append-commit-phases.log
           python3 - <<'PYCOMMIT'
           import pathlib, re
           log = pathlib.Path('append-commit-phases.log').read_text()
           assert not re.search(r'^\s*--- SKIP:', log, re.M)
+          for cut in ('success', 'stale_head', 'missing_pin', 'forged_snapshot', 'oversized', 'cancelled_before', 'conflict', 'rejected', 'committed_lost', 'committed_unknown', 'committed_replaced', 'committed_cancelled'):
+              assert f'--- PASS: TestGraphApplicationAndReaderReleaseAtomic/{cut} ' in log
           for cut in ('context', 'configuration', 'head', 'conflict', 'token', 'owned', 'payload_intent_read', 'payload_intent_rejected', 'payload_intent_lost', 'payload_upload_rejected', 'payload_upload_lost', 'payload_uploaded_read', 'payload_selection_rejected', 'payload_selection_lost', 'node_intent_read', 'node_intent_rejected', 'node_intent_lost', 'node_upload_rejected', 'node_upload_lost', 'node_uploaded_read', 'node_selection_rejected', 'node_selection_lost', 'node_read'):
               assert f'--- PASS: TestGraphAppendPreparationErrorPhases/{cut} ' in log
           for cut in ('context', 'plan', 'observe', 'conflict', 'preservation', 'graph', 'node_grant', 'payload_grant', 'owned_payload', 'root_rejected', 'root_lost', 'root_unknown', 'root_cancelled', 'conflict_readback_unknown'):
@@ -645,6 +647,8 @@ jobs:
           import pathlib, re
           log = pathlib.Path('start-read-phases.log').read_text()
           assert not re.search(r'^--- SKIP:', log, re.M)
+          for cut in ('success', 'cleanup_observation', 'wrong_token', 'corrupt_input', 'conflict', 'rejected', 'committed_lost', 'committed_unknown'):
+              assert f'--- PASS: TestGraphStartBindingAndReaderReleaseAtomic/{cut} ' in log
           assert '--- PASS: TestGraphStartReadErrorPhases ' in log
           for mode in ('valid', 'open', 'input', 'release', 'release_committed', 'release_committed_unknown', 'input_and_release'):
               assert f'--- PASS: TestGraphStartReadErrorPhases/{mode} ' in log
