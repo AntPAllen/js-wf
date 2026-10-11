@@ -1,0 +1,40 @@
+import hashlib,io,json,re,subprocess
+from pathlib import Path
+out=Path(__file__).resolve().parent
+receipt=json.loads((out/'command.json').read_text());exe=json.loads((out/'executable.json').read_text())
+assert receipt['actual_exit']==0 and receipt['executable_captured']
+assert receipt['source_revision']=='d771ee3d05fd135ec7ec81893cee3522b3499d4e'
+assert receipt['command']==['go','test','-race','./worker','-run','^TestNativeGraphContinuationPromiseSelectionPriority$/^(R1|R3Domain)$/^archive=true$/^failed=false$','-count=1','-v','-timeout=6m']
+assert receipt['environment']['GOMAXPROCS']=='2' and receipt['environment']['GOMEMLIMIT']=='512MiB'
+assert exe['parent_pid']==receipt['driver_pid'] and receipt['start_ns']<=exe['captured_ns']<=receipt['end_ns']
+assert '-race=true' in exe['build'] and '/worker.test ' in exe['command']
+assert not Path('/proc/'+str(exe['pid'])).exists() and not Path('/proc/'+str(receipt['driver_pid'])).exists()
+assert hashlib.sha256(Path(exe['retained_path']).read_bytes()).hexdigest()==exe['sha256']
+inputs=json.loads((out/'source-before.json').read_text());assert inputs==json.loads((out/'source-after.json').read_text())
+names=subprocess.check_output(['git','ls-tree','-r','--name-only',receipt['source_revision']],text=True).splitlines()
+required=[n for n in names if n.endswith('.go') or n in ('go.mod','go.sum')];assert set(required)==set(inputs)
+stream=io.BytesIO(subprocess.check_output(['git','cat-file','--batch'],input=''.join(receipt['source_revision']+':'+n+'\n' for n in required).encode()))
+for name in required:
+ header=stream.readline().split();assert header[1]==b'blob';data=stream.read(int(header[2]));assert stream.read(1)==b'\n';assert hashlib.sha256(data).hexdigest()==inputs[name]
+ assert hashlib.sha256(Path(name).read_bytes()).hexdigest()==inputs[name],name
+log=(out/'native.log').read_text();assert not re.search(r'^\s*--- (FAIL|SKIP):',log,re.M) and 'WARNING: DATA RACE' not in log
+for replica in ('R1','R3Domain'):
+ name='TestNativeGraphContinuationPromiseSelectionPriority/'+replica+'/archive=true/failed=false'
+ assert f'--- PASS: {name} ' in log
+ body=log.split('=== RUN   '+name+'\n',1)[1].split('=== RUN',1)[0]
+ parent=re.findall(r'SDK_OPERATION op=journal_append type=test index=(\d+) kind=(\w+) duration=[^ ]+ error="([^"]*)"',body)
+ assert len(parent)==35 and [int(row[0]) for row in parent]==list(range(35))
+ assert all(not row[2] for row in parent)
+ assert sum(row[1]=='Checkpoint' for row in parent)==2
+ assert 'RAW_SDK_CHECKPOINT_HISTORY checkpoints=2' in body
+ assert 'RAW_SDK_CHILD_START_LINKS verified=1 unavailable=0' in body
+ assert 'RAW_SDK_CHILD_TERMINAL_LINKS verified=1 unavailable=0' in body
+ assert 'SDK_PROMISE_CACHE first_signal=1 cached_signal=0 selections=2 child_calls=1 failed=false archive=true' in body
+ assert 'effects=2 records=35 result=43' in body
+root=Path(receipt['root'])/'native';files=json.loads((out/'native-files.json').read_text())
+assert set(files)=={str(p.relative_to(root)) for p in root.rglob('*') if p.is_file()}
+for name,item in files.items():
+ path=root/name;assert not path.is_symlink() and path.stat().st_size==item['bytes']
+ assert hashlib.sha256(path.read_bytes()).hexdigest()==item['sha256']
+result=dict(accepted_scoped_native_run=True,source=receipt['source_revision'],source_git_inputs=len(inputs),actual_exit=0,actual_race_executable_sha256=exe['sha256'],archived_successful_child_variants=2,checkpoint_frames=4,child_start_terminal_pairs=2,parent_append_operations=70,parent_append_errors=0,native_files=len(files),native_bytes=sum(x['bytes'] for x in files.values()),native_census_hash_verified=True,prior_failure_cause_confirmed=False,full_native_matrix_qualified=False,full_current_source_qualified=False,test_seconds=float(re.search(r'ok\s+js-wf/worker\s+([\d.]+)s',log).group(1)))
+(out/'review.json').write_text(json.dumps(result,indent=2)+'\n');print(json.dumps(result))

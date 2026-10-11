@@ -1,5 +1,26 @@
 # Implementation status against the supplied plan
 
+## Archived native child follow-up passed; full163 normal launched — 2026-10-11
+
+A focused retained-store race run at d771ee3 passes both archived successful-child
+variants previously failing with uncertain append deadlines. R1/R3Domain verify
+four checkpoint frames, two child start/terminal witness pairs and all 70 parent
+append operations without errors. The reviewer binds 1157 exact Git inputs,
+the retained race executable and all 473 native files. Enclosing and append bounds
+are unchanged. This run uses two Go CPUs/512 MiB and selects two variants;
+earlier failures remain unconfirmed and the full native matrix remains separate.
+See [retained native follow-up](scale/native-archived-child-deadline-2026-10-11/README.md).
+
+A clean 120 MiB sparse checkout verifies all 3813 required Git inputs for the same
+source. Full163 normal1000 launched at 07:13:06 UTC with InvocationID
+27a378771800445e988551b1322b3243, supervisor273841/driver273864, half-core quota,
+2 GiB service memory, eight sequential package processes and a retained executable.
+Acceptance requires all 163,000 seed bodies/946 pins and the complete inventory;
+live review correctly refuses actual exit 1. Same-source race waits for accepted
+normal. See [full163 campaign](scale/current-main163-tier1-2026-10-11/README.md).
+Full current qualification, native failure causality and original release gates
+remain open. Public continuation stays off; older frozen campaigns are unchanged.
+
 ## Tier-1 worker uncertain append recovery — 2026-10-11
 
 A new seeded family covers request/completion/terminal append deadlines in both
