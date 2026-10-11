@@ -1,0 +1,78 @@
+=== RUN   TestReplayContinuationPlugin
+    replay_continuation_plugin_test.go:45: provision attempt: context deadline exceeded
+    replay_continuation_plugin_test.go:173: two continuation plugin stages: raw_entries=18 objects=2 result=60 offline_effects=0
+--- PASS: TestReplayContinuationPlugin (18.22s)
+=== RUN   TestReplayDeclaredGraphBeforePlugin
+=== RUN   TestReplayDeclaredGraphBeforePlugin/removed_annotation
+=== RUN   TestReplayDeclaredGraphBeforePlugin/unknown_format
+=== RUN   TestReplayDeclaredGraphBeforePlugin/removed_checkpoint_metadata
+--- PASS: TestReplayDeclaredGraphBeforePlugin (0.00s)
+    --- PASS: TestReplayDeclaredGraphBeforePlugin/removed_annotation (0.00s)
+    --- PASS: TestReplayDeclaredGraphBeforePlugin/unknown_format (0.00s)
+    --- PASS: TestReplayDeclaredGraphBeforePlugin/removed_checkpoint_metadata (0.00s)
+=== RUN   TestReplayRecordOrderBeforePlugin
+=== RUN   TestReplayRecordOrderBeforePlugin/format=/index_gap
+=== RUN   TestReplayRecordOrderBeforePlugin/format=/zero_sequence
+=== RUN   TestReplayRecordOrderBeforePlugin/format=/repeated_sequence
+=== RUN   TestReplayRecordOrderBeforePlugin/format=/backwards_epoch
+=== RUN   TestReplayRecordOrderBeforePlugin/format=/repeated_started
+=== RUN   TestReplayRecordOrderBeforePlugin/format=/after_terminal
+=== RUN   TestReplayRecordOrderBeforePlugin/format=/unknown_kind
+=== RUN   TestReplayRecordOrderBeforePlugin/format=/foreign_terminal
+=== RUN   TestReplayRecordOrderBeforePlugin/format=/empty_failure
+=== RUN   TestReplayRecordOrderBeforePlugin/format=graph-v1/index_gap
+=== RUN   TestReplayRecordOrderBeforePlugin/format=graph-v1/zero_sequence
+=== RUN   TestReplayRecordOrderBeforePlugin/format=graph-v1/repeated_sequence
+=== RUN   TestReplayRecordOrderBeforePlugin/format=graph-v1/backwards_epoch
+=== RUN   TestReplayRecordOrderBeforePlugin/format=graph-v1/repeated_started
+=== RUN   TestReplayRecordOrderBeforePlugin/format=graph-v1/after_terminal
+=== RUN   TestReplayRecordOrderBeforePlugin/format=graph-v1/unknown_kind
+=== RUN   TestReplayRecordOrderBeforePlugin/format=graph-v1/foreign_terminal
+=== RUN   TestReplayRecordOrderBeforePlugin/format=graph-v1/empty_failure
+--- PASS: TestReplayRecordOrderBeforePlugin (0.00s)
+    --- PASS: TestReplayRecordOrderBeforePlugin/format=/index_gap (0.00s)
+    --- PASS: TestReplayRecordOrderBeforePlugin/format=/zero_sequence (0.00s)
+    --- PASS: TestReplayRecordOrderBeforePlugin/format=/repeated_sequence (0.00s)
+    --- PASS: TestReplayRecordOrderBeforePlugin/format=/backwards_epoch (0.00s)
+    --- PASS: TestReplayRecordOrderBeforePlugin/format=/repeated_started (0.00s)
+    --- PASS: TestReplayRecordOrderBeforePlugin/format=/after_terminal (0.00s)
+    --- PASS: TestReplayRecordOrderBeforePlugin/format=/unknown_kind (0.00s)
+    --- PASS: TestReplayRecordOrderBeforePlugin/format=/foreign_terminal (0.00s)
+    --- PASS: TestReplayRecordOrderBeforePlugin/format=/empty_failure (0.00s)
+    --- PASS: TestReplayRecordOrderBeforePlugin/format=graph-v1/index_gap (0.00s)
+    --- PASS: TestReplayRecordOrderBeforePlugin/format=graph-v1/zero_sequence (0.00s)
+    --- PASS: TestReplayRecordOrderBeforePlugin/format=graph-v1/repeated_sequence (0.00s)
+    --- PASS: TestReplayRecordOrderBeforePlugin/format=graph-v1/backwards_epoch (0.00s)
+    --- PASS: TestReplayRecordOrderBeforePlugin/format=graph-v1/repeated_started (0.00s)
+    --- PASS: TestReplayRecordOrderBeforePlugin/format=graph-v1/after_terminal (0.00s)
+    --- PASS: TestReplayRecordOrderBeforePlugin/format=graph-v1/unknown_kind (0.00s)
+    --- PASS: TestReplayRecordOrderBeforePlugin/format=graph-v1/foreign_terminal (0.00s)
+    --- PASS: TestReplayRecordOrderBeforePlugin/format=graph-v1/empty_failure (0.00s)
+=== RUN   TestReplayTerminalResultBeforePlugin
+=== RUN   TestReplayTerminalResultBeforePlugin/format=
+=== RUN   TestReplayTerminalResultBeforePlugin/format=/completed_error
+=== RUN   TestReplayTerminalResultBeforePlugin/format=/failed_inline
+=== RUN   TestReplayTerminalResultBeforePlugin/format=/failed_external
+=== RUN   TestReplayTerminalResultBeforePlugin/format=/object_missing
+=== RUN   TestReplayTerminalResultBeforePlugin/format=/object_wrong
+=== RUN   TestReplayTerminalResultBeforePlugin/format=graph-v1
+=== RUN   TestReplayTerminalResultBeforePlugin/format=graph-v1/completed_error
+=== RUN   TestReplayTerminalResultBeforePlugin/format=graph-v1/failed_inline
+=== RUN   TestReplayTerminalResultBeforePlugin/format=graph-v1/failed_external
+=== RUN   TestReplayTerminalResultBeforePlugin/format=graph-v1/object_missing
+=== RUN   TestReplayTerminalResultBeforePlugin/format=graph-v1/object_wrong
+--- PASS: TestReplayTerminalResultBeforePlugin (0.00s)
+    --- PASS: TestReplayTerminalResultBeforePlugin/format= (0.00s)
+        --- PASS: TestReplayTerminalResultBeforePlugin/format=/completed_error (0.00s)
+        --- PASS: TestReplayTerminalResultBeforePlugin/format=/failed_inline (0.00s)
+        --- PASS: TestReplayTerminalResultBeforePlugin/format=/failed_external (0.00s)
+        --- PASS: TestReplayTerminalResultBeforePlugin/format=/object_missing (0.00s)
+        --- PASS: TestReplayTerminalResultBeforePlugin/format=/object_wrong (0.00s)
+    --- PASS: TestReplayTerminalResultBeforePlugin/format=graph-v1 (0.00s)
+        --- PASS: TestReplayTerminalResultBeforePlugin/format=graph-v1/completed_error (0.00s)
+        --- PASS: TestReplayTerminalResultBeforePlugin/format=graph-v1/failed_inline (0.00s)
+        --- PASS: TestReplayTerminalResultBeforePlugin/format=graph-v1/failed_external (0.00s)
+        --- PASS: TestReplayTerminalResultBeforePlugin/format=graph-v1/object_missing (0.00s)
+        --- PASS: TestReplayTerminalResultBeforePlugin/format=graph-v1/object_wrong (0.00s)
+PASS
+ok  	js-wf/cmd/wf	19.417s

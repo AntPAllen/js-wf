@@ -2,6 +2,8 @@ package wf
 
 import (
 	"bytes"
+	"context"
+	"fmt"
 
 	"js-wf/internal/checkpoint"
 	"js-wf/internal/stepwire"
@@ -66,11 +68,39 @@ func validateReplayRecordOrder(records []journal.Record, invocation uint64) erro
 			return nil
 		}
 		var outcome Outcome
-		if decodeReplayTerminal(last.Payload, &outcome) != nil || invocation != 0 && (outcome.InvSeq != invocation || last.Kind == journal.Failed && outcome.Error == "") {
+		if decodeChildOutcome(last.Payload, &outcome) != nil || invocation != 0 && outcome.InvSeq != invocation {
+			return ErrCorruptJournal
+		}
+		if last.Kind == journal.Completed && (outcome.Error != "" || outcome.LimitRequest != nil || outcome.LimitEntry != nil) || last.Kind == journal.Failed && outcome.Error == "" {
 			return ErrCorruptJournal
 		}
 	}
 	return nil
+}
+
+// A terminal external result is part of the exported history, even if the
+// replayed handler does not inspect it. Verify its edge before entering user
+// code; this does not compare the handler's eventual return value.
+func validateReplayTerminalResult(records []journal.Record, objects map[string][]byte) error {
+	if len(records) == 0 {
+		return ErrCorruptJournal
+	}
+	last := records[len(records)-1]
+	if last.Kind != journal.Completed || len(last.Payload) == 0 {
+		return nil
+	}
+	var outcome Outcome
+	if decodeChildOutcome(last.Payload, &outcome) != nil {
+		return ErrCorruptJournal
+	}
+	_, err := outcome.ResultBytes(context.Background(), func(_ context.Context, name string) ([]byte, error) {
+		data, ok := objects[name]
+		if !ok {
+			return nil, fmt.Errorf("%w: %s", ErrReplayObjectMissing, name)
+		}
+		return data, nil
+	})
+	return err
 }
 
 func decodeReplaySignal(raw []byte, signal *replayCheckpointSignal) error {

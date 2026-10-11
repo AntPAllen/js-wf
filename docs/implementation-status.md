@@ -1,5 +1,24 @@
 # Implementation status against the supplied plan
 
+## Offline terminal result admission before user code — 2026-10-11
+
+Replay now rejects contradictory terminal kinds/results and verifies successful
+external terminal objects before entering a handler or loading a CLI plugin.
+The baseline admitted 37 bad histories and entered their handlers. New SDK/CLI
+controls cover legacy identity-free, identified and graph-v1 exports, with valid
+inline/external/opaque results retained. Normal/race terminal suites each pass
+498 named tests; the complete SDK race suite passes in 86.501 seconds. A native
+R3 legacy continuation/plugin compatibility fixture and CLI guards pass in
+19.417 seconds. Independent review binds 1229 inputs and ten actual executables;
+the final CI reducers also pass. See [admission evidence](scale/replay-terminal-result-2026-10-11/README.md).
+
+This does not compare ordinary replay handler returns against terminal results,
+qualify the canonical native matrix or explain native append deadlines. Inventory
+remains 163 families/946 pins. Four frozen qualification services were verified
+running before this change; they qualify their earlier sources. Full current
+simulation and original native/scale/soak/adoption gates remain open. Public
+continuation admission stays disabled.
+
 ## Retained race boundary recovered; frozen full162 normal accepted — 2026-10-11
 
 A hash-verified copy of the failed 100,000-entry race store confirms count/tail

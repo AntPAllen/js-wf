@@ -104,6 +104,9 @@ func replayWithStages[T any](journalBytes []byte, fn func(*Context) (T, error), 
 	if err := validateReplayRecordOrder(records, opts.InvSeq); err != nil {
 		return result, err
 	}
+	if err := validateReplayTerminalResult(records, opts.Objects); err != nil {
+		return result, err
+	}
 	if stages != nil {
 		subject := identity.JournalSubject(opts.Type, opts.ID)
 		snapshot := integrity.Snapshot{Invocations: []string{identity.InvocationSubject(opts.Type, opts.ID)}, Journals: map[string][]journal.Record{subject: records}, TerminalState: map[string][]byte{}}
