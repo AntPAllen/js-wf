@@ -1,0 +1,4839 @@
+{
+  "Observations": [
+    {
+      "Phase": "cluster.Start",
+      "Nanos": 173483984,
+      "Error": "",
+      "Value": null
+    },
+    {
+      "Phase": "node0.StreamInfo(PURGE_SCALE_AUTH)",
+      "Nanos": 8000680354,
+      "Error": "context deadline exceeded",
+      "Value": null
+    },
+    {
+      "Phase": "node0.StreamInfo(OBJ_PURGE_SCALE_OBJECTS)",
+      "Nanos": 1226785,
+      "Error": "",
+      "Value": {
+        "config": {
+          "name": "OBJ_PURGE_SCALE_OBJECTS",
+          "subjects": [
+            "$O.PURGE_SCALE_OBJECTS.C.\u003e",
+            "$O.PURGE_SCALE_OBJECTS.M.\u003e"
+          ],
+          "retention": "limits",
+          "max_consumers": -1,
+          "max_msgs": -1,
+          "max_bytes": -1,
+          "discard": "old",
+          "max_age": 0,
+          "max_msgs_per_subject": -1,
+          "max_msg_size": -1,
+          "storage": "file",
+          "num_replicas": 3,
+          "duplicate_window": 120000000000,
+          "deny_delete": true,
+          "allow_rollup_hdrs": true,
+          "compression": "none",
+          "allow_direct": false,
+          "mirror_direct": false,
+          "consumer_limits": {},
+          "metadata": {
+            "_nats.level": "5",
+            "_nats.req.level": "0",
+            "_nats.ver": "2.15.0",
+            "js-wf-blob-format": "graph-recoverable-v1"
+          }
+        },
+        "created": "2026-10-11T08:05:48.828869779Z",
+        "state": {
+          "messages": 13836,
+          "bytes": 13010490,
+          "first_seq": 2,
+          "first_ts": "2026-10-11T08:05:50.564502686Z",
+          "last_seq": 20753,
+          "last_ts": "2026-10-11T08:08:15.468893638Z",
+          "consumer_count": 0,
+          "deleted": null,
+          "num_deleted": 6916,
+          "num_subjects": 13836,
+          "subjects": null
+        },
+        "cluster": {
+          "name": "wf-test",
+          "raft_group": "S-R3F-zvxHoV38",
+          "leader": "wf-test-2",
+          "leader_since": "2026-10-11T08:35:41.786301653Z",
+          "system_account": true,
+          "traffic_account": "$SYS",
+          "replicas": [
+            {
+              "name": "wf-test-0",
+              "current": true,
+              "active": 512423121,
+              "peer": "fPPVT2kZ"
+            },
+            {
+              "name": "wf-test-1",
+              "current": true,
+              "active": 512413517,
+              "peer": "OFrOUlB0"
+            }
+          ]
+        },
+        "ts": "2026-10-11T08:35:44.298928777Z"
+      }
+    },
+    {
+      "Phase": "node0.StreamInfo(WF_INV)",
+      "Nanos": 371434,
+      "Error": "",
+      "Value": {
+        "config": {
+          "name": "WF_INV",
+          "subjects": [
+            "wf.inv.*.*"
+          ],
+          "retention": "limits",
+          "max_consumers": -1,
+          "max_msgs": -1,
+          "max_bytes": -1,
+          "discard": "new",
+          "discard_new_per_subject": true,
+          "max_age": 0,
+          "max_msgs_per_subject": 1,
+          "max_msg_size": -1,
+          "storage": "file",
+          "num_replicas": 3,
+          "duplicate_window": 120000000000,
+          "compression": "none",
+          "allow_direct": false,
+          "mirror_direct": false,
+          "consumer_limits": {},
+          "metadata": {
+            "_nats.level": "5",
+            "_nats.req.level": "0",
+            "_nats.ver": "2.15.0"
+          }
+        },
+        "created": "2026-10-11T08:05:47.738056783Z",
+        "state": {
+          "messages": 990,
+          "bytes": 337590,
+          "first_seq": 1,
+          "first_ts": "2026-10-11T08:05:51.290514854Z",
+          "last_seq": 990,
+          "last_ts": "2026-10-11T08:08:14.967112768Z",
+          "consumer_count": 0,
+          "deleted": null,
+          "num_deleted": 0,
+          "num_subjects": 990,
+          "subjects": null
+        },
+        "cluster": {
+          "name": "wf-test",
+          "raft_group": "S-R3F-U7VEpd3z",
+          "leader": "wf-test-2",
+          "leader_since": "2026-10-11T08:35:40.623695717Z",
+          "system_account": true,
+          "traffic_account": "$SYS",
+          "replicas": [
+            {
+              "name": "wf-test-0",
+              "current": true,
+              "active": 675010880,
+              "peer": "fPPVT2kZ"
+            },
+            {
+              "name": "wf-test-1",
+              "current": true,
+              "active": 674953343,
+              "peer": "OFrOUlB0"
+            }
+          ]
+        },
+        "ts": "2026-10-11T08:35:44.299367423Z"
+      }
+    },
+    {
+      "Phase": "node0.StreamInfo(WF_RUN)",
+      "Nanos": 351765,
+      "Error": "",
+      "Value": {
+        "config": {
+          "name": "WF_RUN",
+          "subjects": [
+            "wf.run.*",
+            "wf.schedule.*.*.*"
+          ],
+          "retention": "workqueue",
+          "max_consumers": -1,
+          "max_msgs": -1,
+          "max_bytes": -1,
+          "discard": "old",
+          "max_age": 0,
+          "max_msgs_per_subject": -1,
+          "max_msg_size": -1,
+          "storage": "file",
+          "num_replicas": 3,
+          "duplicate_window": 120000000000,
+          "allow_rollup_hdrs": true,
+          "compression": "none",
+          "allow_direct": false,
+          "mirror_direct": false,
+          "consumer_limits": {},
+          "metadata": {
+            "_nats.level": "5",
+            "_nats.req.level": "2",
+            "_nats.ver": "2.15.0"
+          },
+          "allow_msg_schedules": true
+        },
+        "created": "2026-10-11T08:05:47.838618826Z",
+        "state": {
+          "messages": 551,
+          "bytes": 67139,
+          "first_seq": 171,
+          "first_ts": "2026-10-11T08:06:05.457361103Z",
+          "last_seq": 984,
+          "last_ts": "2026-10-11T08:08:15.543289062Z",
+          "consumer_count": 64,
+          "deleted": null,
+          "num_deleted": 263,
+          "num_subjects": 51,
+          "subjects": null
+        },
+        "cluster": {
+          "name": "wf-test",
+          "raft_group": "S-R3F-oXQJMMHc",
+          "leader": "wf-test-2",
+          "leader_since": "2026-10-11T08:35:42.937408145Z",
+          "system_account": true,
+          "traffic_account": "$SYS",
+          "replicas": [
+            {
+              "name": "wf-test-0",
+              "current": true,
+              "active": 363890738,
+              "peer": "fPPVT2kZ"
+            },
+            {
+              "name": "wf-test-1",
+              "current": true,
+              "active": 363865970,
+              "peer": "OFrOUlB0"
+            }
+          ]
+        },
+        "ts": "2026-10-11T08:35:44.299611304Z"
+      }
+    },
+    {
+      "Phase": "node1.StreamInfo(PURGE_SCALE_AUTH)",
+      "Nanos": 730630,
+      "Error": "",
+      "Value": {
+        "config": {
+          "name": "PURGE_SCALE_AUTH",
+          "subjects": [
+            "wf.graph.purgescale.root.\u003e",
+            "wf.graph.purgescale.blob.\u003e",
+            "wf.graph.purgescale.owner.\u003e"
+          ],
+          "retention": "limits",
+          "max_consumers": -1,
+          "max_msgs": -1,
+          "max_bytes": -1,
+          "discard": "old",
+          "max_age": 0,
+          "max_msgs_per_subject": 1,
+          "max_msg_size": -1,
+          "storage": "file",
+          "num_replicas": 3,
+          "duplicate_window": 120000000000,
+          "deny_delete": true,
+          "deny_purge": true,
+          "compression": "none",
+          "allow_direct": false,
+          "mirror_direct": false,
+          "consumer_limits": {},
+          "metadata": {
+            "_nats.level": "5",
+            "_nats.req.level": "0",
+            "_nats.ver": "2.15.0",
+            "wf_graph_owner_index": "js-wf-graph-owner-index-v1"
+          }
+        },
+        "created": "2026-10-11T08:05:48.745906624Z",
+        "state": {
+          "messages": 15316,
+          "bytes": 12883045,
+          "first_seq": 250,
+          "first_ts": "2026-10-11T08:05:50.59006006Z",
+          "last_seq": 111100,
+          "last_ts": "2026-10-11T08:08:17.629518778Z",
+          "consumer_count": 0,
+          "deleted": null,
+          "num_deleted": 95535,
+          "num_subjects": 15316,
+          "subjects": null
+        },
+        "cluster": {
+          "name": "wf-test",
+          "raft_group": "S-R3F-iGJWZ7r7",
+          "leader": "wf-test-1",
+          "leader_since": "2026-10-11T08:35:40.551732686Z",
+          "system_account": true,
+          "traffic_account": "$SYS",
+          "replicas": [
+            {
+              "name": "wf-test-0",
+              "current": true,
+              "active": 748397185,
+              "peer": "fPPVT2kZ"
+            },
+            {
+              "name": "wf-test-2",
+              "current": true,
+              "active": 748300718,
+              "peer": "80zpbVEM"
+            }
+          ]
+        },
+        "ts": "2026-10-11T08:35:44.300356737Z"
+      }
+    },
+    {
+      "Phase": "node1.StreamInfo(OBJ_PURGE_SCALE_OBJECTS)",
+      "Nanos": 481452,
+      "Error": "",
+      "Value": {
+        "config": {
+          "name": "OBJ_PURGE_SCALE_OBJECTS",
+          "subjects": [
+            "$O.PURGE_SCALE_OBJECTS.C.\u003e",
+            "$O.PURGE_SCALE_OBJECTS.M.\u003e"
+          ],
+          "retention": "limits",
+          "max_consumers": -1,
+          "max_msgs": -1,
+          "max_bytes": -1,
+          "discard": "old",
+          "max_age": 0,
+          "max_msgs_per_subject": -1,
+          "max_msg_size": -1,
+          "storage": "file",
+          "num_replicas": 3,
+          "duplicate_window": 120000000000,
+          "deny_delete": true,
+          "allow_rollup_hdrs": true,
+          "compression": "none",
+          "allow_direct": false,
+          "mirror_direct": false,
+          "consumer_limits": {},
+          "metadata": {
+            "_nats.level": "5",
+            "_nats.req.level": "0",
+            "_nats.ver": "2.15.0",
+            "js-wf-blob-format": "graph-recoverable-v1"
+          }
+        },
+        "created": "2026-10-11T08:05:48.828869779Z",
+        "state": {
+          "messages": 13836,
+          "bytes": 13010490,
+          "first_seq": 2,
+          "first_ts": "2026-10-11T08:05:50.564502686Z",
+          "last_seq": 20753,
+          "last_ts": "2026-10-11T08:08:15.468893638Z",
+          "consumer_count": 0,
+          "deleted": null,
+          "num_deleted": 6916,
+          "num_subjects": 13836,
+          "subjects": null
+        },
+        "cluster": {
+          "name": "wf-test",
+          "raft_group": "S-R3F-zvxHoV38",
+          "leader": "wf-test-2",
+          "leader_since": "2026-10-11T08:35:41.786301653Z",
+          "system_account": true,
+          "traffic_account": "$SYS",
+          "replicas": [
+            {
+              "name": "wf-test-0",
+              "current": true,
+              "active": 514426346,
+              "peer": "fPPVT2kZ"
+            },
+            {
+              "name": "wf-test-1",
+              "current": true,
+              "active": 514416742,
+              "peer": "OFrOUlB0"
+            }
+          ]
+        },
+        "ts": "2026-10-11T08:35:44.30093081Z"
+      }
+    },
+    {
+      "Phase": "node1.StreamInfo(WF_INV)",
+      "Nanos": 414320,
+      "Error": "",
+      "Value": {
+        "config": {
+          "name": "WF_INV",
+          "subjects": [
+            "wf.inv.*.*"
+          ],
+          "retention": "limits",
+          "max_consumers": -1,
+          "max_msgs": -1,
+          "max_bytes": -1,
+          "discard": "new",
+          "discard_new_per_subject": true,
+          "max_age": 0,
+          "max_msgs_per_subject": 1,
+          "max_msg_size": -1,
+          "storage": "file",
+          "num_replicas": 3,
+          "duplicate_window": 120000000000,
+          "compression": "none",
+          "allow_direct": false,
+          "mirror_direct": false,
+          "consumer_limits": {},
+          "metadata": {
+            "_nats.level": "5",
+            "_nats.req.level": "0",
+            "_nats.ver": "2.15.0"
+          }
+        },
+        "created": "2026-10-11T08:05:47.738056783Z",
+        "state": {
+          "messages": 990,
+          "bytes": 337590,
+          "first_seq": 1,
+          "first_ts": "2026-10-11T08:05:51.290514854Z",
+          "last_seq": 990,
+          "last_ts": "2026-10-11T08:08:14.967112768Z",
+          "consumer_count": 0,
+          "deleted": null,
+          "num_deleted": 0,
+          "num_subjects": 990,
+          "subjects": null
+        },
+        "cluster": {
+          "name": "wf-test",
+          "raft_group": "S-R3F-U7VEpd3z",
+          "leader": "wf-test-2",
+          "leader_since": "2026-10-11T08:35:40.623695717Z",
+          "system_account": true,
+          "traffic_account": "$SYS",
+          "replicas": [
+            {
+              "name": "wf-test-0",
+              "current": true,
+              "active": 676992392,
+              "peer": "fPPVT2kZ"
+            },
+            {
+              "name": "wf-test-1",
+              "current": true,
+              "active": 676934855,
+              "peer": "OFrOUlB0"
+            }
+          ]
+        },
+        "ts": "2026-10-11T08:35:44.301348855Z"
+      }
+    },
+    {
+      "Phase": "node1.StreamInfo(WF_RUN)",
+      "Nanos": 253505,
+      "Error": "",
+      "Value": {
+        "config": {
+          "name": "WF_RUN",
+          "subjects": [
+            "wf.run.*",
+            "wf.schedule.*.*.*"
+          ],
+          "retention": "workqueue",
+          "max_consumers": -1,
+          "max_msgs": -1,
+          "max_bytes": -1,
+          "discard": "old",
+          "max_age": 0,
+          "max_msgs_per_subject": -1,
+          "max_msg_size": -1,
+          "storage": "file",
+          "num_replicas": 3,
+          "duplicate_window": 120000000000,
+          "allow_rollup_hdrs": true,
+          "compression": "none",
+          "allow_direct": false,
+          "mirror_direct": false,
+          "consumer_limits": {},
+          "metadata": {
+            "_nats.level": "5",
+            "_nats.req.level": "2",
+            "_nats.ver": "2.15.0"
+          },
+          "allow_msg_schedules": true
+        },
+        "created": "2026-10-11T08:05:47.838618826Z",
+        "state": {
+          "messages": 551,
+          "bytes": 67139,
+          "first_seq": 171,
+          "first_ts": "2026-10-11T08:06:05.457361103Z",
+          "last_seq": 984,
+          "last_ts": "2026-10-11T08:08:15.543289062Z",
+          "consumer_count": 64,
+          "deleted": null,
+          "num_deleted": 263,
+          "num_subjects": 51,
+          "subjects": null
+        },
+        "cluster": {
+          "name": "wf-test",
+          "raft_group": "S-R3F-oXQJMMHc",
+          "leader": "wf-test-2",
+          "leader_since": "2026-10-11T08:35:42.937408145Z",
+          "system_account": true,
+          "traffic_account": "$SYS",
+          "replicas": [
+            {
+              "name": "wf-test-0",
+              "current": true,
+              "active": 365957730,
+              "peer": "fPPVT2kZ"
+            },
+            {
+              "name": "wf-test-1",
+              "current": true,
+              "active": 365932962,
+              "peer": "OFrOUlB0"
+            }
+          ]
+        },
+        "ts": "2026-10-11T08:35:44.301677785Z"
+      }
+    },
+    {
+      "Phase": "node2.StreamInfo(PURGE_SCALE_AUTH)",
+      "Nanos": 533631,
+      "Error": "",
+      "Value": {
+        "config": {
+          "name": "PURGE_SCALE_AUTH",
+          "subjects": [
+            "wf.graph.purgescale.root.\u003e",
+            "wf.graph.purgescale.blob.\u003e",
+            "wf.graph.purgescale.owner.\u003e"
+          ],
+          "retention": "limits",
+          "max_consumers": -1,
+          "max_msgs": -1,
+          "max_bytes": -1,
+          "discard": "old",
+          "max_age": 0,
+          "max_msgs_per_subject": 1,
+          "max_msg_size": -1,
+          "storage": "file",
+          "num_replicas": 3,
+          "duplicate_window": 120000000000,
+          "deny_delete": true,
+          "deny_purge": true,
+          "compression": "none",
+          "allow_direct": false,
+          "mirror_direct": false,
+          "consumer_limits": {},
+          "metadata": {
+            "_nats.level": "5",
+            "_nats.req.level": "0",
+            "_nats.ver": "2.15.0",
+            "wf_graph_owner_index": "js-wf-graph-owner-index-v1"
+          }
+        },
+        "created": "2026-10-11T08:05:48.745906624Z",
+        "state": {
+          "messages": 15316,
+          "bytes": 12883045,
+          "first_seq": 250,
+          "first_ts": "2026-10-11T08:05:50.59006006Z",
+          "last_seq": 111100,
+          "last_ts": "2026-10-11T08:08:17.629518778Z",
+          "consumer_count": 0,
+          "deleted": null,
+          "num_deleted": 95535,
+          "num_subjects": 15316,
+          "subjects": null
+        },
+        "cluster": {
+          "name": "wf-test",
+          "raft_group": "S-R3F-iGJWZ7r7",
+          "leader": "wf-test-1",
+          "leader_since": "2026-10-11T08:35:40.551732686Z",
+          "system_account": true,
+          "traffic_account": "$SYS",
+          "replicas": [
+            {
+              "name": "wf-test-0",
+              "current": true,
+              "active": 750216320,
+              "peer": "fPPVT2kZ"
+            },
+            {
+              "name": "wf-test-2",
+              "current": true,
+              "active": 750119853,
+              "peer": "80zpbVEM"
+            }
+          ]
+        },
+        "ts": "2026-10-11T08:35:44.302174861Z"
+      }
+    },
+    {
+      "Phase": "node2.StreamInfo(OBJ_PURGE_SCALE_OBJECTS)",
+      "Nanos": 168576,
+      "Error": "",
+      "Value": {
+        "config": {
+          "name": "OBJ_PURGE_SCALE_OBJECTS",
+          "subjects": [
+            "$O.PURGE_SCALE_OBJECTS.C.\u003e",
+            "$O.PURGE_SCALE_OBJECTS.M.\u003e"
+          ],
+          "retention": "limits",
+          "max_consumers": -1,
+          "max_msgs": -1,
+          "max_bytes": -1,
+          "discard": "old",
+          "max_age": 0,
+          "max_msgs_per_subject": -1,
+          "max_msg_size": -1,
+          "storage": "file",
+          "num_replicas": 3,
+          "duplicate_window": 120000000000,
+          "deny_delete": true,
+          "allow_rollup_hdrs": true,
+          "compression": "none",
+          "allow_direct": false,
+          "mirror_direct": false,
+          "consumer_limits": {},
+          "metadata": {
+            "_nats.level": "5",
+            "_nats.req.level": "0",
+            "_nats.ver": "2.15.0",
+            "js-wf-blob-format": "graph-recoverable-v1"
+          }
+        },
+        "created": "2026-10-11T08:05:48.828869779Z",
+        "state": {
+          "messages": 13836,
+          "bytes": 13010490,
+          "first_seq": 2,
+          "first_ts": "2026-10-11T08:05:50.564502686Z",
+          "last_seq": 20753,
+          "last_ts": "2026-10-11T08:08:15.468893638Z",
+          "consumer_count": 0,
+          "deleted": null,
+          "num_deleted": 6916,
+          "num_subjects": 13836,
+          "subjects": null
+        },
+        "cluster": {
+          "name": "wf-test",
+          "raft_group": "S-R3F-zvxHoV38",
+          "leader": "wf-test-2",
+          "leader_since": "2026-10-11T08:35:41.786301653Z",
+          "system_account": true,
+          "traffic_account": "$SYS",
+          "replicas": [
+            {
+              "name": "wf-test-0",
+              "current": true,
+              "active": 515898604,
+              "peer": "fPPVT2kZ"
+            },
+            {
+              "name": "wf-test-1",
+              "current": true,
+              "active": 515889000,
+              "peer": "OFrOUlB0"
+            }
+          ]
+        },
+        "ts": "2026-10-11T08:35:44.302401035Z"
+      }
+    },
+    {
+      "Phase": "node2.StreamInfo(WF_INV)",
+      "Nanos": 157639,
+      "Error": "",
+      "Value": {
+        "config": {
+          "name": "WF_INV",
+          "subjects": [
+            "wf.inv.*.*"
+          ],
+          "retention": "limits",
+          "max_consumers": -1,
+          "max_msgs": -1,
+          "max_bytes": -1,
+          "discard": "new",
+          "discard_new_per_subject": true,
+          "max_age": 0,
+          "max_msgs_per_subject": 1,
+          "max_msg_size": -1,
+          "storage": "file",
+          "num_replicas": 3,
+          "duplicate_window": 120000000000,
+          "compression": "none",
+          "allow_direct": false,
+          "mirror_direct": false,
+          "consumer_limits": {},
+          "metadata": {
+            "_nats.level": "5",
+            "_nats.req.level": "0",
+            "_nats.ver": "2.15.0"
+          }
+        },
+        "created": "2026-10-11T08:05:47.738056783Z",
+        "state": {
+          "messages": 990,
+          "bytes": 337590,
+          "first_seq": 1,
+          "first_ts": "2026-10-11T08:05:51.290514854Z",
+          "last_seq": 990,
+          "last_ts": "2026-10-11T08:08:14.967112768Z",
+          "consumer_count": 0,
+          "deleted": null,
+          "num_deleted": 0,
+          "num_subjects": 990,
+          "subjects": null
+        },
+        "cluster": {
+          "name": "wf-test",
+          "raft_group": "S-R3F-U7VEpd3z",
+          "leader": "wf-test-2",
+          "leader_since": "2026-10-11T08:35:40.623695717Z",
+          "system_account": true,
+          "traffic_account": "$SYS",
+          "replicas": [
+            {
+              "name": "wf-test-0",
+              "current": true,
+              "active": 678208701,
+              "peer": "fPPVT2kZ"
+            },
+            {
+              "name": "wf-test-1",
+              "current": true,
+              "active": 678151164,
+              "peer": "OFrOUlB0"
+            }
+          ]
+        },
+        "ts": "2026-10-11T08:35:44.30256927Z"
+      }
+    },
+    {
+      "Phase": "node2.StreamInfo(WF_RUN)",
+      "Nanos": 163669,
+      "Error": "",
+      "Value": {
+        "config": {
+          "name": "WF_RUN",
+          "subjects": [
+            "wf.run.*",
+            "wf.schedule.*.*.*"
+          ],
+          "retention": "workqueue",
+          "max_consumers": -1,
+          "max_msgs": -1,
+          "max_bytes": -1,
+          "discard": "old",
+          "max_age": 0,
+          "max_msgs_per_subject": -1,
+          "max_msg_size": -1,
+          "storage": "file",
+          "num_replicas": 3,
+          "duplicate_window": 120000000000,
+          "allow_rollup_hdrs": true,
+          "compression": "none",
+          "allow_direct": false,
+          "mirror_direct": false,
+          "consumer_limits": {},
+          "metadata": {
+            "_nats.level": "5",
+            "_nats.req.level": "2",
+            "_nats.ver": "2.15.0"
+          },
+          "allow_msg_schedules": true
+        },
+        "created": "2026-10-11T08:05:47.838618826Z",
+        "state": {
+          "messages": 551,
+          "bytes": 67139,
+          "first_seq": 171,
+          "first_ts": "2026-10-11T08:06:05.457361103Z",
+          "last_seq": 984,
+          "last_ts": "2026-10-11T08:08:15.543289062Z",
+          "consumer_count": 64,
+          "deleted": null,
+          "num_deleted": 263,
+          "num_subjects": 51,
+          "subjects": null
+        },
+        "cluster": {
+          "name": "wf-test",
+          "raft_group": "S-R3F-oXQJMMHc",
+          "leader": "wf-test-2",
+          "leader_since": "2026-10-11T08:35:42.937408145Z",
+          "system_account": true,
+          "traffic_account": "$SYS",
+          "replicas": [
+            {
+              "name": "wf-test-0",
+              "current": true,
+              "active": 367011252,
+              "peer": "fPPVT2kZ"
+            },
+            {
+              "name": "wf-test-1",
+              "current": true,
+              "active": 366986484,
+              "peer": "OFrOUlB0"
+            }
+          ]
+        },
+        "ts": "2026-10-11T08:35:44.302731377Z"
+      }
+    },
+    {
+      "Phase": "node0.metadataRecheck(PURGE_SCALE_AUTH)",
+      "Nanos": 624029,
+      "Error": "",
+      "Value": {
+        "config": {
+          "name": "PURGE_SCALE_AUTH",
+          "subjects": [
+            "wf.graph.purgescale.root.\u003e",
+            "wf.graph.purgescale.blob.\u003e",
+            "wf.graph.purgescale.owner.\u003e"
+          ],
+          "retention": "limits",
+          "max_consumers": -1,
+          "max_msgs": -1,
+          "max_bytes": -1,
+          "discard": "old",
+          "max_age": 0,
+          "max_msgs_per_subject": 1,
+          "max_msg_size": -1,
+          "storage": "file",
+          "num_replicas": 3,
+          "duplicate_window": 120000000000,
+          "deny_delete": true,
+          "deny_purge": true,
+          "compression": "none",
+          "allow_direct": false,
+          "mirror_direct": false,
+          "consumer_limits": {},
+          "metadata": {
+            "_nats.level": "5",
+            "_nats.req.level": "0",
+            "_nats.ver": "2.15.0",
+            "wf_graph_owner_index": "js-wf-graph-owner-index-v1"
+          }
+        },
+        "created": "2026-10-11T08:05:48.745906624Z",
+        "state": {
+          "messages": 15316,
+          "bytes": 12883045,
+          "first_seq": 250,
+          "first_ts": "2026-10-11T08:05:50.59006006Z",
+          "last_seq": 111100,
+          "last_ts": "2026-10-11T08:08:17.629518778Z",
+          "consumer_count": 0,
+          "deleted": null,
+          "num_deleted": 95535,
+          "num_subjects": 15316,
+          "subjects": null
+        },
+        "cluster": {
+          "name": "wf-test",
+          "raft_group": "S-R3F-iGJWZ7r7",
+          "leader": "wf-test-1",
+          "leader_since": "2026-10-11T08:35:40.551732686Z",
+          "system_account": true,
+          "traffic_account": "$SYS",
+          "replicas": [
+            {
+              "name": "wf-test-0",
+              "current": true,
+              "active": 751146955,
+              "peer": "fPPVT2kZ"
+            },
+            {
+              "name": "wf-test-2",
+              "current": true,
+              "active": 751050488,
+              "peer": "80zpbVEM"
+            }
+          ]
+        },
+        "ts": "2026-10-11T08:35:44.303105876Z"
+      }
+    },
+    {
+      "Phase": "node0.metadataRecheck(OBJ_PURGE_SCALE_OBJECTS)",
+      "Nanos": 418546,
+      "Error": "",
+      "Value": {
+        "config": {
+          "name": "OBJ_PURGE_SCALE_OBJECTS",
+          "subjects": [
+            "$O.PURGE_SCALE_OBJECTS.C.\u003e",
+            "$O.PURGE_SCALE_OBJECTS.M.\u003e"
+          ],
+          "retention": "limits",
+          "max_consumers": -1,
+          "max_msgs": -1,
+          "max_bytes": -1,
+          "discard": "old",
+          "max_age": 0,
+          "max_msgs_per_subject": -1,
+          "max_msg_size": -1,
+          "storage": "file",
+          "num_replicas": 3,
+          "duplicate_window": 120000000000,
+          "deny_delete": true,
+          "allow_rollup_hdrs": true,
+          "compression": "none",
+          "allow_direct": false,
+          "mirror_direct": false,
+          "consumer_limits": {},
+          "metadata": {
+            "_nats.level": "5",
+            "_nats.req.level": "0",
+            "_nats.ver": "2.15.0",
+            "js-wf-blob-format": "graph-recoverable-v1"
+          }
+        },
+        "created": "2026-10-11T08:05:48.828869779Z",
+        "state": {
+          "messages": 13836,
+          "bytes": 13010490,
+          "first_seq": 2,
+          "first_ts": "2026-10-11T08:05:50.564502686Z",
+          "last_seq": 20753,
+          "last_ts": "2026-10-11T08:08:15.468893638Z",
+          "consumer_count": 0,
+          "deleted": null,
+          "num_deleted": 6916,
+          "num_subjects": 13836,
+          "subjects": null
+        },
+        "cluster": {
+          "name": "wf-test",
+          "raft_group": "S-R3F-zvxHoV38",
+          "leader": "wf-test-2",
+          "leader_since": "2026-10-11T08:35:41.786301653Z",
+          "system_account": true,
+          "traffic_account": "$SYS",
+          "replicas": [
+            {
+              "name": "wf-test-0",
+              "current": true,
+              "active": 517239483,
+              "peer": "fPPVT2kZ"
+            },
+            {
+              "name": "wf-test-1",
+              "current": true,
+              "active": 517229879,
+              "peer": "OFrOUlB0"
+            }
+          ]
+        },
+        "ts": "2026-10-11T08:35:44.303742194Z"
+      }
+    },
+    {
+      "Phase": "node0.metadataRecheck(WF_INV)",
+      "Nanos": 1536987,
+      "Error": "",
+      "Value": {
+        "config": {
+          "name": "WF_INV",
+          "subjects": [
+            "wf.inv.*.*"
+          ],
+          "retention": "limits",
+          "max_consumers": -1,
+          "max_msgs": -1,
+          "max_bytes": -1,
+          "discard": "new",
+          "discard_new_per_subject": true,
+          "max_age": 0,
+          "max_msgs_per_subject": 1,
+          "max_msg_size": -1,
+          "storage": "file",
+          "num_replicas": 3,
+          "duplicate_window": 120000000000,
+          "compression": "none",
+          "allow_direct": false,
+          "mirror_direct": false,
+          "consumer_limits": {},
+          "metadata": {
+            "_nats.level": "5",
+            "_nats.req.level": "0",
+            "_nats.ver": "2.15.0"
+          }
+        },
+        "created": "2026-10-11T08:05:47.738056783Z",
+        "state": {
+          "messages": 990,
+          "bytes": 337590,
+          "first_seq": 1,
+          "first_ts": "2026-10-11T08:05:51.290514854Z",
+          "last_seq": 990,
+          "last_ts": "2026-10-11T08:08:14.967112768Z",
+          "consumer_count": 0,
+          "deleted": null,
+          "num_deleted": 0,
+          "num_subjects": 990,
+          "subjects": null
+        },
+        "cluster": {
+          "name": "wf-test",
+          "raft_group": "S-R3F-U7VEpd3z",
+          "leader": "wf-test-2",
+          "leader_since": "2026-10-11T08:35:40.623695717Z",
+          "system_account": true,
+          "traffic_account": "$SYS",
+          "replicas": [
+            {
+              "name": "wf-test-0",
+              "current": true,
+              "active": 680896958,
+              "peer": "fPPVT2kZ"
+            },
+            {
+              "name": "wf-test-1",
+              "current": true,
+              "active": 680839421,
+              "peer": "OFrOUlB0"
+            }
+          ]
+        },
+        "ts": "2026-10-11T08:35:44.305253431Z"
+      }
+    },
+    {
+      "Phase": "node0.metadataRecheck(WF_RUN)",
+      "Nanos": 332215,
+      "Error": "",
+      "Value": {
+        "config": {
+          "name": "WF_RUN",
+          "subjects": [
+            "wf.run.*",
+            "wf.schedule.*.*.*"
+          ],
+          "retention": "workqueue",
+          "max_consumers": -1,
+          "max_msgs": -1,
+          "max_bytes": -1,
+          "discard": "old",
+          "max_age": 0,
+          "max_msgs_per_subject": -1,
+          "max_msg_size": -1,
+          "storage": "file",
+          "num_replicas": 3,
+          "duplicate_window": 120000000000,
+          "allow_rollup_hdrs": true,
+          "compression": "none",
+          "allow_direct": false,
+          "mirror_direct": false,
+          "consumer_limits": {},
+          "metadata": {
+            "_nats.level": "5",
+            "_nats.req.level": "2",
+            "_nats.ver": "2.15.0"
+          },
+          "allow_msg_schedules": true
+        },
+        "created": "2026-10-11T08:05:47.838618826Z",
+        "state": {
+          "messages": 551,
+          "bytes": 67139,
+          "first_seq": 171,
+          "first_ts": "2026-10-11T08:06:05.457361103Z",
+          "last_seq": 984,
+          "last_ts": "2026-10-11T08:08:15.543289062Z",
+          "consumer_count": 64,
+          "deleted": null,
+          "num_deleted": 263,
+          "num_subjects": 51,
+          "subjects": null
+        },
+        "cluster": {
+          "name": "wf-test",
+          "raft_group": "S-R3F-oXQJMMHc",
+          "leader": "wf-test-2",
+          "leader_since": "2026-10-11T08:35:42.937408145Z",
+          "system_account": true,
+          "traffic_account": "$SYS",
+          "replicas": [
+            {
+              "name": "wf-test-0",
+              "current": true,
+              "active": 369938111,
+              "peer": "fPPVT2kZ"
+            },
+            {
+              "name": "wf-test-1",
+              "current": true,
+              "active": 369913343,
+              "peer": "OFrOUlB0"
+            }
+          ]
+        },
+        "ts": "2026-10-11T08:35:44.305659017Z"
+      }
+    },
+    {
+      "Phase": "OpenNativeGraphStore",
+      "Nanos": 1198101,
+      "Error": "",
+      "Value": null
+    },
+    {
+      "Phase": "authority.subjects",
+      "Nanos": 2562626,
+      "Error": "",
+      "Value": 1027
+    },
+    {
+      "Phase": "rawStartCatalog",
+      "Nanos": 264755784,
+      "Error": "",
+      "Value": {
+        "bound": 984,
+        "pending": 43
+      }
+    },
+    {
+      "Phase": "pending.ReadStart(old-00670)",
+      "Nanos": 26771636,
+      "Error": "",
+      "Value": {
+        "input": {
+          "kind": "old",
+          "index": 670
+        },
+        "state": {
+          "Start": {
+            "schema": "js-wf-canonical-start-v1",
+            "token": "c67d7a092cb0ee5f6cbd471cfd346033",
+            "request": {
+              "type": "purge-scale",
+              "id": "old-00670"
+            },
+            "input_sha256": "e4b5ad48bbaac9ce7d09989f548a1e064bb9b32aaae0c3c9a10f2c9c14b7eb22",
+            "input_size": 26
+          },
+          "Invocation": 0,
+          "Pending": true
+        }
+      }
+    },
+    {
+      "Phase": "pending.sourceBefore(old-00670)",
+      "Nanos": 4217691,
+      "Error": "",
+      "Value": 0
+    },
+    {
+      "Phase": "pending.RecoverStartAttempt(old-00670)",
+      "Nanos": 29947864,
+      "Error": "",
+      "Value": {
+        "after": {
+          "State": {
+            "Start": {
+              "schema": "js-wf-canonical-start-v1",
+              "token": "c67d7a092cb0ee5f6cbd471cfd346033",
+              "request": {
+                "type": "purge-scale",
+                "id": "old-00670"
+              },
+              "input_sha256": "e4b5ad48bbaac9ce7d09989f548a1e064bb9b32aaae0c3c9a10f2c9c14b7eb22",
+              "input_size": 26
+            },
+            "Invocation": 991,
+            "Pending": false
+          },
+          "JournalCount": 0,
+          "JournalTail": 0,
+          "Retired": false,
+          "Purging": false,
+          "Kind": "",
+          "SignalInputs": 0,
+          "SignalBindings": 0,
+          "SignalConsumed": 0,
+          "SignalRepair": 0,
+          "Checkpoint": null
+        },
+        "handle": {
+          "type": "purge-scale",
+          "id": "old-00670",
+          "inv_seq": 991
+        },
+        "source": {
+          "Subject": "wf.inv.purge-scale.old-00670",
+          "Sequence": 991,
+          "Header": {
+            "Nats-Expected-Last-Subject-Sequence": [
+              "0"
+            ],
+            "Wf-Graph-Start-Token": [
+              "c67d7a092cb0ee5f6cbd471cfd346033"
+            ],
+            "Wf-Input-SHA256": [
+              "e4b5ad48bbaac9ce7d09989f548a1e064bb9b32aaae0c3c9a10f2c9c14b7eb22"
+            ]
+          },
+          "Data": "eyJzY2hlbWEiOiJqcy13Zi1jYW5vbmljYWwtc3RhcnQtcG9pbnRlci12MSIsInRva2VuIjoiYzY3ZDdhMDkyY2IwZWU1ZjZjYmQ0NzFjZmQzNDYwMzMifQ==",
+          "Time": "2026-10-11T08:35:44.617518222Z"
+        }
+      }
+    },
+    {
+      "Phase": "pending.ReadStart(old-00631)",
+      "Nanos": 22535146,
+      "Error": "",
+      "Value": {
+        "input": {
+          "kind": "old",
+          "index": 631
+        },
+        "state": {
+          "Start": {
+            "schema": "js-wf-canonical-start-v1",
+            "token": "be5f7d0ff7b76b8c30b6adcbf19076ad",
+            "request": {
+              "type": "purge-scale",
+              "id": "old-00631"
+            },
+            "input_sha256": "dd86d3db9981474fe0ce36fdb12f1b11575337330c59aedf23f1ff9c6d32114b",
+            "input_size": 26
+          },
+          "Invocation": 0,
+          "Pending": true
+        }
+      }
+    },
+    {
+      "Phase": "pending.sourceBefore(old-00631)",
+      "Nanos": 1589295,
+      "Error": "",
+      "Value": 0
+    },
+    {
+      "Phase": "pending.RecoverStartAttempt(old-00631)",
+      "Nanos": 63728633,
+      "Error": "",
+      "Value": {
+        "after": {
+          "State": {
+            "Start": {
+              "schema": "js-wf-canonical-start-v1",
+              "token": "be5f7d0ff7b76b8c30b6adcbf19076ad",
+              "request": {
+                "type": "purge-scale",
+                "id": "old-00631"
+              },
+              "input_sha256": "dd86d3db9981474fe0ce36fdb12f1b11575337330c59aedf23f1ff9c6d32114b",
+              "input_size": 26
+            },
+            "Invocation": 992,
+            "Pending": false
+          },
+          "JournalCount": 0,
+          "JournalTail": 0,
+          "Retired": false,
+          "Purging": false,
+          "Kind": "",
+          "SignalInputs": 0,
+          "SignalBindings": 0,
+          "SignalConsumed": 0,
+          "SignalRepair": 0,
+          "Checkpoint": null
+        },
+        "handle": {
+          "type": "purge-scale",
+          "id": "old-00631",
+          "inv_seq": 992
+        },
+        "source": {
+          "Subject": "wf.inv.purge-scale.old-00631",
+          "Sequence": 992,
+          "Header": {
+            "Nats-Expected-Last-Subject-Sequence": [
+              "0"
+            ],
+            "Wf-Graph-Start-Token": [
+              "be5f7d0ff7b76b8c30b6adcbf19076ad"
+            ],
+            "Wf-Input-SHA256": [
+              "dd86d3db9981474fe0ce36fdb12f1b11575337330c59aedf23f1ff9c6d32114b"
+            ]
+          },
+          "Data": "eyJzY2hlbWEiOiJqcy13Zi1jYW5vbmljYWwtc3RhcnQtcG9pbnRlci12MSIsInRva2VuIjoiYmU1ZjdkMGZmN2I3NmI4YzMwYjZhZGNiZjE5MDc2YWQifQ==",
+          "Time": "2026-10-11T08:35:44.704445741Z"
+        }
+      }
+    },
+    {
+      "Phase": "pending.ReadStart(old-00630)",
+      "Nanos": 13573474,
+      "Error": "",
+      "Value": {
+        "input": {
+          "kind": "old",
+          "index": 630
+        },
+        "state": {
+          "Start": {
+            "schema": "js-wf-canonical-start-v1",
+            "token": "114fdba052e16876759a53ff4675370f",
+            "request": {
+              "type": "purge-scale",
+              "id": "old-00630"
+            },
+            "input_sha256": "f2537be2c6663b132052a3b372976f92a95f23e780a9bbaa79ca1abca40abaf2",
+            "input_size": 26
+          },
+          "Invocation": 0,
+          "Pending": true
+        }
+      }
+    },
+    {
+      "Phase": "pending.sourceBefore(old-00630)",
+      "Nanos": 128605,
+      "Error": "",
+      "Value": 0
+    },
+    {
+      "Phase": "pending.RecoverStartAttempt(old-00630)",
+      "Nanos": 43160257,
+      "Error": "",
+      "Value": {
+        "after": {
+          "State": {
+            "Start": {
+              "schema": "js-wf-canonical-start-v1",
+              "token": "114fdba052e16876759a53ff4675370f",
+              "request": {
+                "type": "purge-scale",
+                "id": "old-00630"
+              },
+              "input_sha256": "f2537be2c6663b132052a3b372976f92a95f23e780a9bbaa79ca1abca40abaf2",
+              "input_size": 26
+            },
+            "Invocation": 993,
+            "Pending": false
+          },
+          "JournalCount": 0,
+          "JournalTail": 0,
+          "Retired": false,
+          "Purging": false,
+          "Kind": "",
+          "SignalInputs": 0,
+          "SignalBindings": 0,
+          "SignalConsumed": 0,
+          "SignalRepair": 0,
+          "Checkpoint": null
+        },
+        "handle": {
+          "type": "purge-scale",
+          "id": "old-00630",
+          "inv_seq": 993
+        },
+        "source": {
+          "Subject": "wf.inv.purge-scale.old-00630",
+          "Sequence": 993,
+          "Header": {
+            "Nats-Expected-Last-Subject-Sequence": [
+              "0"
+            ],
+            "Wf-Graph-Start-Token": [
+              "114fdba052e16876759a53ff4675370f"
+            ],
+            "Wf-Input-SHA256": [
+              "f2537be2c6663b132052a3b372976f92a95f23e780a9bbaa79ca1abca40abaf2"
+            ]
+          },
+          "Data": "eyJzY2hlbWEiOiJqcy13Zi1jYW5vbmljYWwtc3RhcnQtcG9pbnRlci12MSIsInRva2VuIjoiMTE0ZmRiYTA1MmUxNjg3Njc1OWE1M2ZmNDY3NTM3MGYifQ==",
+          "Time": "2026-10-11T08:35:44.766692822Z"
+        }
+      }
+    },
+    {
+      "Phase": "pending.ReadStart(old-00618)",
+      "Nanos": 6948743,
+      "Error": "",
+      "Value": {
+        "input": {
+          "kind": "old",
+          "index": 618
+        },
+        "state": {
+          "Start": {
+            "schema": "js-wf-canonical-start-v1",
+            "token": "e6d8d2885becc8d367188c77947f4908",
+            "request": {
+              "type": "purge-scale",
+              "id": "old-00618"
+            },
+            "input_sha256": "f34574969527dc68a7690814b69f4a967c0f381ac167dcb9d9382d5dc8f4c8c8",
+            "input_size": 26
+          },
+          "Invocation": 0,
+          "Pending": true
+        }
+      }
+    },
+    {
+      "Phase": "pending.sourceBefore(old-00618)",
+      "Nanos": 168426,
+      "Error": "",
+      "Value": 717
+    },
+    {
+      "Phase": "pending.RecoverStartAttempt(old-00618)",
+      "Nanos": 30512232,
+      "Error": "",
+      "Value": {
+        "after": {
+          "State": {
+            "Start": {
+              "schema": "js-wf-canonical-start-v1",
+              "token": "e6d8d2885becc8d367188c77947f4908",
+              "request": {
+                "type": "purge-scale",
+                "id": "old-00618"
+              },
+              "input_sha256": "f34574969527dc68a7690814b69f4a967c0f381ac167dcb9d9382d5dc8f4c8c8",
+              "input_size": 26
+            },
+            "Invocation": 717,
+            "Pending": false
+          },
+          "JournalCount": 0,
+          "JournalTail": 0,
+          "Retired": false,
+          "Purging": false,
+          "Kind": "",
+          "SignalInputs": 0,
+          "SignalBindings": 0,
+          "SignalConsumed": 0,
+          "SignalRepair": 0,
+          "Checkpoint": null
+        },
+        "handle": {
+          "type": "purge-scale",
+          "id": "old-00618",
+          "inv_seq": 717
+        },
+        "source": {
+          "Subject": "wf.inv.purge-scale.old-00618",
+          "Sequence": 717,
+          "Header": {
+            "Nats-Expected-Last-Subject-Sequence": [
+              "0"
+            ],
+            "Wf-Graph-Start-Token": [
+              "e6d8d2885becc8d367188c77947f4908"
+            ],
+            "Wf-Input-SHA256": [
+              "f34574969527dc68a7690814b69f4a967c0f381ac167dcb9d9382d5dc8f4c8c8"
+            ]
+          },
+          "Data": "eyJzY2hlbWEiOiJqcy13Zi1jYW5vbmljYWwtc3RhcnQtcG9pbnRlci12MSIsInRva2VuIjoiZTZkOGQyODg1YmVjYzhkMzY3MTg4Yzc3OTQ3ZjQ5MDgifQ==",
+          "Time": "2026-10-11T08:07:16.358642782Z"
+        }
+      }
+    },
+    {
+      "Phase": "pending.ReadStart(old-00669)",
+      "Nanos": 7950375,
+      "Error": "",
+      "Value": {
+        "input": {
+          "kind": "old",
+          "index": 669
+        },
+        "state": {
+          "Start": {
+            "schema": "js-wf-canonical-start-v1",
+            "token": "40089f96934ac3d95b528851896d54f4",
+            "request": {
+              "type": "purge-scale",
+              "id": "old-00669"
+            },
+            "input_sha256": "4800c699d2b39bac0178a5666584ff94ae7bbfabdf12934a4b41552d44ee472b",
+            "input_size": 26
+          },
+          "Invocation": 0,
+          "Pending": true
+        }
+      }
+    },
+    {
+      "Phase": "pending.sourceBefore(old-00669)",
+      "Nanos": 197560,
+      "Error": "",
+      "Value": 0
+    },
+    {
+      "Phase": "pending.RecoverStartAttempt(old-00669)",
+      "Nanos": 30090340,
+      "Error": "",
+      "Value": {
+        "after": {
+          "State": {
+            "Start": {
+              "schema": "js-wf-canonical-start-v1",
+              "token": "40089f96934ac3d95b528851896d54f4",
+              "request": {
+                "type": "purge-scale",
+                "id": "old-00669"
+              },
+              "input_sha256": "4800c699d2b39bac0178a5666584ff94ae7bbfabdf12934a4b41552d44ee472b",
+              "input_size": 26
+            },
+            "Invocation": 994,
+            "Pending": false
+          },
+          "JournalCount": 0,
+          "JournalTail": 0,
+          "Retired": false,
+          "Purging": false,
+          "Kind": "",
+          "SignalInputs": 0,
+          "SignalBindings": 0,
+          "SignalConsumed": 0,
+          "SignalRepair": 0,
+          "Checkpoint": null
+        },
+        "handle": {
+          "type": "purge-scale",
+          "id": "old-00669",
+          "inv_seq": 994
+        },
+        "source": {
+          "Subject": "wf.inv.purge-scale.old-00669",
+          "Sequence": 994,
+          "Header": {
+            "Nats-Expected-Last-Subject-Sequence": [
+              "0"
+            ],
+            "Wf-Graph-Start-Token": [
+              "40089f96934ac3d95b528851896d54f4"
+            ],
+            "Wf-Input-SHA256": [
+              "4800c699d2b39bac0178a5666584ff94ae7bbfabdf12934a4b41552d44ee472b"
+            ]
+          },
+          "Data": "eyJzY2hlbWEiOiJqcy13Zi1jYW5vbmljYWwtc3RhcnQtcG9pbnRlci12MSIsInRva2VuIjoiNDAwODlmOTY5MzRhYzNkOTViNTI4ODUxODk2ZDU0ZjQifQ==",
+          "Time": "2026-10-11T08:35:44.847657065Z"
+        }
+      }
+    },
+    {
+      "Phase": "pending.ReadStart(old-00673)",
+      "Nanos": 11445208,
+      "Error": "",
+      "Value": {
+        "input": {
+          "kind": "old",
+          "index": 673
+        },
+        "state": {
+          "Start": {
+            "schema": "js-wf-canonical-start-v1",
+            "token": "144644a3ec6bdb258ed89953f9f1895a",
+            "request": {
+              "type": "purge-scale",
+              "id": "old-00673"
+            },
+            "input_sha256": "84aded30c925facb0968085381441f661306db2b71b50b889286b54a5515ef78",
+            "input_size": 26
+          },
+          "Invocation": 0,
+          "Pending": true
+        }
+      }
+    },
+    {
+      "Phase": "pending.sourceBefore(old-00673)",
+      "Nanos": 182047,
+      "Error": "",
+      "Value": 0
+    },
+    {
+      "Phase": "pending.RecoverStartAttempt(old-00673)",
+      "Nanos": 37514385,
+      "Error": "",
+      "Value": {
+        "after": {
+          "State": {
+            "Start": {
+              "schema": "js-wf-canonical-start-v1",
+              "token": "144644a3ec6bdb258ed89953f9f1895a",
+              "request": {
+                "type": "purge-scale",
+                "id": "old-00673"
+              },
+              "input_sha256": "84aded30c925facb0968085381441f661306db2b71b50b889286b54a5515ef78",
+              "input_size": 26
+            },
+            "Invocation": 995,
+            "Pending": false
+          },
+          "JournalCount": 0,
+          "JournalTail": 0,
+          "Retired": false,
+          "Purging": false,
+          "Kind": "",
+          "SignalInputs": 0,
+          "SignalBindings": 0,
+          "SignalConsumed": 0,
+          "SignalRepair": 0,
+          "Checkpoint": null
+        },
+        "handle": {
+          "type": "purge-scale",
+          "id": "old-00673",
+          "inv_seq": 995
+        },
+        "source": {
+          "Subject": "wf.inv.purge-scale.old-00673",
+          "Sequence": 995,
+          "Header": {
+            "Nats-Expected-Last-Subject-Sequence": [
+              "0"
+            ],
+            "Wf-Graph-Start-Token": [
+              "144644a3ec6bdb258ed89953f9f1895a"
+            ],
+            "Wf-Input-SHA256": [
+              "84aded30c925facb0968085381441f661306db2b71b50b889286b54a5515ef78"
+            ]
+          },
+          "Data": "eyJzY2hlbWEiOiJqcy13Zi1jYW5vbmljYWwtc3RhcnQtcG9pbnRlci12MSIsInRva2VuIjoiMTQ0NjQ0YTNlYzZiZGIyNThlZDg5OTUzZjlmMTg5NWEifQ==",
+          "Time": "2026-10-11T08:35:44.892843543Z"
+        }
+      }
+    },
+    {
+      "Phase": "pending.ReadStart(old-00652)",
+      "Nanos": 10165924,
+      "Error": "",
+      "Value": {
+        "input": {
+          "kind": "old",
+          "index": 652
+        },
+        "state": {
+          "Start": {
+            "schema": "js-wf-canonical-start-v1",
+            "token": "f7dee6f7e21b58f96ba6c324002f122a",
+            "request": {
+              "type": "purge-scale",
+              "id": "old-00652"
+            },
+            "input_sha256": "dece36d0955286efd9df0a93dc699eee8e00aabd694a9274a8f953530c018ca7",
+            "input_size": 26
+          },
+          "Invocation": 0,
+          "Pending": true
+        }
+      }
+    },
+    {
+      "Phase": "pending.sourceBefore(old-00652)",
+      "Nanos": 290982,
+      "Error": "",
+      "Value": 0
+    },
+    {
+      "Phase": "pending.RecoverStartAttempt(old-00652)",
+      "Nanos": 26532812,
+      "Error": "",
+      "Value": {
+        "after": {
+          "State": {
+            "Start": {
+              "schema": "js-wf-canonical-start-v1",
+              "token": "f7dee6f7e21b58f96ba6c324002f122a",
+              "request": {
+                "type": "purge-scale",
+                "id": "old-00652"
+              },
+              "input_sha256": "dece36d0955286efd9df0a93dc699eee8e00aabd694a9274a8f953530c018ca7",
+              "input_size": 26
+            },
+            "Invocation": 996,
+            "Pending": false
+          },
+          "JournalCount": 0,
+          "JournalTail": 0,
+          "Retired": false,
+          "Purging": false,
+          "Kind": "",
+          "SignalInputs": 0,
+          "SignalBindings": 0,
+          "SignalConsumed": 0,
+          "SignalRepair": 0,
+          "Checkpoint": null
+        },
+        "handle": {
+          "type": "purge-scale",
+          "id": "old-00652",
+          "inv_seq": 996
+        },
+        "source": {
+          "Subject": "wf.inv.purge-scale.old-00652",
+          "Sequence": 996,
+          "Header": {
+            "Nats-Expected-Last-Subject-Sequence": [
+              "0"
+            ],
+            "Wf-Graph-Start-Token": [
+              "f7dee6f7e21b58f96ba6c324002f122a"
+            ],
+            "Wf-Input-SHA256": [
+              "dece36d0955286efd9df0a93dc699eee8e00aabd694a9274a8f953530c018ca7"
+            ]
+          },
+          "Data": "eyJzY2hlbWEiOiJqcy13Zi1jYW5vbmljYWwtc3RhcnQtcG9pbnRlci12MSIsInRva2VuIjoiZjdkZWU2ZjdlMjFiNThmOTZiYTZjMzI0MDAyZjEyMmEifQ==",
+          "Time": "2026-10-11T08:35:44.934019655Z"
+        }
+      }
+    },
+    {
+      "Phase": "pending.ReadStart(old-00665)",
+      "Nanos": 6446289,
+      "Error": "",
+      "Value": {
+        "input": {
+          "kind": "old",
+          "index": 665
+        },
+        "state": {
+          "Start": {
+            "schema": "js-wf-canonical-start-v1",
+            "token": "acda69cca33586d6f9edf90de705cd47",
+            "request": {
+              "type": "purge-scale",
+              "id": "old-00665"
+            },
+            "input_sha256": "a1fbb22c369b651426ac3801ff98f277ee9a635967e90a20051c07135436453c",
+            "input_size": 26
+          },
+          "Invocation": 0,
+          "Pending": true
+        }
+      }
+    },
+    {
+      "Phase": "pending.sourceBefore(old-00665)",
+      "Nanos": 108885,
+      "Error": "",
+      "Value": 0
+    },
+    {
+      "Phase": "pending.RecoverStartAttempt(old-00665)",
+      "Nanos": 24908633,
+      "Error": "",
+      "Value": {
+        "after": {
+          "State": {
+            "Start": {
+              "schema": "js-wf-canonical-start-v1",
+              "token": "acda69cca33586d6f9edf90de705cd47",
+              "request": {
+                "type": "purge-scale",
+                "id": "old-00665"
+              },
+              "input_sha256": "a1fbb22c369b651426ac3801ff98f277ee9a635967e90a20051c07135436453c",
+              "input_size": 26
+            },
+            "Invocation": 997,
+            "Pending": false
+          },
+          "JournalCount": 0,
+          "JournalTail": 0,
+          "Retired": false,
+          "Purging": false,
+          "Kind": "",
+          "SignalInputs": 0,
+          "SignalBindings": 0,
+          "SignalConsumed": 0,
+          "SignalRepair": 0,
+          "Checkpoint": null
+        },
+        "handle": {
+          "type": "purge-scale",
+          "id": "old-00665",
+          "inv_seq": 997
+        },
+        "source": {
+          "Subject": "wf.inv.purge-scale.old-00665",
+          "Sequence": 997,
+          "Header": {
+            "Nats-Expected-Last-Subject-Sequence": [
+              "0"
+            ],
+            "Wf-Graph-Start-Token": [
+              "acda69cca33586d6f9edf90de705cd47"
+            ],
+            "Wf-Input-SHA256": [
+              "a1fbb22c369b651426ac3801ff98f277ee9a635967e90a20051c07135436453c"
+            ]
+          },
+          "Data": "eyJzY2hlbWEiOiJqcy13Zi1jYW5vbmljYWwtc3RhcnQtcG9pbnRlci12MSIsInRva2VuIjoiYWNkYTY5Y2NhMzM1ODZkNmY5ZWRmOTBkZTcwNWNkNDcifQ==",
+          "Time": "2026-10-11T08:35:44.961866364Z"
+        }
+      }
+    },
+    {
+      "Phase": "pending.ReadStart(old-00666)",
+      "Nanos": 5170109,
+      "Error": "",
+      "Value": {
+        "input": {
+          "kind": "old",
+          "index": 666
+        },
+        "state": {
+          "Start": {
+            "schema": "js-wf-canonical-start-v1",
+            "token": "51b58872eae346390d64d857742c3fb8",
+            "request": {
+              "type": "purge-scale",
+              "id": "old-00666"
+            },
+            "input_sha256": "2c7a6e4a747968494bd531d09f858a144a078c1007c3944a55b387cca9f8fb23",
+            "input_size": 26
+          },
+          "Invocation": 0,
+          "Pending": true
+        }
+      }
+    },
+    {
+      "Phase": "pending.sourceBefore(old-00666)",
+      "Nanos": 235228,
+      "Error": "",
+      "Value": 0
+    },
+    {
+      "Phase": "pending.RecoverStartAttempt(old-00666)",
+      "Nanos": 58746961,
+      "Error": "",
+      "Value": {
+        "after": {
+          "State": {
+            "Start": {
+              "schema": "js-wf-canonical-start-v1",
+              "token": "51b58872eae346390d64d857742c3fb8",
+              "request": {
+                "type": "purge-scale",
+                "id": "old-00666"
+              },
+              "input_sha256": "2c7a6e4a747968494bd531d09f858a144a078c1007c3944a55b387cca9f8fb23",
+              "input_size": 26
+            },
+            "Invocation": 998,
+            "Pending": false
+          },
+          "JournalCount": 0,
+          "JournalTail": 0,
+          "Retired": false,
+          "Purging": false,
+          "Kind": "",
+          "SignalInputs": 0,
+          "SignalBindings": 0,
+          "SignalConsumed": 0,
+          "SignalRepair": 0,
+          "Checkpoint": null
+        },
+        "handle": {
+          "type": "purge-scale",
+          "id": "old-00666",
+          "inv_seq": 998
+        },
+        "source": {
+          "Subject": "wf.inv.purge-scale.old-00666",
+          "Sequence": 998,
+          "Header": {
+            "Nats-Expected-Last-Subject-Sequence": [
+              "0"
+            ],
+            "Wf-Graph-Start-Token": [
+              "51b58872eae346390d64d857742c3fb8"
+            ],
+            "Wf-Input-SHA256": [
+              "2c7a6e4a747968494bd531d09f858a144a078c1007c3944a55b387cca9f8fb23"
+            ]
+          },
+          "Data": "eyJzY2hlbWEiOiJqcy13Zi1jYW5vbmljYWwtc3RhcnQtcG9pbnRlci12MSIsInRva2VuIjoiNTFiNTg4NzJlYWUzNDYzOTBkNjRkODU3NzQyYzNmYjgifQ==",
+          "Time": "2026-10-11T08:35:45.025433973Z"
+        }
+      }
+    },
+    {
+      "Phase": "pending.ReadStart(old-00621)",
+      "Nanos": 8284343,
+      "Error": "",
+      "Value": {
+        "input": {
+          "kind": "old",
+          "index": 621
+        },
+        "state": {
+          "Start": {
+            "schema": "js-wf-canonical-start-v1",
+            "token": "78448f88c7ee56aaf66e937c6086703d",
+            "request": {
+              "type": "purge-scale",
+              "id": "old-00621"
+            },
+            "input_sha256": "10f64d36b0c98fa722fd36f7144f6c3d729aba1e1ca0becea6f5d986361ee3aa",
+            "input_size": 26
+          },
+          "Invocation": 0,
+          "Pending": true
+        }
+      }
+    },
+    {
+      "Phase": "pending.sourceBefore(old-00621)",
+      "Nanos": 161075,
+      "Error": "",
+      "Value": 0
+    },
+    {
+      "Phase": "pending.RecoverStartAttempt(old-00621)",
+      "Nanos": 25707467,
+      "Error": "",
+      "Value": {
+        "after": {
+          "State": {
+            "Start": {
+              "schema": "js-wf-canonical-start-v1",
+              "token": "78448f88c7ee56aaf66e937c6086703d",
+              "request": {
+                "type": "purge-scale",
+                "id": "old-00621"
+              },
+              "input_sha256": "10f64d36b0c98fa722fd36f7144f6c3d729aba1e1ca0becea6f5d986361ee3aa",
+              "input_size": 26
+            },
+            "Invocation": 999,
+            "Pending": false
+          },
+          "JournalCount": 0,
+          "JournalTail": 0,
+          "Retired": false,
+          "Purging": false,
+          "Kind": "",
+          "SignalInputs": 0,
+          "SignalBindings": 0,
+          "SignalConsumed": 0,
+          "SignalRepair": 0,
+          "Checkpoint": null
+        },
+        "handle": {
+          "type": "purge-scale",
+          "id": "old-00621",
+          "inv_seq": 999
+        },
+        "source": {
+          "Subject": "wf.inv.purge-scale.old-00621",
+          "Sequence": 999,
+          "Header": {
+            "Nats-Expected-Last-Subject-Sequence": [
+              "0"
+            ],
+            "Wf-Graph-Start-Token": [
+              "78448f88c7ee56aaf66e937c6086703d"
+            ],
+            "Wf-Input-SHA256": [
+              "10f64d36b0c98fa722fd36f7144f6c3d729aba1e1ca0becea6f5d986361ee3aa"
+            ]
+          },
+          "Data": "eyJzY2hlbWEiOiJqcy13Zi1jYW5vbmljYWwtc3RhcnQtcG9pbnRlci12MSIsInRva2VuIjoiNzg0NDhmODhjN2VlNTZhYWY2NmU5MzdjNjA4NjcwM2QifQ==",
+          "Time": "2026-10-11T08:35:45.062721604Z"
+        }
+      }
+    },
+    {
+      "Phase": "pending.ReadStart(old-00634)",
+      "Nanos": 6797753,
+      "Error": "",
+      "Value": {
+        "input": {
+          "kind": "old",
+          "index": 634
+        },
+        "state": {
+          "Start": {
+            "schema": "js-wf-canonical-start-v1",
+            "token": "92c7ce367e395473e3ae195f82e2eb01",
+            "request": {
+              "type": "purge-scale",
+              "id": "old-00634"
+            },
+            "input_sha256": "d46f8014e21133c734ba1acd3cda37b20e17f467c5db7c7853292cc4368812c6",
+            "input_size": 26
+          },
+          "Invocation": 0,
+          "Pending": true
+        }
+      }
+    },
+    {
+      "Phase": "pending.sourceBefore(old-00634)",
+      "Nanos": 224061,
+      "Error": "",
+      "Value": 0
+    },
+    {
+      "Phase": "pending.RecoverStartAttempt(old-00634)",
+      "Nanos": 21740558,
+      "Error": "",
+      "Value": {
+        "after": {
+          "State": {
+            "Start": {
+              "schema": "js-wf-canonical-start-v1",
+              "token": "92c7ce367e395473e3ae195f82e2eb01",
+              "request": {
+                "type": "purge-scale",
+                "id": "old-00634"
+              },
+              "input_sha256": "d46f8014e21133c734ba1acd3cda37b20e17f467c5db7c7853292cc4368812c6",
+              "input_size": 26
+            },
+            "Invocation": 1000,
+            "Pending": false
+          },
+          "JournalCount": 0,
+          "JournalTail": 0,
+          "Retired": false,
+          "Purging": false,
+          "Kind": "",
+          "SignalInputs": 0,
+          "SignalBindings": 0,
+          "SignalConsumed": 0,
+          "SignalRepair": 0,
+          "Checkpoint": null
+        },
+        "handle": {
+          "type": "purge-scale",
+          "id": "old-00634",
+          "inv_seq": 1000
+        },
+        "source": {
+          "Subject": "wf.inv.purge-scale.old-00634",
+          "Sequence": 1000,
+          "Header": {
+            "Nats-Expected-Last-Subject-Sequence": [
+              "0"
+            ],
+            "Wf-Graph-Start-Token": [
+              "92c7ce367e395473e3ae195f82e2eb01"
+            ],
+            "Wf-Input-SHA256": [
+              "d46f8014e21133c734ba1acd3cda37b20e17f467c5db7c7853292cc4368812c6"
+            ]
+          },
+          "Data": "eyJzY2hlbWEiOiJqcy13Zi1jYW5vbmljYWwtc3RhcnQtcG9pbnRlci12MSIsInRva2VuIjoiOTJjN2NlMzY3ZTM5NTQ3M2UzYWUxOTVmODJlMmViMDEifQ==",
+          "Time": "2026-10-11T08:35:45.092464786Z"
+        }
+      }
+    },
+    {
+      "Phase": "pending.ReadStart(old-00667)",
+      "Nanos": 5864635,
+      "Error": "",
+      "Value": {
+        "input": {
+          "kind": "old",
+          "index": 667
+        },
+        "state": {
+          "Start": {
+            "schema": "js-wf-canonical-start-v1",
+            "token": "44828fa81427c6d68ae4cd1f77a68985",
+            "request": {
+              "type": "purge-scale",
+              "id": "old-00667"
+            },
+            "input_sha256": "7b417d9c83c9993bcdf1b1ec4cee0352ec63aca18406dff92ec6c8e07f65ef4d",
+            "input_size": 26
+          },
+          "Invocation": 0,
+          "Pending": true
+        }
+      }
+    },
+    {
+      "Phase": "pending.sourceBefore(old-00667)",
+      "Nanos": 144379,
+      "Error": "",
+      "Value": 0
+    },
+    {
+      "Phase": "pending.RecoverStartAttempt(old-00667)",
+      "Nanos": 24342463,
+      "Error": "",
+      "Value": {
+        "after": {
+          "State": {
+            "Start": {
+              "schema": "js-wf-canonical-start-v1",
+              "token": "44828fa81427c6d68ae4cd1f77a68985",
+              "request": {
+                "type": "purge-scale",
+                "id": "old-00667"
+              },
+              "input_sha256": "7b417d9c83c9993bcdf1b1ec4cee0352ec63aca18406dff92ec6c8e07f65ef4d",
+              "input_size": 26
+            },
+            "Invocation": 1001,
+            "Pending": false
+          },
+          "JournalCount": 0,
+          "JournalTail": 0,
+          "Retired": false,
+          "Purging": false,
+          "Kind": "",
+          "SignalInputs": 0,
+          "SignalBindings": 0,
+          "SignalConsumed": 0,
+          "SignalRepair": 0,
+          "Checkpoint": null
+        },
+        "handle": {
+          "type": "purge-scale",
+          "id": "old-00667",
+          "inv_seq": 1001
+        },
+        "source": {
+          "Subject": "wf.inv.purge-scale.old-00667",
+          "Sequence": 1001,
+          "Header": {
+            "Nats-Expected-Last-Subject-Sequence": [
+              "0"
+            ],
+            "Wf-Graph-Start-Token": [
+              "44828fa81427c6d68ae4cd1f77a68985"
+            ],
+            "Wf-Input-SHA256": [
+              "7b417d9c83c9993bcdf1b1ec4cee0352ec63aca18406dff92ec6c8e07f65ef4d"
+            ]
+          },
+          "Data": "eyJzY2hlbWEiOiJqcy13Zi1jYW5vbmljYWwtc3RhcnQtcG9pbnRlci12MSIsInRva2VuIjoiNDQ4MjhmYTgxNDI3YzZkNjhhZTRjZDFmNzdhNjg5ODUifQ==",
+          "Time": "2026-10-11T08:35:45.120935274Z"
+        }
+      }
+    },
+    {
+      "Phase": "pending.ReadStart(old-00627)",
+      "Nanos": 6957406,
+      "Error": "",
+      "Value": {
+        "input": {
+          "kind": "old",
+          "index": 627
+        },
+        "state": {
+          "Start": {
+            "schema": "js-wf-canonical-start-v1",
+            "token": "e0a09ac4044b68bc19fe8918dbafd122",
+            "request": {
+              "type": "purge-scale",
+              "id": "old-00627"
+            },
+            "input_sha256": "afc52cbce5af01138796619831e53f112d7e1e75438e2c4d0e2c5693b63ce060",
+            "input_size": 26
+          },
+          "Invocation": 0,
+          "Pending": true
+        }
+      }
+    },
+    {
+      "Phase": "pending.sourceBefore(old-00627)",
+      "Nanos": 107524,
+      "Error": "",
+      "Value": 0
+    },
+    {
+      "Phase": "pending.RecoverStartAttempt(old-00627)",
+      "Nanos": 25032522,
+      "Error": "",
+      "Value": {
+        "after": {
+          "State": {
+            "Start": {
+              "schema": "js-wf-canonical-start-v1",
+              "token": "e0a09ac4044b68bc19fe8918dbafd122",
+              "request": {
+                "type": "purge-scale",
+                "id": "old-00627"
+              },
+              "input_sha256": "afc52cbce5af01138796619831e53f112d7e1e75438e2c4d0e2c5693b63ce060",
+              "input_size": 26
+            },
+            "Invocation": 1002,
+            "Pending": false
+          },
+          "JournalCount": 0,
+          "JournalTail": 0,
+          "Retired": false,
+          "Purging": false,
+          "Kind": "",
+          "SignalInputs": 0,
+          "SignalBindings": 0,
+          "SignalConsumed": 0,
+          "SignalRepair": 0,
+          "Checkpoint": null
+        },
+        "handle": {
+          "type": "purge-scale",
+          "id": "old-00627",
+          "inv_seq": 1002
+        },
+        "source": {
+          "Subject": "wf.inv.purge-scale.old-00627",
+          "Sequence": 1002,
+          "Header": {
+            "Nats-Expected-Last-Subject-Sequence": [
+              "0"
+            ],
+            "Wf-Graph-Start-Token": [
+              "e0a09ac4044b68bc19fe8918dbafd122"
+            ],
+            "Wf-Input-SHA256": [
+              "afc52cbce5af01138796619831e53f112d7e1e75438e2c4d0e2c5693b63ce060"
+            ]
+          },
+          "Data": "eyJzY2hlbWEiOiJqcy13Zi1jYW5vbmljYWwtc3RhcnQtcG9pbnRlci12MSIsInRva2VuIjoiZTBhMDlhYzQwNDRiNjhiYzE5ZmU4OTE4ZGJhZmQxMjIifQ==",
+          "Time": "2026-10-11T08:35:45.15377251Z"
+        }
+      }
+    },
+    {
+      "Phase": "pending.ReadStart(old-00674)",
+      "Nanos": 5977537,
+      "Error": "",
+      "Value": {
+        "input": {
+          "kind": "old",
+          "index": 674
+        },
+        "state": {
+          "Start": {
+            "schema": "js-wf-canonical-start-v1",
+            "token": "dfd417f5b61b2b0578ed506d271fae65",
+            "request": {
+              "type": "purge-scale",
+              "id": "old-00674"
+            },
+            "input_sha256": "ba39b279a3122f6174ecd52f7b63bb2c20bd6183ce510f42957fe2e1b3e5537a",
+            "input_size": 26
+          },
+          "Invocation": 0,
+          "Pending": true
+        }
+      }
+    },
+    {
+      "Phase": "pending.sourceBefore(old-00674)",
+      "Nanos": 115996,
+      "Error": "",
+      "Value": 0
+    },
+    {
+      "Phase": "pending.RecoverStartAttempt(old-00674)",
+      "Nanos": 28242502,
+      "Error": "",
+      "Value": {
+        "after": {
+          "State": {
+            "Start": {
+              "schema": "js-wf-canonical-start-v1",
+              "token": "dfd417f5b61b2b0578ed506d271fae65",
+              "request": {
+                "type": "purge-scale",
+                "id": "old-00674"
+              },
+              "input_sha256": "ba39b279a3122f6174ecd52f7b63bb2c20bd6183ce510f42957fe2e1b3e5537a",
+              "input_size": 26
+            },
+            "Invocation": 1003,
+            "Pending": false
+          },
+          "JournalCount": 0,
+          "JournalTail": 0,
+          "Retired": false,
+          "Purging": false,
+          "Kind": "",
+          "SignalInputs": 0,
+          "SignalBindings": 0,
+          "SignalConsumed": 0,
+          "SignalRepair": 0,
+          "Checkpoint": null
+        },
+        "handle": {
+          "type": "purge-scale",
+          "id": "old-00674",
+          "inv_seq": 1003
+        },
+        "source": {
+          "Subject": "wf.inv.purge-scale.old-00674",
+          "Sequence": 1003,
+          "Header": {
+            "Nats-Expected-Last-Subject-Sequence": [
+              "0"
+            ],
+            "Wf-Graph-Start-Token": [
+              "dfd417f5b61b2b0578ed506d271fae65"
+            ],
+            "Wf-Input-SHA256": [
+              "ba39b279a3122f6174ecd52f7b63bb2c20bd6183ce510f42957fe2e1b3e5537a"
+            ]
+          },
+          "Data": "eyJzY2hlbWEiOiJqcy13Zi1jYW5vbmljYWwtc3RhcnQtcG9pbnRlci12MSIsInRva2VuIjoiZGZkNDE3ZjViNjFiMmIwNTc4ZWQ1MDZkMjcxZmFlNjUifQ==",
+          "Time": "2026-10-11T08:35:45.183407748Z"
+        }
+      }
+    },
+    {
+      "Phase": "pending.ReadStart(old-00614)",
+      "Nanos": 12030447,
+      "Error": "",
+      "Value": {
+        "input": {
+          "kind": "old",
+          "index": 614
+        },
+        "state": {
+          "Start": {
+            "schema": "js-wf-canonical-start-v1",
+            "token": "177ff95868698b01aa18e7c097363397",
+            "request": {
+              "type": "purge-scale",
+              "id": "old-00614"
+            },
+            "input_sha256": "9b8abb7671e4cfcd22759d4ff97e6638995f92e86f647f0eabd8e7400ec2bea0",
+            "input_size": 26
+          },
+          "Invocation": 0,
+          "Pending": true
+        }
+      }
+    },
+    {
+      "Phase": "pending.sourceBefore(old-00614)",
+      "Nanos": 973259,
+      "Error": "",
+      "Value": 707
+    },
+    {
+      "Phase": "pending.RecoverStartAttempt(old-00614)",
+      "Nanos": 33633677,
+      "Error": "",
+      "Value": {
+        "after": {
+          "State": {
+            "Start": {
+              "schema": "js-wf-canonical-start-v1",
+              "token": "177ff95868698b01aa18e7c097363397",
+              "request": {
+                "type": "purge-scale",
+                "id": "old-00614"
+              },
+              "input_sha256": "9b8abb7671e4cfcd22759d4ff97e6638995f92e86f647f0eabd8e7400ec2bea0",
+              "input_size": 26
+            },
+            "Invocation": 707,
+            "Pending": false
+          },
+          "JournalCount": 0,
+          "JournalTail": 0,
+          "Retired": false,
+          "Purging": false,
+          "Kind": "",
+          "SignalInputs": 0,
+          "SignalBindings": 0,
+          "SignalConsumed": 0,
+          "SignalRepair": 0,
+          "Checkpoint": null
+        },
+        "handle": {
+          "type": "purge-scale",
+          "id": "old-00614",
+          "inv_seq": 707
+        },
+        "source": {
+          "Subject": "wf.inv.purge-scale.old-00614",
+          "Sequence": 707,
+          "Header": {
+            "Nats-Expected-Last-Subject-Sequence": [
+              "0"
+            ],
+            "Wf-Graph-Start-Token": [
+              "177ff95868698b01aa18e7c097363397"
+            ],
+            "Wf-Input-SHA256": [
+              "9b8abb7671e4cfcd22759d4ff97e6638995f92e86f647f0eabd8e7400ec2bea0"
+            ]
+          },
+          "Data": "eyJzY2hlbWEiOiJqcy13Zi1jYW5vbmljYWwtc3RhcnQtcG9pbnRlci12MSIsInRva2VuIjoiMTc3ZmY5NTg2ODY5OGIwMWFhMThlN2MwOTczNjMzOTcifQ==",
+          "Time": "2026-10-11T08:07:15.354839536Z"
+        }
+      }
+    },
+    {
+      "Phase": "pending.ReadStart(old-00649)",
+      "Nanos": 10402723,
+      "Error": "",
+      "Value": {
+        "input": {
+          "kind": "old",
+          "index": 649
+        },
+        "state": {
+          "Start": {
+            "schema": "js-wf-canonical-start-v1",
+            "token": "d40b13ac0ffae72ad682069e1cbba541",
+            "request": {
+              "type": "purge-scale",
+              "id": "old-00649"
+            },
+            "input_sha256": "6984cca5427534f53e23a88693b2ee6f5f2d18805bbbd30fdcb619c0e65ae0c2",
+            "input_size": 26
+          },
+          "Invocation": 0,
+          "Pending": true
+        }
+      }
+    },
+    {
+      "Phase": "pending.sourceBefore(old-00649)",
+      "Nanos": 179203,
+      "Error": "",
+      "Value": 0
+    },
+    {
+      "Phase": "pending.RecoverStartAttempt(old-00649)",
+      "Nanos": 32973462,
+      "Error": "",
+      "Value": {
+        "after": {
+          "State": {
+            "Start": {
+              "schema": "js-wf-canonical-start-v1",
+              "token": "d40b13ac0ffae72ad682069e1cbba541",
+              "request": {
+                "type": "purge-scale",
+                "id": "old-00649"
+              },
+              "input_sha256": "6984cca5427534f53e23a88693b2ee6f5f2d18805bbbd30fdcb619c0e65ae0c2",
+              "input_size": 26
+            },
+            "Invocation": 1004,
+            "Pending": false
+          },
+          "JournalCount": 0,
+          "JournalTail": 0,
+          "Retired": false,
+          "Purging": false,
+          "Kind": "",
+          "SignalInputs": 0,
+          "SignalBindings": 0,
+          "SignalConsumed": 0,
+          "SignalRepair": 0,
+          "Checkpoint": null
+        },
+        "handle": {
+          "type": "purge-scale",
+          "id": "old-00649",
+          "inv_seq": 1004
+        },
+        "source": {
+          "Subject": "wf.inv.purge-scale.old-00649",
+          "Sequence": 1004,
+          "Header": {
+            "Nats-Expected-Last-Subject-Sequence": [
+              "0"
+            ],
+            "Wf-Graph-Start-Token": [
+              "d40b13ac0ffae72ad682069e1cbba541"
+            ],
+            "Wf-Input-SHA256": [
+              "6984cca5427534f53e23a88693b2ee6f5f2d18805bbbd30fdcb619c0e65ae0c2"
+            ]
+          },
+          "Data": "eyJzY2hlbWEiOiJqcy13Zi1jYW5vbmljYWwtc3RhcnQtcG9pbnRlci12MSIsInRva2VuIjoiZDQwYjEzYWMwZmZhZTcyYWQ2ODIwNjllMWNiYmE1NDEifQ==",
+          "Time": "2026-10-11T08:35:45.272440386Z"
+        }
+      }
+    },
+    {
+      "Phase": "pending.ReadStart(old-00619)",
+      "Nanos": 9998419,
+      "Error": "",
+      "Value": {
+        "input": {
+          "kind": "old",
+          "index": 619
+        },
+        "state": {
+          "Start": {
+            "schema": "js-wf-canonical-start-v1",
+            "token": "fba278e9719ace11877b1c6ae2837986",
+            "request": {
+              "type": "purge-scale",
+              "id": "old-00619"
+            },
+            "input_sha256": "cb0d385a8443b330796ffc7f7d432225ad8e8468cf8934ebca9a1e48a0fe8135",
+            "input_size": 26
+          },
+          "Invocation": 0,
+          "Pending": true
+        }
+      }
+    },
+    {
+      "Phase": "pending.sourceBefore(old-00619)",
+      "Nanos": 236620,
+      "Error": "",
+      "Value": 724
+    },
+    {
+      "Phase": "pending.RecoverStartAttempt(old-00619)",
+      "Nanos": 37940853,
+      "Error": "",
+      "Value": {
+        "after": {
+          "State": {
+            "Start": {
+              "schema": "js-wf-canonical-start-v1",
+              "token": "fba278e9719ace11877b1c6ae2837986",
+              "request": {
+                "type": "purge-scale",
+                "id": "old-00619"
+              },
+              "input_sha256": "cb0d385a8443b330796ffc7f7d432225ad8e8468cf8934ebca9a1e48a0fe8135",
+              "input_size": 26
+            },
+            "Invocation": 724,
+            "Pending": false
+          },
+          "JournalCount": 0,
+          "JournalTail": 0,
+          "Retired": false,
+          "Purging": false,
+          "Kind": "",
+          "SignalInputs": 0,
+          "SignalBindings": 0,
+          "SignalConsumed": 0,
+          "SignalRepair": 0,
+          "Checkpoint": null
+        },
+        "handle": {
+          "type": "purge-scale",
+          "id": "old-00619",
+          "inv_seq": 724
+        },
+        "source": {
+          "Subject": "wf.inv.purge-scale.old-00619",
+          "Sequence": 724,
+          "Header": {
+            "Nats-Expected-Last-Subject-Sequence": [
+              "0"
+            ],
+            "Wf-Graph-Start-Token": [
+              "fba278e9719ace11877b1c6ae2837986"
+            ],
+            "Wf-Input-SHA256": [
+              "cb0d385a8443b330796ffc7f7d432225ad8e8468cf8934ebca9a1e48a0fe8135"
+            ]
+          },
+          "Data": "eyJzY2hlbWEiOiJqcy13Zi1jYW5vbmljYWwtc3RhcnQtcG9pbnRlci12MSIsInRva2VuIjoiZmJhMjc4ZTk3MTlhY2UxMTg3N2IxYzZhZTI4Mzc5ODYifQ==",
+          "Time": "2026-10-11T08:07:16.883852932Z"
+        }
+      }
+    },
+    {
+      "Phase": "pending.ReadStart(old-00668)",
+      "Nanos": 9626824,
+      "Error": "",
+      "Value": {
+        "input": {
+          "kind": "old",
+          "index": 668
+        },
+        "state": {
+          "Start": {
+            "schema": "js-wf-canonical-start-v1",
+            "token": "aabe7402897470cd131ac178eb5bfd05",
+            "request": {
+              "type": "purge-scale",
+              "id": "old-00668"
+            },
+            "input_sha256": "b5708bcf58e48ab663dee6a8f75ef71642c3f428a50b7d72e1d9de2e558dcc87",
+            "input_size": 26
+          },
+          "Invocation": 0,
+          "Pending": true
+        }
+      }
+    },
+    {
+      "Phase": "pending.sourceBefore(old-00668)",
+      "Nanos": 143828,
+      "Error": "",
+      "Value": 0
+    },
+    {
+      "Phase": "pending.RecoverStartAttempt(old-00668)",
+      "Nanos": 23412348,
+      "Error": "",
+      "Value": {
+        "after": {
+          "State": {
+            "Start": {
+              "schema": "js-wf-canonical-start-v1",
+              "token": "aabe7402897470cd131ac178eb5bfd05",
+              "request": {
+                "type": "purge-scale",
+                "id": "old-00668"
+              },
+              "input_sha256": "b5708bcf58e48ab663dee6a8f75ef71642c3f428a50b7d72e1d9de2e558dcc87",
+              "input_size": 26
+            },
+            "Invocation": 1005,
+            "Pending": false
+          },
+          "JournalCount": 0,
+          "JournalTail": 0,
+          "Retired": false,
+          "Purging": false,
+          "Kind": "",
+          "SignalInputs": 0,
+          "SignalBindings": 0,
+          "SignalConsumed": 0,
+          "SignalRepair": 0,
+          "Checkpoint": null
+        },
+        "handle": {
+          "type": "purge-scale",
+          "id": "old-00668",
+          "inv_seq": 1005
+        },
+        "source": {
+          "Subject": "wf.inv.purge-scale.old-00668",
+          "Sequence": 1005,
+          "Header": {
+            "Nats-Expected-Last-Subject-Sequence": [
+              "0"
+            ],
+            "Wf-Graph-Start-Token": [
+              "aabe7402897470cd131ac178eb5bfd05"
+            ],
+            "Wf-Input-SHA256": [
+              "b5708bcf58e48ab663dee6a8f75ef71642c3f428a50b7d72e1d9de2e558dcc87"
+            ]
+          },
+          "Data": "eyJzY2hlbWEiOiJqcy13Zi1jYW5vbmljYWwtc3RhcnQtcG9pbnRlci12MSIsInRva2VuIjoiYWFiZTc0MDI4OTc0NzBjZDEzMWFjMTc4ZWI1YmZkMDUifQ==",
+          "Time": "2026-10-11T08:35:45.359658345Z"
+        }
+      }
+    },
+    {
+      "Phase": "pending.ReadStart(old-00654)",
+      "Nanos": 7600814,
+      "Error": "",
+      "Value": {
+        "input": {
+          "kind": "old",
+          "index": 654
+        },
+        "state": {
+          "Start": {
+            "schema": "js-wf-canonical-start-v1",
+            "token": "60ef4eb73ce1b10911c3bc9e420138bb",
+            "request": {
+              "type": "purge-scale",
+              "id": "old-00654"
+            },
+            "input_sha256": "5ec7b9024f0f1fed1f8bdbf98268a6be9021f5a82dedcfd6ced2a981c0dd83b3",
+            "input_size": 26
+          },
+          "Invocation": 0,
+          "Pending": true
+        }
+      }
+    },
+    {
+      "Phase": "pending.sourceBefore(old-00654)",
+      "Nanos": 266746,
+      "Error": "",
+      "Value": 0
+    },
+    {
+      "Phase": "pending.RecoverStartAttempt(old-00654)",
+      "Nanos": 27405148,
+      "Error": "",
+      "Value": {
+        "after": {
+          "State": {
+            "Start": {
+              "schema": "js-wf-canonical-start-v1",
+              "token": "60ef4eb73ce1b10911c3bc9e420138bb",
+              "request": {
+                "type": "purge-scale",
+                "id": "old-00654"
+              },
+              "input_sha256": "5ec7b9024f0f1fed1f8bdbf98268a6be9021f5a82dedcfd6ced2a981c0dd83b3",
+              "input_size": 26
+            },
+            "Invocation": 1006,
+            "Pending": false
+          },
+          "JournalCount": 0,
+          "JournalTail": 0,
+          "Retired": false,
+          "Purging": false,
+          "Kind": "",
+          "SignalInputs": 0,
+          "SignalBindings": 0,
+          "SignalConsumed": 0,
+          "SignalRepair": 0,
+          "Checkpoint": null
+        },
+        "handle": {
+          "type": "purge-scale",
+          "id": "old-00654",
+          "inv_seq": 1006
+        },
+        "source": {
+          "Subject": "wf.inv.purge-scale.old-00654",
+          "Sequence": 1006,
+          "Header": {
+            "Nats-Expected-Last-Subject-Sequence": [
+              "0"
+            ],
+            "Wf-Graph-Start-Token": [
+              "60ef4eb73ce1b10911c3bc9e420138bb"
+            ],
+            "Wf-Input-SHA256": [
+              "5ec7b9024f0f1fed1f8bdbf98268a6be9021f5a82dedcfd6ced2a981c0dd83b3"
+            ]
+          },
+          "Data": "eyJzY2hlbWEiOiJqcy13Zi1jYW5vbmljYWwtc3RhcnQtcG9pbnRlci12MSIsInRva2VuIjoiNjBlZjRlYjczY2UxYjEwOTExYzNiYzllNDIwMTM4YmIifQ==",
+          "Time": "2026-10-11T08:35:45.391471094Z"
+        }
+      }
+    },
+    {
+      "Phase": "pending.ReadStart(old-00632)",
+      "Nanos": 12201928,
+      "Error": "",
+      "Value": {
+        "input": {
+          "kind": "old",
+          "index": 632
+        },
+        "state": {
+          "Start": {
+            "schema": "js-wf-canonical-start-v1",
+            "token": "51303aaa12772114cdc0e39f562b7143",
+            "request": {
+              "type": "purge-scale",
+              "id": "old-00632"
+            },
+            "input_sha256": "ee7c713354e7ee8213c2fd30ea7ce817b025228eff7a5b588cf3a1de3aa3e699",
+            "input_size": 26
+          },
+          "Invocation": 0,
+          "Pending": true
+        }
+      }
+    },
+    {
+      "Phase": "pending.sourceBefore(old-00632)",
+      "Nanos": 175016,
+      "Error": "",
+      "Value": 0
+    },
+    {
+      "Phase": "pending.RecoverStartAttempt(old-00632)",
+      "Nanos": 33426461,
+      "Error": "",
+      "Value": {
+        "after": {
+          "State": {
+            "Start": {
+              "schema": "js-wf-canonical-start-v1",
+              "token": "51303aaa12772114cdc0e39f562b7143",
+              "request": {
+                "type": "purge-scale",
+                "id": "old-00632"
+              },
+              "input_sha256": "ee7c713354e7ee8213c2fd30ea7ce817b025228eff7a5b588cf3a1de3aa3e699",
+              "input_size": 26
+            },
+            "Invocation": 1007,
+            "Pending": false
+          },
+          "JournalCount": 0,
+          "JournalTail": 0,
+          "Retired": false,
+          "Purging": false,
+          "Kind": "",
+          "SignalInputs": 0,
+          "SignalBindings": 0,
+          "SignalConsumed": 0,
+          "SignalRepair": 0,
+          "Checkpoint": null
+        },
+        "handle": {
+          "type": "purge-scale",
+          "id": "old-00632",
+          "inv_seq": 1007
+        },
+        "source": {
+          "Subject": "wf.inv.purge-scale.old-00632",
+          "Sequence": 1007,
+          "Header": {
+            "Nats-Expected-Last-Subject-Sequence": [
+              "0"
+            ],
+            "Wf-Graph-Start-Token": [
+              "51303aaa12772114cdc0e39f562b7143"
+            ],
+            "Wf-Input-SHA256": [
+              "ee7c713354e7ee8213c2fd30ea7ce817b025228eff7a5b588cf3a1de3aa3e699"
+            ]
+          },
+          "Data": "eyJzY2hlbWEiOiJqcy13Zi1jYW5vbmljYWwtc3RhcnQtcG9pbnRlci12MSIsInRva2VuIjoiNTEzMDNhYWExMjc3MjExNGNkYzBlMzlmNTYyYjcxNDMifQ==",
+          "Time": "2026-10-11T08:35:45.436899709Z"
+        }
+      }
+    },
+    {
+      "Phase": "pending.ReadStart(old-00651)",
+      "Nanos": 13625662,
+      "Error": "",
+      "Value": {
+        "input": {
+          "kind": "old",
+          "index": 651
+        },
+        "state": {
+          "Start": {
+            "schema": "js-wf-canonical-start-v1",
+            "token": "48c2e4972fb71dea5a023393b08cfe05",
+            "request": {
+              "type": "purge-scale",
+              "id": "old-00651"
+            },
+            "input_sha256": "ae6cf2b03319ac02b56dfc7e76b3f4e7440dbef0f208d8e20c1f1843b5d3ddcb",
+            "input_size": 26
+          },
+          "Invocation": 0,
+          "Pending": true
+        }
+      }
+    },
+    {
+      "Phase": "pending.sourceBefore(old-00651)",
+      "Nanos": 134895,
+      "Error": "",
+      "Value": 0
+    },
+    {
+      "Phase": "pending.RecoverStartAttempt(old-00651)",
+      "Nanos": 35801562,
+      "Error": "",
+      "Value": {
+        "after": {
+          "State": {
+            "Start": {
+              "schema": "js-wf-canonical-start-v1",
+              "token": "48c2e4972fb71dea5a023393b08cfe05",
+              "request": {
+                "type": "purge-scale",
+                "id": "old-00651"
+              },
+              "input_sha256": "ae6cf2b03319ac02b56dfc7e76b3f4e7440dbef0f208d8e20c1f1843b5d3ddcb",
+              "input_size": 26
+            },
+            "Invocation": 1008,
+            "Pending": false
+          },
+          "JournalCount": 0,
+          "JournalTail": 0,
+          "Retired": false,
+          "Purging": false,
+          "Kind": "",
+          "SignalInputs": 0,
+          "SignalBindings": 0,
+          "SignalConsumed": 0,
+          "SignalRepair": 0,
+          "Checkpoint": null
+        },
+        "handle": {
+          "type": "purge-scale",
+          "id": "old-00651",
+          "inv_seq": 1008
+        },
+        "source": {
+          "Subject": "wf.inv.purge-scale.old-00651",
+          "Sequence": 1008,
+          "Header": {
+            "Nats-Expected-Last-Subject-Sequence": [
+              "0"
+            ],
+            "Wf-Graph-Start-Token": [
+              "48c2e4972fb71dea5a023393b08cfe05"
+            ],
+            "Wf-Input-SHA256": [
+              "ae6cf2b03319ac02b56dfc7e76b3f4e7440dbef0f208d8e20c1f1843b5d3ddcb"
+            ]
+          },
+          "Data": "eyJzY2hlbWEiOiJqcy13Zi1jYW5vbmljYWwtc3RhcnQtcG9pbnRlci12MSIsInRva2VuIjoiNDhjMmU0OTcyZmI3MWRlYTVhMDIzMzkzYjA4Y2ZlMDUifQ==",
+          "Time": "2026-10-11T08:35:45.486236706Z"
+        }
+      }
+    },
+    {
+      "Phase": "pending.ReadStart(old-00620)",
+      "Nanos": 9868751,
+      "Error": "",
+      "Value": {
+        "input": {
+          "kind": "old",
+          "index": 620
+        },
+        "state": {
+          "Start": {
+            "schema": "js-wf-canonical-start-v1",
+            "token": "99b17d5678e4b62444f7289577d56daf",
+            "request": {
+              "type": "purge-scale",
+              "id": "old-00620"
+            },
+            "input_sha256": "1a2763e5e8c6c7b2e79150719d04e8308b8869ccee729962e0f8f0657b5bd6a8",
+            "input_size": 26
+          },
+          "Invocation": 0,
+          "Pending": true
+        }
+      }
+    },
+    {
+      "Phase": "pending.sourceBefore(old-00620)",
+      "Nanos": 210110,
+      "Error": "",
+      "Value": 0
+    },
+    {
+      "Phase": "pending.RecoverStartAttempt(old-00620)",
+      "Nanos": 33208050,
+      "Error": "",
+      "Value": {
+        "after": {
+          "State": {
+            "Start": {
+              "schema": "js-wf-canonical-start-v1",
+              "token": "99b17d5678e4b62444f7289577d56daf",
+              "request": {
+                "type": "purge-scale",
+                "id": "old-00620"
+              },
+              "input_sha256": "1a2763e5e8c6c7b2e79150719d04e8308b8869ccee729962e0f8f0657b5bd6a8",
+              "input_size": 26
+            },
+            "Invocation": 1009,
+            "Pending": false
+          },
+          "JournalCount": 0,
+          "JournalTail": 0,
+          "Retired": false,
+          "Purging": false,
+          "Kind": "",
+          "SignalInputs": 0,
+          "SignalBindings": 0,
+          "SignalConsumed": 0,
+          "SignalRepair": 0,
+          "Checkpoint": null
+        },
+        "handle": {
+          "type": "purge-scale",
+          "id": "old-00620",
+          "inv_seq": 1009
+        },
+        "source": {
+          "Subject": "wf.inv.purge-scale.old-00620",
+          "Sequence": 1009,
+          "Header": {
+            "Nats-Expected-Last-Subject-Sequence": [
+              "0"
+            ],
+            "Wf-Graph-Start-Token": [
+              "99b17d5678e4b62444f7289577d56daf"
+            ],
+            "Wf-Input-SHA256": [
+              "1a2763e5e8c6c7b2e79150719d04e8308b8869ccee729962e0f8f0657b5bd6a8"
+            ]
+          },
+          "Data": "eyJzY2hlbWEiOiJqcy13Zi1jYW5vbmljYWwtc3RhcnQtcG9pbnRlci12MSIsInRva2VuIjoiOTliMTdkNTY3OGU0YjYyNDQ0ZjcyODk1NzdkNTZkYWYifQ==",
+          "Time": "2026-10-11T08:35:45.530115416Z"
+        }
+      }
+    },
+    {
+      "Phase": "pending.ReadStart(old-00633)",
+      "Nanos": 14407040,
+      "Error": "",
+      "Value": {
+        "input": {
+          "kind": "old",
+          "index": 633
+        },
+        "state": {
+          "Start": {
+            "schema": "js-wf-canonical-start-v1",
+            "token": "0d3a9898390e9e3b550764a702df33ad",
+            "request": {
+              "type": "purge-scale",
+              "id": "old-00633"
+            },
+            "input_sha256": "ba421cbf0a907aeb4563c7c7b8929b48b79bf97283c6df348734311643bc6e27",
+            "input_size": 26
+          },
+          "Invocation": 0,
+          "Pending": true
+        }
+      }
+    },
+    {
+      "Phase": "pending.sourceBefore(old-00633)",
+      "Nanos": 180304,
+      "Error": "",
+      "Value": 0
+    },
+    {
+      "Phase": "pending.RecoverStartAttempt(old-00633)",
+      "Nanos": 39145766,
+      "Error": "",
+      "Value": {
+        "after": {
+          "State": {
+            "Start": {
+              "schema": "js-wf-canonical-start-v1",
+              "token": "0d3a9898390e9e3b550764a702df33ad",
+              "request": {
+                "type": "purge-scale",
+                "id": "old-00633"
+              },
+              "input_sha256": "ba421cbf0a907aeb4563c7c7b8929b48b79bf97283c6df348734311643bc6e27",
+              "input_size": 26
+            },
+            "Invocation": 1010,
+            "Pending": false
+          },
+          "JournalCount": 0,
+          "JournalTail": 0,
+          "Retired": false,
+          "Purging": false,
+          "Kind": "",
+          "SignalInputs": 0,
+          "SignalBindings": 0,
+          "SignalConsumed": 0,
+          "SignalRepair": 0,
+          "Checkpoint": null
+        },
+        "handle": {
+          "type": "purge-scale",
+          "id": "old-00633",
+          "inv_seq": 1010
+        },
+        "source": {
+          "Subject": "wf.inv.purge-scale.old-00633",
+          "Sequence": 1010,
+          "Header": {
+            "Nats-Expected-Last-Subject-Sequence": [
+              "0"
+            ],
+            "Wf-Graph-Start-Token": [
+              "0d3a9898390e9e3b550764a702df33ad"
+            ],
+            "Wf-Input-SHA256": [
+              "ba421cbf0a907aeb4563c7c7b8929b48b79bf97283c6df348734311643bc6e27"
+            ]
+          },
+          "Data": "eyJzY2hlbWEiOiJqcy13Zi1jYW5vbmljYWwtc3RhcnQtcG9pbnRlci12MSIsInRva2VuIjoiMGQzYTk4OTgzOTBlOWUzYjU1MDc2NGE3MDJkZjMzYWQifQ==",
+          "Time": "2026-10-11T08:35:45.577520546Z"
+        }
+      }
+    },
+    {
+      "Phase": "pending.ReadStart(old-00676)",
+      "Nanos": 13122638,
+      "Error": "",
+      "Value": {
+        "input": {
+          "kind": "old",
+          "index": 676
+        },
+        "state": {
+          "Start": {
+            "schema": "js-wf-canonical-start-v1",
+            "token": "84a50d2b7681ba0e231c4a8cb5ab7ba8",
+            "request": {
+              "type": "purge-scale",
+              "id": "old-00676"
+            },
+            "input_sha256": "eb85be62eb73e3feb21543cd82c158e42e7eefbeb259e929c73af3a233e9abb5",
+            "input_size": 26
+          },
+          "Invocation": 0,
+          "Pending": true
+        }
+      }
+    },
+    {
+      "Phase": "pending.sourceBefore(old-00676)",
+      "Nanos": 233615,
+      "Error": "",
+      "Value": 0
+    },
+    {
+      "Phase": "pending.RecoverStartAttempt(old-00676)",
+      "Nanos": 28250273,
+      "Error": "",
+      "Value": {
+        "after": {
+          "State": {
+            "Start": {
+              "schema": "js-wf-canonical-start-v1",
+              "token": "84a50d2b7681ba0e231c4a8cb5ab7ba8",
+              "request": {
+                "type": "purge-scale",
+                "id": "old-00676"
+              },
+              "input_sha256": "eb85be62eb73e3feb21543cd82c158e42e7eefbeb259e929c73af3a233e9abb5",
+              "input_size": 26
+            },
+            "Invocation": 1011,
+            "Pending": false
+          },
+          "JournalCount": 0,
+          "JournalTail": 0,
+          "Retired": false,
+          "Purging": false,
+          "Kind": "",
+          "SignalInputs": 0,
+          "SignalBindings": 0,
+          "SignalConsumed": 0,
+          "SignalRepair": 0,
+          "Checkpoint": null
+        },
+        "handle": {
+          "type": "purge-scale",
+          "id": "old-00676",
+          "inv_seq": 1011
+        },
+        "source": {
+          "Subject": "wf.inv.purge-scale.old-00676",
+          "Sequence": 1011,
+          "Header": {
+            "Nats-Expected-Last-Subject-Sequence": [
+              "0"
+            ],
+            "Wf-Graph-Start-Token": [
+              "84a50d2b7681ba0e231c4a8cb5ab7ba8"
+            ],
+            "Wf-Input-SHA256": [
+              "eb85be62eb73e3feb21543cd82c158e42e7eefbeb259e929c73af3a233e9abb5"
+            ]
+          },
+          "Data": "eyJzY2hlbWEiOiJqcy13Zi1jYW5vbmljYWwtc3RhcnQtcG9pbnRlci12MSIsInRva2VuIjoiODRhNTBkMmI3NjgxYmEwZTIzMWM0YThjYjVhYjdiYTgifQ==",
+          "Time": "2026-10-11T08:35:45.628879137Z"
+        }
+      }
+    },
+    {
+      "Phase": "pending.ReadStart(old-00625)",
+      "Nanos": 7138461,
+      "Error": "",
+      "Value": {
+        "input": {
+          "kind": "old",
+          "index": 625
+        },
+        "state": {
+          "Start": {
+            "schema": "js-wf-canonical-start-v1",
+            "token": "238222c50363998e928a15ea9b23ec45",
+            "request": {
+              "type": "purge-scale",
+              "id": "old-00625"
+            },
+            "input_sha256": "c09341e0298188d939e754251063b01943256557d51baaa24cab93386a05e075",
+            "input_size": 26
+          },
+          "Invocation": 0,
+          "Pending": true
+        }
+      }
+    },
+    {
+      "Phase": "pending.sourceBefore(old-00625)",
+      "Nanos": 146813,
+      "Error": "",
+      "Value": 0
+    },
+    {
+      "Phase": "pending.RecoverStartAttempt(old-00625)",
+      "Nanos": 34607266,
+      "Error": "",
+      "Value": {
+        "after": {
+          "State": {
+            "Start": {
+              "schema": "js-wf-canonical-start-v1",
+              "token": "238222c50363998e928a15ea9b23ec45",
+              "request": {
+                "type": "purge-scale",
+                "id": "old-00625"
+              },
+              "input_sha256": "c09341e0298188d939e754251063b01943256557d51baaa24cab93386a05e075",
+              "input_size": 26
+            },
+            "Invocation": 1012,
+            "Pending": false
+          },
+          "JournalCount": 0,
+          "JournalTail": 0,
+          "Retired": false,
+          "Purging": false,
+          "Kind": "",
+          "SignalInputs": 0,
+          "SignalBindings": 0,
+          "SignalConsumed": 0,
+          "SignalRepair": 0,
+          "Checkpoint": null
+        },
+        "handle": {
+          "type": "purge-scale",
+          "id": "old-00625",
+          "inv_seq": 1012
+        },
+        "source": {
+          "Subject": "wf.inv.purge-scale.old-00625",
+          "Sequence": 1012,
+          "Header": {
+            "Nats-Expected-Last-Subject-Sequence": [
+              "0"
+            ],
+            "Wf-Graph-Start-Token": [
+              "238222c50363998e928a15ea9b23ec45"
+            ],
+            "Wf-Input-SHA256": [
+              "c09341e0298188d939e754251063b01943256557d51baaa24cab93386a05e075"
+            ]
+          },
+          "Data": "eyJzY2hlbWEiOiJqcy13Zi1jYW5vbmljYWwtc3RhcnQtcG9pbnRlci12MSIsInRva2VuIjoiMjM4MjIyYzUwMzYzOTk4ZTkyOGExNWVhOWIyM2VjNDUifQ==",
+          "Time": "2026-10-11T08:35:45.662637493Z"
+        }
+      }
+    },
+    {
+      "Phase": "pending.ReadStart(old-00623)",
+      "Nanos": 7565731,
+      "Error": "",
+      "Value": {
+        "input": {
+          "kind": "old",
+          "index": 623
+        },
+        "state": {
+          "Start": {
+            "schema": "js-wf-canonical-start-v1",
+            "token": "1f9653ff74514a3ac5e5cabd9b1035d5",
+            "request": {
+              "type": "purge-scale",
+              "id": "old-00623"
+            },
+            "input_sha256": "e5bb50d712fbfd981815b9b60d88fbbd68b802f9f9ec4b5bfa3f1054bf154cbf",
+            "input_size": 26
+          },
+          "Invocation": 0,
+          "Pending": true
+        }
+      }
+    },
+    {
+      "Phase": "pending.sourceBefore(old-00623)",
+      "Nanos": 146282,
+      "Error": "",
+      "Value": 0
+    },
+    {
+      "Phase": "pending.RecoverStartAttempt(old-00623)",
+      "Nanos": 34841743,
+      "Error": "",
+      "Value": {
+        "after": {
+          "State": {
+            "Start": {
+              "schema": "js-wf-canonical-start-v1",
+              "token": "1f9653ff74514a3ac5e5cabd9b1035d5",
+              "request": {
+                "type": "purge-scale",
+                "id": "old-00623"
+              },
+              "input_sha256": "e5bb50d712fbfd981815b9b60d88fbbd68b802f9f9ec4b5bfa3f1054bf154cbf",
+              "input_size": 26
+            },
+            "Invocation": 1013,
+            "Pending": false
+          },
+          "JournalCount": 0,
+          "JournalTail": 0,
+          "Retired": false,
+          "Purging": false,
+          "Kind": "",
+          "SignalInputs": 0,
+          "SignalBindings": 0,
+          "SignalConsumed": 0,
+          "SignalRepair": 0,
+          "Checkpoint": null
+        },
+        "handle": {
+          "type": "purge-scale",
+          "id": "old-00623",
+          "inv_seq": 1013
+        },
+        "source": {
+          "Subject": "wf.inv.purge-scale.old-00623",
+          "Sequence": 1013,
+          "Header": {
+            "Nats-Expected-Last-Subject-Sequence": [
+              "0"
+            ],
+            "Wf-Graph-Start-Token": [
+              "1f9653ff74514a3ac5e5cabd9b1035d5"
+            ],
+            "Wf-Input-SHA256": [
+              "e5bb50d712fbfd981815b9b60d88fbbd68b802f9f9ec4b5bfa3f1054bf154cbf"
+            ]
+          },
+          "Data": "eyJzY2hlbWEiOiJqcy13Zi1jYW5vbmljYWwtc3RhcnQtcG9pbnRlci12MSIsInRva2VuIjoiMWY5NjUzZmY3NDUxNGEzYWM1ZTVjYWJkOWIxMDM1ZDUifQ==",
+          "Time": "2026-10-11T08:35:45.708474208Z"
+        }
+      }
+    },
+    {
+      "Phase": "pending.ReadStart(old-00617)",
+      "Nanos": 6432397,
+      "Error": "",
+      "Value": {
+        "input": {
+          "kind": "old",
+          "index": 617
+        },
+        "state": {
+          "Start": {
+            "schema": "js-wf-canonical-start-v1",
+            "token": "d58b9091e1893e63dbb3a99daf23e3ed",
+            "request": {
+              "type": "purge-scale",
+              "id": "old-00617"
+            },
+            "input_sha256": "509acfaec6cd38167523de1b5e4db32c095720c9a8f1d5e1aea93e08b3ee4aad",
+            "input_size": 26
+          },
+          "Invocation": 0,
+          "Pending": true
+        }
+      }
+    },
+    {
+      "Phase": "pending.sourceBefore(old-00617)",
+      "Nanos": 177730,
+      "Error": "",
+      "Value": 711
+    },
+    {
+      "Phase": "pending.RecoverStartAttempt(old-00617)",
+      "Nanos": 28251275,
+      "Error": "",
+      "Value": {
+        "after": {
+          "State": {
+            "Start": {
+              "schema": "js-wf-canonical-start-v1",
+              "token": "d58b9091e1893e63dbb3a99daf23e3ed",
+              "request": {
+                "type": "purge-scale",
+                "id": "old-00617"
+              },
+              "input_sha256": "509acfaec6cd38167523de1b5e4db32c095720c9a8f1d5e1aea93e08b3ee4aad",
+              "input_size": 26
+            },
+            "Invocation": 711,
+            "Pending": false
+          },
+          "JournalCount": 0,
+          "JournalTail": 0,
+          "Retired": false,
+          "Purging": false,
+          "Kind": "",
+          "SignalInputs": 0,
+          "SignalBindings": 0,
+          "SignalConsumed": 0,
+          "SignalRepair": 0,
+          "Checkpoint": null
+        },
+        "handle": {
+          "type": "purge-scale",
+          "id": "old-00617",
+          "inv_seq": 711
+        },
+        "source": {
+          "Subject": "wf.inv.purge-scale.old-00617",
+          "Sequence": 711,
+          "Header": {
+            "Nats-Expected-Last-Subject-Sequence": [
+              "0"
+            ],
+            "Wf-Graph-Start-Token": [
+              "d58b9091e1893e63dbb3a99daf23e3ed"
+            ],
+            "Wf-Input-SHA256": [
+              "509acfaec6cd38167523de1b5e4db32c095720c9a8f1d5e1aea93e08b3ee4aad"
+            ]
+          },
+          "Data": "eyJzY2hlbWEiOiJqcy13Zi1jYW5vbmljYWwtc3RhcnQtcG9pbnRlci12MSIsInRva2VuIjoiZDU4YjkwOTFlMTg5M2U2M2RiYjNhOTlkYWYyM2UzZWQifQ==",
+          "Time": "2026-10-11T08:07:16.197513053Z"
+        }
+      }
+    },
+    {
+      "Phase": "pending.ReadStart(old-00616)",
+      "Nanos": 10305756,
+      "Error": "",
+      "Value": {
+        "input": {
+          "kind": "old",
+          "index": 616
+        },
+        "state": {
+          "Start": {
+            "schema": "js-wf-canonical-start-v1",
+            "token": "17b5ce712f8c5e0259cc276168539cf1",
+            "request": {
+              "type": "purge-scale",
+              "id": "old-00616"
+            },
+            "input_sha256": "ec3433a1f58089223d0400a64f460128ecd5a6f5739f9c3ef244fdf05313c08b",
+            "input_size": 26
+          },
+          "Invocation": 0,
+          "Pending": true
+        }
+      }
+    },
+    {
+      "Phase": "pending.sourceBefore(old-00616)",
+      "Nanos": 147104,
+      "Error": "",
+      "Value": 710
+    },
+    {
+      "Phase": "pending.RecoverStartAttempt(old-00616)",
+      "Nanos": 53699198,
+      "Error": "",
+      "Value": {
+        "after": {
+          "State": {
+            "Start": {
+              "schema": "js-wf-canonical-start-v1",
+              "token": "17b5ce712f8c5e0259cc276168539cf1",
+              "request": {
+                "type": "purge-scale",
+                "id": "old-00616"
+              },
+              "input_sha256": "ec3433a1f58089223d0400a64f460128ecd5a6f5739f9c3ef244fdf05313c08b",
+              "input_size": 26
+            },
+            "Invocation": 710,
+            "Pending": false
+          },
+          "JournalCount": 0,
+          "JournalTail": 0,
+          "Retired": false,
+          "Purging": false,
+          "Kind": "",
+          "SignalInputs": 0,
+          "SignalBindings": 0,
+          "SignalConsumed": 0,
+          "SignalRepair": 0,
+          "Checkpoint": null
+        },
+        "handle": {
+          "type": "purge-scale",
+          "id": "old-00616",
+          "inv_seq": 710
+        },
+        "source": {
+          "Subject": "wf.inv.purge-scale.old-00616",
+          "Sequence": 710,
+          "Header": {
+            "Nats-Expected-Last-Subject-Sequence": [
+              "0"
+            ],
+            "Wf-Graph-Start-Token": [
+              "17b5ce712f8c5e0259cc276168539cf1"
+            ],
+            "Wf-Input-SHA256": [
+              "ec3433a1f58089223d0400a64f460128ecd5a6f5739f9c3ef244fdf05313c08b"
+            ]
+          },
+          "Data": "eyJzY2hlbWEiOiJqcy13Zi1jYW5vbmljYWwtc3RhcnQtcG9pbnRlci12MSIsInRva2VuIjoiMTdiNWNlNzEyZjhjNWUwMjU5Y2MyNzYxNjg1MzljZjEifQ==",
+          "Time": "2026-10-11T08:07:16.050095715Z"
+        }
+      }
+    },
+    {
+      "Phase": "pending.ReadStart(old-00662)",
+      "Nanos": 10256591,
+      "Error": "",
+      "Value": {
+        "input": {
+          "kind": "old",
+          "index": 662
+        },
+        "state": {
+          "Start": {
+            "schema": "js-wf-canonical-start-v1",
+            "token": "59f8480016b40b456118a3a5e9afbf01",
+            "request": {
+              "type": "purge-scale",
+              "id": "old-00662"
+            },
+            "input_sha256": "6348f2f57b6c4853d88fca7112db2f62fd677cbb6cabb8b12cc72ef9bf6fed58",
+            "input_size": 26
+          },
+          "Invocation": 0,
+          "Pending": true
+        }
+      }
+    },
+    {
+      "Phase": "pending.sourceBefore(old-00662)",
+      "Nanos": 263681,
+      "Error": "",
+      "Value": 0
+    },
+    {
+      "Phase": "pending.RecoverStartAttempt(old-00662)",
+      "Nanos": 33213418,
+      "Error": "",
+      "Value": {
+        "after": {
+          "State": {
+            "Start": {
+              "schema": "js-wf-canonical-start-v1",
+              "token": "59f8480016b40b456118a3a5e9afbf01",
+              "request": {
+                "type": "purge-scale",
+                "id": "old-00662"
+              },
+              "input_sha256": "6348f2f57b6c4853d88fca7112db2f62fd677cbb6cabb8b12cc72ef9bf6fed58",
+              "input_size": 26
+            },
+            "Invocation": 1014,
+            "Pending": false
+          },
+          "JournalCount": 0,
+          "JournalTail": 0,
+          "Retired": false,
+          "Purging": false,
+          "Kind": "",
+          "SignalInputs": 0,
+          "SignalBindings": 0,
+          "SignalConsumed": 0,
+          "SignalRepair": 0,
+          "Checkpoint": null
+        },
+        "handle": {
+          "type": "purge-scale",
+          "id": "old-00662",
+          "inv_seq": 1014
+        },
+        "source": {
+          "Subject": "wf.inv.purge-scale.old-00662",
+          "Sequence": 1014,
+          "Header": {
+            "Nats-Expected-Last-Subject-Sequence": [
+              "0"
+            ],
+            "Wf-Graph-Start-Token": [
+              "59f8480016b40b456118a3a5e9afbf01"
+            ],
+            "Wf-Input-SHA256": [
+              "6348f2f57b6c4853d88fca7112db2f62fd677cbb6cabb8b12cc72ef9bf6fed58"
+            ]
+          },
+          "Data": "eyJzY2hlbWEiOiJqcy13Zi1jYW5vbmljYWwtc3RhcnQtcG9pbnRlci12MSIsInRva2VuIjoiNTlmODQ4MDAxNmI0MGI0NTYxMThhM2E1ZTlhZmJmMDEifQ==",
+          "Time": "2026-10-11T08:35:45.851951537Z"
+        }
+      }
+    },
+    {
+      "Phase": "pending.ReadStart(old-00653)",
+      "Nanos": 8647154,
+      "Error": "",
+      "Value": {
+        "input": {
+          "kind": "old",
+          "index": 653
+        },
+        "state": {
+          "Start": {
+            "schema": "js-wf-canonical-start-v1",
+            "token": "bf93b237c18b3f1c624c86afd1e02ff6",
+            "request": {
+              "type": "purge-scale",
+              "id": "old-00653"
+            },
+            "input_sha256": "f7bdd1cf84e75b708aa8997fc3534a1d69917059f43148b63be3fc3c47360c95",
+            "input_size": 26
+          },
+          "Invocation": 0,
+          "Pending": true
+        }
+      }
+    },
+    {
+      "Phase": "pending.sourceBefore(old-00653)",
+      "Nanos": 189357,
+      "Error": "",
+      "Value": 0
+    },
+    {
+      "Phase": "pending.RecoverStartAttempt(old-00653)",
+      "Nanos": 37812268,
+      "Error": "",
+      "Value": {
+        "after": {
+          "State": {
+            "Start": {
+              "schema": "js-wf-canonical-start-v1",
+              "token": "bf93b237c18b3f1c624c86afd1e02ff6",
+              "request": {
+                "type": "purge-scale",
+                "id": "old-00653"
+              },
+              "input_sha256": "f7bdd1cf84e75b708aa8997fc3534a1d69917059f43148b63be3fc3c47360c95",
+              "input_size": 26
+            },
+            "Invocation": 1015,
+            "Pending": false
+          },
+          "JournalCount": 0,
+          "JournalTail": 0,
+          "Retired": false,
+          "Purging": false,
+          "Kind": "",
+          "SignalInputs": 0,
+          "SignalBindings": 0,
+          "SignalConsumed": 0,
+          "SignalRepair": 0,
+          "Checkpoint": null
+        },
+        "handle": {
+          "type": "purge-scale",
+          "id": "old-00653",
+          "inv_seq": 1015
+        },
+        "source": {
+          "Subject": "wf.inv.purge-scale.old-00653",
+          "Sequence": 1015,
+          "Header": {
+            "Nats-Expected-Last-Subject-Sequence": [
+              "0"
+            ],
+            "Wf-Graph-Start-Token": [
+              "bf93b237c18b3f1c624c86afd1e02ff6"
+            ],
+            "Wf-Input-SHA256": [
+              "f7bdd1cf84e75b708aa8997fc3534a1d69917059f43148b63be3fc3c47360c95"
+            ]
+          },
+          "Data": "eyJzY2hlbWEiOiJqcy13Zi1jYW5vbmljYWwtc3RhcnQtcG9pbnRlci12MSIsInRva2VuIjoiYmY5M2IyMzdjMThiM2YxYzYyNGM4NmFmZDFlMDJmZjYifQ==",
+          "Time": "2026-10-11T08:35:45.899999765Z"
+        }
+      }
+    },
+    {
+      "Phase": "pending.ReadStart(old-00615)",
+      "Nanos": 8510988,
+      "Error": "",
+      "Value": {
+        "input": {
+          "kind": "old",
+          "index": 615
+        },
+        "state": {
+          "Start": {
+            "schema": "js-wf-canonical-start-v1",
+            "token": "16b320a6bc380b36fc5370fe02f23cf1",
+            "request": {
+              "type": "purge-scale",
+              "id": "old-00615"
+            },
+            "input_sha256": "62a19b4132b375a26b6deb3ff35c54ef8b79064930949d923b3cfd7a592f6bed",
+            "input_size": 26
+          },
+          "Invocation": 0,
+          "Pending": true
+        }
+      }
+    },
+    {
+      "Phase": "pending.sourceBefore(old-00615)",
+      "Nanos": 207575,
+      "Error": "",
+      "Value": 709
+    },
+    {
+      "Phase": "pending.RecoverStartAttempt(old-00615)",
+      "Nanos": 40603290,
+      "Error": "",
+      "Value": {
+        "after": {
+          "State": {
+            "Start": {
+              "schema": "js-wf-canonical-start-v1",
+              "token": "16b320a6bc380b36fc5370fe02f23cf1",
+              "request": {
+                "type": "purge-scale",
+                "id": "old-00615"
+              },
+              "input_sha256": "62a19b4132b375a26b6deb3ff35c54ef8b79064930949d923b3cfd7a592f6bed",
+              "input_size": 26
+            },
+            "Invocation": 709,
+            "Pending": false
+          },
+          "JournalCount": 0,
+          "JournalTail": 0,
+          "Retired": false,
+          "Purging": false,
+          "Kind": "",
+          "SignalInputs": 0,
+          "SignalBindings": 0,
+          "SignalConsumed": 0,
+          "SignalRepair": 0,
+          "Checkpoint": null
+        },
+        "handle": {
+          "type": "purge-scale",
+          "id": "old-00615",
+          "inv_seq": 709
+        },
+        "source": {
+          "Subject": "wf.inv.purge-scale.old-00615",
+          "Sequence": 709,
+          "Header": {
+            "Nats-Expected-Last-Subject-Sequence": [
+              "0"
+            ],
+            "Wf-Graph-Start-Token": [
+              "16b320a6bc380b36fc5370fe02f23cf1"
+            ],
+            "Wf-Input-SHA256": [
+              "62a19b4132b375a26b6deb3ff35c54ef8b79064930949d923b3cfd7a592f6bed"
+            ]
+          },
+          "Data": "eyJzY2hlbWEiOiJqcy13Zi1jYW5vbmljYWwtc3RhcnQtcG9pbnRlci12MSIsInRva2VuIjoiMTZiMzIwYTZiYzM4MGIzNmZjNTM3MGZlMDJmMjNjZjEifQ==",
+          "Time": "2026-10-11T08:07:15.990160101Z"
+        }
+      }
+    },
+    {
+      "Phase": "pending.ReadStart(old-00664)",
+      "Nanos": 10345526,
+      "Error": "",
+      "Value": {
+        "input": {
+          "kind": "old",
+          "index": 664
+        },
+        "state": {
+          "Start": {
+            "schema": "js-wf-canonical-start-v1",
+            "token": "69f1bece4638db1c41bae4b9f72098ca",
+            "request": {
+              "type": "purge-scale",
+              "id": "old-00664"
+            },
+            "input_sha256": "d35f5fd26389fb6b156cd5bf79312603833cea47e850ecb68f615d05a294d843",
+            "input_size": 26
+          },
+          "Invocation": 0,
+          "Pending": true
+        }
+      }
+    },
+    {
+      "Phase": "pending.sourceBefore(old-00664)",
+      "Nanos": 116837,
+      "Error": "",
+      "Value": 0
+    },
+    {
+      "Phase": "pending.RecoverStartAttempt(old-00664)",
+      "Nanos": 36295663,
+      "Error": "",
+      "Value": {
+        "after": {
+          "State": {
+            "Start": {
+              "schema": "js-wf-canonical-start-v1",
+              "token": "69f1bece4638db1c41bae4b9f72098ca",
+              "request": {
+                "type": "purge-scale",
+                "id": "old-00664"
+              },
+              "input_sha256": "d35f5fd26389fb6b156cd5bf79312603833cea47e850ecb68f615d05a294d843",
+              "input_size": 26
+            },
+            "Invocation": 1016,
+            "Pending": false
+          },
+          "JournalCount": 0,
+          "JournalTail": 0,
+          "Retired": false,
+          "Purging": false,
+          "Kind": "",
+          "SignalInputs": 0,
+          "SignalBindings": 0,
+          "SignalConsumed": 0,
+          "SignalRepair": 0,
+          "Checkpoint": null
+        },
+        "handle": {
+          "type": "purge-scale",
+          "id": "old-00664",
+          "inv_seq": 1016
+        },
+        "source": {
+          "Subject": "wf.inv.purge-scale.old-00664",
+          "Sequence": 1016,
+          "Header": {
+            "Nats-Expected-Last-Subject-Sequence": [
+              "0"
+            ],
+            "Wf-Graph-Start-Token": [
+              "69f1bece4638db1c41bae4b9f72098ca"
+            ],
+            "Wf-Input-SHA256": [
+              "d35f5fd26389fb6b156cd5bf79312603833cea47e850ecb68f615d05a294d843"
+            ]
+          },
+          "Data": "eyJzY2hlbWEiOiJqcy13Zi1jYW5vbmljYWwtc3RhcnQtcG9pbnRlci12MSIsInRva2VuIjoiNjlmMWJlY2U0NjM4ZGIxYzQxYmFlNGI5ZjcyMDk4Y2EifQ==",
+          "Time": "2026-10-11T08:35:45.994874914Z"
+        }
+      }
+    },
+    {
+      "Phase": "pending.ReadStart(old-00671)",
+      "Nanos": 11684621,
+      "Error": "",
+      "Value": {
+        "input": {
+          "kind": "old",
+          "index": 671
+        },
+        "state": {
+          "Start": {
+            "schema": "js-wf-canonical-start-v1",
+            "token": "3abed746a282d2de8de805a10813b94b",
+            "request": {
+              "type": "purge-scale",
+              "id": "old-00671"
+            },
+            "input_sha256": "11ae89aaa5cdc1dec3d6f39db569aaf9540d7b39416a31640bf9678342d866f7",
+            "input_size": 26
+          },
+          "Invocation": 0,
+          "Pending": true
+        }
+      }
+    },
+    {
+      "Phase": "pending.sourceBefore(old-00671)",
+      "Nanos": 285764,
+      "Error": "",
+      "Value": 0
+    },
+    {
+      "Phase": "pending.RecoverStartAttempt(old-00671)",
+      "Nanos": 21092743,
+      "Error": "",
+      "Value": {
+        "after": {
+          "State": {
+            "Start": {
+              "schema": "js-wf-canonical-start-v1",
+              "token": "3abed746a282d2de8de805a10813b94b",
+              "request": {
+                "type": "purge-scale",
+                "id": "old-00671"
+              },
+              "input_sha256": "11ae89aaa5cdc1dec3d6f39db569aaf9540d7b39416a31640bf9678342d866f7",
+              "input_size": 26
+            },
+            "Invocation": 1017,
+            "Pending": false
+          },
+          "JournalCount": 0,
+          "JournalTail": 0,
+          "Retired": false,
+          "Purging": false,
+          "Kind": "",
+          "SignalInputs": 0,
+          "SignalBindings": 0,
+          "SignalConsumed": 0,
+          "SignalRepair": 0,
+          "Checkpoint": null
+        },
+        "handle": {
+          "type": "purge-scale",
+          "id": "old-00671",
+          "inv_seq": 1017
+        },
+        "source": {
+          "Subject": "wf.inv.purge-scale.old-00671",
+          "Sequence": 1017,
+          "Header": {
+            "Nats-Expected-Last-Subject-Sequence": [
+              "0"
+            ],
+            "Wf-Graph-Start-Token": [
+              "3abed746a282d2de8de805a10813b94b"
+            ],
+            "Wf-Input-SHA256": [
+              "11ae89aaa5cdc1dec3d6f39db569aaf9540d7b39416a31640bf9678342d866f7"
+            ]
+          },
+          "Data": "eyJzY2hlbWEiOiJqcy13Zi1jYW5vbmljYWwtc3RhcnQtcG9pbnRlci12MSIsInRva2VuIjoiM2FiZWQ3NDZhMjgyZDJkZThkZTgwNWExMDgxM2I5NGIifQ==",
+          "Time": "2026-10-11T08:35:46.034175254Z"
+        }
+      }
+    },
+    {
+      "Phase": "pending.ReadStart(old-00663)",
+      "Nanos": 9377925,
+      "Error": "",
+      "Value": {
+        "input": {
+          "kind": "old",
+          "index": 663
+        },
+        "state": {
+          "Start": {
+            "schema": "js-wf-canonical-start-v1",
+            "token": "0129716fd5e52ca42627708e7b8c8790",
+            "request": {
+              "type": "purge-scale",
+              "id": "old-00663"
+            },
+            "input_sha256": "2b62e5787aa36d49283b148482c31863a3d77967a04b4ce6f0986bd1f727e056",
+            "input_size": 26
+          },
+          "Invocation": 0,
+          "Pending": true
+        }
+      }
+    },
+    {
+      "Phase": "pending.sourceBefore(old-00663)",
+      "Nanos": 188607,
+      "Error": "",
+      "Value": 0
+    },
+    {
+      "Phase": "pending.RecoverStartAttempt(old-00663)",
+      "Nanos": 24982726,
+      "Error": "",
+      "Value": {
+        "after": {
+          "State": {
+            "Start": {
+              "schema": "js-wf-canonical-start-v1",
+              "token": "0129716fd5e52ca42627708e7b8c8790",
+              "request": {
+                "type": "purge-scale",
+                "id": "old-00663"
+              },
+              "input_sha256": "2b62e5787aa36d49283b148482c31863a3d77967a04b4ce6f0986bd1f727e056",
+              "input_size": 26
+            },
+            "Invocation": 1018,
+            "Pending": false
+          },
+          "JournalCount": 0,
+          "JournalTail": 0,
+          "Retired": false,
+          "Purging": false,
+          "Kind": "",
+          "SignalInputs": 0,
+          "SignalBindings": 0,
+          "SignalConsumed": 0,
+          "SignalRepair": 0,
+          "Checkpoint": null
+        },
+        "handle": {
+          "type": "purge-scale",
+          "id": "old-00663",
+          "inv_seq": 1018
+        },
+        "source": {
+          "Subject": "wf.inv.purge-scale.old-00663",
+          "Sequence": 1018,
+          "Header": {
+            "Nats-Expected-Last-Subject-Sequence": [
+              "0"
+            ],
+            "Wf-Graph-Start-Token": [
+              "0129716fd5e52ca42627708e7b8c8790"
+            ],
+            "Wf-Input-SHA256": [
+              "2b62e5787aa36d49283b148482c31863a3d77967a04b4ce6f0986bd1f727e056"
+            ]
+          },
+          "Data": "eyJzY2hlbWEiOiJqcy13Zi1jYW5vbmljYWwtc3RhcnQtcG9pbnRlci12MSIsInRva2VuIjoiMDEyOTcxNmZkNWU1MmNhNDI2Mjc3MDhlN2I4Yzg3OTAifQ==",
+          "Time": "2026-10-11T08:35:46.06565688Z"
+        }
+      }
+    },
+    {
+      "Phase": "pending.ReadStart(old-00629)",
+      "Nanos": 7799256,
+      "Error": "",
+      "Value": {
+        "input": {
+          "kind": "old",
+          "index": 629
+        },
+        "state": {
+          "Start": {
+            "schema": "js-wf-canonical-start-v1",
+            "token": "bee50f4d5fa93d6bafdb8305621a260f",
+            "request": {
+              "type": "purge-scale",
+              "id": "old-00629"
+            },
+            "input_sha256": "890cf71bef334707a4c8dcd04c09b97d174f21a446b24064cee36294214e3e87",
+            "input_size": 26
+          },
+          "Invocation": 0,
+          "Pending": true
+        }
+      }
+    },
+    {
+      "Phase": "pending.sourceBefore(old-00629)",
+      "Nanos": 119591,
+      "Error": "",
+      "Value": 0
+    },
+    {
+      "Phase": "pending.RecoverStartAttempt(old-00629)",
+      "Nanos": 50254421,
+      "Error": "",
+      "Value": {
+        "after": {
+          "State": {
+            "Start": {
+              "schema": "js-wf-canonical-start-v1",
+              "token": "bee50f4d5fa93d6bafdb8305621a260f",
+              "request": {
+                "type": "purge-scale",
+                "id": "old-00629"
+              },
+              "input_sha256": "890cf71bef334707a4c8dcd04c09b97d174f21a446b24064cee36294214e3e87",
+              "input_size": 26
+            },
+            "Invocation": 1019,
+            "Pending": false
+          },
+          "JournalCount": 0,
+          "JournalTail": 0,
+          "Retired": false,
+          "Purging": false,
+          "Kind": "",
+          "SignalInputs": 0,
+          "SignalBindings": 0,
+          "SignalConsumed": 0,
+          "SignalRepair": 0,
+          "Checkpoint": null
+        },
+        "handle": {
+          "type": "purge-scale",
+          "id": "old-00629",
+          "inv_seq": 1019
+        },
+        "source": {
+          "Subject": "wf.inv.purge-scale.old-00629",
+          "Sequence": 1019,
+          "Header": {
+            "Nats-Expected-Last-Subject-Sequence": [
+              "0"
+            ],
+            "Wf-Graph-Start-Token": [
+              "bee50f4d5fa93d6bafdb8305621a260f"
+            ],
+            "Wf-Input-SHA256": [
+              "890cf71bef334707a4c8dcd04c09b97d174f21a446b24064cee36294214e3e87"
+            ]
+          },
+          "Data": "eyJzY2hlbWEiOiJqcy13Zi1jYW5vbmljYWwtc3RhcnQtcG9pbnRlci12MSIsInRva2VuIjoiYmVlNTBmNGQ1ZmE5M2Q2YmFmZGI4MzA1NjIxYTI2MGYifQ==",
+          "Time": "2026-10-11T08:35:46.12454208Z"
+        }
+      }
+    },
+    {
+      "Phase": "pending.ReadStart(old-00626)",
+      "Nanos": 9698131,
+      "Error": "",
+      "Value": {
+        "input": {
+          "kind": "old",
+          "index": 626
+        },
+        "state": {
+          "Start": {
+            "schema": "js-wf-canonical-start-v1",
+            "token": "0148264537a5788aaf14dcb376a4a523",
+            "request": {
+              "type": "purge-scale",
+              "id": "old-00626"
+            },
+            "input_sha256": "d9a96e4f26dbafc63a796804c9b7a4bc4be797b475cdb3e284d81a8438d62913",
+            "input_size": 26
+          },
+          "Invocation": 0,
+          "Pending": true
+        }
+      }
+    },
+    {
+      "Phase": "pending.sourceBefore(old-00626)",
+      "Nanos": 182568,
+      "Error": "",
+      "Value": 0
+    },
+    {
+      "Phase": "pending.RecoverStartAttempt(old-00626)",
+      "Nanos": 34680698,
+      "Error": "",
+      "Value": {
+        "after": {
+          "State": {
+            "Start": {
+              "schema": "js-wf-canonical-start-v1",
+              "token": "0148264537a5788aaf14dcb376a4a523",
+              "request": {
+                "type": "purge-scale",
+                "id": "old-00626"
+              },
+              "input_sha256": "d9a96e4f26dbafc63a796804c9b7a4bc4be797b475cdb3e284d81a8438d62913",
+              "input_size": 26
+            },
+            "Invocation": 1020,
+            "Pending": false
+          },
+          "JournalCount": 0,
+          "JournalTail": 0,
+          "Retired": false,
+          "Purging": false,
+          "Kind": "",
+          "SignalInputs": 0,
+          "SignalBindings": 0,
+          "SignalConsumed": 0,
+          "SignalRepair": 0,
+          "Checkpoint": null
+        },
+        "handle": {
+          "type": "purge-scale",
+          "id": "old-00626",
+          "inv_seq": 1020
+        },
+        "source": {
+          "Subject": "wf.inv.purge-scale.old-00626",
+          "Sequence": 1020,
+          "Header": {
+            "Nats-Expected-Last-Subject-Sequence": [
+              "0"
+            ],
+            "Wf-Graph-Start-Token": [
+              "0148264537a5788aaf14dcb376a4a523"
+            ],
+            "Wf-Input-SHA256": [
+              "d9a96e4f26dbafc63a796804c9b7a4bc4be797b475cdb3e284d81a8438d62913"
+            ]
+          },
+          "Data": "eyJzY2hlbWEiOiJqcy13Zi1jYW5vbmljYWwtc3RhcnQtcG9pbnRlci12MSIsInRva2VuIjoiMDE0ODI2NDUzN2E1Nzg4YWFmMTRkY2IzNzZhNGE1MjMifQ==",
+          "Time": "2026-10-11T08:35:46.164272044Z"
+        }
+      }
+    },
+    {
+      "Phase": "pending.ReadStart(old-00675)",
+      "Nanos": 7491859,
+      "Error": "",
+      "Value": {
+        "input": {
+          "kind": "old",
+          "index": 675
+        },
+        "state": {
+          "Start": {
+            "schema": "js-wf-canonical-start-v1",
+            "token": "a60eea8e7b4f55efe5d280e69eed2d97",
+            "request": {
+              "type": "purge-scale",
+              "id": "old-00675"
+            },
+            "input_sha256": "7de4144189cb4619f30ad0dffe988529a95ed388c8decf435d17114d06ba1064",
+            "input_size": 26
+          },
+          "Invocation": 0,
+          "Pending": true
+        }
+      }
+    },
+    {
+      "Phase": "pending.sourceBefore(old-00675)",
+      "Nanos": 140544,
+      "Error": "",
+      "Value": 0
+    },
+    {
+      "Phase": "pending.RecoverStartAttempt(old-00675)",
+      "Nanos": 26978931,
+      "Error": "",
+      "Value": {
+        "after": {
+          "State": {
+            "Start": {
+              "schema": "js-wf-canonical-start-v1",
+              "token": "a60eea8e7b4f55efe5d280e69eed2d97",
+              "request": {
+                "type": "purge-scale",
+                "id": "old-00675"
+              },
+              "input_sha256": "7de4144189cb4619f30ad0dffe988529a95ed388c8decf435d17114d06ba1064",
+              "input_size": 26
+            },
+            "Invocation": 1021,
+            "Pending": false
+          },
+          "JournalCount": 0,
+          "JournalTail": 0,
+          "Retired": false,
+          "Purging": false,
+          "Kind": "",
+          "SignalInputs": 0,
+          "SignalBindings": 0,
+          "SignalConsumed": 0,
+          "SignalRepair": 0,
+          "Checkpoint": null
+        },
+        "handle": {
+          "type": "purge-scale",
+          "id": "old-00675",
+          "inv_seq": 1021
+        },
+        "source": {
+          "Subject": "wf.inv.purge-scale.old-00675",
+          "Sequence": 1021,
+          "Header": {
+            "Nats-Expected-Last-Subject-Sequence": [
+              "0"
+            ],
+            "Wf-Graph-Start-Token": [
+              "a60eea8e7b4f55efe5d280e69eed2d97"
+            ],
+            "Wf-Input-SHA256": [
+              "7de4144189cb4619f30ad0dffe988529a95ed388c8decf435d17114d06ba1064"
+            ]
+          },
+          "Data": "eyJzY2hlbWEiOiJqcy13Zi1jYW5vbmljYWwtc3RhcnQtcG9pbnRlci12MSIsInRva2VuIjoiYTYwZWVhOGU3YjRmNTVlZmU1ZDI4MGU2OWVlZDJkOTcifQ==",
+          "Time": "2026-10-11T08:35:46.200908364Z"
+        }
+      }
+    },
+    {
+      "Phase": "pending.ReadStart(old-00624)",
+      "Nanos": 16177241,
+      "Error": "",
+      "Value": {
+        "input": {
+          "kind": "old",
+          "index": 624
+        },
+        "state": {
+          "Start": {
+            "schema": "js-wf-canonical-start-v1",
+            "token": "c05c14bedc9029047793eed14d75dc06",
+            "request": {
+              "type": "purge-scale",
+              "id": "old-00624"
+            },
+            "input_sha256": "e6744db743e1c913f223d537f7207e708ed9ba513b6c83cb07b1f68c9e46c34e",
+            "input_size": 26
+          },
+          "Invocation": 0,
+          "Pending": true
+        }
+      }
+    },
+    {
+      "Phase": "pending.sourceBefore(old-00624)",
+      "Nanos": 175838,
+      "Error": "",
+      "Value": 0
+    },
+    {
+      "Phase": "pending.RecoverStartAttempt(old-00624)",
+      "Nanos": 50713800,
+      "Error": "",
+      "Value": {
+        "after": {
+          "State": {
+            "Start": {
+              "schema": "js-wf-canonical-start-v1",
+              "token": "c05c14bedc9029047793eed14d75dc06",
+              "request": {
+                "type": "purge-scale",
+                "id": "old-00624"
+              },
+              "input_sha256": "e6744db743e1c913f223d537f7207e708ed9ba513b6c83cb07b1f68c9e46c34e",
+              "input_size": 26
+            },
+            "Invocation": 1022,
+            "Pending": false
+          },
+          "JournalCount": 0,
+          "JournalTail": 0,
+          "Retired": false,
+          "Purging": false,
+          "Kind": "",
+          "SignalInputs": 0,
+          "SignalBindings": 0,
+          "SignalConsumed": 0,
+          "SignalRepair": 0,
+          "Checkpoint": null
+        },
+        "handle": {
+          "type": "purge-scale",
+          "id": "old-00624",
+          "inv_seq": 1022
+        },
+        "source": {
+          "Subject": "wf.inv.purge-scale.old-00624",
+          "Sequence": 1022,
+          "Header": {
+            "Nats-Expected-Last-Subject-Sequence": [
+              "0"
+            ],
+            "Wf-Graph-Start-Token": [
+              "c05c14bedc9029047793eed14d75dc06"
+            ],
+            "Wf-Input-SHA256": [
+              "e6744db743e1c913f223d537f7207e708ed9ba513b6c83cb07b1f68c9e46c34e"
+            ]
+          },
+          "Data": "eyJzY2hlbWEiOiJqcy13Zi1jYW5vbmljYWwtc3RhcnQtcG9pbnRlci12MSIsInRva2VuIjoiYzA1YzE0YmVkYzkwMjkwNDc3OTNlZWQxNGQ3NWRjMDYifQ==",
+          "Time": "2026-10-11T08:35:46.256788818Z"
+        }
+      }
+    },
+    {
+      "Phase": "pending.ReadStart(old-00628)",
+      "Nanos": 13431567,
+      "Error": "",
+      "Value": {
+        "input": {
+          "kind": "old",
+          "index": 628
+        },
+        "state": {
+          "Start": {
+            "schema": "js-wf-canonical-start-v1",
+            "token": "28141b51142b065beb5cda80090890ad",
+            "request": {
+              "type": "purge-scale",
+              "id": "old-00628"
+            },
+            "input_sha256": "38c9336dc00a5a1a84e0e0c6165714cb210d358bad2e446f3490fd041e036607",
+            "input_size": 26
+          },
+          "Invocation": 0,
+          "Pending": true
+        }
+      }
+    },
+    {
+      "Phase": "pending.sourceBefore(old-00628)",
+      "Nanos": 150008,
+      "Error": "",
+      "Value": 0
+    },
+    {
+      "Phase": "pending.RecoverStartAttempt(old-00628)",
+      "Nanos": 41864558,
+      "Error": "",
+      "Value": {
+        "after": {
+          "State": {
+            "Start": {
+              "schema": "js-wf-canonical-start-v1",
+              "token": "28141b51142b065beb5cda80090890ad",
+              "request": {
+                "type": "purge-scale",
+                "id": "old-00628"
+              },
+              "input_sha256": "38c9336dc00a5a1a84e0e0c6165714cb210d358bad2e446f3490fd041e036607",
+              "input_size": 26
+            },
+            "Invocation": 1023,
+            "Pending": false
+          },
+          "JournalCount": 0,
+          "JournalTail": 0,
+          "Retired": false,
+          "Purging": false,
+          "Kind": "",
+          "SignalInputs": 0,
+          "SignalBindings": 0,
+          "SignalConsumed": 0,
+          "SignalRepair": 0,
+          "Checkpoint": null
+        },
+        "handle": {
+          "type": "purge-scale",
+          "id": "old-00628",
+          "inv_seq": 1023
+        },
+        "source": {
+          "Subject": "wf.inv.purge-scale.old-00628",
+          "Sequence": 1023,
+          "Header": {
+            "Nats-Expected-Last-Subject-Sequence": [
+              "0"
+            ],
+            "Wf-Graph-Start-Token": [
+              "28141b51142b065beb5cda80090890ad"
+            ],
+            "Wf-Input-SHA256": [
+              "38c9336dc00a5a1a84e0e0c6165714cb210d358bad2e446f3490fd041e036607"
+            ]
+          },
+          "Data": "eyJzY2hlbWEiOiJqcy13Zi1jYW5vbmljYWwtc3RhcnQtcG9pbnRlci12MSIsInRva2VuIjoiMjgxNDFiNTExNDJiMDY1YmViNWNkYTgwMDkwODkwYWQifQ==",
+          "Time": "2026-10-11T08:35:46.324640629Z"
+        }
+      }
+    },
+    {
+      "Phase": "pending.ReadStart(old-00661)",
+      "Nanos": 10690861,
+      "Error": "",
+      "Value": {
+        "input": {
+          "kind": "old",
+          "index": 661
+        },
+        "state": {
+          "Start": {
+            "schema": "js-wf-canonical-start-v1",
+            "token": "569f366952e41741f9e8c0e7d54527df",
+            "request": {
+              "type": "purge-scale",
+              "id": "old-00661"
+            },
+            "input_sha256": "91722aad97bc7cefdf177fa519fae0ec63668be2652d2f5e91013ddcf67eda8d",
+            "input_size": 26
+          },
+          "Invocation": 0,
+          "Pending": true
+        }
+      }
+    },
+    {
+      "Phase": "pending.sourceBefore(old-00661)",
+      "Nanos": 121034,
+      "Error": "",
+      "Value": 0
+    },
+    {
+      "Phase": "pending.RecoverStartAttempt(old-00661)",
+      "Nanos": 34981696,
+      "Error": "",
+      "Value": {
+        "after": {
+          "State": {
+            "Start": {
+              "schema": "js-wf-canonical-start-v1",
+              "token": "569f366952e41741f9e8c0e7d54527df",
+              "request": {
+                "type": "purge-scale",
+                "id": "old-00661"
+              },
+              "input_sha256": "91722aad97bc7cefdf177fa519fae0ec63668be2652d2f5e91013ddcf67eda8d",
+              "input_size": 26
+            },
+            "Invocation": 1024,
+            "Pending": false
+          },
+          "JournalCount": 0,
+          "JournalTail": 0,
+          "Retired": false,
+          "Purging": false,
+          "Kind": "",
+          "SignalInputs": 0,
+          "SignalBindings": 0,
+          "SignalConsumed": 0,
+          "SignalRepair": 0,
+          "Checkpoint": null
+        },
+        "handle": {
+          "type": "purge-scale",
+          "id": "old-00661",
+          "inv_seq": 1024
+        },
+        "source": {
+          "Subject": "wf.inv.purge-scale.old-00661",
+          "Sequence": 1024,
+          "Header": {
+            "Nats-Expected-Last-Subject-Sequence": [
+              "0"
+            ],
+            "Wf-Graph-Start-Token": [
+              "569f366952e41741f9e8c0e7d54527df"
+            ],
+            "Wf-Input-SHA256": [
+              "91722aad97bc7cefdf177fa519fae0ec63668be2652d2f5e91013ddcf67eda8d"
+            ]
+          },
+          "Data": "eyJzY2hlbWEiOiJqcy13Zi1jYW5vbmljYWwtc3RhcnQtcG9pbnRlci12MSIsInRva2VuIjoiNTY5ZjM2Njk1MmU0MTc0MWY5ZThjMGU3ZDU0NTI3ZGYifQ==",
+          "Time": "2026-10-11T08:35:46.367498366Z"
+        }
+      }
+    },
+    {
+      "Phase": "pending.ReadStart(old-00622)",
+      "Nanos": 12810833,
+      "Error": "",
+      "Value": {
+        "input": {
+          "kind": "old",
+          "index": 622
+        },
+        "state": {
+          "Start": {
+            "schema": "js-wf-canonical-start-v1",
+            "token": "9158a687ddc8e13fce5c430a56dce423",
+            "request": {
+              "type": "purge-scale",
+              "id": "old-00622"
+            },
+            "input_sha256": "7b65e7af29bf803ece4419b69fbc84466c7a61c0e2e5377b271fcf1dde4c328e",
+            "input_size": 26
+          },
+          "Invocation": 0,
+          "Pending": true
+        }
+      }
+    },
+    {
+      "Phase": "pending.sourceBefore(old-00622)",
+      "Nanos": 254517,
+      "Error": "",
+      "Value": 0
+    },
+    {
+      "Phase": "pending.RecoverStartAttempt(old-00622)",
+      "Nanos": 38957549,
+      "Error": "",
+      "Value": {
+        "after": {
+          "State": {
+            "Start": {
+              "schema": "js-wf-canonical-start-v1",
+              "token": "9158a687ddc8e13fce5c430a56dce423",
+              "request": {
+                "type": "purge-scale",
+                "id": "old-00622"
+              },
+              "input_sha256": "7b65e7af29bf803ece4419b69fbc84466c7a61c0e2e5377b271fcf1dde4c328e",
+              "input_size": 26
+            },
+            "Invocation": 1025,
+            "Pending": false
+          },
+          "JournalCount": 0,
+          "JournalTail": 0,
+          "Retired": false,
+          "Purging": false,
+          "Kind": "",
+          "SignalInputs": 0,
+          "SignalBindings": 0,
+          "SignalConsumed": 0,
+          "SignalRepair": 0,
+          "Checkpoint": null
+        },
+        "handle": {
+          "type": "purge-scale",
+          "id": "old-00622",
+          "inv_seq": 1025
+        },
+        "source": {
+          "Subject": "wf.inv.purge-scale.old-00622",
+          "Sequence": 1025,
+          "Header": {
+            "Nats-Expected-Last-Subject-Sequence": [
+              "0"
+            ],
+            "Wf-Graph-Start-Token": [
+              "9158a687ddc8e13fce5c430a56dce423"
+            ],
+            "Wf-Input-SHA256": [
+              "7b65e7af29bf803ece4419b69fbc84466c7a61c0e2e5377b271fcf1dde4c328e"
+            ]
+          },
+          "Data": "eyJzY2hlbWEiOiJqcy13Zi1jYW5vbmljYWwtc3RhcnQtcG9pbnRlci12MSIsInRva2VuIjoiOTE1OGE2ODdkZGM4ZTEzZmNlNWM0MzBhNTZkY2U0MjMifQ==",
+          "Time": "2026-10-11T08:35:46.420194669Z"
+        }
+      }
+    },
+    {
+      "Phase": "pending.ReadStart(old-00677)",
+      "Nanos": 8752134,
+      "Error": "",
+      "Value": {
+        "input": {
+          "kind": "old",
+          "index": 677
+        },
+        "state": {
+          "Start": {
+            "schema": "js-wf-canonical-start-v1",
+            "token": "0f1b2648832c117641f24ef95b8d057e",
+            "request": {
+              "type": "purge-scale",
+              "id": "old-00677"
+            },
+            "input_sha256": "d48927e5fd56c107d6fc98e26fff221381b7b1a5a42f35ae23810b893c160ae5",
+            "input_size": 26
+          },
+          "Invocation": 0,
+          "Pending": true
+        }
+      }
+    },
+    {
+      "Phase": "pending.sourceBefore(old-00677)",
+      "Nanos": 175417,
+      "Error": "",
+      "Value": 0
+    },
+    {
+      "Phase": "pending.RecoverStartAttempt(old-00677)",
+      "Nanos": 49575639,
+      "Error": "",
+      "Value": {
+        "after": {
+          "State": {
+            "Start": {
+              "schema": "js-wf-canonical-start-v1",
+              "token": "0f1b2648832c117641f24ef95b8d057e",
+              "request": {
+                "type": "purge-scale",
+                "id": "old-00677"
+              },
+              "input_sha256": "d48927e5fd56c107d6fc98e26fff221381b7b1a5a42f35ae23810b893c160ae5",
+              "input_size": 26
+            },
+            "Invocation": 1026,
+            "Pending": false
+          },
+          "JournalCount": 0,
+          "JournalTail": 0,
+          "Retired": false,
+          "Purging": false,
+          "Kind": "",
+          "SignalInputs": 0,
+          "SignalBindings": 0,
+          "SignalConsumed": 0,
+          "SignalRepair": 0,
+          "Checkpoint": null
+        },
+        "handle": {
+          "type": "purge-scale",
+          "id": "old-00677",
+          "inv_seq": 1026
+        },
+        "source": {
+          "Subject": "wf.inv.purge-scale.old-00677",
+          "Sequence": 1026,
+          "Header": {
+            "Nats-Expected-Last-Subject-Sequence": [
+              "0"
+            ],
+            "Wf-Graph-Start-Token": [
+              "0f1b2648832c117641f24ef95b8d057e"
+            ],
+            "Wf-Input-SHA256": [
+              "d48927e5fd56c107d6fc98e26fff221381b7b1a5a42f35ae23810b893c160ae5"
+            ]
+          },
+          "Data": "eyJzY2hlbWEiOiJqcy13Zi1jYW5vbmljYWwtc3RhcnQtcG9pbnRlci12MSIsInRva2VuIjoiMGYxYjI2NDg4MzJjMTE3NjQxZjI0ZWY5NWI4ZDA1N2UifQ==",
+          "Time": "2026-10-11T08:35:46.477136787Z"
+        }
+      }
+    },
+    {
+      "Phase": "pending.ReadStart(old-00672)",
+      "Nanos": 7557608,
+      "Error": "",
+      "Value": {
+        "input": {
+          "kind": "old",
+          "index": 672
+        },
+        "state": {
+          "Start": {
+            "schema": "js-wf-canonical-start-v1",
+            "token": "6fb24d6d34e463684b7bae7991e678b6",
+            "request": {
+              "type": "purge-scale",
+              "id": "old-00672"
+            },
+            "input_sha256": "e2325f01f7efd65a85e622c27781578b087851ded940cd8baa6f61671ac41309",
+            "input_size": 26
+          },
+          "Invocation": 0,
+          "Pending": true
+        }
+      }
+    },
+    {
+      "Phase": "pending.sourceBefore(old-00672)",
+      "Nanos": 4368390,
+      "Error": "",
+      "Value": 0
+    },
+    {
+      "Phase": "pending.RecoverStartAttempt(old-00672)",
+      "Nanos": 26642490,
+      "Error": "",
+      "Value": {
+        "after": {
+          "State": {
+            "Start": {
+              "schema": "js-wf-canonical-start-v1",
+              "token": "6fb24d6d34e463684b7bae7991e678b6",
+              "request": {
+                "type": "purge-scale",
+                "id": "old-00672"
+              },
+              "input_sha256": "e2325f01f7efd65a85e622c27781578b087851ded940cd8baa6f61671ac41309",
+              "input_size": 26
+            },
+            "Invocation": 1027,
+            "Pending": false
+          },
+          "JournalCount": 0,
+          "JournalTail": 0,
+          "Retired": false,
+          "Purging": false,
+          "Kind": "",
+          "SignalInputs": 0,
+          "SignalBindings": 0,
+          "SignalConsumed": 0,
+          "SignalRepair": 0,
+          "Checkpoint": null
+        },
+        "handle": {
+          "type": "purge-scale",
+          "id": "old-00672",
+          "inv_seq": 1027
+        },
+        "source": {
+          "Subject": "wf.inv.purge-scale.old-00672",
+          "Sequence": 1027,
+          "Header": {
+            "Nats-Expected-Last-Subject-Sequence": [
+              "0"
+            ],
+            "Wf-Graph-Start-Token": [
+              "6fb24d6d34e463684b7bae7991e678b6"
+            ],
+            "Wf-Input-SHA256": [
+              "e2325f01f7efd65a85e622c27781578b087851ded940cd8baa6f61671ac41309"
+            ]
+          },
+          "Data": "eyJzY2hlbWEiOiJqcy13Zi1jYW5vbmljYWwtc3RhcnQtcG9pbnRlci12MSIsInRva2VuIjoiNmZiMjRkNmQzNGU0NjM2ODRiN2JhZTc5OTFlNjc4YjYifQ==",
+          "Time": "2026-10-11T08:35:46.524037831Z"
+        }
+      }
+    },
+    {
+      "Phase": "boundDescriptorsUnchanged",
+      "Nanos": 193658148,
+      "Error": "",
+      "Value": 984
+    }
+  ],
+  "Error": ""
+}

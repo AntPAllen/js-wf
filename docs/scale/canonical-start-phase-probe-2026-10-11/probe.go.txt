@@ -1,0 +1,69 @@
+// Inspect only a verified copy. Public API phase deadlines are diagnostic.
+package main
+import (
+ "context"
+ "crypto/sha256"
+ "encoding/hex"
+ "encoding/json"
+ "errors"
+ "fmt"
+ "os"
+ "path/filepath"
+ "sort"
+ "time"
+ "github.com/nats-io/nats.go/jetstream"
+ "js-wf/client"
+ "js-wf/identity"
+ "js-wf/journal"
+ "js-wf/testcluster"
+)
+type observation struct {Phase string; Nanos int64; Error string; Value any}
+func run() (err error) {
+ root:=os.Args[1];out:=os.Args[2];copy:=filepath.Join(root,"store-copy")
+ var marker struct {Copy string `json:"copy"`;Verified bool `json:"verified"`}
+ raw,e:=os.ReadFile(filepath.Join(root,"copy-verified.json"));if e!=nil{return e};if json.Unmarshal(raw,&marker)!=nil||!marker.Verified||marker.Copy!=copy{return fmt.Errorf("unverified copy")}
+ observations:=[]observation{}
+ defer func(){r:=struct{Observations []observation;Error string}{Observations:observations};if err!=nil{r.Error=err.Error()};b,_:=json.MarshalIndent(r,"","  ");if e:=os.WriteFile(out,append(b,'\n'),0600);e!=nil{panic(e)}}()
+ ctx,stop:=context.WithTimeout(context.Background(),3*time.Minute);defer stop()
+ phase:=func(name string,fn func(context.Context)(any,error)) error {
+  fmt.Println("begin",name);start:=time.Now();call,cancel:=context.WithTimeout(ctx,8*time.Second);defer cancel();value,e:=fn(call)
+  o:=observation{Phase:name,Nanos:time.Since(start).Nanoseconds(),Value:value};if e!=nil{o.Error=e.Error()};observations=append(observations,o);fmt.Printf("end %s duration=%s error=%v\n",name,time.Since(start),e);if e!=nil{return fmt.Errorf("%s: %w",name,e)};return nil
+ }
+ var cluster *testcluster.Cluster
+ if err=phase("cluster.Start",func(context.Context)(any,error){var e error;cluster,e=testcluster.Start(copy,3);return nil,e});err!=nil{return err};defer cluster.Close()
+ clients:=make([]jetstream.JetStream,3)
+ var metadataError error
+ for i,nc:=range cluster.Clients {
+  js,e:=jetstream.New(nc);if e!=nil{return e};clients[i]=js
+  for _,name:=range []string{"PURGE_SCALE_AUTH","OBJ_PURGE_SCALE_OBJECTS","WF_INV","WF_RUN"} {
+   e=phase(fmt.Sprintf("node%d.StreamInfo(%s)",i,name),func(call context.Context)(any,error){s,e:=js.Stream(call,name);if e!=nil{return nil,e};return s.Info(call)})
+   if e!=nil&&metadataError==nil{metadataError=e}
+  }
+ }
+ if metadataError!=nil{return metadataError}
+ js:=clients[0];var graph *journal.GraphStore
+ cfg:=journal.NativeGraphConfig{AuthorityStream:"PURGE_SCALE_AUTH",AuthorityPrefix:"wf.graph.purgescale",ObjectBucket:"PURGE_SCALE_OBJECTS",ExpectedReplicas:3,CanonicalStarts:true,CanonicalSignals:true,OwnerScopeIndex:true}
+ if err=phase("OpenNativeGraphStore",func(call context.Context)(any,error){var e error;graph,e=journal.OpenNativeGraphStore(call,js,cfg);return nil,e});err!=nil{return err}
+ c,e:=client.NewWithGraphJournal(js,graph);if e!=nil{return e}
+ authority,e:=js.Stream(ctx,cfg.AuthorityStream);if e!=nil{return e}
+ var info *jetstream.StreamInfo
+ if err=phase("authority.subjects",func(call context.Context)(any,error){var e error;info,e=authority.Info(call,jetstream.WithSubjectFilter(cfg.AuthorityPrefix+".root.>"));if e!=nil{return nil,e};return len(info.State.Subjects),nil});err!=nil{return err}
+ subjects:=[]string{};for k:=range info.State.Subjects{subjects=append(subjects,k)};sort.Strings(subjects)
+ type cursor struct {Invocation uint64 `json:"invocation"`;Start *journal.GraphStart `json:"start"`}
+ pending:=[]cursor{};stable:=map[string]string{}
+ hash:=func(b []byte) string {s:=sha256.Sum256(b);return hex.EncodeToString(s[:])}
+ if err=phase("rawStartCatalog",func(call context.Context)(any,error){for _,key:=range subjects{
+  m,e:=authority.GetLastMsgForSubject(call,key);if e!=nil{return nil,e};var env struct {Root *struct {Application []byte `json:"application"`} `json:"root"`};if e=json.Unmarshal(m.Data,&env);e!=nil{return nil,e};if env.Root==nil||len(env.Root.Application)==0{continue};var v cursor;if e=json.Unmarshal(env.Root.Application,&v);e!=nil{return nil,e};if v.Start==nil{return nil,fmt.Errorf("missing Start")};if v.Invocation==0{pending=append(pending,v)}else{stable[key]=hash(env.Root.Application)}
+ };return map[string]int{"pending":len(pending),"bound":len(stable)},nil});err!=nil{return err}
+ inv,e:=js.Stream(ctx,"WF_INV");if e!=nil{return e}
+ for _,v:=range pending{
+  request:=v.Start.Request;token:=v.Start.Token
+  if err=phase("pending.ReadStart("+request.ID+")",func(call context.Context)(any,error){state,input,e:=graph.ReadStart(call,request.Type,request.ID);if e!=nil{return nil,e};if state.Start!=*v.Start||!state.Pending||hash(input)!=v.Start.InputSHA256{return nil,fmt.Errorf("descriptor/input differs")};return map[string]any{"state":state,"input":json.RawMessage(input)},nil});err!=nil{return err}
+  beforeSeq:=uint64(0)
+  if err=phase("pending.sourceBefore("+request.ID+")",func(call context.Context)(any,error){m,e:=inv.GetLastMsgForSubject(call,identity.InvocationSubject(request.Type,request.ID));if errors.Is(e,jetstream.ErrMsgNotFound){return uint64(0),nil};if e!=nil{return nil,e};if !v.Start.MatchesInvocation(m){return nil,fmt.Errorf("different source")};beforeSeq=m.Sequence;return beforeSeq,nil});err!=nil{return err}
+  if err=phase("pending.RecoverStartAttempt("+request.ID+")",func(call context.Context)(any,error){h,e:=c.RecoverStartAttempt(call,request.Type,request.ID,token);if e!=nil{return nil,e};after,e:=graph.InspectStart(call,request.Type,request.ID);if e!=nil{return nil,e};m,e:=inv.GetLastMsgForSubject(call,identity.InvocationSubject(request.Type,request.ID));if e!=nil{return nil,e};if after==nil||after.State.Pending||after.State.Start!=*v.Start||h.InvSeq!=m.Sequence||after.State.Invocation!=m.Sequence||!v.Start.MatchesInvocation(m)||beforeSeq!=0&&beforeSeq!=m.Sequence{return nil,fmt.Errorf("binding differs")};return map[string]any{"handle":h,"after":after,"source":m},nil});err!=nil{return err}
+ }
+ if err=phase("boundDescriptorsUnchanged",func(call context.Context)(any,error){for key,sha:=range stable{m,e:=authority.GetLastMsgForSubject(call,key);if e!=nil{return nil,e};var env struct{Root struct{Application []byte `json:"application"`} `json:"root"`};if e=json.Unmarshal(m.Data,&env);e!=nil||hash(env.Root.Application)!=sha{return nil,fmt.Errorf("bound descriptor changed: %s",key)}};return len(stable),nil});err!=nil{return err}
+ if len(pending)==0{return fmt.Errorf("no pending descriptor to challenge")};return nil
+}
+func main(){if e:=run();e!=nil{fmt.Fprintln(os.Stderr,e);os.Exit(1)}}

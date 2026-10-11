@@ -1,5 +1,25 @@
 # JetStream Durable Workflow Runtime — Implementation Plan
 
+## Retained R3 pending Starts recovered after metadata readiness — 2026-10-11
+
+A fresh verified copy of the failed full-scale store isolates an early authority
+StreamInfo deadline immediately after socket readiness; the next eleven metadata
+requests succeed. A separate fresh-copy experiment preserves that observation,
+then performs bounded read-only metadata rechecks before graph inspection.
+It recovers all43 pending Starts with their original tokens and inputs, retaining
+six existing source sequences and binding37 missing sources. All984 already-bound
+application descriptors remain unchanged. No workers or ordinary replacement
+Starts run. Maximum observed recovery call is63.729ms; helper actualexit0.
+
+Independent review checks both retained binaries,1161 exact source inputs each,
+all43 input/source/pointer/handle bindings and closed copied-store censuses. The
+original2443 files/198,307,813bytes remain unchanged. See
+[copied-store recovery evidence](scale/canonical-start-phase-probe-2026-10-11/README.md).
+This resolves the copied pending-Start recovery question, not the original full
+10k failure cause or scale gate. The earlier unlabelled inspection deadline is
+not assigned a cause from this separate observation. Production bounds and
+uncertain-publication rules are unchanged; original release gates remain open.
+
 ## Start failure phase diagnostics — 2026-10-11
 
 Canonical Start input reads now identify reader open, state read, input read and

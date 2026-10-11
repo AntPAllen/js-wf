@@ -1,0 +1,821 @@
+{
+  "Observations": [
+    {
+      "Phase": "cluster.Start",
+      "Nanos": 361866004,
+      "Error": "",
+      "Value": null
+    },
+    {
+      "Phase": "node0.StreamInfo(PURGE_SCALE_AUTH)",
+      "Nanos": 8000526128,
+      "Error": "context deadline exceeded",
+      "Value": null
+    },
+    {
+      "Phase": "node0.StreamInfo(OBJ_PURGE_SCALE_OBJECTS)",
+      "Nanos": 1472619,
+      "Error": "",
+      "Value": {
+        "config": {
+          "name": "OBJ_PURGE_SCALE_OBJECTS",
+          "subjects": [
+            "$O.PURGE_SCALE_OBJECTS.C.\u003e",
+            "$O.PURGE_SCALE_OBJECTS.M.\u003e"
+          ],
+          "retention": "limits",
+          "max_consumers": -1,
+          "max_msgs": -1,
+          "max_bytes": -1,
+          "discard": "old",
+          "max_age": 0,
+          "max_msgs_per_subject": -1,
+          "max_msg_size": -1,
+          "storage": "file",
+          "num_replicas": 3,
+          "duplicate_window": 120000000000,
+          "deny_delete": true,
+          "allow_rollup_hdrs": true,
+          "compression": "none",
+          "allow_direct": false,
+          "mirror_direct": false,
+          "consumer_limits": {},
+          "metadata": {
+            "_nats.level": "5",
+            "_nats.req.level": "0",
+            "_nats.ver": "2.15.0",
+            "js-wf-blob-format": "graph-recoverable-v1"
+          }
+        },
+        "created": "2026-10-11T08:05:48.828869779Z",
+        "state": {
+          "messages": 13836,
+          "bytes": 13010490,
+          "first_seq": 2,
+          "first_ts": "2026-10-11T08:05:50.564502686Z",
+          "last_seq": 20753,
+          "last_ts": "2026-10-11T08:08:15.468893638Z",
+          "consumer_count": 0,
+          "deleted": null,
+          "num_deleted": 6916,
+          "num_subjects": 13836,
+          "subjects": null
+        },
+        "cluster": {
+          "name": "wf-test",
+          "raft_group": "S-R3F-zvxHoV38",
+          "leader": "wf-test-2",
+          "leader_since": "2026-10-11T08:34:26.281681538Z",
+          "system_account": true,
+          "traffic_account": "$SYS",
+          "replicas": [
+            {
+              "name": "wf-test-0",
+              "current": true,
+              "active": 269271129,
+              "peer": "fPPVT2kZ"
+            },
+            {
+              "name": "wf-test-1",
+              "current": true,
+              "active": 269250738,
+              "peer": "OFrOUlB0"
+            }
+          ]
+        },
+        "ts": "2026-10-11T08:34:28.540697652Z"
+      }
+    },
+    {
+      "Phase": "node0.StreamInfo(WF_INV)",
+      "Nanos": 383103,
+      "Error": "",
+      "Value": {
+        "config": {
+          "name": "WF_INV",
+          "subjects": [
+            "wf.inv.*.*"
+          ],
+          "retention": "limits",
+          "max_consumers": -1,
+          "max_msgs": -1,
+          "max_bytes": -1,
+          "discard": "new",
+          "discard_new_per_subject": true,
+          "max_age": 0,
+          "max_msgs_per_subject": 1,
+          "max_msg_size": -1,
+          "storage": "file",
+          "num_replicas": 3,
+          "duplicate_window": 120000000000,
+          "compression": "none",
+          "allow_direct": false,
+          "mirror_direct": false,
+          "consumer_limits": {},
+          "metadata": {
+            "_nats.level": "5",
+            "_nats.req.level": "0",
+            "_nats.ver": "2.15.0"
+          }
+        },
+        "created": "2026-10-11T08:05:47.738056783Z",
+        "state": {
+          "messages": 990,
+          "bytes": 337590,
+          "first_seq": 1,
+          "first_ts": "2026-10-11T08:05:51.290514854Z",
+          "last_seq": 990,
+          "last_ts": "2026-10-11T08:08:14.967112768Z",
+          "consumer_count": 0,
+          "deleted": null,
+          "num_deleted": 0,
+          "num_subjects": 990,
+          "subjects": null
+        },
+        "cluster": {
+          "name": "wf-test",
+          "raft_group": "S-R3F-U7VEpd3z",
+          "leader": "wf-test-2",
+          "leader_since": "2026-10-11T08:34:25.945250673Z",
+          "system_account": true,
+          "traffic_account": "$SYS",
+          "replicas": [
+            {
+              "name": "wf-test-0",
+              "current": true,
+              "active": 595591504,
+              "peer": "fPPVT2kZ"
+            },
+            {
+              "name": "wf-test-1",
+              "current": true,
+              "active": 595579946,
+              "peer": "OFrOUlB0"
+            }
+          ]
+        },
+        "ts": "2026-10-11T08:34:28.541112031Z"
+      }
+    },
+    {
+      "Phase": "node0.StreamInfo(WF_RUN)",
+      "Nanos": 338995,
+      "Error": "",
+      "Value": {
+        "config": {
+          "name": "WF_RUN",
+          "subjects": [
+            "wf.run.*",
+            "wf.schedule.*.*.*"
+          ],
+          "retention": "workqueue",
+          "max_consumers": -1,
+          "max_msgs": -1,
+          "max_bytes": -1,
+          "discard": "old",
+          "max_age": 0,
+          "max_msgs_per_subject": -1,
+          "max_msg_size": -1,
+          "storage": "file",
+          "num_replicas": 3,
+          "duplicate_window": 120000000000,
+          "allow_rollup_hdrs": true,
+          "compression": "none",
+          "allow_direct": false,
+          "mirror_direct": false,
+          "consumer_limits": {},
+          "metadata": {
+            "_nats.level": "5",
+            "_nats.req.level": "2",
+            "_nats.ver": "2.15.0"
+          },
+          "allow_msg_schedules": true
+        },
+        "created": "2026-10-11T08:05:47.838618826Z",
+        "state": {
+          "messages": 551,
+          "bytes": 67139,
+          "first_seq": 171,
+          "first_ts": "2026-10-11T08:06:05.457361103Z",
+          "last_seq": 984,
+          "last_ts": "2026-10-11T08:08:15.543289062Z",
+          "consumer_count": 64,
+          "deleted": null,
+          "num_deleted": 263,
+          "num_subjects": 51,
+          "subjects": null
+        },
+        "cluster": {
+          "name": "wf-test",
+          "raft_group": "S-R3F-oXQJMMHc",
+          "leader": "wf-test-0",
+          "leader_since": "2026-10-11T08:34:26.270923824Z",
+          "system_account": true,
+          "traffic_account": "$SYS",
+          "replicas": [
+            {
+              "name": "wf-test-1",
+              "current": true,
+              "active": 270033468,
+              "peer": "OFrOUlB0"
+            },
+            {
+              "name": "wf-test-2",
+              "current": true,
+              "active": 270097365,
+              "peer": "80zpbVEM"
+            }
+          ]
+        },
+        "ts": "2026-10-11T08:34:28.541450837Z"
+      }
+    },
+    {
+      "Phase": "node1.StreamInfo(PURGE_SCALE_AUTH)",
+      "Nanos": 1766325,
+      "Error": "",
+      "Value": {
+        "config": {
+          "name": "PURGE_SCALE_AUTH",
+          "subjects": [
+            "wf.graph.purgescale.root.\u003e",
+            "wf.graph.purgescale.blob.\u003e",
+            "wf.graph.purgescale.owner.\u003e"
+          ],
+          "retention": "limits",
+          "max_consumers": -1,
+          "max_msgs": -1,
+          "max_bytes": -1,
+          "discard": "old",
+          "max_age": 0,
+          "max_msgs_per_subject": 1,
+          "max_msg_size": -1,
+          "storage": "file",
+          "num_replicas": 3,
+          "duplicate_window": 120000000000,
+          "deny_delete": true,
+          "deny_purge": true,
+          "compression": "none",
+          "allow_direct": false,
+          "mirror_direct": false,
+          "consumer_limits": {},
+          "metadata": {
+            "_nats.level": "5",
+            "_nats.req.level": "0",
+            "_nats.ver": "2.15.0",
+            "wf_graph_owner_index": "js-wf-graph-owner-index-v1"
+          }
+        },
+        "created": "2026-10-11T08:05:48.745906624Z",
+        "state": {
+          "messages": 15316,
+          "bytes": 12883045,
+          "first_seq": 250,
+          "first_ts": "2026-10-11T08:05:50.59006006Z",
+          "last_seq": 111100,
+          "last_ts": "2026-10-11T08:08:17.629518778Z",
+          "consumer_count": 0,
+          "deleted": null,
+          "num_deleted": 95535,
+          "num_subjects": 15316,
+          "subjects": null
+        },
+        "cluster": {
+          "name": "wf-test",
+          "raft_group": "S-R3F-iGJWZ7r7",
+          "leader": "wf-test-1",
+          "leader_since": "2026-10-11T08:34:25.239168133Z",
+          "system_account": true,
+          "traffic_account": "$SYS",
+          "replicas": [
+            {
+              "name": "wf-test-0",
+              "current": true,
+              "active": 303959822,
+              "peer": "fPPVT2kZ"
+            },
+            {
+              "name": "wf-test-2",
+              "current": true,
+              "active": 303973032,
+              "peer": "80zpbVEM"
+            }
+          ]
+        },
+        "ts": "2026-10-11T08:34:28.543213746Z"
+      }
+    },
+    {
+      "Phase": "node1.StreamInfo(OBJ_PURGE_SCALE_OBJECTS)",
+      "Nanos": 427821,
+      "Error": "",
+      "Value": {
+        "config": {
+          "name": "OBJ_PURGE_SCALE_OBJECTS",
+          "subjects": [
+            "$O.PURGE_SCALE_OBJECTS.C.\u003e",
+            "$O.PURGE_SCALE_OBJECTS.M.\u003e"
+          ],
+          "retention": "limits",
+          "max_consumers": -1,
+          "max_msgs": -1,
+          "max_bytes": -1,
+          "discard": "old",
+          "max_age": 0,
+          "max_msgs_per_subject": -1,
+          "max_msg_size": -1,
+          "storage": "file",
+          "num_replicas": 3,
+          "duplicate_window": 120000000000,
+          "deny_delete": true,
+          "allow_rollup_hdrs": true,
+          "compression": "none",
+          "allow_direct": false,
+          "mirror_direct": false,
+          "consumer_limits": {},
+          "metadata": {
+            "_nats.level": "5",
+            "_nats.req.level": "0",
+            "_nats.ver": "2.15.0",
+            "js-wf-blob-format": "graph-recoverable-v1"
+          }
+        },
+        "created": "2026-10-11T08:05:48.828869779Z",
+        "state": {
+          "messages": 13836,
+          "bytes": 13010490,
+          "first_seq": 2,
+          "first_ts": "2026-10-11T08:05:50.564502686Z",
+          "last_seq": 20753,
+          "last_ts": "2026-10-11T08:08:15.468893638Z",
+          "consumer_count": 0,
+          "deleted": null,
+          "num_deleted": 6916,
+          "num_subjects": 13836,
+          "subjects": null
+        },
+        "cluster": {
+          "name": "wf-test",
+          "raft_group": "S-R3F-zvxHoV38",
+          "leader": "wf-test-2",
+          "leader_since": "2026-10-11T08:34:26.281681538Z",
+          "system_account": true,
+          "traffic_account": "$SYS",
+          "replicas": [
+            {
+              "name": "wf-test-0",
+              "current": true,
+              "active": 272236527,
+              "peer": "fPPVT2kZ"
+            },
+            {
+              "name": "wf-test-1",
+              "current": true,
+              "active": 272216136,
+              "peer": "OFrOUlB0"
+            }
+          ]
+        },
+        "ts": "2026-10-11T08:34:28.543666304Z"
+      }
+    },
+    {
+      "Phase": "node1.StreamInfo(WF_INV)",
+      "Nanos": 316161,
+      "Error": "",
+      "Value": {
+        "config": {
+          "name": "WF_INV",
+          "subjects": [
+            "wf.inv.*.*"
+          ],
+          "retention": "limits",
+          "max_consumers": -1,
+          "max_msgs": -1,
+          "max_bytes": -1,
+          "discard": "new",
+          "discard_new_per_subject": true,
+          "max_age": 0,
+          "max_msgs_per_subject": 1,
+          "max_msg_size": -1,
+          "storage": "file",
+          "num_replicas": 3,
+          "duplicate_window": 120000000000,
+          "compression": "none",
+          "allow_direct": false,
+          "mirror_direct": false,
+          "consumer_limits": {},
+          "metadata": {
+            "_nats.level": "5",
+            "_nats.req.level": "0",
+            "_nats.ver": "2.15.0"
+          }
+        },
+        "created": "2026-10-11T08:05:47.738056783Z",
+        "state": {
+          "messages": 990,
+          "bytes": 337590,
+          "first_seq": 1,
+          "first_ts": "2026-10-11T08:05:51.290514854Z",
+          "last_seq": 990,
+          "last_ts": "2026-10-11T08:08:14.967112768Z",
+          "consumer_count": 0,
+          "deleted": null,
+          "num_deleted": 0,
+          "num_subjects": 990,
+          "subjects": null
+        },
+        "cluster": {
+          "name": "wf-test",
+          "raft_group": "S-R3F-U7VEpd3z",
+          "leader": "wf-test-2",
+          "leader_since": "2026-10-11T08:34:25.945250673Z",
+          "system_account": true,
+          "traffic_account": "$SYS",
+          "replicas": [
+            {
+              "name": "wf-test-0",
+              "current": true,
+              "active": 598485744,
+              "peer": "fPPVT2kZ"
+            },
+            {
+              "name": "wf-test-1",
+              "current": true,
+              "active": 598474186,
+              "peer": "OFrOUlB0"
+            }
+          ]
+        },
+        "ts": "2026-10-11T08:34:28.544011629Z"
+      }
+    },
+    {
+      "Phase": "node1.StreamInfo(WF_RUN)",
+      "Nanos": 337964,
+      "Error": "",
+      "Value": {
+        "config": {
+          "name": "WF_RUN",
+          "subjects": [
+            "wf.run.*",
+            "wf.schedule.*.*.*"
+          ],
+          "retention": "workqueue",
+          "max_consumers": -1,
+          "max_msgs": -1,
+          "max_bytes": -1,
+          "discard": "old",
+          "max_age": 0,
+          "max_msgs_per_subject": -1,
+          "max_msg_size": -1,
+          "storage": "file",
+          "num_replicas": 3,
+          "duplicate_window": 120000000000,
+          "allow_rollup_hdrs": true,
+          "compression": "none",
+          "allow_direct": false,
+          "mirror_direct": false,
+          "consumer_limits": {},
+          "metadata": {
+            "_nats.level": "5",
+            "_nats.req.level": "2",
+            "_nats.ver": "2.15.0"
+          },
+          "allow_msg_schedules": true
+        },
+        "created": "2026-10-11T08:05:47.838618826Z",
+        "state": {
+          "messages": 551,
+          "bytes": 67139,
+          "first_seq": 171,
+          "first_ts": "2026-10-11T08:06:05.457361103Z",
+          "last_seq": 984,
+          "last_ts": "2026-10-11T08:08:15.543289062Z",
+          "consumer_count": 64,
+          "deleted": null,
+          "num_deleted": 263,
+          "num_subjects": 51,
+          "subjects": null
+        },
+        "cluster": {
+          "name": "wf-test",
+          "raft_group": "S-R3F-oXQJMMHc",
+          "leader": "wf-test-0",
+          "leader_since": "2026-10-11T08:34:26.270923824Z",
+          "system_account": true,
+          "traffic_account": "$SYS",
+          "replicas": [
+            {
+              "name": "wf-test-1",
+              "current": true,
+              "active": 272933817,
+              "peer": "OFrOUlB0"
+            },
+            {
+              "name": "wf-test-2",
+              "current": true,
+              "active": 272997714,
+              "peer": "80zpbVEM"
+            }
+          ]
+        },
+        "ts": "2026-10-11T08:34:28.544350505Z"
+      }
+    },
+    {
+      "Phase": "node2.StreamInfo(PURGE_SCALE_AUTH)",
+      "Nanos": 658882,
+      "Error": "",
+      "Value": {
+        "config": {
+          "name": "PURGE_SCALE_AUTH",
+          "subjects": [
+            "wf.graph.purgescale.root.\u003e",
+            "wf.graph.purgescale.blob.\u003e",
+            "wf.graph.purgescale.owner.\u003e"
+          ],
+          "retention": "limits",
+          "max_consumers": -1,
+          "max_msgs": -1,
+          "max_bytes": -1,
+          "discard": "old",
+          "max_age": 0,
+          "max_msgs_per_subject": 1,
+          "max_msg_size": -1,
+          "storage": "file",
+          "num_replicas": 3,
+          "duplicate_window": 120000000000,
+          "deny_delete": true,
+          "deny_purge": true,
+          "compression": "none",
+          "allow_direct": false,
+          "mirror_direct": false,
+          "consumer_limits": {},
+          "metadata": {
+            "_nats.level": "5",
+            "_nats.req.level": "0",
+            "_nats.ver": "2.15.0",
+            "wf_graph_owner_index": "js-wf-graph-owner-index-v1"
+          }
+        },
+        "created": "2026-10-11T08:05:48.745906624Z",
+        "state": {
+          "messages": 15316,
+          "bytes": 12883045,
+          "first_seq": 250,
+          "first_ts": "2026-10-11T08:05:50.59006006Z",
+          "last_seq": 111100,
+          "last_ts": "2026-10-11T08:08:17.629518778Z",
+          "consumer_count": 0,
+          "deleted": null,
+          "num_deleted": 95535,
+          "num_subjects": 15316,
+          "subjects": null
+        },
+        "cluster": {
+          "name": "wf-test",
+          "raft_group": "S-R3F-iGJWZ7r7",
+          "leader": "wf-test-1",
+          "leader_since": "2026-10-11T08:34:25.239168133Z",
+          "system_account": true,
+          "traffic_account": "$SYS",
+          "replicas": [
+            {
+              "name": "wf-test-0",
+              "current": true,
+              "active": 305750795,
+              "peer": "fPPVT2kZ"
+            },
+            {
+              "name": "wf-test-2",
+              "current": true,
+              "active": 305764005,
+              "peer": "80zpbVEM"
+            }
+          ]
+        },
+        "ts": "2026-10-11T08:34:28.545003237Z"
+      }
+    },
+    {
+      "Phase": "node2.StreamInfo(OBJ_PURGE_SCALE_OBJECTS)",
+      "Nanos": 304222,
+      "Error": "",
+      "Value": {
+        "config": {
+          "name": "OBJ_PURGE_SCALE_OBJECTS",
+          "subjects": [
+            "$O.PURGE_SCALE_OBJECTS.C.\u003e",
+            "$O.PURGE_SCALE_OBJECTS.M.\u003e"
+          ],
+          "retention": "limits",
+          "max_consumers": -1,
+          "max_msgs": -1,
+          "max_bytes": -1,
+          "discard": "old",
+          "max_age": 0,
+          "max_msgs_per_subject": -1,
+          "max_msg_size": -1,
+          "storage": "file",
+          "num_replicas": 3,
+          "duplicate_window": 120000000000,
+          "deny_delete": true,
+          "allow_rollup_hdrs": true,
+          "compression": "none",
+          "allow_direct": false,
+          "mirror_direct": false,
+          "consumer_limits": {},
+          "metadata": {
+            "_nats.level": "5",
+            "_nats.req.level": "0",
+            "_nats.ver": "2.15.0",
+            "js-wf-blob-format": "graph-recoverable-v1"
+          }
+        },
+        "created": "2026-10-11T08:05:48.828869779Z",
+        "state": {
+          "messages": 13836,
+          "bytes": 13010490,
+          "first_seq": 2,
+          "first_ts": "2026-10-11T08:05:50.564502686Z",
+          "last_seq": 20753,
+          "last_ts": "2026-10-11T08:08:15.468893638Z",
+          "consumer_count": 0,
+          "deleted": null,
+          "num_deleted": 6916,
+          "num_subjects": 13836,
+          "subjects": null
+        },
+        "cluster": {
+          "name": "wf-test",
+          "raft_group": "S-R3F-zvxHoV38",
+          "leader": "wf-test-2",
+          "leader_since": "2026-10-11T08:34:26.281681538Z",
+          "system_account": true,
+          "traffic_account": "$SYS",
+          "replicas": [
+            {
+              "name": "wf-test-0",
+              "current": true,
+              "active": 273898523,
+              "peer": "fPPVT2kZ"
+            },
+            {
+              "name": "wf-test-1",
+              "current": true,
+              "active": 273878132,
+              "peer": "OFrOUlB0"
+            }
+          ]
+        },
+        "ts": "2026-10-11T08:34:28.545322973Z"
+      }
+    },
+    {
+      "Phase": "node2.StreamInfo(WF_INV)",
+      "Nanos": 346617,
+      "Error": "",
+      "Value": {
+        "config": {
+          "name": "WF_INV",
+          "subjects": [
+            "wf.inv.*.*"
+          ],
+          "retention": "limits",
+          "max_consumers": -1,
+          "max_msgs": -1,
+          "max_bytes": -1,
+          "discard": "new",
+          "discard_new_per_subject": true,
+          "max_age": 0,
+          "max_msgs_per_subject": 1,
+          "max_msg_size": -1,
+          "storage": "file",
+          "num_replicas": 3,
+          "duplicate_window": 120000000000,
+          "compression": "none",
+          "allow_direct": false,
+          "mirror_direct": false,
+          "consumer_limits": {},
+          "metadata": {
+            "_nats.level": "5",
+            "_nats.req.level": "0",
+            "_nats.ver": "2.15.0"
+          }
+        },
+        "created": "2026-10-11T08:05:47.738056783Z",
+        "state": {
+          "messages": 990,
+          "bytes": 337590,
+          "first_seq": 1,
+          "first_ts": "2026-10-11T08:05:51.290514854Z",
+          "last_seq": 990,
+          "last_ts": "2026-10-11T08:08:14.967112768Z",
+          "consumer_count": 0,
+          "deleted": null,
+          "num_deleted": 0,
+          "num_subjects": 990,
+          "subjects": null
+        },
+        "cluster": {
+          "name": "wf-test",
+          "raft_group": "S-R3F-U7VEpd3z",
+          "leader": "wf-test-2",
+          "leader_since": "2026-10-11T08:34:25.945250673Z",
+          "system_account": true,
+          "traffic_account": "$SYS",
+          "replicas": [
+            {
+              "name": "wf-test-0",
+              "current": true,
+              "active": 600158116,
+              "peer": "fPPVT2kZ"
+            },
+            {
+              "name": "wf-test-1",
+              "current": true,
+              "active": 600146558,
+              "peer": "OFrOUlB0"
+            }
+          ]
+        },
+        "ts": "2026-10-11T08:34:28.545682279Z"
+      }
+    },
+    {
+      "Phase": "node2.StreamInfo(WF_RUN)",
+      "Nanos": 674044,
+      "Error": "",
+      "Value": {
+        "config": {
+          "name": "WF_RUN",
+          "subjects": [
+            "wf.run.*",
+            "wf.schedule.*.*.*"
+          ],
+          "retention": "workqueue",
+          "max_consumers": -1,
+          "max_msgs": -1,
+          "max_bytes": -1,
+          "discard": "old",
+          "max_age": 0,
+          "max_msgs_per_subject": -1,
+          "max_msg_size": -1,
+          "storage": "file",
+          "num_replicas": 3,
+          "duplicate_window": 120000000000,
+          "allow_rollup_hdrs": true,
+          "compression": "none",
+          "allow_direct": false,
+          "mirror_direct": false,
+          "consumer_limits": {},
+          "metadata": {
+            "_nats.level": "5",
+            "_nats.req.level": "2",
+            "_nats.ver": "2.15.0"
+          },
+          "allow_msg_schedules": true
+        },
+        "created": "2026-10-11T08:05:47.838618826Z",
+        "state": {
+          "messages": 551,
+          "bytes": 67139,
+          "first_seq": 171,
+          "first_ts": "2026-10-11T08:06:05.457361103Z",
+          "last_seq": 984,
+          "last_ts": "2026-10-11T08:08:15.543289062Z",
+          "consumer_count": 64,
+          "deleted": null,
+          "num_deleted": 263,
+          "num_subjects": 51,
+          "subjects": null
+        },
+        "cluster": {
+          "name": "wf-test",
+          "raft_group": "S-R3F-oXQJMMHc",
+          "leader": "wf-test-0",
+          "leader_since": "2026-10-11T08:34:26.270923824Z",
+          "system_account": true,
+          "traffic_account": "$SYS",
+          "replicas": [
+            {
+              "name": "wf-test-1",
+              "current": true,
+              "active": 274897212,
+              "peer": "OFrOUlB0"
+            },
+            {
+              "name": "wf-test-2",
+              "current": true,
+              "active": 274961109,
+              "peer": "80zpbVEM"
+            }
+          ]
+        },
+        "ts": "2026-10-11T08:34:28.546315632Z"
+      }
+    }
+  ],
+  "Error": "node0.StreamInfo(PURGE_SCALE_AUTH): context deadline exceeded"
+}
