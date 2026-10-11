@@ -1,5 +1,19 @@
 # JetStream Durable Workflow Runtime — Implementation Plan
 
+## Cancelled timer wakeups after archived checkpoints — 2026-10-11
+
+Native R1/R3Domain race cases pass in93.701s. After checkpoint compaction and
+object collection, three independently fenced cancelled wakeups per case (step4
+at next; steps4/14 at finish) must return no-op, preserve complete logical history
+and leave handler/effect counts unchanged despite a future supplied timestamp.
+Both workflows then complete normally and pass independent raw history audits.
+CI requires all six receipts. This injects the production execute boundary; broker
+delivery/ACK metrics and tagged-clock/kill qualification remain separate.
+[Evidence, retained stores and exact scope](scale/native-sdk-cancelled-timer-wakeup-2026-10-11/README.md).
+
+Both frozen larger campaigns remain running under their original invocations;
+the100000-entry normal is verifying its second checkpoint after completing padding.
+
 ## Positive native timer wakeup through SDK continuations — 2026-10-11
 
 Real R1/R3Domain RunPartition workers suspend on a75ms SDK timer and resume from

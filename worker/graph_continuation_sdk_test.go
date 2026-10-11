@@ -51,6 +51,17 @@ func TestNativeGraphContinuationTimerHistory(t *testing.T) {
 		}
 	}
 }
+func TestNativeGraphContinuationCancelledTimerWakeup(t *testing.T) {
+	for _, domain := range []string{"", "WFCONTINUATIONSDK"} {
+		name := "R1"
+		if domain != "" {
+			name = "R3Domain"
+		}
+		t.Run(name, func(t *testing.T) {
+			testNativeGraphContinuationSDKFlow(t, domain, false, false, false, false, true, false, false, false, false, false, true, false, true)
+		})
+	}
+}
 func TestNativeGraphContinuationScheduledTimerFlow(t *testing.T) {
 	for _, domain := range []string{"", "WFCONTINUATIONSDK"} {
 		name := "R1"
@@ -179,7 +190,7 @@ func TestNativeGraphContinuationArchiveCollection(t *testing.T) {
 	}
 }
 func testNativeGraphContinuationSDKFlow(t *testing.T, domain string, partition, bufferedSignals, childPromiseFlow, bufferedChild bool, archiveMode ...bool) {
-	// Optional modes: archive, failed child, pending child, cancel pending parent, running effect cancellation, late success, timer history, positive timer wakeup.
+	// Optional modes: archive, failed child, pending child, cancel pending parent, running effect cancellation, late success, timer history, positive timer wakeup, cancelled timer wakeup.
 	archive := len(archiveMode) != 0 && archiveMode[0]
 	childFailure := len(archiveMode) > 1 && archiveMode[1]
 	pendingChild := len(archiveMode) > 2 && archiveMode[2]
@@ -188,6 +199,7 @@ func testNativeGraphContinuationSDKFlow(t *testing.T, domain string, partition, 
 	lateEffectSuccess := len(archiveMode) > 5 && archiveMode[5]
 	timerHistory := len(archiveMode) > 6 && archiveMode[6]
 	positiveTimer := len(archiveMode) > 7 && archiveMode[7]
+	cancelledWakeup := len(archiveMode) > 8 && archiveMode[8]
 	effectEntered := make(chan struct{})
 	if cancelPendingChild && !pendingChild {
 		t.Fatal("cancellation fixture requires an unresolved child")
@@ -508,7 +520,7 @@ func testNativeGraphContinuationSDKFlow(t *testing.T, domain string, partition, 
 		}
 		leases = lease.NewWithKeyValue(sdkLeaseTraceKV{KeyValue: kv, t: t, js: js})
 	}
-	executeWorkflow := func(typ, id, workerID string) {
+	executeWorkflow := func(typ, id, workerID string, wakeups ...timerWakeup) bool {
 		t.Helper()
 		owner, err := leases.Acquire(ctx, typ, id, workerID)
 		if err != nil {
@@ -539,13 +551,20 @@ func testNativeGraphContinuationSDKFlow(t *testing.T, domain string, partition, 
 				}
 			}
 		}()
-		err = runner.execute(stageCtx, typ, id, owner, time.Time{}, timerWakeup{}, &noOp, runner.deliveryOperations(typ, id, 0, 0))
+		wakeup := timerWakeup{}
+		at := time.Time{}
+		if len(wakeups) > 0 {
+			wakeup = wakeups[0]
+			at = time.Now().Add(2 * time.Hour)
+		}
+		err = runner.execute(stageCtx, typ, id, owner, at, wakeup, &noOp, runner.deliveryOperations(typ, id, 0, 0))
 		stopStage()
 		heartbeatErr := <-heartbeatDone
 		releaseErr := owner.Release(ctx)
 		if err != nil && !(cancelRunningEffect && errors.Is(err, context.Canceled)) || releaseErr != nil || heartbeatErr != nil && !errors.Is(heartbeatErr, context.Canceled) {
 			t.Fatal("SDK stage delivery", err, releaseErr, heartbeatErr)
 		}
+		return noOp
 	}
 	execute := func() { executeWorkflow(h.Type, h.ID, "sdkcontinue") }
 	scan, err := reconcile.NewCanonicalContinuationScan(js, graph)
@@ -762,6 +781,31 @@ func testNativeGraphContinuationSDKFlow(t *testing.T, domain string, partition, 
 				t.Fatal("SDK boundary wakeup not recovered", stage, result, err)
 			}
 			phase("boundary_scan_end_" + stage)
+			if cancelledWakeup {
+				steps := []uint64{4}
+				if stage == "finish" {
+					steps = append(steps, 14)
+				}
+				for _, step := range steps {
+					before, _, err := graph.ReadExisting(ctx, h.Type, h.ID, h.InvSeq)
+					if err != nil {
+						t.Fatal(err)
+					}
+					priorCalls, priorEffects := fmt.Sprint(calls), effects
+					noOp := executeWorkflow(h.Type, h.ID, "cancelled-wakeup", timerWakeup{scheduled: true, generation: h.InvSeq, step: step})
+					after, _, err := graph.ReadExisting(ctx, h.Type, h.ID, h.InvSeq)
+					if err != nil {
+						t.Fatal(err)
+					}
+					a, _ := json.Marshal(before)
+					b, _ := json.Marshal(after)
+					if !noOp || !bytes.Equal(a, b) || effects != priorEffects || fmt.Sprint(calls) != priorCalls {
+						t.Fatal("cancelled timer reentered archived handler", stage, step, noOp, calls, effects)
+					}
+					t.Logf("SDK_CANCELLED_TIMER_WAKEUP stage=%s step=%d no_op=true immutable_history=true unchanged_effects=true archive=true", stage, step)
+				}
+			}
+
 			if childPromiseFlow {
 				if stage == "next" && !pendingChild {
 					executeWorkflow(childPromise.ChildType, childPromise.ChildID, "sdkchild")
