@@ -1,5 +1,20 @@
 # JetStream Durable Workflow Runtime — Implementation Plan
 
+## SDK checkpoint state reconstructed from journal history — 2026-10-11
+
+The independent checker now reconstructs completed state writes and validates
+reads across archived/live prefixes. The latest worker-annotated SDK checkpoint
+must contain exactly that state map; external results require owned bytes.
+Ten JSON/protobuf positives and11 physical-reference-valid corruptions pass
+race in1.147s; six actual R1/R3Domain SDK cases pass in83.036s. Existing checkpoint
+and metadata fixture regression cases also pass.
+[Evidence and scope](scale/raw-graph-sdk-state-history-2026-10-11/README.md).
+
+Promise/signal/timer history reconstruction, every historical checkpoint,
+protected reader semantics and original full acceptance remain open. Journal-only
+frames receive structural state checks. Both frozen qualification runs remain live.
+
+
 ## Independent persistent signal indexes validated — 2026-10-11
 
 The raw graph checker independently decodes both signal indexes, binds each

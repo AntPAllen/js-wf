@@ -5,6 +5,7 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
+	"strings"
 	"testing"
 	"time"
 
@@ -28,13 +29,49 @@ func rawJournalCheckpointFixture(t *testing.T, encoding journal.Encoding, archiv
 		{Index: 2, Epoch: 1, WorkerID: "worker", Kind: journal.StepCompleted, Payload: json.RawMessage(`{"result":42}`)},
 		{Index: 3, Epoch: 1, WorkerID: "worker", Kind: journal.Completed, Payload: json.RawMessage(`{"inv_seq":10,"result":"NDI="}`)},
 	}
+	history := strings.HasPrefix(control, "history-")
+	requestIndex, frameIndex, position := uint64(1), uint64(2), uint64(2)
+	var stateResult []byte
+	if history {
+		requestIndex, frameIndex, position = 3, 4, 4
+		stateRequest := json.RawMessage(`{"kind":"state_set","name":"value","input_hash":"` + digest([]byte(`42`)) + `"}`)
+		stateCompletion := json.RawMessage(`{"result":{"found":true,"value":42}}`)
+		switch control {
+		case "history-write-hash":
+			stateRequest = json.RawMessage(`{"kind":"state_set","name":"value","input_hash":"` + digest([]byte(`43`)) + `"}`)
+		case "history-write-missing":
+			stateCompletion = json.RawMessage(`{"result":{"found":false}}`)
+		case "history-write-error", "history-write-error-valid":
+			stateCompletion = json.RawMessage(`{"error":"failed"}`)
+		case "history-read-absent-valid":
+			stateRequest = json.RawMessage(`{"kind":"state_get","name":"value","input_hash":"` + digest([]byte(`null`)) + `"}`)
+			stateCompletion = json.RawMessage(`{"result":{"found":false}}`)
+		case "history-read-fabricated":
+			stateRequest = json.RawMessage(`{"kind":"state_get","name":"value","input_hash":"` + digest([]byte(`null`)) + `"}`)
+		case "history-null-valid":
+			stateRequest = json.RawMessage(`{"kind":"state_set","name":"value","input_hash":"` + digest([]byte(`null`)) + `"}`)
+			stateCompletion = json.RawMessage(`{"result":{"found":true,"value":null}}`)
+		case "history-result-null":
+			stateCompletion = json.RawMessage(`{"result":null}`)
+		case "history-result-unknown":
+			stateCompletion = json.RawMessage(`{"result":{"found":true,"value":42,"other":1}}`)
+		}
+		if strings.HasPrefix(control, "history-external-") {
+			stateResult = []byte(`{"found":true,"value":42}`)
+			stateCompletion = json.RawMessage(`{"result_ref":"step-result-` + digest(stateResult) + `","result_hash":"` + digest(stateResult) + `"}`)
+			if control == "history-external-wrong" {
+				stateResult = []byte(`{"found":true,"value":43}`)
+			}
+		}
+		entries = []journal.Entry{entries[0], {Index: 1, Epoch: 1, WorkerID: "worker", Kind: journal.StepRequested, Payload: stateRequest}, {Index: 2, Epoch: 1, WorkerID: "worker", Kind: journal.StepCompleted, Payload: stateCompletion}, {Index: 3, Epoch: 1, WorkerID: "worker", Kind: journal.StepRequested}, {Index: 4, Epoch: 1, WorkerID: "worker", Kind: journal.StepCompleted}, {Index: 5, Epoch: 1, WorkerID: "worker", Kind: journal.Completed, Payload: entries[3].Payload}}
+	}
 	var frameBytes []byte
 	var promiseBytes [][]byte
 	var metadataBytes []byte
 	var pointer auditedCheckpointPointer
 	if archive {
 		// Independently encoded frame and pointer; no production writer/reader.
-		frame := map[string]any{"version": 1, "identity": map[string]any{"type": "kind", "id": "id", "inv_seq": 10}, "stage": "next", "data": map[string]int{"x": 1}, "anchor": map[string]uint64{"index": 2, "epoch": 1}, "step_position": 2}
+		frame := map[string]any{"version": 1, "identity": map[string]any{"type": "kind", "id": "id", "inv_seq": 10}, "stage": "next", "data": map[string]int{"x": 1}, "anchor": map[string]uint64{"index": frameIndex, "epoch": 1}, "step_position": position}
 		switch control {
 		case "promise-owned-valid", "promise-owned-missing", "promise-owned-wrong", "promise-owned-conflict":
 			outcomes := map[string]any{"child": map[string]any{"inv_seq": 3, "result_ref": "promise-result", "result_hash": digest([]byte(`42`))}}
@@ -113,12 +150,25 @@ func rawJournalCheckpointFixture(t *testing.T, encoding journal.Encoding, archiv
 		case "frame-locals":
 			frame["data"] = map[string]int{"x": 2}
 		}
+		if history {
+			frame["state"] = map[string]any{"value": 42}
+			switch control {
+			case "history-frame-value":
+				frame["state"] = map[string]any{"value": 43}
+			case "history-frame-missing", "history-read-absent-valid", "history-write-error-valid":
+				frame["state"] = map[string]any{}
+			case "history-null-valid":
+				frame["state"] = map[string]any{"value": nil}
+			case "history-frame-extra":
+				frame["state"] = map[string]any{"value": 42, "extra": 1}
+			}
+		}
 		frameBytes, _ = json.Marshal(frame)
 		hash := digest(frameBytes)
-		entries[1].Payload = json.RawMessage(`{"kind":"checkpoint","name":"next","input_hash":"` + digest([]byte(`{"x":1}`)) + `"}`)
-		entries[2].Payload = json.RawMessage(`{"result_ref":"step-result-` + hash + `","result_hash":"` + hash + `"}`)
-		if len(control) >= 9 && control[:9] == "metadata-" {
-			meta := map[string]any{"version": 1, "identity": map[string]any{"type": "kind", "id": "id", "inv_seq": 10}, "anchor": map[string]uint64{"index": 2, "epoch": 1}, "frame_sha256": hash, "children": map[string]any{}, "signals": map[string]any{}, "signal_next": 0, "signal_last": 0}
+		entries[requestIndex].Payload = json.RawMessage(`{"kind":"checkpoint","name":"next","input_hash":"` + digest([]byte(`{"x":1}`)) + `"}`)
+		entries[frameIndex].Payload = json.RawMessage(`{"result_ref":"step-result-` + hash + `","result_hash":"` + hash + `"}`)
+		if len(control) >= 9 && control[:9] == "metadata-" || history {
+			meta := map[string]any{"version": 1, "identity": map[string]any{"type": "kind", "id": "id", "inv_seq": 10}, "anchor": map[string]uint64{"index": frameIndex, "epoch": 1}, "frame_sha256": hash, "children": map[string]any{}, "signals": map[string]any{}, "signal_next": 0, "signal_last": 0}
 			switch control {
 			case "metadata-generation":
 				meta["identity"] = map[string]any{"type": "kind", "id": "id", "inv_seq": 11}
@@ -144,10 +194,10 @@ func rawJournalCheckpointFixture(t *testing.T, encoding journal.Encoding, archiv
 			if control == "metadata-wrong-edge" {
 				completion["checkpoint_metadata_ref"], completion["checkpoint_metadata_hash"] = "step-result-"+digest([]byte("wrong")), digest([]byte("wrong"))
 			}
-			entries[2].Payload, _ = json.Marshal(completion)
+			entries[frameIndex].Payload, _ = json.Marshal(completion)
 		}
-		pointer.RequestIndex = 1
-		pointer.Runtime.InvSeq, pointer.Runtime.Stage, pointer.Runtime.Sequence, pointer.Runtime.Index, pointer.Runtime.Epoch, pointer.Runtime.StepPosition, pointer.Runtime.Object, pointer.Runtime.SHA256 = 10, "next", 103, 2, 1, 2, "step-result-"+hash, hash
+		pointer.RequestIndex = requestIndex
+		pointer.Runtime.InvSeq, pointer.Runtime.Stage, pointer.Runtime.Sequence, pointer.Runtime.Index, pointer.Runtime.Epoch, pointer.Runtime.StepPosition, pointer.Runtime.Object, pointer.Runtime.SHA256 = 10, "next", 101+frameIndex, frameIndex, 1, position, "step-result-"+hash, hash
 		switch control {
 		case "pointer-generation":
 			pointer.Runtime.InvSeq++
@@ -169,7 +219,7 @@ func rawJournalCheckpointFixture(t *testing.T, encoding journal.Encoding, archiv
 		alter(entries)
 	}
 	objects := map[string][]byte{}
-	projections := map[string][]byte{"kind.id": entries[3].Payload}
+	projections := map[string][]byte{"kind.id": entries[len(entries)-1].Payload}
 	graph := GraphReferenceSnapshot{Roots: map[string]graphpublication.Root{}, Fences: map[string]graphpublication.Fence{}, PayloadLimit: 1024}
 	graph.LoadObject = func(ctx context.Context, name string, limit int) ([]byte, error) {
 		data, ok := objects[name]
@@ -204,16 +254,19 @@ func rawJournalCheckpointFixture(t *testing.T, encoding journal.Encoding, archiv
 			EntrySHA256 string `json:"entry_sha256"`
 		}{"js-wf-graph-journal-entry-v1", inv, 101 + index, edge.Hash})
 		blobs := []retainedgraph.Link{edge}
-		if archive && index == 2 && control != "frame-unowned" {
+		if archive && index == frameIndex && control != "frame-unowned" {
 			blobs = append(blobs, put(frameBytes, graphpublication.Location{Kind: "payload", First: first, Stream: stream}))
 		}
-		if archive && index == 2 && len(metadataBytes) > 0 && control != "metadata-unowned" {
+		if archive && index == frameIndex && len(metadataBytes) > 0 && control != "metadata-unowned" {
 			blobs = append(blobs, put(metadataBytes, graphpublication.Location{Kind: "payload", First: first, Stream: stream}))
 		}
-		if archive && index == 2 {
+		if archive && index == frameIndex {
 			for _, data := range promiseBytes {
 				blobs = append(blobs, put(data, graphpublication.Location{Kind: "payload", First: first, Stream: stream}))
 			}
+		}
+		if history && index == 2 && len(stateResult) > 0 && control != "history-external-unowned" {
+			blobs = append(blobs, put(stateResult, graphpublication.Location{Kind: "payload", First: first, Stream: stream}))
 		}
 		if missingEntry && index == 1 {
 			blobs = nil
@@ -241,7 +294,7 @@ func rawJournalCheckpointFixture(t *testing.T, encoding journal.Encoding, archiv
 		}{retainedgraph.Schema, first, height, []retainedgraph.Link{left.Link, right.Link}})
 		return retainedgraph.Tree{First: first, Height: height, Link: put(data, graphpublication.Location{Kind: "node", First: first, Height: height, Stream: stream})}
 	}
-	cursor := auditedGraphCursor{Schema: "js-wf-graph-journal-cursor-v1", Invocation: 10, Base: 100, Count: 4, Epoch: 1, Kind: journal.Completed}
+	cursor := auditedGraphCursor{Schema: "js-wf-graph-journal-cursor-v1", Invocation: 10, Base: 100, Count: uint64(len(entries)), Epoch: 1, Kind: journal.Completed}
 	root := graphpublication.Root{Schema: graphpublication.ApplicationSchema, Head: 20, Token: "owner", Graph: retainedgraph.Root{Schema: retainedgraph.Schema, Count: 4, Frontier: []retainedgraph.Tree{tree(0, 0, 2, "")}}}
 	source := &jetstream.RawStreamMsg{Sequence: 10, Subject: "wf.inv.kind.id", Data: []byte("input")}
 	if archive {
@@ -249,7 +302,7 @@ func rawJournalCheckpointFixture(t *testing.T, encoding journal.Encoding, archiv
 		objects = map[string][]byte{}
 		graph.Fences = map[string]graphpublication.Fence{}
 		cursor.Schema = "js-wf-graph-runtime-cursor-v6"
-		cursor.RetainedFrom = 1
+		cursor.RetainedFrom = requestIndex
 		cursor.Checkpoint, _ = json.Marshal(pointer)
 		start := journal.GraphStart{Schema: "js-wf-canonical-start-v1", Token: "start", Request: journal.GraphStartRequest{Type: "kind", ID: "id"}, InputSHA256: digest([]byte("input")), InputSize: 5}
 		cursor.Start = &start
@@ -262,8 +315,11 @@ func rawJournalCheckpointFixture(t *testing.T, encoding journal.Encoding, archiv
 			Record *retainedgraph.Record
 		}{retainedgraph.Schema, 0, 0, &retainedgraph.Record{Data: startData, Blobs: []retainedgraph.Link{inputLink}}})
 		root.Schema = graphpublication.StreamsSchema
-		root.Graph = retainedgraph.Root{Schema: retainedgraph.Schema, Count: 3, Frontier: []retainedgraph.Tree{tree(1, 0, 1, ""), tree(3, 2, 0, "")}}
+		root.Graph = retainedgraph.Root{Schema: retainedgraph.Schema, Count: 3, Frontier: []retainedgraph.Tree{tree(requestIndex, 0, 1, ""), tree(requestIndex+2, 2, 0, "")}}
 		root.Streams = []graphpublication.StreamGraph{{Name: "archive", Graph: retainedgraph.Root{Schema: retainedgraph.Schema, Count: 1, Frontier: []retainedgraph.Tree{tree(0, 0, 0, "archive")}}}, {Name: "input", Graph: retainedgraph.Root{Schema: retainedgraph.Schema, Count: 1, Frontier: []retainedgraph.Tree{{Link: put(inputNode, graphpublication.Location{Kind: "node", Stream: "input"})}}}}}
+		if history {
+			root.Streams[0].Graph = retainedgraph.Root{Schema: retainedgraph.Schema, Count: 3, Frontier: []retainedgraph.Tree{tree(0, 0, 1, "archive"), tree(2, 2, 0, "archive")}}
+		}
 		source.Data = []byte(`{"schema":"js-wf-canonical-start-pointer-v1","token":"start"}`)
 		source.Header = nats.Header{"Wf-Graph-Start-Token": []string{"start"}, "Wf-Input-SHA256": []string{start.InputSHA256}}
 	}

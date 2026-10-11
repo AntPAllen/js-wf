@@ -211,7 +211,7 @@ jobs:
         shell: bash
         run: |
           set -o pipefail
-          go test -race -p=1 ./integrity -run '^(TestRawGraphReferencesAndIndependentCorruptionControls|TestNativeRawGraphReferenceAuditQuiescentReaders|TestRawGraphJournalGenerationsOutcomesAndArchive|TestRawGraphCheckpointPointerAndFrameBindings|TestNativeRawGraphCheckpointAudit|TestRawGraphCheckpointMaterializedState|TestRawGraphCheckpointPromiseOwnership|TestRawGraphCheckpointMetadataBindings|TestRawGraphRetiredSourceProjectionScope|TestRawGraphSignalReservationAndBinding|TestRawGraphSignalIndexIndependentPrefixes|TestRawGraphSignalIndexProductionPackets)$' -count=1 -v -timeout=5m 2>&1 | tee raw-graph-audit.log
+          go test -race -p=1 ./integrity -run '^(TestRawGraphReferencesAndIndependentCorruptionControls|TestNativeRawGraphReferenceAuditQuiescentReaders|TestRawGraphJournalGenerationsOutcomesAndArchive|TestRawGraphCheckpointPointerAndFrameBindings|TestNativeRawGraphCheckpointAudit|TestRawGraphCheckpointMaterializedState|TestRawGraphCheckpointPromiseOwnership|TestRawGraphCheckpointMetadataBindings|TestRawGraphRetiredSourceProjectionScope|TestRawGraphSignalReservationAndBinding|TestRawGraphSignalIndexIndependentPrefixes|TestRawGraphSignalIndexProductionPackets|TestRawGraphCheckpointSDKStateHistory)$' -count=1 -v -timeout=5m 2>&1 | tee raw-graph-audit.log
           python3 - <<'PY'
           import pathlib, re
           log = pathlib.Path('raw-graph-audit.log').read_text()
@@ -225,6 +225,12 @@ jobs:
           assert '--- PASS: TestRawGraphCheckpointMaterializedState ' in log
           assert '--- PASS: TestRawGraphCheckpointPromiseOwnership ' in log
           assert '--- PASS: TestRawGraphCheckpointMetadataBindings ' in log
+          assert '--- PASS: TestRawGraphCheckpointSDKStateHistory ' in log
+          for encoding in ('json', 'protobuf-v1'):
+              for mode in ('history-valid', 'history-external-valid', 'history-read-absent-valid', 'history-write-error-valid', 'history-null-valid'):
+                  assert f'--- PASS: TestRawGraphCheckpointSDKStateHistory/{encoding}/{mode} ' in log
+          for mode in ('history-frame-value', 'history-frame-missing', 'history-frame-extra', 'history-write-hash', 'history-write-missing', 'history-write-error', 'history-read-fabricated', 'history-result-null', 'history-result-unknown', 'history-external-unowned', 'history-external-wrong'):
+              assert f'--- PASS: TestRawGraphCheckpointSDKStateHistory/{mode} ' in log
           assert '--- PASS: TestRawGraphRetiredSourceProjectionScope ' in log
           assert '--- PASS: TestRawGraphSignalReservationAndBinding ' in log
           assert '--- PASS: TestRawGraphSignalIndexProductionPackets ' in log

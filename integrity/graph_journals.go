@@ -70,6 +70,7 @@ type auditedGraphJournal struct {
 	boundInputs       map[uint64]bool
 	signalKeys        map[journal.GraphSignalRequest]bool
 	signalTokens      map[string]bool
+	sdkState          map[string]json.RawMessage
 	inputIndex        auditedSignalIndex
 	queueIndex        auditedSignalIndex
 }
@@ -281,6 +282,9 @@ func CheckGraphJournals(ctx context.Context, snapshot GraphJournalSnapshot) (rep
 			return fmt.Errorf("%s: canonical entry index/epoch/tail differs", record.Destination)
 		}
 		if err := state.journal.advance(record.Destination, journal.Record{Entry: entry, Sequence: envelope.Sequence}); err != nil {
+			return err
+		}
+		if err := auditSDKStateOperation(call, graph, state, entry, record.Record.Blobs); err != nil {
 			return err
 		}
 		if entry.Kind == journal.StepRequested || entry.Kind == journal.StepCompleted {

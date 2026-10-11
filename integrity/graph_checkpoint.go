@@ -110,6 +110,13 @@ func auditCheckpointFrame(ctx context.Context, graph GraphReferenceSnapshot, sta
 	if err := auditMaterializedCheckpoint(frame); err != nil {
 		return err
 	}
+	// Worker annotation identifies an SDK materialization. Journal-only frame
+	// writers may supply state without recording SDK operations.
+	if done.MetadataRef != "" || done.MetadataHash != "" {
+		if err := auditSDKCheckpointState(state.sdkState, frame.State); err != nil {
+			return err
+		}
+	}
 	// The checkpoint completion must own the transitive promise payloads, not
 	// merely mention hashes previously reachable somewhere in the journal.
 	refs := map[string]string{r.Object: r.SHA256}
