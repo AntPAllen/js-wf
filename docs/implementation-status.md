@@ -1,5 +1,21 @@
 # Implementation status against the supplied plan
 
+## Accepted100000-entry normal store archived to S3 — 2026-10-11
+
+The closed accepted classified normal server data moved to a content-addressed
+S3 archive after complete remote readback, fresh restoration of all3170 files
+and independent rerun of the original unit/source/binary/log/classification/file
+review. Acceptance remains true with57 definite CAS conflicts and no uncertain
+errors. Original state/review bytes remain unchanged. Proof was committed and
+pushed before removal. The3170 originals released3,371,347,968 allocated bytes
+(3.14GiB); task-created archive/recovery copies were removed separately. Free
+space afterward was8.53GiB. Logs, manifests, verdict and the storage pointer
+remain local; all three live qualification jobs retain their own stores.
+[Recovery, removal ledger and restore instructions](scale/closed-classified-entry100000-storage-2026-10-11/README.md).
+
+This is evidence storage housekeeping. Full race/current-source scale, original
+fault/soak/rollout/admission/import and online collection gates remain open.
+
 ## Actual 100000-entry normal accepted; race launched; cached-promise priority — 2026-10-11
 
 The frozen classified source 9189259 normal fixture completed actual 100000 entries,
