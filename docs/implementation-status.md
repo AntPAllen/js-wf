@@ -1,5 +1,18 @@
 # Implementation status against the supplied plan
 
+## Closed original100000 stores offloaded with verified recovery — 2026-10-11
+
+Archived3170 closed native files (3.37GB) to the user's S3 storage. Full remote
+body/metadata/inventory readback matched committed proof. Fresh recovery verified
+all file bytes, modes and mtimes; the original reviewer checked the restored
+census and preserved accepted=false for the same41 unclassified CASRoot errors.
+Only after receipts were committed/pushed were originals and task staging removed.
+The original allocation reclaimed is3.14GiB; free space is now about8.1GiB.
+[Archive receipts, removal ledger and recovery commands](scale/closed-entry100000-storage-2026-10-11/README.md).
+Both frozen qualification services remain live. This storage operation does not
+qualify the rejected run or change any implementation-plan acceptance gate.
+
+
 ## SDK checkpoint promise provenance audited — 2026-10-11
 
 Saved promise outcomes now require a preceding selected child signal, matching
