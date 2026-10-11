@@ -9,6 +9,9 @@ import (
 // Forests have been retired. This admits the remaining projection, without
 // claiming result ownership or rejected-operation provenance from lost history.
 func auditRetiredProjection(raw []byte, invocation uint64, kind journal.Kind) error {
+	if err := auditOutcomeFields(raw); err != nil {
+		return err
+	}
 	var o auditedGraphOutcome
 	if err := checkpoint.DecodeUnambiguous(raw, &o); err != nil {
 		return err

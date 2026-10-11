@@ -1,5 +1,26 @@
 # Implementation status against the supplied plan
 
+## Independent terminal outcome field presence — 2026-10-11
+
+The raw audit requires canonical outcome generation and rejects explicit null in
+all outcome fields. Rejected limit entries require non-null kind/payload. Both
+live terminal journals and retired projections are checked; optional omission,
+empty result/error and opaque result bytes retain their declared meaning.
+
+Baseline 3bab6c4 plus the new test accepted error:null and failed the test. The
+first race run failed one positive JSON whitespace fixture: entry serialization
+compacted payload bytes while its projection retained whitespace. The fixture
+now binds the projection to actual stored bytes; both failures/source receipts
+are preserved. Final actual race exit0 in23.234s covers76 physical cases
+(28 positive/48 negative), cursor/start/source/projection/limit-prefix regressions,
+and four native R1/R3 checkpoint flows. All423 pre-run source inputs remained
+unchanged, the executable was captured, and exact new CI guards passed locally.
+See [outcome presence evidence](scale/raw-outcome-presence-2026-10-11/README.md).
+
+Full retired history, rejected-payload provenance after retirement, other nested
+schema presence and original broad gates remain open. The four long campaigns
+remain live and predate this audit; no hosted/full-suite/power proof is claimed.
+
 ## Independent canonical start/request field presence — 2026-10-11
 
 Canonical starts now require all five always-emitted fields; their nested requests

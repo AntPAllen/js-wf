@@ -23,11 +23,45 @@ type auditedGraphOutcome struct {
 	} `json:"limit_entry"`
 }
 
+// Canonical outcomes always identify a nonzero generation. Optional metadata
+// may be absent, but null cannot stand in for a scalar or rejected operation.
+// User result bytes and rejected-operation payload semantics remain separate.
+func auditOutcomeFields(raw []byte) error {
+	var fields map[string]json.RawMessage
+	if err := json.Unmarshal(raw, &fields); err != nil {
+		return err
+	}
+	if _, ok := fields["inv_seq"]; !ok {
+		return fmt.Errorf("missing outcome generation")
+	}
+	for field, value := range fields {
+		if bytes.Equal(bytes.TrimSpace(value), []byte("null")) {
+			return fmt.Errorf("null outcome field %s", field)
+		}
+	}
+	if rawEntry, ok := fields["limit_entry"]; ok {
+		var entry map[string]json.RawMessage
+		if err := json.Unmarshal(rawEntry, &entry); err != nil {
+			return err
+		}
+		for _, field := range []string{"kind", "payload"} {
+			value, ok := entry[field]
+			if !ok || bytes.Equal(bytes.TrimSpace(value), []byte("null")) {
+				return fmt.Errorf("missing/null limit entry field %s", field)
+			}
+		}
+	}
+	return nil
+}
+
 // Check before advancing the terminal: advance releases the request/completion
 // prefix. The configured capacity is not durable in these records.
 func auditGraphLimitBoundary(entry journal.Entry, prefix *journalAudit) error {
 	if entry.Kind != journal.Completed && entry.Kind != journal.Failed {
 		return nil
+	}
+	if err := auditOutcomeFields(entry.Payload); err != nil {
+		return err
 	}
 	var outcome auditedGraphOutcome
 	if err := checkpoint.DecodeUnambiguous(entry.Payload, &outcome); err != nil {

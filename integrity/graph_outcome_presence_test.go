@@ -1,0 +1,98 @@
+package integrity
+
+import (
+	"bytes"
+	"encoding/json"
+	"fmt"
+	"strings"
+	"testing"
+
+	"js-wf/internal/retainedgraph"
+	"js-wf/journal"
+)
+
+func TestRawGraphOutcomeFieldPresence(t *testing.T) {
+	controls := []string{"empty", "whitespace", "empty-result", "empty-error", "failed", "limit-entry", "limit-request", "missing-generation", "null-generation"}
+	for _, field := range []string{"result", "result_ref", "result_hash", "error", "limit_request", "limit_entry"} {
+		controls = append(controls, "null-"+field)
+	}
+	for _, field := range []string{"kind", "payload"} {
+		controls = append(controls, "limit-missing-"+field, "limit-null-"+field)
+	}
+	for _, enc := range []journal.Encoding{journal.JSON, journal.ProtobufV1} {
+		for _, retired := range []bool{false, true} {
+			for _, control := range controls {
+				t.Run(fmt.Sprintf("%s/retired=%t/%s", enc, retired, control), func(t *testing.T) {
+					fields := map[string]json.RawMessage{"inv_seq": json.RawMessage(`10`)}
+					failed := control == "failed" || strings.HasPrefix(control, "limit-")
+					if failed {
+						fields["error"] = json.RawMessage(`"failure"`)
+					}
+					switch control {
+					case "empty", "whitespace", "failed":
+					case "empty-result":
+						fields["result"] = json.RawMessage(`""`)
+					case "empty-error":
+						fields["error"] = json.RawMessage(`""`)
+					case "missing-generation":
+						delete(fields, "inv_seq")
+					case "null-generation":
+						fields["inv_seq"] = json.RawMessage(`null`)
+					default:
+						if strings.HasPrefix(control, "null-") {
+							fields[strings.TrimPrefix(control, "null-")] = json.RawMessage(`null`)
+						} else {
+							fields["error"] = json.RawMessage(`"journal exceeds 100000 entries"`)
+							if control == "limit-request" {
+								fields["limit_request"] = json.RawMessage(`{"kind":"run","name":"extra"}`)
+							} else {
+								entry := map[string]json.RawMessage{"kind": json.RawMessage(`"Attempt"`), "payload": json.RawMessage(`{"count":1,"error":"panic"}`)}
+								if strings.HasPrefix(control, "limit-missing-") {
+									delete(entry, strings.TrimPrefix(control, "limit-missing-"))
+								}
+								if strings.HasPrefix(control, "limit-null-") {
+									entry[strings.TrimPrefix(control, "limit-null-")] = json.RawMessage(`null`)
+								}
+								fields["limit_entry"], _ = json.Marshal(entry)
+							}
+						}
+					}
+					raw, _ := json.Marshal(fields)
+					if control == "whitespace" {
+						raw = append(append([]byte(" \n"), raw...), []byte("\n ")...)
+					}
+					s, projections := rawJournalFixture(t, enc, false, func(entries []journal.Entry) {
+						entries[3].Payload = raw
+						if failed {
+							entries[3].Kind = journal.Failed
+						}
+					}, false, false)
+					// JSON entry serialization compacts RawMessage payloads. Bind the
+					// projection to those exact stored bytes; protobuf preserves them.
+					if enc == journal.JSON && !retired {
+						var compact bytes.Buffer
+						if err := json.Compact(&compact, raw); err != nil {
+							t.Fatal(err)
+						}
+						projections["kind.id"] = compact.Bytes()
+					}
+					if retired {
+						for name, root := range s.Graph.Roots {
+							var c auditedGraphCursor
+							if err := json.Unmarshal(root.Application, &c); err != nil {
+								t.Fatal(err)
+							}
+							c.Retired = true
+							root.Token = ""
+							root.Graph = retainedgraph.Root{Schema: retainedgraph.Schema, Frontier: []retainedgraph.Tree{}}
+							root.Application, _ = json.Marshal(c)
+							s.Graph.Roots[name] = root
+						}
+					}
+					valid := control == "empty" || control == "whitespace" || control == "empty-result" || control == "empty-error" || control == "failed" || control == "limit-entry" || control == "limit-request"
+					assertRawEnvelopeVerdict(t, s, valid)
+				})
+			}
+		}
+	}
+}

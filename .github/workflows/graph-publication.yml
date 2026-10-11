@@ -310,7 +310,7 @@ jobs:
         shell: bash
         run: |
           set -o pipefail
-          go test -race -p=1 ./integrity -run '^(TestRawGraphReferencesAndIndependentCorruptionControls|TestNativeRawGraphReferenceAuditQuiescentReaders|TestRawGraphJournalGenerationsOutcomesAndArchive|TestRawGraphCheckpointPointerAndFrameBindings|TestNativeRawGraphCheckpointAudit|TestRawGraphCheckpointMaterializedState|TestRawGraphCheckpointPromiseOwnership|TestRawGraphCheckpointMetadataBindings|TestRawGraphRetiredSourceProjectionScope|TestRawGraphSignalReservationAndBinding|TestRawGraphSignalIndexIndependentPrefixes|TestRawGraphSignalIndexProductionPackets|TestRawGraphCheckpointSDKStateHistory|TestRawGraphCheckpointPromiseHistory|TestRawGraphCheckpointSDKSignalHistory|TestRawGraphCheckpointSDKTimerHistory|TestRawGraphEveryCheckpointHistory|TestRawGraphSDKStepEnvelope|TestRawGraphCanonicalEnvelope|TestRawGraphTerminalEnvelope|TestRawGraphRejectedLimitBoundary|TestRawGraphRejectedLimitPrefix|TestRawGraphRejectedLimitContinuation|TestRawGraphSelectionPriority|TestRawGraphSelectionReadiness|TestRawGraphCursorEnvelope|TestRawGraphStartEnvelope|TestRawGraphRetiredProjectionEnvelope|TestRawGraphStartSourceHeaders|TestRawGraphStartFieldPresence|TestRawGraphCursorFieldPresence|TestRawGraphCursorState|TestRawGraphCursorVersionCapabilities)$' -count=1 -v -timeout=5m 2>&1 | tee raw-graph-audit.log
+          go test -race -p=1 ./integrity -run '^(TestRawGraphReferencesAndIndependentCorruptionControls|TestNativeRawGraphReferenceAuditQuiescentReaders|TestRawGraphJournalGenerationsOutcomesAndArchive|TestRawGraphCheckpointPointerAndFrameBindings|TestNativeRawGraphCheckpointAudit|TestRawGraphCheckpointMaterializedState|TestRawGraphCheckpointPromiseOwnership|TestRawGraphCheckpointMetadataBindings|TestRawGraphRetiredSourceProjectionScope|TestRawGraphSignalReservationAndBinding|TestRawGraphSignalIndexIndependentPrefixes|TestRawGraphSignalIndexProductionPackets|TestRawGraphCheckpointSDKStateHistory|TestRawGraphCheckpointPromiseHistory|TestRawGraphCheckpointSDKSignalHistory|TestRawGraphCheckpointSDKTimerHistory|TestRawGraphEveryCheckpointHistory|TestRawGraphSDKStepEnvelope|TestRawGraphCanonicalEnvelope|TestRawGraphTerminalEnvelope|TestRawGraphRejectedLimitBoundary|TestRawGraphRejectedLimitPrefix|TestRawGraphRejectedLimitContinuation|TestRawGraphSelectionPriority|TestRawGraphSelectionReadiness|TestRawGraphCursorEnvelope|TestRawGraphStartEnvelope|TestRawGraphRetiredProjectionEnvelope|TestRawGraphStartSourceHeaders|TestRawGraphOutcomeFieldPresence|TestRawGraphStartFieldPresence|TestRawGraphCursorFieldPresence|TestRawGraphCursorState|TestRawGraphCursorVersionCapabilities)$' -count=1 -v -timeout=5m 2>&1 | tee raw-graph-audit.log
           python3 - <<'PY'
           import pathlib, re
           log = pathlib.Path('raw-graph-audit.log').read_text()
@@ -375,6 +375,16 @@ jobs:
           for encoding in ('json', 'protobuf-v1'):
               for control in ('inline', 'opaque', 'empty', 'whitespace', 'failed', 'external', 'limit-request', 'limit-entry', 'unknown', 'alias', 'duplicate-generation', 'escaped-generation', 'duplicate-result', 'duplicate-error', 'unknown-limit-entry', 'alias-limit-entry', 'duplicate-limit-entry', 'null', 'array', 'base64', 'generation-fraction', 'generation-negative', 'failed-inline', 'failed-pointer', 'hash-only', 'pointer-only', 'bad-hash', 'mixed-result', 'completed-limit', 'both-limits', 'wrong-limit-error'):
                   assert f'--- PASS: TestRawGraphRetiredProjectionEnvelope/{encoding}/{control} ' in log
+          assert '--- PASS: TestRawGraphOutcomeFieldPresence ' in log
+          outcome_presence_controls = ['empty', 'whitespace', 'empty-result', 'empty-error', 'failed', 'limit-entry', 'limit-request', 'missing-generation', 'null-generation']
+          for field in ('result', 'result_ref', 'result_hash', 'error', 'limit_request', 'limit_entry'):
+              outcome_presence_controls.append('null-'+field)
+          for field in ('kind', 'payload'):
+              outcome_presence_controls += ['limit-missing-'+field, 'limit-null-'+field]
+          for encoding in ('json', 'protobuf-v1'):
+              for retired in ('false', 'true'):
+                  for control in outcome_presence_controls:
+                      assert f'--- PASS: TestRawGraphOutcomeFieldPresence/{encoding}/retired={retired}/{control} ' in log
           assert '--- PASS: TestRawGraphStartFieldPresence ' in log
           start_presence_controls = ['valid', 'whitespace', 'optional-zero']
           for field in ('schema', 'token', 'request', 'input_sha256', 'input_size', 'request.type', 'request.id'):
