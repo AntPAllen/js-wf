@@ -1,5 +1,24 @@
 # Implementation status against the supplied plan
 
+## Checkpoint promise ownership verified; actual100000 normal review finding — 2026-10-11
+
+The independent raw audit now requires each checkpoint promise result to have an
+owned edge at the checkpoint completion, readable bounded bytes with the declared
+hash, and consistent logical reference aliases. Retained focused race exits0 in
+20.0s: two JSON/protobuf positives,three reference-valid semantic corruptions and
+all sixteen native checkpoint-stage receipts. CI requires the new cases.
+[Evidence and limits](scale/raw-graph-promise-audit-2026-10-11/README.md).
+
+The original actual100000-entry normal test and supervisor exited0. Independent
+review verifies100000 entries,two archived checkpoints,terminal slot99999,
+49992 real SDK padding operations,zero rejected-request effects,1924 source
+inputs and3170 preserved physical files(3.37GB). **Full acceptance remains false**:
+CASRoot profiler errors17+24 are unclassified,so the existing zero-error gate is
+not passed. The reviewer now reports this finding and still verifies the other
+assertions/files; it does not waive the gate. Race remains unlaunched.
+[Exact normal evidence and finding](scale/graph-indexed-entry-campaign-2026-10-10/README.md).
+The frozen00eeb13 complete159 normal continues under its unchanged invocation.
+
 ## Independent materialized checkpoint consistency verified — 2026-10-11
 
 The raw audit now checks saved state/promise shapes, signal set ordering and

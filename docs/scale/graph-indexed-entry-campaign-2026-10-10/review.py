@@ -65,9 +65,15 @@ windows=re.findall(r'GRAPH_LIMIT_PORT_PROFILE from=(\d+) to=(\d+) wall_ns=(\d+) 
 assert len(windows)==2
 padding=(budget-16)//2
 assert [(int(w[0]),int(w[1])) for w in windows]==[(0,padding//2),(padding//2,padding)]
+profile_errors = []
 for row in windows:
     operations=json.loads(row[3]);assert operations
-    assert all(value['errors']==0 for value in operations.values())
+    for operation,value in operations.items():
+        assert value['calls'] > 0 and 0 <= value['errors'] <= value['calls'] and value['total_ns'] >= 0
+        if value['errors']:
+            profile_errors.append(dict(from_padding=int(row[0]),to_padding=int(row[1]),operation=operation,calls=value['calls'],errors=value['errors']))
+result['profile_errors'] = profile_errors
+result['zero_profile_errors_gate'] = not profile_errors
 files=json.loads(gzip.decompress((a.root/'native-files.json.gz').read_bytes()))
 assert files and len(files)==state['native_files']
 assert sum(x['bytes'] for x in files.values())==state['native_bytes']
@@ -79,8 +85,10 @@ for name,item in files.items():
     with path.open('rb') as f:
         for block in iter(lambda:f.read(1<<20),b''):digest.update(block)
     assert digest.hexdigest()==item['sha256'],name
-result.update(accepted=True,source_inputs=len(before),budget=budget,entries=budget,
+result.update(accepted=not profile_errors,functional_limit_assertions_verified=True,source_inputs=len(before),budget=budget,entries=budget,
     checkpoints=2,terminal_slot=budget-1,padding_operations=padding,native_files=len(files),
     native_bytes=state['native_bytes'],child_wall_seconds=state['child_wall_seconds'],
-    actual_100000_entries_qualified=budget==100000,log_sha256=state['log_sha256'])
+    actual_100000_entries_qualified=budget==100000 and not profile_errors,log_sha256=state['log_sha256'])
+if profile_errors:
+    result['remaining_gate'] = 'Classify recorded transport errors; zero-profile-errors gate remains unaccepted. Functional assertions/source/binary/native-file verification passed separately.'
 save();print(json.dumps(result))

@@ -29,11 +29,25 @@ func rawJournalCheckpointFixture(t *testing.T, encoding journal.Encoding, archiv
 		{Index: 3, Epoch: 1, WorkerID: "worker", Kind: journal.Completed, Payload: json.RawMessage(`{"inv_seq":10,"result":"NDI="}`)},
 	}
 	var frameBytes []byte
+	var promiseBytes [][]byte
 	var pointer auditedCheckpointPointer
 	if archive {
 		// Independently encoded frame and pointer; no production writer/reader.
 		frame := map[string]any{"version": 1, "identity": map[string]any{"type": "kind", "id": "id", "inv_seq": 10}, "stage": "next", "data": map[string]int{"x": 1}, "anchor": map[string]uint64{"index": 2, "epoch": 1}, "step_position": 2}
 		switch control {
+		case "promise-owned-valid", "promise-owned-missing", "promise-owned-wrong", "promise-owned-conflict":
+			outcomes := map[string]any{"child": map[string]any{"inv_seq": 3, "result_ref": "promise-result", "result_hash": digest([]byte(`42`))}}
+			frame["promise_outcomes"] = outcomes
+			if control != "promise-owned-missing" {
+				promiseBytes = [][]byte{[]byte(`42`)}
+			}
+			if control == "promise-owned-wrong" {
+				promiseBytes = [][]byte{[]byte(`43`)}
+			}
+			if control == "promise-owned-conflict" {
+				outcomes["second"] = map[string]any{"inv_seq": 4, "result_ref": "promise-result", "result_hash": digest([]byte(`43`))}
+				promiseBytes = append(promiseBytes, []byte(`43`))
+			}
 		case "materialized-valid":
 			frame["state"] = map[string]any{"value": 42}
 			frame["promise_outcomes"] = map[string]any{"child": map[string]any{"inv_seq": 3, "result": "NDI="}}
@@ -162,6 +176,11 @@ func rawJournalCheckpointFixture(t *testing.T, encoding journal.Encoding, archiv
 		blobs := []retainedgraph.Link{edge}
 		if archive && index == 2 && control != "frame-unowned" {
 			blobs = append(blobs, put(frameBytes, graphpublication.Location{Kind: "payload", First: first, Stream: stream}))
+		}
+		if archive && index == 2 {
+			for _, data := range promiseBytes {
+				blobs = append(blobs, put(data, graphpublication.Location{Kind: "payload", First: first, Stream: stream}))
+			}
 		}
 		if missingEntry && index == 1 {
 			blobs = nil
@@ -326,6 +345,28 @@ func TestRawGraphCheckpointMaterializedState(t *testing.T) {
 			}
 			if _, err := CheckGraphJournals(context.Background(), s); err == nil {
 				t.Fatal("corrupt materialized state accepted")
+			}
+		})
+	}
+}
+
+func TestRawGraphCheckpointPromiseOwnership(t *testing.T) {
+	for _, encoding := range []journal.Encoding{journal.JSON, journal.ProtobufV1} {
+		t.Run(string(encoding)+"/valid", func(t *testing.T) {
+			s, _ := rawJournalCheckpointFixture(t, encoding, true, nil, false, false, "promise-owned-valid")
+			if _, err := CheckGraphJournals(context.Background(), s); err != nil {
+				t.Fatal(err)
+			}
+		})
+	}
+	for _, control := range []string{"promise-owned-missing", "promise-owned-wrong", "promise-owned-conflict"} {
+		t.Run(control, func(t *testing.T) {
+			s, _ := rawJournalCheckpointFixture(t, journal.JSON, true, nil, false, false, control)
+			if _, err := CheckGraphReferences(context.Background(), s.Graph); err != nil {
+				t.Fatal("fixture reference corruption", err)
+			}
+			if _, err := CheckGraphJournals(context.Background(), s); err == nil {
+				t.Fatal("unowned or conflicting promise accepted")
 			}
 		})
 	}

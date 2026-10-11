@@ -1,5 +1,26 @@
 # Actual-entry supervisor preparation — 2026-10-10
 
+## Actual100000 normal closed; profile gate unaccepted — 2026-10-11
+
+Invocation290b17b6df9e45629c853c10ed5cc772 closed with actual child and
+supervisor exit0, MainPID0 and RemainAfterExit=yes. The test passed in5683.93s,
+with100000 entries,49992 real padding SDK operations,two archived checkpoints,
+terminal slot99999,no rejected-request effects and unchanged prefix call counts.
+Independent review verifies1924 frozen inputs, the retained binary/log and all
+3170 physical files totaling3369550584 bytes.
+
+Full acceptance remains **false**. The original review stopped at its zero-error
+profiler assertion: CASRoot recorded17 and24 errors in the two windows. The log
+contains counts, not classifications; contention/retry or a server cause is not
+proven. The original reviewer and failure are preserved. The revised reviewer
+retains the same zero-profile-errors gate, reports its failure explicitly, and
+continues independent functional/source/binary/file verification rather than
+stopping with an assertion traceback. normal-review.json therefore records
+functional_limit_assertions_verified=true but accepted=false and
+actual_100000_entries_qualified=false. Race remains unlaunched pending this gate.
+Physical stores are preserved at the original root; compressed evidence is here.
+
+
 ## Executed supervision control
 
 The prepared normal worker binary at frozen6408a5e executes one indexed,

@@ -105,12 +105,52 @@ func auditCheckpointFrame(ctx context.Context, graph GraphReferenceSnapshot, sta
 	if frame.PanicAttempts != uint64(state.journal.lastAttempt) || frame.SignalCursor < state.journal.lastSignal {
 		return fmt.Errorf("checkpoint attempt/signal cursor differs from journal prefix")
 	}
-	return auditMaterializedCheckpoint(frame)
+	if err := auditMaterializedCheckpoint(frame); err != nil {
+		return err
+	}
+	// The checkpoint completion must own the transitive promise payloads, not
+	// merely mention hashes previously reachable somewhere in the journal.
+	refs := map[string]string{r.Object: r.SHA256}
+	for name, raw := range frame.PromiseOutcomes {
+		var outcome struct {
+			ResultRef  string `json:"result_ref"`
+			ResultHash string `json:"result_hash"`
+		}
+		if json.Unmarshal(raw, &outcome) != nil {
+			return fmt.Errorf("invalid checkpoint promise %s", name)
+		}
+		if outcome.ResultRef == "" {
+			continue
+		}
+		if prior, ok := refs[outcome.ResultRef]; ok && prior != outcome.ResultHash {
+			return fmt.Errorf("checkpoint promise aliases conflicting result hashes")
+		}
+		refs[outcome.ResultRef] = outcome.ResultHash
+		found := false
+		for _, link := range edges {
+			if link.Hash != outcome.ResultHash {
+				continue
+			}
+			data, err := graph.LoadObject(ctx, link.Reference.Object, graph.PayloadLimit)
+			if err != nil {
+				return err
+			}
+			if len(data) > graph.PayloadLimit || digest(data) != outcome.ResultHash {
+				return fmt.Errorf("checkpoint promise result bytes differ")
+			}
+			found = true
+			break
+		}
+		if !found {
+			return fmt.Errorf("checkpoint promise %s lacks owned result edge", name)
+		}
+	}
+	return nil
 }
 
 // This validates materialized values and identity sets without calling the
-// production frame validator. Reconstructing their values from SDK history and
-// resolving promise result ownership remain separate audits.
+// production frame validator. Comparing these values to SDK history remains a
+// separate audit.
 func auditMaterializedCheckpoint(frame checkpoint.Frame) error {
 	for key, value := range frame.State {
 		if identity.ValidateToken(key) != nil || !json.Valid(value) {

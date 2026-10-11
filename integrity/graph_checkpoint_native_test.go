@@ -90,13 +90,14 @@ func TestNativeRawGraphCheckpointAudit(t *testing.T) {
 				sum := sha256.Sum256([]byte(`42`))
 				appendEntry(journal.Started, []byte(`{"input_sha256":"`+hex.EncodeToString(sum[:])+`"}`), []byte(`42`))
 				locals := json.RawMessage(`{"x":1}`)
-				frame, hash, err := checkpoint.Encode(checkpoint.Frame{Version: checkpoint.Version, Identity: checkpoint.Identity{Type: h.Type, ID: h.ID, InvSeq: h.InvSeq}, Stage: "next", Data: locals, Anchor: checkpoint.Anchor{Index: 2, Epoch: 1}, StepPosition: 2, State: map[string]json.RawMessage{"value": json.RawMessage(`42`)}, PromiseOutcomes: map[string]json.RawMessage{"child": json.RawMessage(`{"inv_seq":3,"result":"NDI="}`)}, CancelledTimers: []uint64{0}})
+				promiseHash := sha256.Sum256([]byte(`42`))
+				frame, hash, err := checkpoint.Encode(checkpoint.Frame{Version: checkpoint.Version, Identity: checkpoint.Identity{Type: h.Type, ID: h.ID, InvSeq: h.InvSeq}, Stage: "next", Data: locals, Anchor: checkpoint.Anchor{Index: 2, Epoch: 1}, StepPosition: 2, State: map[string]json.RawMessage{"value": json.RawMessage(`42`)}, PromiseOutcomes: map[string]json.RawMessage{"child": json.RawMessage(`{"inv_seq":3,"result_ref":"promise-result","result_hash":"` + hex.EncodeToString(promiseHash[:]) + `"}`)}, CancelledTimers: []uint64{0}})
 				if err != nil {
 					t.Fatal(err)
 				}
 				sum = sha256.Sum256(locals)
 				appendEntry(journal.StepRequested, []byte(`{"kind":"checkpoint","name":"next","input_hash":"`+hex.EncodeToString(sum[:])+`"}`))
-				appendEntry(journal.StepCompleted, []byte(`{"result_ref":"step-result-`+hash+`","result_hash":"`+hash+`"}`), frame)
+				appendEntry(journal.StepCompleted, []byte(`{"result_ref":"step-result-`+hash+`","result_hash":"`+hash+`"}`), frame, []byte(`42`))
 				runtime := journal.RuntimeCheckpoint{InvSeq: h.InvSeq, Stage: "next", Sequence: tail, Index: 2, Epoch: 1, StepPosition: 2, Object: "step-result-" + hash, SHA256: hash}
 				appendEntry(journal.Suspended, []byte(`{"waiting_on":"continuation:next"}`))
 				ns := integrity.GraphAuditNamespace{AuthorityStream: cfg.AuthorityStream, AuthorityPrefix: cfg.AuthorityPrefix, ObjectBucket: cfg.ObjectBucket, PayloadLimit: cfg.PayloadReadLimit}
