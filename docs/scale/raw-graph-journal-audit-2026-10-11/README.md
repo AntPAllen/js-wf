@@ -60,3 +60,19 @@ The original actual 100,000-entry normal remains live under invocation
 290b17b6df9e45629c853c10ed5cc772; PID185950 is verifying the second archive at
 checkpoint index99993. The index is the fixed checkpoint position, not a progress
 counter. Completion, independent review and race remain required.
+
+## Current-source complete159 campaign launched
+
+The normal1000 eight-part campaign now runs frozen source
+00eeb1306ed0264a7f50e6eb3014b4a58780aebb under user service
+`js-wf-current159-tier1-normal-20261011-qualified.service`, invocation
+730878de8a6b43ff99e1f7c8d1c0fdc1, supervisor204393/driver204416. The launch
+receipt binds these live processes, the supervisor hash, one-core CPU quota,
+2 GiB memory limit and RemainAfterExit=yes. Race requires independently accepted
+normal at exactly the same source. No result is claimed from launch.
+
+The 102 MiB sparse checkout preserves all 3,532 required tracked Go/Python/YAML,
+module and trace inputs. Bulky documentation evidence is omitted; the independent
+reviewer still verifies the complete required input set against Git blob bytes.
+Initial empty-index sparse preparation failed its missing-input preflight before
+any test launch; populating the index resolved it, and the checkout was clean.

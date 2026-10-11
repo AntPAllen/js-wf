@@ -1,5 +1,15 @@
 # Implementation status against the supplied plan
 
+## Current-source complete159 normal campaign running — 2026-10-11
+
+Source00eeb13 is now frozen in a clean 102 MiB sparse checkout retaining all
+3,532 required tracked qualification inputs. The eight-part normal1000 campaign
+is live under invocation730878de8a6b43ff99e1f7c8d1c0fdc1 with one-core quota and
+2 GiB memory cap. [Launch and review contract](scale/raw-graph-journal-audit-2026-10-11/README.md).
+Race requires accepted normal at the same source; launch is not a passing result.
+The original actual100000-entry normal has published its second archive and
+continuation; final deliveries, terminal-slot assertions and review remain open.
+
 ## Raw canonical journal invariants added — 2026-10-11
 
 The independent raw graph audit now verifies canonical invocation/Start input,
