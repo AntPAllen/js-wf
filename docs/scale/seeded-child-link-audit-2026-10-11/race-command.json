@@ -1,0 +1,25 @@
+{
+  "command": [
+    "go",
+    "test",
+    "-race",
+    "./sim",
+    "-run",
+    "^(TestSeededGraphChildLinkAuditReplay|TestGraphStartHeaderFailureTracePersistence|TestPinnedRegressionCorpus)$/^(graph_child_link_audit_|default|explicit)",
+    "-count=1",
+    "-v",
+    "-timeout=6m"
+  ],
+  "driver_pid": 250822,
+  "actual_exit_code": 0,
+  "start_ns": 1791693728887553570,
+  "end_ns": 1791693949657852335,
+  "executable_captured": true,
+  "environment": {
+    "SIM_SEEDS": "1000",
+    "SIM_COVERAGE_SUMMARY": "1",
+    "GOMAXPROCS": "2",
+    "GOMEMLIMIT": "512MiB",
+    "FAULT_TRACE_OUT": "/home/exedev/js-wf-child-link-model-20261011/race-failure.json"
+  }
+}

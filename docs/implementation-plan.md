@@ -1,5 +1,32 @@
 # JetStream Durable Workflow Runtime — Implementation Plan
 
+## Seeded retained child-link audit family — 2026-10-11
+
+A new raw-history simulation family covers consumed/rejected arrivals × JSON/
+protobuf × seven witness/uncertainty modes:28 combinations. Real GraphStore
+writes use seeded graph/start/signal/KV transports; child retirement/source
+purge, owned canonical signal bodies, complete raw censuses, uncertain projection
+writes and stale reads are included. Recorded retired start metadata corruption
+and fixture restoration are test-only, not healthy server operations or automatic
+production repair. Every case exactly replays, verifies available/unavailable
+link counts, heals its fixture witness and drains all owned objects after60s
+virtual expiry.
+
+Normal/race actual exits0 in15.722s/201.263s each cover1000 generated bodies,
+28 pinned exact replays and two shared failure-trace persistence controls. Both
+actual executables were captured;2054 prelaunch inputs remain unchanged. The
+exact new normal/race CI guards passed locally. Focused raw-auditor overlays
+reproduce semantic rejection failures at seeds1 (start guard) and5 (terminal
+guard); both saved failures replay exactly through the minimizer. These are
+focused audit controls, not the original six-invariant mutation campaign.
+See [seeded child-link evidence](scale/seeded-child-link-audit-2026-10-11/README.md).
+
+The corpus is now162 families/922 pins. Only the new family is qualified here.
+The full161 normal campaign remains frozen at ec97015 and excludes it; four
+older race/scale campaigns remain live. Full current162/extended, worker/SDK
+interleavings for this family, NATS conformance/original publication/lease
+causality and original fault/scale/soak/power/rollout gates remain open.
+
 ## Complete frozen161 normal launched — 2026-10-11
 
 Complete current161 normal qualification started04:36:30UTC at frozen source

@@ -33,6 +33,8 @@ on:
       - 'internal/retainedgraph/**'
       - 'internal/retainedindex/**'
       - 'sim/graph_publication*'
+      - 'sim/graph_child_link_audit_test.go'
+      - 'sim/testdata/regressions/graph_child_link_audit_*'
       - 'sim/graph_projection_census_test.go'
       - 'sim/testdata/regressions/graph_projection_census_*'
       - 'sim/graph_checkpoint_compaction_test.go'
@@ -98,6 +100,8 @@ on:
       - 'internal/retainedgraph/**'
       - 'internal/retainedindex/**'
       - 'sim/graph_publication*'
+      - 'sim/graph_child_link_audit_test.go'
+      - 'sim/testdata/regressions/graph_child_link_audit_*'
       - 'sim/graph_projection_census_test.go'
       - 'sim/testdata/regressions/graph_projection_census_*'
       - 'sim/graph_checkpoint_compaction_test.go'
@@ -630,6 +634,53 @@ jobs:
           path: |
             projection-census.log
             projection-census-failure.json
+          if-no-files-found: error
+  seeded-child-link-audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      matrix:
+        mode: [normal, race]
+    env:
+      GOMAXPROCS: '2'
+      GOMEMLIMIT: 512MiB
+      SIM_SEEDS: '1000'
+      SIM_COVERAGE_SUMMARY: '1'
+      FAULT_TRACE_OUT: child-link-audit-failure.json
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - name: Check seeded raw child link audit and pinned replay
+        shell: bash
+        env:
+          GRAPH_MODE: ${{ matrix.mode }}
+        run: |
+          set -o pipefail
+          graph_flags=()
+          if [ "$GRAPH_MODE" = race ]; then graph_flags=(-race); fi
+          go test "${graph_flags[@]}" ./sim -run '^(TestSeededGraphChildLinkAuditReplay|TestGraphStartHeaderFailureTracePersistence|TestPinnedRegressionCorpus)$/^(graph_child_link_audit_|default|explicit)' -count=1 -v -timeout=6m 2>&1 | tee child-link-audit.log
+          python3 - <<'PY'
+          import pathlib, re
+          log = pathlib.Path('child-link-audit.log').read_text()
+          assert not re.search(r'^--- SKIP:', log, re.M)
+          assert '--- PASS: TestSeededGraphChildLinkAuditReplay ' in log
+          for mode in ('default', 'explicit'):
+              assert f'--- PASS: TestGraphStartHeaderFailureTracePersistence/{mode} ' in log
+          assert 'TIER1_SEEDS test=TestSeededGraphChildLinkAuditReplay first=1 last=1000 completed=1000 requested=1000' in log
+          for stage in ('consumed', 'rejected'):
+              for encoding in ('json', 'protobuf-v1'):
+                  for mode in ('healthy', 'projection_mismatch', 'parent_mismatch', 'input_mismatch', 'projection_drop', 'projection_lost_ack', 'projection_stale_read'):
+                      assert f'--- PASS: TestPinnedRegressionCorpus/graph_child_link_audit_{stage}_{encoding}_{mode}.json ' in log
+          PY
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: seeded-child-link-audit-${{ matrix.mode }}
+          path: |
+            child-link-audit.log
+            child-link-audit-failure.json
           if-no-files-found: error
   raw-sdk-retired-projection-audit:
     runs-on: ubuntu-latest
