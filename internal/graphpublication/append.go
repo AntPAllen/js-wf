@@ -98,20 +98,30 @@ func (p Protocol) prepareAppend(ctx context.Context, destination string, expecte
 	return p.prepareStreamAppend(ctx, destination, expected, "", data, payloads, owned, expires, application, updateApplication)
 }
 
-func (p Protocol) prepareStreamAppend(ctx context.Context, destination string, expected uint64, stream string, data []byte, payloads [][]byte, owned []OwnedPayload, expires time.Time, application []byte, updateApplication bool) (Prepared, error) {
+func (p Protocol) prepareStreamAppend(ctx context.Context, destination string, expected uint64, stream string, data []byte, payloads [][]byte, owned []OwnedPayload, expires time.Time, application []byte, updateApplication bool) (prepared Prepared, err error) {
+	phase := "check append preparation context"
+	defer func() {
+		if err != nil {
+			err = &AppendPrepareError{Phase: phase, Err: err}
+		}
+	}()
 	if err := ctx.Err(); err != nil {
 		return Prepared{}, err
 	}
+	phase = "validate append preparation configuration"
 	if p.Port == nil || destination == "" || !utf8.ValidString(destination) || len(destination) > 256 || expected == math.MaxUint64 || expires.IsZero() || len(data) > retainedgraph.MaxDataBytes || len(payloads) > retainedgraph.MaxBlobReferences || len(owned) > retainedgraph.MaxBlobReferences-len(payloads) {
 		return Prepared{}, errors.New("invalid graph append configuration")
 	}
+	phase = "observe append preparation head"
 	base, err := p.readRoot(ctx, destination)
 	if err != nil {
 		return Prepared{}, err
 	}
+	phase = "check append preparation head"
 	if base.Head != expected {
 		return Prepared{}, ErrConflict
 	}
+	phase = "select append preparation stream"
 	graph := selectGraph(base.Graph, base.Streams, stream)
 	if stream != "" && graph.Count == 0 {
 		found := false
@@ -125,6 +135,7 @@ func (p Protocol) prepareStreamAppend(ctx context.Context, destination string, e
 	if graph.Count == math.MaxInt64 {
 		return Prepared{}, errors.New("graph population exhausted")
 	}
+	phase = "create append publication token"
 	token, err := p.id()
 	if err != nil {
 		return Prepared{}, err
@@ -143,6 +154,7 @@ func (p Protocol) prepareStreamAppend(ctx context.Context, destination string, e
 	if stream != "" {
 		result.publication.Schema = StreamsSchema
 	}
+	phase = "verify append owned payload"
 	selected := map[string]retainedgraph.Link{}
 	for _, payload := range owned {
 		if payload.Stream != stream {
@@ -169,6 +181,7 @@ func (p Protocol) prepareStreamAppend(ctx context.Context, destination string, e
 	}
 	sort.Strings(keys)
 	record := retainedgraph.Record{Data: append([]byte{}, data...), Blobs: []retainedgraph.Link{}}
+	phase = "acquire append payload"
 	for _, k := range keys {
 		if _, exists := selected[k]; exists {
 			continue
@@ -183,6 +196,7 @@ func (p Protocol) prepareStreamAppend(ctx context.Context, destination string, e
 	for _, link := range selected {
 		record.Blobs = append(record.Blobs, link)
 	}
+	phase = "stage append nodes"
 	next, err := retainedgraph.Append(ctx, stageStore{protocol: p, destination: destination, expected: expected, expires: expires, token: token, index: graph.Count, stream: stream}, graph, record)
 	if err != nil {
 		return Prepared{}, err

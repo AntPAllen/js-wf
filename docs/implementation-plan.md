@@ -1,5 +1,21 @@
 # JetStream Durable Workflow Runtime — Implementation Plan
 
+## Preparation phases qualified without changing mutation policy — 2026-10-11
+
+Append preparation now distinguishes head observation/check, payload acquisition
+and node staging; nested acquisition errors identify intent reads/writes,
+immutable upload and object selection. Primary errors.Is classifications and
+all calls, bounds, retries and deadlines are preserved. Twenty-three deterministic
+cuts verify no canonical publication or unknown-write retry on failed preparation,
+and fresh recovery never adopts abandoned physical uploads.
+
+Six actual SDK executions pass in normal/race modes:99 named protocol controls,
+22 client controls and947 corpus cases per mode, including all946 unchanged pins.
+Simulation/model inputs are unchanged againstd322671; no new seeded family or
+pin is claimed. CI requires the new phase controls. This does not establish the
+native Signal timeout's cause or close the full scale gates.
+[Preparation control receipts](scale/append-prepare-phases-2026-10-11/README.md).
+
 ## Fresh race passes active population; Signal preparation still fails — 2026-10-11
 
 The frozen5285012 R3 active10/10/1 race diagnostic is terminal, SDKexit1 after

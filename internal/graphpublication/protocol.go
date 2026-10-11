@@ -401,13 +401,21 @@ func validObject(o blobpublication.Object) bool {
 	return err == nil
 }
 
-func (p Protocol) acquire(ctx context.Context, hash string, data []byte, token string, intent Intent) (blobpublication.Reference, error) {
+func (p Protocol) acquire(ctx context.Context, hash string, data []byte, token string, intent Intent) (reference blobpublication.Reference, err error) {
+	phase := "observe blob intent"
+	defer func() {
+		if err != nil {
+			err = &AcquisitionError{Phase: phase, Err: err}
+		}
+	}()
 	k := authorityKey(hash, token)
 	for attempts := 0; attempts < 32; attempts++ {
+		phase = "observe blob intent"
 		record, err := p.Port.ReadBlob(ctx, k)
 		if err != nil {
 			return blobpublication.Reference{}, err
 		}
+		phase = "validate blob intent"
 		if err = validateFence(k, record); err != nil {
 			return blobpublication.Reference{}, err
 		}
@@ -447,6 +455,7 @@ func (p Protocol) acquire(ctx context.Context, hash string, data []byte, token s
 			intent.Locations = merged
 		}
 		f.Intents[token] = intent
+		phase = "publish blob intent"
 		record, err = p.casBlob(ctx, k, record.Revision, f)
 		if errors.Is(err, ErrConflict) {
 			continue
@@ -457,6 +466,7 @@ func (p Protocol) acquire(ctx context.Context, hash string, data []byte, token s
 		if record.Fence.Phase == "ready" {
 			return blobpublication.Reference{record.Fence.Generation, record.Fence.Object}, nil
 		}
+		phase = "create blob upload token"
 		id, err := p.id()
 		if err != nil {
 			return blobpublication.Reference{}, err
@@ -465,16 +475,19 @@ func (p Protocol) acquire(ctx context.Context, hash string, data []byte, token s
 			return blobpublication.Reference{}, errors.New("invalid upload ID")
 		}
 		object := objectName(hash, record.Fence.Generation, token, id)
+		phase = "upload immutable blob"
 		if err = p.Port.Put(ctx, object, data); err != nil {
 			return blobpublication.Reference{}, err
 		}
 		// A concurrent uploader may have chosen another physical attempt. Never
 		// overwrite its selection, and never resurrect a closed generation.
 		for retries := 0; retries < 32; retries++ {
+			phase = "observe uploaded blob intent"
 			current, err := p.Port.ReadBlob(ctx, k)
 			if err != nil {
 				return blobpublication.Reference{}, err
 			}
+			phase = "validate uploaded blob intent"
 			if err = validateFence(k, current); err != nil {
 				return blobpublication.Reference{}, err
 			}
@@ -493,6 +506,7 @@ func (p Protocol) acquire(ctx context.Context, hash string, data []byte, token s
 			next := current.Fence
 			next.Phase = "ready"
 			next.Object = object
+			phase = "select uploaded blob"
 			_, err = p.casBlob(ctx, k, current.Revision, next)
 			if errors.Is(err, ErrConflict) {
 				continue
@@ -502,8 +516,10 @@ func (p Protocol) acquire(ctx context.Context, hash string, data []byte, token s
 			}
 			return blobpublication.Reference{next.Generation, object}, nil
 		}
+		phase = "uploaded blob contention budget"
 		return blobpublication.Reference{}, ErrConflict
 	}
+	phase = "blob intent contention budget"
 	return blobpublication.Reference{}, ErrConflict
 }
 
