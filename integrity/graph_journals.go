@@ -70,6 +70,8 @@ type auditedGraphJournal struct {
 	boundInputs       map[uint64]bool
 	signalKeys        map[journal.GraphSignalRequest]bool
 	signalTokens      map[string]bool
+	inputIndex        auditedSignalIndex
+	queueIndex        auditedSignalIndex
 }
 
 func graphDestinationForKey(key string) string { return "journal/" + digest([]byte("wf.jrn."+key)) }

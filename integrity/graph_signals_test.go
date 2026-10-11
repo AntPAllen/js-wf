@@ -2,6 +2,8 @@ package integrity
 
 import (
 	"context"
+	"crypto/sha256"
+	"encoding/binary"
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
@@ -73,10 +75,26 @@ func rawSignalFixture(t *testing.T, enc journal.Encoding, control string) GraphJ
 	}
 	for _, stream := range []string{"signal-input", "signal-queue"} {
 		var data []byte
+		packet := rawSignalLeafIndex(input.Request, 0)
+		if stream == "signal-queue" {
+			packet = rawSignalLeafIndex(binding.Input.Request, 0)
+		}
+		switch control {
+		case "index-magic":
+			packet[0]++
+		case "index-key":
+			packet[16]++
+		case "index-value":
+			packet[63]++
+		case "queue-index-key":
+			if stream == "signal-queue" {
+				packet[16]++
+			}
+		}
 		if stream == "signal-input" {
-			data, _ = json.Marshal(map[string]any{"input": input, "index_packet": []byte("opaque-index")})
+			data, _ = json.Marshal(map[string]any{"input": input, "index_packet": packet})
 		} else {
-			data, _ = json.Marshal(map[string]any{"binding": binding, "index_packet": []byte("opaque-index")})
+			data, _ = json.Marshal(map[string]any{"binding": binding, "index_packet": packet})
 		}
 		blobs := []retainedgraph.Link{put(body, stream, "payload", 0)}
 		if control == "missing-body" {
@@ -152,7 +170,7 @@ func TestRawGraphSignalReservationAndBinding(t *testing.T) {
 			}
 		})
 	}
-	for _, control := range []string{"generation", "reservation-index", "name", "key", "size", "body", "token", "binding-input", "binding-index", "source-zero", "source-frontier", "consumption-census", "missing-body", "consumed-index", "consumed-token", "consumed-name", "consumed-sequence", "consumed-ref", "consumed-hash", "consumed-no-marker", "consumed-unowned"} {
+	for _, control := range []string{"generation", "reservation-index", "name", "key", "size", "body", "token", "binding-input", "binding-index", "source-zero", "source-frontier", "consumption-census", "missing-body", "consumed-index", "consumed-token", "consumed-name", "consumed-sequence", "consumed-ref", "consumed-hash", "consumed-no-marker", "consumed-unowned", "index-magic", "index-key", "index-value", "queue-index-key"} {
 		t.Run(control, func(t *testing.T) {
 			s := rawSignalFixture(t, journal.JSON, control)
 			if _, err := CheckGraphReferences(context.Background(), s.Graph); err != nil {
@@ -163,4 +181,17 @@ func TestRawGraphSignalReservationAndBinding(t *testing.T) {
 			}
 		})
 	}
+}
+
+// Encode the single-leaf wire fixture without the production index codec.
+func rawSignalLeafIndex(request journal.GraphSignalRequest, value uint64) []byte {
+	data := make([]byte, 96)
+	copy(data, "JWFIDX01")
+	binary.BigEndian.PutUint16(data[8:10], 1)
+	raw, _ := json.Marshal(request)
+	hash := sha256.Sum256(raw)
+	copy(data[16:48], hash[:])
+	binary.BigEndian.PutUint16(data[48:50], 256)
+	binary.BigEndian.PutUint64(data[56:64], value)
+	return data
 }

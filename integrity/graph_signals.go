@@ -2,6 +2,7 @@ package integrity
 
 import (
 	"context"
+	"crypto/sha256"
 	"encoding/json"
 	"fmt"
 	"unicode/utf8"
@@ -23,6 +24,7 @@ func auditGraphSignalRecord(ctx context.Context, graph GraphReferenceSnapshot, s
 	}
 	var input journal.GraphSignalInput
 	var binding journal.GraphSignalBinding
+	var packet []byte
 	if record.Stream == "signal-input" {
 		var wire struct {
 			Input       journal.GraphSignalInput `json:"input"`
@@ -31,7 +33,7 @@ func auditGraphSignalRecord(ctx context.Context, graph GraphReferenceSnapshot, s
 		if json.Unmarshal(record.Record.Data, &wire) != nil || record.Index != uint64(len(state.signalInputs)) || wire.Input.Index != record.Index {
 			return fmt.Errorf("invalid signal reservation record/order")
 		}
-		input = wire.Input
+		input, packet = wire.Input, wire.IndexPacket
 	} else {
 		var wire struct {
 			Binding     journal.GraphSignalBinding `json:"binding"`
@@ -40,7 +42,7 @@ func auditGraphSignalRecord(ctx context.Context, graph GraphReferenceSnapshot, s
 		if json.Unmarshal(record.Record.Data, &wire) != nil || wire.Binding.Schema != "js-wf-canonical-signal-binding-v1" || record.Index != uint64(len(state.signalBindings)) || wire.Binding.Index != record.Index {
 			return fmt.Errorf("invalid signal queue record/order")
 		}
-		binding, input = wire.Binding, wire.Binding.Input
+		binding, input, packet = wire.Binding, wire.Binding.Input, wire.IndexPacket
 		if binding.Sequence == 0 || binding.Sequence > c.SignalSource || len(state.signalBindings) > 0 && binding.Sequence <= state.signalBindings[len(state.signalBindings)-1].Sequence {
 			return fmt.Errorf("signal queue source order differs")
 		}
@@ -68,6 +70,14 @@ func auditGraphSignalRecord(ctx context.Context, graph GraphReferenceSnapshot, s
 	}
 	if len(body) != input.InputSize || digest(body) != input.InputSHA256 {
 		return fmt.Errorf("signal input body size/hash differs")
+	}
+	requestBytes, _ := json.Marshal(r)
+	index := &state.inputIndex
+	if record.Stream == "signal-queue" {
+		index = &state.queueIndex
+	}
+	if err := index.append(ctx, packet, sha256.Sum256(requestBytes), record.Index); err != nil {
+		return err
 	}
 	if record.Stream == "signal-input" {
 		if state.signalKeys == nil {

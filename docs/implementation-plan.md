@@ -1,5 +1,21 @@
 # JetStream Durable Workflow Runtime — Implementation Plan
 
+## Independent persistent signal indexes validated — 2026-10-11
+
+The raw graph checker independently decodes both signal indexes, binds each
+key/value to its reservation or queue record, validates coordinates/topology
+and proves that each update preserves the preceding complete key set using
+logical tree fingerprints. It calls no production index decoder or lookup.
+
+Focused race passes21 index corruptions,4 new physical-reference-valid graph
+index corruptions,1024 generated updates and a257-key maximum-depth sequence.
+Six actual SDK R1/R3Domain cases pass the extended audit in95.230s.
+[Evidence, algorithm and limits](scale/raw-graph-signal-index-audit-2026-10-11/README.md).
+Source-frontier history, protected reader semantics, SDK materialized-history
+reconstruction and full original acceptance remain open. Frozen159 race and
+classified100000-entry normal continue under their original invocations.
+
+
 ## Independent canonical signal bindings and consumption audited — 2026-10-11
 
 The raw graph audit now verifies reservation identity and owned body bytes,
