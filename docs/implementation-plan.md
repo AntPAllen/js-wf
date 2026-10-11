@@ -1,5 +1,24 @@
 # JetStream Durable Workflow Runtime — Implementation Plan
 
+## Full frozen163 normal accepted; matching race launched — 2026-10-11
+
+Frozen d771ee3 normal1000 closed at08:37:48UTC with actual supervisor exit0.
+Independent review accepts3813 Git inputs, the actual retained executable, all
+163,000 seed bodies/all946 pins and231 top-level PASS results in eight disjoint
+package processes. All47 terminal nonbinary files are retained with original and
+compressed hashes. See [full qualification evidence](scale/current-main163-tier1-2026-10-11/README.md).
+
+After normal acceptance, same-source race1000 launched at08:39:05UTC as
+js-wf-main163-tier1-race-20261011-prepared.service, InvocationID
+6ee3db65808341ed9eaa52a1139f551e, supervisor291704/driver291728. Actual process
+handles and loaded command/configuration verify; live acceptance refuses exit1.
+Half-core quota/2GiB memory/eight sequential processes/300m per-process bounds
+remain. The three earlier159/160/161 race campaigns remain separate and live.
+
+This qualifies the frozen d771ee3 full163 normal inventory, not subsequent main
+runtime changes or the full native fault/scale/soak/extended/adoption requirements.
+Those gates and matching full163 race acceptance remain open.
+
 ## Retained R3 pending Starts recovered after metadata readiness — 2026-10-11
 
 A fresh verified copy of the failed full-scale store isolates an early authority

@@ -1,0 +1,51 @@
+{
+  "source": "d771ee3d05fd135ec7ec81893cee3522b3499d4e",
+  "invocation": "6ee3db65808341ed9eaa52a1139f551e",
+  "supervisor_pid": 291704,
+  "child_pid": 291728,
+  "command": [
+    "python3",
+    "scripts/check-tier1-race.py",
+    "--root",
+    "/home/exedev/js-wf-main163-tier1-20261011/race1000",
+    "--seeds",
+    "1000",
+    "--shards",
+    "8"
+  ],
+  "service": {
+    "RuntimeMaxUSec": "1d 16h 20min",
+    "RemainAfterExit": "yes",
+    "MainPID": "291704",
+    "ExecMainPID": "291704",
+    "ExecMainStatus": "0",
+    "ExecStart": "{ path=/usr/bin/python3 ; argv[]=/usr/bin/python3 /home/exedev/js-wf/docs/scale/current-main163-tier1-2026-10-11/qualification-run.py d771ee3d05fd135ec7ec81893cee3522b3499d4e race ; ignore_errors=no ; start_time=[Sun 2026-10-11 08:39:05 UTC] ; stop_time=[n/a] ; pid=291704 ; code=(null) ; status=0/0 }",
+    "CPUQuotaPerSecUSec": "500ms",
+    "MemoryMax": "2147483648",
+    "LoadState": "loaded",
+    "ActiveState": "active",
+    "SubState": "running",
+    "InvocationID": "6ee3db65808341ed9eaa52a1139f551e"
+  },
+  "supervisor_sha256": "f205619be7bb8e504e8e6971480dfb4c2c3d4f9731e867eb713ada9731dd1009",
+  "launch_command": [
+    "systemd-run",
+    "--user",
+    "--unit",
+    "js-wf-main163-tier1-race-20261011-prepared.service",
+    "--property=CPUQuota=50%",
+    "--property=MemoryMax=2G",
+    "--property=RuntimeMaxSec=145200",
+    "--property=RemainAfterExit=yes",
+    "--property=WorkingDirectory=/home/exedev/js-wf",
+    "--property=Environment=PYTHONUNBUFFERED=1",
+    "/usr/bin/python3",
+    "/home/exedev/js-wf/docs/scale/current-main163-tier1-2026-10-11/qualification-run.py",
+    "d771ee3d05fd135ec7ec81893cee3522b3499d4e",
+    "race"
+  ],
+  "actual_launch_exit": 0,
+  "start_ns": 1791707945633634063,
+  "end_ns": 1791707945882465470,
+  "accepted": false
+}
