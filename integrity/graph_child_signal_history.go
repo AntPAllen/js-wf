@@ -1,6 +1,7 @@
 package integrity
 
 import (
+	"bytes"
 	"context"
 	"fmt"
 	"js-wf/identity"
@@ -13,7 +14,7 @@ import (
 // Bind each annotated arrival to the preceding parent call, even if no later
 // checkpoint or promise cache survives. This does not reconstruct the child's
 // original publication/parent-start history after retirement or ID reuse.
-func auditSDKChildSignal(ctx context.Context, graph GraphReferenceSnapshot, state *auditedGraphJournal, signal auditedCheckpointSignal, edges []retainedgraph.Link) error {
+func auditSDKChildSignal(ctx context.Context, graph GraphReferenceSnapshot, state *auditedGraphJournal, signal auditedCheckpointSignal, edges []retainedgraph.Link, cursors map[string]auditedGraphCursor, projections map[string][]byte, readProjection func(context.Context, string) ([]byte, error), report *GraphJournalReport) error {
 	declared, requested := state.children[signal.Name]
 	if signal.Child == nil {
 		if requested {
@@ -73,6 +74,27 @@ func auditSDKChildSignal(ctx context.Context, graph GraphReferenceSnapshot, stat
 			return err
 		}
 	}
+	key := identity.Key(child.Type, child.ID)
+	cursor, found := cursors[graphDestinationForKey(key)]
+	if !found || cursor.Invocation != child.Invocation {
+		report.ChildTerminalLinksUnavailable++
+		return nil
+	}
+	if cursor.Kind != journal.Completed && cursor.Kind != journal.Failed {
+		return fmt.Errorf("matching child generation is not terminal")
+	}
+	if _, present := projections[key]; !present {
+		report.ChildTerminalLinksUnavailable++
+		return nil
+	}
+	projection, err := readProjection(ctx, key)
+	if err != nil {
+		return err
+	}
+	if !bytes.Equal(body, projection) {
+		return fmt.Errorf("consumed child outcome differs from retained terminal projection")
+	}
+	report.ChildTerminalLinksVerified++
 	return nil
 }
 

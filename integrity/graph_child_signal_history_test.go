@@ -69,7 +69,7 @@ func childHistorySnapshot(t *testing.T, enc journal.Encoding, mode string) integ
 	child := map[string]any{"type": "child", "id": "id", "inv_seq": uint64(3)}
 	outcome := map[string]any{"inv_seq": uint64(3), "result": []byte(`42`)}
 	var external []byte
-	if strings.HasPrefix(mode, "external") {
+	if strings.HasPrefix(mode, "external") || strings.HasPrefix(mode, "terminal-external") {
 		external = []byte(`42`)
 		h := childHistoryHash(external)
 		child["result_ref"], child["result_hash"] = "child-result", h
@@ -77,7 +77,7 @@ func childHistorySnapshot(t *testing.T, enc journal.Encoding, mode string) integ
 		outcome["result_ref"], outcome["result_hash"] = "child-result", h
 	}
 	switch mode {
-	case "failed":
+	case "failed", "terminal-failed", "terminal-error":
 		delete(outcome, "result")
 		outcome["error"] = "child failed"
 	case "wrong-type":
@@ -125,7 +125,8 @@ func childHistorySnapshot(t *testing.T, enc journal.Encoding, mode string) integ
 		payloads = append(payloads, external)
 	}
 	appendEntry(journal.Entry{Index: 3, Kind: journal.SignalConsumed, Payload: payload}, payloads...)
-	if strings.HasPrefix(mode, "start-") {
+	projections := map[string][]byte{}
+	if strings.HasPrefix(mode, "start-") || strings.HasPrefix(mode, "terminal-") {
 		r := journal.GraphStartRequest{Type: "child", ID: "id", ParentType: "parent", ParentID: "id", ParentInvocation: 1, SignalName: "gate"}
 		input := []byte(`7`)
 		inv := uint64(3)
@@ -142,7 +143,7 @@ func childHistorySnapshot(t *testing.T, enc journal.Encoding, mode string) integ
 			r.ParentType, r.ParentID, r.ParentInvocation, r.SignalName = "", "", 0, ""
 		case "start-input":
 			input = []byte(`8`)
-		case "start-reused":
+		case "start-reused", "terminal-reused":
 			inv = 4
 		}
 		childStart, e := g.ReserveStart(ctx, r, input)
@@ -156,8 +157,49 @@ func childHistorySnapshot(t *testing.T, enc journal.Encoding, mode string) integ
 		if e != nil {
 			t.Fatal(e)
 		}
-		for i, kind := range []journal.Kind{journal.Started, journal.Completed} {
-			ct, e = g.Append(ctx, r.Type, r.ID, inv, journal.Entry{Index: uint64(i), Kind: kind, Epoch: 1, WorkerID: "child-owner", Payload: []byte(`{}`)}, ct, nil, nil)
+		terminalBody := append([]byte(nil), body...)
+		if strings.HasPrefix(mode, "terminal-") {
+			var projected map[string]any
+			if e = json.Unmarshal(body, &projected); e != nil {
+				t.Fatal(e)
+			}
+			projected["inv_seq"] = inv
+			switch mode {
+			case "terminal-result":
+				projected["result"] = []byte(`43`)
+			case "terminal-error":
+				projected["error"] = "different failure"
+			case "terminal-external-ref":
+				projected["result_ref"] = "other-result"
+			case "terminal-external-hash":
+				projected["result_hash"] = childHistoryHash([]byte(`43`))
+			case "terminal-kind":
+				delete(projected, "result")
+				projected["error"] = "failed"
+			}
+			terminalBody, e = json.Marshal(projected)
+			if e != nil {
+				t.Fatal(e)
+			}
+			if mode == "terminal-whitespace" {
+				terminalBody = append([]byte(" "), terminalBody...)
+			}
+			if mode != "terminal-missing" {
+				projections["child.id"] = terminalBody
+			}
+		}
+		kind := journal.Completed
+		var projected struct {
+			Error string `json:"error"`
+		}
+		if e = json.Unmarshal(terminalBody, &projected); e != nil {
+			t.Fatal(e)
+		}
+		if projected.Error != "" {
+			kind = journal.Failed
+		}
+		for i, kind := range []journal.Kind{journal.Started, kind} {
+			ct, e = g.Append(ctx, r.Type, r.ID, inv, journal.Entry{Index: uint64(i), Kind: kind, Epoch: 1, WorkerID: "child-owner", Payload: terminalBody}, ct, nil, nil)
 			if e != nil {
 				t.Fatal(e)
 			}
@@ -194,7 +236,12 @@ func childHistorySnapshot(t *testing.T, enc journal.Encoding, mode string) integ
 		return m.Get(ctx, retainedgraph.Link{Reference: blobpublication.Reference{Object: name}}, limit)
 	}}
 	source := &jetstream.RawStreamMsg{Sequence: 1, Subject: "wf.inv.parent.id", Data: start.Start.PointerBytes(), Header: nats.Header{journal.GraphStartTokenHeader: []string{start.Start.Token}, "Wf-Input-SHA256": []string{start.Start.InputSHA256}}}
-	return integrity.GraphJournalSnapshot{Graph: graph, Invocations: map[string]*jetstream.RawStreamMsg{"parent.id": source}, Projections: map[string][]byte{}, ReadProjection: func(context.Context, string) ([]byte, error) { return nil, fmt.Errorf("no terminal") }}
+	return integrity.GraphJournalSnapshot{Graph: graph, Invocations: map[string]*jetstream.RawStreamMsg{"parent.id": source}, Projections: projections, ReadProjection: func(_ context.Context, key string) ([]byte, error) {
+		if p, ok := projections[key]; ok {
+			return p, nil
+		}
+		return nil, fmt.Errorf("no terminal")
+	}}
 }
 func TestRawGraphChildSignalHistory(t *testing.T) {
 	for _, enc := range []journal.Encoding{journal.JSON, journal.ProtobufV1} {
@@ -240,6 +287,36 @@ func TestRawGraphChildStartLinks(t *testing.T) {
 					}
 					if report.ChildStartLinksVerified != verified || report.ChildStartLinksUnavailable != unavailable {
 						t.Fatal("incorrect child start evidence scope", report)
+					}
+				}
+			})
+		}
+	}
+}
+
+func TestRawGraphChildTerminalLinks(t *testing.T) {
+	for _, enc := range []journal.Encoding{journal.JSON, journal.ProtobufV1} {
+		for _, mode := range []string{"terminal-inline", "terminal-failed", "terminal-external", "terminal-missing", "terminal-reused", "terminal-result", "terminal-error", "terminal-external-ref", "terminal-external-hash", "terminal-kind", "terminal-whitespace"} {
+			t.Run(string(enc)+"/"+mode, func(t *testing.T) {
+				s := childHistorySnapshot(t, enc, mode)
+				if _, err := integrity.CheckGraphReferences(context.Background(), s.Graph); err != nil {
+					t.Fatal("physical references", err)
+				}
+				report, err := integrity.CheckGraphJournals(context.Background(), s)
+				valid := mode == "terminal-inline" || mode == "terminal-failed" || mode == "terminal-external" || mode == "terminal-missing" || mode == "terminal-reused"
+				if valid && err != nil {
+					t.Fatal(report, err)
+				}
+				if !valid && err == nil {
+					t.Fatal("invalid child terminal link accepted", report)
+				}
+				if valid {
+					verified, unavailable := 1, 0
+					if mode == "terminal-missing" || mode == "terminal-reused" {
+						verified, unavailable = 0, 1
+					}
+					if report.ChildTerminalLinksVerified != verified || report.ChildTerminalLinksUnavailable != unavailable {
+						t.Fatal("incorrect terminal evidence scope", report)
 					}
 				}
 			})

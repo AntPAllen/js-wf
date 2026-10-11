@@ -1,5 +1,28 @@
 # Implementation status against the supplied plan
 
+## Available retained child terminal projection linkage — 2026-10-11
+
+Consumed child outcome bytes now independently match an available same-generation
+child terminal projection, including inline results, failures and external result
+descriptors. The complete projection census/read stability checks apply. A
+matching nonterminal child cursor is rejected. Report counters distinguish exact
+verified links from unavailable roots/projections or reused generations.
+
+Baseline3549a11 accepted consumed42 against retained child result43 (regression
+exit1). Final broad race exit0 in41.713s covers39 raw graph top-level tests,
+four native checkpoint/census cases and22 new physical controls (10 positive/
+12 negative). Four native R1/R3 child/buffered-child cases pass in72.705s with
+four verified terminal links, four verified start links, zero unavailable
+witnesses and eight checkpoint frames. Both actual executables were captured;
+1131 prelaunch inputs remained unchanged. The exact new CI guard passed locally.
+See [retained child terminal evidence](scale/raw-child-terminal-links-2026-10-11/README.md).
+
+Retained projection bytes do not prove the original retired child journal's
+ownership or original publication/parent-source/lease causality. Unavailable old
+generations, current complete161/894 qualification and original scale/fault/soak/
+power gates remain open. Four frozen long campaigns remain running and predate
+this code.
+
 ## Available retained child start linkage — 2026-10-11
 
 Consumed child signals now independently match a same-generation retained child

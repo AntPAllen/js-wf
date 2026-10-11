@@ -31,6 +31,7 @@ type GraphJournalReport struct {
 	Invocations, Journals, Entries, Terminal, Pending, Retired, Checkpoints int
 	RetiredProjectionOnly                                                   int
 	ChildStartLinksVerified, ChildStartLinksUnavailable                     int
+	ChildTerminalLinksVerified, ChildTerminalLinksUnavailable               int
 }
 
 // This decoder is independent of GraphStore's cursor validation and traversal.
@@ -393,7 +394,7 @@ func CheckGraphJournals(ctx context.Context, snapshot GraphJournalSnapshot) (rep
 				}
 				state.signalEvents = append(state.signalEvents, signal)
 			}
-			if err := auditSDKChildSignal(call, graph, state, signal, record.Record.Blobs); err != nil {
+			if err := auditSDKChildSignal(call, graph, state, signal, record.Record.Blobs, cursors, snapshot.Projections, readProjection, &report); err != nil {
 				return fmt.Errorf("%s: invalid child signal history: %w", record.Destination, err)
 			}
 			if err := auditChildStartLink(state, signal, cursors, &report); err != nil {
