@@ -47,6 +47,8 @@ jobs:
           if-no-files-found: ignore
       - name: Check benchmark and disk-trace parsers
         run: python3 -m unittest discover -s scripts -p 'test_*.py'
+      - name: Check bounded dispatch pulls under race instrumentation
+        run: go test -race ./worker -run '^(TestDispatchFetch|TestPartitionCancellationDuringStalledBatch)' -count=1 -timeout=2m -v
   cluster:
     runs-on: ubuntu-latest
     timeout-minutes: 35

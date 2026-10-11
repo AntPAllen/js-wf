@@ -1,0 +1,79 @@
+// Inspect and recover one original signal token on a verified native-store copy.
+package main
+
+import (
+ "bytes"
+ "context"
+ "encoding/json"
+ "fmt"
+ "os"
+ "path/filepath"
+ "time"
+
+ "github.com/nats-io/nats.go/jetstream"
+ "errors"
+ "js-wf/identity"
+ "js-wf/provision"
+ "js-wf/journal"
+ "js-wf/testcluster"
+)
+
+type observation struct { Phase string; Nanos int64; Error string; Value any }
+func run() (err error) {
+ root,out:=os.Args[1],os.Args[2];copy:=filepath.Join(root,"store-copy")
+ var marker struct{Copy string `json:"copy"`;Verified bool `json:"verified"`}
+ raw,e:=os.ReadFile(filepath.Join(root,"copy-verified.json"));if e!=nil{return e}
+ if json.Unmarshal(raw,&marker)!=nil||!marker.Verified||marker.Copy!=copy{return fmt.Errorf("unverified copy")}
+ observations:=[]observation{}
+ defer func(){r:=struct{Observations []observation;Error string}{Observations:observations};if err!=nil{r.Error=err.Error()};b,_:=json.MarshalIndent(r,"","  ");if e:=os.WriteFile(out,append(b,'\n'),0600);e!=nil{panic(e)}}()
+ ctx,stop:=context.WithTimeout(context.Background(),3*time.Minute);defer stop()
+ phase:=func(name string,fn func(context.Context)(any,error)) error {
+  start:=time.Now();call,cancel:=context.WithTimeout(ctx,8*time.Second);defer cancel();value,e:=fn(call)
+  o:=observation{Phase:name,Nanos:time.Since(start).Nanoseconds(),Value:value};if e!=nil{o.Error=e.Error()};observations=append(observations,o)
+  fmt.Printf("%s duration=%s error=%v\n",name,time.Since(start),e)
+  if e!=nil{return fmt.Errorf("%s: %w",name,e)};return nil
+ }
+ var cluster *testcluster.Cluster
+ if err=phase("cluster.Start",func(context.Context)(any,error){var e error;cluster,e=testcluster.Start(copy,3);return nil,e});err!=nil{return err};defer cluster.Close()
+ clients:=make([]jetstream.JetStream,3)
+ for i,nc:=range cluster.Clients{js,e:=jetstream.New(nc);if e!=nil{return e};clients[i]=js}
+ // Socket readiness alone does not establish restored JetStream metadata readiness.
+ ready:=false
+ for round:=0;round<4&&!ready;round++{
+  ready=true
+  for i,js:=range clients{for _,name:=range []string{"PURGE_SCALE_AUTH","OBJ_PURGE_SCALE_OBJECTS","WF_INV","WF_RUN","KV_WF_LEASE"}{
+   e=phase(fmt.Sprintf("metadata.round%d.node%d.%s",round,i,name),func(call context.Context)(any,error){s,e:=js.Stream(call,name);if e!=nil{return nil,e};return s.Info(call)})
+   if e!=nil{ready=false}
+  }}
+ }
+ if !ready{return fmt.Errorf("metadata readiness not established")}
+ js:=clients[0]
+ cfg:=journal.NativeGraphConfig{AuthorityStream:"PURGE_SCALE_AUTH",AuthorityPrefix:"wf.graph.purgescale",ObjectBucket:"PURGE_SCALE_OBJECTS",ExpectedReplicas:3,CanonicalStarts:true,CanonicalSignals:true,OwnerScopeIndex:true}
+ var graph *journal.GraphStore
+ if err=phase("OpenNativeGraphStore",func(call context.Context)(any,error){var e error;graph,e=journal.OpenNativeGraphStore(call,js,cfg);return nil,e});err!=nil{return err}
+ inv,e:=js.Stream(ctx,"WF_INV");if e!=nil{return e}
+ runs,e:=js.Stream(ctx,"WF_RUN");if e!=nil{return e}
+ lease,e:=js.KeyValue(ctx,"WF_LEASE");if e!=nil{return e}
+ for _,kind:=range []string{"old","live"}{for index:=0;index<10;index++{
+  id:=fmt.Sprintf("%s-%05d",kind,index)
+  if err=phase("invocation."+id,func(call context.Context)(any,error){
+   msg,e:=inv.GetLastMsgForSubject(call,identity.InvocationSubject("purge-scale",id));if e!=nil{return nil,e}
+   state,input,e:=graph.ReadStart(call,"purge-scale",id);if e!=nil{return nil,e}
+   var job struct{Kind string `json:"kind"`;Index int `json:"index"`}
+   if e=json.Unmarshal(input,&job);e!=nil{return nil,e}
+   if state.Pending||state.Invocation!=msg.Sequence||!state.Start.MatchesInvocation(msg)||job.Kind!=kind||job.Index!=index{return nil,fmt.Errorf("source/reservation/body differs")}
+   status,e:=graph.InspectRetirement(call,"purge-scale",id);if e!=nil{return nil,e}
+   records,tail,e:=graph.ReadExisting(call,"purge-scale",id,msg.Sequence);if e!=nil{return nil,e}
+   if tail!=status.Tail{return nil,fmt.Errorf("cursor/history tail differs")}
+   partition:=identity.Partition("purge-scale",id,provision.Partitions)
+   consumer,e:=runs.Consumer(call,fmt.Sprintf("WF_P_%02d",partition));if e!=nil{return nil,e}
+   info,e:=consumer.Info(call);if e!=nil{return nil,e}
+   return map[string]any{"kind":kind,"index":index,"source":msg,"start":state,"input":json.RawMessage(input),"status":status,"records":records,"tail":tail,"partition":partition,"consumer":info},nil
+  });err!=nil{return err}
+  if err=phase("lease."+id,func(call context.Context)(any,error){entry,e:=lease.Get(call,identity.Key("purge-scale",id));if errors.Is(e,jetstream.ErrKeyNotFound)||errors.Is(e,jetstream.ErrKeyDeleted){return map[string]any{"missing":true},nil};if e!=nil{return nil,e};return map[string]any{"missing":false,"value":string(entry.Value()),"revision":entry.Revision(),"created":entry.Created()},nil});err!=nil{return err}
+ }}
+ if err=phase("retained.run.messages",func(call context.Context)(any,error){info,e:=runs.Info(call);if e!=nil{return nil,e};if info.State.LastSeq-info.State.FirstSeq>10000{return nil,fmt.Errorf("unexpected run span")};messages:=[]*jetstream.RawStreamMsg{};for n:=info.State.FirstSeq;n<=info.State.LastSeq&&n>0;n++{m,e:=runs.GetMsg(call,n);if errors.Is(e,jetstream.ErrMsgNotFound){continue};if e!=nil{return nil,e};messages=append(messages,m)};if uint64(len(messages))!=info.State.Msgs{return nil,fmt.Errorf("run census differs")};return map[string]any{"state":info.State,"messages":messages},nil});err!=nil{return err}
+ if err=phase("lease.bucket",func(call context.Context)(any,error){return lease.Status(call)});err!=nil{return err}
+ return nil
+}
+func main(){if e:=run();e!=nil{fmt.Fprintln(os.Stderr,e);os.Exit(1)}}

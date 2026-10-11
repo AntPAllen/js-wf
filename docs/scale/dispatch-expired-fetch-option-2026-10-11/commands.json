@@ -1,0 +1,73 @@
+[
+  {
+    "mode": "normal",
+    "label": "build",
+    "argv": [
+      "go",
+      "test",
+      "-c",
+      "-o",
+      "/home/exedev/js-wf-fetch-expired-option-20261011/normal.test",
+      "./worker"
+    ],
+    "pid": 324824,
+    "start_ns": 1791716249386577145,
+    "end_ns": 1791716252452748884,
+    "actual_exit": 0
+  },
+  {
+    "mode": "normal",
+    "label": "test",
+    "argv": [
+      "/home/exedev/js-wf-fetch-expired-option-20261011/normal.test",
+      "-test.run=^(TestDispatchFetch|TestPartitionCancellationDuringStalledBatch)",
+      "-test.count=1",
+      "-test.timeout=30s",
+      "-test.v"
+    ],
+    "pid": 324864,
+    "start_ns": 1791716252453065205,
+    "end_ns": 1791716254795687506,
+    "actual_exit": 0,
+    "executable": {
+      "sha256": "8b9c132cfcde60e775aa5c1f006d54c3e84f17c97dc41becd0fff380079917e8",
+      "bytes": 38841494
+    }
+  },
+  {
+    "mode": "race",
+    "label": "build",
+    "argv": [
+      "go",
+      "test",
+      "-c",
+      "-o",
+      "/home/exedev/js-wf-fetch-expired-option-20261011/race.test",
+      "-race",
+      "./worker"
+    ],
+    "pid": 324871,
+    "start_ns": 1791716254795959610,
+    "end_ns": 1791716271135377198,
+    "actual_exit": 0
+  },
+  {
+    "mode": "race",
+    "label": "test",
+    "argv": [
+      "/home/exedev/js-wf-fetch-expired-option-20261011/race.test",
+      "-test.run=^(TestDispatchFetch|TestPartitionCancellationDuringStalledBatch)",
+      "-test.count=1",
+      "-test.timeout=30s",
+      "-test.v"
+    ],
+    "pid": 324981,
+    "start_ns": 1791716271135918671,
+    "end_ns": 1791716274493279470,
+    "actual_exit": 0,
+    "executable": {
+      "sha256": "ad1ca8b2dd7d8ba09be8e87c42b51023dbdcc0ac1bdc00dbfee1058f8a479a4e",
+      "bytes": 50757658
+    }
+  }
+]

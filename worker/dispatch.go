@@ -2,6 +2,7 @@ package worker
 
 import (
 	"context"
+	"errors"
 	"time"
 
 	"github.com/nats-io/nats.go/jetstream"
@@ -58,6 +59,12 @@ func (c jetStreamDispatchConsumer) FetchOne(ctx context.Context) (DispatchBatch,
 	attempt, cancel := context.WithTimeout(ctx, time.Second)
 	batch, err := c.consumer.Fetch(1, jetstream.FetchContext(attempt))
 	if err != nil {
+		// FetchContext reports an already expired deadline as ErrInvalidOption
+		// without wrapping the context cause. Preserve that cause before cancel
+		// so local attempt expiry cannot terminate a healthy partition loop.
+		if cause := attempt.Err(); cause != nil {
+			err = errors.Join(err, cause)
+		}
 		cancel()
 		return nil, err
 	}

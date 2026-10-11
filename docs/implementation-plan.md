@@ -1,5 +1,27 @@
 # JetStream Durable Workflow Runtime — Implementation Plan
 
+## Expired pull classification reproduced and repaired — 2026-10-11
+
+A real SDK control reproduces the exact context-deadline-invalid-option error:
+local pull expiry before Fetch option evaluation terminates an otherwise healthy
+partition. The adapter now preserves the actual attempt context cause alongside
+the SDK error before cancellation. The corrected loop delivers and confirms an
+ACK; a healthy-context invalid option remains fatal. Five bounded dispatch tests,
+including both new cuts, pass in retained normal and race executables. Targeted
+race CI coverage is added; no deadline or unknown-append policy changes.
+[Runtime control and receipts](scale/dispatch-expired-fetch-option-2026-10-11/README.md).
+
+Two independent copies narrow the prior active-population stall: all20 Starts
+are valid and bound; tenold journals complete, eightlive journals contain Started,
+and live-00001/00005 have empty journals with retained dispatch messages and
+zero delivered consumer sequence. Their partitions51/63 share worker assignment3,
+which no old invocation exercised. The original2346-file store remains unchanged.
+The separated-phase probe exits0, preserving two initial metadata deadlines.
+This is consistent with an assignment stopping but does not prove that the
+reproduced pull defect caused the original failure. Full native active/purge/
+reuse/signal/raw-audit qualification and the remaining plan stay open.
+[Copied-store observations](scale/native-active-population-inspection-2026-10-11/README.md).
+
 ## Native active population timed out; distinct-cohort gate repaired — 2026-10-11
 
 The frozen3aa3550 native race diagnostic is terminal: actualSDKexit1 after
