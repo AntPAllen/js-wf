@@ -12,8 +12,13 @@ and reports tombstones separately. Earlier polling, tombstone, compatibility and
 overlap failures are retained. See [scenario evidence](scale/canonical-purge-reuse-2026-10-11/README.md).
 
 These are diagnostics, not the full Phase 7 scale gate or active-handler proof.
-The full-count active-handler supervisor and live-refusing reviewer are prepared.
-A documented Go cache cleanup makes room without deleting proof stores/checkouts.
+Frozen 20ab8a0 full 10k/10k/1k **active-handler** campaign is now running as
+js-wf-canonical-purge10000-active-20261011.service, InvocationID
+13fb6f9159bb45589a7e332ce9eb7805, supervisor282333/SDK283565. All1231 source
+inputs and actual SDK bytes/birth verify; live acceptance refuses actual exit1.
+Two-core quota/4GiB memory/original20m parent/22m watchdog remain. This is a live
+campaign, not full-scale acceptance. Go cache cleanup raised free space from
+1.7 to39.5GiB without deleting proof stores/checkouts.
 Inventory remains 163 families/946 pins; no runtime worker/journal logic changed.
 Full canonical scale, original native/fault/soak/adoption gates and public admission
 remain open. Four earlier-source qualification services remain independent.

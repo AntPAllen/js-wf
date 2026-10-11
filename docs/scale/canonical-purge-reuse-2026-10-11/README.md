@@ -74,3 +74,22 @@ loss and physical graph collection remain separate gates.
 The Go build cache was cleared through `go clean -cache` to make room; the receipt
 records free space and unchanged retained binary hashes. No proof store or frozen
 checkout was deleted. Full campaign launch and outcome are recorded separately.
+
+## Full active-handler campaign launched
+
+Frozen `20ab8a0` launched as
+`js-wf-canonical-purge10000-active-20261011.service`, InvocationID
+`13fb6f9159bb45589a7e332ce9eb7805`, supervisor 282333 / SDK 283565.
+The 1231 committed inputs match the frozen snapshot; the live SDK executable
+matches the retained diagnostic binary and its recorded process birth. This uses
+the qualified binary built before the commit with identical source bytes; its
+build VCS revision is not promoted to the later commit. CPU quota is two cores,
+MemoryMax 4 GiB, GOMAXPROCS 2 / GOMEMLIMIT 2 GiB, original 20-minute parent and
+22-minute test watchdog, 30-minute service lifetime including source/census work.
+
+The actual log declares `count=10000 reuse=1000 active=true full_scale=true`.
+Root: `/home/exedev/js-wf-canonical-purge10000-active-20261011`.
+The live acceptance reviewer refuses actual exit 1. Launch is evidence of a live
+full campaign, not full-scale acceptance. State/log/native files remain outside
+Git while running. Revalidate the exact unit/InvocationID/SDK before observing it;
+an observation timeout must not trigger a duplicate launch.
