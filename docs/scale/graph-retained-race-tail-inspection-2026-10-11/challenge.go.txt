@@ -1,0 +1,86 @@
+// Inspect a verified COPY of the closed graph-limit R1 store. Opening NATS
+// writes file-store metadata and quorum witnesses, so never use original proof.
+package main
+
+import (
+ "context"
+ "encoding/json"
+ "errors"
+ "flag"
+ "fmt"
+ "os"
+ "path/filepath"
+ "sync/atomic"
+ "time"
+
+ "github.com/nats-io/nats.go/jetstream"
+ "js-wf/identity"
+ "js-wf/journal"
+ "js-wf/lease"
+ "js-wf/wf"
+ "js-wf/testcluster"
+)
+
+func run() error {
+ root:=flag.String("store-copy","","verified copied R1 cluster directory")
+ output:=flag.String("output","","result file")
+ flag.Parse()
+ if *root=="" || *output=="" || !filepath.IsAbs(*root) {return fmt.Errorf("absolute copy path and output required")}
+ marker,err:=os.ReadFile(filepath.Join(filepath.Dir(*root),"copy-verified.json"));if err!=nil{return err}
+ var proof struct{Copy string `json:"copy"`;Verified bool `json:"verified"`}
+ if json.Unmarshal(marker,&proof)!=nil || !proof.Verified || proof.Copy!=*root {return fmt.Errorf("verified copy marker does not match")}
+ cluster,err:=testcluster.StartWithDomain(*root,1,"GRAPH_LIMIT");if err!=nil{return err};defer cluster.Close()
+ ctx,cancel:=context.WithTimeout(context.Background(),2*time.Minute);defer cancel()
+ var requests atomic.Int64
+ js,err:=jetstream.NewWithDomain(cluster.Clients[0],"GRAPH_LIMIT",jetstream.WithClientTrace(&jetstream.ClientTrace{RequestSent:func(string,[]byte){requests.Add(1)}}));if err!=nil{return err}
+ graph,err:=journal.OpenNativeGraphStore(ctx,js,journal.NativeGraphConfig{AuthorityStream:"LIMIT_AUTH",AuthorityPrefix:"wf.graph.limit",ObjectBucket:"LIMIT_OBJECTS",ExpectedReplicas:1,CanonicalStarts:true,CanonicalSignals:true,CheckpointIndex:true,ArchiveCheckpoints:true,OwnerScopeIndex:true});if err!=nil{return err}
+ const typ,id="graph-limit","global"
+ status,err:=graph.InspectStart(ctx,typ,id);if err!=nil||status==nil{return fmt.Errorf("cursor: %v",err)}
+ start,input,err:=graph.ReadStart(ctx,typ,id);if err!=nil{return err}
+ inv,err:=js.Stream(ctx,"WF_INV");if err!=nil{return err}
+ message,err:=inv.GetLastMsgForSubject(ctx,identity.InvocationSubject(typ,id));if err!=nil{return err}
+ if start.Invocation!=message.Sequence || start.Invocation!=status.State.Invocation || !start.Start.MatchesInvocation(message) {return fmt.Errorf("invocation source mismatch")}
+ view,err:=graph.OpenExisting(ctx,typ,id,start.Invocation);if err!=nil||view==nil{return fmt.Errorf("retained view: %v",err)}
+ if err=view.ValidateStartInvocation(ctx,message);err!=nil{return err}
+ records:=[]journal.Record{}
+ begin:=uint64(0);if view.Count()>8{begin=view.Count()-8}
+ for index:=begin;index<view.Count();index++{record,readErr:=view.Read(ctx,index);if readErr!=nil{return readErr};records=append(records,record.Record)}
+ failedIndex:=uint64(40959)
+ failedRecord,failedErr:=view.Read(ctx,failedIndex)
+ absent:=errors.Is(failedErr,journal.ErrGap)&&failedIndex>=view.Count()
+ if failedErr!=nil&&!absent{return failedErr}
+ if err=view.Close(ctx);err!=nil{return err}
+ after,err:=graph.InspectStart(ctx,typ,id);if err!=nil{return err}
+ if after.JournalCount!=status.JournalCount || after.JournalTail!=status.JournalTail || after.Kind!=status.Kind || after.State!=status.State {return fmt.Errorf("logical cursor changed during inspection")}
+
+ if !absent || status.JournalCount!=40959 || status.Checkpoint!=nil || status.Kind!=journal.StepCompleted {return fmt.Errorf("unexpected challenge cursor")}
+ leases,err:=lease.New(ctx,js);if err!=nil{return err}
+ owner,err:=leases.Acquire(ctx,typ,id,"tail-challenge");if err!=nil{return err}
+ defer owner.Release(context.Background())
+ type appendReceipt struct{Index uint64;Kind journal.Kind;Epoch uint64;DurationNS int64;Requests int64;Sequence uint64}
+ appends:=[]appendReceipt{};tail:=status.JournalTail
+ sdk:=wf.NewContext(ctx,nil,func(call context.Context,kind wf.Kind,payload json.RawMessage)error{
+  renew,stop:=context.WithTimeout(call,3*time.Second);err:=owner.Renew(renew);stop();if err!=nil{return err}
+  attempt,finish:=context.WithTimeout(call,15*time.Second);defer finish()
+  started:=time.Now();initialRequests:=requests.Load();index:=tail
+  sequence,err:=graph.Append(attempt,typ,id,start.Invocation,journal.Entry{Index:index,Epoch:owner.Epoch(),Kind:journal.Kind(kind),Payload:payload,WorkerID:"tail-challenge"},tail,nil,nil)
+  if err!=nil{return err};tail=sequence
+  appends=append(appends,appendReceipt{Index:index,Kind:journal.Kind(kind),Epoch:owner.Epoch(),DurationNS:time.Since(started).Nanoseconds(),Requests:requests.Load()-initialRequests,Sequence:sequence});return nil
+ })
+ if err=sdk.SetState("padding",20478);err!=nil{return err}
+ if err=sdk.CheckComplete();err!=nil{return err}
+ if len(appends)!=2 || tail!=40961 {return fmt.Errorf("wrong challenge append count")}
+ challenged,err:=graph.InspectStart(ctx,typ,id);if err!=nil{return err}
+ if challenged.JournalCount!=40961 || challenged.JournalTail!=40961 || challenged.Kind!=journal.StepCompleted || challenged.Checkpoint!=nil {return fmt.Errorf("challenge cursor mismatch")}
+ challengeView,err:=graph.OpenExisting(ctx,typ,id,start.Invocation);if err!=nil{return err}
+ for _,old:=range records {now,err:=challengeView.Read(ctx,old.Index);if err!=nil{return err};before,_:=json.Marshal(old);after,_:=json.Marshal(now.Record);if string(before)!=string(after){return fmt.Errorf("old suffix changed")}}
+ newRecords:=[]journal.Record{}
+ for index:=uint64(40959);index<40961;index++{record,err:=challengeView.Read(ctx,index);if err!=nil{return err};newRecords=append(newRecords,record.Record)}
+ if err=challengeView.Close(ctx);err!=nil{return err}
+ if err=owner.Release(ctx);err!=nil{return err}
+ result:=struct{Before,After *journal.GraphStartStatus;Input json.RawMessage;InvocationSequence uint64;Records []journal.Record;FailedIndex uint64;FailedIndexAbsent bool;FailedIndexRecord *journal.Record;ChallengeStatus *journal.GraphStartStatus;ChallengeRecords []journal.Record;Appends []appendReceipt;Scope string}{Before:status,After:after,Input:json.RawMessage(input),InvocationSequence:message.Sequence,Records:records,FailedIndex:failedIndex,FailedIndexAbsent:absent,ChallengeStatus:challenged,ChallengeRecords:newRecords,Appends:appends,Scope:"copied store; eight-record suffix inspection plus one fresh-lease SDK state write, two single-attempt 15-second graph appends; no full workflow execution, collection or full-history audit"}
+ if !absent {record:=failedRecord.Record;result.FailedIndexRecord=&record}
+ data,err:=json.MarshalIndent(result,"","  ");if err!=nil{return err};data=append(data,'\n')
+ if err=os.WriteFile(*output,data,0600);err!=nil{return err};fmt.Print(string(data));return nil
+}
+func main(){if err:=run();err!=nil{fmt.Fprintln(os.Stderr,err);os.Exit(1)}}

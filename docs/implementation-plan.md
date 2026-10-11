@@ -1,5 +1,25 @@
 # JetStream Durable Workflow Runtime — Implementation Plan
 
+## Retained race boundary recovered; frozen full162 normal accepted — 2026-10-11
+
+A hash-verified copy of the failed 100,000-entry race store confirms count/tail
+40,959 and absence of failed index 40,959. Canonical input/invocation and eight
+suffix records verify. A fresh lease and race-instrumented SDK state write cross
+that 13-merge boundary in 1.341 seconds, then complete in 0.183 seconds, using
+two single-attempt 15-second append bounds. Cold reopen preserves both new
+records at count/tail 40,961. All 866 original files remain unchanged; no full
+history audit or full workflow recovery is claimed. The deadline cause remains
+unconfirmed. See [retained boundary evidence](scale/graph-retained-race-tail-inspection-2026-10-11/README.md).
+
+Frozen full162 normal closed at 07:21:21 UTC with actual exits 0. Independent
+review accepts 162,000 seed bodies/922 pins, 230 top-level passes and eight real
+package processes, binding 3764 Git inputs and the retained executable.
+Compressed terminal receipts are verified. See [full162 normal evidence](scale/current-main162-tier1-2026-10-11/README.md).
+This source predates later admission fixes and the new family. Three older race
+jobs and current full163 normal remain running; full162 race was not launched.
+Current qualification, full native race/scale/fault/soak/adoption release gates
+remain open. Public continuation stays off.
+
 ## Archived native child follow-up passed; full163 normal launched — 2026-10-11
 
 A focused retained-store race run at d771ee3 passes both archived successful-child

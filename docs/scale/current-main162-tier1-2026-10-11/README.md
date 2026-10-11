@@ -1,5 +1,21 @@
 # Full frozen162 qualification preparation — 2026-10-11
 
+## Frozen normal1000 accepted — 2026-10-11
+
+The prepared unit closed at 07:21:21 UTC with actual driver/supervisor exit 0 and
+InvocationID a72883183dfd4d6cbce5660352a040f8. Independent review verifies all
+3764 Git inputs, the retained executable, eight sequential disjoint package
+processes, 162,000 completed seed bodies, 922 saved traces and 230 top-level
+passes (two trace-only inventory skips). Compressed nonbinary terminal receipts
+are bound by normal-terminal-files.json and verified by normal-terminal-review.py.
+The executable and clean frozen checkout remain local.
+
+This accepts source f24e6c012b87bb7c9246f4d2f00d4d8d94dba6fa only. Later
+SDK/result/checkpoint admission changes and the 163rd family remain outside this
+proof. Full163 normal at d771ee3 is the running current-code qualification
+campaign. Full162 race is not launched; current race qualification and original
+release gates remain open.
+
 This prepares complete normal/race qualification for162 seeded families and922
 pinned regressions, including current raw child-link modeling and SDK/worker
 null/ownership/order/terminal admission fixes. The source is frozen after this
