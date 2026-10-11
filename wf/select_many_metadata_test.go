@@ -1,0 +1,53 @@
+package wf
+
+import (
+	"context"
+	"encoding/json"
+	"errors"
+	"testing"
+)
+
+// Direct contexts exercise the worker-facing SDK path without Replay's separate
+// journal preflight masking request admission bugs.
+func TestSelectManyRequestMetadataAdmission(t *testing.T) {
+	cases := map[string]string{
+		"healthy":        `{"kind":"select_many","cases":[{"kind":"signal","name":"ready"}]}`,
+		"explicit_zero":  `{"kind":"select_many","cases":[{"kind":"signal","name":"ready","timer_step":0,"clock_domain":"","child_type":"","child_id":""}]}`,
+		"unknown_root":   `{"kind":"select_many","name":"","cases":[{"kind":"signal","name":"ready"}]}`,
+		"duplicate_root": `{"kind":"select_many","kind":"select_many","cases":[{"kind":"signal","name":"ready"}]}`,
+		"duplicate_case": `{"kind":"select_many","cases":[{"kind":"signal","name":"ready","name":"ready"}]}`,
+		"unknown_case":   `{"kind":"select_many","cases":[{"kind":"signal","name":"ready","extra":0}]}`,
+		"null_case":      `{"kind":"select_many","cases":[null]}`,
+		"null_kind":      `{"kind":null,"cases":[{"kind":"signal","name":"ready"}]}`,
+		"null_cases":     `{"kind":"select_many","cases":null}`,
+	}
+	for _, field := range []string{"kind", "name", "timer_step", "fire_at", "clock_domain", "child_type", "child_id"} {
+		item := map[string]any{"kind": "signal", "name": "ready", field: nil}
+		raw, err := json.Marshal(map[string]any{"kind": "select_many", "cases": []any{item}})
+		if err != nil {
+			t.Fatal(err)
+		}
+		cases["null_case_"+field] = string(raw)
+	}
+	for name, raw := range cases {
+		t.Run(name, func(t *testing.T) {
+			appends := 0
+			c := NewContext(context.Background(), []Entry{
+				{Index: 1, Kind: StepRequested, Payload: json.RawMessage(raw)},
+				{Index: 2, Kind: StepCompleted, Payload: json.RawMessage(`{"case_index":0,"signal_seq":7}`)},
+			}, func(context.Context, Kind, json.RawMessage) error { appends++; return nil },
+				Signal{Sequence: 7, Name: "ready", Payload: []byte(`42`)})
+			index, data, err := Select(c, SignalAwaitable("ready"))
+			if name == "healthy" || name == "explicit_zero" {
+				if err != nil || index != 0 || string(data) != "42" || !c.usedSignals[7] || c.position != 2 {
+					t.Fatalf("valid request: index=%d data=%s position=%d err=%v", index, data, c.position, err)
+				}
+			} else if !errors.Is(err, ErrCorruptJournal) || index != -1 || data != nil || c.usedSignals[7] || c.position != 0 {
+				t.Fatalf("invalid request: index=%d data=%s used=%v position=%d err=%v", index, data, c.usedSignals[7], c.position, err)
+			}
+			if appends != 0 {
+				t.Fatalf("replay appended %d entries", appends)
+			}
+		})
+	}
+}

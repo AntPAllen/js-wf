@@ -94,7 +94,10 @@ func Select(c *Context, awaitables ...Awaitable) (int, []byte, error) {
 	if c.position < len(c.entries) {
 		record := c.entries[c.position]
 		var got selectRequest
-		if record.Kind != StepRequested || checkpoint.DecodeUnambiguous(record.Payload, &got) != nil {
+		var envelope stepwire.Request
+		// Keep Select's narrower field shape, then apply shared metadata admission
+		// before typed zero values can hide nulls in the replay comparison.
+		if record.Kind != StepRequested || checkpoint.DecodeUnambiguous(record.Payload, &got) != nil || stepwire.Decode(record.Payload, &envelope) != nil {
 			return -1, nil, ErrCorruptJournal
 		}
 		encoded, _ := json.Marshal(got)

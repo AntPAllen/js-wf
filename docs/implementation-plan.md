@@ -1,5 +1,30 @@
 # JetStream Durable Workflow Runtime — Implementation Plan
 
+## Close Select request metadata admission gap — 2026-10-11
+
+Direct SDK Select replay now applies shared stepwire metadata admission after
+its narrower strict request decoder. Null root/case metadata is rejected before
+cursor advancement or signal consumption; selector-specific unknown fields and
+duplicate keys remain rejected. Healthy requests and explicit zero metadata
+remain valid. This closes a worker-facing Context API bypass that offline
+Replay's independent preflight already rejected; it does not establish whole
+worker before-handler admission.
+
+Baseline5ff4d52 consumed the recorded signal for five null optional case fields.
+The new direct-context test covers16 controls (two positive/14 negative), checking
+no cursor movement, signal consumption or appends on rejection. Full wf/stepwire
+race suites and the normal CI selection pass, with exact current CI assertions
+checked against both logs. Both actual race executables were captured; short
+normal/baseline executable observation was missed and is explicitly recorded.
+All1146 Go/module/workflow inputs remained unchanged during each command; only
+gofmt changed the regression between commands, with preformat bytes retained and
+independently verified. See [Select admission evidence](scale/sdk-select-request-admission-2026-10-11/README.md).
+
+The corpus remains162 families/922 pins. Five older qualification services were
+revalidated active during this work and predate this fix. Full current-source
+qualification, complete I1–I6 causal semantics and the original fault/scale/soak/
+power/client/rollout requirements remain open.
+
 ## Reject null SDK step metadata before replay handlers — 2026-10-11
 
 Production stepwire and the independent raw auditor reject present null request/

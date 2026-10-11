@@ -1,0 +1,47 @@
+=== RUN   TestSelectManyRequestMetadataAdmission
+=== RUN   TestSelectManyRequestMetadataAdmission/duplicate_case
+=== RUN   TestSelectManyRequestMetadataAdmission/null_case_name
+    select_many_metadata_test.go:46: invalid request: index=-1 data= used=false position=0 err=workflow step differs from recorded journal at index 1: recorded "select_many", requested "select_many"
+=== RUN   TestSelectManyRequestMetadataAdmission/null_case_timer_step
+    select_many_metadata_test.go:46: invalid request: index=0 data=42 used=true position=2 err=<nil>
+=== RUN   TestSelectManyRequestMetadataAdmission/null_case
+    select_many_metadata_test.go:46: invalid request: index=-1 data= used=false position=0 err=workflow step differs from recorded journal at index 1: recorded "select_many", requested "select_many"
+=== RUN   TestSelectManyRequestMetadataAdmission/null_kind
+    select_many_metadata_test.go:46: invalid request: index=-1 data= used=false position=0 err=workflow step differs from recorded journal at index 1: recorded "select_many", requested "select_many"
+=== RUN   TestSelectManyRequestMetadataAdmission/null_case_kind
+    select_many_metadata_test.go:46: invalid request: index=-1 data= used=false position=0 err=workflow step differs from recorded journal at index 1: recorded "select_many", requested "select_many"
+=== RUN   TestSelectManyRequestMetadataAdmission/null_case_fire_at
+    select_many_metadata_test.go:46: invalid request: index=0 data=42 used=true position=2 err=<nil>
+=== RUN   TestSelectManyRequestMetadataAdmission/null_case_child_type
+    select_many_metadata_test.go:46: invalid request: index=0 data=42 used=true position=2 err=<nil>
+=== RUN   TestSelectManyRequestMetadataAdmission/healthy
+=== RUN   TestSelectManyRequestMetadataAdmission/explicit_zero
+=== RUN   TestSelectManyRequestMetadataAdmission/unknown_case
+=== RUN   TestSelectManyRequestMetadataAdmission/unknown_root
+=== RUN   TestSelectManyRequestMetadataAdmission/duplicate_root
+=== RUN   TestSelectManyRequestMetadataAdmission/null_cases
+    select_many_metadata_test.go:46: invalid request: index=-1 data= used=false position=0 err=workflow step differs from recorded journal at index 1: recorded "select_many", requested "select_many"
+=== RUN   TestSelectManyRequestMetadataAdmission/null_case_clock_domain
+    select_many_metadata_test.go:46: invalid request: index=0 data=42 used=true position=2 err=<nil>
+=== RUN   TestSelectManyRequestMetadataAdmission/null_case_child_id
+    select_many_metadata_test.go:46: invalid request: index=0 data=42 used=true position=2 err=<nil>
+--- FAIL: TestSelectManyRequestMetadataAdmission (0.00s)
+    --- PASS: TestSelectManyRequestMetadataAdmission/duplicate_case (0.00s)
+    --- FAIL: TestSelectManyRequestMetadataAdmission/null_case_name (0.00s)
+    --- FAIL: TestSelectManyRequestMetadataAdmission/null_case_timer_step (0.00s)
+    --- FAIL: TestSelectManyRequestMetadataAdmission/null_case (0.00s)
+    --- FAIL: TestSelectManyRequestMetadataAdmission/null_kind (0.00s)
+    --- FAIL: TestSelectManyRequestMetadataAdmission/null_case_kind (0.00s)
+    --- FAIL: TestSelectManyRequestMetadataAdmission/null_case_fire_at (0.00s)
+    --- FAIL: TestSelectManyRequestMetadataAdmission/null_case_child_type (0.00s)
+    --- PASS: TestSelectManyRequestMetadataAdmission/healthy (0.00s)
+    --- PASS: TestSelectManyRequestMetadataAdmission/explicit_zero (0.00s)
+    --- PASS: TestSelectManyRequestMetadataAdmission/unknown_case (0.00s)
+    --- PASS: TestSelectManyRequestMetadataAdmission/unknown_root (0.00s)
+    --- PASS: TestSelectManyRequestMetadataAdmission/duplicate_root (0.00s)
+    --- FAIL: TestSelectManyRequestMetadataAdmission/null_cases (0.00s)
+    --- FAIL: TestSelectManyRequestMetadataAdmission/null_case_clock_domain (0.00s)
+    --- FAIL: TestSelectManyRequestMetadataAdmission/null_case_child_id (0.00s)
+FAIL
+FAIL	js-wf/wf	0.008s
+FAIL

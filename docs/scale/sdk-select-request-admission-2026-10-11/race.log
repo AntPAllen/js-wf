@@ -1,0 +1,1008 @@
+=== RUN   TestCheckpointCursorPreservesSDKIdentitiesAndReplay
+--- PASS: TestCheckpointCursorPreservesSDKIdentitiesAndReplay (0.00s)
+=== RUN   TestCheckpointStateMatchesUninterruptedContinuation
+--- PASS: TestCheckpointStateMatchesUninterruptedContinuation (0.00s)
+=== RUN   TestCheckpointRejectsUnfinishedOrLiveTimerBoundary
+=== RUN   TestCheckpointRejectsUnfinishedOrLiveTimerBoundary/pending-request
+=== RUN   TestCheckpointRejectsUnfinishedOrLiveTimerBoundary/suspended
+=== RUN   TestCheckpointRejectsUnfinishedOrLiveTimerBoundary/timer
+--- PASS: TestCheckpointRejectsUnfinishedOrLiveTimerBoundary (0.00s)
+    --- PASS: TestCheckpointRejectsUnfinishedOrLiveTimerBoundary/pending-request (0.00s)
+    --- PASS: TestCheckpointRejectsUnfinishedOrLiveTimerBoundary/suspended (0.00s)
+    --- PASS: TestCheckpointRejectsUnfinishedOrLiveTimerBoundary/timer (0.00s)
+=== RUN   TestCheckpointRejectsRuntimeObjectsInLocalsBeforeWrites
+--- PASS: TestCheckpointRejectsRuntimeObjectsInLocalsBeforeWrites (0.01s)
+=== RUN   TestCheckpointRestoreRejectsGenerationAndSuffixBeforeEffects
+--- PASS: TestCheckpointRestoreRejectsGenerationAndSuffixBeforeEffects (0.01s)
+=== RUN   TestCheckpointPositiveTimerMustBeCanceledEvenAfterSignalSelection
+--- PASS: TestCheckpointPositiveTimerMustBeCanceledEvenAfterSignalSelection (0.00s)
+=== RUN   TestCheckpointRestoredPromiseVerifiesReferencedOutcome
+--- PASS: TestCheckpointRestoredPromiseVerifiesReferencedOutcome (0.00s)
+=== RUN   TestCheckpointLocalValidationVisitsOverlappingSlices
+--- PASS: TestCheckpointLocalValidationVisitsOverlappingSlices (0.00s)
+=== RUN   TestCheckpointRestoresNullableEmptyStateAsWritableMap
+--- PASS: TestCheckpointRestoresNullableEmptyStateAsWritableMap (0.00s)
+=== RUN   TestStepRecovery
+--- PASS: TestStepRecovery (0.00s)
+=== RUN   TestConcurrentStepOrderChangeFailsReplay
+--- PASS: TestConcurrentStepOrderChangeFailsReplay (0.00s)
+=== RUN   TestEffectPanicIsJournaled
+--- PASS: TestEffectPanicIsJournaled (0.00s)
+=== RUN   TestEffectGoexitIsJournaled
+--- PASS: TestEffectGoexitIsJournaled (0.00s)
+=== RUN   TestBlockedEffectReturnsOnCancellationWithoutCompletion
+--- PASS: TestBlockedEffectReturnsOnCancellationWithoutCompletion (0.00s)
+=== RUN   TestContinueCapturesStateAndEndsDelivery
+--- PASS: TestContinueCapturesStateAndEndsDelivery (0.00s)
+=== RUN   TestContinueRepairsPublicationCutsWithoutDuplicateEntries
+=== RUN   TestContinueRepairsPublicationCutsWithoutDuplicateEntries/request_drop
+=== RUN   TestContinueRepairsPublicationCutsWithoutDuplicateEntries/request_ack_lost
+=== RUN   TestContinueRepairsPublicationCutsWithoutDuplicateEntries/blob_ack_lost
+=== RUN   TestContinueRepairsPublicationCutsWithoutDuplicateEntries/blob_get_timeout
+=== RUN   TestContinueRepairsPublicationCutsWithoutDuplicateEntries/completion_drop
+=== RUN   TestContinueRepairsPublicationCutsWithoutDuplicateEntries/completion_ack_lost
+--- PASS: TestContinueRepairsPublicationCutsWithoutDuplicateEntries (0.02s)
+    --- PASS: TestContinueRepairsPublicationCutsWithoutDuplicateEntries/request_drop (0.00s)
+    --- PASS: TestContinueRepairsPublicationCutsWithoutDuplicateEntries/request_ack_lost (0.00s)
+    --- PASS: TestContinueRepairsPublicationCutsWithoutDuplicateEntries/blob_ack_lost (0.00s)
+    --- PASS: TestContinueRepairsPublicationCutsWithoutDuplicateEntries/blob_get_timeout (0.00s)
+    --- PASS: TestContinueRepairsPublicationCutsWithoutDuplicateEntries/completion_drop (0.00s)
+    --- PASS: TestContinueRepairsPublicationCutsWithoutDuplicateEntries/completion_ack_lost (0.00s)
+=== RUN   TestContinueRejectsChangedLocalsAndStagesBeforeObjectReads
+--- PASS: TestContinueRejectsChangedLocalsAndStagesBeforeObjectReads (0.00s)
+=== RUN   TestContinueRejectsUnregisteredAndInvalidBoundaries
+--- PASS: TestContinueRejectsUnregisteredAndInvalidBoundaries (0.00s)
+=== RUN   TestContinueMarshalsLocalsOnceAndProtectsStoreInput
+--- PASS: TestContinueMarshalsLocalsOnceAndProtectsStoreInput (0.00s)
+=== RUN   TestPromiseResolvesLargeChildResult
+--- PASS: TestPromiseResolvesLargeChildResult (0.00s)
+=== RUN   TestPromiseRepeatedAwaitReplaysOneConsumptionAndCopiesResult
+--- PASS: TestPromiseRepeatedAwaitReplaysOneConsumptionAndCopiesResult (0.00s)
+=== RUN   TestPromiseObjectReadRetryDoesNotConsumeAnotherSignal
+--- PASS: TestPromiseObjectReadRetryDoesNotConsumeAnotherSignal (0.00s)
+=== RUN   TestPromiseRepeatedChildFailureAndCorruptOutcome
+--- PASS: TestPromiseRepeatedChildFailureAndCorruptOutcome (0.00s)
+=== RUN   TestPromiseResultCacheRemainsBounded
+--- PASS: TestPromiseResultCacheRemainsBounded (0.25s)
+=== RUN   TestRandomWorkflowDAGsRecoverAfterKill
+--- PASS: TestRandomWorkflowDAGsRecoverAfterKill (21.54s)
+=== RUN   TestReplayCompletionEnvelopeBeforeHandler
+=== RUN   TestReplayCompletionEnvelopeBeforeHandler/result
+=== RUN   TestReplayCompletionEnvelopeBeforeHandler/hash
+=== RUN   TestReplayCompletionEnvelopeBeforeHandler/error_kind
+=== RUN   TestReplayCompletionEnvelopeBeforeHandler/selected
+=== RUN   TestReplayCompletionEnvelopeBeforeHandler/metadata_reference
+=== RUN   TestReplayCompletionEnvelopeBeforeHandler/unknown
+=== RUN   TestReplayCompletionEnvelopeBeforeHandler/metadata_object
+=== RUN   TestReplayCompletionEnvelopeBeforeHandler/metadata_null
+=== RUN   TestReplayCompletionEnvelopeBeforeHandler/error
+=== RUN   TestReplayCompletionEnvelopeBeforeHandler/case
+=== RUN   TestReplayCompletionEnvelopeBeforeHandler/cancelled
+=== RUN   TestReplayCompletionEnvelopeBeforeHandler/missing
+=== RUN   TestReplayCompletionEnvelopeBeforeHandler/escaped_result
+=== RUN   TestReplayCompletionEnvelopeBeforeHandler/metadata_hash
+=== RUN   TestReplayCompletionEnvelopeBeforeHandler/null
+=== RUN   TestReplayCompletionEnvelopeBeforeHandler/result_alias
+=== RUN   TestReplayCompletionEnvelopeBeforeHandler/reference
+=== RUN   TestReplayCompletionEnvelopeBeforeHandler/signal
+--- PASS: TestReplayCompletionEnvelopeBeforeHandler (0.02s)
+    --- PASS: TestReplayCompletionEnvelopeBeforeHandler/result (0.00s)
+    --- PASS: TestReplayCompletionEnvelopeBeforeHandler/hash (0.00s)
+    --- PASS: TestReplayCompletionEnvelopeBeforeHandler/error_kind (0.00s)
+    --- PASS: TestReplayCompletionEnvelopeBeforeHandler/selected (0.00s)
+    --- PASS: TestReplayCompletionEnvelopeBeforeHandler/metadata_reference (0.00s)
+    --- PASS: TestReplayCompletionEnvelopeBeforeHandler/unknown (0.00s)
+    --- PASS: TestReplayCompletionEnvelopeBeforeHandler/metadata_object (0.00s)
+    --- PASS: TestReplayCompletionEnvelopeBeforeHandler/metadata_null (0.00s)
+    --- PASS: TestReplayCompletionEnvelopeBeforeHandler/error (0.00s)
+    --- PASS: TestReplayCompletionEnvelopeBeforeHandler/case (0.00s)
+    --- PASS: TestReplayCompletionEnvelopeBeforeHandler/cancelled (0.00s)
+    --- PASS: TestReplayCompletionEnvelopeBeforeHandler/missing (0.00s)
+    --- PASS: TestReplayCompletionEnvelopeBeforeHandler/escaped_result (0.00s)
+    --- PASS: TestReplayCompletionEnvelopeBeforeHandler/metadata_hash (0.00s)
+    --- PASS: TestReplayCompletionEnvelopeBeforeHandler/null (0.00s)
+    --- PASS: TestReplayCompletionEnvelopeBeforeHandler/result_alias (0.00s)
+    --- PASS: TestReplayCompletionEnvelopeBeforeHandler/reference (0.00s)
+    --- PASS: TestReplayCompletionEnvelopeBeforeHandler/signal (0.00s)
+=== RUN   TestCompletionEnvelopeKeepsUserResultOpaque
+--- PASS: TestCompletionEnvelopeKeepsUserResultOpaque (0.00s)
+=== RUN   TestReplayAcrossContinuationFramesAndHistoricalFacts
+--- PASS: TestReplayAcrossContinuationFramesAndHistoricalFacts (0.07s)
+=== RUN   TestReplayContinuationCanceledPendingEffect
+--- PASS: TestReplayContinuationCanceledPendingEffect (0.06s)
+=== RUN   TestReplayContinuationRejectsMissingObjectsUnknownStagesAndChanges
+--- PASS: TestReplayContinuationRejectsMissingObjectsUnknownStagesAndChanges (0.06s)
+=== RUN   TestReplayContinuationPendingCorruptionAndStagePanic
+--- PASS: TestReplayContinuationPendingCorruptionAndStagePanic (0.03s)
+=== RUN   TestReplayContinuationRejectsRebuiltStateMismatch
+--- PASS: TestReplayContinuationRejectsRebuiltStateMismatch (0.02s)
+=== RUN   TestReplayContinuationChecksTerminalResultAndObjectHash
+--- PASS: TestReplayContinuationChecksTerminalResultAndObjectHash (0.08s)
+=== RUN   TestReplayEpochWorkerOwnership
+=== RUN   TestReplayEpochWorkerOwnership/same_worker
+=== RUN   TestReplayEpochWorkerOwnership/new_epoch
+=== RUN   TestReplayEpochWorkerOwnership/conflicting_epoch
+=== RUN   TestReplayEpochWorkerOwnership/conflict_after_missing_id
+=== RUN   TestReplayEpochWorkerOwnership/legacy_missing_ids
+=== RUN   TestReplayEpochWorkerOwnership/legacy_partial_ids
+=== RUN   TestReplayEpochWorkerOwnership/legacy_zero_epoch
+=== RUN   TestReplayEpochWorkerOwnership/zero_then_owned_epoch
+--- PASS: TestReplayEpochWorkerOwnership (0.01s)
+    --- PASS: TestReplayEpochWorkerOwnership/same_worker (0.00s)
+    --- PASS: TestReplayEpochWorkerOwnership/new_epoch (0.00s)
+    --- PASS: TestReplayEpochWorkerOwnership/conflicting_epoch (0.00s)
+    --- PASS: TestReplayEpochWorkerOwnership/conflict_after_missing_id (0.00s)
+    --- PASS: TestReplayEpochWorkerOwnership/legacy_missing_ids (0.00s)
+    --- PASS: TestReplayEpochWorkerOwnership/legacy_partial_ids (0.00s)
+    --- PASS: TestReplayEpochWorkerOwnership/legacy_zero_epoch (0.00s)
+    --- PASS: TestReplayEpochWorkerOwnership/zero_then_owned_epoch (0.00s)
+=== RUN   TestReplayGraphCheckpointMetadata
+=== RUN   TestReplayGraphCheckpointMetadata/buffered=false/valid
+=== RUN   TestReplayGraphCheckpointMetadata/buffered=false/duplicate_completion_metadata_reference
+=== RUN   TestReplayGraphCheckpointMetadata/buffered=false/duplicate_completion_metadata_hash
+=== RUN   TestReplayGraphCheckpointMetadata/buffered=false/legacy
+=== RUN   TestReplayGraphCheckpointMetadata/buffered=false/missing_metadata
+=== RUN   TestReplayGraphCheckpointMetadata/buffered=false/changed_bytes
+=== RUN   TestReplayGraphCheckpointMetadata/buffered=false/missing_hash
+=== RUN   TestReplayGraphCheckpointMetadata/buffered=false/missing_reference
+=== RUN   TestReplayGraphCheckpointMetadata/buffered=false/wrong_hash
+=== RUN   TestReplayGraphCheckpointMetadata/buffered=false/null_reference
+=== RUN   TestReplayGraphCheckpointMetadata/buffered=false/wrong_version
+=== RUN   TestReplayGraphCheckpointMetadata/buffered=false/wrong_type
+=== RUN   TestReplayGraphCheckpointMetadata/buffered=false/wrong_id
+=== RUN   TestReplayGraphCheckpointMetadata/buffered=false/wrong_invocation
+=== RUN   TestReplayGraphCheckpointMetadata/buffered=false/wrong_anchor
+=== RUN   TestReplayGraphCheckpointMetadata/buffered=false/wrong_epoch
+=== RUN   TestReplayGraphCheckpointMetadata/buffered=false/wrong_frame_hash
+=== RUN   TestReplayGraphCheckpointMetadata/buffered=false/wrong_signal_next
+=== RUN   TestReplayGraphCheckpointMetadata/buffered=false/wrong_signal_last
+=== RUN   TestReplayGraphCheckpointMetadata/buffered=false/missing_child
+=== RUN   TestReplayGraphCheckpointMetadata/buffered=false/foreign_child
+=== RUN   TestReplayGraphCheckpointMetadata/buffered=false/resolved_child_declaration
+=== RUN   TestReplayGraphCheckpointMetadata/buffered=false/extra_child
+=== RUN   TestReplayGraphCheckpointMetadata/buffered=false/extra_signal
+=== RUN   TestReplayGraphCheckpointMetadata/buffered=false/duplicate_version
+=== RUN   TestReplayGraphCheckpointMetadata/buffered=false/alias_version
+=== RUN   TestReplayGraphCheckpointMetadata/buffered=false/unknown_field
+=== RUN   TestReplayGraphCheckpointMetadata/buffered=false/non_checkpoint
+=== RUN   TestReplayGraphCheckpointMetadata/buffered=false/missing_frame
+=== RUN   TestReplayGraphCheckpointMetadata/buffered=false/changed_frame
+=== RUN   TestReplayGraphCheckpointMetadata/buffered=true/valid
+=== RUN   TestReplayGraphCheckpointMetadata/buffered=true/duplicate_completion_metadata_reference
+=== RUN   TestReplayGraphCheckpointMetadata/buffered=true/duplicate_completion_metadata_hash
+=== RUN   TestReplayGraphCheckpointMetadata/buffered=true/legacy
+=== RUN   TestReplayGraphCheckpointMetadata/buffered=true/missing_metadata
+=== RUN   TestReplayGraphCheckpointMetadata/buffered=true/changed_bytes
+=== RUN   TestReplayGraphCheckpointMetadata/buffered=true/missing_hash
+=== RUN   TestReplayGraphCheckpointMetadata/buffered=true/missing_reference
+=== RUN   TestReplayGraphCheckpointMetadata/buffered=true/wrong_hash
+=== RUN   TestReplayGraphCheckpointMetadata/buffered=true/null_reference
+=== RUN   TestReplayGraphCheckpointMetadata/buffered=true/wrong_version
+=== RUN   TestReplayGraphCheckpointMetadata/buffered=true/wrong_type
+=== RUN   TestReplayGraphCheckpointMetadata/buffered=true/wrong_id
+=== RUN   TestReplayGraphCheckpointMetadata/buffered=true/wrong_invocation
+=== RUN   TestReplayGraphCheckpointMetadata/buffered=true/wrong_anchor
+=== RUN   TestReplayGraphCheckpointMetadata/buffered=true/wrong_epoch
+=== RUN   TestReplayGraphCheckpointMetadata/buffered=true/wrong_frame_hash
+=== RUN   TestReplayGraphCheckpointMetadata/buffered=true/wrong_signal_next
+=== RUN   TestReplayGraphCheckpointMetadata/buffered=true/wrong_signal_last
+=== RUN   TestReplayGraphCheckpointMetadata/buffered=true/missing_child
+=== RUN   TestReplayGraphCheckpointMetadata/buffered=true/foreign_child
+=== RUN   TestReplayGraphCheckpointMetadata/buffered=true/resolved_child_declaration
+=== RUN   TestReplayGraphCheckpointMetadata/buffered=true/extra_child
+=== RUN   TestReplayGraphCheckpointMetadata/buffered=true/extra_signal
+=== RUN   TestReplayGraphCheckpointMetadata/buffered=true/duplicate_version
+=== RUN   TestReplayGraphCheckpointMetadata/buffered=true/alias_version
+=== RUN   TestReplayGraphCheckpointMetadata/buffered=true/unknown_field
+=== RUN   TestReplayGraphCheckpointMetadata/buffered=true/non_checkpoint
+=== RUN   TestReplayGraphCheckpointMetadata/buffered=true/missing_frame
+=== RUN   TestReplayGraphCheckpointMetadata/buffered=true/changed_frame
+=== RUN   TestReplayGraphCheckpointMetadata/buffered=true/missing_buffered
+=== RUN   TestReplayGraphCheckpointMetadata/buffered=true/changed_payload
+=== RUN   TestReplayGraphCheckpointMetadata/buffered=true/changed_token
+=== RUN   TestReplayGraphCheckpointMetadata/buffered=true/changed_binding
+=== RUN   TestReplayGraphCheckpointMetadata/buffered=true/wrong_sequence
+=== RUN   TestReplayGraphCheckpointMetadata/buffered=true/wrong_child
+--- PASS: TestReplayGraphCheckpointMetadata (0.40s)
+    --- PASS: TestReplayGraphCheckpointMetadata/buffered=false/valid (0.00s)
+    --- PASS: TestReplayGraphCheckpointMetadata/buffered=false/duplicate_completion_metadata_reference (0.00s)
+    --- PASS: TestReplayGraphCheckpointMetadata/buffered=false/duplicate_completion_metadata_hash (0.00s)
+    --- PASS: TestReplayGraphCheckpointMetadata/buffered=false/legacy (0.00s)
+    --- PASS: TestReplayGraphCheckpointMetadata/buffered=false/missing_metadata (0.00s)
+    --- PASS: TestReplayGraphCheckpointMetadata/buffered=false/changed_bytes (0.00s)
+    --- PASS: TestReplayGraphCheckpointMetadata/buffered=false/missing_hash (0.00s)
+    --- PASS: TestReplayGraphCheckpointMetadata/buffered=false/missing_reference (0.00s)
+    --- PASS: TestReplayGraphCheckpointMetadata/buffered=false/wrong_hash (0.00s)
+    --- PASS: TestReplayGraphCheckpointMetadata/buffered=false/null_reference (0.00s)
+    --- PASS: TestReplayGraphCheckpointMetadata/buffered=false/wrong_version (0.01s)
+    --- PASS: TestReplayGraphCheckpointMetadata/buffered=false/wrong_type (0.01s)
+    --- PASS: TestReplayGraphCheckpointMetadata/buffered=false/wrong_id (0.01s)
+    --- PASS: TestReplayGraphCheckpointMetadata/buffered=false/wrong_invocation (0.01s)
+    --- PASS: TestReplayGraphCheckpointMetadata/buffered=false/wrong_anchor (0.00s)
+    --- PASS: TestReplayGraphCheckpointMetadata/buffered=false/wrong_epoch (0.01s)
+    --- PASS: TestReplayGraphCheckpointMetadata/buffered=false/wrong_frame_hash (0.01s)
+    --- PASS: TestReplayGraphCheckpointMetadata/buffered=false/wrong_signal_next (0.01s)
+    --- PASS: TestReplayGraphCheckpointMetadata/buffered=false/wrong_signal_last (0.01s)
+    --- PASS: TestReplayGraphCheckpointMetadata/buffered=false/missing_child (0.01s)
+    --- PASS: TestReplayGraphCheckpointMetadata/buffered=false/foreign_child (0.01s)
+    --- PASS: TestReplayGraphCheckpointMetadata/buffered=false/resolved_child_declaration (0.01s)
+    --- PASS: TestReplayGraphCheckpointMetadata/buffered=false/extra_child (0.01s)
+    --- PASS: TestReplayGraphCheckpointMetadata/buffered=false/extra_signal (0.01s)
+    --- PASS: TestReplayGraphCheckpointMetadata/buffered=false/duplicate_version (0.00s)
+    --- PASS: TestReplayGraphCheckpointMetadata/buffered=false/alias_version (0.00s)
+    --- PASS: TestReplayGraphCheckpointMetadata/buffered=false/unknown_field (0.00s)
+    --- PASS: TestReplayGraphCheckpointMetadata/buffered=false/non_checkpoint (0.00s)
+    --- PASS: TestReplayGraphCheckpointMetadata/buffered=false/missing_frame (0.00s)
+    --- PASS: TestReplayGraphCheckpointMetadata/buffered=false/changed_frame (0.00s)
+    --- PASS: TestReplayGraphCheckpointMetadata/buffered=true/valid (0.00s)
+    --- PASS: TestReplayGraphCheckpointMetadata/buffered=true/duplicate_completion_metadata_reference (0.00s)
+    --- PASS: TestReplayGraphCheckpointMetadata/buffered=true/duplicate_completion_metadata_hash (0.00s)
+    --- PASS: TestReplayGraphCheckpointMetadata/buffered=true/legacy (0.00s)
+    --- PASS: TestReplayGraphCheckpointMetadata/buffered=true/missing_metadata (0.00s)
+    --- PASS: TestReplayGraphCheckpointMetadata/buffered=true/changed_bytes (0.00s)
+    --- PASS: TestReplayGraphCheckpointMetadata/buffered=true/missing_hash (0.00s)
+    --- PASS: TestReplayGraphCheckpointMetadata/buffered=true/missing_reference (0.01s)
+    --- PASS: TestReplayGraphCheckpointMetadata/buffered=true/wrong_hash (0.01s)
+    --- PASS: TestReplayGraphCheckpointMetadata/buffered=true/null_reference (0.00s)
+    --- PASS: TestReplayGraphCheckpointMetadata/buffered=true/wrong_version (0.01s)
+    --- PASS: TestReplayGraphCheckpointMetadata/buffered=true/wrong_type (0.01s)
+    --- PASS: TestReplayGraphCheckpointMetadata/buffered=true/wrong_id (0.01s)
+    --- PASS: TestReplayGraphCheckpointMetadata/buffered=true/wrong_invocation (0.01s)
+    --- PASS: TestReplayGraphCheckpointMetadata/buffered=true/wrong_anchor (0.01s)
+    --- PASS: TestReplayGraphCheckpointMetadata/buffered=true/wrong_epoch (0.01s)
+    --- PASS: TestReplayGraphCheckpointMetadata/buffered=true/wrong_frame_hash (0.01s)
+    --- PASS: TestReplayGraphCheckpointMetadata/buffered=true/wrong_signal_next (0.02s)
+    --- PASS: TestReplayGraphCheckpointMetadata/buffered=true/wrong_signal_last (0.01s)
+    --- PASS: TestReplayGraphCheckpointMetadata/buffered=true/missing_child (0.01s)
+    --- PASS: TestReplayGraphCheckpointMetadata/buffered=true/foreign_child (0.01s)
+    --- PASS: TestReplayGraphCheckpointMetadata/buffered=true/resolved_child_declaration (0.01s)
+    --- PASS: TestReplayGraphCheckpointMetadata/buffered=true/extra_child (0.01s)
+    --- PASS: TestReplayGraphCheckpointMetadata/buffered=true/extra_signal (0.01s)
+    --- PASS: TestReplayGraphCheckpointMetadata/buffered=true/duplicate_version (0.01s)
+    --- PASS: TestReplayGraphCheckpointMetadata/buffered=true/alias_version (0.00s)
+    --- PASS: TestReplayGraphCheckpointMetadata/buffered=true/unknown_field (0.01s)
+    --- PASS: TestReplayGraphCheckpointMetadata/buffered=true/non_checkpoint (0.00s)
+    --- PASS: TestReplayGraphCheckpointMetadata/buffered=true/missing_frame (0.00s)
+    --- PASS: TestReplayGraphCheckpointMetadata/buffered=true/changed_frame (0.00s)
+    --- PASS: TestReplayGraphCheckpointMetadata/buffered=true/missing_buffered (0.00s)
+    --- PASS: TestReplayGraphCheckpointMetadata/buffered=true/changed_payload (0.00s)
+    --- PASS: TestReplayGraphCheckpointMetadata/buffered=true/changed_token (0.00s)
+    --- PASS: TestReplayGraphCheckpointMetadata/buffered=true/changed_binding (0.00s)
+    --- PASS: TestReplayGraphCheckpointMetadata/buffered=true/wrong_sequence (0.00s)
+    --- PASS: TestReplayGraphCheckpointMetadata/buffered=true/wrong_child (0.00s)
+=== RUN   TestReplayGraphChildSelectedSignal
+=== RUN   TestReplayGraphChildSelectedSignal/async=false/legacy
+=== RUN   TestReplayGraphChildSelectedSignal/async=false/unbound
+=== RUN   TestReplayGraphChildSelectedSignal/async=false/bound
+=== RUN   TestReplayGraphChildSelectedSignal/async=true/legacy
+=== RUN   TestReplayGraphChildSelectedSignal/async=true/unbound
+=== RUN   TestReplayGraphChildSelectedSignal/async=true/bound
+--- PASS: TestReplayGraphChildSelectedSignal (0.02s)
+    --- PASS: TestReplayGraphChildSelectedSignal/async=false/legacy (0.00s)
+    --- PASS: TestReplayGraphChildSelectedSignal/async=false/unbound (0.00s)
+    --- PASS: TestReplayGraphChildSelectedSignal/async=false/bound (0.00s)
+    --- PASS: TestReplayGraphChildSelectedSignal/async=true/legacy (0.00s)
+    --- PASS: TestReplayGraphChildSelectedSignal/async=true/unbound (0.00s)
+    --- PASS: TestReplayGraphChildSelectedSignal/async=true/bound (0.00s)
+=== RUN   TestReplayGraphChildSelectedAfterCheckpoint
+=== RUN   TestReplayGraphChildSelectedAfterCheckpoint/legacy=false/child=false
+=== RUN   TestReplayGraphChildSelectedAfterCheckpoint/legacy=false/child=true
+=== RUN   TestReplayGraphChildSelectedAfterCheckpoint/legacy=true/child=false
+=== RUN   TestReplayGraphChildSelectedAfterCheckpoint/legacy=true/child=true
+--- PASS: TestReplayGraphChildSelectedAfterCheckpoint (0.03s)
+    --- PASS: TestReplayGraphChildSelectedAfterCheckpoint/legacy=false/child=false (0.00s)
+    --- PASS: TestReplayGraphChildSelectedAfterCheckpoint/legacy=false/child=true (0.01s)
+    --- PASS: TestReplayGraphChildSelectedAfterCheckpoint/legacy=true/child=false (0.01s)
+    --- PASS: TestReplayGraphChildSelectedAfterCheckpoint/legacy=true/child=true (0.00s)
+=== RUN   TestReplayDeclaredGraphFormat
+=== RUN   TestReplayDeclaredGraphFormat/valid
+=== RUN   TestReplayDeclaredGraphFormat/unversioned_compatibility
+=== RUN   TestReplayDeclaredGraphFormat/unknown_version
+=== RUN   TestReplayDeclaredGraphFormat/missing_annotation
+=== RUN   TestReplayDeclaredGraphFormat/null_annotation
+=== RUN   TestReplayDeclaredGraphFormat/wrong_queue_index
+=== RUN   TestReplayDeclaredGraphFormat/missing_token
+=== RUN   TestReplayDeclaredGraphFormat/missing_object
+=== RUN   TestReplayDeclaredGraphFormat/changed_object
+=== RUN   TestReplayDeclaredGraphFormat/inline_signal
+=== RUN   TestReplayDeclaredGraphFormat/zero_sequence
+=== RUN   TestReplayDeclaredGraphFormat/alias_annotation
+=== RUN   TestReplayDeclaredGraphFormat/checkpoint_metadata_removed
+=== RUN   TestReplayDeclaredGraphFormat/limit_nested_annotation_removed
+--- PASS: TestReplayDeclaredGraphFormat (0.02s)
+    --- PASS: TestReplayDeclaredGraphFormat/valid (0.00s)
+    --- PASS: TestReplayDeclaredGraphFormat/unversioned_compatibility (0.00s)
+    --- PASS: TestReplayDeclaredGraphFormat/unknown_version (0.00s)
+    --- PASS: TestReplayDeclaredGraphFormat/missing_annotation (0.00s)
+    --- PASS: TestReplayDeclaredGraphFormat/null_annotation (0.00s)
+    --- PASS: TestReplayDeclaredGraphFormat/wrong_queue_index (0.00s)
+    --- PASS: TestReplayDeclaredGraphFormat/missing_token (0.00s)
+    --- PASS: TestReplayDeclaredGraphFormat/missing_object (0.00s)
+    --- PASS: TestReplayDeclaredGraphFormat/changed_object (0.00s)
+    --- PASS: TestReplayDeclaredGraphFormat/inline_signal (0.00s)
+    --- PASS: TestReplayDeclaredGraphFormat/zero_sequence (0.00s)
+    --- PASS: TestReplayDeclaredGraphFormat/alias_annotation (0.00s)
+    --- PASS: TestReplayDeclaredGraphFormat/checkpoint_metadata_removed (0.00s)
+    --- PASS: TestReplayDeclaredGraphFormat/limit_nested_annotation_removed (0.00s)
+=== RUN   TestReplayInputBindsStarted
+=== RUN   TestReplayInputBindsStarted/graph_valid
+=== RUN   TestReplayInputBindsStarted/graph_rehashed_input
+=== RUN   TestReplayInputBindsStarted/graph_missing_expected
+=== RUN   TestReplayInputBindsStarted/graph_missing_start_hash
+=== RUN   TestReplayInputBindsStarted/graph_malformed_hash
+=== RUN   TestReplayInputBindsStarted/graph_duplicate_key
+=== RUN   TestReplayInputBindsStarted/graph_case_alias
+=== RUN   TestReplayInputBindsStarted/graph_unknown_field
+=== RUN   TestReplayInputBindsStarted/unversioned_annotated_valid
+=== RUN   TestReplayInputBindsStarted/unversioned_annotated_changed
+=== RUN   TestReplayInputBindsStarted/legacy_without_declaration
+=== RUN   TestReplayInputBindsStarted/legacy_without_expected
+=== RUN   TestReplayInputBindsStarted/legacy_empty_payload
+=== RUN   TestReplayInputBindsStarted/legacy_opaque_payload
+=== RUN   TestReplayInputBindsStarted/unversioned_null_declaration
+--- PASS: TestReplayInputBindsStarted (0.02s)
+    --- PASS: TestReplayInputBindsStarted/graph_valid (0.00s)
+    --- PASS: TestReplayInputBindsStarted/graph_rehashed_input (0.00s)
+    --- PASS: TestReplayInputBindsStarted/graph_missing_expected (0.00s)
+    --- PASS: TestReplayInputBindsStarted/graph_missing_start_hash (0.00s)
+    --- PASS: TestReplayInputBindsStarted/graph_malformed_hash (0.00s)
+    --- PASS: TestReplayInputBindsStarted/graph_duplicate_key (0.00s)
+    --- PASS: TestReplayInputBindsStarted/graph_case_alias (0.00s)
+    --- PASS: TestReplayInputBindsStarted/graph_unknown_field (0.00s)
+    --- PASS: TestReplayInputBindsStarted/unversioned_annotated_valid (0.01s)
+    --- PASS: TestReplayInputBindsStarted/unversioned_annotated_changed (0.00s)
+    --- PASS: TestReplayInputBindsStarted/legacy_without_declaration (0.00s)
+    --- PASS: TestReplayInputBindsStarted/legacy_without_expected (0.00s)
+    --- PASS: TestReplayInputBindsStarted/legacy_empty_payload (0.00s)
+    --- PASS: TestReplayInputBindsStarted/legacy_opaque_payload (0.00s)
+    --- PASS: TestReplayInputBindsStarted/unversioned_null_declaration (0.00s)
+=== RUN   TestReplayJournalHeadersBeforeHandler
+=== RUN   TestReplayJournalHeadersBeforeHandler/valid_opaque_payload
+=== RUN   TestReplayJournalHeadersBeforeHandler/unknown_header
+=== RUN   TestReplayJournalHeadersBeforeHandler/duplicate_epoch
+=== RUN   TestReplayJournalHeadersBeforeHandler/alias_epoch
+=== RUN   TestReplayJournalHeadersBeforeHandler/duplicate_index
+=== RUN   TestReplayJournalHeadersBeforeHandler/alias_index
+=== RUN   TestReplayJournalHeadersBeforeHandler/duplicate_kind
+=== RUN   TestReplayJournalHeadersBeforeHandler/alias_kind
+=== RUN   TestReplayJournalHeadersBeforeHandler/duplicate_payload_header
+=== RUN   TestReplayJournalHeadersBeforeHandler/alias_payload_header
+=== RUN   TestReplayJournalHeadersBeforeHandler/duplicate_worker
+=== RUN   TestReplayJournalHeadersBeforeHandler/alias_worker
+=== RUN   TestReplayJournalHeadersBeforeHandler/duplicate_sequence
+=== RUN   TestReplayJournalHeadersBeforeHandler/alias_sequence
+=== RUN   TestReplayJournalHeadersBeforeHandler/escaped_sequence
+--- PASS: TestReplayJournalHeadersBeforeHandler (0.01s)
+    --- PASS: TestReplayJournalHeadersBeforeHandler/valid_opaque_payload (0.00s)
+    --- PASS: TestReplayJournalHeadersBeforeHandler/unknown_header (0.00s)
+    --- PASS: TestReplayJournalHeadersBeforeHandler/duplicate_epoch (0.00s)
+    --- PASS: TestReplayJournalHeadersBeforeHandler/alias_epoch (0.00s)
+    --- PASS: TestReplayJournalHeadersBeforeHandler/duplicate_index (0.00s)
+    --- PASS: TestReplayJournalHeadersBeforeHandler/alias_index (0.00s)
+    --- PASS: TestReplayJournalHeadersBeforeHandler/duplicate_kind (0.00s)
+    --- PASS: TestReplayJournalHeadersBeforeHandler/alias_kind (0.00s)
+    --- PASS: TestReplayJournalHeadersBeforeHandler/duplicate_payload_header (0.00s)
+    --- PASS: TestReplayJournalHeadersBeforeHandler/alias_payload_header (0.00s)
+    --- PASS: TestReplayJournalHeadersBeforeHandler/duplicate_worker (0.00s)
+    --- PASS: TestReplayJournalHeadersBeforeHandler/alias_worker (0.00s)
+    --- PASS: TestReplayJournalHeadersBeforeHandler/duplicate_sequence (0.00s)
+    --- PASS: TestReplayJournalHeadersBeforeHandler/alias_sequence (0.00s)
+    --- PASS: TestReplayJournalHeadersBeforeHandler/escaped_sequence (0.00s)
+=== RUN   TestReplayRetainedLimitRequest
+=== RUN   TestReplayRetainedLimitRequest/pending
+=== RUN   TestReplayRetainedLimitRequest/identity_required
+=== RUN   TestReplayRetainedLimitRequest/wrong_generation
+=== RUN   TestReplayRetainedLimitRequest/wrong_failure
+=== RUN   TestReplayRetainedLimitRequest/null_request
+=== RUN   TestReplayRetainedLimitRequest/empty_declaration
+=== RUN   TestReplayRetainedLimitRequest/array_request
+=== RUN   TestReplayRetainedLimitRequest/result_ambiguity
+=== RUN   TestReplayRetainedLimitRequest/entry_ambiguity
+=== RUN   TestReplayRetainedLimitRequest/changed_declaration
+--- PASS: TestReplayRetainedLimitRequest (0.01s)
+    --- PASS: TestReplayRetainedLimitRequest/pending (0.00s)
+    --- PASS: TestReplayRetainedLimitRequest/identity_required (0.00s)
+    --- PASS: TestReplayRetainedLimitRequest/wrong_generation (0.00s)
+    --- PASS: TestReplayRetainedLimitRequest/wrong_failure (0.00s)
+    --- PASS: TestReplayRetainedLimitRequest/null_request (0.00s)
+    --- PASS: TestReplayRetainedLimitRequest/empty_declaration (0.00s)
+    --- PASS: TestReplayRetainedLimitRequest/array_request (0.00s)
+    --- PASS: TestReplayRetainedLimitRequest/result_ambiguity (0.00s)
+    --- PASS: TestReplayRetainedLimitRequest/entry_ambiguity (0.00s)
+    --- PASS: TestReplayRetainedLimitRequest/changed_declaration (0.00s)
+=== RUN   TestReplayLimitCannotHidePendingRequest
+--- PASS: TestReplayLimitCannotHidePendingRequest (0.00s)
+=== RUN   TestReplayLimitUnknownContinuationBeforeHandler
+--- PASS: TestReplayLimitUnknownContinuationBeforeHandler (0.00s)
+=== RUN   TestReplayLimitAtHardJournalCap
+--- PASS: TestReplayLimitAtHardJournalCap (51.68s)
+=== RUN   TestReplayRecordOrderBeforeHandler
+=== RUN   TestReplayRecordOrderBeforeHandler/valid
+=== RUN   TestReplayRecordOrderBeforeHandler/physical_sequence_gap
+=== RUN   TestReplayRecordOrderBeforeHandler/logical_index_gap
+=== RUN   TestReplayRecordOrderBeforeHandler/first_index
+=== RUN   TestReplayRecordOrderBeforeHandler/zero_sequence
+=== RUN   TestReplayRecordOrderBeforeHandler/repeated_sequence
+=== RUN   TestReplayRecordOrderBeforeHandler/backwards_sequence
+=== RUN   TestReplayRecordOrderBeforeHandler/backwards_epoch
+=== RUN   TestReplayRecordOrderBeforeHandler/missing_started
+=== RUN   TestReplayRecordOrderBeforeHandler/repeated_started
+=== RUN   TestReplayRecordOrderBeforeHandler/after_terminal
+=== RUN   TestReplayRecordOrderBeforeHandler/unknown_kind
+=== RUN   TestReplayRecordOrderBeforeHandler/foreign_terminal
+=== RUN   TestReplayRecordOrderBeforeHandler/empty_failure
+=== RUN   TestReplayRecordOrderBeforeHandler/empty_history
+--- PASS: TestReplayRecordOrderBeforeHandler (0.01s)
+    --- PASS: TestReplayRecordOrderBeforeHandler/valid (0.00s)
+    --- PASS: TestReplayRecordOrderBeforeHandler/physical_sequence_gap (0.00s)
+    --- PASS: TestReplayRecordOrderBeforeHandler/logical_index_gap (0.00s)
+    --- PASS: TestReplayRecordOrderBeforeHandler/first_index (0.00s)
+    --- PASS: TestReplayRecordOrderBeforeHandler/zero_sequence (0.00s)
+    --- PASS: TestReplayRecordOrderBeforeHandler/repeated_sequence (0.00s)
+    --- PASS: TestReplayRecordOrderBeforeHandler/backwards_sequence (0.00s)
+    --- PASS: TestReplayRecordOrderBeforeHandler/backwards_epoch (0.00s)
+    --- PASS: TestReplayRecordOrderBeforeHandler/missing_started (0.00s)
+    --- PASS: TestReplayRecordOrderBeforeHandler/repeated_started (0.00s)
+    --- PASS: TestReplayRecordOrderBeforeHandler/after_terminal (0.00s)
+    --- PASS: TestReplayRecordOrderBeforeHandler/unknown_kind (0.00s)
+    --- PASS: TestReplayRecordOrderBeforeHandler/foreign_terminal (0.00s)
+    --- PASS: TestReplayRecordOrderBeforeHandler/empty_failure (0.00s)
+    --- PASS: TestReplayRecordOrderBeforeHandler/empty_history (0.00s)
+=== RUN   TestRequestEnvelopeKeepsHashedUserInputOpaque
+--- PASS: TestRequestEnvelopeKeepsHashedUserInputOpaque (0.00s)
+=== RUN   TestReplayRequestEnvelopeBeforeHandler
+=== RUN   TestReplayRequestEnvelopeBeforeHandler/duplicate_child
+=== RUN   TestReplayRequestEnvelopeBeforeHandler/duplicate_kind
+=== RUN   TestReplayRequestEnvelopeBeforeHandler/alias_kind
+=== RUN   TestReplayRequestEnvelopeBeforeHandler/unknown_field
+=== RUN   TestReplayRequestEnvelopeBeforeHandler/missing
+=== RUN   TestReplayRequestEnvelopeBeforeHandler/null
+=== RUN   TestReplayRequestEnvelopeBeforeHandler/duplicate_name
+=== RUN   TestReplayRequestEnvelopeBeforeHandler/duplicate_cases
+=== RUN   TestReplayRequestEnvelopeBeforeHandler/duplicate_hash
+=== RUN   TestReplayRequestEnvelopeBeforeHandler/alias_hash
+=== RUN   TestReplayRequestEnvelopeBeforeHandler/alias_timer
+=== RUN   TestReplayRequestEnvelopeBeforeHandler/nested_case
+=== RUN   TestReplayRequestEnvelopeBeforeHandler/nested_alias
+=== RUN   TestReplayRequestEnvelopeBeforeHandler/escaped_kind
+=== RUN   TestReplayRequestEnvelopeBeforeHandler/alias_name
+--- PASS: TestReplayRequestEnvelopeBeforeHandler (0.01s)
+    --- PASS: TestReplayRequestEnvelopeBeforeHandler/duplicate_child (0.00s)
+    --- PASS: TestReplayRequestEnvelopeBeforeHandler/duplicate_kind (0.00s)
+    --- PASS: TestReplayRequestEnvelopeBeforeHandler/alias_kind (0.00s)
+    --- PASS: TestReplayRequestEnvelopeBeforeHandler/unknown_field (0.00s)
+    --- PASS: TestReplayRequestEnvelopeBeforeHandler/missing (0.00s)
+    --- PASS: TestReplayRequestEnvelopeBeforeHandler/null (0.00s)
+    --- PASS: TestReplayRequestEnvelopeBeforeHandler/duplicate_name (0.00s)
+    --- PASS: TestReplayRequestEnvelopeBeforeHandler/duplicate_cases (0.00s)
+    --- PASS: TestReplayRequestEnvelopeBeforeHandler/duplicate_hash (0.00s)
+    --- PASS: TestReplayRequestEnvelopeBeforeHandler/alias_hash (0.00s)
+    --- PASS: TestReplayRequestEnvelopeBeforeHandler/alias_timer (0.00s)
+    --- PASS: TestReplayRequestEnvelopeBeforeHandler/nested_case (0.00s)
+    --- PASS: TestReplayRequestEnvelopeBeforeHandler/nested_alias (0.00s)
+    --- PASS: TestReplayRequestEnvelopeBeforeHandler/escaped_kind (0.00s)
+    --- PASS: TestReplayRequestEnvelopeBeforeHandler/alias_name (0.00s)
+=== RUN   TestReplaySignalEnvelopeBeforeHandler
+=== RUN   TestReplaySignalEnvelopeBeforeHandler/duplicate_sequence
+=== RUN   TestReplaySignalEnvelopeBeforeHandler/alias_sequence
+=== RUN   TestReplaySignalEnvelopeBeforeHandler/escaped_sequence
+=== RUN   TestReplaySignalEnvelopeBeforeHandler/duplicate_name
+=== RUN   TestReplaySignalEnvelopeBeforeHandler/alias_name
+=== RUN   TestReplaySignalEnvelopeBeforeHandler/duplicate_payload
+=== RUN   TestReplaySignalEnvelopeBeforeHandler/alias_payload
+=== RUN   TestReplaySignalEnvelopeBeforeHandler/duplicate_reference
+=== RUN   TestReplaySignalEnvelopeBeforeHandler/alias_reference
+=== RUN   TestReplaySignalEnvelopeBeforeHandler/duplicate_hash
+=== RUN   TestReplaySignalEnvelopeBeforeHandler/alias_hash
+=== RUN   TestReplaySignalEnvelopeBeforeHandler/duplicate_child
+=== RUN   TestReplaySignalEnvelopeBeforeHandler/alias_child
+=== RUN   TestReplaySignalEnvelopeBeforeHandler/duplicate_canonical
+=== RUN   TestReplaySignalEnvelopeBeforeHandler/alias_canonical
+=== RUN   TestReplaySignalEnvelopeBeforeHandler/nested_child_invocation
+=== RUN   TestReplaySignalEnvelopeBeforeHandler/nested_child_alias
+=== RUN   TestReplaySignalEnvelopeBeforeHandler/nested_canonical_index
+=== RUN   TestReplaySignalEnvelopeBeforeHandler/nested_canonical_alias
+=== RUN   TestReplaySignalEnvelopeBeforeHandler/unknown_field
+--- PASS: TestReplaySignalEnvelopeBeforeHandler (0.03s)
+    --- PASS: TestReplaySignalEnvelopeBeforeHandler/duplicate_sequence (0.00s)
+    --- PASS: TestReplaySignalEnvelopeBeforeHandler/alias_sequence (0.00s)
+    --- PASS: TestReplaySignalEnvelopeBeforeHandler/escaped_sequence (0.00s)
+    --- PASS: TestReplaySignalEnvelopeBeforeHandler/duplicate_name (0.00s)
+    --- PASS: TestReplaySignalEnvelopeBeforeHandler/alias_name (0.00s)
+    --- PASS: TestReplaySignalEnvelopeBeforeHandler/duplicate_payload (0.00s)
+    --- PASS: TestReplaySignalEnvelopeBeforeHandler/alias_payload (0.00s)
+    --- PASS: TestReplaySignalEnvelopeBeforeHandler/duplicate_reference (0.00s)
+    --- PASS: TestReplaySignalEnvelopeBeforeHandler/alias_reference (0.00s)
+    --- PASS: TestReplaySignalEnvelopeBeforeHandler/duplicate_hash (0.00s)
+    --- PASS: TestReplaySignalEnvelopeBeforeHandler/alias_hash (0.00s)
+    --- PASS: TestReplaySignalEnvelopeBeforeHandler/duplicate_child (0.00s)
+    --- PASS: TestReplaySignalEnvelopeBeforeHandler/alias_child (0.00s)
+    --- PASS: TestReplaySignalEnvelopeBeforeHandler/duplicate_canonical (0.00s)
+    --- PASS: TestReplaySignalEnvelopeBeforeHandler/alias_canonical (0.00s)
+    --- PASS: TestReplaySignalEnvelopeBeforeHandler/nested_child_invocation (0.00s)
+    --- PASS: TestReplaySignalEnvelopeBeforeHandler/nested_child_alias (0.00s)
+    --- PASS: TestReplaySignalEnvelopeBeforeHandler/nested_canonical_index (0.00s)
+    --- PASS: TestReplaySignalEnvelopeBeforeHandler/nested_canonical_alias (0.00s)
+    --- PASS: TestReplaySignalEnvelopeBeforeHandler/unknown_field (0.00s)
+=== RUN   TestReplaySignalEnvelopeOpaquePayload
+--- PASS: TestReplaySignalEnvelopeOpaquePayload (0.00s)
+=== RUN   TestReplaySignalEnvelopeMissing
+=== RUN   TestReplaySignalEnvelopeMissing/payload=
+=== RUN   TestReplaySignalEnvelopeMissing/payload=null
+=== RUN   TestReplaySignalEnvelopeMissing/payload=__null__
+--- PASS: TestReplaySignalEnvelopeMissing (0.00s)
+    --- PASS: TestReplaySignalEnvelopeMissing/payload= (0.00s)
+    --- PASS: TestReplaySignalEnvelopeMissing/payload=null (0.00s)
+    --- PASS: TestReplaySignalEnvelopeMissing/payload=__null__ (0.00s)
+=== RUN   TestReplayNullStepMetadataBeforeHandler
+=== RUN   TestReplayNullStepMetadataBeforeHandler/request/kind
+=== RUN   TestReplayNullStepMetadataBeforeHandler/request/name
+=== RUN   TestReplayNullStepMetadataBeforeHandler/request/input_hash
+=== RUN   TestReplayNullStepMetadataBeforeHandler/request/duration_nanos
+=== RUN   TestReplayNullStepMetadataBeforeHandler/request/fire_at
+=== RUN   TestReplayNullStepMetadataBeforeHandler/request/clock_domain
+=== RUN   TestReplayNullStepMetadataBeforeHandler/request/timer_step
+=== RUN   TestReplayNullStepMetadataBeforeHandler/request/timer_name
+=== RUN   TestReplayNullStepMetadataBeforeHandler/request/child_type
+=== RUN   TestReplayNullStepMetadataBeforeHandler/request/child_id
+=== RUN   TestReplayNullStepMetadataBeforeHandler/request/cases
+=== RUN   TestReplayNullStepMetadataBeforeHandler/case/kind
+=== RUN   TestReplayNullStepMetadataBeforeHandler/case/name
+=== RUN   TestReplayNullStepMetadataBeforeHandler/case/timer_step
+=== RUN   TestReplayNullStepMetadataBeforeHandler/case/fire_at
+=== RUN   TestReplayNullStepMetadataBeforeHandler/case/clock_domain
+=== RUN   TestReplayNullStepMetadataBeforeHandler/case/child_type
+=== RUN   TestReplayNullStepMetadataBeforeHandler/case/child_id
+=== RUN   TestReplayNullStepMetadataBeforeHandler/completion/case_index
+=== RUN   TestReplayNullStepMetadataBeforeHandler/completion/result_ref
+=== RUN   TestReplayNullStepMetadataBeforeHandler/completion/result_hash
+=== RUN   TestReplayNullStepMetadataBeforeHandler/completion/error
+=== RUN   TestReplayNullStepMetadataBeforeHandler/completion/error_kind
+=== RUN   TestReplayNullStepMetadataBeforeHandler/completion/signal_seq
+=== RUN   TestReplayNullStepMetadataBeforeHandler/completion/selected
+=== RUN   TestReplayNullStepMetadataBeforeHandler/completion/cancelled
+=== RUN   TestReplayNullStepMetadataBeforeHandler/completion/checkpoint_metadata_ref
+=== RUN   TestReplayNullStepMetadataBeforeHandler/completion/checkpoint_metadata_hash
+--- PASS: TestReplayNullStepMetadataBeforeHandler (0.04s)
+    --- PASS: TestReplayNullStepMetadataBeforeHandler/request/kind (0.00s)
+    --- PASS: TestReplayNullStepMetadataBeforeHandler/request/name (0.00s)
+    --- PASS: TestReplayNullStepMetadataBeforeHandler/request/input_hash (0.00s)
+    --- PASS: TestReplayNullStepMetadataBeforeHandler/request/duration_nanos (0.00s)
+    --- PASS: TestReplayNullStepMetadataBeforeHandler/request/fire_at (0.00s)
+    --- PASS: TestReplayNullStepMetadataBeforeHandler/request/clock_domain (0.00s)
+    --- PASS: TestReplayNullStepMetadataBeforeHandler/request/timer_step (0.00s)
+    --- PASS: TestReplayNullStepMetadataBeforeHandler/request/timer_name (0.00s)
+    --- PASS: TestReplayNullStepMetadataBeforeHandler/request/child_type (0.00s)
+    --- PASS: TestReplayNullStepMetadataBeforeHandler/request/child_id (0.00s)
+    --- PASS: TestReplayNullStepMetadataBeforeHandler/request/cases (0.00s)
+    --- PASS: TestReplayNullStepMetadataBeforeHandler/case/kind (0.00s)
+    --- PASS: TestReplayNullStepMetadataBeforeHandler/case/name (0.00s)
+    --- PASS: TestReplayNullStepMetadataBeforeHandler/case/timer_step (0.00s)
+    --- PASS: TestReplayNullStepMetadataBeforeHandler/case/fire_at (0.00s)
+    --- PASS: TestReplayNullStepMetadataBeforeHandler/case/clock_domain (0.00s)
+    --- PASS: TestReplayNullStepMetadataBeforeHandler/case/child_type (0.00s)
+    --- PASS: TestReplayNullStepMetadataBeforeHandler/case/child_id (0.00s)
+    --- PASS: TestReplayNullStepMetadataBeforeHandler/completion/case_index (0.00s)
+    --- PASS: TestReplayNullStepMetadataBeforeHandler/completion/result_ref (0.00s)
+    --- PASS: TestReplayNullStepMetadataBeforeHandler/completion/result_hash (0.00s)
+    --- PASS: TestReplayNullStepMetadataBeforeHandler/completion/error (0.00s)
+    --- PASS: TestReplayNullStepMetadataBeforeHandler/completion/error_kind (0.00s)
+    --- PASS: TestReplayNullStepMetadataBeforeHandler/completion/signal_seq (0.00s)
+    --- PASS: TestReplayNullStepMetadataBeforeHandler/completion/selected (0.00s)
+    --- PASS: TestReplayNullStepMetadataBeforeHandler/completion/cancelled (0.00s)
+    --- PASS: TestReplayNullStepMetadataBeforeHandler/completion/checkpoint_metadata_ref (0.00s)
+    --- PASS: TestReplayNullStepMetadataBeforeHandler/completion/checkpoint_metadata_hash (0.00s)
+=== RUN   TestReplayTerminalEnvelopeBeforeHandler
+=== RUN   TestReplayTerminalEnvelopeBeforeHandler/duplicate_invocation
+=== RUN   TestReplayTerminalEnvelopeBeforeHandler/alias_invocation
+=== RUN   TestReplayTerminalEnvelopeBeforeHandler/escaped_invocation
+=== RUN   TestReplayTerminalEnvelopeBeforeHandler/duplicate_result
+=== RUN   TestReplayTerminalEnvelopeBeforeHandler/alias_result
+=== RUN   TestReplayTerminalEnvelopeBeforeHandler/duplicate_reference
+=== RUN   TestReplayTerminalEnvelopeBeforeHandler/alias_reference
+=== RUN   TestReplayTerminalEnvelopeBeforeHandler/duplicate_hash
+=== RUN   TestReplayTerminalEnvelopeBeforeHandler/alias_hash
+=== RUN   TestReplayTerminalEnvelopeBeforeHandler/duplicate_error
+=== RUN   TestReplayTerminalEnvelopeBeforeHandler/alias_error
+=== RUN   TestReplayTerminalEnvelopeBeforeHandler/duplicate_limit_request
+=== RUN   TestReplayTerminalEnvelopeBeforeHandler/alias_limit_request
+=== RUN   TestReplayTerminalEnvelopeBeforeHandler/duplicate_limit_entry
+=== RUN   TestReplayTerminalEnvelopeBeforeHandler/alias_limit_entry
+=== RUN   TestReplayTerminalEnvelopeBeforeHandler/unknown_field
+--- PASS: TestReplayTerminalEnvelopeBeforeHandler (0.02s)
+    --- PASS: TestReplayTerminalEnvelopeBeforeHandler/duplicate_invocation (0.00s)
+    --- PASS: TestReplayTerminalEnvelopeBeforeHandler/alias_invocation (0.00s)
+    --- PASS: TestReplayTerminalEnvelopeBeforeHandler/escaped_invocation (0.00s)
+    --- PASS: TestReplayTerminalEnvelopeBeforeHandler/duplicate_result (0.00s)
+    --- PASS: TestReplayTerminalEnvelopeBeforeHandler/alias_result (0.00s)
+    --- PASS: TestReplayTerminalEnvelopeBeforeHandler/duplicate_reference (0.00s)
+    --- PASS: TestReplayTerminalEnvelopeBeforeHandler/alias_reference (0.00s)
+    --- PASS: TestReplayTerminalEnvelopeBeforeHandler/duplicate_hash (0.00s)
+    --- PASS: TestReplayTerminalEnvelopeBeforeHandler/alias_hash (0.00s)
+    --- PASS: TestReplayTerminalEnvelopeBeforeHandler/duplicate_error (0.00s)
+    --- PASS: TestReplayTerminalEnvelopeBeforeHandler/alias_error (0.00s)
+    --- PASS: TestReplayTerminalEnvelopeBeforeHandler/duplicate_limit_request (0.00s)
+    --- PASS: TestReplayTerminalEnvelopeBeforeHandler/alias_limit_request (0.00s)
+    --- PASS: TestReplayTerminalEnvelopeBeforeHandler/duplicate_limit_entry (0.00s)
+    --- PASS: TestReplayTerminalEnvelopeBeforeHandler/alias_limit_entry (0.00s)
+    --- PASS: TestReplayTerminalEnvelopeBeforeHandler/unknown_field (0.00s)
+=== RUN   TestReplayTerminalEnvelopeTypedBoundary
+=== RUN   TestReplayTerminalEnvelopeTypedBoundary/valid
+=== RUN   TestReplayTerminalEnvelopeTypedBoundary/legacy_identity_absent
+=== RUN   TestReplayTerminalEnvelopeTypedBoundary/opaque_result
+=== RUN   TestReplayTerminalEnvelopeTypedBoundary/opaque_limit_request
+=== RUN   TestReplayTerminalEnvelopeTypedBoundary/opaque_limit_payload
+=== RUN   TestReplayTerminalEnvelopeTypedBoundary/duplicate_nested_kind
+=== RUN   TestReplayTerminalEnvelopeTypedBoundary/alias_nested_kind
+=== RUN   TestReplayTerminalEnvelopeTypedBoundary/duplicate_nested_payload
+=== RUN   TestReplayTerminalEnvelopeTypedBoundary/alias_nested_payload
+=== RUN   TestReplayTerminalEnvelopeTypedBoundary/unknown_nested_field
+=== RUN   TestReplayTerminalEnvelopeTypedBoundary/trailing_value
+=== RUN   TestReplayTerminalEnvelopeTypedBoundary/null
+=== RUN   TestReplayTerminalEnvelopeTypedBoundary/empty
+--- PASS: TestReplayTerminalEnvelopeTypedBoundary (0.00s)
+    --- PASS: TestReplayTerminalEnvelopeTypedBoundary/valid (0.00s)
+    --- PASS: TestReplayTerminalEnvelopeTypedBoundary/legacy_identity_absent (0.00s)
+    --- PASS: TestReplayTerminalEnvelopeTypedBoundary/opaque_result (0.00s)
+    --- PASS: TestReplayTerminalEnvelopeTypedBoundary/opaque_limit_request (0.00s)
+    --- PASS: TestReplayTerminalEnvelopeTypedBoundary/opaque_limit_payload (0.00s)
+    --- PASS: TestReplayTerminalEnvelopeTypedBoundary/duplicate_nested_kind (0.00s)
+    --- PASS: TestReplayTerminalEnvelopeTypedBoundary/alias_nested_kind (0.00s)
+    --- PASS: TestReplayTerminalEnvelopeTypedBoundary/duplicate_nested_payload (0.00s)
+    --- PASS: TestReplayTerminalEnvelopeTypedBoundary/alias_nested_payload (0.00s)
+    --- PASS: TestReplayTerminalEnvelopeTypedBoundary/unknown_nested_field (0.00s)
+    --- PASS: TestReplayTerminalEnvelopeTypedBoundary/trailing_value (0.00s)
+    --- PASS: TestReplayTerminalEnvelopeTypedBoundary/null (0.00s)
+    --- PASS: TestReplayTerminalEnvelopeTypedBoundary/empty (0.00s)
+=== RUN   TestOfflineReplayNeverRunsIncompleteEffect
+--- PASS: TestOfflineReplayNeverRunsIncompleteEffect (0.00s)
+=== RUN   TestOfflineReplayWithSignalAndObjectResult
+--- PASS: TestOfflineReplayWithSignalAndObjectResult (0.11s)
+=== RUN   TestOfflineReplayObservesSuspensionAndFailure
+--- PASS: TestOfflineReplayObservesSuspensionAndFailure (0.00s)
+=== RUN   TestOfflineReplayObservesChildSuspension
+--- PASS: TestOfflineReplayObservesChildSuspension (0.00s)
+=== RUN   TestUnserializableStepResultsAreDurable
+=== RUN   TestUnserializableStepResultsAreDurable/channel
+=== RUN   TestUnserializableStepResultsAreDurable/function
+=== RUN   TestUnserializableStepResultsAreDurable/cyclic_value
+--- PASS: TestUnserializableStepResultsAreDurable (0.01s)
+    --- PASS: TestUnserializableStepResultsAreDurable/channel (0.00s)
+    --- PASS: TestUnserializableStepResultsAreDurable/function (0.00s)
+    --- PASS: TestUnserializableStepResultsAreDurable/cyclic_value (0.01s)
+=== RUN   TestUnknownStepResultErrorKindFailsClosed
+--- PASS: TestUnknownStepResultErrorKindFailsClosed (0.00s)
+=== RUN   TestSearchAttributesReplayAndValidation
+--- PASS: TestSearchAttributesReplayAndValidation (0.00s)
+=== RUN   TestSelectManyRequestMetadataAdmission
+=== RUN   TestSelectManyRequestMetadataAdmission/null_kind
+=== RUN   TestSelectManyRequestMetadataAdmission/null_case_fire_at
+=== RUN   TestSelectManyRequestMetadataAdmission/null_case_child_type
+=== RUN   TestSelectManyRequestMetadataAdmission/null_case_child_id
+=== RUN   TestSelectManyRequestMetadataAdmission/duplicate_root
+=== RUN   TestSelectManyRequestMetadataAdmission/duplicate_case
+=== RUN   TestSelectManyRequestMetadataAdmission/unknown_case
+=== RUN   TestSelectManyRequestMetadataAdmission/explicit_zero
+=== RUN   TestSelectManyRequestMetadataAdmission/null_case
+=== RUN   TestSelectManyRequestMetadataAdmission/null_cases
+=== RUN   TestSelectManyRequestMetadataAdmission/null_case_kind
+=== RUN   TestSelectManyRequestMetadataAdmission/null_case_timer_step
+=== RUN   TestSelectManyRequestMetadataAdmission/null_case_clock_domain
+=== RUN   TestSelectManyRequestMetadataAdmission/healthy
+=== RUN   TestSelectManyRequestMetadataAdmission/unknown_root
+=== RUN   TestSelectManyRequestMetadataAdmission/null_case_name
+--- PASS: TestSelectManyRequestMetadataAdmission (0.01s)
+    --- PASS: TestSelectManyRequestMetadataAdmission/null_kind (0.00s)
+    --- PASS: TestSelectManyRequestMetadataAdmission/null_case_fire_at (0.00s)
+    --- PASS: TestSelectManyRequestMetadataAdmission/null_case_child_type (0.00s)
+    --- PASS: TestSelectManyRequestMetadataAdmission/null_case_child_id (0.00s)
+    --- PASS: TestSelectManyRequestMetadataAdmission/duplicate_root (0.00s)
+    --- PASS: TestSelectManyRequestMetadataAdmission/duplicate_case (0.00s)
+    --- PASS: TestSelectManyRequestMetadataAdmission/unknown_case (0.00s)
+    --- PASS: TestSelectManyRequestMetadataAdmission/explicit_zero (0.00s)
+    --- PASS: TestSelectManyRequestMetadataAdmission/null_case (0.00s)
+    --- PASS: TestSelectManyRequestMetadataAdmission/null_cases (0.00s)
+    --- PASS: TestSelectManyRequestMetadataAdmission/null_case_kind (0.00s)
+    --- PASS: TestSelectManyRequestMetadataAdmission/null_case_timer_step (0.00s)
+    --- PASS: TestSelectManyRequestMetadataAdmission/null_case_clock_domain (0.00s)
+    --- PASS: TestSelectManyRequestMetadataAdmission/healthy (0.00s)
+    --- PASS: TestSelectManyRequestMetadataAdmission/unknown_root (0.00s)
+    --- PASS: TestSelectManyRequestMetadataAdmission/null_case_name (0.00s)
+=== RUN   TestSelectManySuspendsReplaysChoiceAndRetainsLosers
+--- PASS: TestSelectManySuspendsReplaysChoiceAndRetainsLosers (0.01s)
+=== RUN   TestSelectManyRejectsInvalidCasesAndCorruptCompletion
+--- PASS: TestSelectManyRejectsInvalidCasesAndCorruptCompletion (0.00s)
+=== RUN   TestSelectManyUnknownCompletionReplaysRecordedWinner
+--- PASS: TestSelectManyUnknownCompletionReplaysRecordedWinner (0.00s)
+=== RUN   TestTimerSelectSignalSuspendsAndReplaysChoice
+--- PASS: TestTimerSelectSignalSuspendsAndReplaysChoice (0.00s)
+=== RUN   TestTimerSelectSignalTimerBranchReplaysWithoutFiringAgain
+--- PASS: TestTimerSelectSignalTimerBranchReplaysWithoutFiringAgain (0.00s)
+=== RUN   TestJournaledStateReplayAndDivergence
+--- PASS: TestJournaledStateReplayAndDivergence (0.00s)
+=== RUN   TestDomainTimersUseUpperOriginAndLowerDueAcrossDeliveryClocks
+=== RUN   TestDomainTimersUseUpperOriginAndLowerDueAcrossDeliveryClocks/sleep/-1m0s
+=== RUN   TestDomainTimersUseUpperOriginAndLowerDueAcrossDeliveryClocks/sleep/1m0s
+=== RUN   TestDomainTimersUseUpperOriginAndLowerDueAcrossDeliveryClocks/await/-1m0s
+=== RUN   TestDomainTimersUseUpperOriginAndLowerDueAcrossDeliveryClocks/await/1m0s
+=== RUN   TestDomainTimersUseUpperOriginAndLowerDueAcrossDeliveryClocks/select_signal/-1m0s
+=== RUN   TestDomainTimersUseUpperOriginAndLowerDueAcrossDeliveryClocks/select_signal/1m0s
+=== RUN   TestDomainTimersUseUpperOriginAndLowerDueAcrossDeliveryClocks/select_many/-1m0s
+=== RUN   TestDomainTimersUseUpperOriginAndLowerDueAcrossDeliveryClocks/select_many/1m0s
+--- PASS: TestDomainTimersUseUpperOriginAndLowerDueAcrossDeliveryClocks (0.03s)
+    --- PASS: TestDomainTimersUseUpperOriginAndLowerDueAcrossDeliveryClocks/sleep/-1m0s (0.00s)
+    --- PASS: TestDomainTimersUseUpperOriginAndLowerDueAcrossDeliveryClocks/sleep/1m0s (0.00s)
+    --- PASS: TestDomainTimersUseUpperOriginAndLowerDueAcrossDeliveryClocks/await/-1m0s (0.00s)
+    --- PASS: TestDomainTimersUseUpperOriginAndLowerDueAcrossDeliveryClocks/await/1m0s (0.00s)
+    --- PASS: TestDomainTimersUseUpperOriginAndLowerDueAcrossDeliveryClocks/select_signal/-1m0s (0.00s)
+    --- PASS: TestDomainTimersUseUpperOriginAndLowerDueAcrossDeliveryClocks/select_signal/1m0s (0.00s)
+    --- PASS: TestDomainTimersUseUpperOriginAndLowerDueAcrossDeliveryClocks/select_many/-1m0s (0.01s)
+    --- PASS: TestDomainTimersUseUpperOriginAndLowerDueAcrossDeliveryClocks/select_many/1m0s (0.00s)
+=== RUN   TestDomainClockRejectsInvalidBoundsAndPreservesLegacy
+=== RUN   TestDomainClockRejectsInvalidBoundsAndPreservesLegacy/zero
+=== RUN   TestDomainClockRejectsInvalidBoundsAndPreservesLegacy/reversed
+=== RUN   TestDomainClockRejectsInvalidBoundsAndPreservesLegacy/unavailable
+--- PASS: TestDomainClockRejectsInvalidBoundsAndPreservesLegacy (0.00s)
+    --- PASS: TestDomainClockRejectsInvalidBoundsAndPreservesLegacy/zero (0.00s)
+    --- PASS: TestDomainClockRejectsInvalidBoundsAndPreservesLegacy/reversed (0.00s)
+    --- PASS: TestDomainClockRejectsInvalidBoundsAndPreservesLegacy/unavailable (0.00s)
+=== RUN   TestDomainNativeHintFailureUsesDurableRepair
+=== RUN   TestDomainNativeHintFailureUsesDurableRepair/sleep/hint
+=== RUN   TestDomainNativeHintFailureUsesDurableRepair/sleep/required
+=== RUN   TestDomainNativeHintFailureUsesDurableRepair/sleep/cancelled
+=== RUN   TestDomainNativeHintFailureUsesDurableRepair/sleep/missing_scheduler
+=== RUN   TestDomainNativeHintFailureUsesDurableRepair/sleep/ownership_error
+=== RUN   TestDomainNativeHintFailureUsesDurableRepair/await/hint
+=== RUN   TestDomainNativeHintFailureUsesDurableRepair/await/required
+=== RUN   TestDomainNativeHintFailureUsesDurableRepair/await/cancelled
+=== RUN   TestDomainNativeHintFailureUsesDurableRepair/await/missing_scheduler
+=== RUN   TestDomainNativeHintFailureUsesDurableRepair/await/ownership_error
+=== RUN   TestDomainNativeHintFailureUsesDurableRepair/select_signal/hint
+=== RUN   TestDomainNativeHintFailureUsesDurableRepair/select_signal/required
+=== RUN   TestDomainNativeHintFailureUsesDurableRepair/select_signal/cancelled
+=== RUN   TestDomainNativeHintFailureUsesDurableRepair/select_signal/missing_scheduler
+=== RUN   TestDomainNativeHintFailureUsesDurableRepair/select_signal/ownership_error
+=== RUN   TestDomainNativeHintFailureUsesDurableRepair/select_many/hint
+=== RUN   TestDomainNativeHintFailureUsesDurableRepair/select_many/required
+=== RUN   TestDomainNativeHintFailureUsesDurableRepair/select_many/cancelled
+=== RUN   TestDomainNativeHintFailureUsesDurableRepair/select_many/missing_scheduler
+=== RUN   TestDomainNativeHintFailureUsesDurableRepair/select_many/ownership_error
+--- PASS: TestDomainNativeHintFailureUsesDurableRepair (0.01s)
+    --- PASS: TestDomainNativeHintFailureUsesDurableRepair/sleep/hint (0.00s)
+    --- PASS: TestDomainNativeHintFailureUsesDurableRepair/sleep/required (0.00s)
+    --- PASS: TestDomainNativeHintFailureUsesDurableRepair/sleep/cancelled (0.00s)
+    --- PASS: TestDomainNativeHintFailureUsesDurableRepair/sleep/missing_scheduler (0.00s)
+    --- PASS: TestDomainNativeHintFailureUsesDurableRepair/sleep/ownership_error (0.00s)
+    --- PASS: TestDomainNativeHintFailureUsesDurableRepair/await/hint (0.00s)
+    --- PASS: TestDomainNativeHintFailureUsesDurableRepair/await/required (0.00s)
+    --- PASS: TestDomainNativeHintFailureUsesDurableRepair/await/cancelled (0.00s)
+    --- PASS: TestDomainNativeHintFailureUsesDurableRepair/await/missing_scheduler (0.00s)
+    --- PASS: TestDomainNativeHintFailureUsesDurableRepair/await/ownership_error (0.00s)
+    --- PASS: TestDomainNativeHintFailureUsesDurableRepair/select_signal/hint (0.00s)
+    --- PASS: TestDomainNativeHintFailureUsesDurableRepair/select_signal/required (0.00s)
+    --- PASS: TestDomainNativeHintFailureUsesDurableRepair/select_signal/cancelled (0.00s)
+    --- PASS: TestDomainNativeHintFailureUsesDurableRepair/select_signal/missing_scheduler (0.00s)
+    --- PASS: TestDomainNativeHintFailureUsesDurableRepair/select_signal/ownership_error (0.00s)
+    --- PASS: TestDomainNativeHintFailureUsesDurableRepair/select_many/hint (0.00s)
+    --- PASS: TestDomainNativeHintFailureUsesDurableRepair/select_many/required (0.00s)
+    --- PASS: TestDomainNativeHintFailureUsesDurableRepair/select_many/cancelled (0.00s)
+    --- PASS: TestDomainNativeHintFailureUsesDurableRepair/select_many/missing_scheduler (0.00s)
+    --- PASS: TestDomainNativeHintFailureUsesDurableRepair/select_many/ownership_error (0.00s)
+=== RUN   TestFreshPositiveTimersIgnoreCurrentDeliveryWakeup
+=== RUN   TestFreshPositiveTimersIgnoreCurrentDeliveryWakeup/sleep
+=== RUN   TestFreshPositiveTimersIgnoreCurrentDeliveryWakeup/await
+=== RUN   TestFreshPositiveTimersIgnoreCurrentDeliveryWakeup/select_signal
+=== RUN   TestFreshPositiveTimersIgnoreCurrentDeliveryWakeup/select_many
+--- PASS: TestFreshPositiveTimersIgnoreCurrentDeliveryWakeup (0.00s)
+    --- PASS: TestFreshPositiveTimersIgnoreCurrentDeliveryWakeup/sleep (0.00s)
+    --- PASS: TestFreshPositiveTimersIgnoreCurrentDeliveryWakeup/await (0.00s)
+    --- PASS: TestFreshPositiveTimersIgnoreCurrentDeliveryWakeup/select_signal (0.00s)
+    --- PASS: TestFreshPositiveTimersIgnoreCurrentDeliveryWakeup/select_many (0.00s)
+=== RUN   TestTimerHandlesCancelAndCoalesceOnReplay
+--- PASS: TestTimerHandlesCancelAndCoalesceOnReplay (0.00s)
+=== RUN   TestTimerHandleRetriesScheduleAfterRequest
+--- PASS: TestTimerHandleRetriesScheduleAfterRequest (0.00s)
+=== RUN   TestSleepUsesServerClockAndReplays
+--- PASS: TestSleepUsesServerClockAndReplays (0.00s)
+=== RUN   TestNonpositiveSleepCompletesImmediately
+--- PASS: TestNonpositiveSleepCompletesImmediately (0.00s)
+=== RUN   TestRunOnceRetryKeepsDeduplicationKey
+--- PASS: TestRunOnceRetryKeepsDeduplicationKey (0.01s)
+=== RUN   TestJournaledNowAndRandomReplay
+--- PASS: TestJournaledNowAndRandomReplay (0.00s)
+=== RUN   TestVersionReplaysDecision
+--- PASS: TestVersionReplaysDecision (0.00s)
+=== RUN   TestGraphChildRetentionRequiresExactParentOwnership
+=== RUN   TestGraphChildRetentionRequiresExactParentOwnership/valid/external-envelope=false
+=== RUN   TestGraphChildRetentionRequiresExactParentOwnership/ordinary/external-envelope=false
+=== RUN   TestGraphChildRetentionRequiresExactParentOwnership/before_request/external-envelope=false
+=== RUN   TestGraphChildRetentionRequiresExactParentOwnership/duplicate_request/external-envelope=false
+=== RUN   TestGraphChildRetentionRequiresExactParentOwnership/duplicate_signal/external-envelope=false
+=== RUN   TestGraphChildRetentionRequiresExactParentOwnership/foreign_type/external-envelope=false
+=== RUN   TestGraphChildRetentionRequiresExactParentOwnership/foreign_id/external-envelope=false
+=== RUN   TestGraphChildRetentionRequiresExactParentOwnership/foreign_generation/external-envelope=false
+=== RUN   TestGraphChildRetentionRequiresExactParentOwnership/foreign_ref/external-envelope=false
+=== RUN   TestGraphChildRetentionRequiresExactParentOwnership/foreign_hash/external-envelope=false
+=== RUN   TestGraphChildRetentionRequiresExactParentOwnership/forged_envelope/external-envelope=false
+=== RUN   TestGraphChildRetentionRequiresExactParentOwnership/missing_result_edge/external-envelope=false
+=== RUN   TestGraphChildRetentionRequiresExactParentOwnership/missing_envelope_edge/external-envelope=false
+=== RUN   TestGraphChildRetentionRequiresExactParentOwnership/bad_inline_hash/external-envelope=false
+=== RUN   TestGraphChildRetentionRequiresExactParentOwnership/failed/external-envelope=false
+=== RUN   TestGraphChildRetentionRequiresExactParentOwnership/cancelled/external-envelope=false
+=== RUN   TestGraphChildRetentionRequiresExactParentOwnership/valid/external-envelope=true
+=== RUN   TestGraphChildRetentionRequiresExactParentOwnership/ordinary/external-envelope=true
+=== RUN   TestGraphChildRetentionRequiresExactParentOwnership/before_request/external-envelope=true
+=== RUN   TestGraphChildRetentionRequiresExactParentOwnership/duplicate_request/external-envelope=true
+=== RUN   TestGraphChildRetentionRequiresExactParentOwnership/duplicate_signal/external-envelope=true
+=== RUN   TestGraphChildRetentionRequiresExactParentOwnership/foreign_type/external-envelope=true
+=== RUN   TestGraphChildRetentionRequiresExactParentOwnership/foreign_id/external-envelope=true
+=== RUN   TestGraphChildRetentionRequiresExactParentOwnership/foreign_generation/external-envelope=true
+=== RUN   TestGraphChildRetentionRequiresExactParentOwnership/foreign_ref/external-envelope=true
+=== RUN   TestGraphChildRetentionRequiresExactParentOwnership/foreign_hash/external-envelope=true
+=== RUN   TestGraphChildRetentionRequiresExactParentOwnership/forged_envelope/external-envelope=true
+=== RUN   TestGraphChildRetentionRequiresExactParentOwnership/missing_result_edge/external-envelope=true
+=== RUN   TestGraphChildRetentionRequiresExactParentOwnership/missing_envelope_edge/external-envelope=true
+=== RUN   TestGraphChildRetentionRequiresExactParentOwnership/bad_inline_hash/external-envelope=true
+=== RUN   TestGraphChildRetentionRequiresExactParentOwnership/failed/external-envelope=true
+=== RUN   TestGraphChildRetentionRequiresExactParentOwnership/cancelled/external-envelope=true
+--- PASS: TestGraphChildRetentionRequiresExactParentOwnership (1.49s)
+    --- PASS: TestGraphChildRetentionRequiresExactParentOwnership/valid/external-envelope=false (0.04s)
+    --- PASS: TestGraphChildRetentionRequiresExactParentOwnership/ordinary/external-envelope=false (0.03s)
+    --- PASS: TestGraphChildRetentionRequiresExactParentOwnership/before_request/external-envelope=false (0.03s)
+    --- PASS: TestGraphChildRetentionRequiresExactParentOwnership/duplicate_request/external-envelope=false (0.05s)
+    --- PASS: TestGraphChildRetentionRequiresExactParentOwnership/duplicate_signal/external-envelope=false (0.07s)
+    --- PASS: TestGraphChildRetentionRequiresExactParentOwnership/foreign_type/external-envelope=false (0.04s)
+    --- PASS: TestGraphChildRetentionRequiresExactParentOwnership/foreign_id/external-envelope=false (0.04s)
+    --- PASS: TestGraphChildRetentionRequiresExactParentOwnership/foreign_generation/external-envelope=false (0.04s)
+    --- PASS: TestGraphChildRetentionRequiresExactParentOwnership/foreign_ref/external-envelope=false (0.04s)
+    --- PASS: TestGraphChildRetentionRequiresExactParentOwnership/foreign_hash/external-envelope=false (0.04s)
+    --- PASS: TestGraphChildRetentionRequiresExactParentOwnership/forged_envelope/external-envelope=false (0.04s)
+    --- PASS: TestGraphChildRetentionRequiresExactParentOwnership/missing_result_edge/external-envelope=false (0.05s)
+    --- PASS: TestGraphChildRetentionRequiresExactParentOwnership/missing_envelope_edge/external-envelope=false (0.03s)
+    --- PASS: TestGraphChildRetentionRequiresExactParentOwnership/bad_inline_hash/external-envelope=false (0.03s)
+    --- PASS: TestGraphChildRetentionRequiresExactParentOwnership/failed/external-envelope=false (0.03s)
+    --- PASS: TestGraphChildRetentionRequiresExactParentOwnership/cancelled/external-envelope=false (0.04s)
+    --- PASS: TestGraphChildRetentionRequiresExactParentOwnership/valid/external-envelope=true (0.04s)
+    --- PASS: TestGraphChildRetentionRequiresExactParentOwnership/ordinary/external-envelope=true (0.10s)
+    --- PASS: TestGraphChildRetentionRequiresExactParentOwnership/before_request/external-envelope=true (0.07s)
+    --- PASS: TestGraphChildRetentionRequiresExactParentOwnership/duplicate_request/external-envelope=true (0.03s)
+    --- PASS: TestGraphChildRetentionRequiresExactParentOwnership/duplicate_signal/external-envelope=true (0.06s)
+    --- PASS: TestGraphChildRetentionRequiresExactParentOwnership/foreign_type/external-envelope=true (0.04s)
+    --- PASS: TestGraphChildRetentionRequiresExactParentOwnership/foreign_id/external-envelope=true (0.05s)
+    --- PASS: TestGraphChildRetentionRequiresExactParentOwnership/foreign_generation/external-envelope=true (0.04s)
+    --- PASS: TestGraphChildRetentionRequiresExactParentOwnership/foreign_ref/external-envelope=true (0.04s)
+    --- PASS: TestGraphChildRetentionRequiresExactParentOwnership/foreign_hash/external-envelope=true (0.07s)
+    --- PASS: TestGraphChildRetentionRequiresExactParentOwnership/forged_envelope/external-envelope=true (0.05s)
+    --- PASS: TestGraphChildRetentionRequiresExactParentOwnership/missing_result_edge/external-envelope=true (0.04s)
+    --- PASS: TestGraphChildRetentionRequiresExactParentOwnership/missing_envelope_edge/external-envelope=true (0.05s)
+    --- PASS: TestGraphChildRetentionRequiresExactParentOwnership/bad_inline_hash/external-envelope=true (0.05s)
+    --- PASS: TestGraphChildRetentionRequiresExactParentOwnership/failed/external-envelope=true (0.08s)
+    --- PASS: TestGraphChildRetentionRequiresExactParentOwnership/cancelled/external-envelope=true (0.05s)
+PASS
+ok  	js-wf/wf	77.258s
+=== RUN   TestNullRuntimeMetadataAndOpaqueResults
+=== RUN   TestNullRuntimeMetadataAndOpaqueResults/request/input_hash/null
+=== RUN   TestNullRuntimeMetadataAndOpaqueResults/request/input_hash/zero
+=== RUN   TestNullRuntimeMetadataAndOpaqueResults/request/duration_nanos/null
+=== RUN   TestNullRuntimeMetadataAndOpaqueResults/request/duration_nanos/zero
+=== RUN   TestNullRuntimeMetadataAndOpaqueResults/request/clock_domain/null
+=== RUN   TestNullRuntimeMetadataAndOpaqueResults/request/clock_domain/zero
+=== RUN   TestNullRuntimeMetadataAndOpaqueResults/request/timer_name/null
+=== RUN   TestNullRuntimeMetadataAndOpaqueResults/request/timer_name/zero
+=== RUN   TestNullRuntimeMetadataAndOpaqueResults/request/child_id/null
+=== RUN   TestNullRuntimeMetadataAndOpaqueResults/request/child_id/zero
+=== RUN   TestNullRuntimeMetadataAndOpaqueResults/request/kind/null
+=== RUN   TestNullRuntimeMetadataAndOpaqueResults/request/kind/zero
+=== RUN   TestNullRuntimeMetadataAndOpaqueResults/request/name/null
+=== RUN   TestNullRuntimeMetadataAndOpaqueResults/request/name/zero
+=== RUN   TestNullRuntimeMetadataAndOpaqueResults/request/fire_at/null
+=== RUN   TestNullRuntimeMetadataAndOpaqueResults/request/fire_at/zero
+=== RUN   TestNullRuntimeMetadataAndOpaqueResults/request/timer_step/null
+=== RUN   TestNullRuntimeMetadataAndOpaqueResults/request/timer_step/zero
+=== RUN   TestNullRuntimeMetadataAndOpaqueResults/request/child_type/null
+=== RUN   TestNullRuntimeMetadataAndOpaqueResults/request/child_type/zero
+=== RUN   TestNullRuntimeMetadataAndOpaqueResults/request/cases/null
+=== RUN   TestNullRuntimeMetadataAndOpaqueResults/request/cases/zero
+=== RUN   TestNullRuntimeMetadataAndOpaqueResults/case/clock_domain/null
+=== RUN   TestNullRuntimeMetadataAndOpaqueResults/case/clock_domain/zero
+=== RUN   TestNullRuntimeMetadataAndOpaqueResults/case/child_type/null
+=== RUN   TestNullRuntimeMetadataAndOpaqueResults/case/child_type/zero
+=== RUN   TestNullRuntimeMetadataAndOpaqueResults/case/child_id/null
+=== RUN   TestNullRuntimeMetadataAndOpaqueResults/case/child_id/zero
+=== RUN   TestNullRuntimeMetadataAndOpaqueResults/case/kind/null
+=== RUN   TestNullRuntimeMetadataAndOpaqueResults/case/kind/zero
+=== RUN   TestNullRuntimeMetadataAndOpaqueResults/case/name/null
+=== RUN   TestNullRuntimeMetadataAndOpaqueResults/case/name/zero
+=== RUN   TestNullRuntimeMetadataAndOpaqueResults/case/timer_step/null
+=== RUN   TestNullRuntimeMetadataAndOpaqueResults/case/timer_step/zero
+=== RUN   TestNullRuntimeMetadataAndOpaqueResults/case/fire_at/null
+=== RUN   TestNullRuntimeMetadataAndOpaqueResults/case/fire_at/zero
+=== RUN   TestNullRuntimeMetadataAndOpaqueResults/completion/case_index/null
+=== RUN   TestNullRuntimeMetadataAndOpaqueResults/completion/case_index/zero
+=== RUN   TestNullRuntimeMetadataAndOpaqueResults/completion/result_ref/null
+=== RUN   TestNullRuntimeMetadataAndOpaqueResults/completion/result_ref/zero
+=== RUN   TestNullRuntimeMetadataAndOpaqueResults/completion/checkpoint_metadata_hash/null
+=== RUN   TestNullRuntimeMetadataAndOpaqueResults/completion/checkpoint_metadata_hash/zero
+=== RUN   TestNullRuntimeMetadataAndOpaqueResults/completion/result_hash/null
+=== RUN   TestNullRuntimeMetadataAndOpaqueResults/completion/result_hash/zero
+=== RUN   TestNullRuntimeMetadataAndOpaqueResults/completion/error/null
+=== RUN   TestNullRuntimeMetadataAndOpaqueResults/completion/error/zero
+=== RUN   TestNullRuntimeMetadataAndOpaqueResults/completion/error_kind/null
+=== RUN   TestNullRuntimeMetadataAndOpaqueResults/completion/error_kind/zero
+=== RUN   TestNullRuntimeMetadataAndOpaqueResults/completion/signal_seq/null
+=== RUN   TestNullRuntimeMetadataAndOpaqueResults/completion/signal_seq/zero
+=== RUN   TestNullRuntimeMetadataAndOpaqueResults/completion/selected/null
+=== RUN   TestNullRuntimeMetadataAndOpaqueResults/completion/selected/zero
+=== RUN   TestNullRuntimeMetadataAndOpaqueResults/completion/cancelled/null
+=== RUN   TestNullRuntimeMetadataAndOpaqueResults/completion/cancelled/zero
+=== RUN   TestNullRuntimeMetadataAndOpaqueResults/completion/checkpoint_metadata_ref/null
+=== RUN   TestNullRuntimeMetadataAndOpaqueResults/completion/checkpoint_metadata_ref/zero
+=== RUN   TestNullRuntimeMetadataAndOpaqueResults/null-case
+=== RUN   TestNullRuntimeMetadataAndOpaqueResults/opaque/{"result":null}
+=== RUN   TestNullRuntimeMetadataAndOpaqueResults/opaque/{"result":{"error":null,"kind":null,"x":1,"x":2}}
+=== RUN   TestNullRuntimeMetadataAndOpaqueResults/opaque/{}
+--- PASS: TestNullRuntimeMetadataAndOpaqueResults (0.04s)
+    --- PASS: TestNullRuntimeMetadataAndOpaqueResults/request/input_hash/null (0.00s)
+    --- PASS: TestNullRuntimeMetadataAndOpaqueResults/request/input_hash/zero (0.00s)
+    --- PASS: TestNullRuntimeMetadataAndOpaqueResults/request/duration_nanos/null (0.00s)
+    --- PASS: TestNullRuntimeMetadataAndOpaqueResults/request/duration_nanos/zero (0.00s)
+    --- PASS: TestNullRuntimeMetadataAndOpaqueResults/request/clock_domain/null (0.00s)
+    --- PASS: TestNullRuntimeMetadataAndOpaqueResults/request/clock_domain/zero (0.00s)
+    --- PASS: TestNullRuntimeMetadataAndOpaqueResults/request/timer_name/null (0.00s)
+    --- PASS: TestNullRuntimeMetadataAndOpaqueResults/request/timer_name/zero (0.00s)
+    --- PASS: TestNullRuntimeMetadataAndOpaqueResults/request/child_id/null (0.00s)
+    --- PASS: TestNullRuntimeMetadataAndOpaqueResults/request/child_id/zero (0.00s)
+    --- PASS: TestNullRuntimeMetadataAndOpaqueResults/request/kind/null (0.00s)
+    --- PASS: TestNullRuntimeMetadataAndOpaqueResults/request/kind/zero (0.01s)
+    --- PASS: TestNullRuntimeMetadataAndOpaqueResults/request/name/null (0.00s)
+    --- PASS: TestNullRuntimeMetadataAndOpaqueResults/request/name/zero (0.00s)
+    --- PASS: TestNullRuntimeMetadataAndOpaqueResults/request/fire_at/null (0.00s)
+    --- PASS: TestNullRuntimeMetadataAndOpaqueResults/request/fire_at/zero (0.00s)
+    --- PASS: TestNullRuntimeMetadataAndOpaqueResults/request/timer_step/null (0.00s)
+    --- PASS: TestNullRuntimeMetadataAndOpaqueResults/request/timer_step/zero (0.00s)
+    --- PASS: TestNullRuntimeMetadataAndOpaqueResults/request/child_type/null (0.00s)
+    --- PASS: TestNullRuntimeMetadataAndOpaqueResults/request/child_type/zero (0.00s)
+    --- PASS: TestNullRuntimeMetadataAndOpaqueResults/request/cases/null (0.00s)
+    --- PASS: TestNullRuntimeMetadataAndOpaqueResults/request/cases/zero (0.00s)
+    --- PASS: TestNullRuntimeMetadataAndOpaqueResults/case/clock_domain/null (0.00s)
+    --- PASS: TestNullRuntimeMetadataAndOpaqueResults/case/clock_domain/zero (0.00s)
+    --- PASS: TestNullRuntimeMetadataAndOpaqueResults/case/child_type/null (0.00s)
+    --- PASS: TestNullRuntimeMetadataAndOpaqueResults/case/child_type/zero (0.00s)
+    --- PASS: TestNullRuntimeMetadataAndOpaqueResults/case/child_id/null (0.00s)
+    --- PASS: TestNullRuntimeMetadataAndOpaqueResults/case/child_id/zero (0.00s)
+    --- PASS: TestNullRuntimeMetadataAndOpaqueResults/case/kind/null (0.01s)
+    --- PASS: TestNullRuntimeMetadataAndOpaqueResults/case/kind/zero (0.00s)
+    --- PASS: TestNullRuntimeMetadataAndOpaqueResults/case/name/null (0.00s)
+    --- PASS: TestNullRuntimeMetadataAndOpaqueResults/case/name/zero (0.00s)
+    --- PASS: TestNullRuntimeMetadataAndOpaqueResults/case/timer_step/null (0.00s)
+    --- PASS: TestNullRuntimeMetadataAndOpaqueResults/case/timer_step/zero (0.00s)
+    --- PASS: TestNullRuntimeMetadataAndOpaqueResults/case/fire_at/null (0.00s)
+    --- PASS: TestNullRuntimeMetadataAndOpaqueResults/case/fire_at/zero (0.00s)
+    --- PASS: TestNullRuntimeMetadataAndOpaqueResults/completion/case_index/null (0.00s)
+    --- PASS: TestNullRuntimeMetadataAndOpaqueResults/completion/case_index/zero (0.00s)
+    --- PASS: TestNullRuntimeMetadataAndOpaqueResults/completion/result_ref/null (0.00s)
+    --- PASS: TestNullRuntimeMetadataAndOpaqueResults/completion/result_ref/zero (0.00s)
+    --- PASS: TestNullRuntimeMetadataAndOpaqueResults/completion/checkpoint_metadata_hash/null (0.00s)
+    --- PASS: TestNullRuntimeMetadataAndOpaqueResults/completion/checkpoint_metadata_hash/zero (0.00s)
+    --- PASS: TestNullRuntimeMetadataAndOpaqueResults/completion/result_hash/null (0.01s)
+    --- PASS: TestNullRuntimeMetadataAndOpaqueResults/completion/result_hash/zero (0.00s)
+    --- PASS: TestNullRuntimeMetadataAndOpaqueResults/completion/error/null (0.00s)
+    --- PASS: TestNullRuntimeMetadataAndOpaqueResults/completion/error/zero (0.00s)
+    --- PASS: TestNullRuntimeMetadataAndOpaqueResults/completion/error_kind/null (0.00s)
+    --- PASS: TestNullRuntimeMetadataAndOpaqueResults/completion/error_kind/zero (0.00s)
+    --- PASS: TestNullRuntimeMetadataAndOpaqueResults/completion/signal_seq/null (0.00s)
+    --- PASS: TestNullRuntimeMetadataAndOpaqueResults/completion/signal_seq/zero (0.00s)
+    --- PASS: TestNullRuntimeMetadataAndOpaqueResults/completion/selected/null (0.00s)
+    --- PASS: TestNullRuntimeMetadataAndOpaqueResults/completion/selected/zero (0.00s)
+    --- PASS: TestNullRuntimeMetadataAndOpaqueResults/completion/cancelled/null (0.00s)
+    --- PASS: TestNullRuntimeMetadataAndOpaqueResults/completion/cancelled/zero (0.00s)
+    --- PASS: TestNullRuntimeMetadataAndOpaqueResults/completion/checkpoint_metadata_ref/null (0.00s)
+    --- PASS: TestNullRuntimeMetadataAndOpaqueResults/completion/checkpoint_metadata_ref/zero (0.00s)
+    --- PASS: TestNullRuntimeMetadataAndOpaqueResults/null-case (0.00s)
+    --- PASS: TestNullRuntimeMetadataAndOpaqueResults/opaque/{"result":null} (0.00s)
+    --- PASS: TestNullRuntimeMetadataAndOpaqueResults/opaque/{"result":{"error":null,"kind":null,"x":1,"x":2}} (0.00s)
+    --- PASS: TestNullRuntimeMetadataAndOpaqueResults/opaque/{} (0.00s)
+=== RUN   TestRequestVariantsRemainReadable
+--- PASS: TestRequestVariantsRemainReadable (0.01s)
+PASS
+ok  	js-wf/internal/stepwire	1.097s

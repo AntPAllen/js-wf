@@ -5,6 +5,7 @@ on:
     paths:
       - 'internal/stepwire/**'
       - 'wf/replay_step_null_test.go'
+      - 'wf/select_many*.go'
       - 'internal/graphpublication/**'
       - 'journal/graph*.go'
       - 'reconcile/**'
@@ -74,6 +75,7 @@ on:
     paths:
       - 'internal/stepwire/**'
       - 'wf/replay_step_null_test.go'
+      - 'wf/select_many*.go'
       - 'internal/graphpublication/**'
       - 'journal/graph*.go'
       - 'reconcile/**'
@@ -971,12 +973,12 @@ jobs:
           set -o pipefail
           sdk_flags=()
           if [ "$SDK_MODE" = race ]; then sdk_flags=(-race); fi
-          go test "${sdk_flags[@]}" ./wf ./internal/stepwire -run '^(TestReplayNullStepMetadataBeforeHandler|TestNullRuntimeMetadataAndOpaqueResults|TestRequestVariantsRemainReadable|TestCompletionEnvelopeKeepsUserResultOpaque|TestRequestEnvelopeKeepsHashedUserInputOpaque)$' -count=1 -v -timeout=4m 2>&1 | tee sdk-step-metadata.log
+          go test "${sdk_flags[@]}" ./wf ./internal/stepwire -run '^(TestSelectManyRequestMetadataAdmission|TestSelectManySuspendsReplaysChoiceAndRetainsLosers|TestSelectManyUnknownCompletionReplaysRecordedWinner|TestReplayNullStepMetadataBeforeHandler|TestNullRuntimeMetadataAndOpaqueResults|TestRequestVariantsRemainReadable|TestCompletionEnvelopeKeepsUserResultOpaque|TestRequestEnvelopeKeepsHashedUserInputOpaque)$' -count=1 -v -timeout=4m 2>&1 | tee sdk-step-metadata.log
           python3 - <<'PY'
           import pathlib, re
           log = pathlib.Path('sdk-step-metadata.log').read_text()
           assert not re.search(r'^--- (FAIL|SKIP):', log, re.M)
-          for test in ('TestReplayNullStepMetadataBeforeHandler', 'TestNullRuntimeMetadataAndOpaqueResults', 'TestRequestVariantsRemainReadable', 'TestCompletionEnvelopeKeepsUserResultOpaque', 'TestRequestEnvelopeKeepsHashedUserInputOpaque'):
+          for test in ('TestSelectManyRequestMetadataAdmission', 'TestSelectManySuspendsReplaysChoiceAndRetainsLosers', 'TestSelectManyUnknownCompletionReplaysRecordedWinner', 'TestReplayNullStepMetadataBeforeHandler', 'TestNullRuntimeMetadataAndOpaqueResults', 'TestRequestVariantsRemainReadable', 'TestCompletionEnvelopeKeepsUserResultOpaque', 'TestRequestEnvelopeKeepsHashedUserInputOpaque'):
               assert f'--- PASS: {test} ' in log
           for level, fields in [('request', ('kind', 'name', 'input_hash', 'duration_nanos', 'fire_at', 'clock_domain', 'timer_step', 'timer_name', 'child_type', 'child_id', 'cases')), ('case', ('kind', 'name', 'timer_step', 'fire_at', 'clock_domain', 'child_type', 'child_id')), ('completion', ('case_index', 'result_ref', 'result_hash', 'error', 'error_kind', 'signal_seq', 'selected', 'cancelled', 'checkpoint_metadata_ref', 'checkpoint_metadata_hash'))]:
               for field in fields:
@@ -984,6 +986,8 @@ jobs:
                   for control in ('null', 'zero'):
                       assert f'--- PASS: TestNullRuntimeMetadataAndOpaqueResults/{level}/{field}/{control} ' in log
           assert '--- PASS: TestNullRuntimeMetadataAndOpaqueResults/null-case ' in log
+          for case in ('healthy', 'explicit_zero', 'unknown_root', 'duplicate_root', 'duplicate_case', 'unknown_case', 'null_case', 'null_kind', 'null_cases', 'null_case_kind', 'null_case_name', 'null_case_timer_step', 'null_case_fire_at', 'null_case_clock_domain', 'null_case_child_type', 'null_case_child_id'):
+              assert f'--- PASS: TestSelectManyRequestMetadataAdmission/{case} ' in log
           PY
       - uses: actions/upload-artifact@v4
         if: always()
