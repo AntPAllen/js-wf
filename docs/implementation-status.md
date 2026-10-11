@@ -1,5 +1,21 @@
 # Implementation status against the supplied plan
 
+## Full current-source Tier-1 normal1000 launched — 2026-10-11
+
+Frozen source b4fe445 now runs the complete compiled suite and 159 seeded families
+at 1000 seeds, including 860 pinned traces, in eight sequential disjoint processes.
+A 105 MiB clean sparse checkout retains all 3589 required Git-verifier inputs and
+all code/test fixtures. Unit js-wf-main159-tier1-normal-20261011-prepared.service,
+InvocationID 251311b5bc46429586fce59d5b2a3188, supervisor 224601/driver 224625 are live.
+The new reviewer binds the exact loaded service command, supervisor PID, resource
+limits and sparse/source inputs before independent full-suite reduction.
+[Launch, setup failure and terminal review](scale/current-main159-tier1-2026-10-11/README.md).
+
+This is a launch, not an accepted qualification. A setup-only service exit 2 is
+preserved separately; no suite test started in that attempt. Current-source full
+race/extended seeds and original native acceptance remain open. Both prior frozen
+campaigns retain their original live invocations and inputs.
+
 ## Native competing-case SDK selection priority — 2026-10-11
 
 Four production SDK continuation cases now cover R1/R3 and archive=false/true
