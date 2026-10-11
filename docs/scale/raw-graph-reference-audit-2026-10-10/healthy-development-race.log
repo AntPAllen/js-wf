@@ -1,0 +1,44 @@
+=== RUN   TestNativeRawGraphReferenceAuditQuiescentReaders
+=== RUN   TestNativeRawGraphReferenceAuditQuiescentReaders/R1/indexedfalse
+    graph_native_references_test.go:110: raw audit R1 indexed=false records=4 nodes=6 authority_last=38 unchanged
+    graph_native_references_test.go:114: raw audit R1 indexed=false records=2 nodes=3 authority_last=40 unchanged
+=== RUN   TestNativeRawGraphReferenceAuditQuiescentReaders/R1/indexedtrue
+    graph_native_references_test.go:110: raw audit R1 indexed=true records=4 nodes=6 authority_last=48 unchanged
+    graph_native_references_test.go:114: raw audit R1 indexed=true records=2 nodes=3 authority_last=50 unchanged
+=== RUN   TestNativeRawGraphReferenceAuditQuiescentReaders/R3/indexedfalse
+    graph_native_references_test.go:110: raw audit R3 indexed=false records=4 nodes=6 authority_last=38 unchanged
+    graph_native_references_test.go:114: raw audit R3 indexed=false records=2 nodes=3 authority_last=40 unchanged
+=== RUN   TestNativeRawGraphReferenceAuditQuiescentReaders/R3/indexedtrue
+    graph_native_references_test.go:110: raw audit R3 indexed=true records=4 nodes=6 authority_last=48 unchanged
+    graph_native_references_test.go:114: raw audit R3 indexed=true records=2 nodes=3 authority_last=50 unchanged
+--- PASS: TestNativeRawGraphReferenceAuditQuiescentReaders (2.60s)
+    --- PASS: TestNativeRawGraphReferenceAuditQuiescentReaders/R1/indexedfalse (0.29s)
+    --- PASS: TestNativeRawGraphReferenceAuditQuiescentReaders/R1/indexedtrue (0.37s)
+    --- PASS: TestNativeRawGraphReferenceAuditQuiescentReaders/R3/indexedfalse (0.83s)
+    --- PASS: TestNativeRawGraphReferenceAuditQuiescentReaders/R3/indexedtrue (1.12s)
+=== RUN   TestRawGraphReferencesAndIndependentCorruptionControls
+=== RUN   TestRawGraphReferencesAndIndependentCorruptionControls/missing-object
+=== RUN   TestRawGraphReferencesAndIndependentCorruptionControls/changed-bytes
+=== RUN   TestRawGraphReferencesAndIndependentCorruptionControls/closed-ready-grant
+=== RUN   TestRawGraphReferencesAndIndependentCorruptionControls/wrong-generation
+=== RUN   TestRawGraphReferencesAndIndependentCorruptionControls/wrong-destination
+=== RUN   TestRawGraphReferencesAndIndependentCorruptionControls/future-grant
+=== RUN   TestRawGraphReferencesAndIndependentCorruptionControls/wrong-coordinate
+=== RUN   TestRawGraphReferencesAndIndependentCorruptionControls/lost-payload-origin
+=== RUN   TestRawGraphReferencesAndIndependentCorruptionControls/duplicate-reader
+=== RUN   TestRawGraphReferencesAndIndependentCorruptionControls/wrong-count
+=== RUN   TestRawGraphReferencesAndIndependentCorruptionControls/duplicate-stream
+--- PASS: TestRawGraphReferencesAndIndependentCorruptionControls (0.01s)
+    --- PASS: TestRawGraphReferencesAndIndependentCorruptionControls/missing-object (0.00s)
+    --- PASS: TestRawGraphReferencesAndIndependentCorruptionControls/changed-bytes (0.00s)
+    --- PASS: TestRawGraphReferencesAndIndependentCorruptionControls/closed-ready-grant (0.00s)
+    --- PASS: TestRawGraphReferencesAndIndependentCorruptionControls/wrong-generation (0.00s)
+    --- PASS: TestRawGraphReferencesAndIndependentCorruptionControls/wrong-destination (0.00s)
+    --- PASS: TestRawGraphReferencesAndIndependentCorruptionControls/future-grant (0.00s)
+    --- PASS: TestRawGraphReferencesAndIndependentCorruptionControls/wrong-coordinate (0.00s)
+    --- PASS: TestRawGraphReferencesAndIndependentCorruptionControls/lost-payload-origin (0.00s)
+    --- PASS: TestRawGraphReferencesAndIndependentCorruptionControls/duplicate-reader (0.00s)
+    --- PASS: TestRawGraphReferencesAndIndependentCorruptionControls/wrong-count (0.00s)
+    --- PASS: TestRawGraphReferencesAndIndependentCorruptionControls/duplicate-stream (0.00s)
+PASS
+ok  	js-wf/integrity	3.639s

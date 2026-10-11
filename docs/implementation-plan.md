@@ -1,5 +1,25 @@
 # JetStream Durable Workflow Runtime — Implementation Plan
 
+## Raw canonical graph reference audits integrated — 2026-10-11
+
+A new integrity API independently walks raw frontiers/nodes/physical receipts and
+original ready ownership grants, including named forests, payload origin edges
+and retained reader snapshots. Its native reader supports ordinary/owner-indexed
+authority layouts, checks census/identity/revision and bounded ObjectStore bytes,
+and rejects authority/object high-water changes. It performs no witness writes
+or pin acquisition and requires externally quiescent stores.
+[API, contract and evidence](scale/raw-graph-reference-audit-2026-10-10/README.md).
+
+Focused race passes eleven corruption controls and four native R1/R3 × layout
+cases, each with moving-authority and closed-grant controls. All six canonical
+retention SIGKILL cases also pass with raw reference audits after recovery.
+CI requires both sets of coverage; hosted execution remains pending.
+The frozen f15a573 complete159 normal and original actual 100,000-entry jobs
+continue under their existing invocations. Runtime application/generation/epoch/
+step/terminal invariant auditing, full native store census, original large
+retention concurrency and broader plan acceptance remain open. No whole-phase
+completion or admission/import/online-collection enablement is claimed.
+
 ## Phase 7 canonical retention worker SIGKILL boundaries verified — 2026-10-10
 
 A separate race-instrumented production worker is killed and reaped with SIGKILL
