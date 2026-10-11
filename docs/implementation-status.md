@@ -1,5 +1,28 @@
 # Implementation status against the supplied plan
 
+## Append commit phases and readback diagnostics qualified — 2026-10-11
+
+Protocol.Commit now identifies context/plan validation, authority observation
+and head checks, preservation, graph verification, node/new/owned payload grants,
+and root publication failures. Typed AppendCommitError preserves the original
+error through Unwrap; optional fallback-readback error is diagnostic only.
+A secondary readback deadline does not reclassify an original definite conflict.
+No transport calls, retries, context checks, deadlines or publication rules change.
+
+Fourteen new protocol controls plus six existing deadline-recovery cuts pass in
+normal/race modes. Signal phase/recovery/budget/classification controls and all
+946 unchanged pins also pass:991 named PASS results per mode across six actual
+SDK exits. Independent review binds3859 source inputs, executable hashes,
+1169 unchanged simulation inputs against3db37a3 and21 compiled CI Python blocks.
+No seed family or pin is added; inventory remains163/946.
+[Commit phase evidence](scale/append-commit-phases-2026-10-11/README.md).
+
+These labels are ready for subsequent native investigation; they do not assign
+a phase retrospectively to the earlier executable or explain its timeout.
+No native fixture was repeated solely for component label qualification.
+Three older-source full race campaigns remain live; full current seed,
+canonical scale, original fault, soak and adoption requirements remain open.
+
 ## Copied native signal recovers first binding across dedup expiry — 2026-10-11
 
 Two verified copies of the retained native race failure show the exact

@@ -628,6 +628,16 @@ jobs:
               assert f'--- PASS: {test} ' in log
           PYCONTROL
           go test "${graph_flags[@]}" ./sim -run '^(TestGraphStartReadErrorPhases|TestGraphViewCloseSingleAuthorityObservation)$' -count=1 -v -timeout=2m 2>&1 | tee start-read-phases.log
+          go test "${graph_flags[@]}" ./internal/graphpublication -run '^(TestGraphAppendCommitErrorPhases|TestGraphAppendRequestDeadlineRecovery)$' -count=1 -v -timeout=2m 2>&1 | tee append-commit-phases.log
+          python3 - <<'PYCOMMIT'
+          import pathlib, re
+          log = pathlib.Path('append-commit-phases.log').read_text()
+          assert not re.search(r'^\s*--- SKIP:', log, re.M)
+          for cut in ('context', 'plan', 'observe', 'conflict', 'preservation', 'graph', 'node_grant', 'payload_grant', 'owned_payload', 'root_rejected', 'root_lost', 'root_unknown', 'root_cancelled', 'conflict_readback_unknown'):
+              assert f'--- PASS: TestGraphAppendCommitErrorPhases/{cut} ' in log
+          for cut in ('grant_read', 'cas_not_committed', 'cas_committed_readback', 'cas_committed_unknown', 'cas_committed_cancelled', 'cas_committed_replaced'):
+              assert f'--- PASS: TestGraphAppendRequestDeadlineRecovery/{cut} ' in log
+          PYCOMMIT
           go test "${graph_flags[@]}" ./internal/graphpublication -run '^TestGraphReleaseReaderCurrent$' -count=1 -v -timeout=2m 2>&1 | tee reader-release-current.log
           python3 - <<'PY'
           import pathlib, re
@@ -664,6 +674,7 @@ jobs:
             start-source-headers.log
             start-read-phases.log
             reader-release-current.log
+            append-commit-phases.log
             signal-mutation-phases.log
             start-source-header-failure.json
           if-no-files-found: error

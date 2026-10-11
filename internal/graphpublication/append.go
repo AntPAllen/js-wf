@@ -227,31 +227,31 @@ func (s stageStore) Get(ctx context.Context, link retainedgraph.Link, limit int)
 // readback, never by observing uploads or a matching content hash alone.
 func (p Protocol) Commit(ctx context.Context, prepared Prepared) (Root, error) {
 	if err := ctx.Err(); err != nil {
-		return Root{}, err
+		return Root{}, appendCommitError("check append commit context", err)
 	}
 	if p.Port == nil || prepared.destination == "" || !utf8.ValidString(prepared.destination) || !validID(prepared.publication.Token) {
-		return Root{}, errors.New("invalid prepared graph append")
+		return Root{}, appendCommitError("validate append plan", errors.New("invalid prepared graph append"))
 	}
 	current, err := p.readRoot(ctx, prepared.destination)
 	if err != nil {
-		return Root{}, err
+		return Root{}, appendCommitError("observe append commit head", err)
 	}
 	if current.Head > prepared.expected && samePublication(current, prepared.publication) {
 		return current, nil
 	}
 	if current.Head != prepared.expected || !samePublication(current, prepared.base) {
-		return Root{}, ErrConflict
+		return Root{}, appendCommitError("check append commit head", ErrConflict)
 	}
 	// The private plan is not an arbitrary graph-set replacement. Verify that
 	// its one append preserves every forest outside the selected stream.
 	preserved := prepared.base
 	setStream(&preserved, prepared.stream, selectGraph(prepared.publication.Graph, prepared.publication.Streams, prepared.stream))
 	if !reflect.DeepEqual(preserved.Graph, prepared.publication.Graph) || !reflect.DeepEqual(preserved.Streams, prepared.publication.Streams) || !reflect.DeepEqual(prepared.base.Readers, prepared.publication.Readers) {
-		return Root{}, errors.New("append changed another forest or reader")
+		return Root{}, appendCommitError("validate append preservation", errors.New("append changed another forest or reader"))
 	}
 	delta, err := retainedgraph.ValidateAppend(ctx, stageStore{protocol: p}, selectGraph(prepared.base.Graph, prepared.base.Streams, prepared.stream), selectGraph(prepared.publication.Graph, prepared.publication.Streams, prepared.stream))
 	if err != nil {
-		return Root{}, err
+		return Root{}, appendCommitError("verify append graph", err)
 	}
 	check := func(link retainedgraph.Link, location Location) error {
 		record, err := p.Port.ReadBlob(ctx, authorityKey(link.Hash, prepared.publication.Token))
@@ -275,18 +275,18 @@ func (p Protocol) Commit(ctx context.Context, prepared Prepared) (Root, error) {
 	}
 	for _, tree := range delta.Nodes {
 		if err = check(tree.Link, Location{Kind: "node", First: tree.First, Height: tree.Height, Stream: prepared.stream}); err != nil {
-			return Root{}, err
+			return Root{}, appendCommitError("verify append node grant", err)
 		}
 	}
 	for _, link := range delta.Record.Blobs {
 		if index, exists := prepared.owned[link]; exists {
 			if err = p.verifyOwned(ctx, prepared.destination, prepared.base, OwnedPayload{Index: index, Link: link, Stream: prepared.stream}); err != nil {
-				return Root{}, err
+				return Root{}, appendCommitError("verify append owned payload", err)
 			}
 			continue
 		}
 		if err = check(link, Location{Kind: "payload", First: selectGraph(prepared.base.Graph, prepared.base.Streams, prepared.stream).Count, Stream: prepared.stream}); err != nil {
-			return Root{}, err
+			return Root{}, appendCommitError("verify append payload grant", err)
 		}
 	}
 	root, err := p.casRoot(ctx, prepared.destination, prepared.expected, prepared.publication)
@@ -294,13 +294,13 @@ func (p Protocol) Commit(ctx context.Context, prepared Prepared) (Root, error) {
 		return root, nil
 	}
 	if ctx.Err() != nil {
-		return Root{}, err
+		return Root{}, appendCommitError("publish append root", err)
 	}
 	actual, readErr := p.readRoot(ctx, prepared.destination)
 	if readErr == nil && actual.Head > prepared.expected && samePublication(actual, prepared.publication) {
 		return actual, nil
 	}
-	return Root{}, err
+	return Root{}, &AppendCommitError{Phase: "publish append root", Err: err, ReadbackAttempted: true, ReadbackErr: readErr}
 }
 
 // Retire is the v1 whole-graph retirement operation. Ports reject it after a
