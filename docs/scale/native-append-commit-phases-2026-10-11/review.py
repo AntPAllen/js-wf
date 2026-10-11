@@ -5,7 +5,8 @@ out=Path(__file__).resolve().parent
 repo=out.parents[2]
 sha=lambda b:hashlib.sha256(b).hexdigest()
 inputs=json.loads((out/'source-inputs.json').read_text())
-for n,h in inputs.items(): assert sha((repo/n).read_bytes())==h,n
+snapshot=Path(json.loads((out/'frozen-inputs.json').read_text())['snapshot'])
+for n,h in inputs.items(): assert sha((snapshot/n).read_bytes())==h,n
 if not (out/'native-command.json').exists():
  observation=json.loads((out/'live-observation.json').read_text())
  pid=observation['sdk_pid']

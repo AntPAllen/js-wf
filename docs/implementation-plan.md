@@ -1,5 +1,35 @@
 # JetStream Durable Workflow Runtime — Implementation Plan
 
+## Native active population timed out; distinct-cohort gate repaired — 2026-10-11
+
+The frozen3aa3550 native race diagnostic is terminal: actualSDKexit1 after
+1204.492seconds. It completed10 old invocations, then reached the20m parent
+deadline waiting for active population. The endpoint reports0/10, which does
+not establish earlier counts, missing identities or a cause. Four worker-exit
+messages during shutdown report context-deadline-invalid JetStream options;
+without event timestamps they are not assigned as a prior stall cause. No
+purge/reuse, signal commit subphase or final raw audit was reached.
+Independent closure review binds2915 Git inputs in a preserved source snapshot,
+actual executable/process exit and2346 native files/10,652,843bytes.
+[Terminal diagnostic evidence](scale/native-append-commit-phases-2026-10-11/README.md).
+
+Separate fixture review found total callback count can substitute a duplicate
+for a missing invocation. Initial and post-purge gates now require one callback
+per expected live index at a single locked observation, and waiting logs total/
+unique counts plus bounded missing/duplicate samples every30s. This strengthens
+the distinct-cohort proof; older executable results remain aggregate-only at
+that observation scope. No runtime policy or deadline changes.
+
+An isolated checkout kept the native sources untouched until closure. Normal/
+race controls reject the old collision and extra duplicates, accept a complete
+cohort and verify128 concurrent entries/exits. Two actual SDKs/1169 input hashes/
+two CI Python blocks are reviewed; all qualified bytes match integratede882213.
+[Distinct-cohort evidence](scale/purge-active-distinct-2026-10-11/README.md).
+The new fixture has not passed native/full-scale qualification. Three older
+race campaigns remain live; full current seed, canonical scale, original
+fault/soak/adoption requirements remain open. Next inspect a verified closed
+store copy before another native run; the original remains unopened.
+
 ## Native commit phase race diagnostic launched; active population pending — 2026-10-11
 
 A single canonical R3 active10/10/1 race diagnostic uses frozen3aa3550 commit
