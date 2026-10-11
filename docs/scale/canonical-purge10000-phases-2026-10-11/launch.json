@@ -1,0 +1,40 @@
+{
+  "unit": "js-wf-canonical-purge10000-phases-20261011.service",
+  "invocation": "d9d9dbf5b38c47f297bf9cd14ba9f6f7",
+  "revision": "10dc1a7b1c7dbee80f0af16ba3d0205911eccb73",
+  "supervisor_pid": 294508,
+  "driver_pid": 294509,
+  "driver_proc_start": "13478890",
+  "service": {
+    "RuntimeMaxUSec": "30min",
+    "RemainAfterExit": "yes",
+    "MainPID": "294508",
+    "ExecMainPID": "294508",
+    "ExecMainStatus": "0",
+    "ExecStart": "{ path=/usr/bin/python3 ; argv[]=/usr/bin/python3 /home/exedev/js-wf/docs/scale/canonical-purge10000-phases-2026-10-11/supervisor.py ; ignore_errors=no ; start_time=[Sun 2026-10-11 08:43:38 UTC] ; stop_time=[n/a] ; pid=294508 ; code=(null) ; status=0/0 }",
+    "CPUQuotaPerSecUSec": "2s",
+    "MemoryMax": "4294967296",
+    "ActiveState": "active",
+    "SubState": "running",
+    "InvocationID": "d9d9dbf5b38c47f297bf9cd14ba9f6f7"
+  },
+  "launch_command": [
+    "systemd-run",
+    "--user",
+    "--unit",
+    "js-wf-canonical-purge10000-phases-20261011.service",
+    "--property=CPUQuota=200%",
+    "--property=MemoryMax=4G",
+    "--property=RuntimeMaxSec=1800",
+    "--property=RemainAfterExit=yes",
+    "--property=WorkingDirectory=/home/exedev/js-wf",
+    "--property=Environment=PYTHONUNBUFFERED=1",
+    "/usr/bin/python3",
+    "/home/exedev/js-wf/docs/scale/canonical-purge10000-phases-2026-10-11/supervisor.py"
+  ],
+  "actual_launch_exit": 0,
+  "start_ns": 1791708218557678716,
+  "end_ns": 1791708218873820374,
+  "supervisor_sha256": "9bf62bf0b0802cd0fbb706455ce69af0340a8a0b3fb40c7e827a7dec76282c14",
+  "accepted_full": false
+}

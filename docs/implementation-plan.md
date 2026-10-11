@@ -1,5 +1,26 @@
 # JetStream Durable Workflow Runtime — Implementation Plan
 
+## Full active canonical run with phase diagnostics launched — 2026-10-11
+
+Frozen10dc1a7's new executable passes an active-handler10/10/1 preflight, actual
+exit0, with11 terminals/9 tombstones/66 raw entries/zero reader pins. Independent
+review verifies1232 Git inputs, actual executable bytes and2160 closed native
+files/19,191,700bytes. The original full10k/10k-active/1k population is now running
+on that same binary with Start phase/identity/parent-context error labels.
+
+Unit js-wf-canonical-purge10000-phases-20261011.service, InvocationID
+ d9d9dbf5b38c47f297bf9cd14ba9f6f7, supervisor294508/SDK294509, launched08:43:38UTC.
+Actual live executable/command/process birth verify; full acceptance refuses
+actualexit1. Original20m parent/22m SDK bounds and no uncertain Start retry remain.
+Service quota2cores/4GiB and32GiB free admission are retained. Four race
+qualification campaigns are also live on this four-core VM; their contention is
+recorded as resource context, not assigned as a failure cause. See
+[phase-diagnostic full campaign](scale/canonical-purge10000-phases-2026-10-11/README.md).
+
+This launch and diagnostic do not close the full scale gate or other original
+release requirements. The earlier failed store and verified pending recovery
+remain unchanged. Terminal acceptance will require the full original counts.
+
 ## Full frozen163 normal accepted; matching race launched — 2026-10-11
 
 Frozen d771ee3 normal1000 closed at08:37:48UTC with actual supervisor exit0.
