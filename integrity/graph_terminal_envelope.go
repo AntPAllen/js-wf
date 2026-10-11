@@ -102,6 +102,9 @@ func auditGraphLimitBoundary(entry journal.Entry, prefix *journalAudit) error {
 			return fmt.Errorf("rejected attempt does not follow prefix")
 		}
 	case journal.SignalConsumed:
+		if err := auditConsumedSignalFields(raw); err != nil {
+			return err
+		}
 		var signal auditedCheckpointSignal
 		if checkpoint.DecodeUnambiguous(raw, &signal) != nil || signal.Sequence <= prefix.lastSignal || signal.Name == "" {
 			return fmt.Errorf("rejected signal does not follow prefix")

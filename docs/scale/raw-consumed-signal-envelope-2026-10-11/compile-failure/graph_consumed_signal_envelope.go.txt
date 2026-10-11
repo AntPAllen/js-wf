@@ -1,0 +1,43 @@
+package integrity
+
+import (
+	"bytes"
+	"encoding/json"
+	"fmt"
+	"js-wf/internal/checkpoint"
+)
+
+// Admission precedes prefix advancement. Result/payload bytes remain opaque;
+// canonical binding and child causal history are checked separately.
+func auditConsumedSignalFields(raw []byte) error {
+	var signal auditedCheckpointSignal
+	if err := checkpoint.DecodeUnambiguous(raw, &signal); err != nil {
+		return err
+	}
+	fields, err := auditRequiredSignalFields(raw, "sig_seq", "name")
+	if err != nil {
+		return err
+	}
+	for field, value := range fields {
+		if bytes.Equal(bytes.TrimSpace(value), []byte("null")) {
+			return fmt.Errorf("null consumed signal field %s", field)
+		}
+	}
+	if marker, ok := fields["canonical_signal"]; ok {
+		if _, err := auditRequiredSignalFields(marker, "index", "token"); err != nil {
+			return err
+		}
+	}
+	if child, ok := fields["graph_child"]; ok {
+		metadata, err := auditRequiredSignalFields(child, "type", "id", "inv_seq")
+		if err != nil {
+			return err
+		}
+		for field, value := range metadata {
+			if bytes.Equal(bytes.TrimSpace(value), []byte("null")) {
+				return fmt.Errorf("null signal child field %s", field)
+			}
+		}
+	}
+	return nil
+}

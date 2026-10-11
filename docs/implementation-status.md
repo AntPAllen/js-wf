@@ -1,5 +1,29 @@
 # Implementation status against the supplied plan
 
+## Independent consumed-signal wire admission — 2026-10-11
+
+Consumed-signal payloads now receive strict independent decoding before prefix
+advancement: unknown/aliased/duplicate/escaped-duplicate fields are rejected,
+sig_seq/name are required, present fields cannot be null, and present canonical
+markers require index/token. Present child metadata requires type/id/inv_seq;
+child-only exhaustive corruption/causal-history validation remains separate.
+Rejected signal-drain limit entries use the same wire admission before existing
+prefix checks. User bytes remain opaque.
+
+Baseline a9006aa plus a physical fixture accepted an unknown consumed-event field.
+Final race exit0 in36.729s covers50 new physical controls (8 positive/42 negative),
+all36 raw graph top-level tests, rejected-limit regressions and four native
+checkpoint/orphan/delete cases. Four native R1/R3 child/buffered-child race flows
+pass in68.968s, checking eight frames/four retired projections.428 pre-run
+inputs remain unchanged; both actual executables were captured and exact CI
+receipts passed locally. Semantic/compile failures are preserved. See [consumed
+signal evidence](scale/raw-consumed-signal-envelope-2026-10-11/README.md).
+
+Child/parent/lease causal history, retired body equivalence, transport provenance,
+client linearizability and original broad gates remain open. Four frozen long
+campaigns remain live and predate this audit. No full current161/894, hosted CI,
+storage restoration or physical-power acceptance is claimed.
+
 ## Independent canonical signal envelope admission — 2026-10-11
 
 The raw audit now owns complete request/reservation/binding wire declarations,

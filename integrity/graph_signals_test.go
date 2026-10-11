@@ -137,6 +137,9 @@ func rawSignalFixture(t *testing.T, enc journal.Encoding, control string) GraphJ
 			event.Canonical = nil
 		}
 		payload, _ := json.Marshal(event)
+		if strings.HasPrefix(control, "consumed-wire/") {
+			payload = mutateConsumedSignalEnvelope(t, payload, strings.TrimPrefix(control, "consumed-wire/"))
+		}
 		entry, err := journal.MarshalEntry(journal.Entry{Index: 3, Epoch: 1, WorkerID: "worker", Kind: journal.SignalConsumed, Payload: payload}, enc)
 		if err != nil {
 			t.Fatal(err)

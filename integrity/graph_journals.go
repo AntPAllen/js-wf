@@ -319,6 +319,11 @@ func CheckGraphJournals(ctx context.Context, snapshot GraphJournalSnapshot) (rep
 		if !found || entry.Index != index || entry.Epoch > c.Epoch || index+1 == c.Count && (entry.Epoch != c.Epoch || entry.Kind != c.Kind) {
 			return fmt.Errorf("%s: canonical entry index/epoch/tail differs", record.Destination)
 		}
+		if entry.Kind == journal.SignalConsumed {
+			if err := auditConsumedSignalFields(entry.Payload); err != nil {
+				return fmt.Errorf("%s: invalid consumed signal: %w", record.Destination, err)
+			}
+		}
 		if err := auditSDKStepEnvelope(entry); err != nil {
 			return err
 		}
@@ -373,7 +378,7 @@ func CheckGraphJournals(ctx context.Context, snapshot GraphJournalSnapshot) (rep
 		if entry.Kind == journal.SignalConsumed {
 			state.signalCount++
 			var signal auditedCheckpointSignal
-			if json.Unmarshal(entry.Payload, &signal) != nil {
+			if checkpoint.DecodeUnambiguous(entry.Payload, &signal) != nil {
 				return fmt.Errorf("invalid checkpoint signal history")
 			}
 			if canonicalSignalCursor(c) {
