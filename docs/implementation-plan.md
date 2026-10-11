@@ -1,5 +1,23 @@
 # JetStream Durable Workflow Runtime — Implementation Plan
 
+## Full expanded160 normal campaign launched — 2026-10-11
+
+A clean sparse checkout of50e4f9b includes the production source-header fix and
+new160th seeded family. All3631 required Git inputs match frozen source;
+3666 selected paths and sparse patterns are recorded, omitting historical media
+while retaining code and fixtures. The normal campaign launched with
+InvocationIDcd8fc24771f84fcd9868359b78449ba7, supervisor236839/driver236865,
+one-core quota,2GB memory, GOMAXPROCS2/GOMEMLIMIT512MiB, eight sequential disjoint
+package processes and1000 seeds across160 families/880 pins. Its independent
+review refuses running state and requires actual exits, loaded unit/source/binary,
+full inventories/pins and160000 completed bodies. See [frozen160 launch](scale/current-main160-tier1-2026-10-11/README.md).
+
+This is a launch, not acceptance. Same-source race depends on independent normal
+acceptance. The three older-source campaigns remain live under original inputs;
+none qualifies this expanded source. Extended and original native fault/scale/
+soak/rollout acceptance remain open. Public continuation admission/import/online
+collection stay disabled.
+
 ## Tier1 source-header recovery/worker regression — 2026-10-11
 
 A new independent seeded workload drives production recovery, bound repair and
