@@ -1,0 +1,70 @@
+// Inspect and recover one original signal token on a verified native-store copy.
+package main
+
+import (
+ "bytes"
+ "context"
+ "encoding/json"
+ "fmt"
+ "os"
+ "path/filepath"
+ "time"
+
+ "github.com/nats-io/nats.go/jetstream"
+ "js-wf/client"
+ "js-wf/journal"
+ "js-wf/testcluster"
+)
+
+type observation struct { Phase string; Nanos int64; Error string; Value any }
+func run() (err error) {
+ root,out:=os.Args[1],os.Args[2];copy:=filepath.Join(root,"store-copy")
+ var marker struct{Copy string `json:"copy"`;Verified bool `json:"verified"`}
+ raw,e:=os.ReadFile(filepath.Join(root,"copy-verified.json"));if e!=nil{return e}
+ if json.Unmarshal(raw,&marker)!=nil||!marker.Verified||marker.Copy!=copy{return fmt.Errorf("unverified copy")}
+ observations:=[]observation{}
+ defer func(){r:=struct{Observations []observation;Error string}{Observations:observations};if err!=nil{r.Error=err.Error()};b,_:=json.MarshalIndent(r,"","  ");if e:=os.WriteFile(out,append(b,'\n'),0600);e!=nil{panic(e)}}()
+ ctx,stop:=context.WithTimeout(context.Background(),3*time.Minute);defer stop()
+ phase:=func(name string,fn func(context.Context)(any,error)) error {
+  start:=time.Now();call,cancel:=context.WithTimeout(ctx,8*time.Second);defer cancel();value,e:=fn(call)
+  o:=observation{Phase:name,Nanos:time.Since(start).Nanoseconds(),Value:value};if e!=nil{o.Error=e.Error()};observations=append(observations,o)
+  fmt.Printf("%s duration=%s error=%v\n",name,time.Since(start),e)
+  if e!=nil{return fmt.Errorf("%s: %w",name,e)};return nil
+ }
+ var cluster *testcluster.Cluster
+ if err=phase("cluster.Start",func(context.Context)(any,error){var e error;cluster,e=testcluster.Start(copy,3);return nil,e});err!=nil{return err};defer cluster.Close()
+ clients:=make([]jetstream.JetStream,3)
+ for i,nc:=range cluster.Clients{js,e:=jetstream.New(nc);if e!=nil{return e};clients[i]=js}
+ // Socket readiness alone does not establish restored JetStream metadata readiness.
+ ready:=false
+ for round:=0;round<4&&!ready;round++{
+  ready=true
+  for i,js:=range clients{for _,name:=range []string{"PURGE_SCALE_AUTH","OBJ_PURGE_SCALE_OBJECTS","WF_SIG","WF_RUN"}{
+   e=phase(fmt.Sprintf("metadata.round%d.node%d.%s",round,i,name),func(call context.Context)(any,error){s,e:=js.Stream(call,name);if e!=nil{return nil,e};return s.Info(call)})
+   if e!=nil{ready=false}
+  }}
+ }
+ if !ready{return fmt.Errorf("metadata readiness not established")}
+ js:=clients[0]
+ cfg:=journal.NativeGraphConfig{AuthorityStream:"PURGE_SCALE_AUTH",AuthorityPrefix:"wf.graph.purgescale",ObjectBucket:"PURGE_SCALE_OBJECTS",ExpectedReplicas:3,CanonicalStarts:true,CanonicalSignals:true,OwnerScopeIndex:true}
+ var graph *journal.GraphStore
+ if err=phase("OpenNativeGraphStore",func(call context.Context)(any,error){var e error;graph,e=journal.OpenNativeGraphStore(call,js,cfg);return nil,e});err!=nil{return err}
+ c,e:=client.NewWithGraphJournal(js,graph);if e!=nil{return e}
+ request:=journal.GraphSignalRequest{Type:"purge-scale",ID:"live-00004",Invocation:11,Name:"release",Key:"release-4"}
+ var input journal.GraphSignalInput
+ if err=phase("ReadSignalInput.before",func(call context.Context)(any,error){v,data,found,e:=graph.ReadSignalInput(call,request);if e!=nil{return nil,e};if !found||!bytes.Equal(data,[]byte("4"))||v.Request!=request{return nil,fmt.Errorf("original reservation absent or differs")};input=v;return map[string]any{"input":v,"body":string(data),"found":found},nil});err!=nil{return err}
+ if err=phase("ReadSignalBinding.before",func(call context.Context)(any,error){v,data,found,e:=graph.ReadSignalBinding(call,request);if e!=nil{return nil,e};if found&&(v.Input!=input||v.Sequence!=6||!bytes.Equal(data,[]byte("4"))){return nil,fmt.Errorf("existing binding differs")};return map[string]any{"binding":v,"body":string(data),"found":found},nil});err!=nil{return err}
+ signals,e:=js.Stream(ctx,"WF_SIG");if e!=nil{return e}
+ runs,e:=js.Stream(ctx,"WF_RUN");if e!=nil{return e}
+ var source *jetstream.RawStreamMsg
+ if err=phase("SignalSource.before",func(call context.Context)(any,error){var e error;source,e=signals.GetMsg(call,6);if e!=nil{return nil,e};if !input.MatchesSignal(source){return nil,fmt.Errorf("physical source differs")};return source,nil});err!=nil{return err}
+ var signalInfo,runInfo *jetstream.StreamInfo
+ if err=phase("StreamCounts.before",func(call context.Context)(any,error){var e error;signalInfo,e=signals.Info(call);if e!=nil{return nil,e};runInfo,e=runs.Info(call);if e!=nil{return nil,e};return map[string]any{"signal":signalInfo.State,"run":runInfo.State},nil});err!=nil{return err}
+ if err=phase("RecoverSignal.originalToken",func(call context.Context)(any,error){seq,e:=c.RecoverSignal(call,request,input.Token);if e!=nil{return nil,e};if seq!=6{return nil,fmt.Errorf("changed source sequence: %d",seq)};return seq,nil});err!=nil{return err}
+ if err=phase("ReadSignalBinding.after",func(call context.Context)(any,error){v,data,found,e:=graph.ReadSignalBinding(call,request);if e!=nil{return nil,e};if !found||v.Input!=input||v.Sequence!=6||!bytes.Equal(data,[]byte("4")){return nil,fmt.Errorf("recovered binding differs")};return map[string]any{"binding":v,"body":string(data),"found":found},nil});err!=nil{return err}
+ if err=phase("ReadSignalInput.after",func(call context.Context)(any,error){v,data,found,e:=graph.ReadSignalInput(call,request);if e!=nil{return nil,e};if !found||v!=input||!bytes.Equal(data,[]byte("4")){return nil,fmt.Errorf("reservation changed")};return map[string]any{"input":v,"body":string(data),"found":found},nil});err!=nil{return err}
+ if err=phase("SignalSource.after",func(call context.Context)(any,error){m,e:=signals.GetMsg(call,6);if e!=nil{return nil,e};if !input.MatchesSignal(m)||!bytes.Equal(m.Data,source.Data)||!m.Time.Equal(source.Time){return nil,fmt.Errorf("source changed")};return m,nil});err!=nil{return err}
+ if err=phase("StreamCounts.after",func(call context.Context)(any,error){s,e:=signals.Info(call);if e!=nil{return nil,e};r,e:=runs.Info(call);if e!=nil{return nil,e};if s.State.Msgs!=signalInfo.State.Msgs||s.State.LastSeq!=signalInfo.State.LastSeq{return nil,fmt.Errorf("recovery added signal source")};if r.State.Msgs!=runInfo.State.Msgs+1||r.State.LastSeq!=runInfo.State.LastSeq+1{return nil,fmt.Errorf("expected one wakeup: before=%+v after=%+v",runInfo.State,r.State)};return map[string]any{"signal":s.State,"run":r.State},nil});err!=nil{return err}
+ return nil
+}
+func main(){if e:=run();e!=nil{fmt.Fprintln(os.Stderr,e);os.Exit(1)}}

@@ -1,0 +1,21 @@
+# js-wf/client_test [js-wf/client.test]
+client/graph_signal_dedup_expiry_test.go:54:52: cannot use &messages[0] (value of type *sim.Message) as *jetstream.RawStreamMsg value in argument to input.MatchesSignal
+client/graph_signal_dedup_expiry_test.go:78:31: cannot use &m (value of type *sim.Message) as *jetstream.RawStreamMsg value in argument to input.MatchesSignal
+FAIL	js-wf/client [build failed]
+FAIL
+=== RUN   TestCanonicalSignalRecoveryAfterDedupExpiry
+=== RUN   TestCanonicalSignalRecoveryAfterDedupExpiry/binding_commit
+=== RUN   TestCanonicalSignalRecoveryAfterDedupExpiry/binding_commit/within
+=== RUN   TestCanonicalSignalRecoveryAfterDedupExpiry/binding_commit/boundary
+=== RUN   TestCanonicalSignalRecoveryAfterDedupExpiry/binding_commit_unknown
+=== RUN   TestCanonicalSignalRecoveryAfterDedupExpiry/binding_commit_unknown/within
+=== RUN   TestCanonicalSignalRecoveryAfterDedupExpiry/binding_commit_unknown/boundary
+--- PASS: TestCanonicalSignalRecoveryAfterDedupExpiry (0.03s)
+    --- PASS: TestCanonicalSignalRecoveryAfterDedupExpiry/binding_commit (0.01s)
+        --- PASS: TestCanonicalSignalRecoveryAfterDedupExpiry/binding_commit/within (0.01s)
+        --- PASS: TestCanonicalSignalRecoveryAfterDedupExpiry/binding_commit/boundary (0.01s)
+    --- PASS: TestCanonicalSignalRecoveryAfterDedupExpiry/binding_commit_unknown (0.02s)
+        --- PASS: TestCanonicalSignalRecoveryAfterDedupExpiry/binding_commit_unknown/within (0.01s)
+        --- PASS: TestCanonicalSignalRecoveryAfterDedupExpiry/binding_commit_unknown/boundary (0.01s)
+PASS
+ok  	js-wf/client	0.036s

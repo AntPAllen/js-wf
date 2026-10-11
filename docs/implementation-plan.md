@@ -1,5 +1,34 @@
 # JetStream Durable Workflow Runtime — Implementation Plan
 
+## Copied native signal recovers first binding across dedup expiry — 2026-10-11
+
+Two verified copies of the retained native race failure show the exact
+live-00004/invocation11 reservation and source6, but no binding before recovery.
+Original2158 files/14,345,960bytes remain unchanged. First-token recovery returns6
+and preserves the owned body/input; the first helper then fails its excessive
+no-physical-duplicate assertion after the broker dedup window has expired.
+That failure and executable are retained, not presented as a passing run.
+
+A second fresh copy explicitly verifies source age beyond the120s window.
+Recovery takes191.360ms, preserves first binding index0/sequence6, creates one
+wakeup and one exact-token duplicate at source13. Draining the duplicate advances
+only the frontier; the first binding remains unchanged and the next bind is
+exhausted. Actual helper exit0 is independently verified, alongside both frozen
+1164-input source snapshots, closed copies and original-byte immutability.
+Both probes preserve an initial restored metadata deadline and subsequent
+read-only readiness rechecks; these do not explain the original commit timeout.
+
+Four deterministic component cuts cover rejected/committed-unknown binding at
+119999ms and120000ms: expiry permits physical republishing only when unbound;
+already-bound recovery preserves the first source. Normal/race controls pass
+all four plus eight existing phase cuts (16 named PASS results per mode), with
+1166 source inputs/two actual model executables and20 CI Python blocks reviewed.
+Transport dedup semantics and production code are unchanged; inventory remains
+163 families/946 pins. [Copied recovery evidence](scale/native-signal-retained-recovery-2026-10-11/README.md).
+This is copied-state recovery without workers, not native race/full-scale
+acceptance or a server-cause diagnosis. Three older race campaigns remain live;
+full current seed, canonical scale, original fault/soak/adoption gates stay open.
+
 ## Native signal failure isolated to binding commit; frozen159 race accepted — 2026-10-11
 
 A single active10/10/1 R3 race diagnostic on1b7a4bf reproduces the native failure
