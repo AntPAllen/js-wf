@@ -22,6 +22,11 @@ reproduced pull defect caused the original failure. Full native active/purge/
 reuse/signal/raw-audit qualification and the remaining plan stay open.
 [Copied-store observations](scale/native-active-population-inspection-2026-10-11/README.md).
 
+A fresh R3 active10/10/1 race diagnostic is launched from a Git-verified,
+frozen1169-file snapshot of5285012, retaining the same deadlines. Its preparation
+is recorded; no terminal native result is claimed.
+[Follow-up preparation](scale/native-expired-pull-fix-2026-10-11/README.md).
+
 ## Native active population timed out; distinct-cohort gate repaired — 2026-10-11
 
 The frozen3aa3550 native race diagnostic is terminal: actualSDKexit1 after
