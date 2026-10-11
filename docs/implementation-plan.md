@@ -1,5 +1,19 @@
 # JetStream Durable Workflow Runtime — Implementation Plan
 
+## Classified full-cap campaign preparation added — 2026-10-11
+
+Native profile acceptance now requires complete error-class counts and permits
+only exact definite CASRoot/CASBlob rejections. Wrapped,unknown,non-CAS and other
+errors remain ineligible. Adversarial gate tests pass; the original6408a5 normal
+still fails acceptance because its41 CASRoot errors are unclassified.
+
+New preparation/service scripts freeze both binaries and preserve a retained
+20-entry control before original100000-entry execution. The full entry budget,
+49992 real padding operations,two archives,file storage,request bounds and6h
+compaction TTL are retained. Race requires an accepted normal at the same source.
+[Preparation and acceptance contract](scale/graph-classified-entry-preparation-2026-10-11/README.md).
+No new full-scale result is claimed yet; frozen00eeb13 complete159 remains live.
+
 ## Native profiler error classes added — 2026-10-11
 
 The test-only graph limit profiler now distinguishes exact definite CAS conflicts

@@ -23,7 +23,7 @@ if not state['terminal'] or props['MainPID']!='0' or not props['ExecMainExitTime
 assert state['child_terminal'] and state['child_exit']==0 and state['supervisor_exit']==0
 assert props['ExecMainStatus']=='0' and state['phase']=='closed'
 assert state['inputs_unchanged'] and state['binary_unchanged']
-prep_dir=repo/'docs/scale/graph-entry-campaign-preparation-2026-10-10'
+prep_dir=repo/'docs/scale/graph-classified-entry-preparation-2026-10-11'
 subprocess.run(['python3',str(prep_dir/'review.py')],check=True,stdout=subprocess.DEVNULL)
 prep=json.loads((prep_dir/'preparation.json').read_text())
 assert state['source']==prep['source'] and state['binary']==prep['binaries'][state['mode']]

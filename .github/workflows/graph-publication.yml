@@ -10,6 +10,8 @@ on:
       - 'integrity/graph*.go'
       - 'worker/graph_journal*.go'
       - 'worker/graph_limit*.go'
+      - 'scripts/graph_limit_profile.py'
+      - 'scripts/test_graph_limit_profile.py'
       - 'worker/graph_signal*.go'
       - 'worker/graph_terminal*.go'
       - 'worker/graph_child*.go'
@@ -70,6 +72,8 @@ on:
       - 'integrity/graph*.go'
       - 'worker/graph_journal*.go'
       - 'worker/graph_limit*.go'
+      - 'scripts/graph_limit_profile.py'
+      - 'scripts/test_graph_limit_profile.py'
       - 'worker/graph_signal*.go'
       - 'worker/graph_terminal*.go'
       - 'worker/graph_child*.go'
@@ -135,6 +139,8 @@ jobs:
       - uses: actions/setup-go@v5
         with:
           go-version-file: go.mod
+      - name: Reject unclassified and uncertain profile gates
+        run: python3 scripts/test_graph_limit_profile.py -v
       - name: Classify native CAS and preserve concurrent profile snapshots
         shell: bash
         run: |

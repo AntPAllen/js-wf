@@ -1,5 +1,5 @@
 {
-  "observed_utc": "2026-10-11T00:32:50.385511+00:00",
+  "observed_utc": "2026-10-11T00:37:32.274069+00:00",
   "root": "/home/exedev/js-wf-indexed-entry100000-normal-20261010",
   "source": "6408a5e08f551c331b4df8996abbfe3a319eeb09",
   "mode": "normal",
@@ -22,17 +22,38 @@
       "to_padding": 24996,
       "operation": "CASRoot",
       "calls": 100147,
-      "errors": 17
+      "errors": 17,
+      "error_kinds": null
     },
     {
       "from_padding": 24996,
       "to_padding": 49992,
       "operation": "CASRoot",
       "calls": 100186,
-      "errors": 24
+      "errors": 24,
+      "error_kinds": null
+    }
+  ],
+  "unexpected_profile_errors": [
+    {
+      "from_padding": 0,
+      "to_padding": 24996,
+      "operation": "CASRoot",
+      "calls": 100147,
+      "errors": 17,
+      "error_kinds": null
+    },
+    {
+      "from_padding": 24996,
+      "to_padding": 49992,
+      "operation": "CASRoot",
+      "calls": 100186,
+      "errors": 24,
+      "error_kinds": null
     }
   ],
   "zero_profile_errors_gate": false,
+  "no_unexpected_profile_errors_gate": false,
   "functional_limit_assertions_verified": true,
   "source_inputs": 1924,
   "budget": 100000,
@@ -44,5 +65,5 @@
   "native_bytes": 3369550584,
   "child_wall_seconds": 5684.192273943001,
   "log_sha256": "7c18f2dd9fcee39569aa0e1170403eed78c5471364cca2c613cee95f0c5ea131",
-  "remaining_gate": "Classify recorded transport errors; zero-profile-errors gate remains unaccepted. Functional assertions/source/binary/native-file verification passed separately."
+  "remaining_gate": "Unclassified/uncertain/non-CAS errors remain unaccepted; only fully accounted definite CAS conflicts are eligible. Functional assertions/source/binary/native-file verification passed separately."
 }
