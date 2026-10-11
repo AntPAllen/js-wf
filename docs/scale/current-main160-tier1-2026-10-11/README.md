@@ -35,3 +35,20 @@ older-source race/scale campaigns remain live. Later main revisions, extended
 10k/100k and original native fault/scale/soak/retention/import/admission/rollout
 requirements remain separate. Public continuation admission/import/online
 collection remain disabled.
+
+## Frozen normal accepted after actual completion
+
+Independent reviewer accepted the complete normal1000 run at source50e4f9b:
+160 families/160000 completed bodies,880 exact pinned replays,228 top-level
+passes, eight actual disjoint package exits0. All3631 Git inputs match frozen
+source and remain unchanged. The retained binary SHA is
+5b874a90f4c8b65ecc2480db2847fffa39c61ab3fcd75c5089f5e83ce142f8ab.
+Supervisor/driver exits0 and loaded InvocationIDcd8fc24771f84fcd9868359b78449ba7
+are proven with MainPID0/RemainAfterExityes. Finished2026-10-11T04:08:55.633892Z.
+
+normal-terminal/ retains all nonbinary stage files; large logs/source manifests
+are losslessly compressed. normal-terminal-files.json binds original bytes and
+stored files; every copied file was read back and compared. The original binary,
+frozen checkout and loaded unit remain local and required by the independent
+reviewer. This proof does not cover newer main,161-family qualification, race,
+extended or original native/scale/fault/soak/rollout acceptance.

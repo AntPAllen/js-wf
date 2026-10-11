@@ -1,5 +1,22 @@
 # JetStream Durable Workflow Runtime — Implementation Plan
 
+## Complete frozen160 normal Tier1 qualification accepted — 2026-10-11
+
+Independent review accepts source50e4f9bee0931ba4474b68574a08da3bfbaafe52:
+160000 completed seed bodies across160 families,880 pinned replays,228 top-level
+passes and eight disjoint package processes using the same retained binary.
+All3631 required Git inputs match frozen source and are unchanged. Actual child/
+supervisor exits0, loaded InvocationIDcd8fc24771f84fcd9868359b78449ba7,
+MainPID0/RemainAfterExityes and resource/time bounds are independently verified.
+Finished04:08:55UTC. Nonbinary terminal files are retained with lossless large-log/
+source compression and original/stored byte manifests. See [complete normal
+proof](scale/current-main160-tier1-2026-10-11/README.md).
+
+Same-source race may now launch. This source includes source-header hardening and
+the160th family but predates newer raw audits and161st projection-census family.
+Full current161/894 normal/race/extended and original broad gates remain open.
+The two older race and classified100000-entry race campaigns remain live.
+
 ## Independent consumed-signal wire admission — 2026-10-11
 
 Consumed-signal payloads now receive strict independent decoding before prefix
