@@ -1,0 +1,66 @@
+{
+  "command": [
+    "go",
+    "test",
+    "-race",
+    "-p=1",
+    "-exec",
+    "python3 /home/exedev/js-wf-reader-release-current-20261011/capture.py",
+    "./internal/graphpublication",
+    "./sim",
+    "-run",
+    "^(TestGraphReleaseReaderCurrent|TestGraphViewCloseSingleAuthorityObservation|TestGraphStartReadErrorPhases|TestPinnedRegressionCorpus|TestGraphReader.*)$",
+    "-count=1",
+    "-v",
+    "-timeout=6m"
+  ],
+  "start_ns": 1791709813941073453,
+  "environment": {
+    "GOMAXPROCS": "2",
+    "GOMEMLIMIT": "512MiB"
+  },
+  "executions_before": [
+    "299031-execution.json",
+    "299141-execution.json"
+  ],
+  "go_pid": 299148,
+  "actual_exit": 0,
+  "end_ns": 1791710032379760430,
+  "source_unchanged": true,
+  "executions": {
+    "299649-execution.json": {
+      "argv": [
+        "/tmp/go-build9033457/b273/graphpublication.test",
+        "-test.paniconexit0",
+        "-test.run=^(TestGraphReleaseReaderCurrent|TestGraphViewCloseSingleAuthorityObservation|TestGraphStartReadErrorPhases|TestPinnedRegressionCorpus|TestGraphReader.*)$",
+        "-test.count=1",
+        "-test.v=true",
+        "-test.timeout=6m0s"
+      ],
+      "pid": 299649,
+      "start_ns": 1791709873771561301,
+      "end_ns": 1791709874960377026,
+      "actual_exit": 0,
+      "sha256": "677557442cdc9c20d90141e5b33186bb9edfcee2f72378ed31f082c06c645501",
+      "bytes": 27894023,
+      "retained_binary": "/home/exedev/js-wf-reader-release-current-20261011/677557442cdc9c20d90141e5b33186bb9edfcee2f72378ed31f082c06c645501.test"
+    },
+    "299764-execution.json": {
+      "argv": [
+        "/tmp/go-build9033457/b283/sim.test",
+        "-test.paniconexit0",
+        "-test.run=^(TestGraphReleaseReaderCurrent|TestGraphViewCloseSingleAuthorityObservation|TestGraphStartReadErrorPhases|TestPinnedRegressionCorpus|TestGraphReader.*)$",
+        "-test.count=1",
+        "-test.v=true",
+        "-test.timeout=6m0s"
+      ],
+      "pid": 299764,
+      "start_ns": 1791709912236422353,
+      "end_ns": 1791710032329354372,
+      "actual_exit": 0,
+      "sha256": "531006f5c3cb3140d6290e3e63ac72ed3ebfd5cfad50b5bbd5e175b24f9d9096",
+      "bytes": 28336391,
+      "retained_binary": "/home/exedev/js-wf-reader-release-current-20261011/531006f5c3cb3140d6290e3e63ac72ed3ebfd5cfad50b5bbd5e175b24f9d9096.test"
+    }
+  }
+}

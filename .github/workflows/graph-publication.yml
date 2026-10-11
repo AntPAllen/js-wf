@@ -613,7 +613,8 @@ jobs:
           set -o pipefail
           graph_flags=()
           if [ "$GRAPH_MODE" = race ]; then graph_flags=(-race); fi
-          go test "${graph_flags[@]}" ./sim -run '^TestGraphStartReadErrorPhases$' -count=1 -v -timeout=2m 2>&1 | tee start-read-phases.log
+          go test "${graph_flags[@]}" ./sim -run '^(TestGraphStartReadErrorPhases|TestGraphViewCloseSingleAuthorityObservation)$' -count=1 -v -timeout=2m 2>&1 | tee start-read-phases.log
+          go test "${graph_flags[@]}" ./internal/graphpublication -run '^TestGraphReleaseReaderCurrent$' -count=1 -v -timeout=2m 2>&1 | tee reader-release-current.log
           python3 - <<'PY'
           import pathlib, re
           log = pathlib.Path('start-read-phases.log').read_text()
@@ -621,6 +622,12 @@ jobs:
           assert '--- PASS: TestGraphStartReadErrorPhases ' in log
           for mode in ('valid', 'open', 'input', 'release', 'release_committed', 'release_committed_unknown', 'input_and_release'):
               assert f'--- PASS: TestGraphStartReadErrorPhases/{mode} ' in log
+          for mode in ('valid', 'observe_conflict', 'cas_conflict', 'cas_drop', 'commit_lost', 'commit_unknown', 'overtaken_commit'):
+              assert f'--- PASS: TestGraphViewCloseSingleAuthorityObservation/{mode} ' in log
+          log = pathlib.Path('reader-release-current.log').read_text()
+          assert not re.search(r'^--- SKIP:', log, re.M)
+          for mode in ('valid', 'observe_deadline', 'cas_drop', 'cas_commit_lost', 'cas_commit_unknown', 'overtaken_commit', 'conflict', 'forged', 'revoked'):
+              assert f'--- PASS: TestGraphReleaseReaderCurrent/{mode} ' in log
           PY
           go test "${graph_flags[@]}" ./sim -run '^(TestSeededGraphStartSourceHeadersReplay|TestGraphStartHeaderFailureTracePersistence|TestPinnedRegressionCorpus)$/^(graph_start_source_headers_|default|explicit)' -count=1 -v -timeout=6m 2>&1 | tee start-source-headers.log
           python3 - <<'PY'
@@ -642,6 +649,7 @@ jobs:
           path: |
             start-source-headers.log
             start-read-phases.log
+            reader-release-current.log
             start-source-header-failure.json
           if-no-files-found: error
   seeded-projection-census:

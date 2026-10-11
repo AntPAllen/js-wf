@@ -1,0 +1,62 @@
+{
+  "command": [
+    "go",
+    "test",
+    "-p=1",
+    "-exec",
+    "python3 /home/exedev/js-wf-reader-release-current-20261011/capture.py",
+    "./internal/graphpublication",
+    "./sim",
+    "-run",
+    "^(TestGraphReleaseReaderCurrent|TestGraphViewCloseSingleAuthorityObservation|TestGraphStartReadErrorPhases|TestPinnedRegressionCorpus|TestGraphReader.*)$",
+    "-count=1",
+    "-v",
+    "-timeout=6m"
+  ],
+  "start_ns": 1791709784245576080,
+  "environment": {
+    "GOMAXPROCS": "2",
+    "GOMEMLIMIT": "512MiB"
+  },
+  "executions_before": [],
+  "go_pid": 298979,
+  "actual_exit": 0,
+  "end_ns": 1791709813616729025,
+  "source_unchanged": true,
+  "executions": {
+    "299031-execution.json": {
+      "argv": [
+        "/tmp/go-build553864713/b273/graphpublication.test",
+        "-test.paniconexit0",
+        "-test.run=^(TestGraphReleaseReaderCurrent|TestGraphViewCloseSingleAuthorityObservation|TestGraphStartReadErrorPhases|TestPinnedRegressionCorpus|TestGraphReader.*)$",
+        "-test.count=1",
+        "-test.v=true",
+        "-test.timeout=6m0s"
+      ],
+      "pid": 299031,
+      "start_ns": 1791709789175384417,
+      "end_ns": 1791709789197666201,
+      "actual_exit": 0,
+      "sha256": "6f9be369aeae7ffac4799841bde466352d24886b90b408a1cc300de7ed777ccd",
+      "bytes": 19771655,
+      "retained_binary": "/home/exedev/js-wf-reader-release-current-20261011/6f9be369aeae7ffac4799841bde466352d24886b90b408a1cc300de7ed777ccd.test"
+    },
+    "299141-execution.json": {
+      "argv": [
+        "/tmp/go-build553864713/b281/sim.test",
+        "-test.paniconexit0",
+        "-test.run=^(TestGraphReleaseReaderCurrent|TestGraphViewCloseSingleAuthorityObservation|TestGraphStartReadErrorPhases|TestPinnedRegressionCorpus|TestGraphReader.*)$",
+        "-test.count=1",
+        "-test.v=true",
+        "-test.timeout=6m0s"
+      ],
+      "pid": 299141,
+      "start_ns": 1791709806667254803,
+      "end_ns": 1791709813577985490,
+      "actual_exit": 0,
+      "sha256": "6f6d61a4f4e10d00ea8bca5ae369c7e3e0aed385a4cd703cecd89ddad1200a7b",
+      "bytes": 19894535,
+      "retained_binary": "/home/exedev/js-wf-reader-release-current-20261011/6f6d61a4f4e10d00ea8bca5ae369c7e3e0aed385a4cd703cecd89ddad1200a7b.test"
+    }
+  }
+}

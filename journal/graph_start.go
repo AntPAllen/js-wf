@@ -414,6 +414,10 @@ func (s *GraphStore) ReadStart(ctx context.Context, typ, id string) (state Graph
 		cleanup, stop := context.WithTimeout(context.WithoutCancel(ctx), 3*time.Second)
 		defer stop()
 		if e := v.Close(cleanup); err == nil && e != nil {
+			var release *graphpublication.ReaderReleaseError
+			if errors.As(e, &release) {
+				e = fmt.Errorf("%s: %w", release.Phase, e)
+			}
 			err = fmt.Errorf("release start reader: %w", e)
 		}
 	}()

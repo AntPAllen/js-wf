@@ -1,5 +1,29 @@
 # JetStream Durable Workflow Runtime — Implementation Plan
 
+## Reader release removes duplicate observation; controls qualified — 2026-10-11
+
+GraphView.Close now observes authority once before its exact-head pin-release
+CAS, instead of twice. Original readback,3s Start cleanup and16 definite-CAS
+retry bounds remain; observation conflicts return immediately. Typed error phases
+identify observation versus pin release without changing underlying error text.
+Nine protocol/seven view/seven Start controls pass, as does the complete946-pin
+corpus:1003 named PASS results in both normal and race modes.
+
+All163 families/946 pin paths and existing workload assertions remain.380 traces
+update for the removed operation;374 retain exact scheduler decisions,56 reflect
+lower physical catalogue counters and six refresh cooperative actor schedules
+while preserving explicit fault controls. Every updated trace replays exactly.
+Independent review checks old/new bytes,3846 source inputs and six real SDK exits.
+See [reader-release evidence](scale/reader-release-current-2026-10-11/README.md).
+
+Canonical R3 active10/10/1 normal passes its raw audit. Matching race fails later
+in fresh signal publication with journal append outcome unknown/context deadline,
+after active population and purge/reuse overlap; it reports no reader-release
+failure. Its store/binary/closure are retained. Native race acceptance, latest full
+seed qualification and original full10k/fault/soak/adoption gates remain open.
+No native cause or full-scale performance improvement is claimed from the model
+operation-count reduction. No full-scale run was repeated for this change.
+
 ## Full canonical run isolated reader-release deadline — 2026-10-11
 
 The phase-diagnostic full10k/10k-active/1k campaign is terminal, SDK/supervisor

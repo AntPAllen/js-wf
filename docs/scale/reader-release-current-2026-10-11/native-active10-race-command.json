@@ -1,0 +1,58 @@
+{
+  "command": [
+    "go",
+    "test",
+    "-race",
+    "-p=1",
+    "-exec",
+    "python3 /home/exedev/js-wf-reader-release-current-20261011/capture.py",
+    "./integration",
+    "-run",
+    "^TestCanonicalGraphTenThousandConcurrentPurgesAndThousandReusedIDs$",
+    "-count=1",
+    "-v",
+    "-timeout=22m"
+  ],
+  "start_ns": 1791710087977147537,
+  "environment": {
+    "GOMAXPROCS": "2",
+    "GOMEMLIMIT": "512MiB",
+    "WF_GRAPH_PURGE_REUSE_SCALE": "1",
+    "WF_GRAPH_PURGE_REUSE_NATIVE_ROOT": "/home/exedev/js-wf-reader-release-current-20261011/native-active10-race-native",
+    "WF_PURGE_REUSE_ACTIVE": "1",
+    "WF_PURGE_REUSE_COUNT": "10"
+  },
+  "executions_before": [
+    "299031-execution.json",
+    "299141-execution.json",
+    "299649-execution.json",
+    "299764-execution.json",
+    "299872-execution.json"
+  ],
+  "go_pid": 299971,
+  "actual_exit": 1,
+  "end_ns": 1791710235155076483,
+  "source_unchanged": true,
+  "executions": {
+    "300778-execution.json": {
+      "argv": [
+        "/tmp/go-build290008440/b001/integration.test",
+        "-test.paniconexit0",
+        "-test.run=^TestCanonicalGraphTenThousandConcurrentPurgesAndThousandReusedIDs$",
+        "-test.count=1",
+        "-test.v=true",
+        "-test.timeout=22m0s"
+      ],
+      "pid": 300778,
+      "start_ns": 1791710165585932414,
+      "end_ns": 1791710235064483635,
+      "actual_exit": 1,
+      "sha256": "d2e5840a93e128b07e2e7ff6360041ebfe2dd2f404e163861ba52ec457c8ad8b",
+      "bytes": 54120711,
+      "retained_binary": "/home/exedev/js-wf-reader-release-current-20261011/d2e5840a93e128b07e2e7ff6360041ebfe2dd2f404e163861ba52ec457c8ad8b.test"
+    }
+  },
+  "native_root": "/home/exedev/js-wf-reader-release-current-20261011/native-active10-race-native",
+  "native_files": 2166,
+  "native_bytes": 14546396
+}

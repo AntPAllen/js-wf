@@ -140,15 +140,29 @@ func (p Protocol) readerRoot(ctx context.Context, destination string, expected u
 	if err := ctx.Err(); err != nil {
 		return Root{}, err
 	}
-	if p.Port == nil || destination == "" || !utf8.ValidString(destination) || len(destination) > 256 || expected == math.MaxUint64 {
+	if expected == math.MaxUint64 {
 		return Root{}, errors.New("invalid reader destination/head")
 	}
-	root, err := p.readRoot(ctx, destination)
+	root, err := p.currentReaderRoot(ctx, destination)
 	if err != nil {
 		return Root{}, err
 	}
 	if root.Head != expected {
 		return Root{}, ErrConflict
+	}
+	return root, nil
+}
+
+func (p Protocol) currentReaderRoot(ctx context.Context, destination string) (Root, error) {
+	if err := ctx.Err(); err != nil {
+		return Root{}, err
+	}
+	if p.Port == nil || destination == "" || !utf8.ValidString(destination) || len(destination) > 256 {
+		return Root{}, errors.New("invalid reader destination/head")
+	}
+	root, err := p.readRoot(ctx, destination)
+	if err != nil {
+		return Root{}, err
 	}
 	return root, nil
 }
@@ -246,6 +260,36 @@ func (p Protocol) ReleaseReader(ctx context.Context, reader Reader, expected uin
 	if err != nil {
 		return Root{}, err
 	}
+	return p.releaseReaderRoot(ctx, reader, root)
+}
+
+// ReaderReleaseError distinguishes observation failure from release failure
+// without changing the underlying error text or errors.Is behavior.
+type ReaderReleaseError struct {
+	Phase string
+	Err   error
+}
+
+func (e *ReaderReleaseError) Error() string { return e.Err.Error() }
+func (e *ReaderReleaseError) Unwrap() error { return e.Err }
+
+// ReleaseReaderCurrent observes the authority once, validates this reader's pin,
+// and releases at that exact observed head. It never accepts a caller-supplied
+// root or retries an uncertain mutation. Callers may retry a rejected release
+// CAS, but an observation conflict must remain an observation failure.
+func (p Protocol) ReleaseReaderCurrent(ctx context.Context, reader Reader) (Root, error) {
+	root, err := p.currentReaderRoot(ctx, reader.destination)
+	if err != nil {
+		return Root{}, &ReaderReleaseError{Phase: "observe reader release head", Err: err}
+	}
+	ack, err := p.releaseReaderRoot(ctx, reader, root)
+	if err != nil {
+		return Root{}, &ReaderReleaseError{Phase: "release reader pin", Err: err}
+	}
+	return ack, nil
+}
+
+func (p Protocol) releaseReaderRoot(ctx context.Context, reader Reader, root Root) (Root, error) {
 	i, err := readerIndex(root, reader)
 	if err != nil {
 		return Root{}, err
@@ -255,7 +299,7 @@ func (p Protocol) ReleaseReader(ctx context.Context, reader Reader, expected uin
 	if len(root.Readers) == 0 {
 		root.Readers = nil
 	}
-	return p.readerCAS(ctx, reader.destination, expected, root)
+	return p.readerCAS(ctx, reader.destination, root.Head, root)
 }
 
 // ReadRetained validates the live lease before reading a path. The caller's
