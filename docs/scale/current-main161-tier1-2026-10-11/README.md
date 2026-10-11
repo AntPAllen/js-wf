@@ -28,3 +28,21 @@ Four older-source race/scale campaigns are still live and are not replaced.
 Race/extended10k/100k and original native fault/scale/soak/retention/import/
 admission/rollout requirements remain separate. Public continuation admission,
 import and online collection remain disabled.
+
+## Frozen normal launched
+
+Sourceec970159c61dbecb6899077bfa6927b620f62ec9 was checked out in a clean108MiB
+sparse worktree. All3691 required Git inputs match frozen source;3726 selected
+paths and exact sparse patterns are captured in checkout.json/sparse-paths.txt.
+
+The unit js-wf-main161-tier1-normal-20261011-prepared.service started04:36:30UTC.
+InvocationID4d48e5ea936e4ed6ae3ffe8a20e4f0b9, supervisor249502/driver249525,
+actual loaded command, one-core quota,2GB memory and service lifetime are bound
+in normal-launch.json/normal-loaded-unit.txt. SupervisorSHA
+ d9040466dd31e5e7541d826ab5416df02f4a744df5cb3e4d65dbd0a9f419e6b1
+must remain unchanged during the run. Its normal-state.json is live/untracked.
+
+The reviewer actually refused this running stage with exit1; log/receipt are
+retained. This is a launch, not normal acceptance. After actual completion use
+the existing reviewer command. Same-source race remains contingent on accepted
+normal; the four older campaigns remain live.

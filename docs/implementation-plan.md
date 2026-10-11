@@ -1,5 +1,25 @@
 # JetStream Durable Workflow Runtime — Implementation Plan
 
+## Complete frozen161 normal launched — 2026-10-11
+
+Complete current161 normal qualification started04:36:30UTC at frozen source
+ec970159c61dbecb6899077bfa6927b620f62ec9. It includes all preceding wire,
+projection-census, child-start/terminal and rejected-child audit fixes. The
+clean108MiB sparse checkout retains3691 independently Git-verified inputs and
+3726 selected paths. Loaded invocation4d48e5ea936e4ed6ae3ffe8a20e4f0b9,
+supervisor249502/driver249525 and unchanged supervisor bytes are launch-bound.
+
+The run requests1000 seeds per161 families (161000 completed bodies),894 pins,
+eight sequential disjoint package processes and one retained binary, GOMAXPROCS2/
+GOMEMLIMIT512MiB, one-core quota/2GB memory,300m process watchdogs and145200s
+service lifetime. The reviewer actually refused the live stage with exit1;
+launch is not acceptance. See [frozen161 launch evidence](scale/current-main161-tier1-2026-10-11/README.md).
+
+Same-source race may start only after independent normal acceptance. Four older
+race/scale campaigns remain live. Extended10k/100k, original fault/scale/soak/
+retention/power/import/admission/rollout gates remain open; public continuation
+admission/import/online collection remain disabled.
+
 ## Rejected child signal queue and linkage audits — 2026-10-11
 
 A SignalConsumed operation retained inside a failed limit_entry now receives
