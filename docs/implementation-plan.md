@@ -1,5 +1,23 @@
 # JetStream Durable Workflow Runtime — Implementation Plan
 
+## Canonical Phase 7 purge/reuse scenario and tombstone auditing — 2026-10-11
+
+The original 10k completed / 10k live / 1k reused-ID scenario now has a canonical
+native R3 path with the original count/bounds, generation/epoch/signal isolation
+checks, worker join, empty legacy journal and independent raw graph census.
+Canonical normal/race 10/10/1 diagnostics and legacy compatibility pass. Complete
+raw graph audit tests pass 1875 named controls per mode, including 48 new strict
+retired-tombstone controls. The auditor preserves retained-Outcome compatibility
+and reports tombstones separately. Earlier polling, tombstone, compatibility and
+overlap failures are retained. See [scenario evidence](scale/canonical-purge-reuse-2026-10-11/README.md).
+
+These are diagnostics, not the full Phase 7 scale gate or active-handler proof.
+The full-count active-handler supervisor and live-refusing reviewer are prepared.
+A documented Go cache cleanup makes room without deleting proof stores/checkouts.
+Inventory remains 163 families/946 pins; no runtime worker/journal logic changed.
+Full canonical scale, original native/fault/soak/adoption gates and public admission
+remain open. Four earlier-source qualification services remain independent.
+
 ## Offline terminal result admission before user code — 2026-10-11
 
 Replay now rejects contradictory terminal kinds/results and verifies successful

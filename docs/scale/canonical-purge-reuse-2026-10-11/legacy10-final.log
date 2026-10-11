@@ -1,0 +1,10 @@
+=== RUN   TestTenThousandConcurrentPurgesAndThousandReusedIDs
+    purge_reuse_scale_test.go:108: purge/reuse profile canonical=false count=10 reuse=1 active=false full_scale=false
+    purge_reuse_scale_test.go:267: completed 10 old invocations in 201.085797ms
+    purge_reuse_scale_test.go:343: kept 10 other invocations suspended before purge at 246.472625ms
+    purge_reuse_scale_test.go:407: purged 10 while 10 remained live; reused 1 ids in 298.927147ms
+    purge_reuse_scale_test.go:452: reused and released all invocations in 562.281099ms
+    purge_reuse_scale_test.go:546: retained integrity audit passed in 585.662809ms
+--- PASS: TestTenThousandConcurrentPurgesAndThousandReusedIDs (5.60s)
+PASS
+ok  	js-wf/integration	5.722s

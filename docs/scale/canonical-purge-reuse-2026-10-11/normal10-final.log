@@ -1,0 +1,12 @@
+=== RUN   TestCanonicalGraphTenThousandConcurrentPurgesAndThousandReusedIDs
+    purge_reuse_scale_test.go:82: retained canonical purge/reuse native root=/home/exedev/js-wf-canonical-purge-reuse-20261011/normal10-final-native
+    purge_reuse_scale_test.go:108: purge/reuse profile canonical=true count=10 reuse=1 active=false full_scale=false
+    purge_reuse_scale_test.go:267: completed 10 old invocations in 1.162996014s
+    purge_reuse_scale_test.go:343: kept 10 other invocations suspended before purge at 2.901494745s
+    purge_reuse_scale_test.go:407: purged 10 while 10 remained live; reused 1 ids in 3.150731698s
+    purge_reuse_scale_test.go:452: reused and released all invocations in 6.034008186s
+    purge_reuse_scale_test.go:532: canonical raw purge/reuse audit={"References":{"Roots":20,"Forests":62,"ReaderPins":0,"Records":99,"Nodes":143,"PayloadEdges":121},"Invocations":11,"Journals":11,"Entries":66,"Terminal":11,"Pending":0,"Retired":9,"Checkpoints":0,"RetiredProjectionOnly":0,"RetiredTombstones":9,"ChildStartLinksVerified":0,"ChildStartLinksUnavailable":0,"ChildTerminalLinksVerified":0,"ChildTerminalLinksUnavailable":0}
+    purge_reuse_scale_test.go:546: retained integrity audit passed in 7.093705752s
+--- PASS: TestCanonicalGraphTenThousandConcurrentPurgesAndThousandReusedIDs (12.09s)
+PASS
+ok  	js-wf/integration	12.294s

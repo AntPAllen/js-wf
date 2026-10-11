@@ -30,6 +30,7 @@ type GraphJournalReport struct {
 	References                                                              GraphReferenceReport
 	Invocations, Journals, Entries, Terminal, Pending, Retired, Checkpoints int
 	RetiredProjectionOnly                                                   int
+	RetiredTombstones                                                       int
 	ChildStartLinksVerified, ChildStartLinksUnavailable                     int
 	ChildTerminalLinksVerified, ChildTerminalLinksUnavailable               int
 }
@@ -199,10 +200,24 @@ func CheckGraphJournals(ctx context.Context, snapshot GraphJournalSnapshot) (rep
 				if err != nil {
 					return report, err
 				}
-				if err := auditRetiredProjection(raw, c.Invocation, c.Kind); err != nil {
-					return report, fmt.Errorf("%s: invalid retired projection: %w", destination, err)
+				var fields map[string]json.RawMessage
+				if err := json.Unmarshal(raw, &fields); err != nil {
+					return report, err
 				}
-				report.RetiredProjectionOnly++
+				if _, tombstone := fields["tombstone"]; tombstone {
+					if !c.Purging {
+						return report, fmt.Errorf("%s: tombstone without purge fence", destination)
+					}
+					if err := auditRetiredTombstone(raw, c.Invocation); err != nil {
+						return report, fmt.Errorf("%s: invalid retired tombstone: %w", destination, err)
+					}
+					report.RetiredTombstones++
+				} else {
+					if err := auditRetiredProjection(raw, c.Invocation, c.Kind); err != nil {
+						return report, fmt.Errorf("%s: invalid retired projection: %w", destination, err)
+					}
+					report.RetiredProjectionOnly++
+				}
 			}
 			report.Retired++
 			continue

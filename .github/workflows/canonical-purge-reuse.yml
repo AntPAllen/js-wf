@@ -1,0 +1,80 @@
+name: Canonical graph purge and ID reuse
+on:
+  workflow_dispatch:
+    inputs:
+      profile:
+        type: choice
+        default: diagnostic
+        options: [diagnostic, full]
+      active:
+        description: Keep live handlers executing during purge
+        type: boolean
+        default: false
+  push:
+    paths: ['integration/purge_reuse_scale_test.go', '.github/workflows/canonical-purge-reuse.yml']
+  pull_request:
+    paths: ['integration/purge_reuse_scale_test.go', '.github/workflows/canonical-purge-reuse.yml']
+jobs:
+  native:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    strategy:
+      fail-fast: false
+      matrix:
+        mode: [normal, race]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - name: Canonical R3 purge and reuse
+        env:
+          PROFILE: ${{ inputs.profile || 'diagnostic' }}
+          ACTIVE: ${{ inputs.active && '1' || '0' }}
+          MODE: ${{ matrix.mode }}
+          GOMAXPROCS: '2'
+          GOMEMLIMIT: 2GiB
+          WF_GRAPH_PURGE_REUSE_SCALE: '1'
+        shell: bash
+        run: |
+          set -o pipefail
+          export WF_GRAPH_PURGE_REUSE_NATIVE_ROOT="$RUNNER_TEMP/canonical-purge-reuse-$MODE/native"
+          export WF_PURGE_REUSE_ACTIVE="$ACTIVE"
+          mkdir -p "$(dirname "$WF_GRAPH_PURGE_REUSE_NATIVE_ROOT")"
+          if [ "$PROFILE" = full ]; then
+            unset WF_PURGE_REUSE_COUNT
+            # Retained three-replica graph stores and the Go build need room.
+            available=$(df -Pk "$RUNNER_TEMP" | awk 'NR==2 {print $4}')
+            test "$available" -ge 33554432
+          else
+            export WF_PURGE_REUSE_COUNT=10
+          fi
+          flags=()
+          if [ "$MODE" = race ]; then flags=(-race); fi
+          go test "${flags[@]}" ./integrity -run '^TestRawGraphRetiredPurgeTombstones$' -count=1 -v -timeout=3m 2>&1 | tee canonical-tombstones.log
+          go test "${flags[@]}" ./integration -run '^TestCanonicalGraphTenThousandConcurrentPurgesAndThousandReusedIDs$' -count=1 -v -timeout=22m 2>&1 | tee canonical-purge-reuse.log
+          python3 - <<'PY'
+          import json, os, pathlib, re
+          log = pathlib.Path('canonical-purge-reuse.log').read_text()
+          assert not re.search(r'^\s*--- (FAIL|SKIP):', log, re.M)
+          assert '--- PASS: TestCanonicalGraphTenThousandConcurrentPurgesAndThousandReusedIDs ' in log
+          full = os.environ['PROFILE'] == 'full'
+          count = 10000 if full else 10
+          reuse = count // 10
+          active = os.environ['ACTIVE'] == '1'
+          assert f'profile canonical=true count={count} reuse={reuse} active={str(active).lower()} full_scale={str(full).lower()}' in log
+          assert f'purged {count} while {count} remained live; reused {reuse} ids' in log
+          report = json.loads(re.search(r'canonical raw purge/reuse audit=(\{[^\n]+\})', log)[1])
+          assert all(report[k] == count + reuse for k in ('Invocations', 'Journals', 'Terminal'))
+          assert report['Retired'] == count - reuse
+          assert report['RetiredTombstones'] == count - reuse
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: canonical-purge-reuse-${{ inputs.profile || 'diagnostic' }}-${{ matrix.mode }}
+          path: |
+            canonical-purge-reuse.log
+            canonical-tombstones.log
+            ${{ runner.temp }}/canonical-purge-reuse-${{ matrix.mode }}/native
+          retention-days: 14

@@ -1,0 +1,63 @@
+{
+  "command": [
+    "go",
+    "test",
+    "-p=1",
+    "-exec",
+    "python3 /home/exedev/js-wf-canonical-purge-reuse-20261011/capture.py",
+    "./integration",
+    "-run",
+    "^TestCanonicalGraphTenThousandConcurrentPurgesAndThousandReusedIDs$",
+    "-count=1",
+    "-v",
+    "-timeout=22m"
+  ],
+  "environment": {
+    "GOMAXPROCS": "2",
+    "GOMEMLIMIT": "512MiB",
+    "WF_PURGE_REUSE_COUNT": "10",
+    "WF_GRAPH_PURGE_REUSE_SCALE": "1",
+    "WF_GRAPH_PURGE_REUSE_NATIVE_ROOT": "/home/exedev/js-wf-canonical-purge-reuse-20261011/normal10-fixed-native"
+  },
+  "actual_exit": 1,
+  "start_ns": 1791704970654117333,
+  "end_ns": 1791705018271789259,
+  "source_inputs_unchanged": true,
+  "executions": {
+    "278765-execution.json": {
+      "argv": [
+        "/tmp/go-build841547257/b001/integration.test",
+        "-test.paniconexit0",
+        "-test.run=^TestCanonicalGraphTenThousandConcurrentPurgesAndThousandReusedIDs$",
+        "-test.count=1",
+        "-test.v=true",
+        "-test.timeout=22m0s"
+      ],
+      "pid": 278765,
+      "start_ns": 1791705003046882950,
+      "end_ns": 1791705017931111563,
+      "actual_exit": 1,
+      "sha256": "e759f193f128fad75567341940c51d843f503a3da19ceee8a3c9be046c81f380",
+      "bytes": 38031623,
+      "retained_binary": "/home/exedev/js-wf-canonical-purge-reuse-20261011/e759f193f128fad75567341940c51d843f503a3da19ceee8a3c9be046c81f380.test"
+    },
+    "278414-execution.json": {
+      "argv": [
+        "/tmp/go-build1712167579/b001/integration.test",
+        "-test.paniconexit0",
+        "-test.run=^TestCanonicalGraphTenThousandConcurrentPurgesAndThousandReusedIDs$",
+        "-test.count=1",
+        "-test.v=true",
+        "-test.timeout=22m0s"
+      ],
+      "pid": 278414,
+      "start_ns": 1791704798247664833,
+      "end_ns": 1791704945375505166,
+      "actual_exit": -15,
+      "sha256": "4f7ea722177ea0bd76da21144a7eca04a384eff1511359233cec9bf25596a2ad",
+      "bytes": 38031623,
+      "retained_binary": "/home/exedev/js-wf-canonical-purge-reuse-20261011/4f7ea722177ea0bd76da21144a7eca04a384eff1511359233cec9bf25596a2ad.test"
+    }
+  },
+  "native_root": "/home/exedev/js-wf-canonical-purge-reuse-20261011/normal10-fixed-native"
+}

@@ -19,6 +19,7 @@ import (
 	"js-wf/journal"
 	"js-wf/provision"
 	"js-wf/retention"
+	"js-wf/testcluster"
 	"js-wf/visibility"
 	"js-wf/wf"
 	"js-wf/worker"
@@ -36,6 +37,23 @@ func TestTenThousandConcurrentPurgesAndThousandReusedIDs(t *testing.T) {
 	if os.Getenv("WF_PURGE_REUSE_SCALE") == "" {
 		t.Skip("set WF_PURGE_REUSE_SCALE=1 for the 10k purge/reuse proof")
 	}
+	testPurgeReuseScale(t, false)
+}
+
+// Uses the same 10k/10k/1k scenario and 20-minute bound with canonical Start,
+// Signal, worker journal and ordered graph retirement. Count overrides are
+// diagnostic only. The graph namespace is audited after all workers join.
+func TestCanonicalGraphTenThousandConcurrentPurgesAndThousandReusedIDs(t *testing.T) {
+	if os.Getenv("WF_GRAPH_PURGE_REUSE_SCALE") != "1" {
+		t.Skip("set WF_GRAPH_PURGE_REUSE_SCALE=1 for the canonical 10k purge/reuse proof")
+	}
+	if os.Getenv("WF_PURGE_REUSE_POSTGRES") == "1" {
+		t.Fatal("canonical purge/reuse does not qualify the legacy PostgreSQL projection")
+	}
+	testPurgeReuseScale(t, true)
+}
+
+func testPurgeReuseScale(t *testing.T, canonical bool) {
 	count := 10000
 	if value := os.Getenv("WF_PURGE_REUSE_COUNT"); value != "" {
 		parsed, err := strconv.Atoi(value)
@@ -46,10 +64,67 @@ func TestTenThousandConcurrentPurgesAndThousandReusedIDs(t *testing.T) {
 	}
 	reuseCount := count / 10
 	activeMode := os.Getenv("WF_PURGE_REUSE_ACTIVE") == "1"
-	all, _ := setup(t)
+	var all []jetstream.JetStream
+	if canonical && os.Getenv("WF_GRAPH_PURGE_REUSE_NATIVE_ROOT") != "" {
+		root := os.Getenv("WF_GRAPH_PURGE_REUSE_NATIVE_ROOT")
+		if err := os.MkdirAll(root, 0700); err != nil {
+			t.Fatal(err)
+		}
+		entries, err := os.ReadDir(root)
+		if err != nil || len(entries) != 0 {
+			t.Fatal("retained native root must be empty", err)
+		}
+		cluster, err := testcluster.Start(root, 3)
+		if err != nil {
+			t.Fatal(err)
+		}
+		all, _ = setupCluster(t, cluster)
+		t.Logf("retained canonical purge/reuse native root=%s", root)
+	} else {
+		all, _ = setup(t)
+	}
 	ctx, cancel := context.WithTimeout(context.Background(), 20*time.Minute)
 	defer cancel()
 	const typ = "purge-scale"
+	var graphs [3]*journal.GraphStore
+	graphConfig := journal.NativeGraphConfig{AuthorityStream: "PURGE_SCALE_AUTH", AuthorityPrefix: "wf.graph.purgescale", ObjectBucket: "PURGE_SCALE_OBJECTS", ExpectedReplicas: 3, CanonicalStarts: true, CanonicalSignals: true, OwnerScopeIndex: true}
+	if canonical {
+		configs, err := journal.NativeGraphStreamConfigs(graphConfig, 3)
+		if err != nil {
+			t.Fatal(err)
+		}
+		for _, config := range configs {
+			if _, err := all[0].CreateStream(ctx, config); err != nil {
+				t.Fatal(err)
+			}
+		}
+		for index := range graphs {
+			graphs[index], err = journal.OpenNativeGraphStore(ctx, all[index], graphConfig)
+			if err != nil {
+				t.Fatal(err)
+			}
+		}
+	}
+	t.Logf("purge/reuse profile canonical=%t count=%d reuse=%d active=%t full_scale=%t", canonical, count, reuseCount, activeMode, count == 10000)
+	readJournal := func(call context.Context, js jetstream.JetStream, typ, id string) ([]journal.Record, uint64, error) {
+		if !canonical {
+			return journal.New(js).Read(call, typ, id)
+		}
+		inv, err := js.Stream(call, "WF_INV")
+		if err != nil {
+			return nil, 0, err
+		}
+		source, err := inv.GetLastMsgForSubject(call, "wf.inv."+typ+"."+id)
+		if err != nil {
+			return nil, 0, err
+		}
+		for index := range all {
+			if js == all[index] {
+				return graphs[index].Read(call, typ, id, source.Sequence)
+			}
+		}
+		return nil, 0, fmt.Errorf("unknown purge/reuse transport")
+	}
 	var postgres *visibility.Projection
 	var postgresDB *sql.DB
 	if os.Getenv("WF_PURGE_REUSE_POSTGRES") == "1" {
@@ -127,7 +202,11 @@ func TestTenThousandConcurrentPurgesAndThousandReusedIDs(t *testing.T) {
 		if activeMode {
 			concurrency = 256
 		}
-		w, err := worker.New(ctx, all[index%len(all)], fmt.Sprintf("purge-scale-%d", index), map[string]worker.Handler{typ: handler}, worker.WithPartitionConcurrency(concurrency))
+		options := []worker.Option{worker.WithPartitionConcurrency(concurrency)}
+		if canonical {
+			options = append(options, worker.WithGraphJournal(graphs[index%3]))
+		}
+		w, err := worker.New(ctx, all[index%len(all)], fmt.Sprintf("purge-scale-%d", index), map[string]worker.Handler{typ: handler}, options...)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -149,6 +228,15 @@ func TestTenThousandConcurrentPurgesAndThousandReusedIDs(t *testing.T) {
 		t.Fatal("dispatch consumers were not ready")
 	}
 	clients := [3]*client.Client{client.New(all[0]), client.New(all[1]), client.New(all[2])}
+	if canonical {
+		for index := range clients {
+			var err error
+			clients[index], err = client.NewWithGraphJournal(all[index], graphs[index])
+			if err != nil {
+				t.Fatal(err)
+			}
+		}
+	}
 	oldSeq := make([]uint64, reuseCount)
 	oldEpoch := make([]uint64, reuseCount)
 	newSeq := make([]uint64, reuseCount)
@@ -156,6 +244,8 @@ func TestTenThousandConcurrentPurgesAndThousandReusedIDs(t *testing.T) {
 	staleSignalSeq := make([]uint64, reuseCount)
 	freshSignalSeq := make([]uint64, reuseCount)
 	var purgesDone, reuseOverlaps atomic.Int64
+	firstReuseStarted := make(chan struct{})
+	var reusedOnce sync.Once
 	oldID := func(index int) string { return fmt.Sprintf("old-%05d", index) }
 	liveID := func(index int) string { return fmt.Sprintf("live-%05d", index) }
 	start := time.Now()
@@ -176,7 +266,7 @@ func TestTenThousandConcurrentPurgesAndThousandReusedIDs(t *testing.T) {
 	})
 	t.Logf("completed %d old invocations in %s", count, time.Since(start))
 	runPurgeScaleJobs(t, ctx, reuseCount, func(caller, index int) error {
-		records, _, err := journal.New(all[caller%3]).Read(ctx, typ, oldID(index))
+		records, _, err := readJournal(ctx, all[caller%3], typ, oldID(index))
 		if err != nil || len(records) != 2 || records[0].Kind != journal.Started || records[1].Kind != journal.Completed {
 			return fmt.Errorf("old journal %d: entries=%d err=%v", index, len(records), err)
 		}
@@ -197,7 +287,33 @@ func TestTenThousandConcurrentPurgesAndThousandReusedIDs(t *testing.T) {
 	})
 	waitSuspended := func(id string, js jetstream.JetStream) ([]journal.Record, error) {
 		for ctx.Err() == nil {
-			records, _, err := journal.New(js).Read(ctx, typ, id)
+			if canonical {
+				// Full graph reads add/remove reader pins, which mutate the root
+				// and can repeatedly fence the append being observed. Inspect
+				// cursor kind without acquiring a pin, then read the stable tail.
+				var store *journal.GraphStore
+				for index := range all {
+					if js == all[index] {
+						store = graphs[index]
+						break
+					}
+				}
+				if store == nil {
+					return nil, fmt.Errorf("unknown purge/reuse transport")
+				}
+				status, err := store.InspectRetirement(ctx, typ, id)
+				if err != nil {
+					return nil, err
+				}
+				if status.Kind == journal.Completed || status.Kind == journal.Failed {
+					return nil, fmt.Errorf("%s became terminal before fresh signal", id)
+				}
+				if status.Kind != journal.Suspended {
+					time.Sleep(20 * time.Millisecond)
+					continue
+				}
+			}
+			records, _, err := readJournal(ctx, js, typ, id)
 			if err != nil {
 				return nil, err
 			}
@@ -228,8 +344,23 @@ func TestTenThousandConcurrentPurgesAndThousandReusedIDs(t *testing.T) {
 	}
 	runPurgeScaleJobs(t, ctx, count, func(caller, index int) error {
 		id := oldID(index)
+		// Keep one old generation pending until a reused Start succeeds. The
+		// diagnostic's single reused ID must exercise the same overlap as the
+		// full cohort, rather than depending on goroutine completion order.
+		if index == count-1 {
+			select {
+			case <-firstReuseStarted:
+			case <-ctx.Done():
+				return ctx.Err()
+			}
+		}
 		for ctx.Err() == nil {
-			err := retention.Purge(ctx, all[caller%3], typ, id, time.Hour)
+			var err error
+			if canonical {
+				err = retention.PurgeGraph(ctx, all[caller%3], graphs[caller%3], typ, id, time.Hour)
+			} else {
+				err = retention.Purge(ctx, all[caller%3], typ, id, time.Hour)
+			}
 			if err == nil {
 				break
 			}
@@ -264,6 +395,7 @@ func TestTenThousandConcurrentPurgesAndThousandReusedIDs(t *testing.T) {
 			return fmt.Errorf("reuse %s did not advance invocation sequence", id)
 		}
 		newSeq[index] = handle.InvSeq
+		reusedOnce.Do(func() { close(firstReuseStarted) })
 		return nil
 	})
 	if purgesDone.Load() != int64(count) || reuseOverlaps.Load() == 0 {
@@ -319,7 +451,7 @@ func TestTenThousandConcurrentPurgesAndThousandReusedIDs(t *testing.T) {
 	})
 	t.Logf("reused and released all invocations in %s", time.Since(start))
 	runPurgeScaleJobs(t, ctx, reuseCount, func(caller, index int) error {
-		records, _, err := journal.New(all[caller%3]).Read(ctx, typ, oldID(index))
+		records, _, err := readJournal(ctx, all[caller%3], typ, oldID(index))
 		if err != nil || len(records) < 2 || records[0].Kind != journal.Started || records[0].Index != 0 || records[0].Epoch <= oldEpoch[index] || records[len(records)-1].Kind != journal.Completed {
 			return fmt.Errorf("reused %s journal: entries=%d old_epoch=%d err=%v", oldID(index), len(records), oldEpoch[index], err)
 		}
@@ -368,7 +500,37 @@ func TestTenThousandConcurrentPurgesAndThousandReusedIDs(t *testing.T) {
 	if err != nil || info.State.NumSubjects != uint64(count+reuseCount) {
 		t.Fatalf("retained invocation subjects=%d want=%d err=%v", info.State.NumSubjects, count+reuseCount, err)
 	}
-	if _, err := integrity.Check(ctx, all[0]); err != nil {
+	if canonical {
+		// Queue drain is insufficient: workers must stop before the immutable
+		// raw census. This also makes deferred cleanup safe after audit failure.
+		stopWorkers()
+		for startedWorkers > 0 {
+			startedWorkers--
+			if err := <-workerDone; err != nil && !errors.Is(err, context.Canceled) {
+				t.Fatal(err)
+			}
+		}
+		legacy, err := all[0].Stream(ctx, "WF_JRN")
+		if err != nil {
+			t.Fatal(err)
+		}
+		legacyInfo, err := legacy.Info(ctx)
+		if err != nil || legacyInfo.State.Msgs != 0 {
+			t.Fatal("canonical proof used legacy journal", err)
+		}
+		report, err := integrity.CheckNativeGraphJournals(ctx, all[0], integrity.GraphAuditNamespace{AuthorityStream: graphConfig.AuthorityStream, AuthorityPrefix: graphConfig.AuthorityPrefix, ObjectBucket: graphConfig.ObjectBucket, PayloadLimit: graphs[0].PayloadReadLimit()})
+		if err != nil {
+			t.Fatalf("canonical raw integrity audit: %v", err)
+		}
+		if report.Invocations != count+reuseCount || report.Journals != count+reuseCount || report.Terminal != count+reuseCount || report.Retired != count-reuseCount || report.RetiredTombstones != count-reuseCount {
+			t.Fatalf("incomplete canonical population: %+v", report)
+		}
+		data, err := json.Marshal(report)
+		if err != nil {
+			t.Fatal(err)
+		}
+		t.Logf("canonical raw purge/reuse audit=%s", data)
+	} else if _, err := integrity.Check(ctx, all[0]); err != nil {
 		t.Fatalf("retained integrity audit: %v", err)
 	}
 	if postgres != nil {
