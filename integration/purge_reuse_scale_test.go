@@ -160,7 +160,7 @@ func testPurgeReuseScale(t *testing.T, canonical bool) {
 		Index int    `json:"index"`
 	}
 	activeRelease := make(chan struct{})
-	var activeHandlers atomic.Int64
+	activeHandlers := newPurgeScaleActiveHandlers(count)
 	handler := func(c *wf.Context, raw json.RawMessage) (json.RawMessage, error) {
 		var job input
 		if err := json.Unmarshal(raw, &job); err != nil {
@@ -171,8 +171,11 @@ func testPurgeReuseScale(t *testing.T, canonical bool) {
 			return json.RawMessage(strconv.Itoa(job.Index)), nil
 		case "live":
 			if activeMode {
-				activeHandlers.Add(1)
-				defer activeHandlers.Add(-1)
+				if job.Index < 0 || job.Index >= count {
+					return nil, fmt.Errorf("invalid live index %d", job.Index)
+				}
+				leave := activeHandlers.enter(job.Index)
+				defer leave()
 				select {
 				case <-activeRelease:
 				case <-c.Context().Done():
@@ -334,11 +337,16 @@ func testPurgeReuseScale(t *testing.T, canonical bool) {
 		return nil, ctx.Err()
 	}
 	if activeMode {
-		for ctx.Err() == nil && activeHandlers.Load() != int64(count) {
+		lastReport := time.Now()
+		for ctx.Err() == nil && !activeHandlers.ready() {
+			if time.Since(lastReport) >= 30*time.Second {
+				t.Logf("active handler population pending: %+v at %s", activeHandlers.snapshot(), time.Since(start))
+				lastReport = time.Now()
+			}
 			time.Sleep(20 * time.Millisecond)
 		}
 		if ctx.Err() != nil {
-			t.Fatalf("only %d/%d handlers active: %v", activeHandlers.Load(), count, ctx.Err())
+			t.Fatalf("distinct active handler cohort incomplete: %+v: %v", activeHandlers.snapshot(), ctx.Err())
 		}
 		t.Logf("kept %d other handlers executing before purge at %s", count, time.Since(start))
 	} else {
@@ -407,8 +415,8 @@ func testPurgeReuseScale(t *testing.T, canonical bool) {
 	if purgesDone.Load() != int64(count) || reuseOverlaps.Load() == 0 {
 		t.Fatalf("purge/reuse overlap: purged=%d/%d reused_during_purge=%d", purgesDone.Load(), count, reuseOverlaps.Load())
 	}
-	if activeMode && activeHandlers.Load() != int64(count) {
-		t.Fatalf("handlers lost during purge: active=%d want=%d", activeHandlers.Load(), count)
+	if activeMode && !activeHandlers.ready() {
+		t.Fatalf("distinct active handlers lost during purge: %+v", activeHandlers.snapshot())
 	}
 	t.Logf("purged %d while %d remained live; reused %d ids in %s", count, count, reuseCount, time.Since(start))
 	if activeMode {

@@ -11,9 +11,9 @@ on:
         type: boolean
         default: false
   push:
-    paths: ['integration/purge_reuse_scale_test.go', '.github/workflows/canonical-purge-reuse.yml']
+    paths: ['integration/purge_reuse_scale_test.go', 'integration/purge_reuse_active_test.go', '.github/workflows/canonical-purge-reuse.yml']
   pull_request:
-    paths: ['integration/purge_reuse_scale_test.go', '.github/workflows/canonical-purge-reuse.yml']
+    paths: ['integration/purge_reuse_scale_test.go', 'integration/purge_reuse_active_test.go', '.github/workflows/canonical-purge-reuse.yml']
 jobs:
   native:
     runs-on: ubuntu-latest
@@ -51,6 +51,14 @@ jobs:
           fi
           flags=()
           if [ "$MODE" = race ]; then flags=(-race); fi
+          go test "${flags[@]}" ./integration -run '^TestPurgeScaleActiveHandlers' -count=1 -v -timeout=2m 2>&1 | tee canonical-active-cohort.log
+          python3 - <<'PYACTIVE'
+          import pathlib, re
+          log = pathlib.Path('canonical-active-cohort.log').read_text()
+          assert not re.search(r'^\s*--- (FAIL|SKIP):', log, re.M)
+          for test in ('TestPurgeScaleActiveHandlersRequireDistinctCohort', 'TestPurgeScaleActiveHandlersConcurrentCohort'):
+              assert f'--- PASS: {test} ' in log
+          PYACTIVE
           go test "${flags[@]}" ./integrity -run '^TestRawGraphRetiredPurgeTombstones$' -count=1 -v -timeout=3m 2>&1 | tee canonical-tombstones.log
           go test "${flags[@]}" ./integration -run '^TestCanonicalGraphTenThousandConcurrentPurgesAndThousandReusedIDs$' -count=1 -v -timeout=22m 2>&1 | tee canonical-purge-reuse.log
           python3 - <<'PY'
@@ -76,5 +84,6 @@ jobs:
           path: |
             canonical-purge-reuse.log
             canonical-tombstones.log
+            canonical-active-cohort.log
             ${{ runner.temp }}/canonical-purge-reuse-${{ matrix.mode }}/native
           retention-days: 14
