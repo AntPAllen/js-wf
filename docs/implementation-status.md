@@ -1,5 +1,20 @@
 # Implementation status against the supplied plan
 
+## Complete SDK step envelope admission in raw audit — 2026-10-11
+
+Own complete request/completion wire declarations now reject unknown, aliased,
+duplicate or malformed runtime fields before graph journal accumulation; nested
+Select cases and metadata presence/types are checked. User result JSON stays
+opaque, including duplicate user keys. Eight JSON/protobuf physical positives and
+48 reference-valid corruptions pass race1.541s with existing
+state/metadata/historical-frame regressions. Four actual R1/R3Domain positive-timer
+and buffered-child cases pass race71.001s and audit eight frames.
+CI requires every new fixture. [Evidence and scope](scale/raw-sdk-step-envelope-2026-10-11/README.md).
+
+This checks field admission, not every operation's semantics or full outer/source
+schema. Original full simulation/scale/fault/soak and rollout remain open; both
+larger frozen campaigns predate this change and are still running.
+
 ## Every retained checkpoint audited at its history prefix — 2026-10-11
 
 The independent raw auditor now checks every completed checkpoint, including

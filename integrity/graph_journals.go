@@ -288,6 +288,9 @@ func CheckGraphJournals(ctx context.Context, snapshot GraphJournalSnapshot) (rep
 		if !found || entry.Index != index || entry.Epoch > c.Epoch || index+1 == c.Count && (entry.Epoch != c.Epoch || entry.Kind != c.Kind) {
 			return fmt.Errorf("%s: canonical entry index/epoch/tail differs", record.Destination)
 		}
+		if err := auditSDKStepEnvelope(entry); err != nil {
+			return err
+		}
 		if err := state.journal.advance(record.Destination, journal.Record{Entry: entry, Sequence: envelope.Sequence}); err != nil {
 			return err
 		}

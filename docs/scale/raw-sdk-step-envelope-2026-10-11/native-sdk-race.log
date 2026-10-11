@@ -1,0 +1,56 @@
+=== RUN   TestNativeGraphContinuationScheduledTimerFlow
+=== RUN   TestNativeGraphContinuationScheduledTimerFlow/R1
+    graph_continuation_sdk_test.go:225: SDK_DIAGNOSTIC_STORE test=TestNativeGraphContinuationScheduledTimerFlow/R1 root=/home/exedev/js-wf-step-envelope-20261011/native-892892500
+    graph_sdk_lease_trace_test.go:22: SDK_LEASE_CREATE key=test.sdkcontinue revision=67 value={"worker":"sdkcontinue","epoch":0} elapsed=1.330281ms error=%!q(<nil>)
+    graph_sdk_lease_trace_test.go:32: SDK_LEASE_UPDATE key=test.sdkcontinue expected=67 revision=68 value={"worker":"sdkcontinue","epoch":67} elapsed=328.308µs error=%!q(<nil>)
+    graph_continuation_sdk_test.go:1143: SDK_POSITIVE_TIMER suspended=1 handoffs=2 start=1 schedules=3 initial=2 next=1 finish=1 effects=2 deadline=2026-10-11T01:56:28.390412366Z
+    graph_continuation_sdk_test.go:1179: RAW_SDK_CHECKPOINT_AUDIT journals=1 entries=41 terminals=1 pending=0 retired_projection_only=0
+    graph_continuation_sdk_test.go:1180: RAW_SDK_CHECKPOINT_HISTORY checkpoints=2
+    graph_continuation_sdk_test.go:1182: SDK initial/next/finish=map[finish:1 initial:2 next:1] effects=2 records=41 result=43
+    graph_continuation_sdk_test.go:1186: SDK_PHASE name=finished elapsed=13.748640871s remaining=16.251358638s sdk_requests=9793
+=== RUN   TestNativeGraphContinuationScheduledTimerFlow/R3Domain
+    graph_continuation_sdk_test.go:225: SDK_DIAGNOSTIC_STORE test=TestNativeGraphContinuationScheduledTimerFlow/R3Domain root=/home/exedev/js-wf-step-envelope-20261011/native-1395155561
+    graph_sdk_lease_trace_test.go:22: SDK_LEASE_CREATE key=test.sdkcontinue revision=67 value={"worker":"sdkcontinue","epoch":0} elapsed=3.879033ms error=%!q(<nil>)
+    graph_sdk_lease_trace_test.go:32: SDK_LEASE_UPDATE key=test.sdkcontinue expected=67 revision=68 value={"worker":"sdkcontinue","epoch":67} elapsed=1.251571ms error=%!q(<nil>)
+    graph_continuation_sdk_test.go:1143: SDK_POSITIVE_TIMER suspended=1 handoffs=2 start=1 schedules=3 initial=2 next=1 finish=1 effects=2 deadline=2026-10-11T01:56:44.618523244Z
+    graph_continuation_sdk_test.go:1179: RAW_SDK_CHECKPOINT_AUDIT journals=1 entries=41 terminals=1 pending=0 retired_projection_only=0
+    graph_continuation_sdk_test.go:1180: RAW_SDK_CHECKPOINT_HISTORY checkpoints=2
+    graph_continuation_sdk_test.go:1182: SDK initial/next/finish=map[finish:1 initial:2 next:1] effects=2 records=41 result=43
+    graph_continuation_sdk_test.go:1186: SDK_PHASE name=finished elapsed=23.003143303s remaining=6.996856347s sdk_requests=10179
+--- PASS: TestNativeGraphContinuationScheduledTimerFlow (37.08s)
+    --- PASS: TestNativeGraphContinuationScheduledTimerFlow/R1 (13.79s)
+    --- PASS: TestNativeGraphContinuationScheduledTimerFlow/R3Domain (23.29s)
+=== RUN   TestNativeGraphContinuationBufferedChildPromise
+=== RUN   TestNativeGraphContinuationBufferedChildPromise/R1
+    graph_continuation_sdk_test.go:225: SDK_DIAGNOSTIC_STORE test=TestNativeGraphContinuationBufferedChildPromise/R1 root=/home/exedev/js-wf-step-envelope-20261011/native-1217232425
+    graph_continuation_sdk_test.go:590: SDK_PHASE name=execute_begin_next elapsed=258.899647ms remaining=59.741100032s sdk_requests=166
+    graph_continuation_sdk_test.go:592: SDK_PHASE name=execute_end_next elapsed=2.800338492s remaining=57.199661097s sdk_requests=1610
+    graph_continuation_sdk_test.go:783: SDK_PHASE name=boundary_scan_end_next elapsed=2.842726211s remaining=57.157273419s sdk_requests=1638
+    graph_continuation_sdk_test.go:812: SDK_PHASE name=child_execute_end elapsed=3.984114905s remaining=56.015884655s sdk_requests=2191
+    graph_continuation_sdk_test.go:590: SDK_PHASE name=execute_begin_finish elapsed=3.984191892s remaining=56.015807798s sdk_requests=2191
+    graph_continuation_sdk_test.go:592: SDK_PHASE name=execute_end_finish elapsed=7.480455721s remaining=52.519543638s sdk_requests=3956
+    graph_continuation_sdk_test.go:677: SDK_PHASE name=child_retire_end elapsed=7.505197621s remaining=52.494801969s sdk_requests=3971
+    graph_continuation_sdk_test.go:783: SDK_PHASE name=boundary_scan_end_finish elapsed=7.548296208s remaining=52.451703411s sdk_requests=3995
+    graph_continuation_sdk_test.go:1179: RAW_SDK_CHECKPOINT_AUDIT journals=1 entries=25 terminals=1 pending=0 retired_projection_only=1
+    graph_continuation_sdk_test.go:1180: RAW_SDK_CHECKPOINT_HISTORY checkpoints=2
+    graph_continuation_sdk_test.go:1182: SDK initial/next/finish=map[finish:1 initial:1 next:1] effects=2 records=25 result=43
+    graph_continuation_sdk_test.go:1186: SDK_PHASE name=finished elapsed=11.843112081s remaining=48.156887528s sdk_requests=7060
+=== RUN   TestNativeGraphContinuationBufferedChildPromise/R3Domain
+    graph_continuation_sdk_test.go:225: SDK_DIAGNOSTIC_STORE test=TestNativeGraphContinuationBufferedChildPromise/R3Domain root=/home/exedev/js-wf-step-envelope-20261011/native-2434950161
+    graph_continuation_sdk_test.go:590: SDK_PHASE name=execute_begin_next elapsed=3.734456917s remaining=56.265542542s sdk_requests=166
+    graph_continuation_sdk_test.go:592: SDK_PHASE name=execute_end_next elapsed=7.476490315s remaining=52.523509405s sdk_requests=1610
+    graph_continuation_sdk_test.go:783: SDK_PHASE name=boundary_scan_end_next elapsed=7.549833664s remaining=52.450165896s sdk_requests=1638
+    graph_continuation_sdk_test.go:812: SDK_PHASE name=child_execute_end elapsed=9.157197629s remaining=50.842801991s sdk_requests=2177
+    graph_continuation_sdk_test.go:590: SDK_PHASE name=execute_begin_finish elapsed=9.157282608s remaining=50.842717042s sdk_requests=2177
+    graph_continuation_sdk_test.go:592: SDK_PHASE name=execute_end_finish elapsed=14.2882981s remaining=45.711701489s sdk_requests=3942
+    graph_continuation_sdk_test.go:677: SDK_PHASE name=child_retire_end elapsed=14.331522399s remaining=45.6684773s sdk_requests=3957
+    graph_continuation_sdk_test.go:783: SDK_PHASE name=boundary_scan_end_finish elapsed=14.390775871s remaining=45.609223648s sdk_requests=3981
+    graph_continuation_sdk_test.go:1179: RAW_SDK_CHECKPOINT_AUDIT journals=1 entries=25 terminals=1 pending=0 retired_projection_only=1
+    graph_continuation_sdk_test.go:1180: RAW_SDK_CHECKPOINT_HISTORY checkpoints=2
+    graph_continuation_sdk_test.go:1182: SDK initial/next/finish=map[finish:1 initial:1 next:1] effects=2 records=25 result=43
+    graph_continuation_sdk_test.go:1186: SDK_PHASE name=finished elapsed=20.711936282s remaining=39.288063198s sdk_requests=7038
+--- PASS: TestNativeGraphContinuationBufferedChildPromise (32.85s)
+    --- PASS: TestNativeGraphContinuationBufferedChildPromise/R1 (11.88s)
+    --- PASS: TestNativeGraphContinuationBufferedChildPromise/R3Domain (20.97s)
+PASS
+ok  	js-wf/worker	71.001s
