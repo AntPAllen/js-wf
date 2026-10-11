@@ -424,6 +424,9 @@ func rawJournalCheckpointFixture(t *testing.T, encoding journal.Encoding, archiv
 				startData = []byte(strings.Replace(string(startData), `"request":{`, `"request":{"id":"id",`, 1))
 			}
 		}
+		if strings.HasPrefix(control, "start-presence-") {
+			startData = mutateStartPresence(t, startData, strings.TrimPrefix(control, "start-presence-"))
+		}
 		inputNode, _ := json.Marshal(struct {
 			Schema string
 			First  uint64

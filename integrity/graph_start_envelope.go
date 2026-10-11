@@ -1,9 +1,43 @@
 package integrity
 
 import (
+	"bytes"
+	"encoding/json"
 	"fmt"
 	"js-wf/identity"
 )
+
+func auditStartFields(raw json.RawMessage) error {
+	var fields map[string]json.RawMessage
+	if err := json.Unmarshal(raw, &fields); err != nil {
+		return err
+	}
+	for _, field := range []string{"schema", "token", "request", "input_sha256", "input_size"} {
+		if _, ok := fields[field]; !ok {
+			return fmt.Errorf("missing start field %s", field)
+		}
+	}
+	for field, value := range fields {
+		if bytes.Equal(bytes.TrimSpace(value), []byte("null")) {
+			return fmt.Errorf("null start field %s", field)
+		}
+	}
+	var request map[string]json.RawMessage
+	if err := json.Unmarshal(fields["request"], &request); err != nil {
+		return err
+	}
+	for _, field := range []string{"type", "id"} {
+		if _, ok := request[field]; !ok {
+			return fmt.Errorf("missing start request field %s", field)
+		}
+	}
+	for field, value := range request {
+		if bytes.Equal(bytes.TrimSpace(value), []byte("null")) {
+			return fmt.Errorf("null start request field %s", field)
+		}
+	}
+	return nil
+}
 
 // Own complete canonical start wire declarations; production start admission
 // and graph readers are not used to validate their own output.

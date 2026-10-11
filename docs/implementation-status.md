@@ -1,5 +1,25 @@
 # Implementation status against the supplied plan
 
+## Independent canonical start/request field presence — 2026-10-11
+
+Canonical starts now require all five always-emitted fields; their nested requests
+require type/id. Null is rejected for every present start/request field in cursor
+metadata and owned input leaves, including retired cursor metadata. Optional
+parent omission and explicit zero remain valid. Baseline af40da0 plus the new
+fixture failed because a retired start missing input_size was accepted; its log
+is preserved.
+
+Actual race exit0 in22.862s covers126 physical JSON/protobuf × live cursor/retired
+cursor/owned input cases (18 positive/108 negative), previous cursor/start/source/
+projection regressions, and four native R1/R3 indexed/unindexed checkpoint flows.
+422 pre-run source inputs stayed unchanged; actual executable and command exits
+were captured, and exact new CI receipt guards passed locally. See [start presence
+evidence](scale/raw-start-presence-2026-10-11/README.md).
+
+Outcome/other nested envelope presence, full retired history, configuration
+agreement, physical power and original broad gates remain open. The four live
+frozen campaigns predate this change. No hosted/full-suite acceptance is claimed.
+
 ## Independent cursor scalar presence/null admission — 2026-10-11
 
 The raw auditor requires all seven always-emitted top-level cursor fields and

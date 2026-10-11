@@ -238,6 +238,9 @@ func CheckGraphJournals(ctx context.Context, snapshot GraphJournalSnapshot) (rep
 		c := state.cursor
 		if record.Stream == "input" {
 			var start auditedGraphStart
+			if err := auditStartFields(record.Record.Data); err != nil {
+				return fmt.Errorf("%s: invalid owned start fields: %w", record.Destination, err)
+			}
 			if c.Start == nil || record.Index != 0 || checkpoint.DecodeUnambiguous(record.Record.Data, &start) != nil || start != *c.Start || len(record.Record.Blobs) != 1 || record.Record.Blobs[0].Hash != start.InputSHA256 {
 				return fmt.Errorf("%s: canonical owned input differs", record.Destination)
 			}

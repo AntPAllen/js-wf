@@ -27,6 +27,11 @@ func auditGraphCursorFields(raw json.RawMessage) error {
 			return fmt.Errorf("null cursor field %s", field)
 		}
 	}
+	if rawStart, ok := fields["start"]; ok {
+		if err := auditStartFields(rawStart); err != nil {
+			return err
+		}
+	}
 	return nil
 }
 
