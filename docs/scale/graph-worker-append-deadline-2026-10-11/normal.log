@@ -1,0 +1,63 @@
+=== RUN   TestGraphStartHeaderFailureTracePersistence
+=== RUN   TestGraphStartHeaderFailureTracePersistence/default
+=== RUN   TestGraphStartHeaderFailureTracePersistence/explicit
+--- PASS: TestGraphStartHeaderFailureTracePersistence (0.00s)
+    --- PASS: TestGraphStartHeaderFailureTracePersistence/default (0.00s)
+    --- PASS: TestGraphStartHeaderFailureTracePersistence/explicit (0.00s)
+=== RUN   TestSeededGraphWorkerAppendDeadlineReplay
+    graph_worker_deadline_test.go:344: WORKER_APPEND_DEADLINE modes=map[completion_json_cas_committed_readback:38 completion_json_cas_committed_unknown:44 completion_json_cas_not_committed:36 completion_json_grant_read:42 completion_protobuf-v1_cas_committed_readback:42 completion_protobuf-v1_cas_committed_unknown:40 completion_protobuf-v1_cas_not_committed:45 completion_protobuf-v1_grant_read:38 request_json_cas_committed_readback:41 request_json_cas_committed_unknown:47 request_json_cas_not_committed:44 request_json_grant_read:36 request_protobuf-v1_cas_committed_readback:40 request_protobuf-v1_cas_committed_unknown:42 request_protobuf-v1_cas_not_committed:35 request_protobuf-v1_grant_read:42 terminal_json_cas_committed_readback:44 terminal_json_cas_committed_unknown:38 terminal_json_cas_not_committed:47 terminal_json_grant_read:43 terminal_protobuf-v1_cas_committed_readback:47 terminal_protobuf-v1_cas_committed_unknown:44 terminal_protobuf-v1_cas_not_committed:36 terminal_protobuf-v1_grant_read:49]; ACK/NAK cut, fresh worker, recorded effect replay, exact four records and physical drain
+    seed_count_test.go:32: TIER1_SEEDS test=TestSeededGraphWorkerAppendDeadlineReplay first=1 last=1000 completed=1000 requested=1000
+--- PASS: TestSeededGraphWorkerAppendDeadlineReplay (9.35s)
+=== RUN   TestPinnedRegressionCorpus
+=== RUN   TestPinnedRegressionCorpus/graph_worker_append_deadline_completion_json_cas_committed_readback.json
+=== RUN   TestPinnedRegressionCorpus/graph_worker_append_deadline_completion_json_cas_committed_unknown.json
+=== RUN   TestPinnedRegressionCorpus/graph_worker_append_deadline_completion_json_cas_not_committed.json
+=== RUN   TestPinnedRegressionCorpus/graph_worker_append_deadline_completion_json_grant_read.json
+=== RUN   TestPinnedRegressionCorpus/graph_worker_append_deadline_completion_protobuf-v1_cas_committed_readback.json
+=== RUN   TestPinnedRegressionCorpus/graph_worker_append_deadline_completion_protobuf-v1_cas_committed_unknown.json
+=== RUN   TestPinnedRegressionCorpus/graph_worker_append_deadline_completion_protobuf-v1_cas_not_committed.json
+=== RUN   TestPinnedRegressionCorpus/graph_worker_append_deadline_completion_protobuf-v1_grant_read.json
+=== RUN   TestPinnedRegressionCorpus/graph_worker_append_deadline_request_json_cas_committed_readback.json
+=== RUN   TestPinnedRegressionCorpus/graph_worker_append_deadline_request_json_cas_committed_unknown.json
+=== RUN   TestPinnedRegressionCorpus/graph_worker_append_deadline_request_json_cas_not_committed.json
+=== RUN   TestPinnedRegressionCorpus/graph_worker_append_deadline_request_json_grant_read.json
+=== RUN   TestPinnedRegressionCorpus/graph_worker_append_deadline_request_protobuf-v1_cas_committed_readback.json
+=== RUN   TestPinnedRegressionCorpus/graph_worker_append_deadline_request_protobuf-v1_cas_committed_unknown.json
+=== RUN   TestPinnedRegressionCorpus/graph_worker_append_deadline_request_protobuf-v1_cas_not_committed.json
+=== RUN   TestPinnedRegressionCorpus/graph_worker_append_deadline_request_protobuf-v1_grant_read.json
+=== RUN   TestPinnedRegressionCorpus/graph_worker_append_deadline_terminal_json_cas_committed_readback.json
+=== RUN   TestPinnedRegressionCorpus/graph_worker_append_deadline_terminal_json_cas_committed_unknown.json
+=== RUN   TestPinnedRegressionCorpus/graph_worker_append_deadline_terminal_json_cas_not_committed.json
+=== RUN   TestPinnedRegressionCorpus/graph_worker_append_deadline_terminal_json_grant_read.json
+=== RUN   TestPinnedRegressionCorpus/graph_worker_append_deadline_terminal_protobuf-v1_cas_committed_readback.json
+=== RUN   TestPinnedRegressionCorpus/graph_worker_append_deadline_terminal_protobuf-v1_cas_committed_unknown.json
+=== RUN   TestPinnedRegressionCorpus/graph_worker_append_deadline_terminal_protobuf-v1_cas_not_committed.json
+=== RUN   TestPinnedRegressionCorpus/graph_worker_append_deadline_terminal_protobuf-v1_grant_read.json
+--- PASS: TestPinnedRegressionCorpus (0.20s)
+    --- PASS: TestPinnedRegressionCorpus/graph_worker_append_deadline_completion_json_cas_committed_readback.json (0.01s)
+    --- PASS: TestPinnedRegressionCorpus/graph_worker_append_deadline_completion_json_cas_committed_unknown.json (0.01s)
+    --- PASS: TestPinnedRegressionCorpus/graph_worker_append_deadline_completion_json_cas_not_committed.json (0.01s)
+    --- PASS: TestPinnedRegressionCorpus/graph_worker_append_deadline_completion_json_grant_read.json (0.01s)
+    --- PASS: TestPinnedRegressionCorpus/graph_worker_append_deadline_completion_protobuf-v1_cas_committed_readback.json (0.01s)
+    --- PASS: TestPinnedRegressionCorpus/graph_worker_append_deadline_completion_protobuf-v1_cas_committed_unknown.json (0.01s)
+    --- PASS: TestPinnedRegressionCorpus/graph_worker_append_deadline_completion_protobuf-v1_cas_not_committed.json (0.01s)
+    --- PASS: TestPinnedRegressionCorpus/graph_worker_append_deadline_completion_protobuf-v1_grant_read.json (0.01s)
+    --- PASS: TestPinnedRegressionCorpus/graph_worker_append_deadline_request_json_cas_committed_readback.json (0.01s)
+    --- PASS: TestPinnedRegressionCorpus/graph_worker_append_deadline_request_json_cas_committed_unknown.json (0.01s)
+    --- PASS: TestPinnedRegressionCorpus/graph_worker_append_deadline_request_json_cas_not_committed.json (0.01s)
+    --- PASS: TestPinnedRegressionCorpus/graph_worker_append_deadline_request_json_grant_read.json (0.00s)
+    --- PASS: TestPinnedRegressionCorpus/graph_worker_append_deadline_request_protobuf-v1_cas_committed_readback.json (0.00s)
+    --- PASS: TestPinnedRegressionCorpus/graph_worker_append_deadline_request_protobuf-v1_cas_committed_unknown.json (0.00s)
+    --- PASS: TestPinnedRegressionCorpus/graph_worker_append_deadline_request_protobuf-v1_cas_not_committed.json (0.01s)
+    --- PASS: TestPinnedRegressionCorpus/graph_worker_append_deadline_request_protobuf-v1_grant_read.json (0.00s)
+    --- PASS: TestPinnedRegressionCorpus/graph_worker_append_deadline_terminal_json_cas_committed_readback.json (0.00s)
+    --- PASS: TestPinnedRegressionCorpus/graph_worker_append_deadline_terminal_json_cas_committed_unknown.json (0.00s)
+    --- PASS: TestPinnedRegressionCorpus/graph_worker_append_deadline_terminal_json_cas_not_committed.json (0.01s)
+    --- PASS: TestPinnedRegressionCorpus/graph_worker_append_deadline_terminal_json_grant_read.json (0.01s)
+    --- PASS: TestPinnedRegressionCorpus/graph_worker_append_deadline_terminal_protobuf-v1_cas_committed_readback.json (0.00s)
+    --- PASS: TestPinnedRegressionCorpus/graph_worker_append_deadline_terminal_protobuf-v1_cas_committed_unknown.json (0.00s)
+    --- PASS: TestPinnedRegressionCorpus/graph_worker_append_deadline_terminal_protobuf-v1_cas_not_committed.json (0.00s)
+    --- PASS: TestPinnedRegressionCorpus/graph_worker_append_deadline_terminal_protobuf-v1_grant_read.json (0.00s)
+PASS
+TIER1_COVERAGE model_version=3 seeds_per_workload=1000 generated_schedules=1000 scheduler_choices=3000 choices_per_second=313.9 transport_events=343329 virtual_ms_max=61000 virtual_buckets_zero=0 under_1s=0 under_1m=0 at_least_1m=1000 elapsed=9.556573289s
+ok  	js-wf/sim	9.564s

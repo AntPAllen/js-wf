@@ -1,5 +1,23 @@
 # JetStream Durable Workflow Runtime — Implementation Plan
 
+## Tier-1 worker uncertain append recovery — 2026-10-11
+
+A new seeded family covers request/completion/terminal append deadlines in both
+encodings: grant-read failure, noncommitted CAS, committed CAS with unknown
+readback, and exact readback recovery. It checks first-delivery ACK/NAK and journal
+state, then hands recovery to a fresh worker. Recorded completions do not repeat
+effects; unrecorded effects may repeat and still require application idempotence.
+Every case ends with four exact records, matching outcome, reference integrity,
+dispatch drain and physical object drain. No uncertain retry was added.
+
+Focused normal/race each pass 1,000 completed schedules with exact replay and all
+24 pins, independently binding 2105 inputs and both captured executables. Full-suite
+qualification remains separate. The current inventory is 163 families/946 pins.
+A retry-unknown overlay fails, replays and minimizes. See [worker deadline model evidence](scale/graph-worker-append-deadline-2026-10-11/README.md).
+This uses graph journals with ordinary invocation bindings; canonical Start,
+checkpoint/archive native compatibility and the native deadline causes remain
+open. Four frozen long campaigns predate this family. Public continuation stays off.
+
 ## Frozen full159 race qualification accepted — 2026-10-11
 
 Source 00eeb130 completed full race1000 at 06:55:48 UTC with actual exits 0.

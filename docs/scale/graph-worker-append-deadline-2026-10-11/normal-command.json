@@ -1,0 +1,24 @@
+{
+  "command": [
+    "go",
+    "test",
+    "./sim",
+    "-run",
+    "^(TestSeededGraphWorkerAppendDeadlineReplay|TestGraphStartHeaderFailureTracePersistence|TestPinnedRegressionCorpus)$/^(graph_worker_append_deadline_|default|explicit)",
+    "-count=1",
+    "-v",
+    "-timeout=6m"
+  ],
+  "actual_exit": 0,
+  "driver_pid": 272796,
+  "start_ns": 1791702281451681646,
+  "end_ns": 1791702292013334874,
+  "executable_captured": true,
+  "environment": {
+    "SIM_SEEDS": "1000",
+    "SIM_COVERAGE_SUMMARY": "1",
+    "GOMAXPROCS": "2",
+    "GOMEMLIMIT": "512MiB",
+    "FAULT_TRACE_OUT": "/home/exedev/js-wf/docs/scale/graph-worker-append-deadline-2026-10-11/normal-failure.json"
+  }
+}

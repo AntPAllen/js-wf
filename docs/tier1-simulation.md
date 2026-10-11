@@ -1,5 +1,23 @@
 # Tier 1 deterministic simulation: journal, lease, start, signals, timers, dispatch, and worker slices
 
+## Tier-1 worker uncertain append recovery — 2026-10-11
+
+A new seeded family covers request/completion/terminal append deadlines in both
+encodings: grant-read failure, noncommitted CAS, committed CAS with unknown
+readback, and exact readback recovery. It checks first-delivery ACK/NAK and journal
+state, then hands recovery to a fresh worker. Recorded completions do not repeat
+effects; unrecorded effects may repeat and still require application idempotence.
+Every case ends with four exact records, matching outcome, reference integrity,
+dispatch drain and physical object drain. No uncertain retry was added.
+
+Focused normal/race each pass 1,000 completed schedules with exact replay and all
+24 pins, independently binding 2105 inputs and both captured executables. Full-suite
+qualification remains separate. The current inventory is 163 families/946 pins.
+A retry-unknown overlay fails, replays and minimizes. See [worker deadline model evidence](scale/graph-worker-append-deadline-2026-10-11/README.md).
+This uses graph journals with ordinary invocation bindings; canonical Start,
+checkpoint/archive native compatibility and the native deadline causes remain
+open. Four frozen long campaigns predate this family. Public continuation stays off.
+
 ## Complete123-workload normal100000 graph live — 2026-10-07
 
 Actual normal SDK2045340 runs the original full123-workload/395-pin graph at isolated4a04e00 with100000 seeds per workload/count1/300m/twoGoCPU/512MiB. Independent admission verifies2215 selected Git inputs, exact live binary/argv/birth/profile/cwd, compiled/source inventories and original retained service. [Launch and terminal requirements](scale/tier1-full123-2026-10-07/normal100k-launch/). Full123 race1000 is independently accepted and S3-preserved; full normal12300000-body acceptance awaits terminal evidence. Both SQL SIGINT original failure and accepted full50000 fixtures/owned stoppedSQL volumes are now verified S3-backed and retired,1.55GiB reclaimed. Original24h remains live. Full native matrices, safe onlineGC, original million physical drain and fullrelease remain open.
