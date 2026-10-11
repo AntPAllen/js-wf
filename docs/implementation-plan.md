@@ -1,5 +1,22 @@
 # JetStream Durable Workflow Runtime — Implementation Plan
 
+## Full current162 normal qualification launched — 2026-10-11
+
+Sourcef24e6c012b87bb7c9246f4d2f00d4d8d94dba6fa freezes all current162 families/922 pins and recent
+SDK/worker admission fixes. A clean113MiB sparse checkout independently matches
+all3764 required Git inputs;3799 selected paths/sparse patterns are recorded.
+The full normal campaign started05:47:17UTC, requesting162000 seed bodies and
+eight sequential disjoint package processes with a retained executable,
+GOMAXPROCS2/GOMEMLIMIT512MiB, half-core quota,2GB memory and300m per-process
+watchdogs. Loaded unit/InvocationIDa72883183dfd4d6cbce5660352a040f8, supervisor260911/
+driver260935 and unchanged supervisorSHA are launch-bound.
+
+The reviewer actually refused this running stage with exit1; live state remains
+untracked. No normal acceptance is claimed. Race requires independent complete
+same-source normal acceptance. Five older race/scale campaigns continue without
+replacement. See [full current162 launch](scale/current-main162-tier1-2026-10-11/README.md).
+Full current qualification and original release gates remain open.
+
 ## Prepare full current162 qualification after worker admission fixes — 2026-10-11
 
 A new complete normal/race campaign is prepared for162 families/922 pins,
