@@ -8,6 +8,7 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"strconv"
 	"strings"
 	"time"
@@ -403,20 +404,26 @@ func (v *GraphView) ValidateStartInvocation(ctx context.Context, msg *jetstream.
 // Unknown pin acquisition/release cannot be converted into a successful read.
 func (s *GraphStore) ReadStart(ctx context.Context, typ, id string) (state GraphStartState, input []byte, err error) {
 	v, err := s.OpenStart(ctx, typ, id)
-	if err != nil || v == nil {
-		return state, nil, err
+	if err != nil {
+		return state, nil, fmt.Errorf("open start reader: %w", err)
+	}
+	if v == nil {
+		return state, nil, nil
 	}
 	defer func() {
 		cleanup, stop := context.WithTimeout(context.WithoutCancel(ctx), 3*time.Second)
 		defer stop()
-		if e := v.Close(cleanup); err == nil {
-			err = e
+		if e := v.Close(cleanup); err == nil && e != nil {
+			err = fmt.Errorf("release start reader: %w", e)
 		}
 	}()
 	state, err = v.StartState()
 	if err != nil {
-		return state, nil, err
+		return state, nil, fmt.Errorf("read start state: %w", err)
 	}
 	input, err = v.StartInput(ctx)
+	if err != nil {
+		err = fmt.Errorf("read start input: %w", err)
+	}
 	return state, input, err
 }

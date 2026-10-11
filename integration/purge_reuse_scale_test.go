@@ -252,6 +252,9 @@ func testPurgeReuseScale(t *testing.T, canonical bool) {
 	runPurgeScaleJobs(t, ctx, count, func(caller, index int) error {
 		data, _ := json.Marshal(input{Kind: "old", Index: index})
 		handle, err := clients[caller%3].Start(ctx, typ, oldID(index), data)
+		if err != nil {
+			return fmt.Errorf("old Start %s/%s (parent context: %v): %w", typ, oldID(index), ctx.Err(), err)
+		}
 		if err == nil && index < reuseCount {
 			oldSeq[index] = handle.InvSeq
 		}
@@ -280,6 +283,9 @@ func testPurgeReuseScale(t *testing.T, canonical bool) {
 	runPurgeScaleJobs(t, ctx, count, func(caller, index int) error {
 		data, _ := json.Marshal(input{Kind: "live", Index: index})
 		handle, err := clients[caller%3].Start(ctx, typ, liveID(index), data)
+		if err != nil {
+			return fmt.Errorf("live Start %s/%s (parent context: %v): %w", typ, liveID(index), ctx.Err(), err)
+		}
 		if err == nil {
 			liveSeq[index] = handle.InvSeq
 		}
@@ -389,7 +395,7 @@ func testPurgeReuseScale(t *testing.T, canonical bool) {
 		data, _ := json.Marshal(input{Kind: "reused", Index: index})
 		handle, err := clients[caller%3].Start(ctx, typ, id, data)
 		if err != nil {
-			return fmt.Errorf("reuse %s: %w", id, err)
+			return fmt.Errorf("reused Start %s/%s (parent context: %v): %w", typ, id, ctx.Err(), err)
 		}
 		if handle.InvSeq <= oldSeq[index] {
 			return fmt.Errorf("reuse %s did not advance invocation sequence", id)

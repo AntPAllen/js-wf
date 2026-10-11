@@ -1,0 +1,90 @@
+// Open only a verified copy of the closed R3 fixture. Recovery publishes
+// original-token sources/enqueues on that copy; it never executes workers.
+package main
+
+import (
+ "context"
+ "encoding/json"
+ "errors"
+ "flag"
+ "fmt"
+ "os"
+ "path/filepath"
+ "sort"
+ "time"
+
+ "github.com/nats-io/nats.go/jetstream"
+ "js-wf/client"
+ "js-wf/identity"
+ "js-wf/journal"
+ "js-wf/testcluster"
+)
+
+type row struct {
+ Before,After *journal.GraphStartStatus
+ Input json.RawMessage
+ SourceBefore,SourceAfter uint64
+ Handle client.Handle
+ RecoveryNanos int64
+}
+func run() error {
+ copy:=flag.String("store-copy","","verified copied cluster")
+ output:=flag.String("output","","output JSON")
+ flag.Parse()
+ marker,err:=os.ReadFile(filepath.Join(filepath.Dir(*copy),"copy-verified.json"));if err!=nil{return err}
+ var receipt struct{Copy string `json:"copy"`;Verified bool `json:"verified"`}
+ if json.Unmarshal(marker,&receipt)!=nil || !receipt.Verified || receipt.Copy!=*copy || !filepath.IsAbs(*copy){return fmt.Errorf("verified copy required")}
+ cluster,err:=testcluster.Start(*copy,3);if err!=nil{return err};defer cluster.Close()
+ ctx,stop:=context.WithTimeout(context.Background(),3*time.Minute);defer stop()
+ js,err:=jetstream.New(cluster.Clients[0]);if err!=nil{return err}
+ cfg:=journal.NativeGraphConfig{AuthorityStream:"PURGE_SCALE_AUTH",AuthorityPrefix:"wf.graph.purgescale",ObjectBucket:"PURGE_SCALE_OBJECTS",ExpectedReplicas:3,CanonicalStarts:true,CanonicalSignals:true,OwnerScopeIndex:true}
+ graph,err:=journal.OpenNativeGraphStore(ctx,js,cfg);if err!=nil{return err}
+ c,err:=client.NewWithGraphJournal(js,graph);if err!=nil{return err}
+ authority,err:=js.Stream(ctx,cfg.AuthorityStream);if err!=nil{return err}
+ info,err:=authority.Info(ctx,jetstream.WithSubjectFilter(cfg.AuthorityPrefix+".root.>"));if err!=nil{return err}
+ inv,err:=js.Stream(ctx,"WF_INV");if err!=nil{return err}
+ runStream,err:=js.Stream(ctx,"WF_RUN");if err!=nil{return err}
+ invBefore,err:=inv.Info(ctx);if err!=nil{return err}
+ runBefore,err:=runStream.Info(ctx);if err!=nil{return err}
+ keys:=[]string{};for key:=range info.State.Subjects{keys=append(keys,key)};sort.Strings(keys)
+ rows:=[]row{};readyBefore,pendingBefore,absent,sourceAlreadyPresent:=0,0,0,0
+ stable:=map[string]*journal.GraphStartStatus{}
+ for _,subject:=range keys{
+  message,err:=authority.GetLastMsgForSubject(ctx,subject);if err!=nil{return err}
+  var envelope struct{Root *struct {Application []byte `json:"application"`} `json:"root"`}
+  if err=json.Unmarshal(message.Data,&envelope);err!=nil{return err}
+  if envelope.Root==nil || len(envelope.Root.Application)==0 {absent++;continue}
+  var cursor struct{Start *journal.GraphStart `json:"start"`}
+  if err=json.Unmarshal(envelope.Root.Application,&cursor);err!=nil || cursor.Start==nil{return fmt.Errorf("missing descriptor: %v",err)}
+  request:=cursor.Start.Request
+  if request.Type!="purge-scale" {return fmt.Errorf("foreign fixture identity")}
+  status,err:=graph.InspectStart(ctx,request.Type,request.ID);if err!=nil||status==nil{return fmt.Errorf("inspect %s: %v",request.ID,err)}
+  if status.Retired||status.Purging{return fmt.Errorf("unexpected retirement")}
+  if !status.State.Pending {readyBefore++;stable[request.ID]=status;continue}
+  pendingBefore++
+  state,input,err:=graph.ReadStart(ctx,request.Type,request.ID);if err!=nil{return fmt.Errorf("read pending %s: %w",request.ID,err)}
+  if state!=status.State{return fmt.Errorf("pending descriptor changed")}
+  source,sourceErr:=inv.GetLastMsgForSubject(ctx,identity.InvocationSubject(request.Type,request.ID))
+  beforeSequence:=uint64(0)
+  if sourceErr==nil {if !state.Start.MatchesInvocation(source){return fmt.Errorf("source differs")};beforeSequence=source.Sequence;sourceAlreadyPresent++} else if !errors.Is(sourceErr,jetstream.ErrMsgNotFound){return sourceErr}
+  started:=time.Now()
+  handle,err:=c.RecoverStartAttempt(ctx,request.Type,request.ID,state.Start.Token)
+  elapsed:=time.Since(started).Nanoseconds()
+  if err!=nil{return fmt.Errorf("recover pending %s: %w",request.ID,err)}
+  after,err:=graph.InspectStart(ctx,request.Type,request.ID);if err!=nil||after==nil{return fmt.Errorf("after: %v",err)}
+  source,err=inv.GetLastMsgForSubject(ctx,identity.InvocationSubject(request.Type,request.ID));if err!=nil{return err}
+  if after.State.Pending || after.State.Start!=state.Start || after.State.Invocation!=handle.InvSeq || !state.Start.MatchesInvocation(source) || source.Sequence!=handle.InvSeq || after.JournalCount!=status.JournalCount || after.JournalTail!=status.JournalTail || after.Kind!=status.Kind {return fmt.Errorf("recovery binding/history changed")}
+  if beforeSequence!=0&&beforeSequence!=source.Sequence{return fmt.Errorf("source replaced")}
+  rows=append(rows,row{Before:status,After:after,Input:json.RawMessage(input),SourceBefore:beforeSequence,SourceAfter:source.Sequence,Handle:handle,RecoveryNanos:elapsed})
+ }
+ for id,before:=range stable{
+  after,err:=graph.InspectStart(ctx,"purge-scale",id);if err!=nil||after==nil{return fmt.Errorf("stable: %v",err)}
+  a,_:=json.Marshal(before);b,_:=json.Marshal(after);if string(a)!=string(b){return fmt.Errorf("ready generation changed: %s",id)}
+ }
+ invAfter,err:=inv.Info(ctx);if err!=nil{return err};runAfter,err:=runStream.Info(ctx);if err!=nil{return err}
+ if invAfter.State.Msgs!=invBefore.State.Msgs+uint64(pendingBefore-sourceAlreadyPresent) || runAfter.State.LastSeq!=runBefore.State.LastSeq+uint64(pendingBefore){return fmt.Errorf("source/enqueue census differs")}
+ if pendingBefore==0{return fmt.Errorf("no pending Starts to challenge")}
+ result:=struct{ReadyBefore,PendingBefore,AbsentWitnesses,SourceAlreadyPresent,Recovered int;InvocationsBefore,InvocationsAfter,RunLastBefore,RunLastAfter uint64;Rows []row;Scope string}{ReadyBefore:readyBefore,PendingBefore:pendingBefore,AbsentWitnesses:absent,SourceAlreadyPresent:sourceAlreadyPresent,Recovered:len(rows),InvocationsBefore:invBefore.State.Msgs,InvocationsAfter:invAfter.State.Msgs,RunLastBefore:runBefore.State.LastSeq,RunLastAfter:runAfter.State.LastSeq,Rows:rows,Scope:"recovery of pending Start descriptors on verified copy; no workers, no full history audit, no original failure cause or full scale acceptance"}
+ raw,err:=json.MarshalIndent(result,"","  ");if err!=nil{return err};raw=append(raw,'\n');if err=os.WriteFile(*output,raw,0600);err!=nil{return err};fmt.Printf("pending=%d recovered=%d ready_preserved=%d\n",pendingBefore,len(rows),readyBefore);return nil
+}
+func main(){if err:=run();err!=nil{fmt.Fprintln(os.Stderr,err);os.Exit(1)}}

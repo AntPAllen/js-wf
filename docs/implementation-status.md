@@ -1,5 +1,23 @@
 # Implementation status against the supplied plan
 
+## Start failure phase diagnostics — 2026-10-11
+
+Canonical Start input reads now identify reader open, state read, input read and
+reader release errors while preserving error causes, primary read failures and
+existing exact-head resolution. Seven in-memory component controls pass in
+normal and race modes; CI requires each control. Scale Start failures now include
+workflow identity, old/live/reused cohort and parent-context status. Deadlines,
+uncertain-publication rules and the 163-family/946-pin inventory are unchanged.
+
+A verified copy of the failed full-scale R3 store reached a separate three-minute
+inspection deadline (actual exit 1); no pending-Start recovery is claimed. Review
+verifies the original 2443 files/198,307,813 bytes remain unchanged, the retained
+helper and 1160 exact source inputs, and the closed modified copy. See
+[experiment and controls](scale/canonical-start-retained-recovery-2026-10-11/README.md).
+The original full-scale failure remains unconfirmed and its gate remains open.
+Four earlier-source qualification services were revalidated live; they do not
+qualify these changed runtime bytes.
+
 ## Full canonical Phase 7 run failed during Start — 2026-10-11
 
 Frozen20ab8a0 full10k/10k/1k active-handler campaign is now terminal, not running.
