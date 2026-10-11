@@ -2,7 +2,6 @@ package worker
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"sync"
 	"time"
@@ -80,7 +79,7 @@ func (w *Worker) terminalHeldDelivery(ctx context.Context, typ, id string, timer
 	}
 	_, tomb, err := retention.Decode(state.Value)
 	var outcome wf.Outcome
-	if err != nil || tomb || json.Unmarshal(state.Value, &outcome) != nil || outcome.InvSeq == 0 {
+	if err != nil || tomb || wf.DecodeOutcome(state.Value, &outcome) != nil || outcome.InvSeq == 0 {
 		return false, false, nil
 	}
 	invocationPort := w.invocationPort

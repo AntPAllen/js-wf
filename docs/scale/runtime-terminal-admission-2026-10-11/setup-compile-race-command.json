@@ -1,0 +1,21 @@
+{
+  "command": [
+    "go",
+    "test",
+    "-race",
+    "./wf",
+    "./worker",
+    "-run",
+    "^(TestReadGraphTerminalMetadataAdmission|TestLegacyHeldTerminalMetadataAdmission|TestReplayTerminalEnvelopeBeforeHandler|TestReplayTerminalEnvelopeTypedBoundary|TestGraphChildRetentionRequiresExactParentOwnership)$",
+    "-count=1",
+    "-v",
+    "-timeout=3m"
+  ],
+  "driver_pid": 258492,
+  "actual_exit_code": 1,
+  "start_ns": 1791696665003140892,
+  "end_ns": 1791696686153948881,
+  "executables_captured": [
+    "worker"
+  ]
+}

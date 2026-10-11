@@ -1,0 +1,1099 @@
+name: graph-publication
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'internal/stepwire/**'
+      - 'wf/replay_step_null_test.go'
+      - 'wf/select_many*.go'
+      - 'internal/graphpublication/**'
+      - 'journal/graph*.go'
+      - 'reconcile/**'
+      - 'retention/**'
+      - 'integrity/graph*.go'
+      - 'worker/graph_journal*.go'
+      - 'worker/graph_limit*.go'
+      - 'worker/graph_continuation_sdk_test.go'
+      - 'scripts/graph_limit_profile.py'
+      - 'scripts/test_graph_limit_profile.py'
+      - 'worker/graph_signal*.go'
+      - 'worker/graph_terminal*.go'
+      - 'worker/graph_child*.go'
+      - 'worker/graph_parent*.go'
+      - 'worker/graph_start*.go'
+      - 'wf/graph_outcome.go'
+      - 'wf/outcome.go'
+      - 'wf/graph_terminal_metadata_test.go'
+      - 'wf/replay_record_order.go'
+      - 'worker/held_terminal_metadata_test.go'
+      - 'wf/graph_child_retention*.go'
+      - 'wf/context.go'
+      - 'worker/worker.go'
+      - 'worker/step_metadata_admission_test.go'
+      - 'worker/epoch_owner_admission_test.go'
+      - 'worker/step_order_admission_test.go'
+      - 'worker/terminal_delivery.go'
+      - 'worker/continuation.go'
+      - 'client/graph_journal*.go'
+      - 'client/graph_signal*.go'
+      - 'client/graph_bind*.go'
+      - 'client/graph_start*.go'
+      - 'client/client.go'
+      - 'client/signal_port.go'
+      - 'internal/retainedgraph/**'
+      - 'internal/retainedindex/**'
+      - 'sim/graph_publication*'
+      - 'sim/graph_child_link_audit_test.go'
+      - 'sim/testdata/regressions/graph_child_link_audit_*'
+      - 'sim/graph_projection_census_test.go'
+      - 'sim/testdata/regressions/graph_projection_census_*'
+      - 'sim/graph_checkpoint_compaction_test.go'
+      - 'sim/graph_await_contention*'
+      - 'client/graph_await_contention_test.go'
+      - 'sim/testdata/regressions/graph-await-*'
+      - 'sim/journal_transport_test.go'
+      - 'sim/purge_transport.go'
+      - 'sim/blob_sweep_transport.go'
+      - 'sim/testdata/regressions/graph-publication-*'
+      - 'sim/testdata/regressions/graph-readers-*'
+      - 'sim/testdata/regressions/graph-compaction-*'
+      - 'sim/testdata/regressions/graph-reader-resume-*'
+      - 'sim/testdata/regressions/graph-catalog-*'
+      - 'sim/testdata/regressions/graph-application-*'
+      - 'sim/testdata/regressions/graph-streams-*'
+      - 'sim/testdata/regressions/graph-start-*'
+      - 'sim/testdata/regressions/graph-journal-*'
+      - 'sim/testdata/regressions/graph-worker-*'
+      - 'sim/testdata/regressions/graph-result-*'
+      - 'sim/testdata/regressions/graph-child-*'
+      - 'sim/testdata/regressions/graph-reconcile-*'
+      - 'sim/testdata/regressions/graph-purge-*'
+      - 'sim/testdata/regressions/graph-signal-client-*'
+      - 'sim/testdata/regressions/graph-signal-runtime-*'
+      - 'sim/testdata/regressions/graph-parent-worker-*'
+      - 'internal/blobpublication/**'
+      - 'internal/natsstream/**'
+      - 'testcluster/cluster.go'
+      - 'testcluster/process_cluster.go'
+      - '.github/workflows/graph-publication.yml'
+      - 'go.mod'
+      - 'go.sum'
+  pull_request:
+    paths:
+      - 'internal/stepwire/**'
+      - 'wf/replay_step_null_test.go'
+      - 'wf/select_many*.go'
+      - 'internal/graphpublication/**'
+      - 'journal/graph*.go'
+      - 'reconcile/**'
+      - 'retention/**'
+      - 'integrity/graph*.go'
+      - 'worker/graph_journal*.go'
+      - 'worker/graph_limit*.go'
+      - 'worker/graph_continuation_sdk_test.go'
+      - 'scripts/graph_limit_profile.py'
+      - 'scripts/test_graph_limit_profile.py'
+      - 'worker/graph_signal*.go'
+      - 'worker/graph_terminal*.go'
+      - 'worker/graph_child*.go'
+      - 'worker/graph_parent*.go'
+      - 'worker/graph_start*.go'
+      - 'wf/graph_outcome.go'
+      - 'wf/outcome.go'
+      - 'wf/graph_terminal_metadata_test.go'
+      - 'wf/replay_record_order.go'
+      - 'worker/held_terminal_metadata_test.go'
+      - 'wf/graph_child_retention*.go'
+      - 'wf/context.go'
+      - 'worker/worker.go'
+      - 'worker/step_metadata_admission_test.go'
+      - 'worker/epoch_owner_admission_test.go'
+      - 'worker/step_order_admission_test.go'
+      - 'worker/terminal_delivery.go'
+      - 'worker/continuation.go'
+      - 'client/graph_journal*.go'
+      - 'client/graph_signal*.go'
+      - 'client/graph_bind*.go'
+      - 'client/graph_start*.go'
+      - 'client/client.go'
+      - 'client/signal_port.go'
+      - 'internal/retainedgraph/**'
+      - 'internal/retainedindex/**'
+      - 'sim/graph_publication*'
+      - 'sim/graph_child_link_audit_test.go'
+      - 'sim/testdata/regressions/graph_child_link_audit_*'
+      - 'sim/graph_projection_census_test.go'
+      - 'sim/testdata/regressions/graph_projection_census_*'
+      - 'sim/graph_checkpoint_compaction_test.go'
+      - 'sim/graph_await_contention*'
+      - 'client/graph_await_contention_test.go'
+      - 'sim/testdata/regressions/graph-await-*'
+      - 'sim/journal_transport_test.go'
+      - 'sim/purge_transport.go'
+      - 'sim/blob_sweep_transport.go'
+      - 'sim/testdata/regressions/graph-publication-*'
+      - 'sim/testdata/regressions/graph-readers-*'
+      - 'sim/testdata/regressions/graph-compaction-*'
+      - 'sim/testdata/regressions/graph-reader-resume-*'
+      - 'sim/testdata/regressions/graph-catalog-*'
+      - 'sim/testdata/regressions/graph-application-*'
+      - 'sim/testdata/regressions/graph-streams-*'
+      - 'sim/testdata/regressions/graph-start-*'
+      - 'sim/testdata/regressions/graph-journal-*'
+      - 'sim/testdata/regressions/graph-worker-*'
+      - 'sim/testdata/regressions/graph-result-*'
+      - 'sim/testdata/regressions/graph-child-*'
+      - 'sim/testdata/regressions/graph-reconcile-*'
+      - 'sim/testdata/regressions/graph-purge-*'
+      - 'sim/testdata/regressions/graph-signal-client-*'
+      - 'sim/testdata/regressions/graph-signal-runtime-*'
+      - 'sim/testdata/regressions/graph-parent-worker-*'
+      - 'internal/blobpublication/**'
+      - 'internal/natsstream/**'
+      - 'testcluster/cluster.go'
+      - 'testcluster/process_cluster.go'
+      - '.github/workflows/graph-publication.yml'
+      - 'go.mod'
+      - 'go.sum'
+permissions:
+  contents: read
+jobs:
+  graph-limit-error-classification:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      GOMAXPROCS: 4
+      GOMEMLIMIT: 2GiB
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - name: Reject unclassified and uncertain profile gates
+        run: python3 scripts/test_graph_limit_profile.py -v
+      - name: Classify native CAS and preserve concurrent profile snapshots
+        shell: bash
+        run: |
+          set -o pipefail
+          go test -race -p=1 ./worker -run '^(TestGraphLimitProfileErrorClassificationAndSnapshots|TestGraphLimitProfileNativeCASClassification)$' -count=1 -v -timeout=5m 2>&1 | tee graph-limit-error-classification.log
+          python3 - <<'PY'
+          import pathlib, re
+          log = pathlib.Path('graph-limit-error-classification.log').read_text()
+          assert not re.search(r'^--- SKIP:', log, re.M)
+          for test in ('TestGraphLimitProfileErrorClassificationAndSnapshots', 'TestGraphLimitProfileNativeCASClassification'):
+              assert f'--- PASS: {test} ' in log
+          assert 'NATIVE_PROFILE_CLASSIFICATION calls=2 errors=1 conflict=1 wrapped_conflict=0' in log
+          PY
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: graph-limit-error-classification
+          path: graph-limit-error-classification.log
+          if-no-files-found: error
+  raw-sdk-checkpoint-audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      GOMAXPROCS: 4
+      GOMEMLIMIT: 2GiB
+      WF_GRAPH_SDK_RAW_AUDIT: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - name: Audit production SDK checkpoint and child provenance
+        shell: bash
+        run: |
+          set -o pipefail
+          go test -race -p=1 ./worker -run '^(TestNativeGraphContinuationSDKFlow|TestNativeGraphContinuationChildPromise|TestNativeGraphContinuationBufferedChildPromise|TestNativeGraphContinuationBufferedSignals)$' -count=1 -v -timeout=8m 2>&1 | tee raw-sdk-checkpoint-audit.log
+          python3 - <<'PY'
+          import pathlib, re
+          log = pathlib.Path('raw-sdk-checkpoint-audit.log').read_text()
+          assert not re.search(r'^--- SKIP:', log, re.M)
+          for test in ('TestNativeGraphContinuationSDKFlow', 'TestNativeGraphContinuationChildPromise', 'TestNativeGraphContinuationBufferedChildPromise', 'TestNativeGraphContinuationBufferedSignals'):
+              for layout in ('R1', 'R3Domain'):
+                  assert f'--- PASS: {test}/{layout} ' in log
+          assert len(re.findall(r'RAW_SDK_CHECKPOINT_AUDIT journals=\d+ entries=\d+ terminals=[1-9]\d* pending=0', log)) == 8
+          retired = re.findall(r'RAW_SDK_CHECKPOINT_AUDIT journals=\d+ entries=\d+ terminals=[1-9]\d* pending=0 retired_projection_only=([01])', log)
+          assert len(retired) == 8 and retired.count('1') == 4 and retired.count('0') == 4
+          assert log.count('RAW_SDK_CHECKPOINT_HISTORY checkpoints=2') == 8
+          PY
+      - name: Preserve successor on lease initialization conflict
+        shell: bash
+        run: |
+          set -o pipefail
+          go test -race ./lease -run '^TestInitializationConflictPreservesSuccessor$' -count=1 -v -timeout=1m 2>&1 | tee lease-initialization-conflict.log
+          python3 - <<'PY'
+          import pathlib
+          assert '--- PASS: TestInitializationConflictPreservesSuccessor ' in pathlib.Path('lease-initialization-conflict.log').read_text()
+          PY
+      - name: Audit positive timer scheduled delivery and continuations
+        shell: bash
+        run: |
+          set -o pipefail
+          go test -race -p=1 ./worker -run '^TestNativeGraphContinuationScheduledTimerFlow$' -count=1 -v -timeout=4m 2>&1 | tee raw-sdk-positive-timer.log
+          python3 - <<'PYGUARD'
+          import pathlib, re
+          log = pathlib.Path('raw-sdk-positive-timer.log').read_text()
+          assert not re.search(r'^--- SKIP:', log, re.M)
+          for layout in ('R1', 'R3Domain'):
+              assert f'--- PASS: TestNativeGraphContinuationScheduledTimerFlow/{layout} ' in log
+          assert log.count('SDK_POSITIVE_TIMER suspended=1 handoffs=2 start=1 schedules=3 initial=2 next=1 finish=1 effects=2') == 2
+          assert len(re.findall(r'RAW_SDK_CHECKPOINT_AUDIT journals=1 entries=\d+ terminals=1 pending=0 retired_projection_only=0', log)) == 2
+          PYGUARD
+      - name: Reject cancelled timer wakeups after archived checkpoints
+        shell: bash
+        run: |
+          set -o pipefail
+          go test -race -p=1 ./worker -run '^TestNativeGraphContinuationCancelledTimerWakeup$' -count=1 -v -timeout=4m 2>&1 | tee raw-sdk-cancelled-timer-wakeup.log
+          python3 - <<'PYGUARD'
+          import pathlib, re
+          log = pathlib.Path('raw-sdk-cancelled-timer-wakeup.log').read_text()
+          assert not re.search(r'^--- SKIP:', log, re.M)
+          for layout in ('R1', 'R3Domain'):
+              assert f'--- PASS: TestNativeGraphContinuationCancelledTimerWakeup/{layout} ' in log
+          for stage, step in (('next', 4), ('finish', 4), ('finish', 14)):
+              assert log.count(f'SDK_CANCELLED_TIMER_WAKEUP stage={stage} step={step} no_op=true immutable_history=true unchanged_effects=true archive=true') == 2
+          assert len(re.findall(r'RAW_SDK_CHECKPOINT_AUDIT journals=1 entries=\d+ terminals=1 pending=0 retired_projection_only=0', log)) == 2
+          PYGUARD
+      - name: Audit competing promises and cached outcomes
+        shell: bash
+        run: |
+          set -o pipefail
+          go test -race -p=1 ./worker -run '^TestNativeGraphContinuationPromiseSelectionPriority$' -count=1 -v -timeout=12m 2>&1 | tee raw-sdk-promise-selection.log
+          python3 - <<'PYGUARD'
+          import pathlib, re
+          log = pathlib.Path('raw-sdk-promise-selection.log').read_text()
+          assert not re.search(r'^--- SKIP:', log, re.M)
+          for layout in ('R1', 'R3Domain'):
+              for archive in ('false', 'true'):
+                  for failed in ('false', 'true'):
+                      assert f'--- PASS: TestNativeGraphContinuationPromiseSelectionPriority/{layout}/archive={archive}/failed={failed} ' in log
+          for stage in (1, 2):
+              for failed in ('false', 'true'):
+                  assert log.count(f'SDK_PROMISE_PRIORITY stage={stage} case=1 duplicate_ready_case=2 timer_loser_reused=true failed={failed}') == 4
+          assert len(re.findall(r'SDK_PROMISE_CACHE first_signal=[1-9]\d* cached_signal=0 selections=2 child_calls=1 failed=(?:false|true) archive=(?:false|true)', log)) == 8
+          assert len(re.findall(r'RAW_SDK_CHECKPOINT_AUDIT journals=1 entries=35 terminals=1 pending=0 retired_projection_only=1', log)) == 8
+          assert log.count('RAW_SDK_CHECKPOINT_HISTORY checkpoints=2') == 8
+          PYGUARD
+      - name: Audit SDK priority with competing ready cases
+        shell: bash
+        run: |
+          set -o pipefail
+          go test -race -p=1 ./worker -run '^TestNativeGraphContinuationSelectionPriority$' -count=1 -v -timeout=5m 2>&1 | tee raw-sdk-selection-priority.log
+          python3 - <<'PYGUARD'
+          import pathlib, re
+          log = pathlib.Path('raw-sdk-selection-priority.log').read_text()
+          assert not re.search(r'^--- SKIP:', log, re.M)
+          for layout in ('R1', 'R3Domain'):
+              for archive in ('false', 'true'):
+                  assert f'--- PASS: TestNativeGraphContinuationSelectionPriority/{layout}/archive={archive} ' in log
+          assert log.count('SDK_SELECTION_PRIORITY stage=next signal_over_timer=true timer_case=1 ready_timer_loser_reused=true') == 4
+          assert log.count('SDK_SELECTION_PRIORITY stage=finish signal_case=1 duplicate_ready_case=2') == 4
+          assert len(re.findall(r'RAW_SDK_CHECKPOINT_AUDIT journals=1 entries=\d+ terminals=1 pending=0 retired_projection_only=0', log)) == 4
+          assert log.count('RAW_SDK_CHECKPOINT_HISTORY checkpoints=2') == 4
+          PYGUARD
+      - name: Audit native timer handle history through archived checkpoints
+        shell: bash
+        run: |
+          set -o pipefail
+          go test -race -p=1 ./worker -run '^TestNativeGraphContinuationTimerHistory$' -count=1 -v -timeout=8m 2>&1 | tee raw-sdk-timer-history.log
+          python3 - <<'PYGUARD'
+          import pathlib, re
+          log = pathlib.Path('raw-sdk-timer-history.log').read_text()
+          assert not re.search(r'^--- SKIP:', log, re.M)
+          for layout in ('R1', 'R3Domain'):
+              for archive in ('false', 'true'):
+                  assert f'--- PASS: TestNativeGraphContinuationTimerHistory/{layout}/archive={archive} ' in log
+          assert len(re.findall(r'SDK_TIMER_HISTORY stage=next cancelled=\[4\] archive=(?:true|false)', log)) == 4
+          assert len(re.findall(r'SDK_TIMER_HISTORY stage=finish cancelled=\[4,14\] archive=(?:true|false)', log)) == 4
+          assert len(re.findall(r'RAW_SDK_CHECKPOINT_AUDIT journals=1 entries=\d+ terminals=1 pending=0 retired_projection_only=0', log)) == 4
+          PYGUARD
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: raw-sdk-checkpoint-audit
+          path: |
+            raw-sdk-checkpoint-audit.log
+            raw-sdk-timer-history.log
+            raw-sdk-selection-priority.log
+            raw-sdk-promise-selection.log
+            raw-sdk-positive-timer.log
+            raw-sdk-cancelled-timer-wakeup.log
+            lease-initialization-conflict.log
+          if-no-files-found: error
+  raw-graph-reference-audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      GOMAXPROCS: '4'
+      GOMEMLIMIT: 2GiB
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - name: Audit raw graph roots, grants and physical objects
+        shell: bash
+        run: |
+          set -o pipefail
+          go test -race -p=1 ./integrity -run '^(TestRawGraphReferencesAndIndependentCorruptionControls|TestNativeRawGraphReferenceAuditQuiescentReaders|TestRawGraphJournalGenerationsOutcomesAndArchive|TestRawGraphCheckpointPointerAndFrameBindings|TestNativeRawGraphCheckpointAudit|TestRawGraphCheckpointMaterializedState|TestRawGraphCheckpointPromiseOwnership|TestRawGraphCheckpointMetadataBindings|TestRawGraphRetiredSourceProjectionScope|TestRawGraphChildSignalHistory|TestRawGraphChildStartLinks|TestRawGraphChildTerminalLinks|TestRawGraphRejectedChildSignalLinks|TestRawGraphConsumedSignalEnvelope|TestRawGraphSignalEnvelope|TestRawGraphSignalReservationAndBinding|TestRawGraphSignalIndexIndependentPrefixes|TestRawGraphSignalIndexProductionPackets|TestRawGraphCheckpointSDKStateHistory|TestRawGraphCheckpointPromiseHistory|TestRawGraphCheckpointSDKSignalHistory|TestRawGraphCheckpointSDKTimerHistory|TestRawGraphEveryCheckpointHistory|TestRawGraphSDKStepEnvelope|TestRawGraphSDKStepNullMetadata|TestRawGraphCanonicalEnvelope|TestRawGraphTerminalEnvelope|TestRawGraphRejectedLimitBoundary|TestRawGraphRejectedLimitPrefix|TestRawGraphRejectedLimitContinuation|TestRawGraphSelectionPriority|TestRawGraphSelectionReadiness|TestRawGraphCursorEnvelope|TestRawGraphStartEnvelope|TestRawGraphRetiredProjectionEnvelope|TestRawGraphStartSourceHeaders|TestRawGraphOrphanProjectionBaseline|TestRawGraphProjectionCensus|TestRawGraphOutcomeFieldPresence|TestRawGraphStartFieldPresence|TestRawGraphCursorFieldPresence|TestRawGraphCursorState|TestRawGraphCursorVersionCapabilities)$' -count=1 -v -timeout=5m 2>&1 | tee raw-graph-audit.log
+          python3 - <<'PY'
+          import pathlib, re
+          log = pathlib.Path('raw-graph-audit.log').read_text()
+          assert not re.search(r'^--- SKIP:', log, re.M)
+          for replicas in (1, 3):
+              for indexed in ('false', 'true'):
+                  assert f'--- PASS: TestNativeRawGraphReferenceAuditQuiescentReaders/R{replicas}/indexed{indexed} ' in log
+          assert '--- PASS: TestRawGraphReferencesAndIndependentCorruptionControls ' in log
+          assert '--- PASS: TestRawGraphJournalGenerationsOutcomesAndArchive ' in log
+          assert '--- PASS: TestRawGraphCheckpointPointerAndFrameBindings ' in log
+          assert '--- PASS: TestRawGraphCheckpointMaterializedState ' in log
+          assert '--- PASS: TestRawGraphCheckpointPromiseOwnership ' in log
+          assert '--- PASS: TestRawGraphCheckpointMetadataBindings ' in log
+          assert '--- PASS: TestRawGraphCheckpointSDKStateHistory ' in log
+          assert '--- PASS: TestRawGraphCheckpointPromiseHistory ' in log
+          assert '--- PASS: TestRawGraphSelectionPriority ' in log
+          for encoding in ('json', 'protobuf-v1'):
+              for mode in ('first', 'reordered', 'earlier-absent', 'skipped-ready', 'invalid-unselected-kind', 'invalid-unselected-name'):
+                  assert f'--- PASS: TestRawGraphSelectionPriority/{encoding}/{mode} ' in log
+          assert '--- PASS: TestRawGraphSelectionReadiness ' in log
+          for mode in ('signal-first', 'signal-skipped', 'signal-used', 'promise-buffered-skipped', 'promise-cached-skipped', 'promise-ambiguous', 'timer-zero-skipped', 'timer-positive-unknown', 'timer-cancelled', 'timer-fired', 'timer-signal-buffered', 'timer-signal-used', 'timer-signal-absent', 'timer-before-signal', 'invalid-child'):
+              assert f'--- PASS: TestRawGraphSelectionReadiness/{mode} ' in log
+          assert '--- PASS: TestRawGraphRejectedLimitBoundary ' in log
+          for encoding in ('json', 'protobuf-v1'):
+              for mode in ('request', 'attempt', 'signal', 'suspension', 'overlap', 'completed', 'both', 'request-null', 'request-empty', 'request-unknown', 'request-duplicate', 'entry-kind', 'entry-null', 'attempt-gap', 'attempt-empty-error', 'attempt-alias', 'attempt-duplicate', 'signal-zero', 'signal-name', 'signal-alias', 'suspension-unresolved', 'suspension-empty', 'suspension-unknown', 'wrong-error'):
+                  assert f'--- PASS: TestRawGraphRejectedLimitBoundary/{encoding}/{mode} ' in log
+          assert '--- PASS: TestRawGraphRejectedLimitPrefix ' in log
+          for mode in ('attempt-next', 'attempt-reuse', 'attempt-skip', 'signal-next', 'signal-reuse', 'signal-backwards'):
+              assert f'--- PASS: TestRawGraphRejectedLimitPrefix/{mode} ' in log
+          assert '--- PASS: TestRawGraphRejectedLimitContinuation ' in log
+          for mode in ('checkpoint', 'wrong-stage', 'not-checkpoint', 'failed-frame'):
+              assert f'--- PASS: TestRawGraphRejectedLimitContinuation/{mode} ' in log
+          assert '--- PASS: TestRawGraphTerminalEnvelope ' in log
+          for encoding in ('json', 'protobuf-v1'):
+              for mode in ('ordinary', 'opaque-result', 'failed', 'limit-request', 'limit-entry', 'unknown', 'alias', 'duplicate-invocation', 'escaped-duplicate', 'duplicate-result', 'duplicate-error', 'duplicate-limit-request', 'duplicate-limit-entry', 'limit-entry-unknown', 'limit-entry-alias', 'limit-entry-duplicate'):
+                  assert f'--- PASS: TestRawGraphTerminalEnvelope/{encoding}/{mode} ' in log
+          assert '--- PASS: TestRawGraphCanonicalEnvelope ' in log
+          for encoding in ('json', 'protobuf-v1'):
+              for mode in ('outer-valid', 'outer-whitespace', 'outer-unknown', 'outer-alias', 'outer-duplicate', 'outer-escaped-duplicate', 'outer-generation', 'outer-sequence', 'outer-hash'):
+                  assert f'--- PASS: TestRawGraphCanonicalEnvelope/{encoding}/{mode} ' in log
+          assert '--- PASS: TestRawGraphSDKStepEnvelope ' in log
+          for encoding in ('json', 'protobuf-v1'):
+              for mode in ('ordinary', 'opaque-field-names', 'opaque-duplicates', 'opaque-null', 'request-null', 'request-array', 'request-unknown', 'request-alias', 'request-duplicate', 'request-escaped-duplicate', 'request-time-type', 'request-step-negative', 'case-unknown', 'case-alias', 'case-duplicate', 'case-shape', 'completion-null', 'completion-array', 'completion-unknown', 'completion-alias', 'completion-duplicate', 'completion-sequence-negative', 'completion-case-fraction', 'completion-cancel-type', 'metadata-ref-null', 'metadata-ref-object', 'metadata-hash-null', 'metadata-hash-number'):
+                  assert f'--- PASS: TestRawGraphSDKStepEnvelope/{encoding}/{mode} ' in log
+          assert '--- PASS: TestRawGraphStartSourceHeaders ' in log
+          for encoding in ('json', 'protobuf-v1'):
+              for retired in ('false', 'true'):
+                  for parent in ('false', 'true'):
+                      controls = ['valid', 'transport', 'input-ref-empty', 'input-ref', 'pointer']
+                      keys = ['Wf-Graph-Start-Token', 'Wf-Input-SHA256']
+                      parent_keys = ['Wf-Parent-Type', 'Wf-Parent-ID', 'Wf-Parent-Inv-Seq', 'Wf-Parent-Signal']
+                      if parent == 'true':
+                          keys += parent_keys
+                      else:
+                          for key in parent_keys:
+                              controls += [key+'/unexpected-empty', key+'/unexpected-alias']
+                      for key in keys:
+                          controls += [key+'/'+mode for mode in ('duplicate', 'conflicting', 'empty-list', 'alias', 'missing')]
+                      for control in controls:
+                          assert f'--- PASS: TestRawGraphStartSourceHeaders/{encoding}/retired={retired}/parent={parent}/{control} ' in log
+          assert '--- PASS: TestRawGraphRetiredProjectionEnvelope ' in log
+          for encoding in ('json', 'protobuf-v1'):
+              for control in ('inline', 'opaque', 'empty', 'whitespace', 'failed', 'external', 'limit-request', 'limit-entry', 'unknown', 'alias', 'duplicate-generation', 'escaped-generation', 'duplicate-result', 'duplicate-error', 'unknown-limit-entry', 'alias-limit-entry', 'duplicate-limit-entry', 'null', 'array', 'base64', 'generation-fraction', 'generation-negative', 'failed-inline', 'failed-pointer', 'hash-only', 'pointer-only', 'bad-hash', 'mixed-result', 'completed-limit', 'both-limits', 'wrong-limit-error'):
+                  assert f'--- PASS: TestRawGraphRetiredProjectionEnvelope/{encoding}/{control} ' in log
+          assert '--- PASS: TestRawGraphOrphanProjectionBaseline ' in log
+          assert '--- PASS: TestRawGraphProjectionCensus ' in log
+          for encoding in ('json', 'protobuf-v1'):
+              for archive in ('false', 'true'):
+                  for control in ('valid', 'orphan', 'bad-key', 'missing-census', 'reader-differs', 'reader-missing', 'missing-terminal', 'empty-running', 'running-projection', 'retired-survivor', 'retired-survivor-wrong-generation', 'retired-cleared'):
+                      assert f'--- PASS: TestRawGraphProjectionCensus/{encoding}/archive={archive}/{control} ' in log
+          for replicas in (1, 3):
+              for indexed in ('false', 'true'):
+                  assert f'RAW_PROJECTION_CENSUS orphan=rejected R{replicas} indexed={indexed}' in log
+                  assert f'RAW_CHECKPOINT_AUDIT stage=projection-tombstone entries=5 terminals=1 R{replicas} indexed={indexed}' in log
+          assert '--- PASS: TestRawGraphOutcomeFieldPresence ' in log
+          outcome_presence_controls = ['empty', 'whitespace', 'empty-result', 'empty-error', 'failed', 'limit-entry', 'limit-request', 'missing-generation', 'null-generation']
+          for field in ('result', 'result_ref', 'result_hash', 'error', 'limit_request', 'limit_entry'):
+              outcome_presence_controls.append('null-'+field)
+          for field in ('kind', 'payload'):
+              outcome_presence_controls += ['limit-missing-'+field, 'limit-null-'+field]
+          for encoding in ('json', 'protobuf-v1'):
+              for retired in ('false', 'true'):
+                  for control in outcome_presence_controls:
+                      assert f'--- PASS: TestRawGraphOutcomeFieldPresence/{encoding}/retired={retired}/{control} ' in log
+          assert '--- PASS: TestRawGraphStartFieldPresence ' in log
+          start_presence_controls = ['valid', 'whitespace', 'optional-zero']
+          for field in ('schema', 'token', 'request', 'input_sha256', 'input_size', 'request.type', 'request.id'):
+              start_presence_controls += ['missing-'+field, 'null-'+field]
+          for field in ('parent_type', 'parent_id', 'parent_invocation', 'signal_name'):
+              start_presence_controls.append('null-request.'+field)
+          for encoding in ('json', 'protobuf-v1'):
+              for scope in ('cursor-live', 'cursor-retired', 'owned-input'):
+                  for control in start_presence_controls:
+                      assert f'--- PASS: TestRawGraphStartFieldPresence/{encoding}/{scope}/{control} ' in log
+          assert '--- PASS: TestRawGraphCursorFieldPresence ' in log
+          presence_controls = ['valid', 'optional-zero']
+          for field in ('schema', 'invocation', 'base', 'count', 'epoch', 'kind', 'retired'):
+              presence_controls += ['missing-'+field, 'null-'+field]
+          for field in ('purging', 'start', 'previous_invocation', 'signal_inputs', 'signal_bindings', 'signal_source', 'signal_consumed', 'signal_repair', 'retained_from', 'checkpoint'):
+              presence_controls.append('null-'+field)
+          for encoding in ('json', 'protobuf-v1'):
+              for archive in ('false', 'true'):
+                  for retired in ('false', 'true'):
+                      for control in presence_controls:
+                          assert f'--- PASS: TestRawGraphCursorFieldPresence/{encoding}/archive={archive}/retired={retired}/{control} ' in log
+          assert '--- PASS: TestRawGraphCursorState ' in log
+          for encoding in ('json', 'protobuf-v1'):
+              for archive in ('false', 'true'):
+                  for retired in ('false', 'true'):
+                      for control in ('valid', 'root-version', 'previous-generation', 'signal-repair', 'unknown-forest', 'retired-token', 'unknown-kind', 'singleton-terminal'):
+                          assert f'--- PASS: TestRawGraphCursorState/{encoding}/archive={archive}/retired={retired}/{control} ' in log
+          assert '--- PASS: TestRawGraphCursorVersionCapabilities ' in log
+          for version in ('v1', 'v2', 'v4', 'v5', 'v6'):
+              for control in ('valid', 'signal-hint', 'checkpoint', 'archive', 'pending-signal', 'purging', 'input-missing'):
+                  assert f'--- PASS: TestRawGraphCursorVersionCapabilities/{version}/{control} ' in log
+          assert '--- PASS: TestRawGraphCursorEnvelope ' in log
+          for encoding in ('json', 'protobuf-v1'):
+              for archive in ('false', 'true'):
+                  for control in ('valid', 'whitespace', 'unknown', 'alias', 'duplicate-schema', 'duplicate-invocation', 'escaped-count', 'count-fraction', 'invocation-negative'):
+                      assert f'--- PASS: TestRawGraphCursorEnvelope/{encoding}/archive={archive}/{control} ' in log
+          assert '--- PASS: TestRawGraphStartEnvelope ' in log
+          for encoding in ('json', 'protobuf-v1'):
+              for control in ('valid', 'cursor-unknown', 'cursor-alias', 'cursor-duplicate', 'cursor-request-unknown', 'cursor-request-alias', 'cursor-request-duplicate', 'start-wire-unknown', 'start-wire-alias', 'start-wire-duplicate', 'start-wire-escaped', 'start-wire-request-unknown', 'start-wire-request-alias', 'start-wire-request-duplicate', 'start-parent-valid', 'start-parent-type', 'start-parent-id', 'start-parent-generation', 'start-parent-signal'):
+                  assert f'--- PASS: TestRawGraphStartEnvelope/{encoding}/{control} ' in log
+          assert '--- PASS: TestRawGraphEveryCheckpointHistory ' in log
+          for encoding in ('json', 'protobuf-v1'):
+              for mode in ('historical-valid', 'historical-state', 'historical-anchor', 'historical-locals', 'historical-cursor', 'historical-timer', 'historical-metadata'):
+                  assert f'--- PASS: TestRawGraphEveryCheckpointHistory/{encoding}/{mode} ' in log
+          assert '--- PASS: TestRawGraphCheckpointSDKTimerHistory ' in log
+          for mode in ('absolute-position-and-deadline', 'cancel', 'await', 'timer-select', 'many-select', 'signal-then-cancel', 'carried-cancel', 'empty', 'missing-creation', 'wrong-name', 'wrong-deadline', 'wrong-domain', 'unconfirmed-cancel', 'cancel-after-fire', 'await-after-cancel', 'duplicate-cancel', 'live-checkpoint', 'omitted-cancel', 'fabricated-cancel', 'duplicate-cancel-id', 'bad-select-index', 'unselected-dead-timer'):
+              assert f'--- PASS: TestRawGraphCheckpointSDKTimerHistory/{mode} ' in log
+          assert '--- PASS: TestRawGraphCheckpointSDKSignalHistory ' in log
+          for mode in ('signal', 'call', 'timer_signal_select', 'select_many', 'timer-branch', 'many-timer-branch', 'cached-promise', 'different-name-order', 'cursor-advanced', 'cursor-regressed', 'consumed-omitted', 'consumed-fabricated', 'consumed-duplicate', 'pending-omitted', 'pending-extra', 'pending-used', 'pending-name', 'pending-inline-bytes', 'pending-owned-bytes', 'pending-duplicate', 'pending-not-arrived', 'selection-missing', 'selection-name', 'selection-reused', 'selection-skips-oldest', 'timer-branch-invalid', 'timer-with-signal', 'case-index-missing', 'case-index-invalid', 'case-kind-invalid', 'many-timer-with-signal'):
+              assert f'--- PASS: TestRawGraphCheckpointSDKSignalHistory/{mode} ' in log
+          for mode in ('signal-inline', 'signal-external', 'explicit-inline', 'explicit-external', 'ambiguous-cache-omitted', 'cached-select-reuse', 'compacted-outcome', 'multiple-ambiguous-candidates', 'multiple-ambiguous-later', 'outcome-changed', 'name-changed', 'no-selection', 'child-declaration', 'child-generation', 'source-unowned', 'source-wrong-bytes', 'source-missing', 'external-unowned', 'explicit-cache-omitted', 'case-index-missing', 'cached-without-history', 'explicit-cache-reconsumed', 'arrival-missing'):
+              assert f'--- PASS: TestRawGraphCheckpointPromiseHistory/{mode} ' in log
+          for encoding in ('json', 'protobuf-v1'):
+              for mode in ('history-valid', 'history-external-valid', 'history-read-absent-valid', 'history-write-error-valid', 'history-null-valid'):
+                  assert f'--- PASS: TestRawGraphCheckpointSDKStateHistory/{encoding}/{mode} ' in log
+          for mode in ('history-frame-value', 'history-frame-missing', 'history-frame-extra', 'history-write-hash', 'history-write-missing', 'history-write-error', 'history-read-fabricated', 'history-result-null', 'history-result-unknown', 'history-external-unowned', 'history-external-wrong'):
+              assert f'--- PASS: TestRawGraphCheckpointSDKStateHistory/{mode} ' in log
+          assert '--- PASS: TestRawGraphRetiredSourceProjectionScope ' in log
+          assert '--- PASS: TestRawGraphRejectedChildSignalLinks ' in log
+          for encoding in ('json', 'protobuf-v1'):
+              for control in ('inline', 'failed', 'external', 'terminal-inline', 'terminal-failed', 'terminal-external', 'no-declaration', 'missing-child', 'wrong-id', 'outcome-generation', 'start-input', 'terminal-result', 'binding-index', 'binding-token', 'binding-name', 'binding-sequence'):
+                  assert f'--- PASS: TestRawGraphRejectedChildSignalLinks/{encoding}/{control} ' in log
+          assert '--- PASS: TestRawGraphChildTerminalLinks ' in log
+          for encoding in ('json', 'protobuf-v1'):
+              for control in ('terminal-inline', 'terminal-failed', 'terminal-external', 'terminal-missing', 'terminal-reused', 'terminal-result', 'terminal-error', 'terminal-external-ref', 'terminal-external-hash', 'terminal-kind', 'terminal-whitespace'):
+                  assert f'--- PASS: TestRawGraphChildTerminalLinks/{encoding}/{control} ' in log
+          assert '--- PASS: TestRawGraphChildStartLinks ' in log
+          for encoding in ('json', 'protobuf-v1'):
+              for control in ('start-valid', 'start-reused', 'inline', 'start-parent-type', 'start-parent-id', 'start-parent-generation', 'start-signal', 'start-unparented', 'start-input'):
+                  assert f'--- PASS: TestRawGraphChildStartLinks/{encoding}/{control} ' in log
+          assert '--- PASS: TestRawGraphSDKStepNullMetadata ' in log
+          for encoding in ('json', 'protobuf-v1'):
+              for level, fields in [('request', ('kind', 'name', 'input_hash', 'duration_nanos', 'fire_at', 'clock_domain', 'timer_step', 'timer_name', 'child_type', 'child_id', 'cases')), ('case', ('kind', 'name', 'timer_step', 'fire_at', 'clock_domain', 'child_type', 'child_id', 'null-element')), ('completion', ('case_index', 'result_ref', 'result_hash', 'error', 'error_kind', 'signal_seq', 'selected', 'cancelled', 'checkpoint_metadata_ref', 'checkpoint_metadata_hash'))]:
+                  for field in fields:
+                      assert f'--- PASS: TestRawGraphSDKStepNullMetadata/{encoding}/{level}/{field} ' in log
+              for control in ('legacy-kind-omitted', 'legacy-kind-empty', 'opaque-null', 'opaque-duplicates', 'explicit-zero'):
+                  assert f'--- PASS: TestRawGraphSDKStepNullMetadata/{encoding}/valid/{control} ' in log
+          assert '--- PASS: TestRawGraphChildSignalHistory ' in log
+          for encoding in ('json', 'protobuf-v1'):
+              for control in ('inline', 'failed', 'external', 'no-declaration', 'missing-child', 'wrong-type', 'wrong-id', 'zero-generation', 'outcome-generation', 'child-hash-only', 'failed-result', 'null-error', 'unknown-outcome', 'external-outcome-ref', 'external-unowned', 'external-wrong-bytes', 'mixed-body'):
+                  assert f'--- PASS: TestRawGraphChildSignalHistory/{encoding}/{control} ' in log
+          assert '--- PASS: TestRawGraphConsumedSignalEnvelope ' in log
+          for encoding in ('json', 'protobuf-v1'):
+              for level in ('root', 'canonical'):
+                  required = ('sig_seq', 'name') if level == 'root' else ('index', 'token')
+                  nullable = ('sig_seq', 'name', 'payload', 'ref', 'hash', 'graph_child', 'canonical_signal') if level == 'root' else required
+                  controls = ['valid', 'whitespace', 'unknown', 'alias', 'duplicate', 'escaped-duplicate']
+                  controls += ['missing-'+field for field in required]
+                  controls += ['null-'+field for field in nullable]
+                  for control in controls:
+                      assert f'--- PASS: TestRawGraphConsumedSignalEnvelope/{encoding}/{level}/{control} ' in log
+          assert '--- PASS: TestRawGraphSignalEnvelope ' in log
+          for encoding in ('json', 'protobuf-v1'):
+              for stream in ('signal-input', 'signal-queue'):
+                  levels = {'root': ('input' if stream == 'signal-input' else 'binding', 'index_packet'), 'input': ('schema', 'request', 'index', 'token', 'input_sha256', 'input_size'), 'request': ('type', 'id', 'invocation', 'name', 'key')}
+                  if stream == 'signal-queue':
+                      levels['binding'] = ('schema', 'input', 'index', 'sequence')
+                  for level, fields in levels.items():
+                      controls = ['valid', 'whitespace', 'unknown', 'alias', 'duplicate']
+                      for field in fields:
+                          controls += ['missing-'+field, 'null-'+field]
+                      for control in controls:
+                          assert f'--- PASS: TestRawGraphSignalEnvelope/{encoding}/{stream}/{level}/{control} ' in log
+          assert '--- PASS: TestRawGraphSignalReservationAndBinding ' in log
+          assert '--- PASS: TestRawGraphSignalIndexProductionPackets ' in log
+          assert '--- PASS: TestRawGraphSignalIndexProductionPackets/maximum-depth ' in log
+          for control in ('valid', 'magic', 'header-reserved', 'truncated', 'count', 'leaf-key', 'leaf-value', 'leaf-child', 'bit-overflow', 'node-reserved', 'left-reserved', 'right-reserved', 'branch-value', 'branch-prefix', 'branch-bit-order', 'future-record', 'same-record-forward', 'old-slot-missing', 'wrong-side', 'lost-prefix', 'lost-one-old-key', 'unreachable-node', 'canceled'):
+              assert f'--- PASS: TestRawGraphSignalIndexIndependentPrefixes/{control} ' in log
+          for control in ('index-magic', 'index-key', 'index-value', 'queue-index-key'):
+              assert f'--- PASS: TestRawGraphSignalReservationAndBinding/{control} ' in log
+          for encoding in ('json', 'protobuf-v1'):
+              assert f'--- PASS: TestRawGraphSignalReservationAndBinding/{encoding} ' in log
+              assert f'--- PASS: TestRawGraphSignalReservationAndBinding/{encoding}/consumed-valid ' in log
+          for control in ('generation', 'reservation-index', 'name', 'key', 'size', 'body', 'token', 'binding-input', 'binding-index', 'source-zero', 'source-frontier', 'consumption-census', 'missing-body', 'consumed-index', 'consumed-token', 'consumed-name', 'consumed-sequence', 'consumed-ref', 'consumed-hash', 'consumed-no-marker', 'consumed-unowned'):
+              assert f'--- PASS: TestRawGraphSignalReservationAndBinding/{control} ' in log
+          for control in ('valid', 'purging-source', 'source-generation', 'projection-missing', 'projection-generation', 'projection-kind', 'nonterminal', 'live-forest'):
+              assert f'--- PASS: TestRawGraphRetiredSourceProjectionScope/{control} ' in log
+          for encoding in ('json', 'protobuf-v1'):
+              assert f'--- PASS: TestRawGraphCheckpointMetadataBindings/{encoding}/valid ' in log
+          for control in ('metadata-generation', 'metadata-anchor', 'metadata-frame', 'metadata-version', 'metadata-child', 'metadata-signal-prefix', 'metadata-buffered-child', 'metadata-half-pointer', 'metadata-wrong-edge', 'metadata-unowned'):
+              assert f'--- PASS: TestRawGraphCheckpointMetadataBindings/{control} ' in log
+          for encoding in ('json', 'protobuf-v1'):
+              assert f'--- PASS: TestRawGraphCheckpointPromiseOwnership/{encoding}/valid ' in log
+          for control in ('promise-owned-missing', 'promise-owned-wrong', 'promise-owned-conflict'):
+              assert f'--- PASS: TestRawGraphCheckpointPromiseOwnership/{control} ' in log
+          for encoding in ('json', 'protobuf-v1'):
+              assert f'--- PASS: TestRawGraphCheckpointMaterializedState/{encoding}/valid ' in log
+          for control in ('state-name', 'promise-name', 'promise-nonobject', 'promise-unknown-field', 'promise-hash-no-ref', 'promise-ref-bad-hash', 'promise-inline-and-ref', 'consumed-zero', 'consumed-duplicate', 'consumed-unsorted', 'pending-zero', 'pending-beyond-cursor', 'pending-consumed', 'pending-name', 'pending-duplicate', 'timer-odd', 'timer-beyond-position', 'timer-duplicate', 'panic-prefix-mismatch'):
+              assert f'--- PASS: TestRawGraphCheckpointMaterializedState/{control} ' in log
+          for control in ('pointer-generation', 'pointer-sequence', 'pointer-request', 'pointer-position', 'pointer-object', 'completion-result', 'request-kind', 'frame-unowned', 'frame-generation', 'frame-anchor', 'frame-stage', 'frame-position', 'frame-version', 'frame-locals'):
+              assert f'--- PASS: TestRawGraphCheckpointPointerAndFrameBindings/{control} ' in log
+          for replicas in (1, 3):
+              for indexed in ('false', 'true'):
+                  assert f'--- PASS: TestNativeRawGraphCheckpointAudit/R{replicas}/indexed{indexed} ' in log
+                  for stage in ('unpublished', 'published', 'archived', 'terminal'):
+                      entries, terminals = (5, 1) if stage == 'terminal' else (4, 0)
+                      assert f'RAW_CHECKPOINT_AUDIT stage={stage} entries={entries} terminals={terminals} R{replicas} indexed={indexed}' in log
+          for encoding in ('json', 'protobuf-v1'):
+              for archived in ('false', 'true'):
+                  assert f'--- PASS: TestRawGraphJournalGenerationsOutcomesAndArchive/{encoding}/archive{archived} ' in log
+          PY
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: raw-graph-reference-audit
+          path: raw-graph-audit.log
+          if-no-files-found: error
+  seeded-start-source-headers:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      matrix:
+        mode: [normal, race]
+    env:
+      GOMAXPROCS: '2'
+      GOMEMLIMIT: 512MiB
+      SIM_SEEDS: '1000'
+      SIM_COVERAGE_SUMMARY: '1'
+      FAULT_TRACE_OUT: start-source-header-failure.json
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - name: Check seeded source admission and pinned replay
+        shell: bash
+        env:
+          GRAPH_MODE: ${{ matrix.mode }}
+        run: |
+          set -o pipefail
+          graph_flags=()
+          if [ "$GRAPH_MODE" = race ]; then graph_flags=(-race); fi
+          go test "${graph_flags[@]}" ./sim -run '^(TestSeededGraphStartSourceHeadersReplay|TestGraphStartHeaderFailureTracePersistence|TestPinnedRegressionCorpus)$/^(graph_start_source_headers_|default|explicit)' -count=1 -v -timeout=6m 2>&1 | tee start-source-headers.log
+          python3 - <<'PY'
+          import pathlib, re
+          log = pathlib.Path('start-source-headers.log').read_text()
+          assert not re.search(r'^--- SKIP:', log, re.M)
+          assert '--- PASS: TestSeededGraphStartSourceHeadersReplay ' in log
+          for mode in ('default', 'explicit'):
+              assert f'--- PASS: TestGraphStartHeaderFailureTracePersistence/{mode} ' in log
+          assert 'TIER1_SEEDS test=TestSeededGraphStartSourceHeadersReplay first=1 last=1000 completed=1000 requested=1000' in log
+          for stage in ('pending', 'bound'):
+              for mode in ('valid', 'transport', 'duplicate_token', 'conflicting_hash', 'token_alias', 'empty_hash', 'missing_hash', 'input_ref_empty', 'parent_empty', 'parent_alias'):
+                  assert f'--- PASS: TestPinnedRegressionCorpus/graph_start_source_headers_{stage}_{mode}.json ' in log
+          PY
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: seeded-start-source-headers-${{ matrix.mode }}
+          path: |
+            start-source-headers.log
+            start-source-header-failure.json
+          if-no-files-found: error
+  seeded-projection-census:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      matrix:
+        mode: [normal, race]
+    env:
+      GOMAXPROCS: '2'
+      GOMEMLIMIT: 512MiB
+      SIM_SEEDS: '1000'
+      SIM_COVERAGE_SUMMARY: '1'
+      FAULT_TRACE_OUT: projection-census-failure.json
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - name: Check seeded raw projection census and pinned replay
+        shell: bash
+        env:
+          GRAPH_MODE: ${{ matrix.mode }}
+        run: |
+          set -o pipefail
+          graph_flags=()
+          if [ "$GRAPH_MODE" = race ]; then graph_flags=(-race); fi
+          go test "${graph_flags[@]}" ./sim -run '^(TestSeededGraphProjectionCensusReplay|TestGraphStartHeaderFailureTracePersistence|TestPinnedRegressionCorpus)$/^(graph_projection_census_|default|explicit)' -count=1 -v -timeout=6m 2>&1 | tee projection-census.log
+          python3 - <<'PY'
+          import pathlib, re
+          log = pathlib.Path('projection-census.log').read_text()
+          assert not re.search(r'^--- SKIP:', log, re.M)
+          assert '--- PASS: TestSeededGraphProjectionCensusReplay ' in log
+          for mode in ('default', 'explicit'):
+              assert f'--- PASS: TestGraphStartHeaderFailureTracePersistence/{mode} ' in log
+          assert 'TIER1_SEEDS test=TestSeededGraphProjectionCensusReplay first=1 last=1000 completed=1000 requested=1000' in log
+          for stage in ('live', 'retired'):
+              for mode in ('healthy', 'orphan', 'missing', 'wrong_generation', 'stale_reader', 'create_drop', 'create_lost_ack'):
+                  assert f'--- PASS: TestPinnedRegressionCorpus/graph_projection_census_{stage}_{mode}.json ' in log
+          PY
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: seeded-projection-census-${{ matrix.mode }}
+          path: |
+            projection-census.log
+            projection-census-failure.json
+          if-no-files-found: error
+  seeded-child-link-audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      matrix:
+        mode: [normal, race]
+    env:
+      GOMAXPROCS: '2'
+      GOMEMLIMIT: 512MiB
+      SIM_SEEDS: '1000'
+      SIM_COVERAGE_SUMMARY: '1'
+      FAULT_TRACE_OUT: child-link-audit-failure.json
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - name: Check seeded raw child link audit and pinned replay
+        shell: bash
+        env:
+          GRAPH_MODE: ${{ matrix.mode }}
+        run: |
+          set -o pipefail
+          graph_flags=()
+          if [ "$GRAPH_MODE" = race ]; then graph_flags=(-race); fi
+          go test "${graph_flags[@]}" ./sim -run '^(TestSeededGraphChildLinkAuditReplay|TestGraphStartHeaderFailureTracePersistence|TestPinnedRegressionCorpus)$/^(graph_child_link_audit_|default|explicit)' -count=1 -v -timeout=6m 2>&1 | tee child-link-audit.log
+          python3 - <<'PY'
+          import pathlib, re
+          log = pathlib.Path('child-link-audit.log').read_text()
+          assert not re.search(r'^--- SKIP:', log, re.M)
+          assert '--- PASS: TestSeededGraphChildLinkAuditReplay ' in log
+          for mode in ('default', 'explicit'):
+              assert f'--- PASS: TestGraphStartHeaderFailureTracePersistence/{mode} ' in log
+          assert 'TIER1_SEEDS test=TestSeededGraphChildLinkAuditReplay first=1 last=1000 completed=1000 requested=1000' in log
+          for stage in ('consumed', 'rejected'):
+              for encoding in ('json', 'protobuf-v1'):
+                  for mode in ('healthy', 'projection_mismatch', 'parent_mismatch', 'input_mismatch', 'projection_drop', 'projection_lost_ack', 'projection_stale_read'):
+                      assert f'--- PASS: TestPinnedRegressionCorpus/graph_child_link_audit_{stage}_{encoding}_{mode}.json ' in log
+          PY
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: seeded-child-link-audit-${{ matrix.mode }}
+          path: |
+            child-link-audit.log
+            child-link-audit-failure.json
+          if-no-files-found: error
+  raw-sdk-retired-projection-audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      GOMAXPROCS: 4
+      GOMEMLIMIT: 2GiB
+      WF_GRAPH_SDK_RAW_AUDIT: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - name: Audit retired failed child projections
+        shell: bash
+        run: |
+          set -o pipefail
+          go test -race -p=1 ./worker -run '^TestNativeGraphContinuationFailedChildPromise$' -count=1 -v -timeout=6m 2>&1 | tee raw-sdk-retired-projection.log
+          python3 - <<'PY'
+          import pathlib, re
+          log = pathlib.Path('raw-sdk-retired-projection.log').read_text()
+          assert not re.search(r'^--- SKIP:', log, re.M)
+          for layout in ('R1', 'R3Domain'):
+              for archive in ('false', 'true'):
+                  for buffered in ('false', 'true'):
+                      assert f'--- PASS: TestNativeGraphContinuationFailedChildPromise/{layout}/archive={archive}/buffered={buffered} ' in log
+          for archive in ('false', 'true'):
+              for buffered in ('false', 'true'):
+                  assert log.count(f'GRAPH_FAILED_CHILD buffered={buffered} archive={archive} child_calls=1 preserved_error=planned_child_failure parent_result=43') == 2
+          assert log.count('RAW_SDK_CHECKPOINT_AUDIT journals=1 entries=25 terminals=1 pending=0 retired_projection_only=1') == 8
+          assert log.count('RAW_SDK_CHECKPOINT_HISTORY checkpoints=2') == 8
+          PY
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: raw-sdk-retired-projection-audit
+          path: raw-sdk-retired-projection.log
+          if-no-files-found: error
+  retention-sdk-sigkill:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      WF_RETENTION_SIGKILL: '1'
+      GOMAXPROCS: '4'
+      GOMEMLIMIT: 2GiB
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - name: Kill canonical retention workers at SDK journal boundaries
+        shell: bash
+        run: |
+          set -o pipefail
+          go test -race -p=1 ./retention -run '^TestNativeGraphRetentionSDKBoundarySIGKILL$' -count=1 -v -timeout=12m 2>&1 | tee retention-sdk-sigkill.log
+          python3 - <<'PY'
+          import pathlib, re
+          log = pathlib.Path('retention-sdk-sigkill.log').read_text()
+          assert not re.search(r'^--- SKIP:', log, re.M)
+          expected = {(1, 'false'), (2, 'false'), (3, 'false'), (3, 'true'), (4, 'false'), (4, 'true')}
+          passed = {(int(cut), reuse) for cut, reuse in re.findall(r'--- PASS: TestNativeGraphRetentionSDKBoundarySIGKILL/cut([1-4])/reuse(false|true) ', log)}
+          assert passed == expected, passed
+          receipts = re.findall(r'SIGKILL pid=\d+ cut=([1-4]) kind=\w+ reuse=(false|true) leaseTTL=\S+ ackWait=\S+ accepted_prefix=\d+ final_entries=\d+', log)
+          assert len(receipts) == 6 and {(int(cut), reuse) for cut, reuse in receipts} == expected
+          assert len(re.findall(r'RAW_GRAPH_AUDIT roots=\d+ forests=\d+ records=\d+ nodes=\d+ payload_edges=\d+', log)) == 6
+          assert len(re.findall(r'RAW_JOURNAL_AUDIT invocations=\d+ journals=\d+ entries=\d+ terminals=\d+ retired=\d+ pending=0', log)) == 6
+          PY
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: retention-sdk-sigkill
+          path: retention-sdk-sigkill.log
+          if-no-files-found: error
+  ownership:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        mode: [normal, race]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - name: Seeded graph ownership and collection controls
+        env:
+          GOMAXPROCS: '2'
+          GOMEMLIMIT: 512MiB
+          GRAPH_MODE: ${{ matrix.mode }}
+        run: |
+          graph_flags=()
+          if [ "$GRAPH_MODE" = race ]; then graph_flags=(-race); fi
+          go test -p=1 "${graph_flags[@]}" ./internal/natsstream ./internal/graphpublication ./internal/retainedindex -count=1 -timeout=5m -json > graph-publication-events.jsonl
+      - name: Generation-aware graph journal and native payload retention
+        env:
+          GOMAXPROCS: '2'
+          GOMEMLIMIT: 512MiB
+          GRAPH_MODE: ${{ matrix.mode }}
+        run: |
+          graph_flags=()
+          if [ "$GRAPH_MODE" = race ]; then graph_flags=(-race); fi
+          go test -p=1 "${graph_flags[@]}" ./journal -run '^(TestGraphJournal|TestNativeGraphJournal|TestGraphCanonicalStart|TestGraphStartMatchesInvocationHeaders|TestGraphCanonicalSignalInputs|TestNativeGraphCanonicalSignalInputs|TestGraphCanonicalSignalQueue|TestGraphCanonicalSignalConsumption)' -count=1 -timeout=5m -json > graph-journal-events.jsonl
+      - name: Native graph worker input signal result replay and drain
+        env:
+          GOMAXPROCS: '2'
+          GOMEMLIMIT: 512MiB
+          GRAPH_MODE: ${{ matrix.mode }}
+        run: |
+          graph_flags=()
+          if [ "$GRAPH_MODE" = race ]; then graph_flags=(-race); fi
+          go test -p=1 "${graph_flags[@]}" ./worker -run '^(TestNativeGraphWorkerReplayInputsSignalsAndResults|TestNativeGraphChildResultTransferAndReplay|TestGraphChildReplayRejectsForgedProvenance|TestGraphSelectedChildRequiresExactRecordedSignal|TestNativeGraphWorkerParentNotifications|TestNativeCanonicalStartRecoveryWorkerReplayAndPurge)$' -count=1 -timeout=5m -json > graph-worker-events.jsonl
+      - name: Canonical Signal queue consumption replay and child transfer
+        env:
+          GOMAXPROCS: '2'
+          GOMEMLIMIT: 512MiB
+          GRAPH_MODE: ${{ matrix.mode }}
+        run: |
+          graph_flags=()
+          if [ "$GRAPH_MODE" = race ]; then graph_flags=(-race); fi
+          go test -p=1 "${graph_flags[@]}" ./worker -run '^(TestNativeCanonicalSignalQueue|TestGraphCanonicalSignalReplayReadsJournalOwnedBodyOnce)' -count=1 -timeout=5m -json > graph-signal-worker-events.jsonl
+      - name: Canonical graph repair decisions and native wakeup recovery
+        env:
+          GOMAXPROCS: '2'
+          GOMEMLIMIT: 512MiB
+          GRAPH_MODE: ${{ matrix.mode }}
+        run: |
+          graph_flags=()
+          if [ "$GRAPH_MODE" = race ]; then graph_flags=(-race); fi
+          go test -p=1 "${graph_flags[@]}" ./reconcile -run '^(TestGraphReconcile|TestNativeGraphReconcile|TestGraphCanonicalStart|TestGraphCanonicalSignal|TestGraphCanonicalTerminalScan|TestGraphCanonicalCatalogCycles)' -count=1 -timeout=5m -json > graph-reconcile-events.jsonl
+      - name: Canonical graph client terminal reads
+        env:
+          GOMAXPROCS: '2'
+          GOMEMLIMIT: 512MiB
+          GRAPH_MODE: ${{ matrix.mode }}
+        run: |
+          graph_flags=()
+          if [ "$GRAPH_MODE" = race ]; then graph_flags=(-race); fi
+          go test -p=1 "${graph_flags[@]}" ./client -count=1 -timeout=5m -json > graph-client-events.jsonl
+      - name: Canonical graph purge and durable retention workflow
+        env:
+          GOMAXPROCS: '2'
+          GOMEMLIMIT: 512MiB
+          GRAPH_MODE: ${{ matrix.mode }}
+        run: |
+          graph_flags=()
+          if [ "$GRAPH_MODE" = race ]; then graph_flags=(-race); fi
+          go test -p=1 "${graph_flags[@]}" ./retention -count=1 -timeout=5m -json > graph-retention-events.jsonl
+      - name: Workflow child ownership authorization
+        env:
+          GOMAXPROCS: '2'
+          GOMEMLIMIT: 512MiB
+          GRAPH_MODE: ${{ matrix.mode }}
+        run: |
+          graph_flags=()
+          if [ "$GRAPH_MODE" = race ]; then graph_flags=(-race); fi
+          go test -p=1 "${graph_flags[@]}" ./wf -count=1 -timeout=5m -json > graph-workflow-events.jsonl
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: graph-publication-${{ matrix.mode }}
+          path: |
+            graph-publication-events.jsonl
+            graph-journal-events.jsonl
+            graph-worker-events.jsonl
+            graph-signal-worker-events.jsonl
+            graph-client-events.jsonl
+            graph-reconcile-events.jsonl
+            graph-retention-events.jsonl
+            graph-workflow-events.jsonl
+  checkpoint-archive:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        mode: [normal, race]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - name: Checkpoint metadata ownership and malformed authority
+        env:
+          GOMAXPROCS: '2'
+          GOMEMLIMIT: 512MiB
+          GRAPH_MODE: ${{ matrix.mode }}
+        run: |
+          graph_flags=()
+          if [ "$GRAPH_MODE" = race ]; then graph_flags=(-race); fi
+          go test -p=1 "${graph_flags[@]}" ./journal -run '^(TestGraphCheckpoint|TestGraphArchiveDescriptor)' -count=1 -timeout=5m -json > graph-checkpoint-metadata-events.jsonl
+      - name: Native archive lifecycle and observed process kills
+        env:
+          GOMAXPROCS: '2'
+          GOMEMLIMIT: 512MiB
+          GRAPH_MODE: ${{ matrix.mode }}
+          ARCHIVE_PROCESS_EVIDENCE: ${{ github.workspace }}/archive-process-evidence
+        run: |
+          graph_flags=()
+          if [ "$GRAPH_MODE" = race ]; then graph_flags=(-race); fi
+          go test -p=1 "${graph_flags[@]}" ./journal -run '^(TestNativeGraphCheckpointArchive|TestProcessGraphCheckpointArchive)' -count=1 -timeout=5m -json > graph-checkpoint-archive-events.jsonl
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: graph-checkpoint-archive-${{ matrix.mode }}
+          path: |
+            graph-checkpoint-metadata-events.jsonl
+            graph-checkpoint-archive-events.jsonl
+            archive-process-evidence
+  transport:
+    runs-on: ubuntu-latest
+    timeout-minutes: ${{ matrix.family == 'SignalExpiryActors' && 305 || matrix.family == 'SignalExpiryCartesian' && 15 || matrix.family == 'SignalOperationActors' && 95 || matrix.family == 'SignalRuntimeCombined' && 65 || matrix.family == 'SignalRuntimeCartesian' && 35 || matrix.family == 'CheckpointCompaction' && 35 || matrix.family == 'SignalRuntime' && 45 || 10 }}
+    strategy:
+      fail-fast: false
+      matrix:
+        mode: [normal, race]
+        family: [NativeAuthority, Publication, Readers, ReaderResume, ReaderMaintenance, Catalog, Application, Streams, Journal, Worker, Result, TerminalWorker, TerminalProjection, TerminalCatalog, TerminalAudit, Child, ChildSignal, Reconcile, Purge, SignalClient, ParentWorker, Start, StartRepair, SignalRuntime, SignalRuntimeCombined, SignalRuntimeCartesian, SignalOperationActors, SignalExpiryActors, SignalExpiryCartesian, CheckpointCompaction, AwaitContention, Corpus]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - name: Seeded family or complete pinned corpus
+        env:
+          GOMAXPROCS: '2'
+          GOMEMLIMIT: 512MiB
+          GRAPH_MODE: ${{ matrix.mode }}
+          GRAPH_FAMILY: ${{ matrix.family }}
+          SIM_SEEDS: '1000'
+          SIM_COVERAGE_SUMMARY: '1'
+          SIM_PROGRESS: '1'
+        run: |
+          graph_flags=()
+          if [ "$GRAPH_MODE" = race ]; then graph_flags=(-race); fi
+          graph_pattern="^TestSeededGraph${GRAPH_FAMILY}Replay$"
+          if [ "$GRAPH_FAMILY" = Corpus ]; then
+            graph_pattern='^(TestPinnedRegressionCorpus|TestGraphPublicationTransportCopiesFaultsAndIndependentCensus|TestGraphChildSeedPipelineOrdersAndJoins|TestGraphWorkerCompletionAppendReaderInterleaving)$'
+          fi
+          if [ "$GRAPH_FAMILY" = SignalRuntimeCartesian ]; then
+            graph_pattern='^TestGraphSignalRuntimeCartesianReplay$'
+          fi
+          if [ "$GRAPH_FAMILY" = SignalExpiryCartesian ]; then graph_pattern="^TestGraphSignalExpiryCartesianReplay$"; fi
+          graph_timeout=5m
+          if [ "$GRAPH_FAMILY" = CheckpointCompaction ]; then graph_timeout=30m; fi
+          if [ "$GRAPH_FAMILY" = SignalRuntime ]; then graph_timeout=40m; fi
+          if [ "$GRAPH_FAMILY" = SignalRuntimeCombined ]; then graph_timeout=60m; fi
+          if [ "$GRAPH_FAMILY" = SignalRuntimeCartesian ]; then graph_timeout=30m; fi
+          if [ "$GRAPH_FAMILY" = SignalOperationActors ]; then graph_timeout=90m; fi
+          if [ "$GRAPH_FAMILY" = SignalExpiryActors ]; then graph_timeout=300m; fi
+          if [ "$GRAPH_FAMILY" = SignalExpiryCartesian ]; then graph_timeout=10m; fi
+          go test -p=1 "${graph_flags[@]}" ./sim -run "$graph_pattern" -count=1 -timeout="$graph_timeout" -json > graph-transport-events.jsonl
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: graph-transport-${{ matrix.family }}-${{ matrix.mode }}
+          path: graph-transport-events.jsonl
+
+  sdk-step-metadata:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    strategy:
+      matrix:
+        mode: [normal, race]
+    env:
+      GOMAXPROCS: '2'
+      GOMEMLIMIT: 512MiB
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - name: Null metadata admission and opaque user results
+        env:
+          SDK_MODE: ${{ matrix.mode }}
+        shell: bash
+        run: |
+          set -o pipefail
+          sdk_flags=()
+          if [ "$SDK_MODE" = race ]; then sdk_flags=(-race); fi
+          go test "${sdk_flags[@]}" ./wf ./internal/stepwire -run '^(TestSelectManyRequestMetadataAdmission|TestSelectManySuspendsReplaysChoiceAndRetainsLosers|TestSelectManyUnknownCompletionReplaysRecordedWinner|TestReplayNullStepMetadataBeforeHandler|TestNullRuntimeMetadataAndOpaqueResults|TestRequestVariantsRemainReadable|TestCompletionEnvelopeKeepsUserResultOpaque|TestRequestEnvelopeKeepsHashedUserInputOpaque)$' -count=1 -v -timeout=4m 2>&1 | tee sdk-step-metadata.log
+          python3 - <<'PY'
+          import pathlib, re
+          log = pathlib.Path('sdk-step-metadata.log').read_text()
+          assert not re.search(r'^--- (FAIL|SKIP):', log, re.M)
+          for test in ('TestSelectManyRequestMetadataAdmission', 'TestSelectManySuspendsReplaysChoiceAndRetainsLosers', 'TestSelectManyUnknownCompletionReplaysRecordedWinner', 'TestReplayNullStepMetadataBeforeHandler', 'TestNullRuntimeMetadataAndOpaqueResults', 'TestRequestVariantsRemainReadable', 'TestCompletionEnvelopeKeepsUserResultOpaque', 'TestRequestEnvelopeKeepsHashedUserInputOpaque'):
+              assert f'--- PASS: {test} ' in log
+          for level, fields in [('request', ('kind', 'name', 'input_hash', 'duration_nanos', 'fire_at', 'clock_domain', 'timer_step', 'timer_name', 'child_type', 'child_id', 'cases')), ('case', ('kind', 'name', 'timer_step', 'fire_at', 'clock_domain', 'child_type', 'child_id')), ('completion', ('case_index', 'result_ref', 'result_hash', 'error', 'error_kind', 'signal_seq', 'selected', 'cancelled', 'checkpoint_metadata_ref', 'checkpoint_metadata_hash'))]:
+              for field in fields:
+                  assert f'--- PASS: TestReplayNullStepMetadataBeforeHandler/{level}/{field} ' in log
+                  for control in ('null', 'zero'):
+                      assert f'--- PASS: TestNullRuntimeMetadataAndOpaqueResults/{level}/{field}/{control} ' in log
+          assert '--- PASS: TestNullRuntimeMetadataAndOpaqueResults/null-case ' in log
+          for case in ('healthy', 'explicit_zero', 'unknown_root', 'duplicate_root', 'duplicate_case', 'unknown_case', 'null_case', 'null_kind', 'null_cases', 'null_case_kind', 'null_case_name', 'null_case_timer_step', 'null_case_fire_at', 'null_case_clock_domain', 'null_case_child_type', 'null_case_child_id'):
+              assert f'--- PASS: TestSelectManyRequestMetadataAdmission/{case} ' in log
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: sdk-step-metadata-${{ matrix.mode }}
+          path: sdk-step-metadata.log
+          if-no-files-found: error
+
+  worker-step-metadata:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    strategy:
+      matrix:
+        mode: [normal, race]
+    env:
+      GOMAXPROCS: '2'
+      GOMEMLIMIT: 512MiB
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - name: Reject malformed SDK envelopes before worker handler admission
+        env:
+          WORKER_MODE: ${{ matrix.mode }}
+        shell: bash
+        run: |
+          set -o pipefail
+          worker_flags=()
+          if [ "$WORKER_MODE" = race ]; then worker_flags=(-race); fi
+          go test "${worker_flags[@]}" ./worker -run '^(TestWorkerStepMetadataBeforeHandler|TestWorkerEpochOwnerBeforeHandler|TestWorkerStepOrderBeforeHandler)$' -count=1 -v -timeout=2m 2>&1 | tee worker-step-metadata.log
+          python3 - <<'PY'
+          import pathlib, re
+          log = pathlib.Path('worker-step-metadata.log').read_text()
+          assert not re.search(r'^--- (FAIL|SKIP):', log, re.M)
+          assert '--- PASS: TestWorkerStepMetadataBeforeHandler ' in log
+          assert '--- PASS: TestWorkerEpochOwnerBeforeHandler ' in log
+          assert '--- PASS: TestWorkerStepOrderBeforeHandler ' in log
+          for backend in ('legacy', 'canonical'):
+              for case in ('balanced', 'suspended_between_pair', 'pending_request', 'orphan_completion', 'overlapping_requests', 'completion_then_request', 'duplicate_completion', 'completed_pending', 'balanced_terminal', 'failed_pending'):
+                  assert f'--- PASS: TestWorkerStepOrderBeforeHandler/{backend}/{case} ' in log
+          for backend in ('legacy', 'canonical'):
+              for case in ('one_owner', 'successor_owner', 'same_owner_next_epoch', 'omitted_middle', 'all_omitted', 'zero_epoch_legacy', 'request_owner_conflict', 'completion_owner_conflict', 'conflict_after_omitted', 'conflict_without_started_owner', 'successor_epoch_conflict'):
+                  assert f'--- PASS: TestWorkerEpochOwnerBeforeHandler/{backend}/{case} ' in log
+          for backend in ('legacy', 'canonical'):
+              for level in ('healthy', 'opaque_result'):
+                  assert f'--- PASS: TestWorkerStepMetadataBeforeHandler/{backend}/{level}/valid ' in log
+              for level, fields in [('request', ('kind', 'name', 'input_hash', 'duration_nanos', 'fire_at', 'clock_domain', 'timer_step', 'timer_name', 'child_type', 'child_id', 'cases')), ('case', ('kind', 'name', 'timer_step', 'fire_at', 'clock_domain', 'child_type', 'child_id')), ('completion', ('case_index', 'result_ref', 'result_hash', 'error', 'error_kind', 'signal_seq', 'selected', 'cancelled', 'checkpoint_metadata_ref', 'checkpoint_metadata_hash'))]:
+                  for field in fields:
+                      assert f'--- PASS: TestWorkerStepMetadataBeforeHandler/{backend}/{level}/{field} ' in log
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: worker-step-metadata-${{ matrix.mode }}
+          path: worker-step-metadata.log
+          if-no-files-found: error
+
+  terminal-outcome-admission:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    strategy:
+      matrix:
+        mode: [normal, race]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - name: Strict owned terminal and held-lease outcome admission
+        env:
+          TERMINAL_MODE: ${{ matrix.mode }}
+        shell: bash
+        run: |
+          set -o pipefail
+          terminal_flags=()
+          if [ "$TERMINAL_MODE" = race ]; then terminal_flags=(-race); fi
+          go test "${terminal_flags[@]}" ./wf ./worker -run '^(TestReadGraphTerminalMetadataAdmission|TestLegacyHeldTerminalMetadataAdmission|TestReplayTerminalEnvelopeBeforeHandler|TestReplayTerminalEnvelopeTypedBoundary|TestGraphChildRetentionRequiresExactParentOwnership)$' -count=1 -v -timeout=3m 2>&1 | tee terminal-outcome-admission.log
+          python3 - <<'PY'
+          import pathlib, re
+          log = pathlib.Path('terminal-outcome-admission.log').read_text()
+          assert not re.search(r'^--- (FAIL|SKIP):', log, re.M)
+          for test in ('TestReadGraphTerminalMetadataAdmission', 'TestLegacyHeldTerminalMetadataAdmission', 'TestReplayTerminalEnvelopeBeforeHandler', 'TestReplayTerminalEnvelopeTypedBoundary', 'TestGraphChildRetentionRequiresExactParentOwnership'):
+              assert f'--- PASS: {test} ' in log
+          for case in ('inline', 'user_null', 'opaque_user_duplicates', 'explicit_empty_error', 'duplicate_invocation', 'alias_invocation', 'escaped_duplicate_invocation', 'duplicate_result', 'alias_result', 'duplicate_error', 'alias_error', 'unknown_field', 'null_limit_kind', 'null_limit_payload', 'duplicate_limit_kind', 'null_result_ref', 'null_result_hash', 'null_error', 'null_limit_request', 'null_limit_entry', 'null_result'):
+              assert f'--- PASS: TestLegacyHeldTerminalMetadataAdmission/{case} ' in log
+              for codec in ('json', 'protobuf'):
+                  assert f'--- PASS: TestReadGraphTerminalMetadataAdmission/{codec}/{case} ' in log
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: terminal-outcome-admission-${{ matrix.mode }}
+          path: terminal-outcome-admission.log
+          if-no-files-found: error

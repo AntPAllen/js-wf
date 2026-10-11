@@ -87,5 +87,5 @@ func decodeReplayTerminal(raw []byte, outcome *Outcome) error {
 	if len(bytes.TrimSpace(raw)) == 0 || bytes.Equal(bytes.TrimSpace(raw), []byte("null")) {
 		return ErrCorruptJournal
 	}
-	return checkpoint.DecodeUnambiguous(raw, outcome)
+	return DecodeOutcome(raw, outcome)
 }

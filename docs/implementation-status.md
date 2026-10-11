@@ -1,5 +1,30 @@
 # Implementation status against the supplied plan
 
+## Runtime terminal envelope admission shared across readers — 2026-10-11
+
+Graph terminal reads, offline replay terminal envelopes and the legacy held-lease
+shortcut now use wf.DecodeOutcome for strict typed complete envelopes and present
+null metadata rejection. Encoded user results and rejected request/payload contents
+remain opaque; legacy omitted identity stays readable. Caller generation/kind/
+required-field semantics remain separate. Raw auditing uses its own decoder.
+
+A focused two-decoder overlay on sourcec0ebe3e accepts34 malformed owned graph
+terminals (JSON/protobuf-v1) and ACKs17 malformed legacy held outcomes. All12
+positive controls pass. Final normal/race commands pass63 new controls, existing
+offline/parent-retention compatibility tests and exact CI assertions. Four final
+executables are observed; short normal worker capture was missed and explicitly
+limited. All1151 final Go/module/workflow inputs stay unchanged. Native R1/R3
+child/buffered-child compatibility passes in74.471s with four witness pairs/eight
+frames. Incorrect fixture constant names and CI codec strings were corrected
+only after native closure; actual setup failures and both source versions are
+retained and reviewed. See
+[runtime terminal evidence](scale/runtime-terminal-admission-2026-10-11/README.md).
+
+The corpus remains162 families/922 pins; five older race/scale campaigns are live.
+This does not prove complete active-worker/maintenance terminal admission, full
+current qualification, full I1–I6 causal/program semantics, or original fault/
+scale/soak/power/client/retention/import/admission/rollout gates.
+
 ## Frozen161 same-source race launched — 2026-10-11
 
 Following independent full normal acceptance, the frozen161 race stage started

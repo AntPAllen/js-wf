@@ -2,7 +2,6 @@ package wf
 
 import (
 	"context"
-	"encoding/json"
 
 	"js-wf/journal"
 )
@@ -27,7 +26,7 @@ func ReadGraphTerminal(ctx context.Context, view *journal.GraphView, invocation 
 		return GraphTerminal{}, err
 	}
 	var outcome Outcome
-	if json.Unmarshal(record.Payload, &outcome) != nil || outcome.InvSeq != invocation || record.Kind != journal.Completed && record.Kind != journal.Failed || record.Kind == journal.Completed && outcome.Error != "" || record.Kind == journal.Failed && (outcome.Error == "" || len(outcome.Result) != 0 || outcome.ResultRef != "" || outcome.ResultHash != "") {
+	if DecodeOutcome(record.Payload, &outcome) != nil || outcome.InvSeq != invocation || record.Kind != journal.Completed && record.Kind != journal.Failed || record.Kind == journal.Completed && outcome.Error != "" || record.Kind == journal.Failed && (outcome.Error == "" || len(outcome.Result) != 0 || outcome.ResultRef != "" || outcome.ResultHash != "") {
 		return GraphTerminal{}, ErrCorruptJournal
 	}
 	terminal := GraphTerminal{Outcome: outcome, Payload: record.Payload}

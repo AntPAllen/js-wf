@@ -1,0 +1,19 @@
+{
+  "source_revision": "c0ebe3ed68bb4809a1e630dd17c045d5bac918bc",
+  "actual_exit_code": 1,
+  "command": [
+    "go",
+    "test",
+    "-overlay",
+    "docs/scale/runtime-terminal-admission-2026-10-11/baseline-overlay.json",
+    "./wf",
+    "./worker",
+    "-run",
+    "^(TestReadGraphTerminalMetadataAdmission|TestLegacyHeldTerminalMetadataAdmission)$",
+    "-count=1",
+    "-v",
+    "-timeout=2m"
+  ],
+  "type": "Two original decoder files overlaid onto final fixture source; other code current.",
+  "executables_captured": []
+}

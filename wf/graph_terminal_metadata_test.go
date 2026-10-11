@@ -1,0 +1,86 @@
+package wf_test
+
+import (
+	"bytes"
+	"context"
+	"errors"
+	"js-wf/journal"
+	"js-wf/sim"
+	"js-wf/wf"
+	"testing"
+)
+
+func terminalAdmissionCases() map[string]string {
+	cases := map[string]string{
+		"inline":                       `{"inv_seq":1,"result":"NDI="}`,
+		"user_null":                    `{"inv_seq":1,"result":"bnVsbA=="}`,
+		"opaque_user_duplicates":       `{"inv_seq":1,"result":"eyJ1c2VyIjoxLCJ1c2VyIjoyfQ=="}`,
+		"explicit_empty_error":         `{"inv_seq":1,"result":"NDI=","error":""}`,
+		"duplicate_invocation":         `{"inv_seq":9,"inv_seq":1,"result":"NDI="}`,
+		"alias_invocation":             `{"Inv_seq":9,"inv_seq":1,"result":"NDI="}`,
+		"escaped_duplicate_invocation": `{"\u0069nv_seq":9,"inv_seq":1,"result":"NDI="}`,
+		"duplicate_result":             `{"inv_seq":1,"result":"Nw==","result":"NDI="}`,
+		"alias_result":                 `{"inv_seq":1,"Result":"Nw==","result":"NDI="}`,
+		"duplicate_error":              `{"inv_seq":1,"error":"bad","error":"","result":"NDI="}`,
+		"alias_error":                  `{"inv_seq":1,"Error":"bad","error":"","result":"NDI="}`,
+		"unknown_field":                `{"inv_seq":1,"foreign":true,"result":"NDI="}`,
+		"null_limit_kind":              `{"inv_seq":1,"result":"NDI=","limit_entry":{"kind":null,"payload":{}}}`,
+		"null_limit_payload":           `{"inv_seq":1,"result":"NDI=","limit_entry":{"kind":"Suspended","payload":null}}`,
+		"duplicate_limit_kind":         `{"inv_seq":1,"result":"NDI=","limit_entry":{"kind":"Failed","kind":"Suspended","payload":{}}}`,
+	}
+	for _, field := range []string{"result_ref", "result_hash", "error", "limit_request", "limit_entry"} {
+		cases["null_"+field] = `{"inv_seq":1,"result":"NDI=","` + field + `":null}`
+	}
+	cases["null_result"] = `{"inv_seq":1,"result":null}`
+	return cases
+}
+func validTerminalAdmissionCase(name string) bool {
+	return name == "inline" || name == "user_null" || name == "opaque_user_duplicates" || name == "explicit_empty_error"
+}
+
+func TestReadGraphTerminalMetadataAdmission(t *testing.T) {
+	for _, encoding := range []journal.Encoding{journal.JSON, journal.ProtobufV1} {
+		for name, raw := range terminalAdmissionCases() {
+			t.Run(string(encoding)+"/"+name, func(t *testing.T) {
+				ctx := context.Background()
+				model := sim.NewGraphPublicationTransport(sim.NewScheduler(1))
+				store, err := journal.NewGraphStore(journal.GraphConfig{Protocol: model.Protocol(), Encoding: encoding})
+				if err != nil {
+					t.Fatal(err)
+				}
+				tail, err := store.Begin(ctx, "test", "terminal", 1)
+				if err != nil {
+					t.Fatal(err)
+				}
+				tail, err = store.Append(ctx, "test", "terminal", 1, journal.Entry{Kind: journal.Started}, tail, nil, nil)
+				if err != nil {
+					t.Fatal(err)
+				}
+				_, err = store.Append(ctx, "test", "terminal", 1, journal.Entry{Index: 1, Kind: journal.Completed, Payload: []byte(raw)}, tail, nil, nil)
+				if err != nil {
+					t.Fatal(err)
+				}
+				view, err := store.OpenTerminal(ctx, "test", "terminal", 1)
+				if err != nil {
+					t.Fatal(err)
+				}
+				defer view.Close(ctx)
+				record, err := view.Read(ctx, 1)
+				if err != nil || !bytes.Equal(record.Payload, []byte(raw)) {
+					t.Fatal("fixture payload changed", err)
+				}
+				if err = model.CheckReferences(); err != nil {
+					t.Fatal(err)
+				}
+				terminal, err := wf.ReadGraphTerminal(ctx, view, 1, 1000)
+				if validTerminalAdmissionCase(name) {
+					if err != nil || !bytes.Equal(terminal.Payload, []byte(raw)) || len(terminal.Result) == 0 {
+						t.Fatal(terminal, err)
+					}
+				} else if !errors.Is(err, wf.ErrCorruptJournal) {
+					t.Fatal("malformed terminal admitted", terminal, err)
+				}
+			})
+		}
+	}
+}
