@@ -72,6 +72,7 @@ type auditedGraphJournal struct {
 	signalInputs        []auditedGraphSignalInput
 	signalBindings      []auditedGraphSignalBinding
 	signalEvents        []auditedCheckpointSignal
+	rejectedSignal      *auditedCheckpointSignal
 	boundInputs         map[uint64]bool
 	signalKeys          map[auditedGraphSignalRequest]bool
 	signalTokens        map[string]bool
@@ -334,6 +335,30 @@ func CheckGraphJournals(ctx context.Context, snapshot GraphJournalSnapshot) (rep
 		}
 		if err := auditGraphLimitBoundary(entry, &state.journal); err != nil {
 			return err
+		}
+		if entry.Kind == journal.Failed {
+			var outcome auditedGraphOutcome
+			if err := checkpoint.DecodeUnambiguous(entry.Payload, &outcome); err != nil {
+				return err
+			}
+			if outcome.LimitEntry != nil && outcome.LimitEntry.Kind == string(journal.SignalConsumed) {
+				var signal auditedCheckpointSignal
+				if err := checkpoint.DecodeUnambiguous(outcome.LimitEntry.Payload, &signal); err != nil {
+					return err
+				}
+				if canonicalSignalCursor(c) {
+					if err := auditGraphSignalEvent(call, graph, record, signal); err != nil {
+						return err
+					}
+					state.rejectedSignal = &signal
+				}
+				if err := auditSDKChildSignal(call, graph, state, signal, record.Record.Blobs, cursors, snapshot.Projections, readProjection, &report); err != nil {
+					return fmt.Errorf("%s: invalid rejected child signal: %w", record.Destination, err)
+				}
+				if err := auditChildStartLink(state, signal, cursors, &report); err != nil {
+					return err
+				}
+			}
 		}
 		if err := state.journal.advance(record.Destination, journal.Record{Entry: entry, Sequence: envelope.Sequence}); err != nil {
 			return err

@@ -33,6 +33,10 @@ func (s childHistorySource) NextSignal(_ context.Context, from uint64, _ string)
 
 func childHistorySnapshot(t *testing.T, enc journal.Encoding, mode string) integrity.GraphJournalSnapshot {
 	t.Helper()
+	rejected := strings.HasPrefix(mode, "limit-")
+	if rejected {
+		mode = strings.TrimPrefix(mode, "limit-")
+	}
 	ctx := context.Background()
 	m := sim.NewGraphPublicationTransport(sim.NewScheduler(1))
 	g, err := journal.NewGraphStore(journal.GraphConfig{Protocol: m.Protocol(), Encoding: enc, Now: func() time.Time { return time.Unix(0, 0) }, CanonicalStarts: true, CanonicalSignals: true, PinTTL: time.Minute, IntentTTL: time.Minute})
@@ -119,13 +123,35 @@ func childHistorySnapshot(t *testing.T, enc journal.Encoding, mode string) integ
 	if mode == "mixed-body" {
 		event["payload"] = []byte(`forged`)
 	}
+	if rejected {
+		marker := event["canonical_signal"].(map[string]any)
+		switch mode {
+		case "binding-index":
+			marker["index"] = uint64(1)
+		case "binding-token":
+			marker["token"] = strings.Repeat("a", 64)
+		case "binding-name":
+			event["name"] = "other"
+		case "binding-sequence":
+			event["sig_seq"] = uint64(8)
+		}
+	}
 	payload, _ := json.Marshal(event)
 	payloads := [][]byte{body}
 	if external != nil {
 		payloads = append(payloads, external)
 	}
-	appendEntry(journal.Entry{Index: 3, Kind: journal.SignalConsumed, Payload: payload}, payloads...)
 	projections := map[string][]byte{}
+	if rejected {
+		terminal, e := json.Marshal(map[string]any{"inv_seq": uint64(1), "error": journal.ErrTooLong.Error(), "limit_entry": map[string]any{"kind": string(journal.SignalConsumed), "payload": json.RawMessage(payload)}})
+		if e != nil {
+			t.Fatal(e)
+		}
+		appendEntry(journal.Entry{Index: 3, Kind: journal.Failed, Payload: terminal}, payloads...)
+		projections["parent.id"] = terminal
+	} else {
+		appendEntry(journal.Entry{Index: 3, Kind: journal.SignalConsumed, Payload: payload}, payloads...)
+	}
 	if strings.HasPrefix(mode, "start-") || strings.HasPrefix(mode, "terminal-") {
 		r := journal.GraphStartRequest{Type: "child", ID: "id", ParentType: "parent", ParentID: "id", ParentInvocation: 1, SignalName: "gate"}
 		input := []byte(`7`)
@@ -317,6 +343,44 @@ func TestRawGraphChildTerminalLinks(t *testing.T) {
 					}
 					if report.ChildTerminalLinksVerified != verified || report.ChildTerminalLinksUnavailable != unavailable {
 						t.Fatal("incorrect terminal evidence scope", report)
+					}
+				}
+			})
+		}
+	}
+}
+
+func TestRawGraphRejectedChildSignalLinks(t *testing.T) {
+	for _, enc := range []journal.Encoding{journal.JSON, journal.ProtobufV1} {
+		for _, mode := range []string{"inline", "failed", "external", "terminal-inline", "terminal-failed", "terminal-external", "no-declaration", "missing-child", "wrong-id", "outcome-generation", "start-input", "terminal-result", "binding-index", "binding-token", "binding-name", "binding-sequence"} {
+			t.Run(string(enc)+"/"+mode, func(t *testing.T) {
+				s := childHistorySnapshot(t, enc, "limit-"+mode)
+				if _, err := integrity.CheckGraphReferences(context.Background(), s.Graph); err != nil {
+					t.Fatal("physical references", err)
+				}
+				report, err := integrity.CheckGraphJournals(context.Background(), s)
+				valid := mode == "inline" || mode == "failed" || mode == "external" || mode == "terminal-inline" || mode == "terminal-failed" || mode == "terminal-external"
+				if valid && err != nil {
+					t.Fatal(report, err)
+				}
+				if !valid && err == nil {
+					t.Fatal("invalid rejected child signal accepted", report)
+				}
+				if valid {
+					verified, unavailable := 0, 1
+					if strings.HasPrefix(mode, "terminal-") {
+						verified, unavailable = 1, 0
+					}
+					if report.ChildTerminalLinksVerified != verified || report.ChildTerminalLinksUnavailable != unavailable || report.ChildStartLinksVerified != verified || report.ChildStartLinksUnavailable != unavailable || report.Terminal != 1 || report.Entries != 4 {
+						t.Fatal("incorrect rejected evidence scope", report)
+					}
+					for _, root := range s.Graph.Roots {
+						var cursor struct {
+							SignalConsumed uint64 `json:"signal_consumed"`
+						}
+						if err := json.Unmarshal(root.Application, &cursor); err != nil || cursor.SignalConsumed != 0 {
+							t.Fatal("rejected signal advanced consumption", cursor, err)
+						}
 					}
 				}
 			})

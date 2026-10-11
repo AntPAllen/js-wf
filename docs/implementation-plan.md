@@ -1,5 +1,29 @@
 # JetStream Durable Workflow Runtime — Implementation Plan
 
+## Rejected child signal queue and linkage audits — 2026-10-11
+
+A SignalConsumed operation retained inside a failed limit_entry now receives
+independent canonical next-queue binding, preceding parent-call, owned outcome/
+external result, available child-start and retained terminal projection checks.
+The rejected arrival stays separate from consumed arrivals and does not advance
+cursor consumption, SDK promise/cache state or FIFO state.
+
+Baseline61fc95b accepted annotated child generation3 carrying outcome generation4
+inside a rejected operation (regression exit1). Final race exit0 in47.679s covers
+all40 raw graph top-level tests, four native checkpoint/census cases and32 new
+physical controls (12 positive/20 negative). Four native R1/R3 child/buffered-child
+compatibility cases pass in76.044s with four start/terminal witness pairs and
+eight checkpoint frames. Both actual executables were captured;1131 prelaunch
+inputs remained unchanged. The exact new workflow guard passed locally.
+See [rejected child signal evidence](scale/raw-rejected-child-signal-links-2026-10-11/README.md).
+
+The new fixtures retain compact boundary layouts; they do not exhaust the actual
+configured capacity. Native compatibility flows do not exercise limit rejection.
+Actual capacity/configuration proof, original publication/parent-source/lease
+causality, lost retired history, current complete161/894 qualification and
+original scale/fault/soak/power gates remain open. Four frozen long campaigns
+remain running and predate this code.
+
 ## Available retained child terminal projection linkage — 2026-10-11
 
 Consumed child outcome bytes now independently match an available same-generation

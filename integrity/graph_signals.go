@@ -126,7 +126,13 @@ func finishGraphSignalAudit(state *auditedGraphJournal) error {
 	if uint64(len(state.signalInputs)) != c.SignalInputs || uint64(len(state.signalBindings)) != c.SignalBindings || uint64(len(state.signalEvents)) != c.SignalConsumed {
 		return fmt.Errorf("canonical signal census differs")
 	}
-	for index, signal := range state.signalEvents {
+	// A rejected operation retains the next queue position without advancing
+	// either the consumption census or the SDK promise/arrival state.
+	events := state.signalEvents
+	if state.rejectedSignal != nil {
+		events = append(append([]auditedCheckpointSignal(nil), events...), *state.rejectedSignal)
+	}
+	for index, signal := range events {
 		if signal.Canonical == nil || signal.Canonical.Index != uint64(index) || index >= len(state.signalBindings) {
 			return fmt.Errorf("signal consumption queue order differs")
 		}
