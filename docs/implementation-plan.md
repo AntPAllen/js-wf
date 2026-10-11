@@ -1,5 +1,28 @@
 # JetStream Durable Workflow Runtime — Implementation Plan
 
+## Independent canonical signal envelope admission — 2026-10-11
+
+The raw audit now owns complete request/reservation/binding wire declarations,
+rejects unknown/aliased/duplicate fields with strict decoding, and requires every
+emitted field to be present and non-null (including zero-valued indexes). Existing
+body grants/hash/size, generation/order, reservation equality, consumed-event
+census and independent index fingerprints remain checked. Production descriptors
+and admission readers are not used for these wire declarations.
+
+Baseline93055c2 plus the physical fixture accepted an unknown reservation field.
+Final race exit0 in33.832s covers190 new physical controls (28 positive/162 negative),
+all35 raw graph top-level tests and four native checkpoint/orphan/tombstone flows.
+Six native buffered-signal/selection-priority R1/R3 × live/archive cases pass in
+155.994s with six raw SDK receipts,12 frames and four priority receipts.
+426 pre-run inputs remain unchanged; both actual executables were captured and
+the exact new CI guard passed locally. Compile/baseline failures were preserved.
+See [signal envelope evidence](scale/raw-signal-envelope-2026-10-11/README.md).
+
+Consumed-signal wire, original transport provenance, retired/parent/lease causal
+history, client linearizability and original broad gates remain open. Four frozen
+long campaigns remain live and predate this audit. No hosted/full current161/
+894 suite or physical-power acceptance is claimed.
+
 ## Tier1 raw projection census model — 2026-10-11
 
 A new seeded graph_projection_census workload builds canonical owned inputs and

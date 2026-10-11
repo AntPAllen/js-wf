@@ -66,11 +66,11 @@ type auditedGraphJournal struct {
 	signalCount         uint64
 	children            map[string]auditedCheckpointChild
 	childSignals        map[uint64]auditedCheckpointSignal
-	signalInputs        []journal.GraphSignalInput
-	signalBindings      []journal.GraphSignalBinding
+	signalInputs        []auditedGraphSignalInput
+	signalBindings      []auditedGraphSignalBinding
 	signalEvents        []auditedCheckpointSignal
 	boundInputs         map[uint64]bool
-	signalKeys          map[journal.GraphSignalRequest]bool
+	signalKeys          map[auditedGraphSignalRequest]bool
 	signalTokens        map[string]bool
 	sdkState            map[string]json.RawMessage
 	sdkSignals          map[uint64]auditedPromiseSignal

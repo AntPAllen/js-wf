@@ -96,6 +96,9 @@ func rawSignalFixture(t *testing.T, enc journal.Encoding, control string) GraphJ
 		} else {
 			data, _ = json.Marshal(map[string]any{"binding": binding, "index_packet": packet})
 		}
+		if prefix := "wire-" + stream + "/"; strings.HasPrefix(control, prefix) {
+			data = mutateSignalEnvelope(t, data, stream, strings.TrimPrefix(control, prefix))
+		}
 		blobs := []retainedgraph.Link{put(body, stream, "payload", 0)}
 		if control == "missing-body" {
 			blobs = nil

@@ -8,7 +8,7 @@ import (
 	"unicode/utf8"
 
 	"js-wf/identity"
-	"js-wf/journal"
+	"js-wf/internal/checkpoint"
 )
 
 func canonicalSignalCursor(c auditedGraphCursor) bool {
@@ -19,27 +19,30 @@ func canonicalSignalCursor(c auditedGraphCursor) bool {
 // Queue bodies survive deletion of the original WF_SIG transport messages.
 func auditGraphSignalRecord(ctx context.Context, graph GraphReferenceSnapshot, state *auditedGraphJournal, record GraphAuditRecord) error {
 	c := state.cursor
+	if err := auditSignalFields(record.Record.Data, record.Stream); err != nil {
+		return err
+	}
 	if !canonicalSignalCursor(c) || c.Start == nil {
 		return fmt.Errorf("signal forest without canonical signal generation")
 	}
-	var input journal.GraphSignalInput
-	var binding journal.GraphSignalBinding
+	var input auditedGraphSignalInput
+	var binding auditedGraphSignalBinding
 	var packet []byte
 	if record.Stream == "signal-input" {
 		var wire struct {
-			Input       journal.GraphSignalInput `json:"input"`
-			IndexPacket []byte                   `json:"index_packet"`
+			Input       auditedGraphSignalInput `json:"input"`
+			IndexPacket []byte                  `json:"index_packet"`
 		}
-		if json.Unmarshal(record.Record.Data, &wire) != nil || record.Index != uint64(len(state.signalInputs)) || wire.Input.Index != record.Index {
+		if checkpoint.DecodeUnambiguous(record.Record.Data, &wire) != nil || record.Index != uint64(len(state.signalInputs)) || wire.Input.Index != record.Index {
 			return fmt.Errorf("invalid signal reservation record/order")
 		}
 		input, packet = wire.Input, wire.IndexPacket
 	} else {
 		var wire struct {
-			Binding     journal.GraphSignalBinding `json:"binding"`
-			IndexPacket []byte                     `json:"index_packet"`
+			Binding     auditedGraphSignalBinding `json:"binding"`
+			IndexPacket []byte                    `json:"index_packet"`
 		}
-		if json.Unmarshal(record.Record.Data, &wire) != nil || wire.Binding.Schema != "js-wf-canonical-signal-binding-v1" || record.Index != uint64(len(state.signalBindings)) || wire.Binding.Index != record.Index {
+		if checkpoint.DecodeUnambiguous(record.Record.Data, &wire) != nil || wire.Binding.Schema != "js-wf-canonical-signal-binding-v1" || record.Index != uint64(len(state.signalBindings)) || wire.Binding.Index != record.Index {
 			return fmt.Errorf("invalid signal queue record/order")
 		}
 		binding, input, packet = wire.Binding, wire.Binding.Input, wire.IndexPacket
@@ -81,7 +84,7 @@ func auditGraphSignalRecord(ctx context.Context, graph GraphReferenceSnapshot, s
 	}
 	if record.Stream == "signal-input" {
 		if state.signalKeys == nil {
-			state.signalKeys = map[journal.GraphSignalRequest]bool{}
+			state.signalKeys = map[auditedGraphSignalRequest]bool{}
 			state.signalTokens = map[string]bool{}
 		}
 		if state.signalKeys[r] || state.signalTokens[input.Token] {

@@ -314,7 +314,7 @@ jobs:
         shell: bash
         run: |
           set -o pipefail
-          go test -race -p=1 ./integrity -run '^(TestRawGraphReferencesAndIndependentCorruptionControls|TestNativeRawGraphReferenceAuditQuiescentReaders|TestRawGraphJournalGenerationsOutcomesAndArchive|TestRawGraphCheckpointPointerAndFrameBindings|TestNativeRawGraphCheckpointAudit|TestRawGraphCheckpointMaterializedState|TestRawGraphCheckpointPromiseOwnership|TestRawGraphCheckpointMetadataBindings|TestRawGraphRetiredSourceProjectionScope|TestRawGraphSignalReservationAndBinding|TestRawGraphSignalIndexIndependentPrefixes|TestRawGraphSignalIndexProductionPackets|TestRawGraphCheckpointSDKStateHistory|TestRawGraphCheckpointPromiseHistory|TestRawGraphCheckpointSDKSignalHistory|TestRawGraphCheckpointSDKTimerHistory|TestRawGraphEveryCheckpointHistory|TestRawGraphSDKStepEnvelope|TestRawGraphCanonicalEnvelope|TestRawGraphTerminalEnvelope|TestRawGraphRejectedLimitBoundary|TestRawGraphRejectedLimitPrefix|TestRawGraphRejectedLimitContinuation|TestRawGraphSelectionPriority|TestRawGraphSelectionReadiness|TestRawGraphCursorEnvelope|TestRawGraphStartEnvelope|TestRawGraphRetiredProjectionEnvelope|TestRawGraphStartSourceHeaders|TestRawGraphOrphanProjectionBaseline|TestRawGraphProjectionCensus|TestRawGraphOutcomeFieldPresence|TestRawGraphStartFieldPresence|TestRawGraphCursorFieldPresence|TestRawGraphCursorState|TestRawGraphCursorVersionCapabilities)$' -count=1 -v -timeout=5m 2>&1 | tee raw-graph-audit.log
+          go test -race -p=1 ./integrity -run '^(TestRawGraphReferencesAndIndependentCorruptionControls|TestNativeRawGraphReferenceAuditQuiescentReaders|TestRawGraphJournalGenerationsOutcomesAndArchive|TestRawGraphCheckpointPointerAndFrameBindings|TestNativeRawGraphCheckpointAudit|TestRawGraphCheckpointMaterializedState|TestRawGraphCheckpointPromiseOwnership|TestRawGraphCheckpointMetadataBindings|TestRawGraphRetiredSourceProjectionScope|TestRawGraphSignalEnvelope|TestRawGraphSignalReservationAndBinding|TestRawGraphSignalIndexIndependentPrefixes|TestRawGraphSignalIndexProductionPackets|TestRawGraphCheckpointSDKStateHistory|TestRawGraphCheckpointPromiseHistory|TestRawGraphCheckpointSDKSignalHistory|TestRawGraphCheckpointSDKTimerHistory|TestRawGraphEveryCheckpointHistory|TestRawGraphSDKStepEnvelope|TestRawGraphCanonicalEnvelope|TestRawGraphTerminalEnvelope|TestRawGraphRejectedLimitBoundary|TestRawGraphRejectedLimitPrefix|TestRawGraphRejectedLimitContinuation|TestRawGraphSelectionPriority|TestRawGraphSelectionReadiness|TestRawGraphCursorEnvelope|TestRawGraphStartEnvelope|TestRawGraphRetiredProjectionEnvelope|TestRawGraphStartSourceHeaders|TestRawGraphOrphanProjectionBaseline|TestRawGraphProjectionCensus|TestRawGraphOutcomeFieldPresence|TestRawGraphStartFieldPresence|TestRawGraphCursorFieldPresence|TestRawGraphCursorState|TestRawGraphCursorVersionCapabilities)$' -count=1 -v -timeout=5m 2>&1 | tee raw-graph-audit.log
           python3 - <<'PY'
           import pathlib, re
           log = pathlib.Path('raw-graph-audit.log').read_text()
@@ -457,6 +457,18 @@ jobs:
           for mode in ('history-frame-value', 'history-frame-missing', 'history-frame-extra', 'history-write-hash', 'history-write-missing', 'history-write-error', 'history-read-fabricated', 'history-result-null', 'history-result-unknown', 'history-external-unowned', 'history-external-wrong'):
               assert f'--- PASS: TestRawGraphCheckpointSDKStateHistory/{mode} ' in log
           assert '--- PASS: TestRawGraphRetiredSourceProjectionScope ' in log
+          assert '--- PASS: TestRawGraphSignalEnvelope ' in log
+          for encoding in ('json', 'protobuf-v1'):
+              for stream in ('signal-input', 'signal-queue'):
+                  levels = {'root': ('input' if stream == 'signal-input' else 'binding', 'index_packet'), 'input': ('schema', 'request', 'index', 'token', 'input_sha256', 'input_size'), 'request': ('type', 'id', 'invocation', 'name', 'key')}
+                  if stream == 'signal-queue':
+                      levels['binding'] = ('schema', 'input', 'index', 'sequence')
+                  for level, fields in levels.items():
+                      controls = ['valid', 'whitespace', 'unknown', 'alias', 'duplicate']
+                      for field in fields:
+                          controls += ['missing-'+field, 'null-'+field]
+                      for control in controls:
+                          assert f'--- PASS: TestRawGraphSignalEnvelope/{encoding}/{stream}/{level}/{control} ' in log
           assert '--- PASS: TestRawGraphSignalReservationAndBinding ' in log
           assert '--- PASS: TestRawGraphSignalIndexProductionPackets ' in log
           assert '--- PASS: TestRawGraphSignalIndexProductionPackets/maximum-depth ' in log
