@@ -190,6 +190,15 @@ jobs:
           retired = re.findall(r'RAW_SDK_CHECKPOINT_AUDIT journals=\d+ entries=\d+ terminals=[1-9]\d* pending=0 retired_projection_only=([01])', log)
           assert len(retired) == 8 and retired.count('1') == 4 and retired.count('0') == 4
           PY
+      - name: Preserve successor on lease initialization conflict
+        shell: bash
+        run: |
+          set -o pipefail
+          go test -race ./lease -run '^TestInitializationConflictPreservesSuccessor$' -count=1 -v -timeout=1m 2>&1 | tee lease-initialization-conflict.log
+          python3 - <<'PY'
+          import pathlib
+          assert '--- PASS: TestInitializationConflictPreservesSuccessor ' in pathlib.Path('lease-initialization-conflict.log').read_text()
+          PY
       - name: Audit native timer handle history through archived checkpoints
         shell: bash
         run: |
@@ -213,6 +222,7 @@ jobs:
           path: |
             raw-sdk-checkpoint-audit.log
             raw-sdk-timer-history.log
+            lease-initialization-conflict.log
           if-no-files-found: error
   raw-graph-reference-audit:
     runs-on: ubuntu-latest

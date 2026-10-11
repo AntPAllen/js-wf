@@ -1,5 +1,18 @@
 # Implementation status against the supplied plan
 
+## Lease initialization diagnostic and deterministic successor safety — 2026-10-11
+
+Added native Create/Update revision tracing and optional retained broker stores.
+A single instrumented R3Domain timer diagnostic passes race22.738s; all four lease
+initializations use their acknowledged Create revision. It does not reproduce or
+fix the original native failure, whose cause and four-case acceptance remain open.
+423 closed broker files/11.94MB are retained with a full inventory. A deterministic
+successor-between-Create-and-initialization control passes race1.018s: no owner,
+retry or deletion on conflict, and the successor remains held. CI requires it.
+[Diagnostic, retained stores and limits](scale/native-sdk-lease-diagnostic-2026-10-11/README.md).
+
+Both larger frozen campaigns remain running under their original invocations.
+
 ## Native timer campaign: three passes, lease initialization failure — 2026-10-11
 
 Added real SDK timer creation/cancellation, Await and both Select APIs through two

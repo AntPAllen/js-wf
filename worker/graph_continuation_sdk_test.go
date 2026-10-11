@@ -189,10 +189,21 @@ func testNativeGraphContinuationSDKFlow(t *testing.T, domain string, partition, 
 	}
 	var cluster *testcluster.Cluster
 	var err error
+	clusterRoot := t.TempDir()
+	if base := os.Getenv("WF_GRAPH_SDK_DIAGNOSTIC_ROOT"); base != "" {
+		if err = os.MkdirAll(base, 0700); err != nil {
+			t.Fatal(err)
+		}
+		clusterRoot, err = os.MkdirTemp(base, "native-")
+		if err != nil {
+			t.Fatal(err)
+		}
+		t.Logf("SDK_DIAGNOSTIC_STORE test=%s root=%s", t.Name(), clusterRoot)
+	}
 	if domain == "" {
-		cluster, err = testcluster.Start(t.TempDir(), replicas)
+		cluster, err = testcluster.Start(clusterRoot, replicas)
 	} else {
-		cluster, err = testcluster.StartWithDomain(t.TempDir(), replicas, domain)
+		cluster, err = testcluster.StartWithDomain(clusterRoot, replicas, domain)
 	}
 	if err != nil {
 		t.Fatal(err)
@@ -473,6 +484,13 @@ func testNativeGraphContinuationSDKFlow(t *testing.T, domain string, partition, 
 	leases, err := lease.New(ctx, js)
 	if err != nil {
 		t.Fatal(err)
+	}
+	if timerHistory {
+		kv, err := js.KeyValue(ctx, "WF_LEASE")
+		if err != nil {
+			t.Fatal(err)
+		}
+		leases = lease.NewWithKeyValue(sdkLeaseTraceKV{KeyValue: kv, t: t, js: js})
 	}
 	executeWorkflow := func(typ, id, workerID string) {
 		t.Helper()
