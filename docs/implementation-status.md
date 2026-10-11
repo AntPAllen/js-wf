@@ -1,5 +1,22 @@
 # Implementation status against the supplied plan
 
+## Frozen161 same-source race launched — 2026-10-11
+
+Following independent full normal acceptance, the frozen161 race stage started
+05:25:46UTC on ec970159c61dbecb6899077bfa6927b620f62ec9. Loaded unit,
+InvocationID0014cea99f4b491b9dcb657346ccca0d, supervisor257651/driver257675,
+unchanged supervisorSHA, one-core quota,2GB memory and145200s service lifetime
+are launch-bound. It requests1000 seeds per161 families, all894 pins and eight
+sequential disjoint package processes with actual per-process300m watchdogs.
+The reviewer refused the running stage with actual exit1; live state is untracked.
+Four older race/scale campaigns remain active. See
+[frozen161 race launch](scale/current-main161-tier1-2026-10-11/README.md).
+
+This is a live race launch, not race acceptance or full current162 qualification.
+The source predates the162nd family and latest SDK/worker admission fixes.
+Original fault/scale/soak/power/client/retention/import/admission/rollout gates
+remain open; public continuation admission/import/online collection stay off.
+
 ## Frozen161 complete normal campaign independently accepted — 2026-10-11
 
 The full normal campaign on sourceec970159c61dbecb6899077bfa6927b620f62ec9

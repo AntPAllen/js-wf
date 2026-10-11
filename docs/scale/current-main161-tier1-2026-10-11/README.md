@@ -64,3 +64,21 @@ This source predates the162nd child-link family and subsequent SDK/worker null,
 epoch-owner and step-order fixes. The accepted scope is frozen161 normal1000;
 same-source race may launch now. Four older race/scale campaigns remain live.
 Full current162, extended qualification and original release gates remain open.
+
+## Same-source race launched after normal acceptance
+
+The unit js-wf-main161-tier1-race-20261011-prepared.service started05:25:46UTC
+on the unchanged sourceec970159c61dbecb6899077bfa6927b620f62ec9. Invocation
+0014cea99f4b491b9dcb657346ccca0d, supervisor257651/driver257675,
+actual loaded ExecStart, one-core quota,2GB memory and145200s lifetime are bound
+in race-launch.json/race-loaded-unit.txt. SupervisorSHA remains
+ d9040466dd31e5e7541d826ab5416df02f4a744df5cb3e4d65dbd0a9f419e6b1.
+
+The reviewer actually refused acceptance of this running stage with exit1;
+race-live-review-refusal.log/json capture that result. race-state.json remains
+live/untracked. After terminal completion, use the existing race reviewer:
+
+    python3 docs/scale/current-main161-tier1-2026-10-11/qualification-review.py race
+
+No race acceptance is claimed. Four older race/scale campaigns remain active.
+Full current162 qualification and original release requirements remain open.
