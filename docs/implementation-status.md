@@ -1,5 +1,22 @@
 # Implementation status against the supplied plan
 
+## Prepare full current162 qualification after worker admission fixes — 2026-10-11
+
+A new complete normal/race campaign is prepared for162 families/922 pins,
+including current raw child-link and SDK/worker metadata, epoch ownership, step
+ordering and terminal admission fixes. The source will be frozen after preparation.
+Normal requests162000 seed bodies in eight sequential disjoint package processes,
+retaining one executable and using a half-core quota,2GB memory bound and actual
+300m process watchdogs. Independent full same-source normal acceptance is
+required before race launch. No existing campaign is restarted or replaced.
+
+The reviewer binds frozen Git/all required code inputs, source manifests,
+AST/compiled inventories, every pin/seed body, loaded unit/InvocationID and actual
+supervisor/driver/package exits. See
+[current162 preparation](scale/current-main162-tier1-2026-10-11/README.md).
+Preparation and later live launch are not acceptance. Full current qualification,
+extended and original release gates remain open.
+
 ## Active worker admits outcomes before terminal repair — 2026-10-11
 
 Worker.execute now uses wf.DecodeOutcome on retained Completed/Failed records
