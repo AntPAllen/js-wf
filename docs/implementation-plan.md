@@ -1,5 +1,29 @@
 # JetStream Durable Workflow Runtime — Implementation Plan
 
+## Independent cursor version/state capabilities — 2026-10-11
+
+The raw auditor now derives declared capabilities independently for cursor
+v1/v2/v4/v5/v6, matches authority versions, admits only supported forests/fields,
+checks input/archive lifecycle census, signal bounds/repair/source and pending
+state, kind/count, terminal-only purge and retired token clearing. Canonical
+high-water and checkpoint pointer metadata also apply before retired projection
+handling. Retired fixtures now clear tokens as production Retire does; history
+and projection-only counters remain separate.
+
+All64 physical controls (12 positive/52 negative) and35 metadata capability
+controls (10 positive/25 negative) pass in20.628s under race, with existing
+regressions and four native checkpoints. Four R1/R3 native child/buffered-child
+race flows pass in71.260s, checking eight parent frames/four retired projections.
+419 source inputs remain unchanged; actual native executable and closed media
+are retained, while the first race executable capture was missed. All99 new CI
+receipts were checked locally. See [cursor state evidence](scale/raw-cursor-state-2026-10-11/README.md).
+
+Deployment configuration agreement, full retired history, required scalar presence/
+null, complete parent/source/lease history, power durability and original broad
+acceptance remain open. Four larger jobs remain live at their older frozen sources;
+none includes this auditor change. Public continuation admission/import/online
+collection stay disabled.
+
 ## Full expanded160 normal campaign launched — 2026-10-11
 
 A clean sparse checkout of50e4f9b includes the production source-header fix and

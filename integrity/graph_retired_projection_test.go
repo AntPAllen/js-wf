@@ -19,6 +19,7 @@ func TestRawGraphRetiredSourceProjectionScope(t *testing.T) {
 					t.Fatal(err)
 				}
 				cursor.Retired = true
+				root.Token = ""
 				if control != "live-forest" {
 					root.Graph = retainedgraph.Root{Schema: retainedgraph.Schema, Frontier: []retainedgraph.Tree{}}
 				}

@@ -58,6 +58,7 @@ func TestRawGraphRetiredProjectionEnvelope(t *testing.T) {
 						t.Fatal(err)
 					}
 					cursor.Retired = true
+					root.Token = ""
 					if c.failed {
 						cursor.Kind = journal.Failed
 					}

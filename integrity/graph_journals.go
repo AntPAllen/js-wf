@@ -119,11 +119,10 @@ func CheckGraphJournals(ctx context.Context, snapshot GraphJournalSnapshot) (rep
 		if err := checkpoint.DecodeUnambiguous(root.Application, &c); err != nil {
 			return report, fmt.Errorf("%s: invalid canonical cursor: %w", destination, err)
 		}
-		switch c.Schema {
-		case "js-wf-graph-journal-cursor-v1", "js-wf-graph-runtime-cursor-v2", "js-wf-graph-runtime-cursor-v4", "js-wf-graph-runtime-cursor-v5", "js-wf-graph-runtime-cursor-v6":
-		default:
-			return report, fmt.Errorf("%s: unsupported canonical cursor schema", destination)
+		if err := auditGraphCursorShape(c, root); err != nil {
+			return report, fmt.Errorf("%s: invalid cursor state: %w", destination, err)
 		}
+
 		if !strings.HasPrefix(destination, "journal/") || !graphAuditHash(strings.TrimPrefix(destination, "journal/")) || c.Count > journal.MaxEntries || c.Base > math.MaxUint64-c.Count || c.RetainedFrom > c.Count || c.SignalBindings > c.SignalInputs || c.SignalConsumed > c.SignalBindings {
 			return report, fmt.Errorf("%s: invalid canonical cursor bounds", destination)
 		}

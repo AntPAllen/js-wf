@@ -310,7 +310,7 @@ jobs:
         shell: bash
         run: |
           set -o pipefail
-          go test -race -p=1 ./integrity -run '^(TestRawGraphReferencesAndIndependentCorruptionControls|TestNativeRawGraphReferenceAuditQuiescentReaders|TestRawGraphJournalGenerationsOutcomesAndArchive|TestRawGraphCheckpointPointerAndFrameBindings|TestNativeRawGraphCheckpointAudit|TestRawGraphCheckpointMaterializedState|TestRawGraphCheckpointPromiseOwnership|TestRawGraphCheckpointMetadataBindings|TestRawGraphRetiredSourceProjectionScope|TestRawGraphSignalReservationAndBinding|TestRawGraphSignalIndexIndependentPrefixes|TestRawGraphSignalIndexProductionPackets|TestRawGraphCheckpointSDKStateHistory|TestRawGraphCheckpointPromiseHistory|TestRawGraphCheckpointSDKSignalHistory|TestRawGraphCheckpointSDKTimerHistory|TestRawGraphEveryCheckpointHistory|TestRawGraphSDKStepEnvelope|TestRawGraphCanonicalEnvelope|TestRawGraphTerminalEnvelope|TestRawGraphRejectedLimitBoundary|TestRawGraphRejectedLimitPrefix|TestRawGraphRejectedLimitContinuation|TestRawGraphSelectionPriority|TestRawGraphSelectionReadiness|TestRawGraphCursorEnvelope|TestRawGraphStartEnvelope|TestRawGraphRetiredProjectionEnvelope|TestRawGraphStartSourceHeaders)$' -count=1 -v -timeout=5m 2>&1 | tee raw-graph-audit.log
+          go test -race -p=1 ./integrity -run '^(TestRawGraphReferencesAndIndependentCorruptionControls|TestNativeRawGraphReferenceAuditQuiescentReaders|TestRawGraphJournalGenerationsOutcomesAndArchive|TestRawGraphCheckpointPointerAndFrameBindings|TestNativeRawGraphCheckpointAudit|TestRawGraphCheckpointMaterializedState|TestRawGraphCheckpointPromiseOwnership|TestRawGraphCheckpointMetadataBindings|TestRawGraphRetiredSourceProjectionScope|TestRawGraphSignalReservationAndBinding|TestRawGraphSignalIndexIndependentPrefixes|TestRawGraphSignalIndexProductionPackets|TestRawGraphCheckpointSDKStateHistory|TestRawGraphCheckpointPromiseHistory|TestRawGraphCheckpointSDKSignalHistory|TestRawGraphCheckpointSDKTimerHistory|TestRawGraphEveryCheckpointHistory|TestRawGraphSDKStepEnvelope|TestRawGraphCanonicalEnvelope|TestRawGraphTerminalEnvelope|TestRawGraphRejectedLimitBoundary|TestRawGraphRejectedLimitPrefix|TestRawGraphRejectedLimitContinuation|TestRawGraphSelectionPriority|TestRawGraphSelectionReadiness|TestRawGraphCursorEnvelope|TestRawGraphStartEnvelope|TestRawGraphRetiredProjectionEnvelope|TestRawGraphStartSourceHeaders|TestRawGraphCursorState|TestRawGraphCursorVersionCapabilities)$' -count=1 -v -timeout=5m 2>&1 | tee raw-graph-audit.log
           python3 - <<'PY'
           import pathlib, re
           log = pathlib.Path('raw-graph-audit.log').read_text()
@@ -375,6 +375,16 @@ jobs:
           for encoding in ('json', 'protobuf-v1'):
               for control in ('inline', 'opaque', 'empty', 'whitespace', 'failed', 'external', 'limit-request', 'limit-entry', 'unknown', 'alias', 'duplicate-generation', 'escaped-generation', 'duplicate-result', 'duplicate-error', 'unknown-limit-entry', 'alias-limit-entry', 'duplicate-limit-entry', 'null', 'array', 'base64', 'generation-fraction', 'generation-negative', 'failed-inline', 'failed-pointer', 'hash-only', 'pointer-only', 'bad-hash', 'mixed-result', 'completed-limit', 'both-limits', 'wrong-limit-error'):
                   assert f'--- PASS: TestRawGraphRetiredProjectionEnvelope/{encoding}/{control} ' in log
+          assert '--- PASS: TestRawGraphCursorState ' in log
+          for encoding in ('json', 'protobuf-v1'):
+              for archive in ('false', 'true'):
+                  for retired in ('false', 'true'):
+                      for control in ('valid', 'root-version', 'previous-generation', 'signal-repair', 'unknown-forest', 'retired-token', 'unknown-kind', 'singleton-terminal'):
+                          assert f'--- PASS: TestRawGraphCursorState/{encoding}/archive={archive}/retired={retired}/{control} ' in log
+          assert '--- PASS: TestRawGraphCursorVersionCapabilities ' in log
+          for version in ('v1', 'v2', 'v4', 'v5', 'v6'):
+              for control in ('valid', 'signal-hint', 'checkpoint', 'archive', 'pending-signal', 'purging', 'input-missing'):
+                  assert f'--- PASS: TestRawGraphCursorVersionCapabilities/{version}/{control} ' in log
           assert '--- PASS: TestRawGraphCursorEnvelope ' in log
           for encoding in ('json', 'protobuf-v1'):
               for archive in ('false', 'true'):

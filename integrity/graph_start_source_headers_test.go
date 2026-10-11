@@ -78,6 +78,7 @@ func TestRawGraphStartSourceHeaders(t *testing.T) {
 									t.Fatal(err)
 								}
 								cursor.Retired = true
+								root.Token = ""
 								empty := retainedgraph.Root{Schema: retainedgraph.Schema, Frontier: []retainedgraph.Tree{}}
 								root.Graph = empty
 								for i := range root.Streams {
