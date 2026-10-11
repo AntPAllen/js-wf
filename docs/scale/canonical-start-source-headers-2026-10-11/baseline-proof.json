@@ -1,0 +1,17 @@
+{
+  "source": "367d65d38f0b497c6b1b56ba8dac07d4f6b2eb05",
+  "production_graph_start_sha256": "34b2d86a2581d3e3c7d797f5c15a6eede3db9d174f27257f1919a6da644d2f81",
+  "new_test_sha256": "e9d157e41bd1c0bae43dc2218ff058bbc78daf2e7fc73432bcfb183057aae131",
+  "command": [
+    "go",
+    "test",
+    "./journal",
+    "-run",
+    "^TestGraphStartMatchesInvocationHeaders$/^parent=false$/^Wf-Graph-Start-Token$/^duplicate$",
+    "-count=1",
+    "-v"
+  ],
+  "actual_exit": 1,
+  "verdict": "duplicate start token incorrectly matched; source match=true want=false",
+  "scope": "Baseline regression at this committed production source plus the newly added test. The baseline source hash receipt was prepared after the failing command."
+}

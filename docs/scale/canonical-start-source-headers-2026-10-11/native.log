@@ -1,0 +1,60 @@
+=== RUN   TestNativeGraphContinuationChildPromise
+=== RUN   TestNativeGraphContinuationChildPromise/R1
+    graph_continuation_sdk_test.go:261: SDK_DIAGNOSTIC_STORE test=TestNativeGraphContinuationChildPromise/R1 root=/home/exedev/js-wf-canonical-start-headers-native-20261011/native-201141815
+    graph_continuation_sdk_test.go:681: SDK_PHASE name=execute_begin_next elapsed=302.948331ms remaining=59.697051048s sdk_requests=166
+    graph_continuation_sdk_test.go:683: SDK_PHASE name=execute_end_next elapsed=2.783150078s remaining=57.216849572s sdk_requests=1610
+    graph_continuation_sdk_test.go:874: SDK_PHASE name=boundary_scan_end_next elapsed=2.845137363s remaining=57.154862156s sdk_requests=1638
+    graph_continuation_sdk_test.go:903: SDK_PHASE name=child_execute_end elapsed=3.922377004s remaining=56.077622676s sdk_requests=2180
+    graph_continuation_sdk_test.go:681: SDK_PHASE name=execute_begin_finish elapsed=3.922442113s remaining=56.077557677s sdk_requests=2180
+    graph_continuation_sdk_test.go:683: SDK_PHASE name=execute_end_finish elapsed=8.34780152s remaining=51.652198039s sdk_requests=4131
+    graph_continuation_sdk_test.go:768: SDK_PHASE name=child_retire_end elapsed=8.374893575s remaining=51.625106094s sdk_requests=4146
+    graph_continuation_sdk_test.go:874: SDK_PHASE name=boundary_scan_end_finish elapsed=8.42773914s remaining=51.572260319s sdk_requests=4170
+    graph_continuation_sdk_test.go:1300: RAW_SDK_CHECKPOINT_AUDIT journals=1 entries=25 terminals=1 pending=0 retired_projection_only=1
+    graph_continuation_sdk_test.go:1301: RAW_SDK_CHECKPOINT_HISTORY checkpoints=2
+    graph_continuation_sdk_test.go:1303: SDK initial/next/finish=map[finish:1 initial:1 next:1] effects=2 records=25 result=43
+    graph_continuation_sdk_test.go:1307: SDK_PHASE name=finished elapsed=12.296569937s remaining=47.703429602s sdk_requests=6864
+=== RUN   TestNativeGraphContinuationChildPromise/R3Domain
+    graph_continuation_sdk_test.go:261: SDK_DIAGNOSTIC_STORE test=TestNativeGraphContinuationChildPromise/R3Domain root=/home/exedev/js-wf-canonical-start-headers-native-20261011/native-207085223
+    graph_continuation_sdk_test.go:681: SDK_PHASE name=execute_begin_next elapsed=2.025301505s remaining=57.974698084s sdk_requests=166
+    graph_continuation_sdk_test.go:683: SDK_PHASE name=execute_end_next elapsed=5.909435927s remaining=54.090563843s sdk_requests=1610
+    graph_continuation_sdk_test.go:874: SDK_PHASE name=boundary_scan_end_next elapsed=5.978011243s remaining=54.021988367s sdk_requests=1638
+    graph_continuation_sdk_test.go:903: SDK_PHASE name=child_execute_end elapsed=7.822948345s remaining=52.177051244s sdk_requests=2179
+    graph_continuation_sdk_test.go:681: SDK_PHASE name=execute_begin_finish elapsed=7.825125223s remaining=52.174874206s sdk_requests=2179
+    graph_continuation_sdk_test.go:683: SDK_PHASE name=execute_end_finish elapsed=13.688982608s remaining=46.311017012s sdk_requests=4130
+    graph_continuation_sdk_test.go:768: SDK_PHASE name=child_retire_end elapsed=13.729635928s remaining=46.270363792s sdk_requests=4145
+    graph_continuation_sdk_test.go:874: SDK_PHASE name=boundary_scan_end_finish elapsed=13.801878366s remaining=46.198120793s sdk_requests=4169
+    graph_continuation_sdk_test.go:1300: RAW_SDK_CHECKPOINT_AUDIT journals=1 entries=25 terminals=1 pending=0 retired_projection_only=1
+    graph_continuation_sdk_test.go:1301: RAW_SDK_CHECKPOINT_HISTORY checkpoints=2
+    graph_continuation_sdk_test.go:1303: SDK initial/next/finish=map[finish:1 initial:1 next:1] effects=2 records=25 result=43
+    graph_continuation_sdk_test.go:1307: SDK_PHASE name=finished elapsed=19.607413436s remaining=40.392586123s sdk_requests=6863
+--- PASS: TestNativeGraphContinuationChildPromise (32.34s)
+    --- PASS: TestNativeGraphContinuationChildPromise/R1 (12.35s)
+    --- PASS: TestNativeGraphContinuationChildPromise/R3Domain (20.00s)
+=== RUN   TestNativeCanonicalStartRecoveryWorkerReplayAndPurge
+=== RUN   TestNativeCanonicalStartRecoveryWorkerReplayAndPurge/R1
+=== RUN   TestNativeCanonicalStartRecoveryWorkerReplayAndPurge/R1/ordinary
+=== RUN   TestNativeCanonicalStartRecoveryWorkerReplayAndPurge/R1/reserved
+=== RUN   TestNativeCanonicalStartRecoveryWorkerReplayAndPurge/R1/source_committed
+=== RUN   TestNativeCanonicalStartRecoveryWorkerReplayAndPurge/R1/bound_no_enqueue
+=== NAME  TestNativeCanonicalStartRecoveryWorkerReplayAndPurge/R1
+    graph_start_native_test.go:273: physical drain: zero chunks, 84 durable attempt tombstones
+=== RUN   TestNativeCanonicalStartRecoveryWorkerReplayAndPurge/R3
+=== RUN   TestNativeCanonicalStartRecoveryWorkerReplayAndPurge/R3/ordinary
+=== RUN   TestNativeCanonicalStartRecoveryWorkerReplayAndPurge/R3/reserved
+=== RUN   TestNativeCanonicalStartRecoveryWorkerReplayAndPurge/R3/source_committed
+=== RUN   TestNativeCanonicalStartRecoveryWorkerReplayAndPurge/R3/bound_no_enqueue
+=== NAME  TestNativeCanonicalStartRecoveryWorkerReplayAndPurge/R3
+    graph_start_native_test.go:273: physical drain: zero chunks, 84 durable attempt tombstones
+--- PASS: TestNativeCanonicalStartRecoveryWorkerReplayAndPurge (82.73s)
+    --- PASS: TestNativeCanonicalStartRecoveryWorkerReplayAndPurge/R1 (37.08s)
+        --- PASS: TestNativeCanonicalStartRecoveryWorkerReplayAndPurge/R1/ordinary (7.65s)
+        --- PASS: TestNativeCanonicalStartRecoveryWorkerReplayAndPurge/R1/reserved (8.93s)
+        --- PASS: TestNativeCanonicalStartRecoveryWorkerReplayAndPurge/R1/source_committed (8.39s)
+        --- PASS: TestNativeCanonicalStartRecoveryWorkerReplayAndPurge/R1/bound_no_enqueue (9.19s)
+    --- PASS: TestNativeCanonicalStartRecoveryWorkerReplayAndPurge/R3 (45.64s)
+        --- PASS: TestNativeCanonicalStartRecoveryWorkerReplayAndPurge/R3/ordinary (8.96s)
+        --- PASS: TestNativeCanonicalStartRecoveryWorkerReplayAndPurge/R3/reserved (10.04s)
+        --- PASS: TestNativeCanonicalStartRecoveryWorkerReplayAndPurge/R3/source_committed (10.53s)
+        --- PASS: TestNativeCanonicalStartRecoveryWorkerReplayAndPurge/R3/bound_no_enqueue (10.29s)
+PASS
+ok  	js-wf/worker	116.209s

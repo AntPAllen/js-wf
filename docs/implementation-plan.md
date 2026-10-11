@@ -1,5 +1,30 @@
 # JetStream Durable Workflow Runtime — Implementation Plan
 
+## Production canonical source matching hardened — 2026-10-11
+
+The independent source-header checks exposed a production first-value bug: at
+367d65d, a duplicate start-token header incorrectly matched its canonical source.
+That failing regression is preserved. GraphStart.MatchesInvocation now requires
+one exact value and canonical spelling for every owned source field, rejects
+aliases/duplicates/empty lists, and requires unused parent/input-reference headers
+to be absent. Unrelated transport headers remain allowed. The raw auditor retains
+its own independent declarations/checker.
+
+All64 production controls pass (4 positive/60 negative), alongside two journal
+start and six client recovery/repair race regressions. Native race passes in
+116.209s for eight R1/R3 interruption modes plus two raw-audited child cases,
+checking valid complete parent headers, duplicate-effect fencing, replay,
+protected-input purge, ID reuse/high-water and physical drain.462 source inputs
+remain unchanged. Actual native binary and closed SDK media are retained; short
+unit executable captures were missed, and native start temporary media were
+removed after testing. See [production source evidence](scale/canonical-start-source-headers-2026-10-11/README.md).
+
+CI normal/race journal selectors include the new matcher controls. No hosted
+pipeline or full latest-main qualification is claimed. Full parent/source/lease
+history, legacy-mode header admission and original broad acceptance remain open.
+The three longer frozen campaigns were confirmed live under their original
+inputs. Public continuation admission/import/online collection remain disabled.
+
 ## Owned invocation-source headers admitted exactly — 2026-10-11
 
 The independent auditor now checks canonical spelling and the entire value list

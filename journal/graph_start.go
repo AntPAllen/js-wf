@@ -9,6 +9,7 @@ import (
 	"encoding/json"
 	"errors"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/nats-io/nats.go/jetstream"
@@ -348,7 +349,26 @@ func (start GraphStart) MatchesInvocation(msg *jetstream.RawStreamMsg) bool {
 	if start.Request.ParentInvocation != 0 {
 		parentSequence = strconv.FormatUint(start.Request.ParentInvocation, 10)
 	}
-	return msg.Header.Get(GraphStartTokenHeader) == start.Token && msg.Header.Get("Wf-Input-SHA256") == start.InputSHA256 && msg.Header.Get("Wf-Input-Ref") == "" && msg.Header.Get("Wf-Parent-Type") == start.Request.ParentType && msg.Header.Get("Wf-Parent-ID") == start.Request.ParentID && msg.Header.Get("Wf-Parent-Inv-Seq") == parentSequence && msg.Header.Get("Wf-Parent-Signal") == start.Request.SignalName
+	fields := []struct{ key, value string }{
+		{GraphStartTokenHeader, start.Token},
+		{"Wf-Input-SHA256", start.InputSHA256},
+		{"Wf-Input-Ref", ""},
+		{"Wf-Parent-Type", start.Request.ParentType},
+		{"Wf-Parent-ID", start.Request.ParentID},
+		{"Wf-Parent-Inv-Seq", parentSequence},
+		{"Wf-Parent-Signal", start.Request.SignalName},
+	}
+	for _, field := range fields {
+		for key, values := range msg.Header {
+			if strings.EqualFold(key, field.key) && (key != field.key || field.value == "" || len(values) != 1 || values[0] != field.value) {
+				return false
+			}
+		}
+		if field.value != "" && len(msg.Header[field.key]) != 1 {
+			return false
+		}
+	}
+	return true
 }
 
 func (v *GraphView) ValidateStartInvocation(ctx context.Context, msg *jetstream.RawStreamMsg) error {

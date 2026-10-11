@@ -547,7 +547,7 @@ jobs:
         run: |
           graph_flags=()
           if [ "$GRAPH_MODE" = race ]; then graph_flags=(-race); fi
-          go test -p=1 "${graph_flags[@]}" ./journal -run '^(TestGraphJournal|TestNativeGraphJournal|TestGraphCanonicalStart|TestGraphCanonicalSignalInputs|TestNativeGraphCanonicalSignalInputs|TestGraphCanonicalSignalQueue|TestGraphCanonicalSignalConsumption)' -count=1 -timeout=5m -json > graph-journal-events.jsonl
+          go test -p=1 "${graph_flags[@]}" ./journal -run '^(TestGraphJournal|TestNativeGraphJournal|TestGraphCanonicalStart|TestGraphStartMatchesInvocationHeaders|TestGraphCanonicalSignalInputs|TestNativeGraphCanonicalSignalInputs|TestGraphCanonicalSignalQueue|TestGraphCanonicalSignalConsumption)' -count=1 -timeout=5m -json > graph-journal-events.jsonl
       - name: Native graph worker input signal result replay and drain
         env:
           GOMAXPROCS: '2'
