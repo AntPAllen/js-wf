@@ -1,0 +1,20 @@
+{
+  "command": [
+    "go",
+    "test",
+    "-race",
+    "./worker",
+    "-run",
+    "^(TestWorkerStepMetadataBeforeHandler|TestWorkerEpochOwnerBeforeHandler|TestWorkerStepOrderBeforeHandler|TestWorkerTerminalOutcomeBeforeRepair|TestWorkerTerminalResultVerifiedBeforeRepair)$",
+    "-count=1",
+    "-v",
+    "-timeout=2m"
+  ],
+  "driver_pid": 262257,
+  "actual_exit_code": 1,
+  "start_ns": 1791698175079644205,
+  "end_ns": 1791698200486728768,
+  "executables_captured": [
+    "worker"
+  ]
+}

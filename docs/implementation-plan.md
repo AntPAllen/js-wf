@@ -1,5 +1,23 @@
 # JetStream Durable Workflow Runtime — Implementation Plan
 
+## Active worker terminal result verification — 2026-10-11
+
+The worker resolves and checks Completed external result bytes before terminal
+projection repair or parent notification, using bounded legacy reads or owned
+canonical graph references. Unavailable and wrong-byte responses prevent repair;
+healed fresh deliveries preserve the journal and repair exact outcome bytes.
+Eight new controls extend the prior164 to172, all passing normal/race. The prior
+worker source actually projected six bad/unavailable results without verification;
+two healthy controls also lacked verification reads. Four native R1/R3 child flows
+passed with eight checkpoint frames and verified child-link witnesses. The reviewer
+binds1153 inputs and explicitly checks the test-only canonical-option correction
+after native completion; failed attempts are preserved.
+
+See [terminal result repair evidence](scale/worker-terminal-result-repair-2026-10-11/README.md).
+This covers active repair; legacy lease-held external body checks and other
+maintenance paths remain open. Full162 frozen normal predates this fix; full current
+qualification and original release gates remain open. Public continuation remains off.
+
 ## Full current162 normal qualification launched — 2026-10-11
 
 Sourcef24e6c012b87bb7c9246f4d2f00d4d8d94dba6fa freezes all current162 families/922 pins and recent

@@ -1,0 +1,29 @@
+=== RUN   TestWorkerTerminalResultVerifiedBeforeRepair
+=== RUN   TestWorkerTerminalResultVerifiedBeforeRepair/legacy/healthy
+    terminal_result_repair_test.go:176: terminal result reads=0 want=1
+=== RUN   TestWorkerTerminalResultVerifiedBeforeRepair/legacy/unavailable
+    terminal_result_repair_test.go:165: unverified result projected {"inv_seq":1,"result_ref":"terminal-result-73475cb40a568e8da8a045ced110137e159f890ac4da883b6b17dc651b3a8049","result_hash":"73475cb40a568e8da8a045ced110137e159f890ac4da883b6b17dc651b3a8049"} <nil>
+=== RUN   TestWorkerTerminalResultVerifiedBeforeRepair/legacy/wrong_bytes
+    terminal_result_repair_test.go:165: unverified result projected {"inv_seq":1,"result_ref":"terminal-result-73475cb40a568e8da8a045ced110137e159f890ac4da883b6b17dc651b3a8049","result_hash":"73475cb40a568e8da8a045ced110137e159f890ac4da883b6b17dc651b3a8049"} <nil>
+=== RUN   TestWorkerTerminalResultVerifiedBeforeRepair/legacy/inline_conflict
+    terminal_result_repair_test.go:165: unverified result projected {"inv_seq":1,"result":"NDI=","result_ref":"terminal-result-73475cb40a568e8da8a045ced110137e159f890ac4da883b6b17dc651b3a8049","result_hash":"73475cb40a568e8da8a045ced110137e159f890ac4da883b6b17dc651b3a8049"} <nil>
+=== RUN   TestWorkerTerminalResultVerifiedBeforeRepair/canonical/healthy
+    terminal_result_repair_test.go:147: graph journal conflicts with legacy journal/result options
+=== RUN   TestWorkerTerminalResultVerifiedBeforeRepair/canonical/unavailable
+    terminal_result_repair_test.go:147: graph journal conflicts with legacy journal/result options
+=== RUN   TestWorkerTerminalResultVerifiedBeforeRepair/canonical/wrong_bytes
+    terminal_result_repair_test.go:147: graph journal conflicts with legacy journal/result options
+=== RUN   TestWorkerTerminalResultVerifiedBeforeRepair/canonical/inline_conflict
+    terminal_result_repair_test.go:147: graph journal conflicts with legacy journal/result options
+--- FAIL: TestWorkerTerminalResultVerifiedBeforeRepair (0.02s)
+    --- FAIL: TestWorkerTerminalResultVerifiedBeforeRepair/legacy/healthy (0.00s)
+    --- FAIL: TestWorkerTerminalResultVerifiedBeforeRepair/legacy/unavailable (0.00s)
+    --- FAIL: TestWorkerTerminalResultVerifiedBeforeRepair/legacy/wrong_bytes (0.00s)
+    --- FAIL: TestWorkerTerminalResultVerifiedBeforeRepair/legacy/inline_conflict (0.00s)
+    --- FAIL: TestWorkerTerminalResultVerifiedBeforeRepair/canonical/healthy (0.01s)
+    --- FAIL: TestWorkerTerminalResultVerifiedBeforeRepair/canonical/unavailable (0.00s)
+    --- FAIL: TestWorkerTerminalResultVerifiedBeforeRepair/canonical/wrong_bytes (0.00s)
+    --- FAIL: TestWorkerTerminalResultVerifiedBeforeRepair/canonical/inline_conflict (0.00s)
+FAIL
+FAIL	js-wf/worker	0.029s
+FAIL

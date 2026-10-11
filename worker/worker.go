@@ -1038,7 +1038,31 @@ func (w *Worker) execute(ctx context.Context, typ, id string, l *lease.Lease, wa
 			return fmt.Errorf("input hash mismatch for %s.%s", typ, id)
 		}
 	}
+	resultBlobs := w.resultBlobs()
+	if graph != nil {
+		resultBlobs = graph
+	}
+	if resultBlobs != nil {
+		resultBlobs = boundedResultBlobPort{ResultBlobPort: resultBlobs, operations: ops}
+	}
 	if len(records) > 0 && (records[len(records)-1].Kind == journal.Completed || records[len(records)-1].Kind == journal.Failed) {
+		terminal := records[len(records)-1]
+		if terminal.Kind == journal.Completed {
+			var outcome wf.Outcome
+			if wf.DecodeOutcome(terminal.Payload, &outcome) != nil {
+				return wf.ErrCorruptJournal
+			}
+			// Resolve through the invocation's owned graph references or the legacy
+			// result store before repairing a projection or notifying the parent.
+			if _, err := outcome.ResultBytes(ctx, func(ctx context.Context, name string) ([]byte, error) {
+				if resultBlobs == nil {
+					return nil, ErrResultBlobUnavailable
+				}
+				return resultBlobs.GetBytes(ctx, name)
+			}); err != nil {
+				return err
+			}
+		}
 		return w.persistAndNotify(ctx, typ, id, input.Sequence, records[len(records)-1].Payload, input.Header)
 	}
 	// A canceled timer can still repair a terminal outcome above. For an
@@ -1280,13 +1304,6 @@ func (w *Worker) execute(ctx context.Context, typ, id string, l *lease.Lease, wa
 		wctx.SetContinuationSupport(func(stage string) bool { return stages[stage] != nil }, func(completed uint64, recorded bool) (wf.ContinuationAnchor, error) {
 			return continuationAnchor(records, nextIndex(), l.Epoch(), checkpointInfo, completed, recorded)
 		})
-	}
-	resultBlobs := w.resultBlobs()
-	if graph != nil {
-		resultBlobs = graph
-	}
-	if resultBlobs != nil {
-		resultBlobs = boundedResultBlobPort{ResultBlobPort: resultBlobs, operations: ops}
 	}
 	wctx.SetResultStore(func(ctx context.Context, data []byte) (string, error) {
 		if resultBlobs == nil {
