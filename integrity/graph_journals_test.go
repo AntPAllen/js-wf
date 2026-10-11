@@ -301,6 +301,27 @@ func rawJournalCheckpointFixture(t *testing.T, encoding journal.Encoding, archiv
 			Sequence    uint64 `json:"sequence"`
 			EntrySHA256 string `json:"entry_sha256"`
 		}{"js-wf-graph-journal-entry-v1", inv, 101 + index, edge.Hash})
+		if index == 1 && strings.HasPrefix(control, "outer-") {
+			schema := `"schema":"js-wf-graph-journal-entry-v1"`
+			switch control {
+			case "outer-unknown":
+				envelope = []byte(strings.TrimSuffix(string(envelope), "}") + `,"unknown":1}`)
+			case "outer-alias":
+				envelope = []byte(strings.Replace(string(envelope), `"schema":`, `"Schema":`, 1))
+			case "outer-duplicate":
+				envelope = []byte(strings.TrimSuffix(string(envelope), "}") + `,` + schema + `}`)
+			case "outer-escaped-duplicate":
+				envelope = []byte(strings.TrimSuffix(string(envelope), "}") + `,"\u0073chema":"js-wf-graph-journal-entry-v1"}`)
+			case "outer-generation":
+				envelope = []byte(strings.Replace(string(envelope), `"invocation":10`, `"invocation":11`, 1))
+			case "outer-sequence":
+				envelope = []byte(strings.Replace(string(envelope), `"sequence":102`, `"sequence":103`, 1))
+			case "outer-hash":
+				envelope = []byte(strings.Replace(string(envelope), edge.Hash, digest([]byte("foreign")), 1))
+			case "outer-whitespace":
+				envelope = []byte(" \n" + string(envelope) + "\n ")
+			}
+		}
 		blobs := []retainedgraph.Link{edge}
 		if historical && index == 4 {
 			blobs = append(blobs, put(olderFrame, graphpublication.Location{Kind: "payload", First: first, Stream: stream}), put(olderMetadata, graphpublication.Location{Kind: "payload", First: first, Stream: stream}))

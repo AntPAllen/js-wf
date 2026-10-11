@@ -12,6 +12,7 @@ import (
 
 	"github.com/nats-io/nats.go/jetstream"
 	"js-wf/identity"
+	"js-wf/internal/checkpoint"
 	"js-wf/journal"
 )
 
@@ -265,7 +266,7 @@ func CheckGraphJournals(ctx context.Context, snapshot GraphJournalSnapshot) (rep
 			Sequence    uint64 `json:"sequence"`
 			EntrySHA256 string `json:"entry_sha256"`
 		}
-		if json.Unmarshal(record.Record.Data, &envelope) != nil || envelope.Schema != "js-wf-graph-journal-entry-v1" || envelope.Invocation != c.Invocation || envelope.Sequence != c.Base+index+1 || !graphAuditHash(envelope.EntrySHA256) {
+		if checkpoint.DecodeUnambiguous(record.Record.Data, &envelope) != nil || envelope.Schema != "js-wf-graph-journal-entry-v1" || envelope.Invocation != c.Invocation || envelope.Sequence != c.Base+index+1 || !graphAuditHash(envelope.EntrySHA256) {
 			return fmt.Errorf("%s: canonical journal envelope differs", record.Destination)
 		}
 		var entry journal.Entry

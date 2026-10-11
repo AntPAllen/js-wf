@@ -1,5 +1,18 @@
 # JetStream Durable Workflow Runtime — Implementation Plan
 
+## Strict canonical journal outer envelopes — 2026-10-11
+
+The raw auditor now rejects unknown, aliased and duplicate outer journal envelope
+fields before loading owned entry bytes. Exact schema/generation/sequence/hash
+bindings remain required. Four JSON/protobuf physical positives and14 corruption
+controls pass, along with SDK envelope/historical checkpoint regressions and four
+native R1/R3 indexed/unindexed unpublished/published/archive cases; actual race
+exit0 in17.174s. CI requires all new fixtures.
+[Evidence and limits](scale/raw-canonical-envelope-2026-10-11/README.md).
+
+Full cursor/invocation/source/terminal schema and original full acceptance remain
+open. Both larger frozen campaigns continue under their original invocations.
+
 ## Complete SDK step envelope admission in raw audit — 2026-10-11
 
 Own complete request/completion wire declarations now reject unknown, aliased,
