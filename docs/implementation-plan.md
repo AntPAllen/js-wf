@@ -1,5 +1,19 @@
 # JetStream Durable Workflow Runtime — Implementation Plan
 
+## Native timer campaign: three passes, lease initialization failure — 2026-10-11
+
+Added real SDK timer creation/cancellation, Await and both Select APIs through two
+owned continuation checkpoints, with exact cancellation sets[4] and[4,14]. Both
+R1 cases and R3Domain/archive=true pass, including archived history after object
+collection. R3Domain/archive=false fails lease initialization before timer code:
+NATS10164 key revision mismatch after1.79s. Actual campaign exit1; four-case
+acceptance remains open. Cause is unconfirmed; no retry or gate relaxation.
+CI now requires all four cases and its executed guard rejects this incomplete run.
+[Raw failure, passing cases and scope](scale/native-sdk-timer-history-2026-10-11/README.md).
+
+Positive-deadline wakeup/clock readiness and original full gates remain open.
+Both larger frozen services remain running under their original invocations.
+
 ## SDK cancelled timer sets reconstructed from history — 2026-10-11
 
 The independent auditor binds timer handle actions to creation at their absolute

@@ -1,0 +1,61 @@
+=== RUN   TestNativeGraphContinuationTimerHistory
+=== RUN   TestNativeGraphContinuationTimerHistory/R1/archive=false
+    graph_continuation_sdk_test.go:537: SDK_PHASE name=execute_begin_next elapsed=252.933981ms remaining=29.747065598s sdk_requests=166
+    graph_continuation_sdk_test.go:539: SDK_PHASE name=execute_end_next elapsed=3.745321678s remaining=26.254677861s sdk_requests=2201
+    graph_continuation_sdk_test.go:569: SDK_TIMER_HISTORY stage=next cancelled=[4] archive=false
+    graph_continuation_sdk_test.go:730: SDK_PHASE name=boundary_scan_end_next elapsed=3.949017632s remaining=26.050981907s sdk_requests=2330
+    graph_continuation_sdk_test.go:537: SDK_PHASE name=execute_begin_finish elapsed=3.94909498s remaining=26.05090473s sdk_requests=2330
+    graph_continuation_sdk_test.go:539: SDK_PHASE name=execute_end_finish elapsed=8.79438513s remaining=21.20561447s sdk_requests=5155
+    graph_continuation_sdk_test.go:569: SDK_TIMER_HISTORY stage=finish cancelled=[4,14] archive=false
+    graph_continuation_sdk_test.go:730: SDK_PHASE name=boundary_scan_end_finish elapsed=8.978914253s remaining=21.021085506s sdk_requests=5253
+    graph_continuation_sdk_test.go:1053: RAW_SDK_CHECKPOINT_AUDIT journals=1 entries=40 terminals=1 pending=0 retired_projection_only=0
+    graph_continuation_sdk_test.go:1055: SDK initial/next/finish=map[finish:1 initial:1 next:1] effects=2 records=40 result=43
+    graph_continuation_sdk_test.go:1059: SDK_PHASE name=finished elapsed=12.646038846s remaining=17.353960683s sdk_requests=8606
+=== RUN   TestNativeGraphContinuationTimerHistory/R1/archive=true
+    graph_continuation_sdk_test.go:537: SDK_PHASE name=execute_begin_next elapsed=260.220971ms remaining=59.739778749s sdk_requests=166
+    graph_continuation_sdk_test.go:539: SDK_PHASE name=execute_end_next elapsed=6.229526266s remaining=53.770473343s sdk_requests=3967
+    graph_continuation_sdk_test.go:569: SDK_TIMER_HISTORY stage=next cancelled=[4] archive=true
+    graph_continuation_sdk_test.go:657: SDK_PHASE name=parent_sweep_end_next elapsed=9.235608961s remaining=50.764390618s sdk_requests=5836
+    graph_continuation_sdk_test.go:713: ARCHIVE_COLLECTION stage=next original_entry_receipts_removed=17 live_records=3 logical_records=16
+    graph_continuation_sdk_test.go:717: SDK_PHASE name=parent_audit_end_next elapsed=9.794128886s remaining=50.205870734s sdk_requests=6128
+    graph_continuation_sdk_test.go:730: SDK_PHASE name=boundary_scan_end_next elapsed=9.829939813s remaining=50.170059676s sdk_requests=6146
+    graph_continuation_sdk_test.go:537: SDK_PHASE name=execute_begin_finish elapsed=9.830027096s remaining=50.169972564s sdk_requests=6146
+    graph_continuation_sdk_test.go:539: SDK_PHASE name=execute_end_finish elapsed=19.648145062s remaining=40.351854658s sdk_requests=11967
+    graph_continuation_sdk_test.go:569: SDK_TIMER_HISTORY stage=finish cancelled=[4,14] archive=true
+    graph_continuation_sdk_test.go:657: SDK_PHASE name=parent_sweep_end_finish elapsed=26.31582935s remaining=33.684170169s sdk_requests=16392
+    graph_continuation_sdk_test.go:713: ARCHIVE_COLLECTION stage=finish original_entry_receipts_removed=25 live_records=3 logical_records=37
+    graph_continuation_sdk_test.go:717: SDK_PHASE name=parent_audit_end_finish elapsed=27.339992992s remaining=32.660006657s sdk_requests=16955
+    graph_continuation_sdk_test.go:730: SDK_PHASE name=boundary_scan_end_finish elapsed=27.372037026s remaining=32.627962563s sdk_requests=16972
+    graph_continuation_sdk_test.go:1053: RAW_SDK_CHECKPOINT_AUDIT journals=1 entries=40 terminals=1 pending=0 retired_projection_only=0
+    graph_continuation_sdk_test.go:1055: SDK initial/next/finish=map[finish:1 initial:1 next:1] effects=2 records=40 result=43
+    graph_continuation_sdk_test.go:1059: SDK_PHASE name=finished elapsed=31.023076445s remaining=28.976923095s sdk_requests=19827
+=== RUN   TestNativeGraphContinuationTimerHistory/R3Domain/archive=false
+    graph_continuation_sdk_test.go:537: SDK_PHASE name=execute_begin_next elapsed=1.789858624s remaining=28.210141086s sdk_requests=166
+    graph_continuation_sdk_test.go:516: workflow lease was lost: initialization: nats: nats: API error: code=400 err_code=10164 description=wrong last sequence: nats: key revision mismatch
+    panic.go:694: SDK_PHASE name=finished elapsed=1.792792131s remaining=28.207207359s sdk_requests=166
+=== RUN   TestNativeGraphContinuationTimerHistory/R3Domain/archive=true
+    graph_continuation_sdk_test.go:537: SDK_PHASE name=execute_begin_next elapsed=1.802490435s remaining=58.197509244s sdk_requests=166
+    graph_continuation_sdk_test.go:539: SDK_PHASE name=execute_end_next elapsed=12.04626847s remaining=47.953731229s sdk_requests=3967
+    graph_continuation_sdk_test.go:569: SDK_TIMER_HISTORY stage=next cancelled=[4] archive=true
+    graph_continuation_sdk_test.go:657: SDK_PHASE name=parent_sweep_end_next elapsed=16.551904054s remaining=43.448095485s sdk_requests=5836
+    graph_continuation_sdk_test.go:713: ARCHIVE_COLLECTION stage=next original_entry_receipts_removed=17 live_records=3 logical_records=16
+    graph_continuation_sdk_test.go:717: SDK_PHASE name=parent_audit_end_next elapsed=17.326038999s remaining=42.673960461s sdk_requests=6128
+    graph_continuation_sdk_test.go:730: SDK_PHASE name=boundary_scan_end_next elapsed=17.36892196s remaining=42.631077629s sdk_requests=6146
+    graph_continuation_sdk_test.go:537: SDK_PHASE name=execute_begin_finish elapsed=17.369012508s remaining=42.630987222s sdk_requests=6146
+    graph_continuation_sdk_test.go:539: SDK_PHASE name=execute_end_finish elapsed=32.356194414s remaining=27.643805236s sdk_requests=11967
+    graph_continuation_sdk_test.go:569: SDK_TIMER_HISTORY stage=finish cancelled=[4,14] archive=true
+    graph_continuation_sdk_test.go:657: SDK_PHASE name=parent_sweep_end_finish elapsed=42.645456416s remaining=17.354543333s sdk_requests=16392
+    graph_continuation_sdk_test.go:713: ARCHIVE_COLLECTION stage=finish original_entry_receipts_removed=25 live_records=3 logical_records=37
+    graph_continuation_sdk_test.go:717: SDK_PHASE name=parent_audit_end_finish elapsed=44.019458822s remaining=15.980540607s sdk_requests=16955
+    graph_continuation_sdk_test.go:730: SDK_PHASE name=boundary_scan_end_finish elapsed=44.081809911s remaining=15.918189548s sdk_requests=16972
+    graph_continuation_sdk_test.go:1053: RAW_SDK_CHECKPOINT_AUDIT journals=1 entries=40 terminals=1 pending=0 retired_projection_only=0
+    graph_continuation_sdk_test.go:1055: SDK initial/next/finish=map[finish:1 initial:1 next:1] effects=2 records=40 result=43
+    graph_continuation_sdk_test.go:1059: SDK_PHASE name=finished elapsed=49.76598694s remaining=10.234012529s sdk_requests=19824
+--- FAIL: TestNativeGraphContinuationTimerHistory (95.91s)
+    --- PASS: TestNativeGraphContinuationTimerHistory/R1/archive=false (12.69s)
+    --- PASS: TestNativeGraphContinuationTimerHistory/R1/archive=true (31.06s)
+    --- FAIL: TestNativeGraphContinuationTimerHistory/R3Domain/archive=false (2.05s)
+    --- PASS: TestNativeGraphContinuationTimerHistory/R3Domain/archive=true (50.10s)
+FAIL
+FAIL	js-wf/worker	95.965s
+FAIL

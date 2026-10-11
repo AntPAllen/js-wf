@@ -38,6 +38,19 @@ func TestNativeGraphContinuationSDKFlow(t *testing.T) {
 		t.Run(name, func(t *testing.T) { testNativeGraphContinuationSDKFlow(t, domain, false, false, false, false) })
 	}
 }
+func TestNativeGraphContinuationTimerHistory(t *testing.T) {
+	for _, domain := range []string{"", "WFCONTINUATIONSDK"} {
+		name := "R1"
+		if domain != "" {
+			name = "R3Domain"
+		}
+		for _, archive := range []bool{false, true} {
+			t.Run(fmt.Sprintf("%s/archive=%t", name, archive), func(t *testing.T) {
+				testNativeGraphContinuationSDKFlow(t, domain, false, false, false, false, archive, false, false, false, false, false, true)
+			})
+		}
+	}
+}
 func TestNativeGraphContinuationSDKPartitionFlow(t *testing.T) {
 	for _, domain := range []string{"", "WFCONTINUATIONSDK"} {
 		name := "R1"
@@ -155,13 +168,14 @@ func TestNativeGraphContinuationArchiveCollection(t *testing.T) {
 	}
 }
 func testNativeGraphContinuationSDKFlow(t *testing.T, domain string, partition, bufferedSignals, childPromiseFlow, bufferedChild bool, archiveMode ...bool) {
-	// Optional modes: archive, failed child, pending child, cancel pending parent, running effect cancellation, late success.
+	// Optional modes: archive, failed child, pending child, cancel pending parent, running effect cancellation, late success, timer history.
 	archive := len(archiveMode) != 0 && archiveMode[0]
 	childFailure := len(archiveMode) > 1 && archiveMode[1]
 	pendingChild := len(archiveMode) > 2 && archiveMode[2]
 	cancelPendingChild := len(archiveMode) > 3 && archiveMode[3]
 	cancelRunningEffect := len(archiveMode) > 4 && archiveMode[4]
 	lateEffectSuccess := len(archiveMode) > 5 && archiveMode[5]
+	timerHistory := len(archiveMode) > 6 && archiveMode[6]
 	effectEntered := make(chan struct{})
 	if cancelPendingChild && !pendingChild {
 		t.Fatal("cancellation fixture requires an unresolved child")
@@ -295,6 +309,22 @@ func testNativeGraphContinuationSDKFlow(t *testing.T, domain string, partition, 
 		if err := c.SetState("value", got); err != nil {
 			return nil, err
 		}
+		if timerHistory {
+			cancelled, err := c.Timer("initial-cancel", time.Hour)
+			if err != nil {
+				return nil, err
+			}
+			if err = cancelled.Cancel(); err != nil {
+				return nil, err
+			}
+			fired, err := c.Timer("initial-fire", 0)
+			if err != nil {
+				return nil, err
+			}
+			if err = fired.Await(); err != nil {
+				return nil, err
+			}
+		}
 		if childPromiseFlow {
 			var err error
 			childPromise, err = wf.CallAsync(c, "testchild", []byte(`7`))
@@ -335,6 +365,31 @@ func testNativeGraphContinuationSDKFlow(t *testing.T, domain string, partition, 
 	runner.continuations = map[string]map[string]ContinuationHandler{h.Type: {
 		"next": func(c *wf.Context, input, locals json.RawMessage) (json.RawMessage, error) {
 			calls["next"]++
+			if timerHistory {
+				cancelled, err := c.Timer("next-cancel", time.Hour)
+				if err != nil {
+					return nil, err
+				}
+				if err = cancelled.Cancel(); err != nil {
+					return nil, err
+				}
+				selected, err := c.Timer("selected-fire", 0)
+				if err != nil {
+					return nil, err
+				}
+				branch, _, err := selected.SelectSignal("absent")
+				if err != nil || branch != wf.TimerSelected {
+					return nil, fmt.Errorf("timer branch: %s %w", branch, err)
+				}
+				many, err := c.Timer("many-fire", 0)
+				if err != nil {
+					return nil, err
+				}
+				index, _, err := wf.Select(c, many)
+				if err != nil || index != 0 {
+					return nil, fmt.Errorf("timer select: %d %w", index, err)
+				}
+			}
 			var nextPromise wf.Promise
 			if childPromiseFlow {
 				var data struct {
@@ -485,6 +540,33 @@ func testNativeGraphContinuationSDKFlow(t *testing.T, domain string, partition, 
 			status, err := graph.InspectStart(ctx, h.Type, h.ID)
 			if err != nil || status.Checkpoint == nil || status.Checkpoint.Stage != stage || !status.ContinuationReady() {
 				t.Fatal("SDK did not publish checkpoint", stage, status, err)
+			}
+			if timerHistory {
+				view, err := graph.Open(ctx, h.Type, h.ID, h.InvSeq)
+				if err != nil {
+					t.Fatal(err)
+				}
+				found, err := view.ReadCheckpoint(ctx, h.Type, h.ID)
+				if err != nil || found == nil {
+					t.Fatal("timer frame missing", err)
+				}
+				var frame checkpoint.Frame
+				if err = json.Unmarshal(found.Frame, &frame); err != nil {
+					t.Fatal(err)
+				}
+				want := []uint64{4}
+				if stage == "finish" {
+					want = append(want, 14)
+				}
+				a, _ := json.Marshal(frame.CancelledTimers)
+				b, _ := json.Marshal(want)
+				if !bytes.Equal(a, b) {
+					t.Fatal("timer cancellation set", stage, string(a), string(b))
+				}
+				if err = view.Close(ctx); err != nil {
+					t.Fatal(err)
+				}
+				t.Logf("SDK_TIMER_HISTORY stage=%s cancelled=%s archive=%t", stage, a, archive)
 			}
 			if pendingChild {
 				view, err := graph.Open(ctx, h.Type, h.ID, h.InvSeq)
