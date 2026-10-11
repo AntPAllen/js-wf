@@ -1,5 +1,20 @@
 # Implementation status against the supplied plan
 
+## Positive native timer wakeup through SDK continuations — 2026-10-11
+
+Real R1/R3Domain RunPartition workers suspend on a75ms SDK timer and resume from
+NATS native scheduled delivery, then complete two owned continuation handoffs.
+Both race cases pass in40.721s with one timer wait, two continuation waits,
+three schedules, one positive timer declaration and exactly two effects; full
+raw checkpoint/history audits pass. CI requires both cases. The initial fixture
+counted continuation waits as timer waits; its failed log/source remain preserved
+and the corrected guard requires exact waiting_on identities. No runtime change.
+[Evidence, retained native stores and scope](scale/native-sdk-positive-timer-2026-10-11/README.md).
+
+Tagged clock bounds, clock/leader repair, archived positive waits and original
+full acceptance remain open. The earlier native lease failure remains unconfirmed;
+this different scheduled-delivery campaign does not replace its qualification.
+
 ## Lease initialization diagnostic and deterministic successor safety — 2026-10-11
 
 Added native Create/Update revision tracing and optional retained broker stores.

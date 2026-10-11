@@ -199,6 +199,20 @@ jobs:
           import pathlib
           assert '--- PASS: TestInitializationConflictPreservesSuccessor ' in pathlib.Path('lease-initialization-conflict.log').read_text()
           PY
+      - name: Audit positive timer scheduled delivery and continuations
+        shell: bash
+        run: |
+          set -o pipefail
+          go test -race -p=1 ./worker -run '^TestNativeGraphContinuationScheduledTimerFlow$' -count=1 -v -timeout=4m 2>&1 | tee raw-sdk-positive-timer.log
+          python3 - <<'PYGUARD'
+          import pathlib, re
+          log = pathlib.Path('raw-sdk-positive-timer.log').read_text()
+          assert not re.search(r'^--- SKIP:', log, re.M)
+          for layout in ('R1', 'R3Domain'):
+              assert f'--- PASS: TestNativeGraphContinuationScheduledTimerFlow/{layout} ' in log
+          assert log.count('SDK_POSITIVE_TIMER suspended=1 handoffs=2 start=1 schedules=3 initial=2 next=1 finish=1 effects=2') == 2
+          assert len(re.findall(r'RAW_SDK_CHECKPOINT_AUDIT journals=1 entries=\d+ terminals=1 pending=0 retired_projection_only=0', log)) == 2
+          PYGUARD
       - name: Audit native timer handle history through archived checkpoints
         shell: bash
         run: |
@@ -222,6 +236,7 @@ jobs:
           path: |
             raw-sdk-checkpoint-audit.log
             raw-sdk-timer-history.log
+            raw-sdk-positive-timer.log
             lease-initialization-conflict.log
           if-no-files-found: error
   raw-graph-reference-audit:

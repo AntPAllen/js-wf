@@ -1,0 +1,19 @@
+=== RUN   TestNativeGraphContinuationScheduledTimerFlow
+=== RUN   TestNativeGraphContinuationScheduledTimerFlow/R1
+    graph_continuation_sdk_test.go:213: SDK_DIAGNOSTIC_STORE test=TestNativeGraphContinuationScheduledTimerFlow/R1 root=/home/exedev/js-wf-positive-timer-20261011/native-3222230381
+    graph_sdk_lease_trace_test.go:22: SDK_LEASE_CREATE key=test.sdkcontinue revision=68 value={"worker":"sdkcontinue","epoch":0} elapsed=737.23µs error=%!q(<nil>)
+    graph_sdk_lease_trace_test.go:32: SDK_LEASE_UPDATE key=test.sdkcontinue expected=68 revision=69 value={"worker":"sdkcontinue","epoch":68} elapsed=222.087µs error=%!q(<nil>)
+    graph_continuation_sdk_test.go:1084: timer did not suspend/schedule exactly once 3 1 3
+    panic.go:694: SDK_PHASE name=finished elapsed=13.666660655s remaining=16.333338894s sdk_requests=7752
+=== RUN   TestNativeGraphContinuationScheduledTimerFlow/R3Domain
+    graph_continuation_sdk_test.go:213: SDK_DIAGNOSTIC_STORE test=TestNativeGraphContinuationScheduledTimerFlow/R3Domain root=/home/exedev/js-wf-positive-timer-20261011/native-1753211340
+    graph_sdk_lease_trace_test.go:22: SDK_LEASE_CREATE key=test.sdkcontinue revision=68 value={"worker":"sdkcontinue","epoch":0} elapsed=3.326774ms error=%!q(<nil>)
+    graph_sdk_lease_trace_test.go:32: SDK_LEASE_UPDATE key=test.sdkcontinue expected=68 revision=69 value={"worker":"sdkcontinue","epoch":68} elapsed=995.553µs error=%!q(<nil>)
+    graph_continuation_sdk_test.go:1084: timer did not suspend/schedule exactly once 3 1 3
+    panic.go:694: SDK_PHASE name=finished elapsed=21.400323934s remaining=8.599675656s sdk_requests=8053
+--- FAIL: TestNativeGraphContinuationScheduledTimerFlow (35.40s)
+    --- FAIL: TestNativeGraphContinuationScheduledTimerFlow/R1 (13.72s)
+    --- FAIL: TestNativeGraphContinuationScheduledTimerFlow/R3Domain (21.69s)
+FAIL
+FAIL	js-wf/worker	35.455s
+FAIL

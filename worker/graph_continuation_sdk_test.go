@@ -51,6 +51,17 @@ func TestNativeGraphContinuationTimerHistory(t *testing.T) {
 		}
 	}
 }
+func TestNativeGraphContinuationScheduledTimerFlow(t *testing.T) {
+	for _, domain := range []string{"", "WFCONTINUATIONSDK"} {
+		name := "R1"
+		if domain != "" {
+			name = "R3Domain"
+		}
+		t.Run(name, func(t *testing.T) {
+			testNativeGraphContinuationSDKFlow(t, domain, true, false, false, false, false, false, false, false, false, false, true, true)
+		})
+	}
+}
 func TestNativeGraphContinuationSDKPartitionFlow(t *testing.T) {
 	for _, domain := range []string{"", "WFCONTINUATIONSDK"} {
 		name := "R1"
@@ -168,7 +179,7 @@ func TestNativeGraphContinuationArchiveCollection(t *testing.T) {
 	}
 }
 func testNativeGraphContinuationSDKFlow(t *testing.T, domain string, partition, bufferedSignals, childPromiseFlow, bufferedChild bool, archiveMode ...bool) {
-	// Optional modes: archive, failed child, pending child, cancel pending parent, running effect cancellation, late success, timer history.
+	// Optional modes: archive, failed child, pending child, cancel pending parent, running effect cancellation, late success, timer history, positive timer wakeup.
 	archive := len(archiveMode) != 0 && archiveMode[0]
 	childFailure := len(archiveMode) > 1 && archiveMode[1]
 	pendingChild := len(archiveMode) > 2 && archiveMode[2]
@@ -176,6 +187,7 @@ func testNativeGraphContinuationSDKFlow(t *testing.T, domain string, partition, 
 	cancelRunningEffect := len(archiveMode) > 4 && archiveMode[4]
 	lateEffectSuccess := len(archiveMode) > 5 && archiveMode[5]
 	timerHistory := len(archiveMode) > 6 && archiveMode[6]
+	positiveTimer := len(archiveMode) > 7 && archiveMode[7]
 	effectEntered := make(chan struct{})
 	if cancelPendingChild && !pendingChild {
 		t.Fatal("cancellation fixture requires an unresolved child")
@@ -328,7 +340,11 @@ func testNativeGraphContinuationSDKFlow(t *testing.T, domain string, partition, 
 			if err = cancelled.Cancel(); err != nil {
 				return nil, err
 			}
-			fired, err := c.Timer("initial-fire", 0)
+			duration := time.Duration(0)
+			if positiveTimer {
+				duration = 75 * time.Millisecond
+			}
+			fired, err := c.Timer("initial-fire", duration)
 			if err != nil {
 				return nil, err
 			}
@@ -1016,7 +1032,11 @@ func testNativeGraphContinuationSDKFlow(t *testing.T, domain string, partition, 
 	if pendingChild {
 		wantFinish = 2
 	}
-	if err != nil || string(result) != "43" || effects != 2 || calls["initial"] != 1 || calls["next"] != 1 || calls["finish"] != wantFinish {
+	wantInitial := 1
+	if positiveTimer {
+		wantInitial = 2
+	}
+	if err != nil || string(result) != "43" || effects != 2 || calls["initial"] != wantInitial || calls["next"] != 1 || calls["finish"] != wantFinish {
 		t.Fatal("SDK workflow replay/result", string(result), err, calls, effects)
 	}
 	records, _, err := graph.ReadExisting(ctx, h.Type, h.ID, h.InvSeq)
@@ -1036,6 +1056,47 @@ func testNativeGraphContinuationSDKFlow(t *testing.T, domain string, partition, 
 			}
 		}
 		t.Logf("PENDING_CHILD_RESUMED failed=%t archive=%t prefix_records=%d records=%d initial=1 next=1 finish=2 effects=2 child_calls=%d result=43", childFailure, archive, len(pendingPrefix), len(records), childCalls)
+	}
+	if positiveTimer {
+		suspended, handoffs, starts := 0, 0, 0
+		var deadline time.Time
+		for _, record := range records {
+			if record.Kind == journal.Suspended {
+				var wait struct {
+					WaitingOn string `json:"waiting_on"`
+				}
+				if json.Unmarshal(record.Payload, &wait) != nil {
+					t.Fatal("invalid suspension payload")
+				}
+				switch wait.WaitingOn {
+				case "timer:initial-fire":
+					suspended++
+				case "continuation:next", "continuation:finish":
+					handoffs++
+				default:
+					t.Fatal("unexpected suspension", wait.WaitingOn)
+				}
+			}
+			if record.Kind == journal.StepRequested {
+				var request struct {
+					Kind     string    `json:"kind"`
+					Name     string    `json:"name"`
+					Duration int64     `json:"duration_nanos"`
+					FireAt   time.Time `json:"fire_at"`
+				}
+				if json.Unmarshal(record.Payload, &request) == nil && request.Kind == "timer_start" && request.Name == "initial-fire" {
+					starts++
+					deadline = request.FireAt
+					if request.Duration != int64(75*time.Millisecond) || deadline.IsZero() {
+						t.Fatal("positive timer request", request)
+					}
+				}
+			}
+		}
+		if suspended != 1 || handoffs != 2 || starts != 1 || runner.metrics.timersScheduled.Load() != 3 {
+			t.Fatal("timer did not suspend/schedule exactly once", suspended, handoffs, starts, runner.metrics.timersScheduled.Load())
+		}
+		t.Logf("SDK_POSITIVE_TIMER suspended=1 handoffs=2 start=1 schedules=3 initial=2 next=1 finish=1 effects=2 deadline=%s", deadline.Format(time.RFC3339Nano))
 	}
 	completions := 0
 	for i, record := range records {
