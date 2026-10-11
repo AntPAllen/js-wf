@@ -25,7 +25,7 @@ active10k requirement.
 Changes were prepared in the isolated checkout
 `/home/exedev/js-wf-purge-active-unique-20261011` while the old native SDK retained
 its original sources. Captured SDKs, actual exits and1169 input hashes are
-reviewed independently. `fixture.patch` and `active-helper.go.txt` preserve the
+reviewed independently. `fixture.patch.gz` and `active-helper.go.txt` preserve the
 exact proposed changes. All1169 qualified input bytes also match integrated main
 `e882213`; `integration.json` records that comparison. The isolated commit is
 `98d296b`. No model family/pin or production runtime code changes.

@@ -1,10 +1,10 @@
-import hashlib,json,re,subprocess
+import gzip,hashlib,json,re,subprocess
 from pathlib import Path
 out=Path(__file__).resolve().parent
 record=json.loads((out/'source-inputs.json').read_text());checkout=Path(record['checkout']);sha=lambda b:hashlib.sha256(b).hexdigest()
 for n,h in record['files'].items():assert sha((checkout/n).read_bytes())==h,n
 assert (out/'active-helper.go.txt').read_bytes()==(checkout/'integration/purge_reuse_active_test.go').read_bytes()
-assert subprocess.check_output(['git','diff',record['base_revision'],'--','integration/purge_reuse_scale_test.go','.github/workflows/canonical-purge-reuse.yml'],cwd=checkout)==(out/'fixture.patch').read_bytes()
+assert subprocess.check_output(['git','diff',record['base_revision'],'--','integration/purge_reuse_scale_test.go','.github/workflows/canonical-purge-reuse.yml'],cwd=checkout)==gzip.decompress((out/'fixture.patch.gz').read_bytes())
 rows=[]
 for mode in ('normal','race'):
  receipt=json.loads((out/(mode+'-command.json')).read_text());assert receipt['actual_exit']==0 and receipt['source_unchanged'] and len(receipt['executions'])==1

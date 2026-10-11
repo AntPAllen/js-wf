@@ -1,11 +1,11 @@
-import hashlib,json,os,subprocess,time
+import gzip,hashlib,json,os,subprocess,time
 from pathlib import Path
 out=Path(__file__).resolve().parent;checkout=Path('/home/exedev/js-wf-purge-active-unique-20261011');root=Path('/home/exedev/js-wf-purge-active-distinct-20261011')
 names=subprocess.check_output(['git','ls-files'],cwd=checkout,text=True).splitlines()+['integration/purge_reuse_active_test.go']
 names=[n for n in names if n.endswith('.go') or n in ('go.mod','go.sum','.github/workflows/canonical-purge-reuse.yml')]
 inputs={n:hashlib.sha256((checkout/n).read_bytes()).hexdigest() for n in sorted(set(names))}
 (out/'source-inputs.json').write_text(json.dumps(dict(checkout=str(checkout),base_revision=subprocess.check_output(['git','rev-parse','HEAD'],cwd=checkout,text=True).strip(),files=inputs),indent=2)+'\n')
-(out/'fixture.patch').write_bytes(subprocess.check_output(['git','diff','--','integration/purge_reuse_scale_test.go','.github/workflows/canonical-purge-reuse.yml'],cwd=checkout))
+(out/'fixture.patch.gz').write_bytes(gzip.compress(subprocess.check_output(['git','diff',subprocess.check_output(['git','rev-parse','HEAD'],cwd=checkout,text=True).strip(),'--','integration/purge_reuse_scale_test.go','.github/workflows/canonical-purge-reuse.yml'],cwd=checkout),mtime=0))
 (out/'active-helper.go.txt').write_bytes((checkout/'integration/purge_reuse_active_test.go').read_bytes())
 def check():return all(hashlib.sha256((checkout/n).read_bytes()).hexdigest()==h for n,h in inputs.items())
 for mode in ('normal','race'):
