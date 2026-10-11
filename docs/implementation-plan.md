@@ -1,5 +1,22 @@
 # JetStream Durable Workflow Runtime — Implementation Plan
 
+## Complete frozen160 race launched after accepted normal — 2026-10-11
+
+Following independent normal acceptance at50e4f9b (160000 completed bodies/880
+pins/eight real package exits0), same-source race started04:10:38UTC under
+js-wf-main160-tier1-race-20261011-prepared.service. Loaded invocation
+adb2b689836b43ba9d16e55d1e4476a8, supervisor244649/driver244675 and unchanged
+supervisor bytes are captured. Actual handles remain live. One-core quota/2GB
+memory, GOMAXPROCS2/GOMEMLIMIT512MiB, eight sequential disjoint processes,
+1000 seeds per160 families/880 pins and300m per-process watchdog are unchanged.
+
+Independent review deliberately rejects this unfinished stage; its actual refusal
+is retained. Launch does not establish race acceptance. See [source-bound launch
+and accepted normal evidence](scale/current-main160-tier1-2026-10-11/README.md).
+Two older159-family race and classified100000-entry race campaigns also remain
+live. Current main has161 families/894 pins and newer audit code: full current
+normal/race/extended and all original broad acceptance gates remain open.
+
 ## Complete frozen160 normal Tier1 qualification accepted — 2026-10-11
 
 Independent review accepts source50e4f9bee0931ba4474b68574a08da3bfbaafe52:

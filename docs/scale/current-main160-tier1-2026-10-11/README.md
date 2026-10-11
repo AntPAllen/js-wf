@@ -52,3 +52,18 @@ stored files; every copied file was read back and compared. The original binary,
 frozen checkout and loaded unit remain local and required by the independent
 reviewer. This proof does not cover newer main,161-family qualification, race,
 extended or original native/scale/fault/soak/rollout acceptance.
+
+## Same-source full race launched after accepted normal
+
+Unitjs-wf-main160-tier1-race-20261011-prepared.service started04:10:38UTC,
+InvocationIDadb2b689836b43ba9d16e55d1e4476a8, supervisor244649/driver244675.
+race-launch.json and race-loaded-unit.txt bind the actual loaded command,
+resources, process handles, invocation and unchanged supervisor hash. It uses
+the same source50e4f9b,1000 seeds/160 families/880 pins, eight sequential disjoint
+processes and retained race binary, one-core quota/2GB memory, GOMAXPROCS2/
+GOMEMLIMIT512MiB,300m per-process watchdog and145200s unit lifetime.
+
+The reviewer refused this actual running stage with exit1; the refusal is retained.
+Launch is not race acceptance. The live race-state.json remains untracked until
+actual completion. After closure run the existing qualification-review.py race
+command; do not change the captured supervisor or frozen source.
