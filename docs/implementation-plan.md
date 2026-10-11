@@ -1,5 +1,16 @@
 # JetStream Durable Workflow Runtime — Implementation Plan
 
+## Full canonical 10k/10k/1k normal native gate launched — 2026-10-11
+
+One fresh R3 normal native run targets10000 old/10000 live/1000 reused IDs from
+frozenac85566. The actual SDK is live, its environment has no count override,
+and its log confirms full_scale=true. Source binds1171 Git-compared Go/module
+files; executable identity and service resource limits are captured. The existing
+20m parent and22m test bounds remain. The dedicated service has a2CPU quota,
+CPUWeight1000 and4GiB memory limit; the three earlier race campaigns are unchanged.
+No terminal result, raw audit, PostgreSQL or race acceptance is claimed.
+[Full native launch receipts](scale/native-canonical-full-2026-10-11/README.md).
+
 ## Preparation phases qualified without changing mutation policy — 2026-10-11
 
 Append preparation now distinguishes head observation/check, payload acquisition
