@@ -1,5 +1,21 @@
 # Full current-source Tier-1 qualification — 2026-10-11
 
+## Accepted frozen normal1000 — 2026-10-11
+
+The prepared unit finished with actual driver/supervisor exit0 at02:51:48UTC,
+MainPID0, RemainAfterExit=yes and InvocationID251311b5bc46429586fce59d5b2a3188.
+Independent review accepts all159000 seeded bodies across159 families,860 saved
+traces,226 top-level passes and eight sequential package processes sharing the
+same retained binary. All3589 required frozen Git inputs and before/after hashes
+match sourceb4fe4452b827cbbdd51b6c32052c060199742223. Compressed package logs,
+source manifests, command/exit/context receipts and the complete independent
+reduction are retained in normal-terminal; normal-terminal-files.json binds
+original bytes. The prepared binary and frozen sparse checkout remain local.
+
+This qualifies the source current at launch, not later main changes. Same-source
+race and extended qualification remain separate, as do original native plan
+requirements. The original failed setup and earlier live-review refusal remain.
+
 Frozen source b4fe4452b827cbbdd51b6c32052c060199742223 includes the independent raw
 journal/history/envelope/limit/selection auditing and native competing-selection
 fixtures. The full normal1000 suite is now running, with no family filtering:
