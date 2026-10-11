@@ -29,7 +29,8 @@ func rawJournalCheckpointFixture(t *testing.T, encoding journal.Encoding, archiv
 		{Index: 2, Epoch: 1, WorkerID: "worker", Kind: journal.StepCompleted, Payload: json.RawMessage(`{"result":42}`)},
 		{Index: 3, Epoch: 1, WorkerID: "worker", Kind: journal.Completed, Payload: json.RawMessage(`{"inv_seq":10,"result":"NDI="}`)},
 	}
-	history := strings.HasPrefix(control, "history-")
+	historical := strings.HasPrefix(control, "historical-")
+	history := strings.HasPrefix(control, "history-") || historical
 	requestIndex, frameIndex, position := uint64(1), uint64(2), uint64(2)
 	var stateResult []byte
 	if history {
@@ -68,6 +69,7 @@ func rawJournalCheckpointFixture(t *testing.T, encoding journal.Encoding, archiv
 	var frameBytes []byte
 	var promiseBytes [][]byte
 	var metadataBytes []byte
+	var olderFrame, olderMetadata []byte
 	var pointer auditedCheckpointPointer
 	if archive {
 		// Independently encoded frame and pointer; no production writer/reader.
@@ -215,6 +217,52 @@ func rawJournalCheckpointFixture(t *testing.T, encoding journal.Encoding, archiv
 			entries[1].Payload = json.RawMessage(`{"kind":"run","name":"next","input_hash":"` + digest([]byte(`{"x":1}`)) + `"}`)
 		}
 	}
+	if historical {
+		// The old frame and metadata have their own self-consistent physical
+		// hashes/owned edges. Only prefix semantics may reject these controls.
+		var old map[string]any
+		json.Unmarshal(frameBytes, &old)
+		switch control {
+		case "historical-state":
+			old["state"] = map[string]any{"value": 99}
+		case "historical-anchor":
+			old["anchor"] = map[string]uint64{"index": 8, "epoch": 1}
+		case "historical-locals":
+			old["data"] = map[string]int{"x": 9}
+		case "historical-cursor":
+			old["signal_cursor"] = 1
+		case "historical-timer":
+			old["cancelled_timers"] = []uint64{0}
+		}
+		olderFrame, _ = json.Marshal(old)
+		var meta map[string]any
+		json.Unmarshal(metadataBytes, &meta)
+		meta["frame_sha256"] = digest(olderFrame)
+		if control == "historical-metadata" {
+			meta["version"] = 9
+		}
+		olderMetadata, _ = json.Marshal(meta)
+		entries[4].Payload = json.RawMessage(`{"result_ref":"step-result-` + digest(olderFrame) + `","result_hash":"` + digest(olderFrame) + `","checkpoint_metadata_ref":"step-result-` + digest(olderMetadata) + `","checkpoint_metadata_hash":"` + digest(olderMetadata) + `"}`)
+		terminal := entries[len(entries)-1]
+		terminal.Index = 9
+		entries = append(entries[:5], journal.Entry{Index: 5, Epoch: 1, WorkerID: "worker", Kind: journal.StepRequested, Payload: json.RawMessage(`{"kind":"state_set","name":"value","input_hash":"` + digest([]byte(`43`)) + `"}`)}, journal.Entry{Index: 6, Epoch: 1, WorkerID: "worker", Kind: journal.StepCompleted, Payload: json.RawMessage(`{"result":{"found":true,"value":43}}`)}, journal.Entry{Index: 7, Epoch: 1, WorkerID: "worker", Kind: journal.StepRequested, Payload: json.RawMessage(`{"kind":"checkpoint","name":"finish","input_hash":"` + digest([]byte(`{"x":2}`)) + `"}`)}, journal.Entry{Index: 8, Epoch: 1, WorkerID: "worker", Kind: journal.StepCompleted}, terminal)
+		var latest map[string]any
+		json.Unmarshal(frameBytes, &latest)
+		latest["stage"] = "finish"
+		latest["anchor"] = map[string]uint64{"index": 8, "epoch": 1}
+		latest["step_position"] = 8
+		latest["data"] = map[string]int{"x": 2}
+		latest["state"] = map[string]any{"value": 43}
+		frameBytes, _ = json.Marshal(latest)
+		json.Unmarshal(metadataBytes, &meta)
+		meta["anchor"] = map[string]uint64{"index": 8, "epoch": 1}
+		meta["frame_sha256"] = digest(frameBytes)
+		metadataBytes, _ = json.Marshal(meta)
+		entries[8].Payload = json.RawMessage(`{"result_ref":"step-result-` + digest(frameBytes) + `","result_hash":"` + digest(frameBytes) + `","checkpoint_metadata_ref":"step-result-` + digest(metadataBytes) + `","checkpoint_metadata_hash":"` + digest(metadataBytes) + `"}`)
+		requestIndex, frameIndex, position = 7, 8, 8
+		pointer.RequestIndex = 7
+		pointer.Runtime.Stage, pointer.Runtime.Index, pointer.Runtime.Sequence, pointer.Runtime.StepPosition, pointer.Runtime.Object, pointer.Runtime.SHA256 = "finish", 8, 109, 8, "step-result-"+digest(frameBytes), digest(frameBytes)
+	}
 	if alter != nil {
 		alter(entries)
 	}
@@ -254,6 +302,9 @@ func rawJournalCheckpointFixture(t *testing.T, encoding journal.Encoding, archiv
 			EntrySHA256 string `json:"entry_sha256"`
 		}{"js-wf-graph-journal-entry-v1", inv, 101 + index, edge.Hash})
 		blobs := []retainedgraph.Link{edge}
+		if historical && index == 4 {
+			blobs = append(blobs, put(olderFrame, graphpublication.Location{Kind: "payload", First: first, Stream: stream}), put(olderMetadata, graphpublication.Location{Kind: "payload", First: first, Stream: stream}))
+		}
 		if archive && index == frameIndex && control != "frame-unowned" {
 			blobs = append(blobs, put(frameBytes, graphpublication.Location{Kind: "payload", First: first, Stream: stream}))
 		}
@@ -320,6 +371,10 @@ func rawJournalCheckpointFixture(t *testing.T, encoding journal.Encoding, archiv
 		if history {
 			root.Streams[0].Graph = retainedgraph.Root{Schema: retainedgraph.Schema, Count: 3, Frontier: []retainedgraph.Tree{tree(0, 0, 1, "archive"), tree(2, 2, 0, "archive")}}
 		}
+		if historical {
+			root.Streams[0].Graph = retainedgraph.Root{Schema: retainedgraph.Schema, Count: 7, Frontier: []retainedgraph.Tree{tree(0, 0, 2, "archive"), tree(4, 4, 1, "archive"), tree(6, 6, 0, "archive")}}
+		}
+
 		source.Data = []byte(`{"schema":"js-wf-canonical-start-pointer-v1","token":"start"}`)
 		source.Header = nats.Header{"Wf-Graph-Start-Token": []string{"start"}, "Wf-Input-SHA256": []string{start.InputSHA256}}
 	}

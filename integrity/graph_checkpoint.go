@@ -47,6 +47,40 @@ func auditCheckpointPointer(c auditedGraphCursor) (*auditedCheckpointPointer, er
 	return &p, nil
 }
 
+// Every completed checkpoint is checked at its own journal prefix, including
+// unpublished completions and older archived frames. The cursor pointer still
+// independently binds the latest published checkpoint.
+func auditCompletedCheckpoint(ctx context.Context, graph GraphReferenceSnapshot, state *auditedGraphJournal, anchor journal.Record, edges []retainedgraph.Link) (bool, error) {
+	var request struct {
+		Kind string `json:"kind"`
+		Name string `json:"name"`
+	}
+	if json.Unmarshal(state.journal.request, &request) != nil {
+		return false, fmt.Errorf("invalid checkpoint declaration")
+	}
+	if request.Kind != "checkpoint" {
+		return false, nil
+	}
+	var done struct {
+		Ref  string `json:"result_ref"`
+		Hash string `json:"result_hash"`
+	}
+	if json.Unmarshal(anchor.Payload, &done) != nil || identity.ValidateToken(request.Name) != nil || !graphAuditHash(done.Hash) || done.Ref != "step-result-"+done.Hash {
+		return false, fmt.Errorf("invalid historical checkpoint completion")
+	}
+	p := auditedCheckpointPointer{RequestIndex: state.lastStepRequest}
+	p.Runtime.InvSeq, p.Runtime.Stage, p.Runtime.Sequence, p.Runtime.Index, p.Runtime.Epoch, p.Runtime.StepPosition, p.Runtime.Object, p.Runtime.SHA256 = state.cursor.Invocation, request.Name, anchor.Sequence, anchor.Index, anchor.Epoch, state.sdkPosition, done.Ref, done.Hash
+	if state.checkpoint != nil && anchor.Index == state.checkpoint.Runtime.Index && p != *state.checkpoint {
+		return false, fmt.Errorf("published checkpoint differs from completed history")
+	}
+	selected := *state
+	selected.checkpoint = &p
+	if err := auditCheckpointFrame(ctx, graph, &selected, anchor, edges); err != nil {
+		return false, err
+	}
+	return true, nil
+}
+
 func auditCheckpointFrame(ctx context.Context, graph GraphReferenceSnapshot, state *auditedGraphJournal, anchor journal.Record, edges []retainedgraph.Link) error {
 	p := state.checkpoint
 	r := p.Runtime

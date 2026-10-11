@@ -1,5 +1,25 @@
 # JetStream Durable Workflow Runtime — Implementation Plan
 
+## Every retained checkpoint audited at its history prefix — 2026-10-11
+
+The independent raw auditor now checks every completed checkpoint, including
+older archived frames and unpublished completions. Each uses its own declaration,
+completion, prefix state/signals/promises/timers and worker metadata. The latest
+published cursor pointer remains separately bound to its exact completion.
+GraphJournalReport.Checkpoints reports frames actually checked.
+
+Two JSON/protobuf physical positives and12 reference-valid older-frame corruption
+controls pass race1.141s; existing checkpoint regressions pass
+18.622s. Eight native SDK normal, archived buffered-signal,
+child and buffered-child cases pass in two commands (89.011s
+and73.0s), with two audited parent frames each. CI requires
+all new physical fixtures and its complete SDK job's eight history receipts.
+[Evidence and remaining scope](scale/raw-every-checkpoint-history-2026-10-11/README.md).
+
+Unannotated frames remain structural; ambiguous promise completeness, timer clock/
+case priority, original scale/fault/soak/rollout and complete current-source gates
+remain open. Both larger frozen campaigns predate this auditor change.
+
 ## Cancelled timer wakeups after archived checkpoints — 2026-10-11
 
 Native R1/R3Domain race cases pass in93.701s. After checkpoint compaction and

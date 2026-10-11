@@ -189,6 +189,7 @@ jobs:
           assert len(re.findall(r'RAW_SDK_CHECKPOINT_AUDIT journals=\d+ entries=\d+ terminals=[1-9]\d* pending=0', log)) == 8
           retired = re.findall(r'RAW_SDK_CHECKPOINT_AUDIT journals=\d+ entries=\d+ terminals=[1-9]\d* pending=0 retired_projection_only=([01])', log)
           assert len(retired) == 8 and retired.count('1') == 4 and retired.count('0') == 4
+          assert log.count('RAW_SDK_CHECKPOINT_HISTORY checkpoints=2') == 8
           PY
       - name: Preserve successor on lease initialization conflict
         shell: bash
@@ -270,7 +271,7 @@ jobs:
         shell: bash
         run: |
           set -o pipefail
-          go test -race -p=1 ./integrity -run '^(TestRawGraphReferencesAndIndependentCorruptionControls|TestNativeRawGraphReferenceAuditQuiescentReaders|TestRawGraphJournalGenerationsOutcomesAndArchive|TestRawGraphCheckpointPointerAndFrameBindings|TestNativeRawGraphCheckpointAudit|TestRawGraphCheckpointMaterializedState|TestRawGraphCheckpointPromiseOwnership|TestRawGraphCheckpointMetadataBindings|TestRawGraphRetiredSourceProjectionScope|TestRawGraphSignalReservationAndBinding|TestRawGraphSignalIndexIndependentPrefixes|TestRawGraphSignalIndexProductionPackets|TestRawGraphCheckpointSDKStateHistory|TestRawGraphCheckpointPromiseHistory|TestRawGraphCheckpointSDKSignalHistory|TestRawGraphCheckpointSDKTimerHistory)$' -count=1 -v -timeout=5m 2>&1 | tee raw-graph-audit.log
+          go test -race -p=1 ./integrity -run '^(TestRawGraphReferencesAndIndependentCorruptionControls|TestNativeRawGraphReferenceAuditQuiescentReaders|TestRawGraphJournalGenerationsOutcomesAndArchive|TestRawGraphCheckpointPointerAndFrameBindings|TestNativeRawGraphCheckpointAudit|TestRawGraphCheckpointMaterializedState|TestRawGraphCheckpointPromiseOwnership|TestRawGraphCheckpointMetadataBindings|TestRawGraphRetiredSourceProjectionScope|TestRawGraphSignalReservationAndBinding|TestRawGraphSignalIndexIndependentPrefixes|TestRawGraphSignalIndexProductionPackets|TestRawGraphCheckpointSDKStateHistory|TestRawGraphCheckpointPromiseHistory|TestRawGraphCheckpointSDKSignalHistory|TestRawGraphCheckpointSDKTimerHistory|TestRawGraphEveryCheckpointHistory)$' -count=1 -v -timeout=5m 2>&1 | tee raw-graph-audit.log
           python3 - <<'PY'
           import pathlib, re
           log = pathlib.Path('raw-graph-audit.log').read_text()
@@ -286,6 +287,10 @@ jobs:
           assert '--- PASS: TestRawGraphCheckpointMetadataBindings ' in log
           assert '--- PASS: TestRawGraphCheckpointSDKStateHistory ' in log
           assert '--- PASS: TestRawGraphCheckpointPromiseHistory ' in log
+          assert '--- PASS: TestRawGraphEveryCheckpointHistory ' in log
+          for encoding in ('json', 'protobuf-v1'):
+              for mode in ('historical-valid', 'historical-state', 'historical-anchor', 'historical-locals', 'historical-cursor', 'historical-timer', 'historical-metadata'):
+                  assert f'--- PASS: TestRawGraphEveryCheckpointHistory/{encoding}/{mode} ' in log
           assert '--- PASS: TestRawGraphCheckpointSDKTimerHistory ' in log
           for mode in ('absolute-position-and-deadline', 'cancel', 'await', 'timer-select', 'many-select', 'signal-then-cancel', 'carried-cancel', 'empty', 'missing-creation', 'wrong-name', 'wrong-deadline', 'wrong-domain', 'unconfirmed-cancel', 'cancel-after-fire', 'await-after-cancel', 'duplicate-cancel', 'live-checkpoint', 'omitted-cancel', 'fabricated-cancel', 'duplicate-cancel-id', 'bad-select-index', 'unselected-dead-timer'):
               assert f'--- PASS: TestRawGraphCheckpointSDKTimerHistory/{mode} ' in log

@@ -25,9 +25,9 @@ type GraphJournalSnapshot struct {
 }
 
 type GraphJournalReport struct {
-	References                                                 GraphReferenceReport
-	Invocations, Journals, Entries, Terminal, Pending, Retired int
-	RetiredProjectionOnly                                      int
+	References                                                              GraphReferenceReport
+	Invocations, Journals, Entries, Terminal, Pending, Retired, Checkpoints int
+	RetiredProjectionOnly                                                   int
 }
 
 // This decoder is independent of GraphStore's cursor validation and traversal.
@@ -317,6 +317,9 @@ func CheckGraphJournals(ctx context.Context, snapshot GraphJournalSnapshot) (rep
 			if json.Unmarshal(entry.Payload, &request) != nil {
 				return fmt.Errorf("invalid checkpoint history request")
 			}
+			if request.Kind == "checkpoint" {
+				state.checkpointRequest = journal.Record{Entry: entry, Sequence: envelope.Sequence}
+			}
 			if request.Kind == "call" || request.Kind == "call_async" {
 				if identity.ValidateToken(request.Name) != nil || identity.Validate(request.Type, request.ID) != nil {
 					return fmt.Errorf("invalid checkpoint child declaration")
@@ -344,18 +347,22 @@ func CheckGraphJournals(ctx context.Context, snapshot GraphJournalSnapshot) (rep
 				state.childSignals[signal.Sequence] = signal
 			}
 		}
-		if state.checkpoint != nil {
-			pointer := state.checkpoint
-			if index == pointer.RequestIndex {
-				state.checkpointRequest = journal.Record{Entry: entry, Sequence: envelope.Sequence}
+		if entry.Kind == journal.StepCompleted {
+			audited, err := auditCompletedCheckpoint(call, graph, state, journal.Record{Entry: entry, Sequence: envelope.Sequence}, record.Record.Blobs)
+			if err != nil {
+				return err
 			}
-			if index == pointer.Runtime.Index {
-				if err := auditCheckpointFrame(call, graph, state, journal.Record{Entry: entry, Sequence: envelope.Sequence}, record.Record.Blobs); err != nil {
-					return err
+			if audited {
+				report.Checkpoints++
+			}
+			if state.checkpoint != nil && index == state.checkpoint.Runtime.Index {
+				if !audited {
+					return fmt.Errorf("checkpoint pointer completion lacks checkpoint request")
 				}
 				state.checkpointSeen = true
 			}
 		}
+
 		if entry.Kind == journal.Completed || entry.Kind == journal.Failed {
 			var outcome struct {
 				InvSeq     uint64 `json:"inv_seq"`

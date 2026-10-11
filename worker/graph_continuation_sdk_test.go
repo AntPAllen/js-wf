@@ -1173,7 +1173,11 @@ func testNativeGraphContinuationSDKFlow(t *testing.T, domain string, partition, 
 		if err != nil || report.Pending != 0 || report.Terminal == 0 {
 			t.Fatal("independent SDK runtime audit", report, err)
 		}
+		if !childPromiseFlow && !cancelRunningEffect && report.Checkpoints != 2 {
+			t.Fatal("historical SDK checkpoint census", report.Checkpoints)
+		}
 		t.Logf("RAW_SDK_CHECKPOINT_AUDIT journals=%d entries=%d terminals=%d pending=%d retired_projection_only=%d", report.Journals, report.Entries, report.Terminal, report.Pending, report.RetiredProjectionOnly)
+		t.Logf("RAW_SDK_CHECKPOINT_HISTORY checkpoints=%d", report.Checkpoints)
 	}
 	t.Logf("SDK initial/next/finish=%v effects=%d records=%d result=%s", calls, effects, len(records), result)
 	if childFailure {
