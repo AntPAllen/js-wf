@@ -1,5 +1,26 @@
 # Implementation status against the supplied plan
 
+## Owned invocation-source headers admitted exactly — 2026-10-11
+
+The independent auditor now checks canonical spelling and the entire value list
+of each owned start header: token, input SHA256 and all four parent-return fields.
+Required fields have exactly one matching value; absent parent fields and legacy
+input references must be absent. It rejects duplicate/conflicting values, aliases,
+empty lists and missing fields, avoiding first-value ambiguity and empty-list
+panics. Unrelated transport headers remain opaque/allowed. The232 physical
+JSON/protobuf cases pass in28.215s across live/retired and parent/nonparent sources
+(16 positive/216 negative), alongside cursor/start/projection/source regressions
+and four native checkpoints. Four native child/buffered-child R1/R3 race cases
+pass in70.769s with eight parent frames and four retired-child projection receipts.
+Both actual race binaries and417 unchanged source hashes are retained, with closed
+native media and locally executed guards. See [source header evidence](scale/raw-start-source-headers-2026-10-11/README.md).
+
+Production GraphStart.MatchesInvocation still uses first-value reads and needs
+separate hardening. This auditor change does not establish full header interpretation,
+parent causal history, source/lease provenance, all-peer/power faults or original
+broad simulation/scale/soak/rollout acceptance. The three frozen larger campaigns
+remain live. Public continuation admission/import/online collection remain disabled.
+
 ## Strict retired projection admission and full frozen normal qualification — 2026-10-11
 
 The independent auditor now strictly admits all declared terminal projection

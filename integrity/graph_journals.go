@@ -445,5 +445,35 @@ func auditStartSource(start auditedGraphStart, source *jetstream.RawStreamMsg) b
 	if start.Request.ParentInvocation != 0 {
 		parent = strconv.FormatUint(start.Request.ParentInvocation, 10)
 	}
-	return bytes.Equal(source.Data, pointer) && source.Header.Get("Wf-Graph-Start-Token") == start.Token && source.Header.Get("Wf-Input-SHA256") == start.InputSHA256 && source.Header.Get("Wf-Input-Ref") == "" && source.Header.Get("Wf-Parent-Type") == start.Request.ParentType && source.Header.Get("Wf-Parent-ID") == start.Request.ParentID && source.Header.Get("Wf-Parent-Inv-Seq") == parent && source.Header.Get("Wf-Parent-Signal") == start.Request.SignalName
+	if !bytes.Equal(source.Data, pointer) {
+		return false
+	}
+	expected := map[string]string{
+		"Wf-Graph-Start-Token": start.Token,
+		"Wf-Input-SHA256":      start.InputSHA256,
+		"Wf-Input-Ref":         "",
+		"Wf-Parent-Type":       start.Request.ParentType,
+		"Wf-Parent-ID":         start.Request.ParentID,
+		"Wf-Parent-Inv-Seq":    parent,
+		"Wf-Parent-Signal":     start.Request.SignalName,
+	}
+	// Get observes only the first value and can panic on an empty value list.
+	// Admit each owned field exactly once under its canonical spelling. Empty
+	// optional fields must be absent. Unrelated transport headers are opaque.
+	for key, values := range source.Header {
+		for canonical, value := range expected {
+			if !strings.EqualFold(key, canonical) {
+				continue
+			}
+			if key != canonical || value == "" || len(values) != 1 || values[0] != value {
+				return false
+			}
+		}
+	}
+	for key, value := range expected {
+		if value != "" && len(source.Header[key]) != 1 {
+			return false
+		}
+	}
+	return true
 }
