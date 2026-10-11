@@ -271,7 +271,7 @@ jobs:
         shell: bash
         run: |
           set -o pipefail
-          go test -race -p=1 ./integrity -run '^(TestRawGraphReferencesAndIndependentCorruptionControls|TestNativeRawGraphReferenceAuditQuiescentReaders|TestRawGraphJournalGenerationsOutcomesAndArchive|TestRawGraphCheckpointPointerAndFrameBindings|TestNativeRawGraphCheckpointAudit|TestRawGraphCheckpointMaterializedState|TestRawGraphCheckpointPromiseOwnership|TestRawGraphCheckpointMetadataBindings|TestRawGraphRetiredSourceProjectionScope|TestRawGraphSignalReservationAndBinding|TestRawGraphSignalIndexIndependentPrefixes|TestRawGraphSignalIndexProductionPackets|TestRawGraphCheckpointSDKStateHistory|TestRawGraphCheckpointPromiseHistory|TestRawGraphCheckpointSDKSignalHistory|TestRawGraphCheckpointSDKTimerHistory|TestRawGraphEveryCheckpointHistory|TestRawGraphSDKStepEnvelope|TestRawGraphCanonicalEnvelope|TestRawGraphTerminalEnvelope)$' -count=1 -v -timeout=5m 2>&1 | tee raw-graph-audit.log
+          go test -race -p=1 ./integrity -run '^(TestRawGraphReferencesAndIndependentCorruptionControls|TestNativeRawGraphReferenceAuditQuiescentReaders|TestRawGraphJournalGenerationsOutcomesAndArchive|TestRawGraphCheckpointPointerAndFrameBindings|TestNativeRawGraphCheckpointAudit|TestRawGraphCheckpointMaterializedState|TestRawGraphCheckpointPromiseOwnership|TestRawGraphCheckpointMetadataBindings|TestRawGraphRetiredSourceProjectionScope|TestRawGraphSignalReservationAndBinding|TestRawGraphSignalIndexIndependentPrefixes|TestRawGraphSignalIndexProductionPackets|TestRawGraphCheckpointSDKStateHistory|TestRawGraphCheckpointPromiseHistory|TestRawGraphCheckpointSDKSignalHistory|TestRawGraphCheckpointSDKTimerHistory|TestRawGraphEveryCheckpointHistory|TestRawGraphSDKStepEnvelope|TestRawGraphCanonicalEnvelope|TestRawGraphTerminalEnvelope|TestRawGraphRejectedLimitBoundary|TestRawGraphRejectedLimitPrefix|TestRawGraphRejectedLimitContinuation)$' -count=1 -v -timeout=5m 2>&1 | tee raw-graph-audit.log
           python3 - <<'PY'
           import pathlib, re
           log = pathlib.Path('raw-graph-audit.log').read_text()
@@ -287,6 +287,16 @@ jobs:
           assert '--- PASS: TestRawGraphCheckpointMetadataBindings ' in log
           assert '--- PASS: TestRawGraphCheckpointSDKStateHistory ' in log
           assert '--- PASS: TestRawGraphCheckpointPromiseHistory ' in log
+          assert '--- PASS: TestRawGraphRejectedLimitBoundary ' in log
+          for encoding in ('json', 'protobuf-v1'):
+              for mode in ('request', 'attempt', 'signal', 'suspension', 'overlap', 'completed', 'both', 'request-null', 'request-empty', 'request-unknown', 'request-duplicate', 'entry-kind', 'entry-null', 'attempt-gap', 'attempt-empty-error', 'attempt-alias', 'attempt-duplicate', 'signal-zero', 'signal-name', 'signal-alias', 'suspension-unresolved', 'suspension-empty', 'suspension-unknown', 'wrong-error'):
+                  assert f'--- PASS: TestRawGraphRejectedLimitBoundary/{encoding}/{mode} ' in log
+          assert '--- PASS: TestRawGraphRejectedLimitPrefix ' in log
+          for mode in ('attempt-next', 'attempt-reuse', 'attempt-skip', 'signal-next', 'signal-reuse', 'signal-backwards'):
+              assert f'--- PASS: TestRawGraphRejectedLimitPrefix/{mode} ' in log
+          assert '--- PASS: TestRawGraphRejectedLimitContinuation ' in log
+          for mode in ('checkpoint', 'wrong-stage', 'not-checkpoint', 'failed-frame'):
+              assert f'--- PASS: TestRawGraphRejectedLimitContinuation/{mode} ' in log
           assert '--- PASS: TestRawGraphTerminalEnvelope ' in log
           for encoding in ('json', 'protobuf-v1'):
               for mode in ('ordinary', 'opaque-result', 'failed', 'limit-request', 'limit-entry', 'unknown', 'alias', 'duplicate-invocation', 'escaped-duplicate', 'duplicate-result', 'duplicate-error', 'duplicate-limit-request', 'duplicate-limit-entry', 'limit-entry-unknown', 'limit-entry-alias', 'limit-entry-duplicate'):

@@ -292,6 +292,9 @@ func CheckGraphJournals(ctx context.Context, snapshot GraphJournalSnapshot) (rep
 		if err := auditSDKStepEnvelope(entry); err != nil {
 			return err
 		}
+		if err := auditGraphLimitBoundary(entry, &state.journal); err != nil {
+			return err
+		}
 		if err := state.journal.advance(record.Destination, journal.Record{Entry: entry, Sequence: envelope.Sequence}); err != nil {
 			return err
 		}

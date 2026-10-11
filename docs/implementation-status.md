@@ -1,5 +1,21 @@
 # Implementation status against the supplied plan
 
+## Rejected limit operations checked against history — 2026-10-11
+
+The independent raw auditor now checks rejected requests, attempts, signals and
+suspensions against the prefix before the terminal clears it. Limit metadata
+requires a Failed outcome with the exact limit error, no result and one rejected
+operation. Strict typed payloads reject aliases/duplicates/unknown fields; request
+overlap, attempt count gaps, stale signals and unsupported suspensions are rejected.
+Eight positive/40 negative physical fixtures, ten prefix/continuation controls,
+existing envelope/history regressions and four native R1/R3 checkpoint cases pass;
+final actual race exit0 in19.025s. New CI assertions executed against the final log.
+[Evidence and scope](scale/raw-rejected-limit-boundary-2026-10-11/README.md).
+
+Exact configured-cap exhaustion and full rejected-operation execution/source
+semantics remain open, as do original full acceptance gates. Both larger frozen
+campaigns remain live under their original invocations.
+
 ## Strict complete canonical terminal envelopes — 2026-10-11
 
 The raw auditor now admits terminal metadata through own complete wire fields,
