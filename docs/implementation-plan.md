@@ -1,5 +1,28 @@
 # JetStream Durable Workflow Runtime — Implementation Plan
 
+## Tier1 source-header recovery/worker regression — 2026-10-11
+
+A new independent seeded workload drives production recovery, bound repair and
+worker admission through pending/bound cuts and ten source-header modes. Bad
+sources cannot bind/enqueue; bound repair rejects and a deliberately injected
+worker delivery NAKs before journal/handler/effects. A fixture-only header heal
+preserves the physical generation; fresh handles recover and duplicate/redelivered
+runs produce one effect. Legacy journal remains empty, and owned graph/dispatch
+state drains.1000 seeds plus exact generated replay and20 new pins pass in both
+normal16.197s and race165.043s. Persistent default/explicit failure traces are
+checked; the original missing-explicit-directory harness failure is retained.
+1360 source/fixture hashes remain unchanged. Final race executable was captured;
+final normal capture was missed. See [seeded source header evidence](scale/seeded-start-source-headers-2026-10-11/README.md).
+
+The source inventory is now160 seeded families and880 pinned traces. Focused
+CI guards require the complete new family and20 pins in normal/race modes and
+were executed locally; no hosted pipeline result is claimed. Existing replay/
+minimizer and full/extended discovery recognize the new workload. Full160
+qualification remains pending; the accepted159-family frozen normal and the
+three live older-source campaigns do not cover this expansion. Full parent/
+source/lease history, clock/power and original fault/scale/soak/rollout acceptance
+remain open. Public continuation admission/import/online collection stay disabled.
+
 ## Production canonical source matching hardened — 2026-10-11
 
 The independent source-header checks exposed a production first-value bug: at

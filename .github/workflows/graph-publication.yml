@@ -446,6 +446,52 @@ jobs:
           name: raw-graph-reference-audit
           path: raw-graph-audit.log
           if-no-files-found: error
+  seeded-start-source-headers:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      matrix:
+        mode: [normal, race]
+    env:
+      GOMAXPROCS: '2'
+      GOMEMLIMIT: 512MiB
+      SIM_SEEDS: '1000'
+      SIM_COVERAGE_SUMMARY: '1'
+      FAULT_TRACE_OUT: start-source-header-failure.json
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - name: Check seeded source admission and pinned replay
+        shell: bash
+        env:
+          GRAPH_MODE: ${{ matrix.mode }}
+        run: |
+          set -o pipefail
+          graph_flags=()
+          if [ "$GRAPH_MODE" = race ]; then graph_flags=(-race); fi
+          go test "${graph_flags[@]}" ./sim -run '^(TestSeededGraphStartSourceHeadersReplay|TestGraphStartHeaderFailureTracePersistence|TestPinnedRegressionCorpus)$/^(graph_start_source_headers_|default|explicit)' -count=1 -v -timeout=6m 2>&1 | tee start-source-headers.log
+          python3 - <<'PY'
+          import pathlib, re
+          log = pathlib.Path('start-source-headers.log').read_text()
+          assert not re.search(r'^--- SKIP:', log, re.M)
+          assert '--- PASS: TestSeededGraphStartSourceHeadersReplay ' in log
+          for mode in ('default', 'explicit'):
+              assert f'--- PASS: TestGraphStartHeaderFailureTracePersistence/{mode} ' in log
+          assert 'TIER1_SEEDS test=TestSeededGraphStartSourceHeadersReplay first=1 last=1000 completed=1000 requested=1000' in log
+          for stage in ('pending', 'bound'):
+              for mode in ('valid', 'transport', 'duplicate_token', 'conflicting_hash', 'token_alias', 'empty_hash', 'missing_hash', 'input_ref_empty', 'parent_empty', 'parent_alias'):
+                  assert f'--- PASS: TestPinnedRegressionCorpus/graph_start_source_headers_{stage}_{mode}.json ' in log
+          PY
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: seeded-start-source-headers-${{ matrix.mode }}
+          path: |
+            start-source-headers.log
+            start-source-header-failure.json
+          if-no-files-found: error
   raw-sdk-retired-projection-audit:
     runs-on: ubuntu-latest
     timeout-minutes: 15

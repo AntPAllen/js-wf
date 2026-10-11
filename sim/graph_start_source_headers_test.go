@@ -1,0 +1,302 @@
+package sim
+
+import (
+	"context"
+	"encoding/json"
+	"errors"
+	"fmt"
+	"os"
+	"path/filepath"
+	"reflect"
+	"strings"
+	"testing"
+	"time"
+
+	"github.com/nats-io/nats.go"
+	"js-wf/client"
+	"js-wf/identity"
+	"js-wf/journal"
+	"js-wf/lease"
+	"js-wf/wf"
+	"js-wf/worker"
+)
+
+var graphStartHeaderModes = []string{"valid", "transport", "duplicate_token", "conflicting_hash", "token_alias", "empty_hash", "missing_hash", "input_ref_empty", "parent_empty", "parent_alias"}
+
+func runGraphStartSourceHeaders(seed int64, replay *Trace) (trace Trace, runErr error) {
+	s := NewScheduler(seed)
+	if replay != nil {
+		var err error
+		s, err = ReplayScheduler(*replay)
+		if err != nil {
+			return trace, err
+		}
+	}
+	if err := s.SetWorkload("graph_start_source_headers"); err != nil {
+		return trace, err
+	}
+	defer func() { trace = s.Trace() }()
+	stage, err := s.Choose([]string{"pending", "bound"})
+	if err != nil {
+		return trace, err
+	}
+	mode, err := s.Choose(graphStartHeaderModes)
+	if err != nil {
+		return trace, err
+	}
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+	model := NewGraphPublicationTransport(s)
+	now := func() time.Time { return time.UnixMilli(s.NowMillis()).UTC() }
+	newStore := func() (*journal.GraphStore, error) {
+		return journal.NewGraphStore(journal.GraphConfig{Protocol: model.Protocol(), Now: now, CanonicalStarts: true, PinTTL: 30 * time.Second, IntentTTL: time.Second})
+	}
+	graph, err := newStore()
+	if err != nil {
+		return trace, err
+	}
+	transport := NewWorkerTransport(s, 3*time.Second)
+	c, err := client.NewWithSignalPorts(transport.SignalTransport, transport.SignalTransport).WithGraphJournal(graph)
+	if err != nil {
+		return trace, err
+	}
+	typ, id := "test", integratedWorkerIDs(1)[0]
+	input := []byte(`7`)
+	state, err := graph.ReserveStart(ctx, journal.GraphStartRequest{Type: typ, ID: id}, input)
+	if err != nil {
+		return trace, err
+	}
+	subject := identity.InvocationSubject(typ, id)
+	header := nats.Header{journal.GraphStartTokenHeader: []string{state.Start.Token}, "Wf-Input-SHA256": []string{state.Start.InputSHA256}}
+	switch mode {
+	case "transport":
+		header.Set("X-Trace", "opaque")
+	case "duplicate_token":
+		header[journal.GraphStartTokenHeader] = append(header[journal.GraphStartTokenHeader], state.Start.Token)
+	case "conflicting_hash":
+		header["Wf-Input-SHA256"] = append(header["Wf-Input-SHA256"], "conflict")
+	case "token_alias":
+		delete(header, journal.GraphStartTokenHeader)
+		header[strings.ToLower(journal.GraphStartTokenHeader)] = []string{state.Start.Token}
+	case "empty_hash":
+		header["Wf-Input-SHA256"] = nil
+	case "missing_hash":
+		delete(header, "Wf-Input-SHA256")
+	case "input_ref_empty":
+		header.Set("Wf-Input-Ref", "")
+	case "parent_empty":
+		header.Set("Wf-Parent-Type", "")
+	case "parent_alias":
+		header.Set("wf-parent-type", "")
+	}
+	sequence, err := transport.PublishInvocation(ctx, &nats.Msg{Subject: subject, Data: state.Start.PointerBytes(), Header: header})
+	if err != nil {
+		return trace, err
+	}
+	if stage == "bound" {
+		if err = graph.BindStart(ctx, typ, id, state.Start.Token, sequence); err != nil {
+			return trace, err
+		}
+	}
+	valid := mode == "valid" || mode == "transport"
+	h, err := c.RecoverStartAttempt(ctx, typ, id, state.Start.Token)
+	if !valid {
+		if !errors.Is(err, client.ErrStartUnknown) || len(transport.Runs()) != 0 {
+			return trace, fmt.Errorf("bad source recovered/enqueued: %s %s %v", stage, mode, err)
+		}
+		observed, _, e := graph.ReadStart(ctx, typ, id)
+		if e != nil || observed.Invocation != map[bool]uint64{false: 0, true: sequence}[stage == "bound"] {
+			return trace, fmt.Errorf("bad source changed binding: %v", e)
+		}
+		if stage == "bound" {
+			if _, e = c.RepairBoundStartAttempt(ctx, typ, id, state.Start.Token, sequence); !errors.Is(e, client.ErrStartUnknown) || len(transport.Runs()) != 0 {
+				return trace, fmt.Errorf("bad source repaired/enqueued: %v", e)
+			}
+		}
+	} else if err != nil || h.InvSeq != sequence {
+		return trace, fmt.Errorf("valid source failed recovery: %v", err)
+	}
+	legacyPort := NewJournalTransport(s)
+	legacy := journal.NewWithPorts(legacyPort, legacyPort)
+	leasing := lease.NewWithKVPort(NewKVTransport(s, 30*time.Second))
+	outcomes := NewKVTransport(s, 0)
+	handlers, effects := 0, 0
+	build := func(name string) (*worker.Worker, error) {
+		return worker.NewWithPorts(name, map[string]worker.Handler{typ: func(c *wf.Context, got json.RawMessage) (json.RawMessage, error) {
+			handlers++
+			if string(got) != string(input) {
+				return nil, fmt.Errorf("wrong input")
+			}
+			_, e := wf.Run(c, "once", 0, func(context.Context) (int, error) { effects++; return 42, nil })
+			return json.RawMessage(`42`), e
+		}}, worker.ModeledWorkerPorts{Journal: legacy, Leases: leasing, Outcome: outcomes, Invocation: transport.SignalTransport, Signals: transport.SignalTransport, Client: c, HeartbeatTicks: make(chan time.Time), OperationNow: now}, worker.WithGraphJournal(graph))
+	}
+	if !valid && stage == "bound" {
+		if err = c.Enqueue(ctx, typ, id, "malformed-source-probe"); err != nil {
+			return trace, err
+		}
+		w, e := build("source-reject")
+		if e != nil {
+			return trace, e
+		}
+		runctx, stop := context.WithCancel(ctx)
+		transport.Dispatch.StopAfterNextNak(stop)
+		e = w.RunPartitionWithTransport(runctx, 0, transport.Dispatch)
+		stop()
+		if e != nil {
+			return trace, e
+		}
+		records, _, e := graph.Read(ctx, typ, id, sequence)
+		if e != nil || len(records) != 0 || handlers != 0 || effects != 0 {
+			return trace, fmt.Errorf("bad source reached execution: records=%d handlers=%d effects=%d %v", len(records), handlers, effects, e)
+		}
+	}
+	if !valid {
+		// Fixture heal changes only headers, preserving the physical invocation.
+		transport.StartTransport.mu.Lock()
+		raw := transport.StartTransport.invocations[subject]
+		raw.Header = nats.Header{journal.GraphStartTokenHeader: []string{state.Start.Token}, "Wf-Input-SHA256": []string{state.Start.InputSHA256}}
+		transport.StartTransport.invocations[subject] = raw
+		transport.StartTransport.mu.Unlock()
+		s.RecordTransport(TransportEvent{Operation: "heal_start_source_headers", Subject: subject, Sequence: sequence, Outcome: mode})
+		if err = s.AdvanceMillis(60000); err != nil {
+			return trace, err
+		}
+	}
+	// Recover with fresh handles using only retained graph/source state.
+	graph, err = newStore()
+	if err != nil {
+		return trace, err
+	}
+	c, err = client.NewWithSignalPorts(transport.SignalTransport, transport.SignalTransport).WithGraphJournal(graph)
+	if err != nil {
+		return trace, err
+	}
+	h, err = c.RecoverStartAttempt(ctx, typ, id, state.Start.Token)
+	if err != nil || h.InvSeq != sequence {
+		return trace, fmt.Errorf("healed source changed generation: %v", err)
+	}
+	w, err := build("source-recovered")
+	if err != nil {
+		return trace, err
+	}
+	runctx, stop := context.WithCancel(ctx)
+	transport.Dispatch.StopWhenDrained(stop)
+	err = w.RunPartitionWithTransport(runctx, 0, transport.Dispatch)
+	stop()
+	if err != nil {
+		return trace, err
+	}
+	records, tail, err := graph.Read(ctx, typ, id, sequence)
+	if err != nil || len(records) == 0 || records[len(records)-1].Kind != journal.Completed || handlers != 1 || effects != 1 {
+		return trace, fmt.Errorf("healed execution handlers=%d effects=%d: %v", handlers, effects, err)
+	}
+	if old, _, e := legacy.Read(ctx, typ, id); e != nil || len(old) != 0 {
+		return trace, fmt.Errorf("legacy journal changed: %v", e)
+	}
+	if err = model.CheckReferences(); err != nil {
+		return trace, err
+	}
+	if err = graph.FencePurge(ctx, typ, id, sequence, tail); err != nil {
+		return trace, err
+	}
+	if err = graph.Retire(ctx, typ, id, sequence, tail); err != nil {
+		return trace, err
+	}
+	transport.PurgeInvocation(subject)
+	if err = s.AdvanceMillis(60000); err != nil {
+		return trace, err
+	}
+	if _, err = model.Protocol().SweepWithReaders(ctx, now()); err != nil {
+		return trace, err
+	}
+	objects, err := model.Objects(ctx)
+	if err != nil || len(objects) != 0 {
+		return trace, fmt.Errorf("owned graph not drained: %d %v", len(objects), err)
+	}
+	if err = model.CheckReferences(); err != nil {
+		return trace, err
+	}
+	if err = transport.Dispatch.CheckDrained(); err != nil {
+		return trace, err
+	}
+	s.RecordTransport(TransportEvent{Operation: "check_start_source_headers", Subject: subject, Sequence: sequence, Outcome: stage + "_" + mode})
+	return trace, s.Finish()
+}
+
+func saveStartSourceHeaderFailure(trace Trace, path string) (string, error) {
+	if path == "" {
+		dir, err := os.MkdirTemp("", "js-wf-start-source-header-failure-")
+		if err != nil {
+			return "", err
+		}
+		path = filepath.Join(dir, "trace.json")
+	}
+	if err := os.MkdirAll(filepath.Dir(path), 0o700); err != nil {
+		return path, err
+	}
+	return path, trace.Save(path)
+}
+
+func TestSeededGraphStartSourceHeadersReplay(t *testing.T) {
+	seen := map[string]int{}
+	fail := func(seed int64, trace Trace, cause error) {
+		path, err := saveStartSourceHeaderFailure(trace, os.Getenv("FAULT_TRACE_OUT"))
+		if err != nil {
+			t.Fatal(err)
+		}
+		t.Fatalf("FAULT_SEED=%d FAULT_TRACE=%s: %v", seed, path, cause)
+	}
+	for seed := range seededSchedules(t) {
+		generated, err := runGraphStartSourceHeaders(seed, nil)
+		if err != nil {
+			fail(seed, generated, err)
+		}
+		replayed, err := runGraphStartSourceHeaders(seed, &generated)
+		if err != nil || !reflect.DeepEqual(generated, replayed) {
+			fail(seed, generated, fmt.Errorf("replay differs: %v", err))
+		}
+		mode := generated.Decisions[0].Chosen + "_" + generated.Decisions[1].Chosen
+		seen[mode]++
+		if root := os.Getenv("SIM_GRAPH_START_HEADERS_ROOT"); root != "" && seen[mode] == 1 {
+			if e := generated.Save(filepath.Join(root, "graph_start_source_headers_"+mode+".json")); e != nil {
+				t.Fatal(e)
+			}
+		}
+	}
+	if len(seen) != 2*len(graphStartHeaderModes) {
+		t.Fatalf("source header coverage=%v", seen)
+	}
+	t.Logf("START_SOURCE_HEADERS modes=%v; rejected recovery/repair and bound worker execution; same-generation heal, fresh handles, one effect and owned graph/dispatch drain", seen)
+}
+
+func TestGraphStartHeaderFailureTracePersistence(t *testing.T) {
+	trace, err := LoadTrace("testdata/regressions/graph_start_source_headers_pending_valid.json")
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, mode := range []string{"default", "explicit"} {
+		t.Run(mode, func(t *testing.T) {
+			requested := ""
+			if mode == "explicit" {
+				requested = filepath.Join(t.TempDir(), "retained", "trace.json")
+			}
+			path, err := saveStartSourceHeaderFailure(trace, requested)
+			if err != nil {
+				t.Fatal(err)
+			}
+			if mode == "default" {
+				if !strings.HasPrefix(filepath.Base(filepath.Dir(path)), "js-wf-start-source-header-failure-") {
+					t.Fatal("default trace is not in a durable failure directory", path)
+				}
+				defer os.RemoveAll(filepath.Dir(path))
+			} else if path != requested {
+				t.Fatal("explicit trace path changed", path)
+			}
+			loaded, err := LoadTrace(path)
+			if err != nil || !reflect.DeepEqual(trace, loaded) {
+				t.Fatal("failure trace cannot be loaded exactly", err)
+			}
+		})
+	}
+}
