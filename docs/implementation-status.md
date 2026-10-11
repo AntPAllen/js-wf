@@ -1,5 +1,19 @@
 # Implementation status against the supplied plan
 
+## Full native gate stops at Start reader-release observation — 2026-10-11
+
+The frozenac85566 R3 full canonical active10000/10000/1000 normal run is terminal,
+SDKexit1 after196.502seconds. First reported failure is old-00605 with a healthy
+parent: `bind: release start reader: observe reader release head: context deadline exceeded`.
+The failing release iteration stops observing its head, without proving whether
+prior release iterations attempted a CAS or identifying a native cause. Initial
+Start publication, full populations, purge/reuse and raw final audit remain
+unaccepted. Closure verifies1171 Git inputs, actual normal executable/exit and
+2481files/225,488,736bytes. CPU/memory configuration and original deadlines are
+recorded; the prior native stores and race campaigns are unchanged.
+[Full native failure receipts](scale/native-canonical-full-2026-10-11/README.md).
+The next investigation is the Start binding/reader cleanup observation path.
+
 ## Full canonical 10k/10k/1k normal native gate launched — 2026-10-11
 
 One fresh R3 normal native run targets10000 old/10000 live/1000 reused IDs from

@@ -1,5 +1,24 @@
 # Full canonical active purge/reuse native qualification — 2026-10-11
 
+## Terminal closure
+
+Actual SDK exit1 after196.502069164seconds. The first reported failure is old
+Start purge-scale/old-00605 with a healthy parent context:
+`start outcome unknown: bind: release start reader: observe reader release head: context deadline exceeded`.
+The failing reader-release iteration stopped observing the head; this does not
+establish whether preceding iterations attempted a CAS or a server-side cause.
+
+The intended full10k/10k/1k population was confirmed at launch, but initial Start
+publication did not complete. No old-population, active-population, purge/reuse,
+Signal-release or final raw-audit acceptance is claimed. The store is closed:
+2481files/225,488,736bytes. `review.py` independently verifies1171 Git inputs,
+frozen snapshot bytes, actual normal executable/exit and every closed native file.
+The user service is terminal (MainPID0, ExecMainStatus1); the SDK PID is absent.
+The three older race campaigns and all original retained stores are unchanged.
+Next investigation targets this reader-release observation in the Start binding
+path. The full native gate remains open.
+
+
 This follow-up targets the original full 10,000 old / 10,000 live / 1,000 reused
 invocation populations. Count overrides are removed from the environment.
 The existing 20-minute parent deadline, 22-minute test deadline, active-mode
