@@ -332,6 +332,10 @@ func (c *Context) SetChildResultValidator(validate func(context.Context, Signal)
 	c.childResultValidator = validate
 }
 func (c *Context) validateChildResult(signal Signal) error {
+	var outcome Outcome
+	if err := decodeChildOutcome(signal.Payload, &outcome); err != nil {
+		return err
+	}
 	if c.childResultValidator != nil {
 		return c.childResultValidator(c.base, signal)
 	}
@@ -389,17 +393,17 @@ func Call(c *Context, childType string, input []byte) ([]byte, error) {
 		if c.usedSignals[done.SignalSeq] {
 			return nil, ErrCorruptJournal
 		}
-		c.usedSignals[done.SignalSeq] = true
-		c.position++
 		for _, sig := range c.signals {
 			if sig.Sequence == done.SignalSeq && sig.Name == signalName {
 				if err := c.validateChildResult(sig); err != nil {
 					return nil, err
 				}
 				var out Outcome
-				if err := json.Unmarshal(sig.Payload, &out); err != nil {
+				if err := decodeChildOutcome(sig.Payload, &out); err != nil {
 					return nil, ErrCorruptJournal
 				}
+				c.usedSignals[done.SignalSeq] = true
+				c.position++
 				if out.Error != "" {
 					return nil, errors.New(out.Error)
 				}
@@ -416,7 +420,7 @@ func Call(c *Context, childType string, input []byte) ([]byte, error) {
 			return nil, err
 		}
 		var out Outcome
-		if err := json.Unmarshal(sig.Payload, &out); err != nil {
+		if err := decodeChildOutcome(sig.Payload, &out); err != nil {
 			return nil, ErrCorruptJournal
 		}
 		payload, _ := json.Marshal(completion{SignalSeq: sig.Sequence})
@@ -527,7 +531,7 @@ func AwaitPromise(c *Context, p Promise) ([]byte, error) {
 		return bytes.Clone(result.result), nil
 	}
 	var out Outcome
-	if json.Unmarshal(result.payload, &out) != nil {
+	if decodeChildOutcome(result.payload, &out) != nil {
 		return nil, ErrCorruptJournal
 	}
 	if out.Error != "" {
@@ -710,8 +714,6 @@ func awaitSignal(c *Context, name string, child bool) ([]byte, error) {
 		if c.usedSignals[done.SignalSeq] {
 			return nil, ErrCorruptJournal
 		}
-		c.usedSignals[done.SignalSeq] = true
-		c.position++
 		for _, sig := range c.signals {
 			if sig.Sequence == done.SignalSeq && sig.Name == name {
 				if child {
@@ -719,6 +721,8 @@ func awaitSignal(c *Context, name string, child bool) ([]byte, error) {
 						return nil, err
 					}
 				}
+				c.usedSignals[done.SignalSeq] = true
+				c.position++
 				return sig.Payload, nil
 			}
 		}

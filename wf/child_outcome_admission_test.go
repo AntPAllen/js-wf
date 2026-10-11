@@ -1,0 +1,162 @@
+package wf
+
+import (
+	"bytes"
+	"context"
+	"crypto/sha256"
+	"encoding/hex"
+	"encoding/json"
+	"errors"
+	"testing"
+)
+
+func childOutcomeAdmissionCases() map[string]string {
+	cases := map[string]string{
+		"inline":                       `{"inv_seq":22,"result":"NDI="}`,
+		"user_null":                    `{"inv_seq":22,"result":"bnVsbA=="}`,
+		"opaque_user_duplicates":       `{"inv_seq":22,"result":"eyJ1c2VyIjoxLCJ1c2VyIjoyfQ=="}`,
+		"explicit_empty_error":         `{"inv_seq":22,"result":"NDI=","error":""}`,
+		"legacy_identity_omitted":      `{"result":"NDI="}`,
+		"valid_failed":                 `{"inv_seq":22,"error":"failed"}`,
+		"opaque_limit_request":         `{"inv_seq":22,"error":"failed","limit_request":{"user":null,"user":2}}`,
+		"opaque_limit_payload":         `{"inv_seq":22,"error":"failed","limit_entry":{"kind":"Suspended","payload":{"user":null,"user":2}}}`,
+		"external":                     `{"inv_seq":22,"result_ref":"result-object","result_hash":"` + string(bytes.Repeat([]byte("a"), 64)) + `"}`,
+		"duplicate_invocation":         `{"inv_seq":9,"inv_seq":22,"result":"NDI="}`,
+		"alias_invocation":             `{"Inv_seq":9,"inv_seq":22,"result":"NDI="}`,
+		"escaped_duplicate_invocation": `{"\u0069nv_seq":9,"inv_seq":22,"result":"NDI="}`,
+		"duplicate_result":             `{"inv_seq":22,"result":"Nw==","result":"NDI="}`,
+		"alias_result":                 `{"inv_seq":22,"Result":"Nw==","result":"NDI="}`,
+		"duplicate_error":              `{"inv_seq":22,"error":"bad","error":"","result":"NDI="}`,
+		"alias_error":                  `{"inv_seq":22,"Error":"bad","error":"","result":"NDI="}`,
+		"unknown_field":                `{"inv_seq":22,"foreign":true,"result":"NDI="}`,
+		"null_limit_kind":              `{"inv_seq":22,"result":"NDI=","limit_entry":{"kind":null,"payload":{}}}`,
+		"null_limit_payload":           `{"inv_seq":22,"result":"NDI=","limit_entry":{"kind":"Suspended","payload":null}}`,
+		"duplicate_limit_kind":         `{"inv_seq":22,"result":"NDI=","limit_entry":{"kind":"Failed","kind":"Suspended","payload":{}}}`,
+	}
+	for _, field := range []string{"inv_seq", "result_ref", "result_hash", "error", "limit_request", "limit_entry", "result"} {
+		cases["null_"+field] = `{"inv_seq":22,"` + field + `":null}`
+		if field == "inv_seq" {
+			cases["null_"+field] = `{"inv_seq":null,"result":"NDI="}`
+		}
+	}
+	sum := sha256.Sum256([]byte(`42`))
+	hash := hex.EncodeToString(sum[:])
+	cases["external"] = `{"inv_seq":22,"result_ref":"result-object","result_hash":"` + hash + `"}`
+	cases["failed_inline"] = `{"inv_seq":22,"error":"failed","result":"NDI="}`
+	cases["failed_external"] = `{"inv_seq":22,"error":"failed","result_ref":"result-object","result_hash":"` + hash + `"}`
+	cases["hash_without_ref"] = `{"inv_seq":22,"result_hash":"` + hash + `"}`
+	cases["ref_without_hash"] = `{"inv_seq":22,"result_ref":"result-object"}`
+	cases["hash_non_hex"] = `{"inv_seq":22,"result_ref":"result-object","result_hash":"not-a-hash"}`
+	cases["hash_short"] = `{"inv_seq":22,"result_ref":"result-object","result_hash":"ab"}`
+	cases["hash_uppercase"] = `{"inv_seq":22,"result_ref":"result-object","result_hash":"73475CB40A568E8DA8A045CED110137E159F890AC4DA883B6B17DC651B3A8049"}`
+	return cases
+}
+func validChildOutcomeAdmissionCase(name string) bool {
+	switch name {
+	case "inline", "user_null", "opaque_user_duplicates", "explicit_empty_error", "legacy_identity_omitted", "valid_failed", "opaque_limit_request", "opaque_limit_payload", "external":
+		return true
+	}
+	return false
+}
+func runChildOutcomeAdmission(t *testing.T, path string, replay bool, raw string, valid bool, denied bool) {
+	t.Helper()
+	writes, loads, starts, hooks := 0, 0, 0, 0
+	c := NewContext(context.Background(), nil, func(context.Context, Kind, json.RawMessage) error { writes++; return nil }, Signal{Sequence: 7, Name: "child_0", Payload: []byte(raw)})
+	c.SetChildSupport("parent", "admission", 17, func(context.Context, string, string, []byte, string) error { starts++; return nil })
+	c.SetResultStore(nil, func(context.Context, string) ([]byte, error) { loads++; return []byte(`42`), nil })
+	deniedErr := errors.New("denied child provenance")
+	if denied {
+		c.SetChildResultValidator(func(context.Context, Signal) error { hooks++; return deniedErr })
+	}
+	if replay {
+		var requested []byte
+		inputSum := sha256.Sum256([]byte(`7`))
+		switch path {
+		case "call":
+			requested, _ = json.Marshal(request{Kind: "call", Name: "child_0", InputHash: hex.EncodeToString(inputSum[:]), ChildType: "child", ChildID: c.childID("child", 0)})
+		case "await":
+			requested, _ = json.Marshal(request{Kind: "signal", Name: "child_0"})
+		case "select":
+			requested, _ = json.Marshal(selectRequest{Kind: "select_many", Cases: []selectCase{{Kind: "promise", Name: "child_0"}}})
+		}
+		completionRaw := json.RawMessage(`{"signal_seq":7}`)
+		if path == "select" {
+			completionRaw = json.RawMessage(`{"case_index":0,"signal_seq":7}`)
+		}
+		c.entries = []Entry{{Index: 1, Kind: StepRequested, Payload: requested}, {Index: 2, Kind: StepCompleted, Payload: completionRaw}}
+	}
+	var data []byte
+	var err error
+	switch path {
+	case "call":
+		data, err = Call(c, "child", []byte(`7`))
+	case "await":
+		data, err = AwaitPromise(c, Promise{SignalName: "child_0"})
+	case "select":
+		_, data, err = Select(c, Promise{SignalName: "child_0"})
+	}
+	if valid && !denied {
+		var out Outcome
+		if json.Unmarshal([]byte(raw), &out) != nil {
+			t.Fatal("bad positive fixture")
+		}
+		expected := out.Result
+		wantLoads := 0
+		if out.ResultRef != "" {
+			expected = []byte(`42`)
+			wantLoads = 1
+		}
+		if out.Error != "" {
+			if err == nil || err.Error() != out.Error || data != nil {
+				t.Fatal("valid failed child changed", data, err)
+			}
+		} else if err != nil || !bytes.Equal(data, expected) {
+			t.Fatal("valid child result changed", string(data), err)
+		}
+		wantWrites := 2
+		if replay {
+			wantWrites = 0
+		}
+		if !c.usedSignals[7] || c.position != 2 || writes != wantWrites || loads != wantLoads || starts != 0 {
+			t.Fatal("valid child consumption changed", c.position, writes, loads, starts)
+		}
+	} else {
+		wantErr := ErrCorruptJournal
+		if denied {
+			wantErr = deniedErr
+		}
+		if !errors.Is(err, wantErr) || data != nil {
+			t.Error("unverified child outcome returned", string(data), err)
+		}
+		wantWrites := 1
+		if replay {
+			wantWrites = 0
+		}
+		if c.usedSignals[7] || c.position != 1 || writes != wantWrites || loads != 0 || starts != 0 || c.promiseResults["child_0"] != nil {
+			t.Error("unverified child consumed or cached", c.usedSignals[7], c.position, writes, loads, starts)
+		}
+		if denied && hooks != 1 {
+			t.Error("child provenance validator bypassed", hooks)
+		}
+	}
+}
+func TestSDKChildOutcomeBeforeConsumption(t *testing.T) {
+	for _, path := range []string{"call", "await", "select"} {
+		for _, mode := range []string{"fresh", "replay"} {
+			for name, raw := range childOutcomeAdmissionCases() {
+				t.Run(path+"/"+mode+"/"+name, func(t *testing.T) {
+					runChildOutcomeAdmission(t, path, mode == "replay", raw, validChildOutcomeAdmissionCase(name), false)
+				})
+			}
+		}
+	}
+}
+func TestSDKSelectedChildProvenanceBeforeConsumption(t *testing.T) {
+	for _, path := range []string{"call", "await", "select"} {
+		for _, mode := range []string{"fresh", "replay"} {
+			t.Run(path+"/"+mode+"/denied", func(t *testing.T) {
+				runChildOutcomeAdmission(t, path, mode == "replay", `{"result":"NDI="}`, true, true)
+			})
+		}
+	}
+}

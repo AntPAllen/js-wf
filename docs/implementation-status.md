@@ -1,5 +1,29 @@
 # Implementation status against the supplied plan
 
+## SDK child consumption guarded; native compatibility open — 2026-10-11
+
+Call, AwaitPromise and Select validate child metadata and result references before
+signal consumption or replay completion; Select now applies child provenance
+validation. Checkpoints also reject failed promises carrying results. The baseline
+consumed malformed or denied outcomes in 154 controls and bypassed Select's hook
+in two cases. Final normal/race selections pass all 353 named controls, and full
+SDK/checkpoint race suites pass. The reviewer binds 1158 unchanged source inputs.
+
+Native promise-priority verification attempted eight variants: six pass, verifying
+12 checkpoint frames, while both archived successful-child variants fail with an
+uncertain append deadline. Enclosing contexts still had time remaining; cause is
+unconfirmed and native compatibility is unqualified. See [SDK admission evidence](scale/sdk-child-outcome-admission-2026-10-11/README.md).
+
+The separate frozen 9189259 100,000-entry race campaign also closed with actual
+exit 1 at uncertain append index 40,959, without a completed checkpoint. Its 866
+native files and binary are retained and verified. Normal 100,000-entry acceptance
+remains separate; race qualification is open. See [classified race failure](scale/graph-classified-entry-race-failure-2026-10-11/README.md).
+
+Four frozen full-family race services and full162 normal were revalidated running.
+They predate these changes and cannot qualify this source. Public continuation
+remains off; identity equivalence, causal replay, uncertain append recovery and
+original scale/fault/soak/adoption release gates remain open.
+
 ## Checkpoint promise outcomes share strict runtime admission — 2026-10-11
 
 Checkpoint validation now uses the same strict outcome envelope rules as runtime

@@ -24,6 +24,8 @@ func promiseOutcomeCases() map[string]string {
 		"valid_failed":                 `{"inv_seq":22,"error":"failed"}`,
 		"opaque_limit_request":         `{"inv_seq":22,"error":"failed","limit_request":{"user":null,"user":2}}`,
 		"opaque_limit_payload":         `{"inv_seq":22,"error":"failed","limit_entry":{"kind":"Suspended","payload":{"user":null,"user":2}}}`,
+		"failed_inline":                `{"inv_seq":22,"error":"failed","result":"NDI="}`,
+		"failed_external":              `{"inv_seq":22,"error":"failed","result_ref":"result-object","result_hash":"` + string(bytes.Repeat([]byte("a"), 64)) + `"}`,
 		"external":                     `{"inv_seq":22,"result_ref":"result-object","result_hash":"` + string(bytes.Repeat([]byte("a"), 64)) + `"}`,
 		"duplicate_invocation":         `{"inv_seq":9,"inv_seq":22,"result":"NDI="}`,
 		"alias_invocation":             `{"Inv_seq":9,"inv_seq":22,"result":"NDI="}`,

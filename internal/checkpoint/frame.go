@@ -108,6 +108,9 @@ func (f Frame) validate() error {
 		if DecodeOutcomeEnvelope(raw, &out) != nil {
 			return invalid("promise outcome")
 		}
+		if out.Error != "" && (len(out.Result) != 0 || out.ResultRef != "" || out.ResultHash != "") {
+			return invalid("failed promise result")
+		}
 		if out.ResultRef == "" && out.ResultHash != "" || out.ResultRef != "" && (len(out.Result) != 0 || !validHash(out.ResultHash)) {
 			return invalid("promise result reference")
 		}

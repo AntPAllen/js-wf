@@ -114,6 +114,9 @@ func Select(c *Context, awaitables ...Awaitable) (int, []byte, error) {
 		if record.Kind != StepCompleted || stepwire.DecodeCompletion(record.Payload, &done) != nil || done.CaseIndex == nil || *done.CaseIndex < 0 || *done.CaseIndex >= len(awaitables) {
 			return -1, nil, ErrCorruptJournal
 		}
+		if err := c.validateSelectionOutcome(want.Cases[*done.CaseIndex], done.SignalSeq); err != nil {
+			return -1, nil, err
+		}
 		c.position++
 		return completeSelection(c, awaitables, want.Cases, *done.CaseIndex, done.SignalSeq, false)
 	}
@@ -149,6 +152,9 @@ func Select(c *Context, awaitables ...Awaitable) (int, []byte, error) {
 		if !ready {
 			continue
 		}
+		if err := c.validateSelectionOutcome(descriptor, sequence); err != nil {
+			return -1, nil, err
+		}
 		done, _ := json.Marshal(selectCompletion{CaseIndex: &i, SignalSeq: sequence})
 		if err := c.next(StepCompleted, done); err != nil {
 			return -1, nil, err
@@ -158,6 +164,27 @@ func Select(c *Context, awaitables ...Awaitable) (int, []byte, error) {
 	}
 	c.waitingOn = "select_many"
 	return -1, nil, ErrSuspended
+}
+
+// Validate only the selected promise: unselected user signals remain opaque.
+func (c *Context) validateSelectionOutcome(descriptor selectCase, sequence uint64) error {
+	if descriptor.Kind != "promise" {
+		return nil
+	}
+	if sequence == 0 {
+		result := c.promiseResults[descriptor.Name]
+		if result == nil {
+			return ErrCorruptJournal
+		}
+		var outcome Outcome
+		return decodeChildOutcome(result.payload, &outcome)
+	}
+	for _, signal := range c.signals {
+		if signal.Sequence == sequence && signal.Name == descriptor.Name {
+			return c.validateChildResult(signal)
+		}
+	}
+	return ErrCorruptJournal
 }
 
 func completeSelection(c *Context, awaitables []Awaitable, cases []selectCase, index int, sequence uint64, fresh bool) (int, []byte, error) {

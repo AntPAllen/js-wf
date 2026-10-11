@@ -1,0 +1,32 @@
+=== RUN   TestNativeGraphContinuationGlobalLimitAndTerminalSlot
+=== RUN   TestNativeGraphContinuationGlobalLimitAndTerminalSlot/R1/archive=true
+    graph_continuation_limit_test.go:67: GRAPH_LIMIT_STORAGE retained=true path=/home/exedev/js-wf-classified-entry100000-race-20261011/native/R1-archivetrue-286570165
+    graph_continuation_limit_test.go:113: GRAPH_LIMIT_DURABLE storage=file whole_handoff=delivery_context request_bounds_unchanged=true
+    graph_continuation_limit_test.go:117: GRAPH_LIMIT_CONFIG owner_index=true compaction_ttl=6h0m0s default_append_ttl=true
+    graph_continuation_limit_test.go:178: GRAPH_LIMIT_PADDING completed=1000 requested=49992 budget=100000
+    graph_continuation_limit_test.go:178: GRAPH_LIMIT_PADDING completed=2000 requested=49992 budget=100000
+    graph_continuation_limit_test.go:178: GRAPH_LIMIT_PADDING completed=3000 requested=49992 budget=100000
+    graph_continuation_limit_test.go:178: GRAPH_LIMIT_PADDING completed=4000 requested=49992 budget=100000
+    graph_continuation_limit_test.go:178: GRAPH_LIMIT_PADDING completed=5000 requested=49992 budget=100000
+    graph_continuation_limit_test.go:178: GRAPH_LIMIT_PADDING completed=6000 requested=49992 budget=100000
+    graph_continuation_limit_test.go:178: GRAPH_LIMIT_PADDING completed=7000 requested=49992 budget=100000
+    graph_continuation_limit_test.go:178: GRAPH_LIMIT_PADDING completed=8000 requested=49992 budget=100000
+    graph_continuation_limit_test.go:178: GRAPH_LIMIT_PADDING completed=9000 requested=49992 budget=100000
+    graph_continuation_limit_test.go:178: GRAPH_LIMIT_PADDING completed=10000 requested=49992 budget=100000
+    graph_continuation_limit_test.go:178: GRAPH_LIMIT_PADDING completed=11000 requested=49992 budget=100000
+    graph_continuation_limit_test.go:178: GRAPH_LIMIT_PADDING completed=12000 requested=49992 budget=100000
+    graph_continuation_limit_test.go:178: GRAPH_LIMIT_PADDING completed=13000 requested=49992 budget=100000
+    graph_continuation_limit_test.go:178: GRAPH_LIMIT_PADDING completed=14000 requested=49992 budget=100000
+    graph_continuation_limit_test.go:178: GRAPH_LIMIT_PADDING completed=15000 requested=49992 budget=100000
+    graph_continuation_limit_test.go:178: GRAPH_LIMIT_PADDING completed=16000 requested=49992 budget=100000
+    graph_continuation_limit_test.go:178: GRAPH_LIMIT_PADDING completed=17000 requested=49992 budget=100000
+    graph_continuation_limit_test.go:178: GRAPH_LIMIT_PADDING completed=18000 requested=49992 budget=100000
+    graph_continuation_limit_test.go:178: GRAPH_LIMIT_PADDING completed=19000 requested=49992 budget=100000
+    graph_continuation_limit_test.go:178: GRAPH_LIMIT_PADDING completed=20000 requested=49992 budget=100000
+    graph_continuation_limit_test.go:170: GRAPH_LIMIT_PORT_PROFILE from=0 to=24996 wall_ns=14620295827802 operations={"CASBlob":{"calls":252988,"errors":0,"total_ns":2923520319864},"CASRoot":{"calls":84332,"errors":472,"total_ns":1705582643509,"error_kinds":{"conflict":472}},"Get":{"calls":247624,"errors":0,"total_ns":1474284907755},"Put":{"calls":126494,"errors":0,"total_ns":1612970884615},"ReadBlob":{"calls":376386,"errors":1,"total_ns":2292893615370,"error_kinds":{"deadline":1}},"ReadRoot":{"calls":253921,"errors":0,"total_ns":3968654482234}}
+    graph_continuation_limit_test.go:290: CONTINUATION_FAILURE_STATUS count=40959 tail=40959 kind=StepCompleted checkpoint=<nil> error=<nil>
+    graph_continuation_limit_test.go:290: CONTINUATION_FAILURE_ROOT_KEYS count=0 error=context deadline exceeded
+    graph_continuation_limit_test.go:290: delivery failed commit graph append index 40959: journal append outcome unknown: context deadline exceeded <nil> <nil>
+--- FAIL: TestNativeGraphContinuationGlobalLimitAndTerminalSlot (14644.81s)
+    --- FAIL: TestNativeGraphContinuationGlobalLimitAndTerminalSlot/R1/archive=true (14644.80s)
+FAIL

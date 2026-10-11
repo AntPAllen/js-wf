@@ -1,0 +1,24 @@
+{
+  "command": [
+    "go",
+    "test",
+    "-race",
+    "./wf",
+    "./worker",
+    "./internal/checkpoint",
+    "-run",
+    "^(TestSDKChildOutcomeBeforeConsumption|TestSDKSelectedChildProvenanceBeforeConsumption|TestCheckpointPromiseOutcomeMetadataAdmission|TestReadGraphTerminalMetadataAdmission|TestLegacyHeldTerminalMetadataAdmission|TestLegacyHeldTerminalResultBeforeAck|TestGraphReplaySnapshotTerminalMetadataAdmission|TestReplayTerminalEnvelopeBeforeHandler|TestReplayTerminalEnvelopeTypedBoundary|TestGraphChildRetentionRequiresExactParentOwnership)$",
+    "-count=1",
+    "-v",
+    "-timeout=3m"
+  ],
+  "driver_pid": 268529,
+  "actual_exit_code": 0,
+  "start_ns": 1791700183940801342,
+  "end_ns": 1791700309343107744,
+  "executables_captured": [
+    "checkpoint",
+    "wf",
+    "worker"
+  ]
+}

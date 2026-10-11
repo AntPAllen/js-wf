@@ -43,6 +43,27 @@ func DecodeOutcome(raw []byte, target *Outcome) error {
 	return nil
 }
 
+// Child consumers admit the envelope and result shape before signal consumption.
+// A child failure cannot also carry a successful result or external result edge.
+func decodeChildOutcome(raw []byte, target *Outcome) error {
+	if DecodeOutcome(raw, target) != nil {
+		return ErrCorruptJournal
+	}
+	if target.Error != "" && (len(target.Result) != 0 || target.ResultRef != "" || target.ResultHash != "") {
+		return ErrCorruptJournal
+	}
+	if target.ResultRef == "" && target.ResultHash != "" || target.ResultRef != "" && (target.ResultHash == "" || len(target.Result) != 0) {
+		return ErrCorruptJournal
+	}
+	if target.ResultRef != "" {
+		digest, err := hex.DecodeString(target.ResultHash)
+		if err != nil || len(digest) != sha256.Size || hex.EncodeToString(digest) != target.ResultHash {
+			return ErrCorruptJournal
+		}
+	}
+	return nil
+}
+
 // ResultBytes resolves and verifies an Object Store-backed terminal result.
 func (o Outcome) ResultBytes(ctx context.Context, load func(context.Context, string) ([]byte, error)) ([]byte, error) {
 	if o.ResultRef == "" {

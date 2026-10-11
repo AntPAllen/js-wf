@@ -1,0 +1,21 @@
+{
+  "prepared_source": "9189259faca292659001bbbcbf936c73a1e00318",
+  "actual_entry_cap": 100000,
+  "native_log_sha256": "a1b15263bd499f0495630544c05dd288404ebfaca03b245de49c28d0f82d5312",
+  "compaction_ttl": "6h",
+  "request_bounds_unchanged": true,
+  "native_recovery_renewal_seconds": 2647.30873008,
+  "native_grants": 100006,
+  "native_max_batch_seconds": 6.4892298,
+  "native_fixture_lifetime": "3h",
+  "full_entry_fixture_lifetime": "6h",
+  "renewal_trigger_remaining_seconds": 7200,
+  "observed_cost_headroom_ratio": 2.719743231376879,
+  "rationale": "The native 100006-grant race cost is 44m7.309s. Six-hour compaction intent lifetime leaves a two-hour renewal window (2.72x measured cost) for the larger actual-prefix shape. Actual scope cardinality/staging cost remain unproven; this is an explicit diagnostic configuration, not a changed default or performance gate.",
+  "fixture_parent_seconds": 18000,
+  "child_watchdog_seconds": 18600,
+  "service_watchdog_seconds": 19800,
+  "production_defaults_changed": false,
+  "actual_100000_entries_qualified": false,
+  "profiler_classification": "Exact definite CAS rejection classes are recorded; uncertain/unclassified/non-CAS errors remain ineligible."
+}

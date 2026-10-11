@@ -1,0 +1,15 @@
+=== RUN   TestCheckpointPromiseOutcomeMetadataAdmission
+=== RUN   TestCheckpointPromiseOutcomeMetadataAdmission/failed_inline
+    outcome_admission_test.go:73: malformed promise frame admitted {1 {parent materialized 17} collect_v1 {"user":null,"user":2} {2 51} 2 map[counter:23] 0 [] [] map[child_4:{"inv_seq":22,"error":"failed","result":"NDI="}] [] 0} <nil>
+    outcome_admission_test.go:81: malformed promise frame encoded <nil>
+    outcome_admission_test.go:98: malformed promise restored SDK state {collect_v1 {"user":null,"user":2} 2 0 0 []} <nil>
+=== RUN   TestCheckpointPromiseOutcomeMetadataAdmission/failed_external
+    outcome_admission_test.go:73: malformed promise frame admitted {1 {parent materialized 17} collect_v1 {"user":null,"user":2} {2 51} 2 map[counter:23] 0 [] [] map[child_4:{"inv_seq":22,"error":"failed","result_ref":"result-object","result_hash":"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"}] [] 0} <nil>
+    outcome_admission_test.go:81: malformed promise frame encoded <nil>
+    outcome_admission_test.go:98: malformed promise restored SDK state {collect_v1 {"user":null,"user":2} 2 0 0 []} <nil>
+--- FAIL: TestCheckpointPromiseOutcomeMetadataAdmission (0.00s)
+    --- FAIL: TestCheckpointPromiseOutcomeMetadataAdmission/failed_inline (0.00s)
+    --- FAIL: TestCheckpointPromiseOutcomeMetadataAdmission/failed_external (0.00s)
+FAIL
+FAIL	js-wf/internal/checkpoint	0.010s
+FAIL
