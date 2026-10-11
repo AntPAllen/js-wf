@@ -1,5 +1,28 @@
 # Implementation status against the supplied plan
 
+## Worker SDK envelopes admitted before handler execution — 2026-10-11
+
+Worker.execute now preflights retained StepRequested/StepCompleted envelopes
+before terminal repair, signal draining and user handler admission on that path.
+Legacy, canonical graph and resumed suffix records share production stepwire;
+independent raw-auditor admission remains separate. This prevents malformed
+runtime metadata from reaching user code outside SDK callbacks.
+
+Baseline a7bfa9c enters handlers for all56 null-metadata negatives across legacy/
+canonical modeled worker deliveries; four healthy/opaque-result controls pass.
+Final normal/race runs cover all60 controls with exact current CI assertions,
+zero negative handler/effect calls and unchanged negative journal lengths.
+Native R1/R3 child/buffered-child continuation compatibility is reviewed with
+raw SDK auditing; see [worker admission evidence](scale/worker-step-admission-2026-10-11/README.md).
+Setup fixture/stop-condition failures and a rejected normal executable observer
+binding are preserved separately. Final source, actual exits and executable
+provenance are independently reviewed before acceptance.
+
+The corpus remains162 families/922 pins. Five older qualification campaigns
+remain active and predate this fix. Whole worker history ordering, complete I4
+program/causal semantics, full current-source qualification and original fault/
+scale/soak/power/client/lease/rollout requirements remain open.
+
 ## Close Select request metadata admission gap — 2026-10-11
 
 Direct SDK Select replay now applies shared stepwire metadata admission after

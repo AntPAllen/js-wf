@@ -17,6 +17,7 @@ import (
 	"js-wf/client"
 	"js-wf/identity"
 	"js-wf/internal/graphpublication"
+	"js-wf/internal/stepwire"
 	"js-wf/journal"
 	"js-wf/lease"
 	"js-wf/provision"
@@ -943,6 +944,23 @@ func (w *Worker) execute(ctx context.Context, typ, id string, l *lease.Lease, wa
 		ops.finish(readStarted, "journal_read", 0, "", err)
 		if err != nil {
 			return err
+		}
+	}
+	// Admit all retained SDK envelopes before terminal repair, signal draining,
+	// or user code. Per-step replay checks alone run after handler admission and
+	// cannot protect side effects outside SDK callbacks.
+	for _, record := range records {
+		switch record.Kind {
+		case journal.StepRequested:
+			var request stepwire.Request
+			if stepwire.Decode(record.Payload, &request) != nil {
+				return wf.ErrCorruptJournal
+			}
+		case journal.StepCompleted:
+			var completion stepwire.Completion
+			if stepwire.DecodeCompletion(record.Payload, &completion) != nil {
+				return wf.ErrCorruptJournal
+			}
 		}
 	}
 	if resumed != nil && records[len(records)-1].Index >= w.maxEntries {

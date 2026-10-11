@@ -25,6 +25,7 @@ on:
       - 'wf/graph_child_retention*.go'
       - 'wf/context.go'
       - 'worker/worker.go'
+      - 'worker/step_metadata_admission_test.go'
       - 'worker/terminal_delivery.go'
       - 'worker/continuation.go'
       - 'client/graph_journal*.go'
@@ -95,6 +96,7 @@ on:
       - 'wf/graph_child_retention*.go'
       - 'wf/context.go'
       - 'worker/worker.go'
+      - 'worker/step_metadata_admission_test.go'
       - 'worker/terminal_delivery.go'
       - 'worker/continuation.go'
       - 'client/graph_journal*.go'
@@ -994,4 +996,46 @@ jobs:
         with:
           name: sdk-step-metadata-${{ matrix.mode }}
           path: sdk-step-metadata.log
+          if-no-files-found: error
+
+  worker-step-metadata:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    strategy:
+      matrix:
+        mode: [normal, race]
+    env:
+      GOMAXPROCS: '2'
+      GOMEMLIMIT: 512MiB
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - name: Reject malformed SDK envelopes before worker handler admission
+        env:
+          WORKER_MODE: ${{ matrix.mode }}
+        shell: bash
+        run: |
+          set -o pipefail
+          worker_flags=()
+          if [ "$WORKER_MODE" = race ]; then worker_flags=(-race); fi
+          go test "${worker_flags[@]}" ./worker -run '^TestWorkerStepMetadataBeforeHandler$' -count=1 -v -timeout=2m 2>&1 | tee worker-step-metadata.log
+          python3 - <<'PY'
+          import pathlib, re
+          log = pathlib.Path('worker-step-metadata.log').read_text()
+          assert not re.search(r'^--- (FAIL|SKIP):', log, re.M)
+          assert '--- PASS: TestWorkerStepMetadataBeforeHandler ' in log
+          for backend in ('legacy', 'canonical'):
+              for level in ('healthy', 'opaque_result'):
+                  assert f'--- PASS: TestWorkerStepMetadataBeforeHandler/{backend}/{level}/valid ' in log
+              for level, fields in [('request', ('kind', 'name', 'input_hash', 'duration_nanos', 'fire_at', 'clock_domain', 'timer_step', 'timer_name', 'child_type', 'child_id', 'cases')), ('case', ('kind', 'name', 'timer_step', 'fire_at', 'clock_domain', 'child_type', 'child_id')), ('completion', ('case_index', 'result_ref', 'result_hash', 'error', 'error_kind', 'signal_seq', 'selected', 'cancelled', 'checkpoint_metadata_ref', 'checkpoint_metadata_hash'))]:
+                  for field in fields:
+                      assert f'--- PASS: TestWorkerStepMetadataBeforeHandler/{backend}/{level}/{field} ' in log
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: worker-step-metadata-${{ matrix.mode }}
+          path: worker-step-metadata.log
           if-no-files-found: error
