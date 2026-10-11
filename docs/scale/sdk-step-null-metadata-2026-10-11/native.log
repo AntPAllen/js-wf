@@ -1,0 +1,70 @@
+=== RUN   TestNativeGraphContinuationChildPromise
+=== RUN   TestNativeGraphContinuationChildPromise/R1
+    graph_continuation_sdk_test.go:681: SDK_PHASE name=execute_begin_next elapsed=460.395951ms remaining=59.539603549s sdk_requests=166
+    graph_continuation_sdk_test.go:683: SDK_PHASE name=execute_end_next elapsed=4.236954836s remaining=55.763044473s sdk_requests=1610
+    graph_continuation_sdk_test.go:874: SDK_PHASE name=boundary_scan_end_next elapsed=4.303684703s remaining=55.696314756s sdk_requests=1638
+    graph_continuation_sdk_test.go:903: SDK_PHASE name=child_execute_end elapsed=5.914138508s remaining=54.085861111s sdk_requests=2182
+    graph_continuation_sdk_test.go:681: SDK_PHASE name=execute_begin_finish elapsed=5.914219752s remaining=54.085779968s sdk_requests=2182
+    graph_continuation_sdk_test.go:683: SDK_PHASE name=execute_end_finish elapsed=11.928553291s remaining=48.071446448s sdk_requests=4133
+    graph_continuation_sdk_test.go:768: SDK_PHASE name=child_retire_end elapsed=11.984780384s remaining=48.015219226s sdk_requests=4148
+    graph_continuation_sdk_test.go:874: SDK_PHASE name=boundary_scan_end_finish elapsed=12.035115816s remaining=47.964883564s sdk_requests=4172
+    graph_continuation_sdk_test.go:1300: RAW_SDK_CHECKPOINT_AUDIT journals=1 entries=25 terminals=1 pending=0 retired_projection_only=1
+    graph_continuation_sdk_test.go:1304: RAW_SDK_CHILD_START_LINKS verified=1 unavailable=0
+    graph_continuation_sdk_test.go:1308: RAW_SDK_CHILD_TERMINAL_LINKS verified=1 unavailable=0
+    graph_continuation_sdk_test.go:1309: RAW_SDK_CHECKPOINT_HISTORY checkpoints=2
+    graph_continuation_sdk_test.go:1311: SDK initial/next/finish=map[finish:1 initial:1 next:1] effects=2 records=25 result=43
+    graph_continuation_sdk_test.go:1315: SDK_PHASE name=finished elapsed=17.549561564s remaining=42.450438036s sdk_requests=6893
+=== RUN   TestNativeGraphContinuationChildPromise/R3Domain
+    graph_continuation_sdk_test.go:681: SDK_PHASE name=execute_begin_next elapsed=2.09232408s remaining=57.907675499s sdk_requests=166
+    graph_continuation_sdk_test.go:683: SDK_PHASE name=execute_end_next elapsed=7.956010966s remaining=52.043988574s sdk_requests=1619
+    graph_continuation_sdk_test.go:874: SDK_PHASE name=boundary_scan_end_next elapsed=8.087071302s remaining=51.912928287s sdk_requests=1647
+    graph_continuation_sdk_test.go:903: SDK_PHASE name=child_execute_end elapsed=10.896178173s remaining=49.103821426s sdk_requests=2189
+    graph_continuation_sdk_test.go:681: SDK_PHASE name=execute_begin_finish elapsed=10.896355132s remaining=49.103644497s sdk_requests=2189
+    graph_continuation_sdk_test.go:683: SDK_PHASE name=execute_end_finish elapsed=19.353769521s remaining=40.646230058s sdk_requests=4140
+    graph_continuation_sdk_test.go:768: SDK_PHASE name=child_retire_end elapsed=19.417619522s remaining=40.582380208s sdk_requests=4155
+    graph_continuation_sdk_test.go:874: SDK_PHASE name=boundary_scan_end_finish elapsed=19.522869332s remaining=40.477130117s sdk_requests=4179
+    graph_continuation_sdk_test.go:1300: RAW_SDK_CHECKPOINT_AUDIT journals=1 entries=25 terminals=1 pending=0 retired_projection_only=1
+    graph_continuation_sdk_test.go:1304: RAW_SDK_CHILD_START_LINKS verified=1 unavailable=0
+    graph_continuation_sdk_test.go:1308: RAW_SDK_CHILD_TERMINAL_LINKS verified=1 unavailable=0
+    graph_continuation_sdk_test.go:1309: RAW_SDK_CHECKPOINT_HISTORY checkpoints=2
+    graph_continuation_sdk_test.go:1311: SDK initial/next/finish=map[finish:1 initial:1 next:1] effects=2 records=25 result=43
+    graph_continuation_sdk_test.go:1315: SDK_PHASE name=finished elapsed=27.70634058s remaining=32.29365894s sdk_requests=6886
+--- PASS: TestNativeGraphContinuationChildPromise (45.74s)
+    --- PASS: TestNativeGraphContinuationChildPromise/R1 (17.60s)
+    --- PASS: TestNativeGraphContinuationChildPromise/R3Domain (28.13s)
+=== RUN   TestNativeGraphContinuationBufferedChildPromise
+=== RUN   TestNativeGraphContinuationBufferedChildPromise/R1
+    graph_continuation_sdk_test.go:681: SDK_PHASE name=execute_begin_next elapsed=368.130091ms remaining=59.631869508s sdk_requests=166
+    graph_continuation_sdk_test.go:683: SDK_PHASE name=execute_end_next elapsed=3.537367242s remaining=56.462632308s sdk_requests=1607
+    graph_continuation_sdk_test.go:874: SDK_PHASE name=boundary_scan_end_next elapsed=3.628480931s remaining=56.371518418s sdk_requests=1635
+    graph_continuation_sdk_test.go:903: SDK_PHASE name=child_execute_end elapsed=5.504385779s remaining=54.49561372s sdk_requests=2188
+    graph_continuation_sdk_test.go:681: SDK_PHASE name=execute_begin_finish elapsed=5.504488465s remaining=54.495511184s sdk_requests=2188
+    graph_continuation_sdk_test.go:683: SDK_PHASE name=execute_end_finish elapsed=11.102498814s remaining=48.897500796s sdk_requests=3953
+    graph_continuation_sdk_test.go:768: SDK_PHASE name=child_retire_end elapsed=11.154529267s remaining=48.845470213s sdk_requests=3968
+    graph_continuation_sdk_test.go:874: SDK_PHASE name=boundary_scan_end_finish elapsed=11.216788966s remaining=48.783209942s sdk_requests=3992
+    graph_continuation_sdk_test.go:1300: RAW_SDK_CHECKPOINT_AUDIT journals=1 entries=25 terminals=1 pending=0 retired_projection_only=1
+    graph_continuation_sdk_test.go:1304: RAW_SDK_CHILD_START_LINKS verified=1 unavailable=0
+    graph_continuation_sdk_test.go:1308: RAW_SDK_CHILD_TERMINAL_LINKS verified=1 unavailable=0
+    graph_continuation_sdk_test.go:1309: RAW_SDK_CHECKPOINT_HISTORY checkpoints=2
+    graph_continuation_sdk_test.go:1311: SDK initial/next/finish=map[finish:1 initial:1 next:1] effects=2 records=25 result=43
+    graph_continuation_sdk_test.go:1315: SDK_PHASE name=finished elapsed=17.93173883s remaining=42.068260669s sdk_requests=7082
+=== RUN   TestNativeGraphContinuationBufferedChildPromise/R3Domain
+    graph_continuation_sdk_test.go:681: SDK_PHASE name=execute_begin_next elapsed=1.975259657s remaining=58.024739772s sdk_requests=166
+    graph_continuation_sdk_test.go:683: SDK_PHASE name=execute_end_next elapsed=6.204635725s remaining=53.795363964s sdk_requests=1610
+    graph_continuation_sdk_test.go:874: SDK_PHASE name=boundary_scan_end_next elapsed=6.284271055s remaining=53.715728314s sdk_requests=1638
+    graph_continuation_sdk_test.go:903: SDK_PHASE name=child_execute_end elapsed=8.224619862s remaining=51.775379747s sdk_requests=2182
+    graph_continuation_sdk_test.go:681: SDK_PHASE name=execute_begin_finish elapsed=8.224803832s remaining=51.775195757s sdk_requests=2182
+    graph_continuation_sdk_test.go:683: SDK_PHASE name=execute_end_finish elapsed=13.986236367s remaining=46.013763282s sdk_requests=3947
+    graph_continuation_sdk_test.go:768: SDK_PHASE name=child_retire_end elapsed=14.029792712s remaining=45.970206887s sdk_requests=3962
+    graph_continuation_sdk_test.go:874: SDK_PHASE name=boundary_scan_end_finish elapsed=14.092478926s remaining=45.907520553s sdk_requests=3986
+    graph_continuation_sdk_test.go:1300: RAW_SDK_CHECKPOINT_AUDIT journals=1 entries=25 terminals=1 pending=0 retired_projection_only=1
+    graph_continuation_sdk_test.go:1304: RAW_SDK_CHILD_START_LINKS verified=1 unavailable=0
+    graph_continuation_sdk_test.go:1308: RAW_SDK_CHILD_TERMINAL_LINKS verified=1 unavailable=0
+    graph_continuation_sdk_test.go:1309: RAW_SDK_CHECKPOINT_HISTORY checkpoints=2
+    graph_continuation_sdk_test.go:1311: SDK initial/next/finish=map[finish:1 initial:1 next:1] effects=2 records=25 result=43
+    graph_continuation_sdk_test.go:1315: SDK_PHASE name=finished elapsed=21.214831446s remaining=38.785168224s sdk_requests=7063
+--- PASS: TestNativeGraphContinuationBufferedChildPromise (39.53s)
+    --- PASS: TestNativeGraphContinuationBufferedChildPromise/R1 (17.97s)
+    --- PASS: TestNativeGraphContinuationBufferedChildPromise/R3Domain (21.56s)
+PASS
+ok  	js-wf/worker	86.345s

@@ -41,5 +41,8 @@ func Decode(raw []byte, target *Request) error {
 	if len(bytes.TrimSpace(raw)) == 0 || bytes.Equal(bytes.TrimSpace(raw), []byte("null")) {
 		return fmt.Errorf("missing step declaration")
 	}
-	return checkpoint.DecodeUnambiguous(raw, target)
+	if err := checkpoint.DecodeUnambiguous(raw, target); err != nil {
+		return err
+	}
+	return requestMetadata(raw)
 }

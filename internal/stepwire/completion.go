@@ -32,6 +32,9 @@ func DecodeCompletion(raw []byte, target *Completion) error {
 	if err := checkpoint.DecodeUnambiguous(raw, target); err != nil {
 		return err
 	}
+	if _, err := rejectNullMetadata(raw, true); err != nil {
+		return err
+	}
 	for _, field := range []json.RawMessage{target.MetadataRef, target.MetadataHash} {
 		if len(field) == 0 {
 			continue

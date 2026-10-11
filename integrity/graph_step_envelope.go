@@ -56,6 +56,9 @@ func auditSDKStepEnvelope(entry journal.Entry) error {
 	if len(raw) == 0 || raw[0] != '{' {
 		return fmt.Errorf("SDK step envelope is not an object")
 	}
+	if err := auditSDKStepFields(raw, entry.Kind == journal.StepCompleted); err != nil {
+		return err
+	}
 	if entry.Kind == journal.StepRequested {
 		var request auditedStepRequest
 		if err := checkpoint.DecodeUnambiguous(raw, &request); err != nil {

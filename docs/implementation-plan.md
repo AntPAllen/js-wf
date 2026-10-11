@@ -1,5 +1,29 @@
 # JetStream Durable Workflow Runtime — Implementation Plan
 
+## Reject null SDK step metadata before replay handlers — 2026-10-11
+
+Production stepwire and the independent raw auditor reject present null request/
+case/completion metadata and null case objects. Completion result remains opaque
+user JSON; legacy omitted/empty kinds and explicit zero/false/empty values remain
+valid. The auditor uses its own implementation. Existing rejected-limit request
+admission inherits the raw envelope check.
+
+Baseline78ee4ee accepted completion error:null in both raw auditing and SDK
+replay (regressions exit1; replay entered the handler). Final race raw exit0
+in42.876s covers41 top-level raw graph tests, four native checkpoint/census cases
+and68 physical controls (10 positive/58 negative). Full wf/stepwire race suites
+pass in95.957s/1.076s, including28 before-handler negatives and60 null/zero/opaque
+wire controls. Four native R1/R3 child/buffered-child flows pass in86.345s with
+eight checkpoint frames and four start/terminal witness pairs. All four actual
+executables were captured;1136 prelaunch Go/module inputs stayed unchanged.
+CI-only edits followed actual command closure and are separately hash-bound;
+exact raw/SDK guards passed locally. See [null metadata evidence](scale/sdk-step-null-metadata-2026-10-11/README.md).
+
+The corpus remains162 families/922 pins; full current qualification is not
+established. The full161 normal and four older campaigns remain live and exclude
+this code. Full I4 program/causal semantics and original fault/scale/soak/power/
+client/lease/rollout requirements remain open.
+
 ## Seeded retained child-link audit family — 2026-10-11
 
 A new raw-history simulation family covers consumed/rejected arrivals × JSON/

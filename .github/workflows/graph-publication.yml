@@ -3,6 +3,8 @@ on:
   workflow_dispatch:
   push:
     paths:
+      - 'internal/stepwire/**'
+      - 'wf/replay_step_null_test.go'
       - 'internal/graphpublication/**'
       - 'journal/graph*.go'
       - 'reconcile/**'
@@ -70,6 +72,8 @@ on:
       - 'go.sum'
   pull_request:
     paths:
+      - 'internal/stepwire/**'
+      - 'wf/replay_step_null_test.go'
       - 'internal/graphpublication/**'
       - 'journal/graph*.go'
       - 'reconcile/**'
@@ -318,7 +322,7 @@ jobs:
         shell: bash
         run: |
           set -o pipefail
-          go test -race -p=1 ./integrity -run '^(TestRawGraphReferencesAndIndependentCorruptionControls|TestNativeRawGraphReferenceAuditQuiescentReaders|TestRawGraphJournalGenerationsOutcomesAndArchive|TestRawGraphCheckpointPointerAndFrameBindings|TestNativeRawGraphCheckpointAudit|TestRawGraphCheckpointMaterializedState|TestRawGraphCheckpointPromiseOwnership|TestRawGraphCheckpointMetadataBindings|TestRawGraphRetiredSourceProjectionScope|TestRawGraphChildSignalHistory|TestRawGraphChildStartLinks|TestRawGraphChildTerminalLinks|TestRawGraphRejectedChildSignalLinks|TestRawGraphConsumedSignalEnvelope|TestRawGraphSignalEnvelope|TestRawGraphSignalReservationAndBinding|TestRawGraphSignalIndexIndependentPrefixes|TestRawGraphSignalIndexProductionPackets|TestRawGraphCheckpointSDKStateHistory|TestRawGraphCheckpointPromiseHistory|TestRawGraphCheckpointSDKSignalHistory|TestRawGraphCheckpointSDKTimerHistory|TestRawGraphEveryCheckpointHistory|TestRawGraphSDKStepEnvelope|TestRawGraphCanonicalEnvelope|TestRawGraphTerminalEnvelope|TestRawGraphRejectedLimitBoundary|TestRawGraphRejectedLimitPrefix|TestRawGraphRejectedLimitContinuation|TestRawGraphSelectionPriority|TestRawGraphSelectionReadiness|TestRawGraphCursorEnvelope|TestRawGraphStartEnvelope|TestRawGraphRetiredProjectionEnvelope|TestRawGraphStartSourceHeaders|TestRawGraphOrphanProjectionBaseline|TestRawGraphProjectionCensus|TestRawGraphOutcomeFieldPresence|TestRawGraphStartFieldPresence|TestRawGraphCursorFieldPresence|TestRawGraphCursorState|TestRawGraphCursorVersionCapabilities)$' -count=1 -v -timeout=5m 2>&1 | tee raw-graph-audit.log
+          go test -race -p=1 ./integrity -run '^(TestRawGraphReferencesAndIndependentCorruptionControls|TestNativeRawGraphReferenceAuditQuiescentReaders|TestRawGraphJournalGenerationsOutcomesAndArchive|TestRawGraphCheckpointPointerAndFrameBindings|TestNativeRawGraphCheckpointAudit|TestRawGraphCheckpointMaterializedState|TestRawGraphCheckpointPromiseOwnership|TestRawGraphCheckpointMetadataBindings|TestRawGraphRetiredSourceProjectionScope|TestRawGraphChildSignalHistory|TestRawGraphChildStartLinks|TestRawGraphChildTerminalLinks|TestRawGraphRejectedChildSignalLinks|TestRawGraphConsumedSignalEnvelope|TestRawGraphSignalEnvelope|TestRawGraphSignalReservationAndBinding|TestRawGraphSignalIndexIndependentPrefixes|TestRawGraphSignalIndexProductionPackets|TestRawGraphCheckpointSDKStateHistory|TestRawGraphCheckpointPromiseHistory|TestRawGraphCheckpointSDKSignalHistory|TestRawGraphCheckpointSDKTimerHistory|TestRawGraphEveryCheckpointHistory|TestRawGraphSDKStepEnvelope|TestRawGraphSDKStepNullMetadata|TestRawGraphCanonicalEnvelope|TestRawGraphTerminalEnvelope|TestRawGraphRejectedLimitBoundary|TestRawGraphRejectedLimitPrefix|TestRawGraphRejectedLimitContinuation|TestRawGraphSelectionPriority|TestRawGraphSelectionReadiness|TestRawGraphCursorEnvelope|TestRawGraphStartEnvelope|TestRawGraphRetiredProjectionEnvelope|TestRawGraphStartSourceHeaders|TestRawGraphOrphanProjectionBaseline|TestRawGraphProjectionCensus|TestRawGraphOutcomeFieldPresence|TestRawGraphStartFieldPresence|TestRawGraphCursorFieldPresence|TestRawGraphCursorState|TestRawGraphCursorVersionCapabilities)$' -count=1 -v -timeout=5m 2>&1 | tee raw-graph-audit.log
           python3 - <<'PY'
           import pathlib, re
           log = pathlib.Path('raw-graph-audit.log').read_text()
@@ -473,6 +477,13 @@ jobs:
           for encoding in ('json', 'protobuf-v1'):
               for control in ('start-valid', 'start-reused', 'inline', 'start-parent-type', 'start-parent-id', 'start-parent-generation', 'start-signal', 'start-unparented', 'start-input'):
                   assert f'--- PASS: TestRawGraphChildStartLinks/{encoding}/{control} ' in log
+          assert '--- PASS: TestRawGraphSDKStepNullMetadata ' in log
+          for encoding in ('json', 'protobuf-v1'):
+              for level, fields in [('request', ('kind', 'name', 'input_hash', 'duration_nanos', 'fire_at', 'clock_domain', 'timer_step', 'timer_name', 'child_type', 'child_id', 'cases')), ('case', ('kind', 'name', 'timer_step', 'fire_at', 'clock_domain', 'child_type', 'child_id', 'null-element')), ('completion', ('case_index', 'result_ref', 'result_hash', 'error', 'error_kind', 'signal_seq', 'selected', 'cancelled', 'checkpoint_metadata_ref', 'checkpoint_metadata_hash'))]:
+                  for field in fields:
+                      assert f'--- PASS: TestRawGraphSDKStepNullMetadata/{encoding}/{level}/{field} ' in log
+              for control in ('legacy-kind-omitted', 'legacy-kind-empty', 'opaque-null', 'opaque-duplicates', 'explicit-zero'):
+                  assert f'--- PASS: TestRawGraphSDKStepNullMetadata/{encoding}/valid/{control} ' in log
           assert '--- PASS: TestRawGraphChildSignalHistory ' in log
           for encoding in ('json', 'protobuf-v1'):
               for control in ('inline', 'failed', 'external', 'no-declaration', 'missing-child', 'wrong-type', 'wrong-id', 'zero-generation', 'outcome-generation', 'child-hash-only', 'failed-result', 'null-error', 'unknown-outcome', 'external-outcome-ref', 'external-unowned', 'external-wrong-bytes', 'mixed-body'):
@@ -937,3 +948,46 @@ jobs:
         with:
           name: graph-transport-${{ matrix.family }}-${{ matrix.mode }}
           path: graph-transport-events.jsonl
+
+  sdk-step-metadata:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    strategy:
+      matrix:
+        mode: [normal, race]
+    env:
+      GOMAXPROCS: '2'
+      GOMEMLIMIT: 512MiB
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - name: Null metadata admission and opaque user results
+        env:
+          SDK_MODE: ${{ matrix.mode }}
+        shell: bash
+        run: |
+          set -o pipefail
+          sdk_flags=()
+          if [ "$SDK_MODE" = race ]; then sdk_flags=(-race); fi
+          go test "${sdk_flags[@]}" ./wf ./internal/stepwire -run '^(TestReplayNullStepMetadataBeforeHandler|TestNullRuntimeMetadataAndOpaqueResults|TestRequestVariantsRemainReadable|TestCompletionEnvelopeKeepsUserResultOpaque|TestRequestEnvelopeKeepsHashedUserInputOpaque)$' -count=1 -v -timeout=4m 2>&1 | tee sdk-step-metadata.log
+          python3 - <<'PY'
+          import pathlib, re
+          log = pathlib.Path('sdk-step-metadata.log').read_text()
+          assert not re.search(r'^--- (FAIL|SKIP):', log, re.M)
+          for test in ('TestReplayNullStepMetadataBeforeHandler', 'TestNullRuntimeMetadataAndOpaqueResults', 'TestRequestVariantsRemainReadable', 'TestCompletionEnvelopeKeepsUserResultOpaque', 'TestRequestEnvelopeKeepsHashedUserInputOpaque'):
+              assert f'--- PASS: {test} ' in log
+          for level, fields in [('request', ('kind', 'name', 'input_hash', 'duration_nanos', 'fire_at', 'clock_domain', 'timer_step', 'timer_name', 'child_type', 'child_id', 'cases')), ('case', ('kind', 'name', 'timer_step', 'fire_at', 'clock_domain', 'child_type', 'child_id')), ('completion', ('case_index', 'result_ref', 'result_hash', 'error', 'error_kind', 'signal_seq', 'selected', 'cancelled', 'checkpoint_metadata_ref', 'checkpoint_metadata_hash'))]:
+              for field in fields:
+                  assert f'--- PASS: TestReplayNullStepMetadataBeforeHandler/{level}/{field} ' in log
+                  for control in ('null', 'zero'):
+                      assert f'--- PASS: TestNullRuntimeMetadataAndOpaqueResults/{level}/{field}/{control} ' in log
+          assert '--- PASS: TestNullRuntimeMetadataAndOpaqueResults/null-case ' in log
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: sdk-step-metadata-${{ matrix.mode }}
+          path: sdk-step-metadata.log
+          if-no-files-found: error
