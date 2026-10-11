@@ -1,0 +1,62 @@
+{
+  "source": "9189259faca292659001bbbcbf936c73a1e00318",
+  "checkout": "/home/exedev/js-wf-classified-entry100000-qualification-20261011",
+  "root": "/home/exedev/js-wf-classified-entry100000-20261011",
+  "campaign_started": false,
+  "prepared": true,
+  "started_utc": "2026-10-11T00:38:55.645667+00:00",
+  "commands": [
+    {
+      "mode": "normal",
+      "command": [
+        "/usr/local/bin/go",
+        "test",
+        "-c",
+        "-o",
+        "/home/exedev/js-wf-classified-entry100000-20261011/worker-normal.test",
+        "./worker"
+      ],
+      "cwd": "/home/exedev/js-wf-classified-entry100000-qualification-20261011",
+      "started_utc": "2026-10-11T00:38:56.202338+00:00",
+      "exit": 0,
+      "ended_utc": "2026-10-11T00:39:03.588171+00:00"
+    },
+    {
+      "mode": "race",
+      "command": [
+        "/usr/local/bin/go",
+        "test",
+        "-race",
+        "-c",
+        "-o",
+        "/home/exedev/js-wf-classified-entry100000-20261011/worker-race.test",
+        "./worker"
+      ],
+      "cwd": "/home/exedev/js-wf-classified-entry100000-qualification-20261011",
+      "started_utc": "2026-10-11T00:39:03.636116+00:00",
+      "exit": 0,
+      "ended_utc": "2026-10-11T00:39:16.049947+00:00"
+    }
+  ],
+  "compile_environment": {
+    "GOWORK": "off",
+    "GOFLAGS": ""
+  },
+  "inputs": 1946,
+  "toolchain": "go version go1.27.1 linux/amd64",
+  "binaries": {
+    "normal": {
+      "path": "/home/exedev/js-wf-classified-entry100000-20261011/worker-normal.test",
+      "bytes": 38219025,
+      "sha256": "e6715a9e23ce68efce3cc998a781872408f6913abc61939a09d3a0fa385ca01b",
+      "build_info": "/home/exedev/js-wf-classified-entry100000-20261011/worker-normal.test: go1.27.1\n\tpath\tjs-wf/worker.test\n\tmod\tjs-wf\t(devel)\t\n\tdep\tgithub.com/anishathalye/porcupine\tv1.3.1\th1:fBZ4/NGNPnIDdd6xNtrNk9/GiEQ0L4FO5+scINN+t0E=\n\tdep\tgithub.com/antithesishq/antithesis-sdk-go\tv0.8.0-default-no-op\th1:1BOWQJweNyvZMlpAHXGLiZQn9S+QXGcz3xh94lC0w6E=\n\tdep\tgithub.com/klauspost/compress\tv1.20.0\th1:a3C1ke2ohxFymNlb2HWAHjDeKCI90scRskErZkR0ezA=\n\tdep\tgithub.com/minio/highwayhash\tv1.0.4\th1:asJizugGgchQod2ja9NJlGOWq4s7KsAWr5XUc9Clgl4=\n\tdep\tgithub.com/nats-io/jwt/v2\tv2.8.2\th1:XXRgB60MSTnqsRwejQurVDs/hcv2dkt+86GjI+I/bMc=\n\tdep\tgithub.com/nats-io/nats-server/v2\tv2.15.0\th1:M99yf0y05rTr46/qc/Is6ZAowI58Ryp2SjufLCUeVJc=\n\tdep\tgithub.com/nats-io/nats.go\tv1.54.0\th1:vsXoOxjHp/GmPUN+EcI7uOf/uB+iAP+kEsAFNQN0yzA=\n\tdep\tgithub.com/nats-io/nkeys\tv0.4.16\th1:rd5oAuLOb8mnAycB0xleuEBNS1pVVnN0fv/FF34Eypg=\n\tdep\tgithub.com/nats-io/nuid\tv1.0.1\th1:5iA8DT8V7q8WK2EScv2padNa/rTESc1KdnPw4TC2paw=\n\tdep\tgolang.org/x/crypto\tv0.57.0\th1:3ZVCjf8Ggz7zneR/EHRVx68Ctf+2pmIMP2UFhh9cC6M=\n\tdep\tgolang.org/x/sys\tv0.48.0\th1:bbX/i/6MgT9BVLM9RT1thmxL04yeTAhbEz4SyadbXoo=\n\tdep\tgolang.org/x/time\tv0.16.0\th1:vMb6ptszcQMkcwiRTAuNNU50gom6++Q/6gY2hDM6VDE=\n\tdep\tgoogle.golang.org/protobuf\tv1.36.6\th1:z1NpPI8ku2WgiWnf+t9wTPsn6eP1L7ksHUlkfLvd9xY=\n\tbuild\t-buildmode=exe\n\tbuild\t-compiler=gc\n\tbuild\tCGO_ENABLED=1\n\tbuild\tCGO_CFLAGS=\n\tbuild\tCGO_CPPFLAGS=\n\tbuild\tCGO_CXXFLAGS=\n\tbuild\tCGO_LDFLAGS=\n\tbuild\tGOARCH=amd64\n\tbuild\tGOOS=linux\n\tbuild\tGOAMD64=v1\n"
+    },
+    "race": {
+      "path": "/home/exedev/js-wf-classified-entry100000-20261011/worker-race.test",
+      "bytes": 49860660,
+      "sha256": "68312cd0a52b7e2d38d8c7b3ad115d5b72fee2cde5c3546eeae987dd61ac3458",
+      "build_info": "/home/exedev/js-wf-classified-entry100000-20261011/worker-race.test: go1.27.1\n\tpath\tjs-wf/worker.test\n\tmod\tjs-wf\t(devel)\t\n\tdep\tgithub.com/anishathalye/porcupine\tv1.3.1\th1:fBZ4/NGNPnIDdd6xNtrNk9/GiEQ0L4FO5+scINN+t0E=\n\tdep\tgithub.com/antithesishq/antithesis-sdk-go\tv0.8.0-default-no-op\th1:1BOWQJweNyvZMlpAHXGLiZQn9S+QXGcz3xh94lC0w6E=\n\tdep\tgithub.com/klauspost/compress\tv1.20.0\th1:a3C1ke2ohxFymNlb2HWAHjDeKCI90scRskErZkR0ezA=\n\tdep\tgithub.com/minio/highwayhash\tv1.0.4\th1:asJizugGgchQod2ja9NJlGOWq4s7KsAWr5XUc9Clgl4=\n\tdep\tgithub.com/nats-io/jwt/v2\tv2.8.2\th1:XXRgB60MSTnqsRwejQurVDs/hcv2dkt+86GjI+I/bMc=\n\tdep\tgithub.com/nats-io/nats-server/v2\tv2.15.0\th1:M99yf0y05rTr46/qc/Is6ZAowI58Ryp2SjufLCUeVJc=\n\tdep\tgithub.com/nats-io/nats.go\tv1.54.0\th1:vsXoOxjHp/GmPUN+EcI7uOf/uB+iAP+kEsAFNQN0yzA=\n\tdep\tgithub.com/nats-io/nkeys\tv0.4.16\th1:rd5oAuLOb8mnAycB0xleuEBNS1pVVnN0fv/FF34Eypg=\n\tdep\tgithub.com/nats-io/nuid\tv1.0.1\th1:5iA8DT8V7q8WK2EScv2padNa/rTESc1KdnPw4TC2paw=\n\tdep\tgolang.org/x/crypto\tv0.57.0\th1:3ZVCjf8Ggz7zneR/EHRVx68Ctf+2pmIMP2UFhh9cC6M=\n\tdep\tgolang.org/x/sys\tv0.48.0\th1:bbX/i/6MgT9BVLM9RT1thmxL04yeTAhbEz4SyadbXoo=\n\tdep\tgolang.org/x/time\tv0.16.0\th1:vMb6ptszcQMkcwiRTAuNNU50gom6++Q/6gY2hDM6VDE=\n\tdep\tgoogle.golang.org/protobuf\tv1.36.6\th1:z1NpPI8ku2WgiWnf+t9wTPsn6eP1L7ksHUlkfLvd9xY=\n\tbuild\t-buildmode=exe\n\tbuild\t-compiler=gc\n\tbuild\t-race=true\n\tbuild\tCGO_ENABLED=1\n\tbuild\tCGO_CFLAGS=\n\tbuild\tCGO_CPPFLAGS=\n\tbuild\tCGO_CXXFLAGS=\n\tbuild\tCGO_LDFLAGS=\n\tbuild\tGOARCH=amd64\n\tbuild\tGOOS=linux\n\tbuild\tGOAMD64=v1\n"
+    }
+  },
+  "ended_utc": "2026-10-11T00:39:17.523477+00:00"
+}

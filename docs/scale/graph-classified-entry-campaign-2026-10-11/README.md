@@ -22,3 +22,19 @@ CASRoot errors have no class evidence and are not reclassified by this change.
 
 Preparation and full campaign are separate results. No full-cap pass or race
 acceptance is inferred from a build,control,or service launch.
+
+## Preparation accepted and original full normal launched
+
+Frozen source9189259faca292659001bbbcbf936c73a1e00318: both builds completed and
+independent preparation review verified1946 Git inputs,the retained binaries,
+20-entry control and54 physical files. Preparation receipts describe the closed
+pre-launch snapshot; campaign status is given by the separate service receipts.
+
+The production100000 normal is live under
+js-wf-classified-entry100000-normal-20261011.service,invocation
+4574548accd94da986ff05b3652910d2,supervisor208830/child208893. The launch binds
+actual live processes,binary SHA,source,configuration,supervisor hash and service
+properties(RemainAfterExit=yes,330-minute watchdog,10GiB memory cap). Native
+logs confirm file storage,indexed authority,six-hour compaction TTL and unchanged
+request bounds. This is launch evidence,not full acceptance. Race is unlaunched
+and requires independently accepted matching normal termination.

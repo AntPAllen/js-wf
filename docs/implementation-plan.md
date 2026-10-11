@@ -1,5 +1,16 @@
 # JetStream Durable Workflow Runtime — Implementation Plan
 
+## Classified original100000 normal launched — 2026-10-11
+
+Source9189259 is frozen in a clean sparse checkout. Independent preparation
+review verifies1946 Git inputs,both retained binaries and a20-entry normal
+control with54 physical files. The original100000-entry normal is now live under
+invocation4574548accd94da986ff05b3652910d2,supervisor208830/child208893,with
+unchanged entry cap,request bounds,file storage,indexed authority and6h
+compaction TTL. [Preparation and launch receipts](scale/graph-classified-entry-campaign-2026-10-11/README.md).
+Full acceptance/race remain open; the earlier unclassified normal stays rejected.
+Frozen00eeb13 complete159 normal continues under its existing invocation.
+
 ## Classified full-cap campaign preparation added — 2026-10-11
 
 Native profile acceptance now requires complete error-class counts and permits
