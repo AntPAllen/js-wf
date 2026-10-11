@@ -88,3 +88,18 @@ and a separate prepared unit started. No test failure or seed was retried.
 Original native fault, scale, soak, retention/import/admission and rollout gates
 remain separate. Public continuation admission/import/online collection remain
 disabled.
+
+## Complete frozen-source race closure — 2026-10-11
+
+The prepared race service closed at 09:39:50 UTC with actual supervisor exit 0
+and MainPID 0. Independent qualification review accepted all 3589 Git inputs,
+159000 seed executions, 860 saved traces, 226 top-level PASS results and eight
+actual sequential package processes. Its retained executable SHA256 is
+`3ccbab56c00eed28cd02588cebbd959af96b81e02ea5d0702e098e909eafc15a`.
+
+`race-terminal-review.py` separately verifies the 47 compressed terminal files
+against their hashes and original 3,118,586 bytes, the actual closed process
+handles and a fresh independent qualification review. `race-state.json`,
+`race-review.json`, `race-terminal-files.json` and `race-terminal-review.json`
+record acceptance. This proves frozen `b4fe445` race1000 only; later source and
+its 163-family/946-pin inventory are not qualified by this older campaign.

@@ -1,5 +1,28 @@
 # JetStream Durable Workflow Runtime — Implementation Plan
 
+## Native signal failure isolated to binding commit; frozen159 race accepted — 2026-10-11
+
+A single active10/10/1 R3 race diagnostic on1b7a4bf reproduces the native failure
+after old completions, active-handler population and purge/reuse overlap. Its
+first reported failure is release Signal live-00004/invocation11, ordered source
+through6, at signal binding commit; parent context remains healthy. Actual SDK
+exit1/69.415seconds and2158 native files/14,345,960bytes are retained. Independent
+review binds2903 Git inputs, executable, actual closure and complete native
+census. [Native phase evidence](scale/native-signal-phases-2026-10-11/README.md).
+Commit includes authority observation, graph validation and root CAS/readback;
+the label does not prove which failed or that CAS was attempted. Exact durable
+binding outcome and server cause remain unconfirmed. No deadline/retry changes
+or full-scale reruns were made; final raw audit and native acceptance remain open.
+
+Separately, frozenb4fe445 full159 race1000 closed09:39:50UTC actualexit0.
+Independent review accepted3589 Git inputs/159000 seeds/860 pins/226 top-level
+PASS results/eight package processes; a second closure review verifies47 packed
+terminal files/3,118,586 original bytes against retained originals and actual
+process termination. [Frozen159 closure](scale/current-main159-tier1-2026-10-11/README.md).
+Three later-source race campaigns remain live. This older source does not
+qualify currentmain; latest full seed, full canonical scale, original fault,
+soak and adoption requirements remain open.
+
 ## Canonical signal mutation phases qualified — 2026-10-11
 
 Canonical signal failures now identify reservation preparation/commit, ordered
