@@ -42,3 +42,29 @@ prove a timeout cause or establish a dedicated-host performance result.
 Full acceptance, fault/soak/adoption/physical collection/power-loss requirements
 remain open. This run may provide a qualified functional full-population result
 or a specifically labelled failure; neither substitutes for the other gates.
+
+## Full campaign closed with reader-release failure
+
+The same InvocationID is terminal, `MainPID=0 / ExecMainStatus=1 / failed`. Both
+supervisor294508 and driver294509 are absent. The SDK closes actual exit1 after
+133.472 seconds; its test body reports133.40 seconds. The first reported failing
+request is `old Start purge-scale/old-00475`, with parent context `<nil>` and
+`start outcome unknown: input: release start reader: context deadline exceeded`.
+
+This specifically identifies reader cleanup, whose existing convenience-read
+budget is three seconds. It does not identify which release authority read/CAS/
+readback failed, prove a server defect, or prove that changing the budget would
+meet the full gate. Input read/state validation had completed before this error
+was labelled by the cleanup defer. The original20m parent did not expire. No
+new full run or uncertain-publication retry is scheduled from this failure.
+
+`terminal-review.py` verifies all1232 frozen inputs, actual retained executable,
+2370 closed native files/176,600,866bytes and exact loaded service closure. The
+strict full reviewer refuses actualexit1. Terminal state, log, unit, compressed
+census and refusal are retained here; original native bytes remain local. The
+full active population, purge/reuse stages and full raw audit were not reached.
+The successful active10 diagnostic remains qualified only in its own scope.
+
+Next, isolate authority observation, pin-release CAS and exact readback within
+reader cleanup under the actual worker/client concurrency, using deterministic
+cuts and bounded native phase measurements before another full campaign.

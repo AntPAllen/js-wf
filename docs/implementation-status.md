@@ -1,5 +1,24 @@
 # Implementation status against the supplied plan
 
+## Full canonical run isolated reader-release deadline — 2026-10-11
+
+The phase-diagnostic full10k/10k-active/1k campaign is terminal, SDK/supervisor
+actualexit1 after133.472seconds. First reported request is old Start
+purge-scale/old-00475; parent context is `<nil>` and the error is
+`start outcome unknown: input: release start reader: context deadline exceeded`.
+This identifies the cleanup defer after successful state/input reading, whose
+existing budget is3seconds. The enclosing20m deadline was not reached. It does
+not establish which authority observation/CAS/readback failed, a server cause,
+or that a larger cleanup budget would pass the original gate.
+
+Independent closure review verifies1232 frozen inputs, the actual executable,
+2370 native files/176,600,866bytes and loaded unit closure; full acceptance
+refuses actualexit1. [Terminal evidence](scale/canonical-purge10000-phases-2026-10-11/README.md)
+is retained with the original native store. Active10 preflight remains scoped;
+full old completions, active population, purge/reuse and raw audit were not
+completed. Next work isolates the release operations under concurrency before
+another full run. No bounds or uncertain-publication rules were changed.
+
 ## Full active canonical run with phase diagnostics launched — 2026-10-11
 
 Frozen10dc1a7's new executable passes an active-handler10/10/1 preflight, actual
