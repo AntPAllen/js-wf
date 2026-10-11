@@ -93,3 +93,22 @@ The live acceptance reviewer refuses actual exit 1. Launch is evidence of a live
 full campaign, not full-scale acceptance. State/log/native files remain outside
 Git while running. Revalidate the exact unit/InvocationID/SDK before observing it;
 an observation timeout must not trigger a duplicate launch.
+
+## Full campaign closed with failure
+
+The same InvocationID is terminal (`MainPID=0`, failed, `ExecMainStatus=1`). SDK
+283565 and supervisor282333 are absent; SDK/supervisor actual exits are 1. Test
+body152.83s / supervised driver153.010s fails in the initial Start cohort with
+`start outcome unknown: input: context deadline exceeded`, before the enclosing
+20-minute deadline. It does not report all10,000 old completions or enter the
+purge/reuse/active-population proof stages. No full raw audit was completed.
+The first failing Start identity was not logged by this fixture; this limits
+causal diagnosis and remains a follow-up.
+
+The frozen1231 inputs, retained normal executable and all2443 closed native files
+(198,307,813 bytes) verify. `full-failure-review.py` independently reproduces that
+failure-evidence check and acceptance remains refused. All original stores and
+snapshot/binary are retained locally. This does not confirm an underlying server
+cause, classify every individual Start outcome or justify repeating uncertain
+publication. The full Phase7 canonical scale gate remains failed/open. Diagnostic
+normal/race and tombstone controls remain accepted in their smaller scope.

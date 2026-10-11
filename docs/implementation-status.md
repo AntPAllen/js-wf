@@ -1,5 +1,21 @@
 # Implementation status against the supplied plan
 
+## Full canonical Phase 7 run failed during Start — 2026-10-11
+
+Frozen20ab8a0 full10k/10k/1k active-handler campaign is now terminal, not running.
+InvocationID13fb6f9159bb45589a7e332ce9eb7805 / supervisor282333 / SDK283565
+closed actualexit1 after153.010seconds. It fails in the initial Start cohort:
+`start outcome unknown: input: context deadline exceeded`. The20m enclosing
+deadline was not reached; all10k old completions, purge/reuse stages and the full
+raw audit were not completed. First failing Start identity was not logged.
+
+Independent failure review verifies1231 frozen inputs, the actual retained normal
+binary and2443 closed native files/198,307,813bytes. Acceptance is refused;
+original store and snapshot/binary remain local. Cause is unconfirmed, and no
+blind uncertain-publication retry was added. See [closed full-run evidence](scale/canonical-purge-reuse-2026-10-11/README.md).
+The diagnostic canonical/legacy/raw-audit proofs below remain accepted only in
+their own scopes. Full canonical scale and original release gates remain open.
+
 ## Canonical Phase 7 purge/reuse scenario and tombstone auditing — 2026-10-11
 
 The original 10k completed / 10k live / 1k reused-ID scenario now has a canonical
