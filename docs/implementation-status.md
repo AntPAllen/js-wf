@@ -1,5 +1,28 @@
 # Implementation status against the supplied plan
 
+## Child signal parent-call/outcome consistency before checkpointing — 2026-10-11
+
+Each consumed child annotation is now checked against the preceding parent
+call/call_async request, with exact type/ID/generation and result descriptor.
+Requested child arrivals cannot omit the annotation. Owned signal-body bytes,
+strict outcome metadata and external child result grants/hashes are validated at
+consumption even without a later checkpoint/cache. Ordinary unrequested signals
+remain valid. This is local history consistency, not original child publication/
+parent-start causality after retirement or ID reuse.
+
+Baseline7d035fb runtime plus a physical fixture accepted an outcome for generation4
+annotated as child generation3. Final race exit0 in31.465s covers34 physical
+controls (6 positive/28 negative) across JSON/protobuf, all37 raw graph top-level
+tests and four native checkpoint/orphan/tombstone flows. Four native R1/R3 child/
+buffered-child cases pass in74.994s, checking eight frames/four retired
+projections.430 pre-run inputs remained unchanged, both actual executables were
+captured and the exact new CI guard passed locally. See [child history evidence](scale/raw-child-signal-history-2026-10-11/README.md).
+
+Full source/parent-start/lease causal history, client linearizability, physical
+power/GC and original fault/scale/soak/rollout gates remain open. Four live long
+frozen campaigns predate the code; accepted frozen160 normal remains source-bound.
+Full current161/894 normal/race/extended is still outstanding.
+
 ## Complete frozen160 race launched after accepted normal — 2026-10-11
 
 Following independent normal acceptance at50e4f9b (160000 completed bodies/880

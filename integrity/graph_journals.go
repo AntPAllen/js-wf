@@ -387,6 +387,9 @@ func CheckGraphJournals(ctx context.Context, snapshot GraphJournalSnapshot) (rep
 				}
 				state.signalEvents = append(state.signalEvents, signal)
 			}
+			if err := auditSDKChildSignal(call, graph, state, signal, record.Record.Blobs); err != nil {
+				return fmt.Errorf("%s: invalid child signal history: %w", record.Destination, err)
+			}
 			observeSDKPromiseSignal(state, signal, record.Record.Blobs)
 			if signal.Child != nil {
 				state.childSignals[signal.Sequence] = signal

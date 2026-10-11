@@ -1,0 +1,76 @@
+package integrity
+
+import (
+	"context"
+	"fmt"
+	"js-wf/identity"
+	"js-wf/internal/checkpoint"
+	"js-wf/internal/retainedgraph"
+	"js-wf/journal"
+)
+
+// Bind each annotated arrival to the preceding parent call, even if no later
+// checkpoint or promise cache survives. This does not reconstruct the child's
+// original publication/parent-start history after retirement or ID reuse.
+func auditSDKChildSignal(ctx context.Context, graph GraphReferenceSnapshot, state *auditedGraphJournal, signal auditedCheckpointSignal, edges []retainedgraph.Link) error {
+	declared, requested := state.children[signal.Name]
+	if signal.Child == nil {
+		if requested {
+			return fmt.Errorf("requested child signal lacks child annotation")
+		}
+		return nil
+	}
+	child := signal.Child
+	if !requested || identity.Validate(child.Type, child.ID) != nil || child.Invocation == 0 || child.Type != declared.Type || child.ID != declared.ID || (child.Ref == "") != (child.Hash == "") || child.Ref != "" && !graphAuditHash(child.Hash) {
+		return fmt.Errorf("consumed child differs from preceding parent call")
+	}
+	loadOwned := func(hash string) ([]byte, error) {
+		for _, edge := range edges {
+			if edge.Hash != hash {
+				continue
+			}
+			data, err := graph.LoadObject(ctx, edge.Reference.Object, graph.PayloadLimit)
+			if err != nil {
+				return nil, err
+			}
+			if len(data) > graph.PayloadLimit || digest(data) != hash {
+				return nil, fmt.Errorf("owned child signal bytes differ")
+			}
+			return data, nil
+		}
+		return nil, fmt.Errorf("child signal lacks owned body/result")
+	}
+	body := signal.Payload
+	if signal.Ref != "" {
+		if len(body) != 0 || !graphAuditHash(signal.Hash) {
+			return fmt.Errorf("invalid owned child signal descriptor")
+		}
+		var err error
+		body, err = loadOwned(signal.Hash)
+		if err != nil {
+			return err
+		}
+	} else if signal.Hash != "" {
+		return fmt.Errorf("child signal hash without body reference")
+	}
+	var outcome auditedGraphOutcome
+	if err := checkpoint.DecodeUnambiguous(body, &outcome); err != nil {
+		return err
+	}
+	kind := journal.Completed
+	if outcome.Error != "" {
+		kind = journal.Failed
+	}
+	if err := auditRetiredProjection(body, child.Invocation, kind); err != nil {
+		return fmt.Errorf("child signal outcome metadata: %w", err)
+	}
+	if outcome.ResultRef != child.Ref || outcome.ResultHash != child.Hash {
+		return fmt.Errorf("child signal outcome descriptor differs")
+	}
+	if child.Ref != "" {
+		if _, err := loadOwned(child.Hash); err != nil {
+			return err
+		}
+	}
+	return nil
+}

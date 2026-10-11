@@ -1,0 +1,177 @@
+package integrity_test
+
+import (
+	"context"
+	"encoding/json"
+	"fmt"
+	"strings"
+	"testing"
+	"time"
+
+	"crypto/sha256"
+	"encoding/hex"
+	"github.com/nats-io/nats.go"
+	"github.com/nats-io/nats.go/jetstream"
+	"js-wf/integrity"
+	"js-wf/internal/blobpublication"
+	"js-wf/internal/graphpublication"
+	"js-wf/internal/retainedgraph"
+	"js-wf/journal"
+	"js-wf/sim"
+)
+
+func childHistoryHash(b []byte) string { s := sha256.Sum256(b); return hex.EncodeToString(s[:]) }
+
+type childHistorySource struct{ msg *jetstream.RawStreamMsg }
+
+func (s childHistorySource) NextSignal(_ context.Context, from uint64, _ string) (*jetstream.RawStreamMsg, error) {
+	if from > s.msg.Sequence {
+		return nil, jetstream.ErrMsgNotFound
+	}
+	return s.msg, nil
+}
+
+func childHistorySnapshot(t *testing.T, enc journal.Encoding, mode string) integrity.GraphJournalSnapshot {
+	t.Helper()
+	ctx := context.Background()
+	m := sim.NewGraphPublicationTransport(sim.NewScheduler(1))
+	g, err := journal.NewGraphStore(journal.GraphConfig{Protocol: m.Protocol(), Encoding: enc, Now: func() time.Time { return time.Unix(0, 0) }, CanonicalStarts: true, CanonicalSignals: true, PinTTL: time.Minute, IntentTTL: time.Minute})
+	if err != nil {
+		t.Fatal(err)
+	}
+	start, err := g.ReserveStart(ctx, journal.GraphStartRequest{Type: "parent", ID: "id"}, []byte(`7`))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err = g.BindStart(ctx, "parent", "id", start.Start.Token, 1); err != nil {
+		t.Fatal(err)
+	}
+	tail, err := g.Begin(ctx, "parent", "id", 1)
+	if err != nil {
+		t.Fatal(err)
+	}
+	appendEntry := func(entry journal.Entry, payloads ...[]byte) {
+		t.Helper()
+		entry.Epoch = 1
+		entry.WorkerID = "owner"
+		tail, err = g.Append(ctx, "parent", "id", 1, entry, tail, payloads, nil)
+		if err != nil {
+			t.Fatal(err)
+		}
+	}
+	appendEntry(journal.Entry{Kind: journal.Started})
+	request := []byte(`{"kind":"call_async","name":"gate","child_type":"child","child_id":"id","input_hash":"` + childHistoryHash([]byte(`7`)) + `"}`)
+	if mode == "no-declaration" {
+		request = []byte(`{"kind":"run","name":"x","input_hash":"` + childHistoryHash([]byte(`7`)) + `"}`)
+	}
+	appendEntry(journal.Entry{Index: 1, Kind: journal.StepRequested, Payload: request})
+	appendEntry(journal.Entry{Index: 2, Kind: journal.StepCompleted, Payload: []byte(`{}`)})
+	child := map[string]any{"type": "child", "id": "id", "inv_seq": uint64(3)}
+	outcome := map[string]any{"inv_seq": uint64(3), "result": []byte(`42`)}
+	var external []byte
+	if strings.HasPrefix(mode, "external") {
+		external = []byte(`42`)
+		h := childHistoryHash(external)
+		child["result_ref"], child["result_hash"] = "child-result", h
+		delete(outcome, "result")
+		outcome["result_ref"], outcome["result_hash"] = "child-result", h
+	}
+	switch mode {
+	case "failed":
+		delete(outcome, "result")
+		outcome["error"] = "child failed"
+	case "wrong-type":
+		child["type"] = "other"
+	case "wrong-id":
+		child["id"] = "other"
+	case "zero-generation":
+		child["inv_seq"] = uint64(0)
+	case "outcome-generation":
+		outcome["inv_seq"] = uint64(4)
+	case "child-hash-only":
+		child["result_hash"] = childHistoryHash([]byte(`42`))
+	case "failed-result":
+		outcome["error"] = "failed"
+	case "null-error":
+		outcome["error"] = nil
+	case "unknown-outcome":
+		outcome["unknown"] = 1
+	case "external-outcome-ref":
+		outcome["result_ref"] = "foreign-result"
+	case "external-unowned":
+		external = nil
+	case "external-wrong-bytes":
+		external = []byte(`43`)
+	}
+	body, _ := json.Marshal(outcome)
+	input, err := g.ReserveSignal(ctx, journal.GraphSignalRequest{Type: "parent", ID: "id", Invocation: 1, Name: "gate", Key: "key"}, body, false)
+	if err != nil {
+		t.Fatal(err)
+	}
+	msg := &jetstream.RawStreamMsg{Sequence: 7, Subject: "wf.sig.parent.id.gate", Data: input.PointerBytes(), Header: nats.Header{journal.GraphSignalTokenHeader: []string{input.Token}, "Wf-Input-SHA256": []string{input.InputSHA256}, "Wf-Inv-Seq": []string{"1"}}}
+	if progress, err := g.BindNextSignal(ctx, "parent", "id", 1, 7, childHistorySource{msg}); err != nil || !progress {
+		t.Fatal("bind", err)
+	}
+	event := map[string]any{"sig_seq": uint64(7), "name": "gate", "ref": "graph-signal-" + input.InputSHA256, "hash": input.InputSHA256, "graph_child": child, "canonical_signal": map[string]any{"index": input.Index, "token": input.Token}}
+	if mode == "missing-child" {
+		delete(event, "graph_child")
+	}
+	if mode == "mixed-body" {
+		event["payload"] = []byte(`forged`)
+	}
+	payload, _ := json.Marshal(event)
+	payloads := [][]byte{body}
+	if external != nil {
+		payloads = append(payloads, external)
+	}
+	appendEntry(journal.Entry{Index: 3, Kind: journal.SignalConsumed, Payload: payload}, payloads...)
+	roots := map[string]graphpublication.Root{}
+	fences := map[string]graphpublication.Fence{}
+	keys, err := m.RootKeys(ctx)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, k := range keys {
+		r, err := m.ReadRoot(ctx, k)
+		if err != nil {
+			t.Fatal(err)
+		}
+		roots[k] = r
+	}
+	keys, err = m.BlobKeys(ctx)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, k := range keys {
+		r, err := m.ReadBlob(ctx, k)
+		if err != nil {
+			t.Fatal(err)
+		}
+		fences[k] = r.Fence
+	}
+	graph := integrity.GraphReferenceSnapshot{Roots: roots, Fences: fences, PayloadLimit: 1 << 20, LoadObject: func(ctx context.Context, name string, limit int) ([]byte, error) {
+		return m.Get(ctx, retainedgraph.Link{Reference: blobpublication.Reference{Object: name}}, limit)
+	}}
+	source := &jetstream.RawStreamMsg{Sequence: 1, Subject: "wf.inv.parent.id", Data: start.Start.PointerBytes(), Header: nats.Header{journal.GraphStartTokenHeader: []string{start.Start.Token}, "Wf-Input-SHA256": []string{start.Start.InputSHA256}}}
+	return integrity.GraphJournalSnapshot{Graph: graph, Invocations: map[string]*jetstream.RawStreamMsg{"parent.id": source}, Projections: map[string][]byte{}, ReadProjection: func(context.Context, string) ([]byte, error) { return nil, fmt.Errorf("no terminal") }}
+}
+func TestRawGraphChildSignalHistory(t *testing.T) {
+	for _, enc := range []journal.Encoding{journal.JSON, journal.ProtobufV1} {
+		for _, mode := range []string{"inline", "failed", "external", "no-declaration", "missing-child", "wrong-type", "wrong-id", "zero-generation", "outcome-generation", "child-hash-only", "failed-result", "null-error", "unknown-outcome", "external-outcome-ref", "external-unowned", "external-wrong-bytes", "mixed-body"} {
+			t.Run(string(enc)+"/"+mode, func(t *testing.T) {
+				s := childHistorySnapshot(t, enc, mode)
+				if _, err := integrity.CheckGraphReferences(context.Background(), s.Graph); err != nil {
+					t.Fatal("physical references", err)
+				}
+				report, err := integrity.CheckGraphJournals(context.Background(), s)
+				valid := mode == "inline" || mode == "failed" || mode == "external"
+				if valid && err != nil {
+					t.Fatal(report, err)
+				}
+				if !valid && err == nil {
+					t.Fatal("invalid child signal history accepted", report)
+				}
+			})
+		}
+	}
+}
