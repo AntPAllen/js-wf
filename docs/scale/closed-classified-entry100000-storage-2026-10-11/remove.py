@@ -18,6 +18,7 @@ expected=dict(bytes=meta['archive_bytes'],sha256=meta['archive_sha256'])
 assert remote['archive']['full_readback']==expected==recovery['archive']
 assert recovery['all_bytes_modes_mtimes_verified'] and recovery['files']==3170 and recovery['restored_bytes']==3365343276
 assert review['functional_limit_assertions_verified'] and review['accepted'] and review['actual_100000_entries_qualified']
+assert review['unexpected_profile_errors']==[] and sum(row['errors'] for row in review['profile_errors'])==57
 assert review['native_files']==3170 and review['native_bytes']==3365343276 and review['fresh_restored_storage'] and review['native_storage_path']==str(recovered)
 assert remote['endpoint']=='https://nameless-bird-8772.int.exe.xyz' and remote['bucket']=='nameless-bird-8772'
 assert remote['metadata']['full_readback']['sha256']==hashlib.sha256((base/'archive-verification.json').read_bytes()).hexdigest()

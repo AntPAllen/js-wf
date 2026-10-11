@@ -23,3 +23,34 @@ acceptance, qualify the live race or claim a successful NATS restart/power loss.
 The acceptance remains true with57 exact definite CAS conflicts and no uncertain/
 unclassified errors. Zero-profile-error status remains false. Original broader
 scale/fault/soak/rollout/admission/import/online-collection gates remain open.
+
+## Completed remote readback and fresh recovery
+
+The archive, canonical metadata and inventory have been uploaded and fully read
+back from the user-provided S3 endpoint. A separate fresh download matched the
+entire compressed-body hash before replacing this task's staging archive.
+Recovery restored all3170 files/3,365,343,276 bytes and verified bytes, modes and
+nanosecond mtimes. The independent classified reviewer reran every existing
+unit/source/binary/log/error-classification/file-census gate against the recovered
+tree with separate output: accepted=true, actual100000 entries qualified=true,
+57 definite CAS conflicts and no unexpected errors. The original root verdict
+and state remain byte-for-byte unchanged.
+
+The complete remote and restoration receipts are committed before deletion.
+Original store removal and task-created archive/recovery cleanup remain pending
+at this checkpoint. Restoring to a fresh directory requires the committed
+metadata/inventory and this archive object:
+
+js-wf/proofs/c27428cab667d7144d3eef26e3d820ae3777f4c5a20ab6c91f756b84a9e5dd8d/proof.tar.gz
+
+S3 endpoint https://nameless-bird-8772.int.exe.xyz; bucket nameless-bird-8772.
+Use the user-provided credentials through curl stdin configuration, then:
+
+```sh
+python3 scripts/restore-full-fixture-proof.py --archive /home/exedev/downloaded-classified-proof.tar.gz --metadata docs/scale/closed-classified-entry100000-storage-2026-10-11/archive-verification.json --inventory docs/scale/closed-classified-entry100000-storage-2026-10-11/fixture-inventory.json --destination /home/exedev/restored-classified-entry100000
+python3 docs/scale/graph-classified-entry-campaign-2026-10-11/review.py /home/exedev/js-wf-classified-entry100000-normal-20261011 --native-root /home/exedev/restored-classified-entry100000 --output /home/exedev/restored-classified-entry100000-review.json
+```
+
+The second command uses this VM's original loaded unit, frozen checkout, retained
+binary and root logs. Fresh file recovery needs only the downloaded archive and
+committed metadata/inventory. The restore does not start a server.
