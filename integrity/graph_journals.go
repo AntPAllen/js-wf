@@ -119,6 +119,9 @@ func CheckGraphJournals(ctx context.Context, snapshot GraphJournalSnapshot) (rep
 		if err := checkpoint.DecodeUnambiguous(root.Application, &c); err != nil {
 			return report, fmt.Errorf("%s: invalid canonical cursor: %w", destination, err)
 		}
+		if err := auditGraphCursorFields(root.Application); err != nil {
+			return report, fmt.Errorf("%s: invalid cursor fields: %w", destination, err)
+		}
 		if err := auditGraphCursorShape(c, root); err != nil {
 			return report, fmt.Errorf("%s: invalid cursor state: %w", destination, err)
 		}

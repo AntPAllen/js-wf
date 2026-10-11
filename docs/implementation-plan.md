@@ -1,5 +1,23 @@
 # JetStream Durable Workflow Runtime — Implementation Plan
 
+## Independent cursor scalar presence/null admission — 2026-10-11
+
+The raw auditor requires all seven always-emitted top-level cursor fields and
+rejects null in every present top-level field. Omitted optional counters and
+explicit zero/false remain valid. A baseline test at b9e34bf plus the new fixture
+failed because missing retired was accepted; that failure is preserved.
+
+Actual race exit 0 in22.800s covers208 physical JSON/protobuf × legacy/archive ×
+live/retired controls (16 positive/192 negative), existing cursor/start/source/
+retired regressions, and four native R1/R3 indexed/unindexed checkpoint flows.
+421 pre-run source inputs remained unchanged; the actual executable was captured
+and the extracted CI guard passed locally. See [presence evidence](scale/raw-cursor-presence-2026-10-11/README.md).
+
+Nested start/request/outcome required-field presence, full retired history,
+lower-version physical compatibility, configuration agreement and original broad
+acceptance remain open. All four long frozen campaigns are still running and
+predate this change; no hosted/full-suite/power acceptance is claimed.
+
 ## Independent cursor version/state capabilities — 2026-10-11
 
 The raw auditor now derives declared capabilities independently for cursor

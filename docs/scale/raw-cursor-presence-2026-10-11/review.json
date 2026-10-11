@@ -1,0 +1,22 @@
+{
+  "accepted": true,
+  "source_input_count": 421,
+  "source_unchanged": true,
+  "baseline_exit_code": 1,
+  "baseline_rejected_by_test": "missing retired accepted at b9e34bf plus new test",
+  "race_exit_code": 0,
+  "race_package_seconds": 22.8,
+  "physical_cases": 208,
+  "positive_cases": 16,
+  "negative_cases": 192,
+  "native_checkpoint_cases": 4,
+  "ci_receipt_guard_passed": true,
+  "hosted_ci_claim": false,
+  "native_storage_preserved": false,
+  "limitations": [
+    "top-level cursor fields only; nested start/request/outcome required-field presence remains separate",
+    "lower-version physical snapshots beyond v1/v6 not covered",
+    "native checkpoint ephemeral stores removed by test cleanup; no recovery or physical power proof",
+    "four long frozen campaigns still live, predating this change"
+  ]
+}

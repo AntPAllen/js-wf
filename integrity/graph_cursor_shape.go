@@ -1,11 +1,34 @@
 package integrity
 
 import (
+	"bytes"
+	"encoding/json"
 	"fmt"
 	"js-wf/internal/graphpublication"
 	"js-wf/journal"
 	"math"
 )
+
+// DecodeUnambiguous has already rejected duplicate, unknown and aliased fields.
+// Check presence separately: encoding/json accepts null for scalar fields and
+// leaves the destination at zero, obscuring malformed persisted metadata.
+func auditGraphCursorFields(raw json.RawMessage) error {
+	var fields map[string]json.RawMessage
+	if err := json.Unmarshal(raw, &fields); err != nil {
+		return err
+	}
+	for _, field := range []string{"schema", "invocation", "base", "count", "epoch", "kind", "retired"} {
+		if _, ok := fields[field]; !ok {
+			return fmt.Errorf("missing cursor field %s", field)
+		}
+	}
+	for field, value := range fields {
+		if bytes.Equal(bytes.TrimSpace(value), []byte("null")) {
+			return fmt.Errorf("null cursor field %s", field)
+		}
+	}
+	return nil
+}
 
 // Derive capabilities from the persisted version, independently of GraphStore
 // configuration/admission. Projection-only retirement does not waive metadata.
