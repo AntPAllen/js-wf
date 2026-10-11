@@ -30,6 +30,7 @@ type GraphJournalReport struct {
 	References                                                              GraphReferenceReport
 	Invocations, Journals, Entries, Terminal, Pending, Retired, Checkpoints int
 	RetiredProjectionOnly                                                   int
+	ChildStartLinksVerified, ChildStartLinksUnavailable                     int
 }
 
 // This decoder is independent of GraphStore's cursor validation and traversal.
@@ -65,6 +66,7 @@ type auditedGraphJournal struct {
 	lastStepRequest     uint64
 	signalCount         uint64
 	children            map[string]auditedCheckpointChild
+	childInputHashes    map[string]string
 	childSignals        map[uint64]auditedCheckpointSignal
 	signalInputs        []auditedGraphSignalInput
 	signalBindings      []auditedGraphSignalBinding
@@ -137,6 +139,7 @@ func CheckGraphJournals(ctx context.Context, snapshot GraphJournalSnapshot) (rep
 	}
 	report.Invocations = len(sources)
 	states := map[string]*auditedGraphJournal{}
+	cursors := map[string]auditedGraphCursor{}
 	consumed := map[string]bool{}
 	for destination, root := range snapshot.Graph.Roots {
 		var c auditedGraphCursor
@@ -170,6 +173,7 @@ func CheckGraphJournals(ctx context.Context, snapshot GraphJournalSnapshot) (rep
 		} else if c.Schema != "js-wf-graph-journal-cursor-v1" {
 			return report, fmt.Errorf("%s: canonical input descriptor missing", destination)
 		}
+		cursors[destination] = c
 		if c.Retired {
 			if c.Invocation == 0 || c.Count == 0 || c.Kind != journal.Completed && c.Kind != journal.Failed || root.Graph.Count != 0 {
 				return report, fmt.Errorf("%s: invalid retired journal", destination)
@@ -231,7 +235,7 @@ func CheckGraphJournals(ctx context.Context, snapshot GraphJournalSnapshot) (rep
 			}
 			consumed[destination] = true
 		}
-		state := &auditedGraphJournal{cursor: c, key: key, children: map[string]auditedCheckpointChild{}, childSignals: map[uint64]auditedCheckpointSignal{}}
+		state := &auditedGraphJournal{cursor: c, key: key, children: map[string]auditedCheckpointChild{}, childInputHashes: map[string]string{}, childSignals: map[uint64]auditedCheckpointSignal{}}
 		if len(c.Checkpoint) != 0 {
 			pointer, err := auditCheckpointPointer(c)
 			if err != nil {
@@ -354,10 +358,11 @@ func CheckGraphJournals(ctx context.Context, snapshot GraphJournalSnapshot) (rep
 		if entry.Kind == journal.StepRequested {
 			state.lastStepRequest = index
 			var request struct {
-				Kind string `json:"kind"`
-				Name string `json:"name"`
-				Type string `json:"child_type"`
-				ID   string `json:"child_id"`
+				Kind      string `json:"kind"`
+				Name      string `json:"name"`
+				Type      string `json:"child_type"`
+				ID        string `json:"child_id"`
+				InputHash string `json:"input_hash"`
 			}
 			if json.Unmarshal(entry.Payload, &request) != nil {
 				return fmt.Errorf("invalid checkpoint history request")
@@ -373,6 +378,7 @@ func CheckGraphJournals(ctx context.Context, snapshot GraphJournalSnapshot) (rep
 					return fmt.Errorf("duplicate checkpoint child declaration")
 				}
 				state.children[request.Name] = auditedCheckpointChild{Type: request.Type, ID: request.ID}
+				state.childInputHashes[request.Name] = request.InputHash
 			}
 		}
 		if entry.Kind == journal.SignalConsumed {
@@ -389,6 +395,9 @@ func CheckGraphJournals(ctx context.Context, snapshot GraphJournalSnapshot) (rep
 			}
 			if err := auditSDKChildSignal(call, graph, state, signal, record.Record.Blobs); err != nil {
 				return fmt.Errorf("%s: invalid child signal history: %w", record.Destination, err)
+			}
+			if err := auditChildStartLink(state, signal, cursors, &report); err != nil {
+				return fmt.Errorf("%s: invalid child start link: %w", record.Destination, err)
 			}
 			observeSDKPromiseSignal(state, signal, record.Record.Blobs)
 			if signal.Child != nil {

@@ -125,6 +125,47 @@ func childHistorySnapshot(t *testing.T, enc journal.Encoding, mode string) integ
 		payloads = append(payloads, external)
 	}
 	appendEntry(journal.Entry{Index: 3, Kind: journal.SignalConsumed, Payload: payload}, payloads...)
+	if strings.HasPrefix(mode, "start-") {
+		r := journal.GraphStartRequest{Type: "child", ID: "id", ParentType: "parent", ParentID: "id", ParentInvocation: 1, SignalName: "gate"}
+		input := []byte(`7`)
+		inv := uint64(3)
+		switch mode {
+		case "start-parent-type":
+			r.ParentType = "other"
+		case "start-parent-id":
+			r.ParentID = "other"
+		case "start-parent-generation":
+			r.ParentInvocation = 2
+		case "start-signal":
+			r.SignalName = "other"
+		case "start-unparented":
+			r.ParentType, r.ParentID, r.ParentInvocation, r.SignalName = "", "", 0, ""
+		case "start-input":
+			input = []byte(`8`)
+		case "start-reused":
+			inv = 4
+		}
+		childStart, e := g.ReserveStart(ctx, r, input)
+		if e != nil {
+			t.Fatal(e)
+		}
+		if e = g.BindStart(ctx, r.Type, r.ID, childStart.Start.Token, inv); e != nil {
+			t.Fatal(e)
+		}
+		ct, e := g.Begin(ctx, r.Type, r.ID, inv)
+		if e != nil {
+			t.Fatal(e)
+		}
+		for i, kind := range []journal.Kind{journal.Started, journal.Completed} {
+			ct, e = g.Append(ctx, r.Type, r.ID, inv, journal.Entry{Index: uint64(i), Kind: kind, Epoch: 1, WorkerID: "child-owner", Payload: []byte(`{}`)}, ct, nil, nil)
+			if e != nil {
+				t.Fatal(e)
+			}
+		}
+		if e = g.Retire(ctx, r.Type, r.ID, inv, ct); e != nil {
+			t.Fatal(e)
+		}
+	}
 	roots := map[string]graphpublication.Root{}
 	fences := map[string]graphpublication.Fence{}
 	keys, err := m.RootKeys(ctx)
@@ -170,6 +211,36 @@ func TestRawGraphChildSignalHistory(t *testing.T) {
 				}
 				if !valid && err == nil {
 					t.Fatal("invalid child signal history accepted", report)
+				}
+			})
+		}
+	}
+}
+
+func TestRawGraphChildStartLinks(t *testing.T) {
+	for _, enc := range []journal.Encoding{journal.JSON, journal.ProtobufV1} {
+		for _, mode := range []string{"start-valid", "start-reused", "inline", "start-parent-type", "start-parent-id", "start-parent-generation", "start-signal", "start-unparented", "start-input"} {
+			t.Run(string(enc)+"/"+mode, func(t *testing.T) {
+				s := childHistorySnapshot(t, enc, mode)
+				if _, err := integrity.CheckGraphReferences(context.Background(), s.Graph); err != nil {
+					t.Fatal("physical references", err)
+				}
+				report, err := integrity.CheckGraphJournals(context.Background(), s)
+				valid := mode == "start-valid" || mode == "start-reused" || mode == "inline"
+				if valid && err != nil {
+					t.Fatal(report, err)
+				}
+				if !valid && err == nil {
+					t.Fatal("invalid child start link accepted", report)
+				}
+				if valid {
+					verified, unavailable := 0, 1
+					if mode == "start-valid" {
+						verified, unavailable = 1, 0
+					}
+					if report.ChildStartLinksVerified != verified || report.ChildStartLinksUnavailable != unavailable {
+						t.Fatal("incorrect child start evidence scope", report)
+					}
 				}
 			})
 		}

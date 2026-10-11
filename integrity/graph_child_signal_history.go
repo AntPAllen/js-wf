@@ -7,6 +7,7 @@ import (
 	"js-wf/internal/checkpoint"
 	"js-wf/internal/retainedgraph"
 	"js-wf/journal"
+	"strings"
 )
 
 // Bind each annotated arrival to the preceding parent call, even if no later
@@ -72,5 +73,34 @@ func auditSDKChildSignal(ctx context.Context, graph GraphReferenceSnapshot, stat
 			return err
 		}
 	}
+	return nil
+}
+
+// Only a matching generation can witness the child's start. A later generation
+// at the same identity cannot prove or disprove an old parent's return link.
+func auditChildStartLink(state *auditedGraphJournal, signal auditedCheckpointSignal, cursors map[string]auditedGraphCursor, report *GraphJournalReport) error {
+	if signal.Child == nil {
+		return nil
+	}
+	child := signal.Child
+	cursor, found := cursors[graphDestinationForKey(identity.Key(child.Type, child.ID))]
+	if !found || cursor.Invocation != child.Invocation || cursor.Start == nil {
+		report.ChildStartLinksUnavailable++
+		return nil
+	}
+	start := cursor.Start
+	parent := state.cursor.Start
+	if parent == nil { // Legacy parent identity is recovered from its admitted key.
+		parts := strings.Split(state.key, ".")
+		if len(parts) != 2 {
+			return fmt.Errorf("parent identity unavailable")
+		}
+		parent = &auditedGraphStart{Request: auditedGraphStartRequest{Type: parts[0], ID: parts[1]}}
+	}
+	r := start.Request
+	if r.ParentType != parent.Request.Type || r.ParentID != parent.Request.ID || r.ParentInvocation != state.cursor.Invocation || r.SignalName != signal.Name || start.InputSHA256 != state.childInputHashes[signal.Name] {
+		return fmt.Errorf("child start parent/input differs from preceding call")
+	}
+	report.ChildStartLinksVerified++
 	return nil
 }

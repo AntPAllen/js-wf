@@ -1,5 +1,27 @@
 # Implementation status against the supplied plan
 
+## Available retained child start linkage — 2026-10-11
+
+Consumed child signals now independently match a same-generation retained child
+start to the parent call's type/ID/generation, return signal and input hash.
+Retired child cursors are included. Report counters distinguish verified links
+from unavailable legacy/absent/reused-generation witnesses; unavailable witnesses
+do not prove original causality.
+
+Baseline f7923fb accepted a wrong parent generation (retained regression exit1).
+Final broad race exit0 in47.467s covers38 raw graph top-level tests, four native
+checkpoint/census cases and18 new physical controls (6 positive/12 negative).
+Four native R1/R3 child/buffered-child cases pass in77.967s with four verified
+start links, zero unavailable links and eight checkpoint frames. Both final
+executables were captured live;1131 captured inputs stayed unchanged. The source
+manifest was captured after broad driver launch, before native launch. The exact
+new CI guard passed locally. See [retained child start evidence](scale/raw-child-start-links-2026-10-11/README.md).
+
+Full publication/parent-source/lease causality, unavailable old generations,
+original child terminal equivalence, current complete161/894 qualification and
+original scale/fault/soak/power gates remain open. Four frozen long campaigns
+remain running and predate this change.
+
 ## Child signal parent-call/outcome consistency before checkpointing — 2026-10-11
 
 Each consumed child annotation is now checked against the preceding parent

@@ -1298,6 +1298,10 @@ func testNativeGraphContinuationSDKFlow(t *testing.T, domain string, partition, 
 			t.Fatal("historical SDK checkpoint census", report.Checkpoints)
 		}
 		t.Logf("RAW_SDK_CHECKPOINT_AUDIT journals=%d entries=%d terminals=%d pending=%d retired_projection_only=%d", report.Journals, report.Entries, report.Terminal, report.Pending, report.RetiredProjectionOnly)
+		if childPromiseFlow && (report.ChildStartLinksVerified != 1 || report.ChildStartLinksUnavailable != 0) {
+			t.Fatal("child start witness missing", report)
+		}
+		t.Logf("RAW_SDK_CHILD_START_LINKS verified=%d unavailable=%d", report.ChildStartLinksVerified, report.ChildStartLinksUnavailable)
 		t.Logf("RAW_SDK_CHECKPOINT_HISTORY checkpoints=%d", report.Checkpoints)
 	}
 	t.Logf("SDK initial/next/finish=%v effects=%d records=%d result=%s", calls, effects, len(records), result)
