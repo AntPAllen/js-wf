@@ -164,12 +164,8 @@ func CheckGraphJournals(ctx context.Context, snapshot GraphJournalSnapshot) (rep
 				if err != nil {
 					return report, err
 				}
-				var outcome struct {
-					InvSeq uint64 `json:"inv_seq"`
-					Error  string `json:"error"`
-				}
-				if json.Unmarshal(raw, &outcome) != nil || outcome.InvSeq != c.Invocation || (c.Kind == journal.Failed) != (outcome.Error != "") {
-					return report, fmt.Errorf("%s: retired projection generation/kind differs", destination)
+				if err := auditRetiredProjection(raw, c.Invocation, c.Kind); err != nil {
+					return report, fmt.Errorf("%s: invalid retired projection: %w", destination, err)
 				}
 				consumed[destination] = true
 				report.RetiredProjectionOnly++

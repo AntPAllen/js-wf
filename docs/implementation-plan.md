@@ -1,5 +1,33 @@
 # JetStream Durable Workflow Runtime — Implementation Plan
 
+## Strict retired projection admission and full frozen normal qualification — 2026-10-11
+
+The independent auditor now strictly admits all declared terminal projection
+fields after journal retirement, checking generation/kind, excluding results on
+failed outcomes, validating inline/external result descriptor consistency and
+rejecting inconsistent limit metadata. All62 new JSON/protobuf controls pass
+(16 positive/46 negative) in18.712s alongside live terminal/cursor/start, retired
+source and four native checkpoint regressions. Eight native failed-child race
+cases pass in187.311s across R1/R3, archive/buffered combinations, with16 checked
+parent frames and eight retired-child projection receipts. Both CI guards were
+executed locally; actual binaries,416 unchanged source hashes and closed native
+media are retained. See [retired projection evidence](scale/raw-retired-projection-envelope-2026-10-11/README.md).
+Projection-only counters remain separate from full journal/terminal acceptance:
+retired external bytes/ownership and rejected-operation prefix semantics cannot
+be reconstructed from these projections. Orphan census, source/header/parent
+history, scalar presence/null, physical power and original broad gates remain open.
+
+The full normal simulation campaign independently qualifies frozenb4fe445:
+159000 seeded bodies/159 families,860 saved traces,226 top-level passes,
+eight actual package exits and3589 Git-verified inputs. The supervisor/driver
+actually exited0 at02:51:48UTC. Full package receipts/source hashes/reduction are
+committed in [current-at-launch159 evidence](scale/current-main159-tier1-2026-10-11/README.md).
+Following that acceptance, a distinct same-source full race unit launched with
+InvocationID4505c4a1f7f64518a77d6a0a83c41a4c, one-core quota and2GB memory;
+no race result is claimed. The earlier frozen race and classified100000-entry
+race remain live. Later main changes are outside the accepted frozen normal
+source. Public continuation admission/import/online collection remain disabled.
+
 ## Independent cursor/start wire admission — 2026-10-11
 
 The raw auditor now uses its own canonical start fields and strict JSON admission

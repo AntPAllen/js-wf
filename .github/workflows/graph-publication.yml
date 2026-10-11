@@ -310,7 +310,7 @@ jobs:
         shell: bash
         run: |
           set -o pipefail
-          go test -race -p=1 ./integrity -run '^(TestRawGraphReferencesAndIndependentCorruptionControls|TestNativeRawGraphReferenceAuditQuiescentReaders|TestRawGraphJournalGenerationsOutcomesAndArchive|TestRawGraphCheckpointPointerAndFrameBindings|TestNativeRawGraphCheckpointAudit|TestRawGraphCheckpointMaterializedState|TestRawGraphCheckpointPromiseOwnership|TestRawGraphCheckpointMetadataBindings|TestRawGraphRetiredSourceProjectionScope|TestRawGraphSignalReservationAndBinding|TestRawGraphSignalIndexIndependentPrefixes|TestRawGraphSignalIndexProductionPackets|TestRawGraphCheckpointSDKStateHistory|TestRawGraphCheckpointPromiseHistory|TestRawGraphCheckpointSDKSignalHistory|TestRawGraphCheckpointSDKTimerHistory|TestRawGraphEveryCheckpointHistory|TestRawGraphSDKStepEnvelope|TestRawGraphCanonicalEnvelope|TestRawGraphTerminalEnvelope|TestRawGraphRejectedLimitBoundary|TestRawGraphRejectedLimitPrefix|TestRawGraphRejectedLimitContinuation|TestRawGraphSelectionPriority|TestRawGraphSelectionReadiness|TestRawGraphCursorEnvelope|TestRawGraphStartEnvelope)$' -count=1 -v -timeout=5m 2>&1 | tee raw-graph-audit.log
+          go test -race -p=1 ./integrity -run '^(TestRawGraphReferencesAndIndependentCorruptionControls|TestNativeRawGraphReferenceAuditQuiescentReaders|TestRawGraphJournalGenerationsOutcomesAndArchive|TestRawGraphCheckpointPointerAndFrameBindings|TestNativeRawGraphCheckpointAudit|TestRawGraphCheckpointMaterializedState|TestRawGraphCheckpointPromiseOwnership|TestRawGraphCheckpointMetadataBindings|TestRawGraphRetiredSourceProjectionScope|TestRawGraphSignalReservationAndBinding|TestRawGraphSignalIndexIndependentPrefixes|TestRawGraphSignalIndexProductionPackets|TestRawGraphCheckpointSDKStateHistory|TestRawGraphCheckpointPromiseHistory|TestRawGraphCheckpointSDKSignalHistory|TestRawGraphCheckpointSDKTimerHistory|TestRawGraphEveryCheckpointHistory|TestRawGraphSDKStepEnvelope|TestRawGraphCanonicalEnvelope|TestRawGraphTerminalEnvelope|TestRawGraphRejectedLimitBoundary|TestRawGraphRejectedLimitPrefix|TestRawGraphRejectedLimitContinuation|TestRawGraphSelectionPriority|TestRawGraphSelectionReadiness|TestRawGraphCursorEnvelope|TestRawGraphStartEnvelope|TestRawGraphRetiredProjectionEnvelope)$' -count=1 -v -timeout=5m 2>&1 | tee raw-graph-audit.log
           python3 - <<'PY'
           import pathlib, re
           log = pathlib.Path('raw-graph-audit.log').read_text()
@@ -355,6 +355,10 @@ jobs:
           for encoding in ('json', 'protobuf-v1'):
               for mode in ('ordinary', 'opaque-field-names', 'opaque-duplicates', 'opaque-null', 'request-null', 'request-array', 'request-unknown', 'request-alias', 'request-duplicate', 'request-escaped-duplicate', 'request-time-type', 'request-step-negative', 'case-unknown', 'case-alias', 'case-duplicate', 'case-shape', 'completion-null', 'completion-array', 'completion-unknown', 'completion-alias', 'completion-duplicate', 'completion-sequence-negative', 'completion-case-fraction', 'completion-cancel-type', 'metadata-ref-null', 'metadata-ref-object', 'metadata-hash-null', 'metadata-hash-number'):
                   assert f'--- PASS: TestRawGraphSDKStepEnvelope/{encoding}/{mode} ' in log
+          assert '--- PASS: TestRawGraphRetiredProjectionEnvelope ' in log
+          for encoding in ('json', 'protobuf-v1'):
+              for control in ('inline', 'opaque', 'empty', 'whitespace', 'failed', 'external', 'limit-request', 'limit-entry', 'unknown', 'alias', 'duplicate-generation', 'escaped-generation', 'duplicate-result', 'duplicate-error', 'unknown-limit-entry', 'alias-limit-entry', 'duplicate-limit-entry', 'null', 'array', 'base64', 'generation-fraction', 'generation-negative', 'failed-inline', 'failed-pointer', 'hash-only', 'pointer-only', 'bad-hash', 'mixed-result', 'completed-limit', 'both-limits', 'wrong-limit-error'):
+                  assert f'--- PASS: TestRawGraphRetiredProjectionEnvelope/{encoding}/{control} ' in log
           assert '--- PASS: TestRawGraphCursorEnvelope ' in log
           for encoding in ('json', 'protobuf-v1'):
               for archive in ('false', 'true'):
@@ -425,6 +429,43 @@ jobs:
         with:
           name: raw-graph-reference-audit
           path: raw-graph-audit.log
+          if-no-files-found: error
+  raw-sdk-retired-projection-audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      GOMAXPROCS: 4
+      GOMEMLIMIT: 2GiB
+      WF_GRAPH_SDK_RAW_AUDIT: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - name: Audit retired failed child projections
+        shell: bash
+        run: |
+          set -o pipefail
+          go test -race -p=1 ./worker -run '^TestNativeGraphContinuationFailedChildPromise$' -count=1 -v -timeout=6m 2>&1 | tee raw-sdk-retired-projection.log
+          python3 - <<'PY'
+          import pathlib, re
+          log = pathlib.Path('raw-sdk-retired-projection.log').read_text()
+          assert not re.search(r'^--- SKIP:', log, re.M)
+          for layout in ('R1', 'R3Domain'):
+              for archive in ('false', 'true'):
+                  for buffered in ('false', 'true'):
+                      assert f'--- PASS: TestNativeGraphContinuationFailedChildPromise/{layout}/archive={archive}/buffered={buffered} ' in log
+          for archive in ('false', 'true'):
+              for buffered in ('false', 'true'):
+                  assert log.count(f'GRAPH_FAILED_CHILD buffered={buffered} archive={archive} child_calls=1 preserved_error=planned_child_failure parent_result=43') == 2
+          assert log.count('RAW_SDK_CHECKPOINT_AUDIT journals=1 entries=25 terminals=1 pending=0 retired_projection_only=1') == 8
+          assert log.count('RAW_SDK_CHECKPOINT_HISTORY checkpoints=2') == 8
+          PY
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: raw-sdk-retired-projection-audit
+          path: raw-sdk-retired-projection.log
           if-no-files-found: error
   retention-sdk-sigkill:
     runs-on: ubuntu-latest
