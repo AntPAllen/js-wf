@@ -38,6 +38,19 @@ func TestNativeGraphContinuationSDKFlow(t *testing.T) {
 		t.Run(name, func(t *testing.T) { testNativeGraphContinuationSDKFlow(t, domain, false, false, false, false) })
 	}
 }
+func TestNativeGraphContinuationSelectionPriority(t *testing.T) {
+	for _, domain := range []string{"", "WFCONTINUATIONSDK"} {
+		name := "R1"
+		if domain != "" {
+			name = "R3Domain"
+		}
+		for _, archive := range []bool{false, true} {
+			t.Run(fmt.Sprintf("%s/archive=%t", name, archive), func(t *testing.T) {
+				testNativeGraphContinuationSDKFlow(t, domain, false, true, false, false, archive, false, false, false, false, false, false, false, false, true)
+			})
+		}
+	}
+}
 func TestNativeGraphContinuationTimerHistory(t *testing.T) {
 	for _, domain := range []string{"", "WFCONTINUATIONSDK"} {
 		name := "R1"
@@ -190,7 +203,7 @@ func TestNativeGraphContinuationArchiveCollection(t *testing.T) {
 	}
 }
 func testNativeGraphContinuationSDKFlow(t *testing.T, domain string, partition, bufferedSignals, childPromiseFlow, bufferedChild bool, archiveMode ...bool) {
-	// Optional modes: archive, failed child, pending child, cancel pending parent, running effect cancellation, late success, timer history, positive timer wakeup, cancelled timer wakeup.
+	// Optional modes: archive, failed child, pending child, cancel pending parent, running effect cancellation, late success, timer history, positive timer wakeup, cancelled timer wakeup, selection priority.
 	archive := len(archiveMode) != 0 && archiveMode[0]
 	childFailure := len(archiveMode) > 1 && archiveMode[1]
 	pendingChild := len(archiveMode) > 2 && archiveMode[2]
@@ -200,6 +213,10 @@ func testNativeGraphContinuationSDKFlow(t *testing.T, domain string, partition, 
 	timerHistory := len(archiveMode) > 6 && archiveMode[6]
 	positiveTimer := len(archiveMode) > 7 && archiveMode[7]
 	cancelledWakeup := len(archiveMode) > 8 && archiveMode[8]
+	selectionPriority := len(archiveMode) > 9 && archiveMode[9]
+	if selectionPriority && (!bufferedSignals || childPromiseFlow || timerHistory || partition) {
+		t.Fatal("selection priority fixture requires buffered direct signal deliveries")
+	}
 	effectEntered := make(chan struct{})
 	if cancelPendingChild && !pendingChild {
 		t.Fatal("cancellation fixture requires an unresolved child")
@@ -446,7 +463,33 @@ func testNativeGraphContinuationSDKFlow(t *testing.T, domain string, partition, 
 				}
 			}
 			if bufferedSignals {
-				data, err := wf.AwaitSignal(c, "go")
+				var data []byte
+				var err error
+				if selectionPriority {
+					first, e := c.Timer("priority-first", 0)
+					if e != nil {
+						return nil, e
+					}
+					branch, raw, e := first.SelectSignal("go")
+					if e != nil || branch != wf.SignalSelected {
+						return nil, fmt.Errorf("signal lost to immediate timer: %s %w", branch, e)
+					}
+					data = raw
+					second, e := c.Timer("priority-second", 0)
+					if e != nil {
+						return nil, e
+					}
+					index, _, e := wf.Select(c, wf.SignalAwaitable("absent"), first, second)
+					if e != nil || index != 1 {
+						return nil, fmt.Errorf("first ready timer lost: %d %w", index, e)
+					}
+					if e = second.Await(); e != nil {
+						return nil, e
+					}
+					t.Log("SDK_SELECTION_PRIORITY stage=next signal_over_timer=true timer_case=1 ready_timer_loser_reused=true")
+				} else {
+					data, err = wf.AwaitSignal(c, "go")
+				}
 				if err != nil || string(data) != "11" {
 					return nil, wf.ErrCorruptJournal
 				}
@@ -479,7 +522,18 @@ func testNativeGraphContinuationSDKFlow(t *testing.T, domain string, partition, 
 				}
 			}
 			if bufferedSignals {
-				data, err := wf.AwaitSignal(c, "later")
+				var data []byte
+				var err error
+				if selectionPriority {
+					var index int
+					index, data, err = wf.Select(c, wf.SignalAwaitable("absent"), wf.SignalAwaitable("later"), wf.SignalAwaitable("later"))
+					if err != nil || index != 1 {
+						return nil, fmt.Errorf("first ready signal lost: %d %w", index, err)
+					}
+					t.Log("SDK_SELECTION_PRIORITY stage=finish signal_case=1 duplicate_ready_case=2")
+				} else {
+					data, err = wf.AwaitSignal(c, "later")
+				}
 				if err != nil || string(data) != "13" {
 					return nil, wf.ErrCorruptJournal
 				}

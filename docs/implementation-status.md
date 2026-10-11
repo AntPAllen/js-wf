@@ -1,5 +1,21 @@
 # Implementation status against the supplied plan
 
+## Native competing-case SDK selection priority — 2026-10-11
+
+Four production SDK continuation cases now cover R1/R3 and archive=false/true
+under race. A buffered signal beats a ready immediate timer; the first ready
+timer wins select-many while its losing timer remains usable; after the second
+checkpoint the first of two ready signal cases wins. Both archive boundaries
+remove original entry receipts before recovery. All cases preserve payloads,
+result 43, two effects and one call per stage. Actual exit 0 in 107.358s, eight
+priority receipts and eight independently audited checkpoint frames. CI requires
+all cases/receipts; its new guard executed against the completed log.
+[Evidence and scope](scale/native-sdk-selection-priority-2026-10-11/README.md).
+
+Positive-deadline readiness, competing promise cases and original full acceptance
+remain open. The two larger frozen jobs remain live; the 100000-entry job has
+completed second archive verification/publication but has no terminal verdict.
+
 ## Selection priority from retained readiness — 2026-10-11
 
 The independent auditor now rejects timer branches that skip a buffered signal,
