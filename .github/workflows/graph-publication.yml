@@ -310,7 +310,7 @@ jobs:
         shell: bash
         run: |
           set -o pipefail
-          go test -race -p=1 ./integrity -run '^(TestRawGraphReferencesAndIndependentCorruptionControls|TestNativeRawGraphReferenceAuditQuiescentReaders|TestRawGraphJournalGenerationsOutcomesAndArchive|TestRawGraphCheckpointPointerAndFrameBindings|TestNativeRawGraphCheckpointAudit|TestRawGraphCheckpointMaterializedState|TestRawGraphCheckpointPromiseOwnership|TestRawGraphCheckpointMetadataBindings|TestRawGraphRetiredSourceProjectionScope|TestRawGraphSignalReservationAndBinding|TestRawGraphSignalIndexIndependentPrefixes|TestRawGraphSignalIndexProductionPackets|TestRawGraphCheckpointSDKStateHistory|TestRawGraphCheckpointPromiseHistory|TestRawGraphCheckpointSDKSignalHistory|TestRawGraphCheckpointSDKTimerHistory|TestRawGraphEveryCheckpointHistory|TestRawGraphSDKStepEnvelope|TestRawGraphCanonicalEnvelope|TestRawGraphTerminalEnvelope|TestRawGraphRejectedLimitBoundary|TestRawGraphRejectedLimitPrefix|TestRawGraphRejectedLimitContinuation|TestRawGraphSelectionPriority|TestRawGraphSelectionReadiness)$' -count=1 -v -timeout=5m 2>&1 | tee raw-graph-audit.log
+          go test -race -p=1 ./integrity -run '^(TestRawGraphReferencesAndIndependentCorruptionControls|TestNativeRawGraphReferenceAuditQuiescentReaders|TestRawGraphJournalGenerationsOutcomesAndArchive|TestRawGraphCheckpointPointerAndFrameBindings|TestNativeRawGraphCheckpointAudit|TestRawGraphCheckpointMaterializedState|TestRawGraphCheckpointPromiseOwnership|TestRawGraphCheckpointMetadataBindings|TestRawGraphRetiredSourceProjectionScope|TestRawGraphSignalReservationAndBinding|TestRawGraphSignalIndexIndependentPrefixes|TestRawGraphSignalIndexProductionPackets|TestRawGraphCheckpointSDKStateHistory|TestRawGraphCheckpointPromiseHistory|TestRawGraphCheckpointSDKSignalHistory|TestRawGraphCheckpointSDKTimerHistory|TestRawGraphEveryCheckpointHistory|TestRawGraphSDKStepEnvelope|TestRawGraphCanonicalEnvelope|TestRawGraphTerminalEnvelope|TestRawGraphRejectedLimitBoundary|TestRawGraphRejectedLimitPrefix|TestRawGraphRejectedLimitContinuation|TestRawGraphSelectionPriority|TestRawGraphSelectionReadiness|TestRawGraphCursorEnvelope|TestRawGraphStartEnvelope)$' -count=1 -v -timeout=5m 2>&1 | tee raw-graph-audit.log
           python3 - <<'PY'
           import pathlib, re
           log = pathlib.Path('raw-graph-audit.log').read_text()
@@ -355,6 +355,15 @@ jobs:
           for encoding in ('json', 'protobuf-v1'):
               for mode in ('ordinary', 'opaque-field-names', 'opaque-duplicates', 'opaque-null', 'request-null', 'request-array', 'request-unknown', 'request-alias', 'request-duplicate', 'request-escaped-duplicate', 'request-time-type', 'request-step-negative', 'case-unknown', 'case-alias', 'case-duplicate', 'case-shape', 'completion-null', 'completion-array', 'completion-unknown', 'completion-alias', 'completion-duplicate', 'completion-sequence-negative', 'completion-case-fraction', 'completion-cancel-type', 'metadata-ref-null', 'metadata-ref-object', 'metadata-hash-null', 'metadata-hash-number'):
                   assert f'--- PASS: TestRawGraphSDKStepEnvelope/{encoding}/{mode} ' in log
+          assert '--- PASS: TestRawGraphCursorEnvelope ' in log
+          for encoding in ('json', 'protobuf-v1'):
+              for archive in ('false', 'true'):
+                  for control in ('valid', 'whitespace', 'unknown', 'alias', 'duplicate-schema', 'duplicate-invocation', 'escaped-count', 'count-fraction', 'invocation-negative'):
+                      assert f'--- PASS: TestRawGraphCursorEnvelope/{encoding}/archive={archive}/{control} ' in log
+          assert '--- PASS: TestRawGraphStartEnvelope ' in log
+          for encoding in ('json', 'protobuf-v1'):
+              for control in ('valid', 'cursor-unknown', 'cursor-alias', 'cursor-duplicate', 'cursor-request-unknown', 'cursor-request-alias', 'cursor-request-duplicate', 'start-wire-unknown', 'start-wire-alias', 'start-wire-duplicate', 'start-wire-escaped', 'start-wire-request-unknown', 'start-wire-request-alias', 'start-wire-request-duplicate', 'start-parent-valid', 'start-parent-type', 'start-parent-id', 'start-parent-generation', 'start-parent-signal'):
+                  assert f'--- PASS: TestRawGraphStartEnvelope/{encoding}/{control} ' in log
           assert '--- PASS: TestRawGraphEveryCheckpointHistory ' in log
           for encoding in ('json', 'protobuf-v1'):
               for mode in ('historical-valid', 'historical-state', 'historical-anchor', 'historical-locals', 'historical-cursor', 'historical-timer', 'historical-metadata'):

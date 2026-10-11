@@ -389,10 +389,41 @@ func rawJournalCheckpointFixture(t *testing.T, encoding journal.Encoding, archiv
 		cursor.Schema = "js-wf-graph-runtime-cursor-v6"
 		cursor.RetainedFrom = requestIndex
 		cursor.Checkpoint, _ = json.Marshal(pointer)
-		start := journal.GraphStart{Schema: "js-wf-canonical-start-v1", Token: "start", Request: journal.GraphStartRequest{Type: "kind", ID: "id"}, InputSHA256: digest([]byte("input")), InputSize: 5}
+		start := auditedGraphStart{Schema: "js-wf-canonical-start-v1", Token: "start", Request: auditedGraphStartRequest{Type: "kind", ID: "id"}, InputSHA256: digest([]byte("input")), InputSize: 5}
+		if strings.HasPrefix(control, "start-parent-") {
+			start.Request.ParentType, start.Request.ParentID, start.Request.ParentInvocation, start.Request.SignalName = "parent", "root", 3, "child_0"
+			switch control {
+			case "start-parent-type":
+				start.Request.ParentType = "invalid.parent"
+			case "start-parent-id":
+				start.Request.ParentID = ""
+			case "start-parent-generation":
+				start.Request.ParentInvocation = 0
+			case "start-parent-signal":
+				start.Request.SignalName = ""
+			}
+		}
 		cursor.Start = &start
 		inputLink := put([]byte("input"), graphpublication.Location{Kind: "payload", First: 0, Stream: "input"})
 		startData, _ := json.Marshal(start)
+		if strings.HasPrefix(control, "start-wire-") {
+			switch control {
+			case "start-wire-unknown":
+				startData = []byte(strings.TrimSuffix(string(startData), "}") + `,"unknown":1}`)
+			case "start-wire-alias":
+				startData = []byte(strings.Replace(string(startData), `"token":`, `"Token":`, 1))
+			case "start-wire-duplicate":
+				startData = []byte(strings.TrimSuffix(string(startData), "}") + `,"input_size":5}`)
+			case "start-wire-escaped":
+				startData = []byte(strings.TrimSuffix(string(startData), "}") + `,"\u0074oken":"start"}`)
+			case "start-wire-request-unknown":
+				startData = []byte(strings.Replace(string(startData), `"request":{`, `"request":{"unknown":1,`, 1))
+			case "start-wire-request-alias":
+				startData = []byte(strings.Replace(string(startData), `"type":`, `"Type":`, 1))
+			case "start-wire-request-duplicate":
+				startData = []byte(strings.Replace(string(startData), `"request":{`, `"request":{"id":"id",`, 1))
+			}
+		}
 		inputNode, _ := json.Marshal(struct {
 			Schema string
 			First  uint64
@@ -411,6 +442,14 @@ func rawJournalCheckpointFixture(t *testing.T, encoding journal.Encoding, archiv
 
 		source.Data = []byte(`{"schema":"js-wf-canonical-start-pointer-v1","token":"start"}`)
 		source.Header = nats.Header{"Wf-Graph-Start-Token": []string{"start"}, "Wf-Input-SHA256": []string{start.InputSHA256}}
+		if strings.HasPrefix(control, "start-parent-") {
+			source.Header.Set("Wf-Parent-Type", start.Request.ParentType)
+			source.Header.Set("Wf-Parent-ID", start.Request.ParentID)
+			if start.Request.ParentInvocation != 0 {
+				source.Header.Set("Wf-Parent-Inv-Seq", fmt.Sprint(start.Request.ParentInvocation))
+			}
+			source.Header.Set("Wf-Parent-Signal", start.Request.SignalName)
+		}
 	}
 	root.Application, _ = json.Marshal(cursor)
 	graph.Roots[destination] = root

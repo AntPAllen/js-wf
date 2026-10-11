@@ -33,23 +33,23 @@ type GraphJournalReport struct {
 
 // This decoder is independent of GraphStore's cursor validation and traversal.
 type auditedGraphCursor struct {
-	Schema             string              `json:"schema"`
-	Invocation         uint64              `json:"invocation"`
-	Base               uint64              `json:"base"`
-	Count              uint64              `json:"count"`
-	Epoch              uint64              `json:"epoch"`
-	Kind               journal.Kind        `json:"kind"`
-	Retired            bool                `json:"retired"`
-	Purging            bool                `json:"purging,omitempty"`
-	Start              *journal.GraphStart `json:"start,omitempty"`
-	PreviousInvocation uint64              `json:"previous_invocation,omitempty"`
-	SignalInputs       uint64              `json:"signal_inputs,omitempty"`
-	SignalBindings     uint64              `json:"signal_bindings,omitempty"`
-	SignalSource       uint64              `json:"signal_source,omitempty"`
-	SignalConsumed     uint64              `json:"signal_consumed,omitempty"`
-	SignalRepair       uint64              `json:"signal_repair,omitempty"`
-	RetainedFrom       uint64              `json:"retained_from,omitempty"`
-	Checkpoint         json.RawMessage     `json:"checkpoint,omitempty"`
+	Schema             string             `json:"schema"`
+	Invocation         uint64             `json:"invocation"`
+	Base               uint64             `json:"base"`
+	Count              uint64             `json:"count"`
+	Epoch              uint64             `json:"epoch"`
+	Kind               journal.Kind       `json:"kind"`
+	Retired            bool               `json:"retired"`
+	Purging            bool               `json:"purging,omitempty"`
+	Start              *auditedGraphStart `json:"start,omitempty"`
+	PreviousInvocation uint64             `json:"previous_invocation,omitempty"`
+	SignalInputs       uint64             `json:"signal_inputs,omitempty"`
+	SignalBindings     uint64             `json:"signal_bindings,omitempty"`
+	SignalSource       uint64             `json:"signal_source,omitempty"`
+	SignalConsumed     uint64             `json:"signal_consumed,omitempty"`
+	SignalRepair       uint64             `json:"signal_repair,omitempty"`
+	RetainedFrom       uint64             `json:"retained_from,omitempty"`
+	Checkpoint         json.RawMessage    `json:"checkpoint,omitempty"`
 }
 
 type auditedGraphJournal struct {
@@ -116,7 +116,7 @@ func CheckGraphJournals(ctx context.Context, snapshot GraphJournalSnapshot) (rep
 	consumed := map[string]bool{}
 	for destination, root := range snapshot.Graph.Roots {
 		var c auditedGraphCursor
-		if err := json.Unmarshal(root.Application, &c); err != nil {
+		if err := checkpoint.DecodeUnambiguous(root.Application, &c); err != nil {
 			return report, fmt.Errorf("%s: invalid canonical cursor: %w", destination, err)
 		}
 		switch c.Schema {
@@ -137,6 +137,9 @@ func CheckGraphJournals(ctx context.Context, snapshot GraphJournalSnapshot) (rep
 			key = identity.Key(start.Request.Type, start.Request.ID)
 			if start.Schema != "js-wf-canonical-start-v1" || identity.Validate(start.Request.Type, start.Request.ID) != nil || graphDestinationForKey(key) != destination || !graphAuditID(start.Token) || !graphAuditHash(start.InputSHA256) || start.InputSize < 0 || start.InputSize > snapshot.Graph.PayloadLimit {
 				return report, fmt.Errorf("%s: invalid canonical start identity", destination)
+			}
+			if err := auditStartParent(start.Request); err != nil {
+				return report, err
 			}
 		} else if c.Schema != "js-wf-graph-journal-cursor-v1" {
 			return report, fmt.Errorf("%s: canonical input descriptor missing", destination)
@@ -236,8 +239,8 @@ func CheckGraphJournals(ctx context.Context, snapshot GraphJournalSnapshot) (rep
 		}
 		c := state.cursor
 		if record.Stream == "input" {
-			var start journal.GraphStart
-			if c.Start == nil || record.Index != 0 || json.Unmarshal(record.Record.Data, &start) != nil || start != *c.Start || len(record.Record.Blobs) != 1 || record.Record.Blobs[0].Hash != start.InputSHA256 {
+			var start auditedGraphStart
+			if c.Start == nil || record.Index != 0 || checkpoint.DecodeUnambiguous(record.Record.Data, &start) != nil || start != *c.Start || len(record.Record.Blobs) != 1 || record.Record.Blobs[0].Hash != start.InputSHA256 {
 				return fmt.Errorf("%s: canonical owned input differs", record.Destination)
 			}
 			data, err := graph.LoadObject(call, record.Record.Blobs[0].Reference.Object, graph.PayloadLimit)
@@ -437,7 +440,7 @@ func CheckGraphJournals(ctx context.Context, snapshot GraphJournalSnapshot) (rep
 	return report, nil
 }
 
-func auditStartSource(start journal.GraphStart, source *jetstream.RawStreamMsg) bool {
+func auditStartSource(start auditedGraphStart, source *jetstream.RawStreamMsg) bool {
 	pointer, _ := json.Marshal(struct {
 		Schema string `json:"schema"`
 		Token  string `json:"token"`

@@ -1,5 +1,27 @@
 # JetStream Durable Workflow Runtime — Implementation Plan
 
+## Independent cursor/start wire admission — 2026-10-11
+
+The raw auditor now uses its own canonical start fields and strict JSON admission
+for cursors and both cursor/owned-input start descriptors. It rejects unknown,
+aliased and duplicate fields, and requires parent-return metadata to be wholly
+absent or contain valid parent identity, nonzero invocation and signal token.
+Focused race evidence passes all74 new physical controls (12 positive/62 negative)
+in21.368s alongside historical/source/retired-scope and four native checkpoint
+regressions. A separate native child/buffered-child R1/R3 race command passes in
+67.719s with four raw-audit receipts and eight checked parent frames. Closed
+stores are inventoried; source414 files remain unchanged. Actual native binary
+capture is retained; the first race binary capture was missed. The exact new CI
+guard was executed locally, without claiming hosted pipeline execution.
+
+See [cursor/start evidence](scale/raw-cursor-start-envelope-2026-10-11/README.md).
+Full version-specific cursor semantics, required scalar presence/null handling,
+source header census, parent causal history and strict retired projection wire
+admission remain open. Larger frozen normal/race/100000-entry campaigns were
+confirmed live under their original sources. This does not close original scale,
+fault, soak or rollout gates. Public continuation admission/import/online
+collection remain disabled.
+
 ## Accepted100000-entry normal store archived to S3 — 2026-10-11
 
 The closed accepted classified normal server data moved to a content-addressed
