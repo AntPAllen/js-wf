@@ -1,0 +1,55 @@
+=== RUN   TestWorkerStepOrderBeforeHandler
+=== RUN   TestWorkerStepOrderBeforeHandler/legacy/balanced
+=== RUN   TestWorkerStepOrderBeforeHandler/legacy/suspended_between_pair
+=== RUN   TestWorkerStepOrderBeforeHandler/legacy/pending_request
+=== RUN   TestWorkerStepOrderBeforeHandler/legacy/orphan_completion
+    step_order_admission_test.go:36: handler admission: handlers=1 want=0 effects=0
+=== RUN   TestWorkerStepOrderBeforeHandler/legacy/overlapping_requests
+    step_order_admission_test.go:36: handler admission: handlers=1 want=0 effects=0
+=== RUN   TestWorkerStepOrderBeforeHandler/legacy/completion_then_request
+    step_order_admission_test.go:36: handler admission: handlers=1 want=0 effects=0
+=== RUN   TestWorkerStepOrderBeforeHandler/legacy/duplicate_completion
+    step_order_admission_test.go:36: handler admission: handlers=1 want=0 effects=0
+=== RUN   TestWorkerStepOrderBeforeHandler/legacy/completed_pending
+    step_order_admission_test.go:36: corrupt delivery projected an outcome: keys=[test.metadata] err=<nil>
+=== RUN   TestWorkerStepOrderBeforeHandler/legacy/balanced_terminal
+=== RUN   TestWorkerStepOrderBeforeHandler/legacy/failed_pending
+=== RUN   TestWorkerStepOrderBeforeHandler/canonical/balanced
+=== RUN   TestWorkerStepOrderBeforeHandler/canonical/suspended_between_pair
+=== RUN   TestWorkerStepOrderBeforeHandler/canonical/pending_request
+=== RUN   TestWorkerStepOrderBeforeHandler/canonical/orphan_completion
+    step_order_admission_test.go:36: handler admission: handlers=1 want=0 effects=0
+=== RUN   TestWorkerStepOrderBeforeHandler/canonical/overlapping_requests
+    step_order_admission_test.go:36: handler admission: handlers=1 want=0 effects=0
+=== RUN   TestWorkerStepOrderBeforeHandler/canonical/completion_then_request
+    step_order_admission_test.go:36: handler admission: handlers=1 want=0 effects=0
+=== RUN   TestWorkerStepOrderBeforeHandler/canonical/duplicate_completion
+    step_order_admission_test.go:36: handler admission: handlers=1 want=0 effects=0
+=== RUN   TestWorkerStepOrderBeforeHandler/canonical/completed_pending
+    step_order_admission_test.go:36: corrupt delivery projected an outcome: keys=[test.metadata] err=<nil>
+=== RUN   TestWorkerStepOrderBeforeHandler/canonical/balanced_terminal
+=== RUN   TestWorkerStepOrderBeforeHandler/canonical/failed_pending
+--- FAIL: TestWorkerStepOrderBeforeHandler (0.08s)
+    --- PASS: TestWorkerStepOrderBeforeHandler/legacy/balanced (0.00s)
+    --- PASS: TestWorkerStepOrderBeforeHandler/legacy/suspended_between_pair (0.00s)
+    --- PASS: TestWorkerStepOrderBeforeHandler/legacy/pending_request (0.00s)
+    --- FAIL: TestWorkerStepOrderBeforeHandler/legacy/orphan_completion (0.00s)
+    --- FAIL: TestWorkerStepOrderBeforeHandler/legacy/overlapping_requests (0.00s)
+    --- FAIL: TestWorkerStepOrderBeforeHandler/legacy/completion_then_request (0.00s)
+    --- FAIL: TestWorkerStepOrderBeforeHandler/legacy/duplicate_completion (0.00s)
+    --- FAIL: TestWorkerStepOrderBeforeHandler/legacy/completed_pending (0.00s)
+    --- PASS: TestWorkerStepOrderBeforeHandler/legacy/balanced_terminal (0.00s)
+    --- PASS: TestWorkerStepOrderBeforeHandler/legacy/failed_pending (0.00s)
+    --- PASS: TestWorkerStepOrderBeforeHandler/canonical/balanced (0.01s)
+    --- PASS: TestWorkerStepOrderBeforeHandler/canonical/suspended_between_pair (0.01s)
+    --- PASS: TestWorkerStepOrderBeforeHandler/canonical/pending_request (0.01s)
+    --- FAIL: TestWorkerStepOrderBeforeHandler/canonical/orphan_completion (0.00s)
+    --- FAIL: TestWorkerStepOrderBeforeHandler/canonical/overlapping_requests (0.01s)
+    --- FAIL: TestWorkerStepOrderBeforeHandler/canonical/completion_then_request (0.01s)
+    --- FAIL: TestWorkerStepOrderBeforeHandler/canonical/duplicate_completion (0.01s)
+    --- FAIL: TestWorkerStepOrderBeforeHandler/canonical/completed_pending (0.00s)
+    --- PASS: TestWorkerStepOrderBeforeHandler/canonical/balanced_terminal (0.01s)
+    --- PASS: TestWorkerStepOrderBeforeHandler/canonical/failed_pending (0.00s)
+FAIL
+FAIL	js-wf/worker	0.090s
+FAIL

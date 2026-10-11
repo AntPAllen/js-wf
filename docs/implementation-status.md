@@ -1,5 +1,30 @@
 # Implementation status against the supplied plan
 
+## Worker request/completion ordering before replay and terminal repair — 2026-10-11
+
+Worker.execute now rejects overlapping requests, orphan/duplicate completions,
+and successful terminals with an unresolved request before handler admission or
+outcome repair. Pending requests and failed unresolved terminals remain valid.
+A verified resumed checkpoint completion anchor belongs to its compacted prefix;
+suffix completions still require retained requests.
+
+Baselinef754d1f admits eight malformed-order histories to handlers and copies two
+unresolved successful terminal outcomes into KV. Ten positive histories pass.
+Final normal/race commands cover20 ordering controls plus the prior82 metadata/
+epoch controls and exact CI assertions. The helper now also checks no negative
+outcome projection and one legitimate pending-request SDK callback. Native R1/R3
+child/buffered-child compatibility passes in72.290s with four witness pairs/eight
+frames. Final executables and1149 source inputs are reviewed; an empty-KV test
+assertion correction occurred only after native closure, with both helper versions
+hash-bound. Earlier failed assertions are retained. See
+[worker step-order evidence](scale/worker-step-order-admission-2026-10-11/README.md).
+
+The corpus remains162 families/922 pins. Five older qualification campaigns
+remain active and predate this change. Separate terminal-held/maintenance paths,
+full program/result equivalence, clock/promise causality, lease/protected-reader
+history, full current qualification and original fault/scale/soak/power/client/
+rollout requirements remain open.
+
 ## Reject conflicting retained worker ownership before handlers — 2026-10-11
 
 Worker admission now rejects different named workers within the same nonzero

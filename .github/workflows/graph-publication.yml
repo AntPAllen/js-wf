@@ -27,6 +27,7 @@ on:
       - 'worker/worker.go'
       - 'worker/step_metadata_admission_test.go'
       - 'worker/epoch_owner_admission_test.go'
+      - 'worker/step_order_admission_test.go'
       - 'worker/terminal_delivery.go'
       - 'worker/continuation.go'
       - 'client/graph_journal*.go'
@@ -99,6 +100,7 @@ on:
       - 'worker/worker.go'
       - 'worker/step_metadata_admission_test.go'
       - 'worker/epoch_owner_admission_test.go'
+      - 'worker/step_order_admission_test.go'
       - 'worker/terminal_delivery.go'
       - 'worker/continuation.go'
       - 'client/graph_journal*.go'
@@ -1022,13 +1024,17 @@ jobs:
           set -o pipefail
           worker_flags=()
           if [ "$WORKER_MODE" = race ]; then worker_flags=(-race); fi
-          go test "${worker_flags[@]}" ./worker -run '^(TestWorkerStepMetadataBeforeHandler|TestWorkerEpochOwnerBeforeHandler)$' -count=1 -v -timeout=2m 2>&1 | tee worker-step-metadata.log
+          go test "${worker_flags[@]}" ./worker -run '^(TestWorkerStepMetadataBeforeHandler|TestWorkerEpochOwnerBeforeHandler|TestWorkerStepOrderBeforeHandler)$' -count=1 -v -timeout=2m 2>&1 | tee worker-step-metadata.log
           python3 - <<'PY'
           import pathlib, re
           log = pathlib.Path('worker-step-metadata.log').read_text()
           assert not re.search(r'^--- (FAIL|SKIP):', log, re.M)
           assert '--- PASS: TestWorkerStepMetadataBeforeHandler ' in log
           assert '--- PASS: TestWorkerEpochOwnerBeforeHandler ' in log
+          assert '--- PASS: TestWorkerStepOrderBeforeHandler ' in log
+          for backend in ('legacy', 'canonical'):
+              for case in ('balanced', 'suspended_between_pair', 'pending_request', 'orphan_completion', 'overlapping_requests', 'completion_then_request', 'duplicate_completion', 'completed_pending', 'balanced_terminal', 'failed_pending'):
+                  assert f'--- PASS: TestWorkerStepOrderBeforeHandler/{backend}/{case} ' in log
           for backend in ('legacy', 'canonical'):
               for case in ('one_owner', 'successor_owner', 'same_owner_next_epoch', 'omitted_middle', 'all_omitted', 'zero_epoch_legacy', 'request_owner_conflict', 'completion_owner_conflict', 'conflict_after_omitted', 'conflict_without_started_owner', 'successor_epoch_conflict'):
                   assert f'--- PASS: TestWorkerEpochOwnerBeforeHandler/{backend}/{case} ' in log

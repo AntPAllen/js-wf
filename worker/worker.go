@@ -950,7 +950,8 @@ func (w *Worker) execute(ctx context.Context, typ, id string, l *lease.Lease, wa
 	// or user code. Per-step replay checks alone run after handler admission and
 	// cannot protect side effects outside SDK callbacks.
 	epochWorkers := make(map[uint64]string)
-	for _, record := range records {
+	outstandingStep := false
+	for i, record := range records {
 		// An omitted legacy worker ID supplies no ownership evidence, but must
 		// not erase a prior named owner within the same nonzero epoch.
 		if record.Epoch != 0 && record.WorkerID != "" {
@@ -962,12 +963,23 @@ func (w *Worker) execute(ctx context.Context, typ, id string, l *lease.Lease, wa
 		switch record.Kind {
 		case journal.StepRequested:
 			var request stepwire.Request
-			if stepwire.Decode(record.Payload, &request) != nil {
+			if outstandingStep || stepwire.Decode(record.Payload, &request) != nil {
 				return wf.ErrCorruptJournal
 			}
+			outstandingStep = true
 		case journal.StepCompleted:
 			var completion stepwire.Completion
 			if stepwire.DecodeCompletion(record.Payload, &completion) != nil {
+				return wf.ErrCorruptJournal
+			}
+			// A verified checkpoint anchor completes a request in the compacted
+			// prefix. Every suffix completion still needs its retained request.
+			if !outstandingStep && !(resumed != nil && i == 0) {
+				return wf.ErrCorruptJournal
+			}
+			outstandingStep = false
+		case journal.Completed:
+			if outstandingStep {
 				return wf.ErrCorruptJournal
 			}
 		}

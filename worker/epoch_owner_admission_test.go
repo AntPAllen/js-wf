@@ -27,11 +27,12 @@ func TestWorkerEpochOwnerBeforeHandler(t *testing.T) {
 	for _, backend := range []string{"legacy", "canonical"} {
 		for _, c := range cases {
 			t.Run(backend+"/"+c.name, func(t *testing.T) {
-				runWorkerStepAdmission(t, backend, "healthy", "valid", func(entries []journal.Entry) {
+				runWorkerStepAdmission(t, backend, "healthy", "valid", func(entries []journal.Entry) []journal.Entry {
 					for i := range entries {
 						entries[i].Epoch = c.epochs[i]
 						entries[i].WorkerID = c.workers[i]
 					}
+					return entries
 				}, c.valid)
 			})
 		}

@@ -5,9 +5,12 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"testing"
 	"time"
+
+	"github.com/nats-io/nats.go/jetstream"
 
 	"js-wf/client"
 	"js-wf/identity"
@@ -40,7 +43,7 @@ func TestWorkerStepMetadataBeforeHandler(t *testing.T) {
 	}
 }
 
-func runWorkerStepAdmission(t *testing.T, backend, level, field string, mutate func([]journal.Entry), valid bool) {
+func runWorkerStepAdmission(t *testing.T, backend, level, field string, mutate func([]journal.Entry) []journal.Entry, valid bool) {
 	t.Helper()
 	ctx := context.Background()
 	schedule := sim.NewScheduler(1)
@@ -92,7 +95,7 @@ func runWorkerStepAdmission(t *testing.T, backend, level, field string, mutate f
 	start, _ := json.Marshal(map[string]any{"input_sha256": hex.EncodeToString(inputHash[:])})
 	entries := []journal.Entry{{Kind: journal.Started, Payload: start}, {Index: 1, Kind: journal.StepRequested, Payload: r}, {Index: 2, Kind: journal.StepCompleted, Payload: d}}
 	if mutate != nil {
-		mutate(entries)
+		entries = mutate(entries)
 	}
 	for _, entry := range entries {
 		if graph != nil {
@@ -121,6 +124,7 @@ func runWorkerStepAdmission(t *testing.T, backend, level, field string, mutate f
 		}
 	}
 	handlers, effects := 0, 0
+	outcomes := sim.NewKVTransport(schedule, 0)
 	opts := []worker.Option{}
 	if graph != nil {
 		opts = append(opts, worker.WithGraphJournal(graph))
@@ -128,7 +132,7 @@ func runWorkerStepAdmission(t *testing.T, backend, level, field string, mutate f
 	w, err := worker.NewWithPorts("metadata-worker", map[string]worker.Handler{h.Type: func(c *wf.Context, _ json.RawMessage) (json.RawMessage, error) {
 		handlers++
 		return wf.Run(c, "step", nil, func(context.Context) (json.RawMessage, error) { effects++; return json.RawMessage(`42`), nil })
-	}}, worker.ModeledWorkerPorts{Journal: jrn, Leases: leases, Outcome: sim.NewKVTransport(schedule, 0), Invocation: transport.SignalTransport, Signals: transport.SignalTransport, Client: c, HeartbeatTicks: make(chan time.Time)}, opts...)
+	}}, worker.ModeledWorkerPorts{Journal: jrn, Leases: leases, Outcome: outcomes, Invocation: transport.SignalTransport, Signals: transport.SignalTransport, Client: c, HeartbeatTicks: make(chan time.Time)}, opts...)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -145,7 +149,14 @@ func runWorkerStepAdmission(t *testing.T, backend, level, field string, mutate f
 	if valid {
 		want = 1
 	}
-	if handlers != want || effects != 0 {
+	if level == "terminal" || level == "failed_pending" {
+		want = 0
+	}
+	wantEffects := 0
+	if level == "pending_request" && valid {
+		wantEffects = 1
+	}
+	if handlers != want || effects != wantEffects {
 		t.Fatalf("handler admission: handlers=%d want=%d effects=%d", handlers, want, effects)
 	}
 	var count int
@@ -164,6 +175,12 @@ func runWorkerStepAdmission(t *testing.T, backend, level, field string, mutate f
 			t.Fatal(e)
 		}
 		count = len(records)
+	}
+	if !valid {
+		keys, e := outcomes.Keys(ctx)
+		if e != nil && !errors.Is(e, jetstream.ErrNoKeysFound) || len(keys) != 0 {
+			t.Fatalf("corrupt delivery projected an outcome: keys=%v err=%v", keys, e)
+		}
 	}
 	if !valid && count != len(entries) {
 		t.Fatal(fmt.Sprintf("corrupt delivery changed journal length: %d", count))
