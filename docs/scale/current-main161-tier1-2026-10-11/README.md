@@ -46,3 +46,21 @@ The reviewer actually refused this running stage with exit1; log/receipt are
 retained. This is a launch, not normal acceptance. After actual completion use
 the existing reviewer command. Same-source race remains contingent on accepted
 normal; the four older campaigns remain live.
+
+## Normal independently accepted
+
+Finished05:22:08.851594UTC, actual driver/supervisor exits0, loaded service
+active/exited with MainPID0 and RemainAfterExit=yes. The independent reviewer
+accepted3691 frozen Git inputs,3726 selected paths,161000 completed seed bodies,
+894 pinned regressions,229 top-level passes and eight actual package processes.
+Retained binarySHA3692eae295552082057a869c01b8dd2ea6c960cdca501dfd0621620f18a3c30d.
+
+normal-terminal-files.json binds all48 closed nonbinary outputs/driver evidence,
+3,191,081 original bytes and634,779 stored bytes. Binary and frozen checkout
+remain local. normal-evidence-review.py verifies retained compressed/original
+bytes and the local binary; this is not restoration of a full fixture from Git.
+
+This source predates the162nd child-link family and subsequent SDK/worker null,
+epoch-owner and step-order fixes. The accepted scope is frozen161 normal1000;
+same-source race may launch now. Four older race/scale campaigns remain live.
+Full current162, extended qualification and original release gates remain open.

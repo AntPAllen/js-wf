@@ -1,5 +1,24 @@
 # Implementation status against the supplied plan
 
+## Frozen161 complete normal campaign independently accepted — 2026-10-11
+
+The full normal campaign on sourceec970159c61dbecb6899077bfa6927b620f62ec9
+closed at05:22:08UTC with actual driver/supervisor exits0. Independent review
+binds the loaded unit and InvocationID4d48e5ea936e4ed6ae3ffe8a20e4f0b9,
+MainPID0, active/exited, RemainAfterExit=yes and unchanged supervisor/source.
+All3691 frozen Git inputs,3726 selected paths and retained executable bytes are
+verified. Eight real disjoint package processes pass229 top-level tests, all894
+pinned regressions and161000 seed bodies across161 families.
+
+All48 closed nonbinary outputs plus driver evidence are retained and inventoried
+(3.19MB originals/0.635MB stored); the executable remains local, SHA256
+3692eae295552082057a869c01b8dd2ea6c960cdca501dfd0621620f18a3c30d.
+This is complete frozen161 normal1000 acceptance. It excludes the162nd child-link
+family and later SDK/worker null/ownership/order fixes. Same-source race may now
+launch, but race/full current162/extended qualification and original native
+fault/scale/soak/power/client/retention/import/admission/rollout gates remain open.
+See [frozen161 evidence](scale/current-main161-tier1-2026-10-11/README.md).
+
 ## Worker request/completion ordering before replay and terminal repair — 2026-10-11
 
 Worker.execute now rejects overlapping requests, orphan/duplicate completions,
