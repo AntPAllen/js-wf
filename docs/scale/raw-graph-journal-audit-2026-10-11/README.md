@@ -76,3 +76,24 @@ module and trace inputs. Bulky documentation evidence is omitted; the independen
 reviewer still verifies the complete required input set against Git blob bytes.
 Initial empty-index sparse preparation failed its missing-input preflight before
 any test launch; populating the index resolved it, and the checkout was clean.
+
+## Frozen complete159 normal accepted; race launched
+
+Independent review accepts frozen source `00eeb1306ed0264a7f50e6eb3014b4a58780aebb`:
+3,532 Git-verified inputs, 159,000 completed seeded bodies, 860 saved traces,
+226 top-level passes and eight actual package completions. Supervisor and driver
+closed with exit 0; the loaded normal user unit has MainPID=0, RemainAfterExit=yes
+and the exact original invocation. See normal-state.json and normal-review.json.
+
+The matching race stage is now running under
+`js-wf-current159-tier1-race-20261011-qualified.service`, invocation
+`f659459b2143405780de06e6d65159ee`, supervisor211216/driver211240. Launch checks
+independently accepted normal at the same source and its actual terminal unit.
+The receipt preserves one-core CPU quota, 2 GiB memory limit, eight sequential
+parts, 1,000 seeds per family and the original watchdogs. Race acceptance remains
+open until actual completion and independent review. This frozen source predates
+subsequent checkpoint/metadata/signal audits; it is not latest-main qualification.
+
+Earlier live-run observations above are historical; the original unclassified
+100000-entry normal has since closed and failed full acceptance on 41 unclassified
+CASRoot errors. The separate classified 9189259 campaign remains live.

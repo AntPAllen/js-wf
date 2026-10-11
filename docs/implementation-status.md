@@ -1,5 +1,30 @@
 # Implementation status against the supplied plan
 
+## Independent canonical signal bindings and consumption audited — 2026-10-11
+
+The raw graph audit now verifies reservation identity and owned body bytes,
+queue equality/order/uniqueness, cursor census and journal consumption markers
+with independently owned inputs. Four JSON/protobuf positives and21 physical
+reference-valid corruptions pass focused race in1.319s. Six actual R1/R3Domain
+SDK normal/child/buffered-child cases pass race in88.026s with the extended audit.
+[Evidence and scope](scale/raw-graph-signals-audit-2026-10-11/README.md).
+Persistent signal index packets, original source-frontier history, protected
+reader replay and full SDK materialized-history reconstruction remain open.
+The frozen complete159 race and classified100000-entry normal remain live.
+
+
+## Frozen complete159 normal accepted; matching race started — 2026-10-11
+
+Independent review accepts source00eeb13: 159,000 seeded cases, 860 saved traces,
+226 top-level passes, eight actual package completions and 3,532 Git-verified
+inputs. The original supervisor and driver exited0; the exact loaded normal user
+unit confirms MainPID0 and terminal exit0. The same-source race is now live under
+invocationf659459b2143405780de06e6d65159ee, with the same quota and seed inventory.
+[Review and launch receipts](scale/raw-graph-journal-audit-2026-10-11/README.md).
+Race and latest-main full qualification remain open. The classified original
+100000-entry normal continues under its existing invocation.
+
+
 ## Raw worker checkpoint metadata validated on actual SDK flows — 2026-10-11
 
 The independent audit now binds worker metadata to its owned bytes,SDK frame,

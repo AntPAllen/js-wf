@@ -64,6 +64,12 @@ type auditedGraphJournal struct {
 	signalCount       uint64
 	children          map[string]auditedCheckpointChild
 	childSignals      map[uint64]auditedCheckpointSignal
+	signalInputs      []journal.GraphSignalInput
+	signalBindings    []journal.GraphSignalBinding
+	signalEvents      []auditedCheckpointSignal
+	boundInputs       map[uint64]bool
+	signalKeys        map[journal.GraphSignalRequest]bool
+	signalTokens      map[string]bool
 }
 
 func graphDestinationForKey(key string) string { return "journal/" + digest([]byte("wf.jrn."+key)) }
@@ -233,6 +239,9 @@ func CheckGraphJournals(ctx context.Context, snapshot GraphJournalSnapshot) (rep
 			state.inputSeen = true
 			return nil
 		}
+		if record.Stream == "signal-input" || record.Stream == "signal-queue" {
+			return auditGraphSignalRecord(call, graph, state, record)
+		}
 		if record.Stream != "" && record.Stream != "archive" {
 			return nil
 		}
@@ -302,6 +311,12 @@ func CheckGraphJournals(ctx context.Context, snapshot GraphJournalSnapshot) (rep
 			if json.Unmarshal(entry.Payload, &signal) != nil {
 				return fmt.Errorf("invalid checkpoint signal history")
 			}
+			if canonicalSignalCursor(c) {
+				if err := auditGraphSignalEvent(call, graph, record, signal); err != nil {
+					return err
+				}
+				state.signalEvents = append(state.signalEvents, signal)
+			}
 			if signal.Child != nil {
 				state.childSignals[signal.Sequence] = signal
 			}
@@ -366,6 +381,9 @@ func CheckGraphJournals(ctx context.Context, snapshot GraphJournalSnapshot) (rep
 	sort.Strings(destinations)
 	for _, destination := range destinations {
 		state := states[destination]
+		if err := finishGraphSignalAudit(state); err != nil {
+			return report, fmt.Errorf("%s: %w", destination, err)
+		}
 		if uint64(state.journal.count) != state.cursor.Count || state.cursor.Start != nil && !state.inputSeen || state.checkpoint != nil && !state.checkpointSeen {
 			return report, fmt.Errorf("%s: canonical journal/input census differs", destination)
 		}

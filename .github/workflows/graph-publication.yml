@@ -211,7 +211,7 @@ jobs:
         shell: bash
         run: |
           set -o pipefail
-          go test -race -p=1 ./integrity -run '^(TestRawGraphReferencesAndIndependentCorruptionControls|TestNativeRawGraphReferenceAuditQuiescentReaders|TestRawGraphJournalGenerationsOutcomesAndArchive|TestRawGraphCheckpointPointerAndFrameBindings|TestNativeRawGraphCheckpointAudit|TestRawGraphCheckpointMaterializedState|TestRawGraphCheckpointPromiseOwnership|TestRawGraphCheckpointMetadataBindings|TestRawGraphRetiredSourceProjectionScope)$' -count=1 -v -timeout=5m 2>&1 | tee raw-graph-audit.log
+          go test -race -p=1 ./integrity -run '^(TestRawGraphReferencesAndIndependentCorruptionControls|TestNativeRawGraphReferenceAuditQuiescentReaders|TestRawGraphJournalGenerationsOutcomesAndArchive|TestRawGraphCheckpointPointerAndFrameBindings|TestNativeRawGraphCheckpointAudit|TestRawGraphCheckpointMaterializedState|TestRawGraphCheckpointPromiseOwnership|TestRawGraphCheckpointMetadataBindings|TestRawGraphRetiredSourceProjectionScope|TestRawGraphSignalReservationAndBinding)$' -count=1 -v -timeout=5m 2>&1 | tee raw-graph-audit.log
           python3 - <<'PY'
           import pathlib, re
           log = pathlib.Path('raw-graph-audit.log').read_text()
@@ -226,6 +226,12 @@ jobs:
           assert '--- PASS: TestRawGraphCheckpointPromiseOwnership ' in log
           assert '--- PASS: TestRawGraphCheckpointMetadataBindings ' in log
           assert '--- PASS: TestRawGraphRetiredSourceProjectionScope ' in log
+          assert '--- PASS: TestRawGraphSignalReservationAndBinding ' in log
+          for encoding in ('json', 'protobuf-v1'):
+              assert f'--- PASS: TestRawGraphSignalReservationAndBinding/{encoding} ' in log
+              assert f'--- PASS: TestRawGraphSignalReservationAndBinding/{encoding}/consumed-valid ' in log
+          for control in ('generation', 'reservation-index', 'name', 'key', 'size', 'body', 'token', 'binding-input', 'binding-index', 'source-zero', 'source-frontier', 'consumption-census', 'missing-body', 'consumed-index', 'consumed-token', 'consumed-name', 'consumed-sequence', 'consumed-ref', 'consumed-hash', 'consumed-no-marker', 'consumed-unowned'):
+              assert f'--- PASS: TestRawGraphSignalReservationAndBinding/{control} ' in log
           for control in ('valid', 'purging-source', 'source-generation', 'projection-missing', 'projection-generation', 'projection-kind', 'nonterminal', 'live-forest'):
               assert f'--- PASS: TestRawGraphRetiredSourceProjectionScope/{control} ' in log
           for encoding in ('json', 'protobuf-v1'):
