@@ -27,6 +27,7 @@ type GraphJournalSnapshot struct {
 type GraphJournalReport struct {
 	References                                                 GraphReferenceReport
 	Invocations, Journals, Entries, Terminal, Pending, Retired int
+	RetiredProjectionOnly                                      int
 }
 
 // This decoder is independent of GraphStore's cursor validation and traversal.
@@ -60,6 +61,9 @@ type auditedGraphJournal struct {
 	checkpointSeen    bool
 	sdkPosition       uint64
 	lastStepRequest   uint64
+	signalCount       uint64
+	children          map[string]auditedCheckpointChild
+	childSignals      map[uint64]auditedCheckpointSignal
 }
 
 func graphDestinationForKey(key string) string { return "journal/" + digest([]byte("wf.jrn."+key)) }
@@ -121,7 +125,7 @@ func CheckGraphJournals(ctx context.Context, snapshot GraphJournalSnapshot) (rep
 			return report, fmt.Errorf("%s: canonical input descriptor missing", destination)
 		}
 		if c.Retired {
-			if !c.Purging || c.Invocation == 0 || c.Count == 0 || c.Kind != journal.Completed && c.Kind != journal.Failed || root.Graph.Count != 0 {
+			if c.Invocation == 0 || c.Count == 0 || c.Kind != journal.Completed && c.Kind != journal.Failed || root.Graph.Count != 0 {
 				return report, fmt.Errorf("%s: invalid retired journal", destination)
 			}
 			for _, n := range counts {
@@ -129,8 +133,26 @@ func CheckGraphJournals(ctx context.Context, snapshot GraphJournalSnapshot) (rep
 					return report, fmt.Errorf("%s: retired journal retains live forest", destination)
 				}
 			}
-			if sources[destination] != nil {
-				return report, fmt.Errorf("%s: retired journal still has invocation", destination)
+			if source := sources[destination]; source != nil {
+				if c.Purging || source.Sequence != c.Invocation || c.Start != nil && !auditStartSource(*c.Start, source) {
+					return report, fmt.Errorf("%s: invalid retired invocation source", destination)
+				}
+				// Direct terminal Retire clears forests without purging source
+				// or result. Exact terminal bytes no longer have a live journal
+				// witness: report projection-only verification explicitly.
+				raw, err := snapshot.ReadProjection(ctx, key)
+				if err != nil {
+					return report, err
+				}
+				var outcome struct {
+					InvSeq uint64 `json:"inv_seq"`
+					Error  string `json:"error"`
+				}
+				if json.Unmarshal(raw, &outcome) != nil || outcome.InvSeq != c.Invocation || (c.Kind == journal.Failed) != (outcome.Error != "") {
+					return report, fmt.Errorf("%s: retired projection generation/kind differs", destination)
+				}
+				consumed[destination] = true
+				report.RetiredProjectionOnly++
 			}
 			report.Retired++
 			continue
@@ -165,7 +187,7 @@ func CheckGraphJournals(ctx context.Context, snapshot GraphJournalSnapshot) (rep
 			}
 			consumed[destination] = true
 		}
-		state := &auditedGraphJournal{cursor: c, key: key}
+		state := &auditedGraphJournal{cursor: c, key: key, children: map[string]auditedCheckpointChild{}, childSignals: map[uint64]auditedCheckpointSignal{}}
 		if len(c.Checkpoint) != 0 {
 			pointer, err := auditCheckpointPointer(c)
 			if err != nil {
@@ -255,6 +277,34 @@ func CheckGraphJournals(ctx context.Context, snapshot GraphJournalSnapshot) (rep
 		}
 		if entry.Kind == journal.StepRequested {
 			state.lastStepRequest = index
+			var request struct {
+				Kind string `json:"kind"`
+				Name string `json:"name"`
+				Type string `json:"child_type"`
+				ID   string `json:"child_id"`
+			}
+			if json.Unmarshal(entry.Payload, &request) != nil {
+				return fmt.Errorf("invalid checkpoint history request")
+			}
+			if request.Kind == "call" || request.Kind == "call_async" {
+				if identity.ValidateToken(request.Name) != nil || identity.Validate(request.Type, request.ID) != nil {
+					return fmt.Errorf("invalid checkpoint child declaration")
+				}
+				if _, ok := state.children[request.Name]; ok {
+					return fmt.Errorf("duplicate checkpoint child declaration")
+				}
+				state.children[request.Name] = auditedCheckpointChild{Type: request.Type, ID: request.ID}
+			}
+		}
+		if entry.Kind == journal.SignalConsumed {
+			state.signalCount++
+			var signal auditedCheckpointSignal
+			if json.Unmarshal(entry.Payload, &signal) != nil {
+				return fmt.Errorf("invalid checkpoint signal history")
+			}
+			if signal.Child != nil {
+				state.childSignals[signal.Sequence] = signal
+			}
 		}
 		if state.checkpoint != nil {
 			pointer := state.checkpoint

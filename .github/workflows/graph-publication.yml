@@ -10,6 +10,7 @@ on:
       - 'integrity/graph*.go'
       - 'worker/graph_journal*.go'
       - 'worker/graph_limit*.go'
+      - 'worker/graph_continuation_sdk_test.go'
       - 'scripts/graph_limit_profile.py'
       - 'scripts/test_graph_limit_profile.py'
       - 'worker/graph_signal*.go'
@@ -72,6 +73,7 @@ on:
       - 'integrity/graph*.go'
       - 'worker/graph_journal*.go'
       - 'worker/graph_limit*.go'
+      - 'worker/graph_continuation_sdk_test.go'
       - 'scripts/graph_limit_profile.py'
       - 'scripts/test_graph_limit_profile.py'
       - 'worker/graph_signal*.go'
@@ -160,6 +162,40 @@ jobs:
           name: graph-limit-error-classification
           path: graph-limit-error-classification.log
           if-no-files-found: error
+  raw-sdk-checkpoint-audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      GOMAXPROCS: 4
+      GOMEMLIMIT: 2GiB
+      WF_GRAPH_SDK_RAW_AUDIT: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - name: Audit production SDK checkpoint and child provenance
+        shell: bash
+        run: |
+          set -o pipefail
+          go test -race -p=1 ./worker -run '^(TestNativeGraphContinuationSDKFlow|TestNativeGraphContinuationChildPromise|TestNativeGraphContinuationBufferedChildPromise)$' -count=1 -v -timeout=8m 2>&1 | tee raw-sdk-checkpoint-audit.log
+          python3 - <<'PY'
+          import pathlib, re
+          log = pathlib.Path('raw-sdk-checkpoint-audit.log').read_text()
+          assert not re.search(r'^--- SKIP:', log, re.M)
+          for test in ('TestNativeGraphContinuationSDKFlow', 'TestNativeGraphContinuationChildPromise', 'TestNativeGraphContinuationBufferedChildPromise'):
+              for layout in ('R1', 'R3Domain'):
+                  assert f'--- PASS: {test}/{layout} ' in log
+          assert len(re.findall(r'RAW_SDK_CHECKPOINT_AUDIT journals=\d+ entries=\d+ terminals=[1-9]\d* pending=0', log)) == 6
+          retired = re.findall(r'RAW_SDK_CHECKPOINT_AUDIT journals=\d+ entries=\d+ terminals=[1-9]\d* pending=0 retired_projection_only=([01])', log)
+          assert len(retired) == 6 and retired.count('1') == 4 and retired.count('0') == 2
+          PY
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: raw-sdk-checkpoint-audit
+          path: raw-sdk-checkpoint-audit.log
+          if-no-files-found: error
   raw-graph-reference-audit:
     runs-on: ubuntu-latest
     timeout-minutes: 10
@@ -175,7 +211,7 @@ jobs:
         shell: bash
         run: |
           set -o pipefail
-          go test -race -p=1 ./integrity -run '^(TestRawGraphReferencesAndIndependentCorruptionControls|TestNativeRawGraphReferenceAuditQuiescentReaders|TestRawGraphJournalGenerationsOutcomesAndArchive|TestRawGraphCheckpointPointerAndFrameBindings|TestNativeRawGraphCheckpointAudit|TestRawGraphCheckpointMaterializedState|TestRawGraphCheckpointPromiseOwnership)$' -count=1 -v -timeout=5m 2>&1 | tee raw-graph-audit.log
+          go test -race -p=1 ./integrity -run '^(TestRawGraphReferencesAndIndependentCorruptionControls|TestNativeRawGraphReferenceAuditQuiescentReaders|TestRawGraphJournalGenerationsOutcomesAndArchive|TestRawGraphCheckpointPointerAndFrameBindings|TestNativeRawGraphCheckpointAudit|TestRawGraphCheckpointMaterializedState|TestRawGraphCheckpointPromiseOwnership|TestRawGraphCheckpointMetadataBindings|TestRawGraphRetiredSourceProjectionScope)$' -count=1 -v -timeout=5m 2>&1 | tee raw-graph-audit.log
           python3 - <<'PY'
           import pathlib, re
           log = pathlib.Path('raw-graph-audit.log').read_text()
@@ -188,6 +224,14 @@ jobs:
           assert '--- PASS: TestRawGraphCheckpointPointerAndFrameBindings ' in log
           assert '--- PASS: TestRawGraphCheckpointMaterializedState ' in log
           assert '--- PASS: TestRawGraphCheckpointPromiseOwnership ' in log
+          assert '--- PASS: TestRawGraphCheckpointMetadataBindings ' in log
+          assert '--- PASS: TestRawGraphRetiredSourceProjectionScope ' in log
+          for control in ('valid', 'purging-source', 'source-generation', 'projection-missing', 'projection-generation', 'projection-kind', 'nonterminal', 'live-forest'):
+              assert f'--- PASS: TestRawGraphRetiredSourceProjectionScope/{control} ' in log
+          for encoding in ('json', 'protobuf-v1'):
+              assert f'--- PASS: TestRawGraphCheckpointMetadataBindings/{encoding}/valid ' in log
+          for control in ('metadata-generation', 'metadata-anchor', 'metadata-frame', 'metadata-version', 'metadata-child', 'metadata-signal-prefix', 'metadata-buffered-child', 'metadata-half-pointer', 'metadata-wrong-edge', 'metadata-unowned'):
+              assert f'--- PASS: TestRawGraphCheckpointMetadataBindings/{control} ' in log
           for encoding in ('json', 'protobuf-v1'):
               assert f'--- PASS: TestRawGraphCheckpointPromiseOwnership/{encoding}/valid ' in log
           for control in ('promise-owned-missing', 'promise-owned-wrong', 'promise-owned-conflict'):

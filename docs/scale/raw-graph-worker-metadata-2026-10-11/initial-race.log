@@ -1,0 +1,235 @@
+=== RUN   TestNativeGraphContinuationSDKFlow
+=== RUN   TestNativeGraphContinuationSDKFlow/R1
+    graph_continuation_sdk_test.go:482: SDK_PHASE name=execute_begin_next elapsed=324.632783ms remaining=29.675366776s sdk_requests=166
+    graph_continuation_sdk_test.go:484: SDK_PHASE name=execute_end_next elapsed=2.257187458s remaining=27.742812152s sdk_requests=1290
+    graph_continuation_sdk_test.go:648: SDK_PHASE name=boundary_scan_end_next elapsed=2.295800879s remaining=27.704198741s sdk_requests=1311
+    graph_continuation_sdk_test.go:482: SDK_PHASE name=execute_begin_finish elapsed=2.295858095s remaining=27.704141684s sdk_requests=1311
+    graph_continuation_sdk_test.go:484: SDK_PHASE name=execute_end_finish elapsed=4.814145476s remaining=25.185854203s sdk_requests=2762
+    graph_continuation_sdk_test.go:648: SDK_PHASE name=boundary_scan_end_finish elapsed=4.851602991s remaining=25.148396548s sdk_requests=2782
+    graph_continuation_sdk_test.go:971: RAW_SDK_CHECKPOINT_AUDIT journals=1 entries=20 terminals=1 pending=0
+    graph_continuation_sdk_test.go:973: SDK initial/next/finish=map[finish:1 initial:1 next:1] effects=2 records=20 result=43
+    graph_continuation_sdk_test.go:977: SDK_PHASE name=finished elapsed=7.549131929s remaining=22.4508677s sdk_requests=5079
+=== RUN   TestNativeGraphContinuationSDKFlow/R3Domain
+    graph_continuation_sdk_test.go:482: SDK_PHASE name=execute_begin_next elapsed=1.916305969s remaining=28.083693581s sdk_requests=166
+    graph_continuation_sdk_test.go:484: SDK_PHASE name=execute_end_next elapsed=4.999281876s remaining=25.000717814s sdk_requests=1290
+    graph_continuation_sdk_test.go:648: SDK_PHASE name=boundary_scan_end_next elapsed=5.047931111s remaining=24.952068489s sdk_requests=1311
+    graph_continuation_sdk_test.go:482: SDK_PHASE name=execute_begin_finish elapsed=5.047996079s remaining=24.95200372s sdk_requests=1311
+    graph_continuation_sdk_test.go:484: SDK_PHASE name=execute_end_finish elapsed=8.528863659s remaining=21.471136s sdk_requests=2762
+    graph_continuation_sdk_test.go:648: SDK_PHASE name=boundary_scan_end_finish elapsed=8.580947602s remaining=21.419051998s sdk_requests=2782
+    graph_continuation_sdk_test.go:971: RAW_SDK_CHECKPOINT_AUDIT journals=1 entries=20 terminals=1 pending=0
+    graph_continuation_sdk_test.go:973: SDK initial/next/finish=map[finish:1 initial:1 next:1] effects=2 records=20 result=43
+    graph_continuation_sdk_test.go:977: SDK_PHASE name=finished elapsed=12.40020761s remaining=17.59979213s sdk_requests=5079
+--- PASS: TestNativeGraphContinuationSDKFlow (20.35s)
+    --- PASS: TestNativeGraphContinuationSDKFlow/R1 (7.60s)
+    --- PASS: TestNativeGraphContinuationSDKFlow/R3Domain (12.75s)
+=== RUN   TestNativeGraphContinuationChildPromise
+=== RUN   TestNativeGraphContinuationChildPromise/R1
+    graph_continuation_sdk_test.go:482: SDK_PHASE name=execute_begin_next elapsed=263.143306ms remaining=59.736856314s sdk_requests=166
+    graph_continuation_sdk_test.go:484: SDK_PHASE name=execute_end_next elapsed=2.593361917s remaining=57.406637632s sdk_requests=1610
+    graph_continuation_sdk_test.go:648: SDK_PHASE name=boundary_scan_end_next elapsed=2.636610058s remaining=57.363389581s sdk_requests=1638
+    graph_continuation_sdk_test.go:652: SDK_PHASE name=child_execute_end elapsed=3.727085806s remaining=56.272913873s sdk_requests=2182
+    graph_continuation_sdk_test.go:482: SDK_PHASE name=execute_begin_finish elapsed=3.727145948s remaining=56.272853852s sdk_requests=2182
+    graph_continuation_sdk_test.go:484: SDK_PHASE name=execute_end_finish elapsed=7.905749785s remaining=52.094249765s sdk_requests=4133
+    graph_continuation_sdk_test.go:542: SDK_PHASE name=child_retire_end elapsed=7.932520598s remaining=52.067479112s sdk_requests=4148
+    graph_continuation_sdk_test.go:648: SDK_PHASE name=boundary_scan_end_finish elapsed=7.975334308s remaining=52.024665101s sdk_requests=4172
+    graph_continuation_sdk_test.go:969: independent SDK runtime audit {{0 0 0 0 0 0} 2 0 0 0 0 0} journal/e5ec4ff3c0a7dab21ba30d0113ec92a813ffd188ce65ce66b6a070bc33bda066: invalid retired journal
+    panic.go:694: SDK_PHASE name=finished elapsed=10.779417614s remaining=49.220582095s sdk_requests=6497
+=== RUN   TestNativeGraphContinuationChildPromise/R3Domain
+    graph_continuation_sdk_test.go:482: SDK_PHASE name=execute_begin_next elapsed=1.5966329s remaining=58.40336681s sdk_requests=166
+    graph_continuation_sdk_test.go:484: SDK_PHASE name=execute_end_next elapsed=5.34131001s remaining=54.658689659s sdk_requests=1610
+    graph_continuation_sdk_test.go:648: SDK_PHASE name=boundary_scan_end_next elapsed=5.409939464s remaining=54.590060135s sdk_requests=1638
+    graph_continuation_sdk_test.go:652: SDK_PHASE name=child_execute_end elapsed=7.009922025s remaining=52.990077715s sdk_requests=2179
+    graph_continuation_sdk_test.go:482: SDK_PHASE name=execute_begin_finish elapsed=7.009978491s remaining=52.990021279s sdk_requests=2179
+    graph_continuation_sdk_test.go:484: SDK_PHASE name=execute_end_finish elapsed=13.149697035s remaining=46.850302654s sdk_requests=4130
+    graph_continuation_sdk_test.go:542: SDK_PHASE name=child_retire_end elapsed=13.190739126s remaining=46.809260504s sdk_requests=4145
+    graph_continuation_sdk_test.go:648: SDK_PHASE name=boundary_scan_end_finish elapsed=13.267615827s remaining=46.732383742s sdk_requests=4169
+    graph_continuation_sdk_test.go:969: independent SDK runtime audit {{0 0 0 0 0 0} 2 0 0 0 0 0} journal/e5ec4ff3c0a7dab21ba30d0113ec92a813ffd188ce65ce66b6a070bc33bda066: invalid retired journal
+    panic.go:694: SDK_PHASE name=finished elapsed=17.268116812s remaining=42.731882808s sdk_requests=6494
+--- FAIL: TestNativeGraphContinuationChildPromise (28.40s)
+    --- FAIL: TestNativeGraphContinuationChildPromise/R1 (10.82s)
+    --- FAIL: TestNativeGraphContinuationChildPromise/R3Domain (17.58s)
+=== RUN   TestNativeGraphContinuationBufferedChildPromise
+=== RUN   TestNativeGraphContinuationBufferedChildPromise/R1
+    graph_continuation_sdk_test.go:482: SDK_PHASE name=execute_begin_next elapsed=235.241768ms remaining=59.764757802s sdk_requests=166
+    graph_continuation_sdk_test.go:484: SDK_PHASE name=execute_end_next elapsed=2.636880381s remaining=57.363119319s sdk_requests=1610
+    graph_continuation_sdk_test.go:648: SDK_PHASE name=boundary_scan_end_next elapsed=2.686287577s remaining=57.313711902s sdk_requests=1638
+    graph_continuation_sdk_test.go:652: SDK_PHASE name=child_execute_end elapsed=3.765141101s remaining=56.234858428s sdk_requests=2179
+    graph_continuation_sdk_test.go:482: SDK_PHASE name=execute_begin_finish elapsed=3.765228164s remaining=56.234771496s sdk_requests=2179
+    graph_continuation_sdk_test.go:484: SDK_PHASE name=execute_end_finish elapsed=7.222871889s remaining=52.77712768s sdk_requests=3944
+    graph_continuation_sdk_test.go:542: SDK_PHASE name=child_retire_end elapsed=7.252012603s remaining=52.747987017s sdk_requests=3959
+    graph_continuation_sdk_test.go:648: SDK_PHASE name=boundary_scan_end_finish elapsed=7.291519782s remaining=52.708479547s sdk_requests=3983
+    graph_continuation_sdk_test.go:969: independent SDK runtime audit {{0 0 0 0 0 0} 2 0 0 0 0 0} journal/e5ec4ff3c0a7dab21ba30d0113ec92a813ffd188ce65ce66b6a070bc33bda066: invalid retired journal
+    panic.go:694: SDK_PHASE name=finished elapsed=10.821000938s remaining=49.178998571s sdk_requests=6669
+=== RUN   TestNativeGraphContinuationBufferedChildPromise/R3Domain
+    graph_continuation_sdk_test.go:482: SDK_PHASE name=execute_begin_next elapsed=1.999862176s remaining=58.000137534s sdk_requests=166
+    graph_continuation_sdk_test.go:484: SDK_PHASE name=execute_end_next elapsed=5.973912663s remaining=54.026087036s sdk_requests=1610
+    graph_continuation_sdk_test.go:648: SDK_PHASE name=boundary_scan_end_next elapsed=6.035754638s remaining=53.964244922s sdk_requests=1638
+    graph_continuation_sdk_test.go:652: SDK_PHASE name=child_execute_end elapsed=7.644562957s remaining=52.355436612s sdk_requests=2182
+    graph_continuation_sdk_test.go:482: SDK_PHASE name=execute_begin_finish elapsed=7.644633354s remaining=52.355366375s sdk_requests=2182
+    graph_continuation_sdk_test.go:484: SDK_PHASE name=execute_end_finish elapsed=12.396521917s remaining=47.603477652s sdk_requests=3947
+    graph_continuation_sdk_test.go:542: SDK_PHASE name=child_retire_end elapsed=12.449058106s remaining=47.550941563s sdk_requests=3962
+    graph_continuation_sdk_test.go:648: SDK_PHASE name=boundary_scan_end_finish elapsed=12.510579774s remaining=47.489419775s sdk_requests=3986
+    graph_continuation_sdk_test.go:969: independent SDK runtime audit {{0 0 0 0 0 0} 2 0 0 0 0 0} journal/e5ec4ff3c0a7dab21ba30d0113ec92a813ffd188ce65ce66b6a070bc33bda066: invalid retired journal
+    panic.go:694: SDK_PHASE name=finished elapsed=17.39230746s remaining=42.60769211s sdk_requests=6674
+--- FAIL: TestNativeGraphContinuationBufferedChildPromise (28.57s)
+    --- FAIL: TestNativeGraphContinuationBufferedChildPromise/R1 (10.86s)
+    --- FAIL: TestNativeGraphContinuationBufferedChildPromise/R3Domain (17.70s)
+FAIL
+FAIL	js-wf/worker	77.359s
+=== RUN   TestRawGraphJournalGenerationsOutcomesAndArchive
+=== RUN   TestRawGraphJournalGenerationsOutcomesAndArchive/json/archivefalse
+=== RUN   TestRawGraphJournalGenerationsOutcomesAndArchive/json/archivetrue
+=== RUN   TestRawGraphJournalGenerationsOutcomesAndArchive/protobuf-v1/archivefalse
+=== RUN   TestRawGraphJournalGenerationsOutcomesAndArchive/protobuf-v1/archivetrue
+=== RUN   TestRawGraphJournalGenerationsOutcomesAndArchive/envelope-generation
+=== RUN   TestRawGraphJournalGenerationsOutcomesAndArchive/entry-edge-missing
+=== RUN   TestRawGraphJournalGenerationsOutcomesAndArchive/index-gap
+=== RUN   TestRawGraphJournalGenerationsOutcomesAndArchive/epoch-decrease
+=== RUN   TestRawGraphJournalGenerationsOutcomesAndArchive/epoch-two-workers
+=== RUN   TestRawGraphJournalGenerationsOutcomesAndArchive/completion-without-request
+=== RUN   TestRawGraphJournalGenerationsOutcomesAndArchive/overlapping-requests
+=== RUN   TestRawGraphJournalGenerationsOutcomesAndArchive/entry-after-terminal
+=== RUN   TestRawGraphJournalGenerationsOutcomesAndArchive/terminal-generation
+=== RUN   TestRawGraphJournalGenerationsOutcomesAndArchive/result-unowned
+=== RUN   TestRawGraphJournalGenerationsOutcomesAndArchive/source-sequence
+=== RUN   TestRawGraphJournalGenerationsOutcomesAndArchive/source-missing
+=== RUN   TestRawGraphJournalGenerationsOutcomesAndArchive/projection-differs
+=== RUN   TestRawGraphJournalGenerationsOutcomesAndArchive/projection-missing
+=== RUN   TestRawGraphJournalGenerationsOutcomesAndArchive/input-source-token
+=== RUN   TestRawGraphJournalGenerationsOutcomesAndArchive/archive-count
+--- PASS: TestRawGraphJournalGenerationsOutcomesAndArchive (0.05s)
+    --- PASS: TestRawGraphJournalGenerationsOutcomesAndArchive/json/archivefalse (0.00s)
+    --- PASS: TestRawGraphJournalGenerationsOutcomesAndArchive/json/archivetrue (0.01s)
+    --- PASS: TestRawGraphJournalGenerationsOutcomesAndArchive/protobuf-v1/archivefalse (0.00s)
+    --- PASS: TestRawGraphJournalGenerationsOutcomesAndArchive/protobuf-v1/archivetrue (0.00s)
+    --- PASS: TestRawGraphJournalGenerationsOutcomesAndArchive/envelope-generation (0.00s)
+    --- PASS: TestRawGraphJournalGenerationsOutcomesAndArchive/entry-edge-missing (0.00s)
+    --- PASS: TestRawGraphJournalGenerationsOutcomesAndArchive/index-gap (0.00s)
+    --- PASS: TestRawGraphJournalGenerationsOutcomesAndArchive/epoch-decrease (0.00s)
+    --- PASS: TestRawGraphJournalGenerationsOutcomesAndArchive/epoch-two-workers (0.00s)
+    --- PASS: TestRawGraphJournalGenerationsOutcomesAndArchive/completion-without-request (0.00s)
+    --- PASS: TestRawGraphJournalGenerationsOutcomesAndArchive/overlapping-requests (0.00s)
+    --- PASS: TestRawGraphJournalGenerationsOutcomesAndArchive/entry-after-terminal (0.00s)
+    --- PASS: TestRawGraphJournalGenerationsOutcomesAndArchive/terminal-generation (0.00s)
+    --- PASS: TestRawGraphJournalGenerationsOutcomesAndArchive/result-unowned (0.00s)
+    --- PASS: TestRawGraphJournalGenerationsOutcomesAndArchive/source-sequence (0.00s)
+    --- PASS: TestRawGraphJournalGenerationsOutcomesAndArchive/source-missing (0.00s)
+    --- PASS: TestRawGraphJournalGenerationsOutcomesAndArchive/projection-differs (0.00s)
+    --- PASS: TestRawGraphJournalGenerationsOutcomesAndArchive/projection-missing (0.00s)
+    --- PASS: TestRawGraphJournalGenerationsOutcomesAndArchive/input-source-token (0.00s)
+    --- PASS: TestRawGraphJournalGenerationsOutcomesAndArchive/archive-count (0.00s)
+=== RUN   TestRawGraphCheckpointPointerAndFrameBindings
+=== RUN   TestRawGraphCheckpointPointerAndFrameBindings/pointer-generation
+=== RUN   TestRawGraphCheckpointPointerAndFrameBindings/pointer-sequence
+=== RUN   TestRawGraphCheckpointPointerAndFrameBindings/pointer-request
+=== RUN   TestRawGraphCheckpointPointerAndFrameBindings/pointer-position
+=== RUN   TestRawGraphCheckpointPointerAndFrameBindings/pointer-object
+=== RUN   TestRawGraphCheckpointPointerAndFrameBindings/completion-result
+=== RUN   TestRawGraphCheckpointPointerAndFrameBindings/request-kind
+=== RUN   TestRawGraphCheckpointPointerAndFrameBindings/frame-unowned
+=== RUN   TestRawGraphCheckpointPointerAndFrameBindings/frame-generation
+=== RUN   TestRawGraphCheckpointPointerAndFrameBindings/frame-anchor
+=== RUN   TestRawGraphCheckpointPointerAndFrameBindings/frame-stage
+=== RUN   TestRawGraphCheckpointPointerAndFrameBindings/frame-position
+=== RUN   TestRawGraphCheckpointPointerAndFrameBindings/frame-version
+=== RUN   TestRawGraphCheckpointPointerAndFrameBindings/frame-locals
+--- PASS: TestRawGraphCheckpointPointerAndFrameBindings (0.07s)
+    --- PASS: TestRawGraphCheckpointPointerAndFrameBindings/pointer-generation (0.00s)
+    --- PASS: TestRawGraphCheckpointPointerAndFrameBindings/pointer-sequence (0.00s)
+    --- PASS: TestRawGraphCheckpointPointerAndFrameBindings/pointer-request (0.00s)
+    --- PASS: TestRawGraphCheckpointPointerAndFrameBindings/pointer-position (0.00s)
+    --- PASS: TestRawGraphCheckpointPointerAndFrameBindings/pointer-object (0.01s)
+    --- PASS: TestRawGraphCheckpointPointerAndFrameBindings/completion-result (0.01s)
+    --- PASS: TestRawGraphCheckpointPointerAndFrameBindings/request-kind (0.00s)
+    --- PASS: TestRawGraphCheckpointPointerAndFrameBindings/frame-unowned (0.01s)
+    --- PASS: TestRawGraphCheckpointPointerAndFrameBindings/frame-generation (0.01s)
+    --- PASS: TestRawGraphCheckpointPointerAndFrameBindings/frame-anchor (0.00s)
+    --- PASS: TestRawGraphCheckpointPointerAndFrameBindings/frame-stage (0.01s)
+    --- PASS: TestRawGraphCheckpointPointerAndFrameBindings/frame-position (0.00s)
+    --- PASS: TestRawGraphCheckpointPointerAndFrameBindings/frame-version (0.00s)
+    --- PASS: TestRawGraphCheckpointPointerAndFrameBindings/frame-locals (0.00s)
+=== RUN   TestRawGraphCheckpointMaterializedState
+=== RUN   TestRawGraphCheckpointMaterializedState/json/valid
+=== RUN   TestRawGraphCheckpointMaterializedState/protobuf-v1/valid
+=== RUN   TestRawGraphCheckpointMaterializedState/state-name
+=== RUN   TestRawGraphCheckpointMaterializedState/promise-name
+=== RUN   TestRawGraphCheckpointMaterializedState/promise-nonobject
+=== RUN   TestRawGraphCheckpointMaterializedState/promise-unknown-field
+=== RUN   TestRawGraphCheckpointMaterializedState/promise-hash-no-ref
+=== RUN   TestRawGraphCheckpointMaterializedState/promise-ref-bad-hash
+=== RUN   TestRawGraphCheckpointMaterializedState/promise-inline-and-ref
+=== RUN   TestRawGraphCheckpointMaterializedState/consumed-zero
+=== RUN   TestRawGraphCheckpointMaterializedState/consumed-duplicate
+=== RUN   TestRawGraphCheckpointMaterializedState/consumed-unsorted
+=== RUN   TestRawGraphCheckpointMaterializedState/pending-zero
+=== RUN   TestRawGraphCheckpointMaterializedState/pending-beyond-cursor
+=== RUN   TestRawGraphCheckpointMaterializedState/pending-consumed
+=== RUN   TestRawGraphCheckpointMaterializedState/pending-name
+=== RUN   TestRawGraphCheckpointMaterializedState/pending-duplicate
+=== RUN   TestRawGraphCheckpointMaterializedState/timer-odd
+=== RUN   TestRawGraphCheckpointMaterializedState/timer-beyond-position
+=== RUN   TestRawGraphCheckpointMaterializedState/timer-duplicate
+=== RUN   TestRawGraphCheckpointMaterializedState/panic-prefix-mismatch
+--- PASS: TestRawGraphCheckpointMaterializedState (0.09s)
+    --- PASS: TestRawGraphCheckpointMaterializedState/json/valid (0.00s)
+    --- PASS: TestRawGraphCheckpointMaterializedState/protobuf-v1/valid (0.00s)
+    --- PASS: TestRawGraphCheckpointMaterializedState/state-name (0.00s)
+    --- PASS: TestRawGraphCheckpointMaterializedState/promise-name (0.00s)
+    --- PASS: TestRawGraphCheckpointMaterializedState/promise-nonobject (0.00s)
+    --- PASS: TestRawGraphCheckpointMaterializedState/promise-unknown-field (0.01s)
+    --- PASS: TestRawGraphCheckpointMaterializedState/promise-hash-no-ref (0.00s)
+    --- PASS: TestRawGraphCheckpointMaterializedState/promise-ref-bad-hash (0.00s)
+    --- PASS: TestRawGraphCheckpointMaterializedState/promise-inline-and-ref (0.00s)
+    --- PASS: TestRawGraphCheckpointMaterializedState/consumed-zero (0.01s)
+    --- PASS: TestRawGraphCheckpointMaterializedState/consumed-duplicate (0.01s)
+    --- PASS: TestRawGraphCheckpointMaterializedState/consumed-unsorted (0.00s)
+    --- PASS: TestRawGraphCheckpointMaterializedState/pending-zero (0.00s)
+    --- PASS: TestRawGraphCheckpointMaterializedState/pending-beyond-cursor (0.00s)
+    --- PASS: TestRawGraphCheckpointMaterializedState/pending-consumed (0.00s)
+    --- PASS: TestRawGraphCheckpointMaterializedState/pending-name (0.00s)
+    --- PASS: TestRawGraphCheckpointMaterializedState/pending-duplicate (0.00s)
+    --- PASS: TestRawGraphCheckpointMaterializedState/timer-odd (0.00s)
+    --- PASS: TestRawGraphCheckpointMaterializedState/timer-beyond-position (0.00s)
+    --- PASS: TestRawGraphCheckpointMaterializedState/timer-duplicate (0.00s)
+    --- PASS: TestRawGraphCheckpointMaterializedState/panic-prefix-mismatch (0.01s)
+=== RUN   TestRawGraphCheckpointPromiseOwnership
+=== RUN   TestRawGraphCheckpointPromiseOwnership/json/valid
+=== RUN   TestRawGraphCheckpointPromiseOwnership/protobuf-v1/valid
+=== RUN   TestRawGraphCheckpointPromiseOwnership/promise-owned-missing
+=== RUN   TestRawGraphCheckpointPromiseOwnership/promise-owned-wrong
+=== RUN   TestRawGraphCheckpointPromiseOwnership/promise-owned-conflict
+--- PASS: TestRawGraphCheckpointPromiseOwnership (0.02s)
+    --- PASS: TestRawGraphCheckpointPromiseOwnership/json/valid (0.01s)
+    --- PASS: TestRawGraphCheckpointPromiseOwnership/protobuf-v1/valid (0.00s)
+    --- PASS: TestRawGraphCheckpointPromiseOwnership/promise-owned-missing (0.01s)
+    --- PASS: TestRawGraphCheckpointPromiseOwnership/promise-owned-wrong (0.00s)
+    --- PASS: TestRawGraphCheckpointPromiseOwnership/promise-owned-conflict (0.00s)
+=== RUN   TestRawGraphCheckpointMetadataBindings
+=== RUN   TestRawGraphCheckpointMetadataBindings/json/valid
+=== RUN   TestRawGraphCheckpointMetadataBindings/protobuf-v1/valid
+=== RUN   TestRawGraphCheckpointMetadataBindings/metadata-generation
+=== RUN   TestRawGraphCheckpointMetadataBindings/metadata-anchor
+=== RUN   TestRawGraphCheckpointMetadataBindings/metadata-frame
+=== RUN   TestRawGraphCheckpointMetadataBindings/metadata-version
+=== RUN   TestRawGraphCheckpointMetadataBindings/metadata-child
+=== RUN   TestRawGraphCheckpointMetadataBindings/metadata-signal-prefix
+=== RUN   TestRawGraphCheckpointMetadataBindings/metadata-buffered-child
+=== RUN   TestRawGraphCheckpointMetadataBindings/metadata-half-pointer
+=== RUN   TestRawGraphCheckpointMetadataBindings/metadata-wrong-edge
+=== RUN   TestRawGraphCheckpointMetadataBindings/metadata-unowned
+--- PASS: TestRawGraphCheckpointMetadataBindings (0.05s)
+    --- PASS: TestRawGraphCheckpointMetadataBindings/json/valid (0.00s)
+    --- PASS: TestRawGraphCheckpointMetadataBindings/protobuf-v1/valid (0.00s)
+    --- PASS: TestRawGraphCheckpointMetadataBindings/metadata-generation (0.00s)
+    --- PASS: TestRawGraphCheckpointMetadataBindings/metadata-anchor (0.01s)
+    --- PASS: TestRawGraphCheckpointMetadataBindings/metadata-frame (0.01s)
+    --- PASS: TestRawGraphCheckpointMetadataBindings/metadata-version (0.00s)
+    --- PASS: TestRawGraphCheckpointMetadataBindings/metadata-child (0.01s)
+    --- PASS: TestRawGraphCheckpointMetadataBindings/metadata-signal-prefix (0.00s)
+    --- PASS: TestRawGraphCheckpointMetadataBindings/metadata-buffered-child (0.01s)
+    --- PASS: TestRawGraphCheckpointMetadataBindings/metadata-half-pointer (0.00s)
+    --- PASS: TestRawGraphCheckpointMetadataBindings/metadata-wrong-edge (0.00s)
+    --- PASS: TestRawGraphCheckpointMetadataBindings/metadata-unowned (0.00s)
+PASS
+ok  	js-wf/integrity	1.331s
+FAIL

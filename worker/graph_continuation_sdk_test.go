@@ -14,6 +14,7 @@ import (
 	"github.com/nats-io/nats.go/jetstream"
 	"js-wf/client"
 	"js-wf/identity"
+	"js-wf/integrity"
 	"js-wf/internal/checkpoint"
 	"js-wf/internal/graphpublication"
 	"js-wf/internal/retainedgraph"
@@ -23,6 +24,7 @@ import (
 	"js-wf/reconcile"
 	"js-wf/testcluster"
 	"js-wf/wf"
+	"os"
 )
 
 // Internal migration control: public continuation admission remains closed.
@@ -957,6 +959,16 @@ func testNativeGraphContinuationSDKFlow(t *testing.T, domain string, partition, 
 	}
 	if childPromiseFlow && childCalls != 1 {
 		t.Fatal("child was replayed", childCalls)
+	}
+	if os.Getenv("WF_GRAPH_SDK_RAW_AUDIT") == "1" {
+		if err := runner.Close(); err != nil {
+			t.Fatal(err)
+		}
+		report, err := integrity.CheckNativeGraphJournals(ctx, js, integrity.GraphAuditNamespace{AuthorityStream: cfg.AuthorityStream, AuthorityPrefix: cfg.AuthorityPrefix, ObjectBucket: cfg.ObjectBucket, PayloadLimit: checkpoint.MaxBytes})
+		if err != nil || report.Pending != 0 || report.Terminal == 0 {
+			t.Fatal("independent SDK runtime audit", report, err)
+		}
+		t.Logf("RAW_SDK_CHECKPOINT_AUDIT journals=%d entries=%d terminals=%d pending=%d retired_projection_only=%d", report.Journals, report.Entries, report.Terminal, report.Pending, report.RetiredProjectionOnly)
 	}
 	t.Logf("SDK initial/next/finish=%v effects=%d records=%d result=%s", calls, effects, len(records), result)
 	if childFailure {

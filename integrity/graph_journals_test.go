@@ -30,6 +30,7 @@ func rawJournalCheckpointFixture(t *testing.T, encoding journal.Encoding, archiv
 	}
 	var frameBytes []byte
 	var promiseBytes [][]byte
+	var metadataBytes []byte
 	var pointer auditedCheckpointPointer
 	if archive {
 		// Independently encoded frame and pointer; no production writer/reader.
@@ -116,6 +117,35 @@ func rawJournalCheckpointFixture(t *testing.T, encoding journal.Encoding, archiv
 		hash := digest(frameBytes)
 		entries[1].Payload = json.RawMessage(`{"kind":"checkpoint","name":"next","input_hash":"` + digest([]byte(`{"x":1}`)) + `"}`)
 		entries[2].Payload = json.RawMessage(`{"result_ref":"step-result-` + hash + `","result_hash":"` + hash + `"}`)
+		if len(control) >= 9 && control[:9] == "metadata-" {
+			meta := map[string]any{"version": 1, "identity": map[string]any{"type": "kind", "id": "id", "inv_seq": 10}, "anchor": map[string]uint64{"index": 2, "epoch": 1}, "frame_sha256": hash, "children": map[string]any{}, "signals": map[string]any{}, "signal_next": 0, "signal_last": 0}
+			switch control {
+			case "metadata-generation":
+				meta["identity"] = map[string]any{"type": "kind", "id": "id", "inv_seq": 11}
+			case "metadata-anchor":
+				meta["anchor"] = map[string]uint64{"index": 3, "epoch": 1}
+			case "metadata-frame":
+				meta["frame_sha256"] = digest([]byte("other"))
+			case "metadata-version":
+				meta["version"] = 9
+			case "metadata-child":
+				meta["children"] = map[string]any{"child": map[string]any{"type": "child", "id": "id", "inv_seq": 0}}
+			case "metadata-signal-prefix":
+				meta["signal_next"], meta["signal_last"] = 1, 1
+			case "metadata-buffered-child":
+				meta["signals"] = map[string]any{"1": map[string]any{"sig_seq": 1, "name": "child"}}
+			}
+			metadataBytes, _ = json.Marshal(meta)
+			metadataHash := digest(metadataBytes)
+			completion := map[string]any{"result_ref": "step-result-" + hash, "result_hash": hash, "checkpoint_metadata_ref": "step-result-" + metadataHash, "checkpoint_metadata_hash": metadataHash}
+			if control == "metadata-half-pointer" {
+				delete(completion, "checkpoint_metadata_hash")
+			}
+			if control == "metadata-wrong-edge" {
+				completion["checkpoint_metadata_ref"], completion["checkpoint_metadata_hash"] = "step-result-"+digest([]byte("wrong")), digest([]byte("wrong"))
+			}
+			entries[2].Payload, _ = json.Marshal(completion)
+		}
 		pointer.RequestIndex = 1
 		pointer.Runtime.InvSeq, pointer.Runtime.Stage, pointer.Runtime.Sequence, pointer.Runtime.Index, pointer.Runtime.Epoch, pointer.Runtime.StepPosition, pointer.Runtime.Object, pointer.Runtime.SHA256 = 10, "next", 103, 2, 1, 2, "step-result-"+hash, hash
 		switch control {
@@ -176,6 +206,9 @@ func rawJournalCheckpointFixture(t *testing.T, encoding journal.Encoding, archiv
 		blobs := []retainedgraph.Link{edge}
 		if archive && index == 2 && control != "frame-unowned" {
 			blobs = append(blobs, put(frameBytes, graphpublication.Location{Kind: "payload", First: first, Stream: stream}))
+		}
+		if archive && index == 2 && len(metadataBytes) > 0 && control != "metadata-unowned" {
+			blobs = append(blobs, put(metadataBytes, graphpublication.Location{Kind: "payload", First: first, Stream: stream}))
 		}
 		if archive && index == 2 {
 			for _, data := range promiseBytes {
@@ -367,6 +400,28 @@ func TestRawGraphCheckpointPromiseOwnership(t *testing.T) {
 			}
 			if _, err := CheckGraphJournals(context.Background(), s); err == nil {
 				t.Fatal("unowned or conflicting promise accepted")
+			}
+		})
+	}
+}
+
+func TestRawGraphCheckpointMetadataBindings(t *testing.T) {
+	for _, encoding := range []journal.Encoding{journal.JSON, journal.ProtobufV1} {
+		t.Run(string(encoding)+"/valid", func(t *testing.T) {
+			s, _ := rawJournalCheckpointFixture(t, encoding, true, nil, false, false, "metadata-valid")
+			if _, err := CheckGraphJournals(context.Background(), s); err != nil {
+				t.Fatal(err)
+			}
+		})
+	}
+	for _, control := range []string{"metadata-generation", "metadata-anchor", "metadata-frame", "metadata-version", "metadata-child", "metadata-signal-prefix", "metadata-buffered-child", "metadata-half-pointer", "metadata-wrong-edge", "metadata-unowned"} {
+		t.Run(control, func(t *testing.T) {
+			s, _ := rawJournalCheckpointFixture(t, journal.JSON, true, nil, false, false, control)
+			if _, err := CheckGraphReferences(context.Background(), s.Graph); err != nil {
+				t.Fatal("fixture reference corruption", err)
+			}
+			if _, err := CheckGraphJournals(context.Background(), s); err == nil {
+				t.Fatal("corrupt worker metadata accepted")
 			}
 		})
 	}

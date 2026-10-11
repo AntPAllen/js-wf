@@ -62,13 +62,15 @@ func auditCheckpointFrame(ctx context.Context, graph GraphReferenceSnapshot, sta
 		return fmt.Errorf("checkpoint request/completion anchor differs")
 	}
 	var done struct {
-		Result     json.RawMessage `json:"result"`
-		ResultRef  string          `json:"result_ref"`
-		ResultHash string          `json:"result_hash"`
-		Error      string          `json:"error"`
-		ErrorKind  string          `json:"error_kind"`
-		SignalSeq  uint64          `json:"signal_seq"`
-		Selected   string          `json:"selected"`
+		Result       json.RawMessage `json:"result"`
+		ResultRef    string          `json:"result_ref"`
+		ResultHash   string          `json:"result_hash"`
+		Error        string          `json:"error"`
+		ErrorKind    string          `json:"error_kind"`
+		SignalSeq    uint64          `json:"signal_seq"`
+		Selected     string          `json:"selected"`
+		MetadataRef  string          `json:"checkpoint_metadata_ref"`
+		MetadataHash string          `json:"checkpoint_metadata_hash"`
 	}
 	if json.Unmarshal(anchor.Payload, &done) != nil || len(done.Result) != 0 || done.Error != "" || done.ErrorKind != "" || done.SignalSeq != 0 || done.Selected != "" || done.ResultRef != r.Object || done.ResultHash != r.SHA256 {
 		return fmt.Errorf("checkpoint completion result differs")
@@ -145,7 +147,7 @@ func auditCheckpointFrame(ctx context.Context, graph GraphReferenceSnapshot, sta
 			return fmt.Errorf("checkpoint promise %s lacks owned result edge", name)
 		}
 	}
-	return nil
+	return auditCheckpointMetadata(ctx, graph, state, frame, edges, done.MetadataRef, done.MetadataHash)
 }
 
 // This validates materialized values and identity sets without calling the

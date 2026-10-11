@@ -1,5 +1,22 @@
 # Implementation status against the supplied plan
 
+## Raw worker checkpoint metadata validated on actual SDK flows — 2026-10-11
+
+The independent audit now binds worker metadata to its owned bytes,SDK frame,
+raw child declarations,signal prefix and buffered child provenance/payloads.
+Corrected focused race exits0:worker83.780s and integrity1.389s,six native
+R1/R3Domain continuation/child/buffered-child cases and ten metadata corruptions.
+A separate race passes seven invalid retired-source controls plus one positive.
+[Evidence,first failures and scope](scale/raw-graph-worker-metadata-2026-10-11/README.md).
+
+The native child cases exposed a checker assumption:terminal GraphStore.Retire
+may preserve invocation/result records without entering purge. The audit now
+reports those projections separately as RetiredProjectionOnly;it does not claim
+exact journal/terminal equality after their live forest is removed. Four SDK
+child cases each check one full parent journal and one retired child projection.
+Full signal queue/index,materialized SDK-history,reader application and original
+scale/fault/physical acceptance remain open. Both frozen campaigns continue.
+
 ## Classified original100000 normal launched — 2026-10-11
 
 Source9189259 is frozen in a clean sparse checkout. Independent preparation
