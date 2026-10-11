@@ -1,0 +1,9 @@
+{
+  "accepted": false,
+  "actual_command_exit": 1,
+  "seconds": 120.978,
+  "normal_session": 12720,
+  "scope": "Initial native fixture development attempt before cluster readiness guard; both R1 layouts passed all stages, both R3 layouts failed provision.Ensure with context deadline exceeded before any audit. No raw log or binary was retained for this attempt.",
+  "correction": "Wait for elected JetStream leader and complete peer membership before provisioning, matching existing native reference test setup.",
+  "terminal_output": "--- FAIL: TestNativeRawGraphCheckpointAudit (120.97s)\n    --- PASS: TestNativeRawGraphCheckpointAudit/R1/indexedfalse (0.43s)\n    --- PASS: TestNativeRawGraphCheckpointAudit/R1/indexedtrue (0.47s)\n    --- FAIL: TestNativeRawGraphCheckpointAudit/R3/indexedfalse (60.04s)\n    --- FAIL: TestNativeRawGraphCheckpointAudit/R3/indexedtrue (60.03s)\nFAIL\nFAIL js-wf/integrity 120.978s\n"
+}

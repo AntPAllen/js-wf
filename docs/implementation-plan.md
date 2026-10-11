@@ -1,5 +1,21 @@
 # JetStream Durable Workflow Runtime — Implementation Plan
 
+## Independent checkpoint pointer/frame binding audit verified — 2026-10-11
+
+Raw journal auditing now binds published checkpoint descriptors to their request,
+completion, cumulative SDK position and owned hashed frame identity/anchor/stage/
+locals. Focused race exits0 in20.900s: fourteen semantic corruptions, each with
+valid physical references, plus four native R1/R3 × ordinary/indexed layouts at
+unpublished/published/archived/terminal states. CI requires all controls and
+sixteen stage receipts. [Evidence and limits](scale/raw-graph-checkpoint-audit-2026-10-11/README.md).
+
+The first R3 fixture provisioning attempt timed out before auditing; explicit
+leader/peer readiness corrected setup and the full focused race passed. Full
+materialized-frame state semantics, latest-pointer discovery, signal/index and
+reader application histories, original native scale and full phase acceptance
+remain open. The existing frozen00eeb13 complete159 normal and original100000
+entry campaign continue under their existing invocations; neither is restarted.
+
 ## Current-source complete159 normal campaign running — 2026-10-11
 
 Source00eeb13 is now frozen in a clean 102 MiB sparse checkout retaining all

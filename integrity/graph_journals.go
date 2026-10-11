@@ -51,10 +51,15 @@ type auditedGraphCursor struct {
 }
 
 type auditedGraphJournal struct {
-	cursor    auditedGraphCursor
-	key       string
-	journal   journalAudit
-	inputSeen bool
+	cursor            auditedGraphCursor
+	key               string
+	journal           journalAudit
+	inputSeen         bool
+	checkpoint        *auditedCheckpointPointer
+	checkpointRequest journal.Record
+	checkpointSeen    bool
+	sdkPosition       uint64
+	lastStepRequest   uint64
 }
 
 func graphDestinationForKey(key string) string { return "journal/" + digest([]byte("wf.jrn."+key)) }
@@ -64,8 +69,10 @@ func graphDestinationForKey(key string) string { return "journal/" + digest([]by
 // and completion ordering, terminal generation/result edges and exact terminal
 // projection bytes. It shares only entry serialization and the independent
 // retained-journal accumulator; no production graph/journal reader is called.
-// Protected reader snapshots receive reference auditing, not application replay.
-// Checkpoint frame contents, signal binding/index semantics, orphan projections,
+// Checkpoint pointer, owned frame identity/anchor/stage/locals and SDK position
+// are independently bound to the declared request and completion. Protected
+// reader snapshots receive reference auditing, not application replay.
+// Materialized frame state semantics, signal binding/index semantics, orphan projections,
 // lease history, client linearizability and I4/I5 remain separate audits.
 func CheckGraphJournals(ctx context.Context, snapshot GraphJournalSnapshot) (report GraphJournalReport, err error) {
 	if snapshot.Invocations == nil || snapshot.ReadProjection == nil {
@@ -157,7 +164,15 @@ func CheckGraphJournals(ctx context.Context, snapshot GraphJournalSnapshot) (rep
 			}
 			consumed[destination] = true
 		}
-		states[destination] = &auditedGraphJournal{cursor: c, key: key}
+		state := &auditedGraphJournal{cursor: c, key: key}
+		if len(c.Checkpoint) != 0 {
+			pointer, err := auditCheckpointPointer(c)
+			if err != nil {
+				return report, fmt.Errorf("%s: %w", destination, err)
+			}
+			state.checkpoint = pointer
+		}
+		states[destination] = state
 	}
 	for destination := range sources {
 		if !consumed[destination] {
@@ -234,6 +249,24 @@ func CheckGraphJournals(ctx context.Context, snapshot GraphJournalSnapshot) (rep
 		if err := state.journal.advance(record.Destination, journal.Record{Entry: entry, Sequence: envelope.Sequence}); err != nil {
 			return err
 		}
+		if entry.Kind == journal.StepRequested || entry.Kind == journal.StepCompleted {
+			state.sdkPosition++
+		}
+		if entry.Kind == journal.StepRequested {
+			state.lastStepRequest = index
+		}
+		if state.checkpoint != nil {
+			pointer := state.checkpoint
+			if index == pointer.RequestIndex {
+				state.checkpointRequest = journal.Record{Entry: entry, Sequence: envelope.Sequence}
+			}
+			if index == pointer.Runtime.Index {
+				if err := auditCheckpointFrame(call, graph, state, journal.Record{Entry: entry, Sequence: envelope.Sequence}, record.Record.Blobs); err != nil {
+					return err
+				}
+				state.checkpointSeen = true
+			}
+		}
 		if entry.Kind == journal.Completed || entry.Kind == journal.Failed {
 			var outcome struct {
 				InvSeq     uint64 `json:"inv_seq"`
@@ -282,7 +315,7 @@ func CheckGraphJournals(ctx context.Context, snapshot GraphJournalSnapshot) (rep
 	sort.Strings(destinations)
 	for _, destination := range destinations {
 		state := states[destination]
-		if uint64(state.journal.count) != state.cursor.Count || state.cursor.Start != nil && !state.inputSeen {
+		if uint64(state.journal.count) != state.cursor.Count || state.cursor.Start != nil && !state.inputSeen || state.checkpoint != nil && !state.checkpointSeen {
 			return report, fmt.Errorf("%s: canonical journal/input census differs", destination)
 		}
 		if state.cursor.Count == 0 && (state.cursor.Epoch != 0 || state.cursor.Kind != "") {

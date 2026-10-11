@@ -17,12 +17,58 @@ import (
 )
 
 func rawJournalFixture(t *testing.T, encoding journal.Encoding, archive bool, alter func([]journal.Entry), wrongEnvelope bool, missingEntry bool) (GraphJournalSnapshot, map[string][]byte) {
+	return rawJournalCheckpointFixture(t, encoding, archive, alter, wrongEnvelope, missingEntry, "")
+}
+
+func rawJournalCheckpointFixture(t *testing.T, encoding journal.Encoding, archive bool, alter func([]journal.Entry), wrongEnvelope bool, missingEntry bool, control string) (GraphJournalSnapshot, map[string][]byte) {
 	t.Helper()
 	entries := []journal.Entry{
 		{Index: 0, Epoch: 1, WorkerID: "worker", Kind: journal.Started},
 		{Index: 1, Epoch: 1, WorkerID: "worker", Kind: journal.StepRequested, Payload: json.RawMessage(`{"kind":"run","name":"x","input_hash":"` + digest([]byte("1")) + `"}`)},
 		{Index: 2, Epoch: 1, WorkerID: "worker", Kind: journal.StepCompleted, Payload: json.RawMessage(`{"result":42}`)},
 		{Index: 3, Epoch: 1, WorkerID: "worker", Kind: journal.Completed, Payload: json.RawMessage(`{"inv_seq":10,"result":"NDI="}`)},
+	}
+	var frameBytes []byte
+	var pointer auditedCheckpointPointer
+	if archive {
+		// Independently encoded frame and pointer; no production writer/reader.
+		frame := map[string]any{"version": 1, "identity": map[string]any{"type": "kind", "id": "id", "inv_seq": 10}, "stage": "next", "data": map[string]int{"x": 1}, "anchor": map[string]uint64{"index": 2, "epoch": 1}, "step_position": 2}
+		switch control {
+		case "frame-generation":
+			frame["identity"] = map[string]any{"type": "kind", "id": "id", "inv_seq": 11}
+		case "frame-anchor":
+			frame["anchor"] = map[string]uint64{"index": 3, "epoch": 1}
+		case "frame-stage":
+			frame["stage"] = "wrong"
+		case "frame-position":
+			frame["step_position"] = 4
+		case "frame-version":
+			frame["version"] = 9
+		case "frame-locals":
+			frame["data"] = map[string]int{"x": 2}
+		}
+		frameBytes, _ = json.Marshal(frame)
+		hash := digest(frameBytes)
+		entries[1].Payload = json.RawMessage(`{"kind":"checkpoint","name":"next","input_hash":"` + digest([]byte(`{"x":1}`)) + `"}`)
+		entries[2].Payload = json.RawMessage(`{"result_ref":"step-result-` + hash + `","result_hash":"` + hash + `"}`)
+		pointer.RequestIndex = 1
+		pointer.Runtime.InvSeq, pointer.Runtime.Stage, pointer.Runtime.Sequence, pointer.Runtime.Index, pointer.Runtime.Epoch, pointer.Runtime.StepPosition, pointer.Runtime.Object, pointer.Runtime.SHA256 = 10, "next", 103, 2, 1, 2, "step-result-"+hash, hash
+		switch control {
+		case "pointer-generation":
+			pointer.Runtime.InvSeq++
+		case "pointer-sequence":
+			pointer.Runtime.Sequence++
+		case "pointer-request":
+			pointer.RequestIndex = 2
+		case "pointer-position":
+			pointer.Runtime.StepPosition = 4
+		case "pointer-object":
+			pointer.Runtime.Object = "other"
+		case "completion-result":
+			entries[2].Payload = json.RawMessage(`{"result":42}`)
+		case "request-kind":
+			entries[1].Payload = json.RawMessage(`{"kind":"run","name":"next","input_hash":"` + digest([]byte(`{"x":1}`)) + `"}`)
+		}
 	}
 	if alter != nil {
 		alter(entries)
@@ -63,6 +109,9 @@ func rawJournalFixture(t *testing.T, encoding journal.Encoding, archive bool, al
 			EntrySHA256 string `json:"entry_sha256"`
 		}{"js-wf-graph-journal-entry-v1", inv, 101 + index, edge.Hash})
 		blobs := []retainedgraph.Link{edge}
+		if archive && index == 2 && control != "frame-unowned" {
+			blobs = append(blobs, put(frameBytes, graphpublication.Location{Kind: "payload", First: first, Stream: stream}))
+		}
 		if missingEntry && index == 1 {
 			blobs = nil
 		}
@@ -97,8 +146,8 @@ func rawJournalFixture(t *testing.T, encoding journal.Encoding, archive bool, al
 		objects = map[string][]byte{}
 		graph.Fences = map[string]graphpublication.Fence{}
 		cursor.Schema = "js-wf-graph-runtime-cursor-v6"
-		cursor.RetainedFrom = 2
-		cursor.Checkpoint = json.RawMessage(`{"runtime":{},"request_index":1}`)
+		cursor.RetainedFrom = 1
+		cursor.Checkpoint, _ = json.Marshal(pointer)
 		start := journal.GraphStart{Schema: "js-wf-canonical-start-v1", Token: "start", Request: journal.GraphStartRequest{Type: "kind", ID: "id"}, InputSHA256: digest([]byte("input")), InputSize: 5}
 		cursor.Start = &start
 		inputLink := put([]byte("input"), graphpublication.Location{Kind: "payload", First: 0, Stream: "input"})
@@ -110,8 +159,8 @@ func rawJournalFixture(t *testing.T, encoding journal.Encoding, archive bool, al
 			Record *retainedgraph.Record
 		}{retainedgraph.Schema, 0, 0, &retainedgraph.Record{Data: startData, Blobs: []retainedgraph.Link{inputLink}}})
 		root.Schema = graphpublication.StreamsSchema
-		root.Graph = retainedgraph.Root{Schema: retainedgraph.Schema, Count: 2, Frontier: []retainedgraph.Tree{tree(2, 0, 1, "")}}
-		root.Streams = []graphpublication.StreamGraph{{Name: "archive", Graph: retainedgraph.Root{Schema: retainedgraph.Schema, Count: 2, Frontier: []retainedgraph.Tree{tree(0, 0, 1, "archive")}}}, {Name: "input", Graph: retainedgraph.Root{Schema: retainedgraph.Schema, Count: 1, Frontier: []retainedgraph.Tree{{Link: put(inputNode, graphpublication.Location{Kind: "node", Stream: "input"})}}}}}
+		root.Graph = retainedgraph.Root{Schema: retainedgraph.Schema, Count: 3, Frontier: []retainedgraph.Tree{tree(1, 0, 1, ""), tree(3, 2, 0, "")}}
+		root.Streams = []graphpublication.StreamGraph{{Name: "archive", Graph: retainedgraph.Root{Schema: retainedgraph.Schema, Count: 1, Frontier: []retainedgraph.Tree{tree(0, 0, 0, "archive")}}}, {Name: "input", Graph: retainedgraph.Root{Schema: retainedgraph.Schema, Count: 1, Frontier: []retainedgraph.Tree{{Link: put(inputNode, graphpublication.Location{Kind: "node", Stream: "input"})}}}}}
 		source.Data = []byte(`{"schema":"js-wf-canonical-start-pointer-v1","token":"start"}`)
 		source.Header = nats.Header{"Wf-Graph-Start-Token": []string{"start"}, "Wf-Input-SHA256": []string{start.InputSHA256}}
 	}
@@ -182,13 +231,28 @@ func TestRawGraphJournalGenerationsOutcomesAndArchive(t *testing.T) {
 				for k, r := range s.Graph.Roots {
 					var c auditedGraphCursor
 					_ = json.Unmarshal(r.Application, &c)
-					c.RetainedFrom = 1
+					c.RetainedFrom = 2
 					r.Application, _ = json.Marshal(c)
 					s.Graph.Roots[k] = r
 				}
 			}
 			if _, err := CheckGraphJournals(context.Background(), s); err == nil {
 				t.Fatal("corrupt raw binding accepted")
+			}
+		})
+	}
+}
+
+func TestRawGraphCheckpointPointerAndFrameBindings(t *testing.T) {
+	for _, control := range []string{"pointer-generation", "pointer-sequence", "pointer-request", "pointer-position", "pointer-object", "completion-result", "request-kind", "frame-unowned", "frame-generation", "frame-anchor", "frame-stage", "frame-position", "frame-version", "frame-locals"} {
+		t.Run(control, func(t *testing.T) {
+			s, _ := rawJournalCheckpointFixture(t, journal.JSON, true, nil, false, false, control)
+			// Reference integrity must still pass, isolating semantic rejection.
+			if _, err := CheckGraphReferences(context.Background(), s.Graph); err != nil {
+				t.Fatal("fixture reference corruption", err)
+			}
+			if _, err := CheckGraphJournals(context.Background(), s); err == nil {
+				t.Fatal("corrupt checkpoint accepted")
 			}
 		})
 	}

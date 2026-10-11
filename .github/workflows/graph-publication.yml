@@ -137,7 +137,7 @@ jobs:
         shell: bash
         run: |
           set -o pipefail
-          go test -race -p=1 ./integrity -run '^(TestRawGraphReferencesAndIndependentCorruptionControls|TestNativeRawGraphReferenceAuditQuiescentReaders|TestRawGraphJournalGenerationsOutcomesAndArchive)$' -count=1 -v -timeout=5m 2>&1 | tee raw-graph-audit.log
+          go test -race -p=1 ./integrity -run '^(TestRawGraphReferencesAndIndependentCorruptionControls|TestNativeRawGraphReferenceAuditQuiescentReaders|TestRawGraphJournalGenerationsOutcomesAndArchive|TestRawGraphCheckpointPointerAndFrameBindings|TestNativeRawGraphCheckpointAudit)$' -count=1 -v -timeout=5m 2>&1 | tee raw-graph-audit.log
           python3 - <<'PY'
           import pathlib, re
           log = pathlib.Path('raw-graph-audit.log').read_text()
@@ -147,6 +147,15 @@ jobs:
                   assert f'--- PASS: TestNativeRawGraphReferenceAuditQuiescentReaders/R{replicas}/indexed{indexed} ' in log
           assert '--- PASS: TestRawGraphReferencesAndIndependentCorruptionControls ' in log
           assert '--- PASS: TestRawGraphJournalGenerationsOutcomesAndArchive ' in log
+          assert '--- PASS: TestRawGraphCheckpointPointerAndFrameBindings ' in log
+          for control in ('pointer-generation', 'pointer-sequence', 'pointer-request', 'pointer-position', 'pointer-object', 'completion-result', 'request-kind', 'frame-unowned', 'frame-generation', 'frame-anchor', 'frame-stage', 'frame-position', 'frame-version', 'frame-locals'):
+              assert f'--- PASS: TestRawGraphCheckpointPointerAndFrameBindings/{control} ' in log
+          for replicas in (1, 3):
+              for indexed in ('false', 'true'):
+                  assert f'--- PASS: TestNativeRawGraphCheckpointAudit/R{replicas}/indexed{indexed} ' in log
+                  for stage in ('unpublished', 'published', 'archived', 'terminal'):
+                      entries, terminals = (5, 1) if stage == 'terminal' else (4, 0)
+                      assert f'RAW_CHECKPOINT_AUDIT stage={stage} entries={entries} terminals={terminals} R{replicas} indexed={indexed}' in log
           for encoding in ('json', 'protobuf-v1'):
               for archived in ('false', 'true'):
                   assert f'--- PASS: TestRawGraphJournalGenerationsOutcomesAndArchive/{encoding}/archive{archived} ' in log
