@@ -1,0 +1,30 @@
+{
+  "source": "9189259faca292659001bbbcbf936c73a1e00318",
+  "command": [
+    "systemd-run",
+    "--user",
+    "--unit=js-wf-classified-entry100000-race-20261011.service",
+    "--property=RemainAfterExit=yes",
+    "--property=RuntimeMaxSec=19800",
+    "--property=MemoryMax=10G",
+    "--working-directory=/home/exedev/js-wf",
+    "/usr/bin/python3",
+    "/home/exedev/js-wf/docs/scale/graph-classified-entry-campaign-2026-10-11/supervisor.py",
+    "--mode",
+    "race",
+    "--kind",
+    "production",
+    "--root",
+    "/home/exedev/js-wf-classified-entry100000-race-20261011",
+    "--unit",
+    "js-wf-classified-entry100000-race-20261011.service",
+    "--ttl",
+    "6h",
+    "--policy",
+    "/home/exedev/js-wf/docs/scale/graph-classified-entry-campaign-2026-10-11/lifetime-policy.json",
+    "--normal-root",
+    "/home/exedev/js-wf-classified-entry100000-normal-20261011"
+  ],
+  "observed": "2026-10-11T02:26:49.188736+00:00",
+  "supervisor_sha256": "1b5922fc1bb42e700aaed1b9a08f4bc8197694b8aa4ac234fdffefd13571c17a"
+}

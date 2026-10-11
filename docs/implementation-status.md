@@ -1,5 +1,28 @@
 # Implementation status against the supplied plan
 
+## Actual 100000-entry normal accepted; race launched; cached-promise priority — 2026-10-11
+
+The frozen classified source 9189259 normal fixture completed actual 100000 entries,
+two checkpoints and terminal slot 99999, with 49,992 padding operations and no
+rejected effect. Independent review verifies 1946 frozen inputs and 3170 native
+files (3,365,343,276 bytes), exact loaded unit/InvocationID and real child/
+supervisor exits 0 in 6133.959s. All 57 errors are exact definite CAS conflicts;
+no uncertain/unclassified errors remain. Zero-error status is false. The
+same-source race is live under InvocationID c0bd10f5eece4d7f9bbaa7e40139d2bc.
+[Terminal evidence and scope](scale/graph-classified-entry-campaign-2026-10-11/normal-terminal/README.md).
+
+Eight current-source native cached-promise priority cases pass under race,
+covering R1/R3, archive/no archive and successful/failed child outcomes. Selection
+chooses the first ready promise over a duplicate and immediate timer, then
+reuses its cached outcome after checkpoint/child retirement with signal_seq=0.
+Actual exit 0 in 215.258s; 16 priority receipts, eight reuse receipts and 16 independently
+audited checkpoint frames. CI requires every case and receipt.
+[Native cached selection evidence](scale/native-sdk-promise-selection-2026-10-11/README.md).
+
+The two full seeded suites and the new actual 100000-entry race remain live.
+Full current-source scale audit, positive-deadline readiness and original broader
+acceptance gates remain open; public admission/import/collection remain disabled.
+
 ## Full current-source Tier-1 normal1000 launched — 2026-10-11
 
 Frozen source b4fe445 now runs the complete compiled suite and 159 seeded families

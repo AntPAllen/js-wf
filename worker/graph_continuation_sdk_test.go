@@ -38,6 +38,21 @@ func TestNativeGraphContinuationSDKFlow(t *testing.T) {
 		t.Run(name, func(t *testing.T) { testNativeGraphContinuationSDKFlow(t, domain, false, false, false, false) })
 	}
 }
+func TestNativeGraphContinuationPromiseSelectionPriority(t *testing.T) {
+	for _, domain := range []string{"", "WFCONTINUATIONSDK"} {
+		name := "R1"
+		if domain != "" {
+			name = "R3Domain"
+		}
+		for _, archive := range []bool{false, true} {
+			for _, failed := range []bool{false, true} {
+				t.Run(fmt.Sprintf("%s/archive=%t/failed=%t", name, archive, failed), func(t *testing.T) {
+					testNativeGraphContinuationSDKFlow(t, domain, false, false, true, false, archive, failed, false, false, false, false, false, false, false, false, true)
+				})
+			}
+		}
+	}
+}
 func TestNativeGraphContinuationSelectionPriority(t *testing.T) {
 	for _, domain := range []string{"", "WFCONTINUATIONSDK"} {
 		name := "R1"
@@ -203,7 +218,7 @@ func TestNativeGraphContinuationArchiveCollection(t *testing.T) {
 	}
 }
 func testNativeGraphContinuationSDKFlow(t *testing.T, domain string, partition, bufferedSignals, childPromiseFlow, bufferedChild bool, archiveMode ...bool) {
-	// Optional modes: archive, failed child, pending child, cancel pending parent, running effect cancellation, late success, timer history, positive timer wakeup, cancelled timer wakeup, selection priority.
+	// Optional modes: archive, failed child, pending child, cancel pending parent, running effect cancellation, late success, timer history, positive timer wakeup, cancelled timer wakeup, selection priority, promise selection priority.
 	archive := len(archiveMode) != 0 && archiveMode[0]
 	childFailure := len(archiveMode) > 1 && archiveMode[1]
 	pendingChild := len(archiveMode) > 2 && archiveMode[2]
@@ -214,6 +229,10 @@ func testNativeGraphContinuationSDKFlow(t *testing.T, domain string, partition, 
 	positiveTimer := len(archiveMode) > 7 && archiveMode[7]
 	cancelledWakeup := len(archiveMode) > 8 && archiveMode[8]
 	selectionPriority := len(archiveMode) > 9 && archiveMode[9]
+	promiseSelection := len(archiveMode) > 10 && archiveMode[10]
+	if promiseSelection && (!childPromiseFlow || bufferedChild || bufferedSignals || pendingChild || timerHistory || partition || selectionPriority) {
+		t.Fatal("promise selection fixture requires a resolved child and direct deliveries")
+	}
 	if selectionPriority && (!bufferedSignals || childPromiseFlow || timerHistory || partition) {
 		t.Fatal("selection priority fixture requires buffered direct signal deliveries")
 	}
@@ -254,7 +273,7 @@ func testNativeGraphContinuationSDKFlow(t *testing.T, domain string, partition, 
 	if childPromiseFlow || archive {
 		timeout = time.Minute
 	}
-	if childFailure && archive || pendingChild || cancelRunningEffect {
+	if childFailure && archive || pendingChild || cancelRunningEffect || promiseSelection {
 		// Functional watchdog for the complete multi-delivery/collection fixture.
 		// Recovery latency is checked separately from kill through exact ACK.
 		timeout = 2 * time.Minute
@@ -333,7 +352,25 @@ func testNativeGraphContinuationSDKFlow(t *testing.T, domain string, partition, 
 		if json.Unmarshal(locals, &data) != nil || data.Count != count {
 			return wf.ErrCorruptJournal
 		}
-		raw, err := wf.AwaitPromise(c, data.Promise)
+		var raw []byte
+		var err error
+		if promiseSelection {
+			timer, e := c.Timer(fmt.Sprintf("promise-priority-%d", count), 0)
+			if e != nil {
+				return e
+			}
+			var index int
+			index, raw, err = wf.Select(c, wf.SignalAwaitable("absent"), data.Promise, data.Promise, timer)
+			if index != 1 {
+				return fmt.Errorf("first ready promise lost: %d %w", index, err)
+			}
+			if e = timer.Await(); e != nil {
+				return e
+			}
+			t.Logf("SDK_PROMISE_PRIORITY stage=%d case=1 duplicate_ready_case=2 timer_loser_reused=true failed=%t", count, childFailure)
+		} else {
+			raw, err = wf.AwaitPromise(c, data.Promise)
+		}
 		if childFailure {
 			if err == nil || err.Error() != "planned child failure" || len(raw) != 0 {
 				return wf.ErrCorruptJournal
@@ -1140,6 +1177,36 @@ func testNativeGraphContinuationSDKFlow(t *testing.T, domain string, partition, 
 	records, _, err := graph.ReadExisting(ctx, h.Type, h.ID, h.InvSeq)
 	if err != nil {
 		t.Fatal(err)
+	}
+	if promiseSelection {
+		sequences := []uint64{}
+		for i, record := range records {
+			if record.Kind != journal.StepRequested {
+				continue
+			}
+			var request struct {
+				Kind  string                        `json:"kind"`
+				Cases []struct{ Kind, Name string } `json:"cases"`
+			}
+			if json.Unmarshal(record.Payload, &request) != nil || request.Kind != "select_many" {
+				continue
+			}
+			if i+1 >= len(records) || records[i+1].Kind != journal.StepCompleted || len(request.Cases) != 4 || request.Cases[1].Kind != "promise" || request.Cases[1].Name != childPromise.SignalName {
+				t.Fatal("promise selection request/completion missing", record)
+			}
+			var done struct {
+				Index    *int   `json:"case_index"`
+				Sequence uint64 `json:"signal_seq"`
+			}
+			if json.Unmarshal(records[i+1].Payload, &done) != nil || done.Index == nil || *done.Index != 1 {
+				t.Fatal("promise selection completion differs")
+			}
+			sequences = append(sequences, done.Sequence)
+		}
+		if len(sequences) != 2 || sequences[0] == 0 || sequences[1] != 0 {
+			t.Fatal("promise outcome was not selected once then reused from cache", sequences)
+		}
+		t.Logf("SDK_PROMISE_CACHE first_signal=%d cached_signal=0 selections=2 child_calls=%d failed=%t archive=%t", sequences[0], childCalls, childFailure, archive)
 	}
 	if pendingChild {
 		if len(records) <= len(pendingPrefix) {

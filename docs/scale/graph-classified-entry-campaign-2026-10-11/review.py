@@ -10,7 +10,8 @@ parser=argparse.ArgumentParser();parser.add_argument('root',type=Path);a=parser.
 state=json.loads((a.root/'state.json').read_text())
 props=dict(line.split('=',1) for line in subprocess.check_output(['systemctl','--user','show',state['unit'],
     '-p','LoadState','-p','MainPID','-p','InvocationID','-p','RemainAfterExit','-p','ExecMainStatus',
-    '-p','ExecMainExitTimestamp','-p','ActiveState','-p','SubState'],text=True).splitlines())
+    '-p','ExecMainExitTimestamp','-p','ActiveState','-p','SubState','-p','ExecMainPID',
+    '-p','ExecStart','-p','MemoryMax','-p','RuntimeMaxUSec','-p','Result'],text=True).splitlines())
 result=dict(observed_utc=datetime.datetime.now(datetime.timezone.utc).isoformat(),
     root=str(a.root),source=state['source'],mode=state['mode'],kind=state['kind'],properties=props,
     accepted=False,actual_100000_entries_qualified=False)
@@ -22,6 +23,13 @@ if not state['terminal'] or props['MainPID']!='0' or not props['ExecMainExitTime
     save();print(json.dumps(result));raise SystemExit(0)
 assert state['child_terminal'] and state['child_exit']==0 and state['supervisor_exit']==0
 assert props['ExecMainStatus']=='0' and state['phase']=='closed'
+assert props['ActiveState']=='active' and props['SubState']=='exited' and props['Result']=='success'
+assert int(props['ExecMainPID'])==state['supervisor_pid']
+loaded_command=f"argv[]=/usr/bin/python3 {here/'supervisor.py'} --mode {state['mode']} --kind {state['kind']} --root {a.root} --unit {state['unit']} --ttl {state['configuration']['WF_GRAPH_CONTINUATION_COMPACTION_TTL']}"
+assert loaded_command in props['ExecStart']
+if state['kind']=='production':
+    assert f"--policy {here/'lifetime-policy.json'}" in props['ExecStart']
+    assert props['MemoryMax']=='10737418240' and props['RuntimeMaxUSec']=='5h 30min'
 assert state['inputs_unchanged'] and state['binary_unchanged']
 prep_dir=repo/'docs/scale/graph-classified-entry-preparation-2026-10-11'
 subprocess.run(['python3',str(prep_dir/'review.py')],check=True,stdout=subprocess.DEVNULL)

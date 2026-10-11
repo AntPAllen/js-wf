@@ -1,0 +1,35 @@
+{
+  "source": "9189259faca292659001bbbcbf936c73a1e00318",
+  "invocation": "c0bd10f5eece4d7f9bbaa7e40139d2bc",
+  "supervisor_pid": 225845,
+  "child_pid": 225917,
+  "command": [
+    "/home/exedev/js-wf-classified-entry100000-20261011/worker-race.test",
+    "-test.v",
+    "-test.run=^TestNativeGraphContinuationGlobalLimitAndTerminalSlot$/^R1$/^archive=true$",
+    "-test.count=1",
+    "-test.timeout=310m"
+  ],
+  "configuration": {
+    "GOMAXPROCS": "4",
+    "GOMEMLIMIT": "8GiB",
+    "WF_GRAPH_CONTINUATION_LIMIT_BUDGET": "100000",
+    "WF_GRAPH_CONTINUATION_OWNER_INDEX": "1",
+    "WF_GRAPH_CONTINUATION_DURABLE": "1",
+    "WF_GRAPH_CONTINUATION_COMPACTION_TTL": "6h",
+    "WF_GRAPH_LIMIT_PORT_PROFILE": "1",
+    "WF_GRAPH_LIMIT_STORE_ROOT": "/home/exedev/js-wf-classified-entry100000-race-20261011/native"
+  },
+  "properties": {
+    "RuntimeMaxUSec": "5h 30min",
+    "RemainAfterExit": "yes",
+    "MainPID": "225845",
+    "ExecStart": "{ path=/usr/bin/python3 ; argv[]=/usr/bin/python3 /home/exedev/js-wf/docs/scale/graph-classified-entry-campaign-2026-10-11/supervisor.py --mode race --kind production --root /home/exedev/js-wf-classified-entry100000-race-20261011 --unit js-wf-classified-entry100000-race-20261011.service --ttl 6h --policy /home/exedev/js-wf/docs/scale/graph-classified-entry-campaign-2026-10-11/lifetime-policy.json --normal-root /home/exedev/js-wf-classified-entry100000-normal-20261011 ; ignore_errors=no ; start_time=[Sun 2026-10-11 02:26:49 UTC] ; stop_time=[n/a] ; pid=225845 ; code=(null) ; status=0/0 }",
+    "MemoryMax": "10737418240",
+    "LoadState": "loaded",
+    "ActiveState": "active",
+    "SubState": "running",
+    "InvocationID": "c0bd10f5eece4d7f9bbaa7e40139d2bc"
+  },
+  "observed": "2026-10-11T02:27:48.222686+00:00"
+}
