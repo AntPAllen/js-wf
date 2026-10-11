@@ -9,6 +9,7 @@ on:
       - 'retention/**'
       - 'integrity/graph*.go'
       - 'worker/graph_journal*.go'
+      - 'worker/graph_limit*.go'
       - 'worker/graph_signal*.go'
       - 'worker/graph_terminal*.go'
       - 'worker/graph_child*.go'
@@ -68,6 +69,7 @@ on:
       - 'retention/**'
       - 'integrity/graph*.go'
       - 'worker/graph_journal*.go'
+      - 'worker/graph_limit*.go'
       - 'worker/graph_signal*.go'
       - 'worker/graph_terminal*.go'
       - 'worker/graph_child*.go'
@@ -122,6 +124,36 @@ on:
 permissions:
   contents: read
 jobs:
+  graph-limit-error-classification:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      GOMAXPROCS: 4
+      GOMEMLIMIT: 2GiB
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - name: Classify native CAS and preserve concurrent profile snapshots
+        shell: bash
+        run: |
+          set -o pipefail
+          go test -race -p=1 ./worker -run '^(TestGraphLimitProfileErrorClassificationAndSnapshots|TestGraphLimitProfileNativeCASClassification)$' -count=1 -v -timeout=5m 2>&1 | tee graph-limit-error-classification.log
+          python3 - <<'PY'
+          import pathlib, re
+          log = pathlib.Path('graph-limit-error-classification.log').read_text()
+          assert not re.search(r'^--- SKIP:', log, re.M)
+          for test in ('TestGraphLimitProfileErrorClassificationAndSnapshots', 'TestGraphLimitProfileNativeCASClassification'):
+              assert f'--- PASS: {test} ' in log
+          assert 'NATIVE_PROFILE_CLASSIFICATION calls=2 errors=1 conflict=1 wrapped_conflict=0' in log
+          PY
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: graph-limit-error-classification
+          path: graph-limit-error-classification.log
+          if-no-files-found: error
   raw-graph-reference-audit:
     runs-on: ubuntu-latest
     timeout-minutes: 10

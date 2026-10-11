@@ -1,5 +1,20 @@
 # Implementation status against the supplied plan
 
+## Native profiler error classes added — 2026-10-11
+
+The test-only graph limit profiler now distinguishes exact definite CAS conflicts
+from wrapped conflicts,deadline,cancellation,timeout,revocation,API and other
+errors. Snapshot/delta counters remain isolated under concurrent updates, and
+original operation results/errors are preserved. Focused race exits0 in1.084s;
+a native stale-root write emits one exact conflict. A new CI gate requires the
+classification/snapshot tests and native receipt.
+[Evidence and limits](scale/graph-limit-error-classification-2026-10-11/README.md).
+
+The earlier41 CASRoot errors cannot be classified retrospectively. Original
+actual100000 full acceptance and race remain open; its verified functional
+assertions and physical files are preserved. No gate,cap,TTL or production retry
+policy is relaxed. Frozen00eeb13 complete159 normal continues unchanged.
+
 ## Checkpoint promise ownership verified; actual100000 normal review finding — 2026-10-11
 
 The independent raw audit now requires each checkpoint promise result to have an

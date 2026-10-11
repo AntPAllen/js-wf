@@ -2,6 +2,9 @@ package worker
 
 import (
 	"context"
+	"errors"
+	"github.com/nats-io/nats.go"
+	"github.com/nats-io/nats.go/jetstream"
 	"sync"
 	"time"
 
@@ -20,9 +23,10 @@ type graphLimitProfilePort struct {
 }
 
 type graphLimitPortTiming struct {
-	Calls   uint64 `json:"calls"`
-	Errors  uint64 `json:"errors"`
-	TotalNS int64  `json:"total_ns"`
+	Calls      uint64            `json:"calls"`
+	Errors     uint64            `json:"errors"`
+	TotalNS    int64             `json:"total_ns"`
+	ErrorKinds map[string]uint64 `json:"error_kinds,omitempty"`
 }
 
 func graphLimitMeasure[T any](p *graphLimitProfilePort, name string, call func() (T, error)) (T, error) {
@@ -35,6 +39,10 @@ func graphLimitMeasure[T any](p *graphLimitProfilePort, name string, call func()
 	timing.TotalNS += elapsed
 	if err != nil {
 		timing.Errors++
+		if timing.ErrorKinds == nil {
+			timing.ErrorKinds = map[string]uint64{}
+		}
+		timing.ErrorKinds[graphLimitErrorKind(err)]++
 	}
 	p.totals[name] = timing
 	p.mu.Unlock()
@@ -46,6 +54,7 @@ func (p *graphLimitProfilePort) snapshot() map[string]graphLimitPortTiming {
 	defer p.mu.Unlock()
 	copy := make(map[string]graphLimitPortTiming, len(p.totals))
 	for name, timing := range p.totals {
+		timing.ErrorKinds = graphLimitCopyKinds(timing.ErrorKinds)
 		copy[name] = timing
 	}
 	return copy
@@ -55,7 +64,13 @@ func (p *graphLimitProfilePort) delta(before map[string]graphLimitPortTiming) ma
 	after := p.snapshot()
 	for name, timing := range after {
 		old := before[name]
-		after[name] = graphLimitPortTiming{Calls: timing.Calls - old.Calls, Errors: timing.Errors - old.Errors, TotalNS: timing.TotalNS - old.TotalNS}
+		kinds := map[string]uint64{}
+		for kind, count := range timing.ErrorKinds {
+			if count > old.ErrorKinds[kind] {
+				kinds[kind] = count - old.ErrorKinds[kind]
+			}
+		}
+		after[name] = graphLimitPortTiming{Calls: timing.Calls - old.Calls, Errors: timing.Errors - old.Errors, TotalNS: timing.TotalNS - old.TotalNS, ErrorKinds: kinds}
 	}
 	return after
 }
@@ -123,3 +138,42 @@ func openGraphLimitProfile(ctx context.Context, authority *graphpublication.Nati
 }
 
 var _ graphpublication.OwnerScopeScanPort = (*graphLimitIndexedProfilePort)(nil)
+
+// Only an exact conflict sentinel is a definite CAS rejection. A wrapped
+// conflict may encode an uncertain transport outcome and must stay distinct.
+func graphLimitErrorKind(err error) string {
+	if err == graphpublication.ErrConflict {
+		return "conflict"
+	}
+	if errors.Is(err, graphpublication.ErrConflict) {
+		return "wrapped_conflict"
+	}
+	if errors.Is(err, context.Canceled) {
+		return "cancelled"
+	}
+	if errors.Is(err, context.DeadlineExceeded) {
+		return "deadline"
+	}
+	if errors.Is(err, nats.ErrTimeout) {
+		return "timeout"
+	}
+	if errors.Is(err, graphpublication.ErrRevoked) {
+		return "revoked"
+	}
+	var api *jetstream.APIError
+	if errors.As(err, &api) {
+		return "api"
+	}
+	return "other"
+}
+
+func graphLimitCopyKinds(source map[string]uint64) map[string]uint64 {
+	if source == nil {
+		return nil
+	}
+	copy := make(map[string]uint64, len(source))
+	for kind, count := range source {
+		copy[kind] = count
+	}
+	return copy
+}
