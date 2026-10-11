@@ -1,5 +1,22 @@
 # Implementation status against the supplied plan
 
+## Native commit phase race diagnostic launched; active population pending — 2026-10-11
+
+A single canonical R3 active10/10/1 race diagnostic uses frozen3aa3550 commit
+phase/readback labels and unchanged20m scenario/22m SDK bounds. Actual SDK
+PID317568/start ticks14014973 remains live, with executable hash and environment
+verified. Independent live validation checks2915 tracked inputs against Git
+source and current bytes. All10 old invocations completed in28.816seconds;
+all10 active handlers have not yet been reported at observation.
+[Live diagnostic evidence](scale/native-append-commit-phases-2026-10-11/README.md).
+
+Terminal review explicitly refuses the live SDK; no failure, successful result,
+purge/reuse, signal subphase, final raw audit or closed-store census is claimed.
+The same run continues; observation expiry does not trigger restart. The actual
+binary/store are retained, and the active log remains untracked until closure.
+Three older full race campaigns remain live. Full current seed, canonical
+scale, original fault, soak and adoption requirements stay open.
+
 ## Append commit phases and readback diagnostics qualified — 2026-10-11
 
 Protocol.Commit now identifies context/plan validation, authority observation
