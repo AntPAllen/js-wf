@@ -8,6 +8,7 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"math"
 	"strconv"
 	"time"
@@ -211,10 +212,13 @@ func (s *GraphStore) ReserveSignal(ctx context.Context, r GraphSignalRequest, in
 	app, _ := json.Marshal(next)
 	prepared, err := s.cfg.Protocol.PrepareStreamAppendWithApplication(ctx, destination, root.Head, graphSignalInputForest, data, [][]byte{input}, nil, s.cfg.Now().Add(s.cfg.IntentTTL), app)
 	if err != nil {
-		return result, graphMutationError(err)
+		return result, fmt.Errorf("prepare signal input: %w", graphMutationError(err))
 	}
 	_, err = s.cfg.Protocol.Commit(ctx, prepared)
-	return result, graphMutationError(err)
+	if err != nil {
+		return result, fmt.Errorf("commit signal input: %w", graphMutationError(err))
+	}
+	return result, nil
 }
 
 // ReadSignalInput validates the exact retained request and owned body. A missing

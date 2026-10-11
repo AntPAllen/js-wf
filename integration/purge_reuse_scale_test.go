@@ -432,6 +432,9 @@ func testPurgeReuseScale(t *testing.T, canonical bool) {
 	})
 	runPurgeScaleJobs(t, ctx, reuseCount, func(caller, index int) error {
 		seq, err := clients[caller%3].Signal(ctx, typ, oldID(index), "go", []byte(strconv.Itoa(100000+index)), fmt.Sprintf("fresh-%d", index))
+		if err != nil {
+			return fmt.Errorf("fresh Signal %s/%s invocation=%d (parent context: %v): %w", typ, oldID(index), newSeq[index], ctx.Err(), err)
+		}
 		if err == nil {
 			freshSignalSeq[index] = seq
 		}
@@ -446,6 +449,9 @@ func testPurgeReuseScale(t *testing.T, canonical bool) {
 	})
 	runPurgeScaleJobs(t, ctx, count, func(caller, index int) error {
 		_, err := clients[caller%3].Signal(ctx, typ, liveID(index), "release", []byte(strconv.Itoa(index)), fmt.Sprintf("release-%d", index))
+		if err != nil {
+			return fmt.Errorf("release Signal %s/%s invocation=%d (parent context: %v): %w", typ, liveID(index), liveSeq[index], ctx.Err(), err)
+		}
 		return err
 	})
 	runPurgeScaleJobs(t, ctx, count, func(caller, index int) error {

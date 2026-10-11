@@ -1,5 +1,29 @@
 # Implementation status against the supplied plan
 
+## Canonical signal mutation phases qualified — 2026-10-11
+
+Canonical signal failures now identify reservation preparation/commit, ordered
+binding preparation/commit, source-frontier update, or binding outcome readback.
+The native purge/reuse fixture includes signal purpose, workflow identity,
+invocation and parent-context state. Error wrapping preserves `errors.Is`;
+publication bounds and unknown-outcome recovery rules remain unchanged.
+
+Eight deterministic component cuts qualify prepare/commit rejection, exact
+commit readback and unavailable readback for reservation and binding. They check
+error phases, source/wakeup counts, retained identity, original-token recovery
+and reference validity. Existing aggregate budget, actual deadline and conflict
+controls also pass. Normal and race modes each report15 client PASS results and
+947 corpus PASS results (all946 pins plus parent). No families or pins changed.
+Independent review binds3847 source inputs, four actual SDK exits, retained
+executable hashes and20 compiled CI Python heredocs.
+See [signal phase evidence](scale/signal-mutation-phases-2026-10-11/README.md).
+
+These controls establish diagnostic fidelity and recovery behavior, not the
+cause of the previous native race failure. Its old executable lacks these
+labels. No native scale rerun was used for this component qualification. Four
+older-source full race campaigns remain live; latest full seed, original full
+canonical purge/reuse, fault, soak and adoption requirements remain open.
+
 ## Reader release removes duplicate observation; controls qualified — 2026-10-11
 
 GraphView.Close now observes authority once before its exact-head pin-release

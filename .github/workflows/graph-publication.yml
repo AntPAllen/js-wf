@@ -613,6 +613,16 @@ jobs:
           set -o pipefail
           graph_flags=()
           if [ "$GRAPH_MODE" = race ]; then graph_flags=(-race); fi
+          go test "${graph_flags[@]}" ./client -run '^(TestCanonicalSignalMutationErrorPhases|TestGraphCanonicalSignalBindingBudgetRecovery|TestGraphCanonicalSignalBindingActualDeadlineRecovery|TestCanonicalSignalConflictIsNotGenerationReplacement)$' -count=1 -v -timeout=2m 2>&1 | tee signal-mutation-phases.log
+          python3 - <<'PYCONTROL'
+          import pathlib, re
+          log = pathlib.Path('signal-mutation-phases.log').read_text()
+          assert not re.search(r'^--- SKIP:', log, re.M)
+          for mode in ('reserve_prepare', 'reserve_commit', 'reserve_commit_lost', 'reserve_commit_unknown', 'binding_prepare', 'binding_commit', 'binding_commit_lost', 'binding_commit_unknown'):
+              assert f'--- PASS: TestCanonicalSignalMutationErrorPhases/{mode} ' in log
+          for test in ('TestGraphCanonicalSignalBindingBudgetRecovery', 'TestGraphCanonicalSignalBindingActualDeadlineRecovery', 'TestCanonicalSignalConflictIsNotGenerationReplacement'):
+              assert f'--- PASS: {test} ' in log
+          PYCONTROL
           go test "${graph_flags[@]}" ./sim -run '^(TestGraphStartReadErrorPhases|TestGraphViewCloseSingleAuthorityObservation)$' -count=1 -v -timeout=2m 2>&1 | tee start-read-phases.log
           go test "${graph_flags[@]}" ./internal/graphpublication -run '^TestGraphReleaseReaderCurrent$' -count=1 -v -timeout=2m 2>&1 | tee reader-release-current.log
           python3 - <<'PY'
@@ -650,6 +660,7 @@ jobs:
             start-source-headers.log
             start-read-phases.log
             reader-release-current.log
+            signal-mutation-phases.log
             start-source-header-failure.json
           if-no-files-found: error
   seeded-projection-census:

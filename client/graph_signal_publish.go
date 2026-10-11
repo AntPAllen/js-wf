@@ -52,7 +52,7 @@ func (c *Client) signalCanonical(ctx context.Context, r journal.GraphSignalReque
 			break
 		}
 		if !errors.Is(err, journal.ErrStale) || ctx.Err() != nil {
-			return 0, canonicalSignalError(err)
+			return 0, canonicalSignalError(fmt.Errorf("reserve signal input: %w", err))
 		}
 		if e := c.recheckGraphSignal(ctx, r.Type, r.ID, r.Invocation, requireRunning); e != nil {
 			return 0, e
@@ -62,7 +62,7 @@ func (c *Client) signalCanonical(ctx context.Context, r journal.GraphSignalReque
 		}
 	}
 	if err != nil {
-		return 0, canonicalSignalError(err)
+		return 0, canonicalSignalError(fmt.Errorf("reserve signal input: %w", err))
 	}
 	return c.finishCanonicalSignal(ctx, input, requireRunning, published)
 }
@@ -140,7 +140,7 @@ func (c *Client) finishCanonicalSignal(ctx context.Context, input journal.GraphS
 		stop()
 		binding, _, found, e = c.graphJournal.ReadSignalBinding(ctx, r)
 		if e != nil {
-			return 0, canonicalSignalError(e)
+			return 0, canonicalSignalError(fmt.Errorf("read signal binding outcome: %w", e))
 		}
 		if found {
 			if binding.Input != input {
@@ -150,7 +150,7 @@ func (c *Client) finishCanonicalSignal(ctx context.Context, input journal.GraphS
 		}
 		if bindErr != nil {
 			if !errors.Is(bindErr, journal.ErrStale) || ctx.Err() != nil {
-				return 0, canonicalSignalError(bindErr)
+				return 0, canonicalSignalError(fmt.Errorf("bind ordered signal through %d: %w", through, bindErr))
 			}
 			if e = c.recheckGraphSignal(ctx, r.Type, r.ID, r.Invocation, requireRunning); e != nil {
 				return 0, e

@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"math"
 	"strconv"
 	"strings"
@@ -290,6 +291,9 @@ func (s *GraphStore) BindNextSignal(ctx context.Context, typ, id string, invocat
 	app, _ := json.Marshal(next)
 	if !appendQueue {
 		_, err = s.cfg.Protocol.UpdateApplication(ctx, destination, root.Head, app)
+		if err != nil {
+			return false, fmt.Errorf("advance signal source frontier: %w", graphMutationError(err))
+		}
 	} else {
 		data, _ := json.Marshal(graphSignalQueueRecord{Binding: binding, IndexPacket: packet})
 		if len(data) > retainedgraph.MaxDataBytes {
@@ -297,12 +301,12 @@ func (s *GraphStore) BindNextSignal(ctx context.Context, typ, id string, invocat
 		}
 		prepared, e := s.cfg.Protocol.PrepareStreamAppendWithApplication(ctx, destination, root.Head, graphSignalQueueForest, data, [][]byte{body}, nil, s.cfg.Now().Add(s.cfg.IntentTTL), app)
 		if e != nil {
-			return false, graphMutationError(e)
+			return false, fmt.Errorf("prepare signal binding: %w", graphMutationError(e))
 		}
 		_, err = s.cfg.Protocol.Commit(ctx, prepared)
 	}
 	if err != nil {
-		return false, graphMutationError(err)
+		return false, fmt.Errorf("commit signal binding: %w", graphMutationError(err))
 	}
 	return true, nil
 }
