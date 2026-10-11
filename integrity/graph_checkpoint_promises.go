@@ -31,6 +31,10 @@ func observeSDKPromiseSignal(state *auditedGraphJournal, signal auditedCheckpoin
 			s.childResultOwned = true
 		}
 	}
+	if state.sdkArrivalQueue == nil {
+		state.sdkArrivalQueue = map[string][]uint64{}
+	}
+	state.sdkArrivalQueue[signal.Name] = append(state.sdkArrivalQueue[signal.Name], signal.Sequence)
 	state.sdkSignals[signal.Sequence] = s
 }
 

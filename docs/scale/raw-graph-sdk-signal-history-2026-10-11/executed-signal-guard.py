@@ -1,0 +1,3 @@
+assert '--- PASS: TestRawGraphCheckpointSDKSignalHistory ' in log
+for mode in ('signal', 'call', 'timer_signal_select', 'select_many', 'timer-branch', 'many-timer-branch', 'cached-promise', 'different-name-order', 'cursor-advanced', 'cursor-regressed', 'consumed-omitted', 'consumed-fabricated', 'consumed-duplicate', 'pending-omitted', 'pending-extra', 'pending-used', 'pending-name', 'pending-inline-bytes', 'pending-owned-bytes', 'pending-duplicate', 'pending-not-arrived', 'selection-missing', 'selection-name', 'selection-reused', 'selection-skips-oldest', 'timer-branch-invalid', 'timer-with-signal', 'case-index-missing', 'case-index-invalid', 'case-kind-invalid', 'many-timer-with-signal'):
+    assert f'--- PASS: TestRawGraphCheckpointSDKSignalHistory/{mode} ' in log

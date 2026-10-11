@@ -52,30 +52,33 @@ type auditedGraphCursor struct {
 }
 
 type auditedGraphJournal struct {
-	cursor            auditedGraphCursor
-	key               string
-	journal           journalAudit
-	inputSeen         bool
-	checkpoint        *auditedCheckpointPointer
-	checkpointRequest journal.Record
-	checkpointSeen    bool
-	sdkPosition       uint64
-	lastStepRequest   uint64
-	signalCount       uint64
-	children          map[string]auditedCheckpointChild
-	childSignals      map[uint64]auditedCheckpointSignal
-	signalInputs      []journal.GraphSignalInput
-	signalBindings    []journal.GraphSignalBinding
-	signalEvents      []auditedCheckpointSignal
-	boundInputs       map[uint64]bool
-	signalKeys        map[journal.GraphSignalRequest]bool
-	signalTokens      map[string]bool
-	sdkState          map[string]json.RawMessage
-	sdkSignals        map[uint64]auditedPromiseSignal
-	promiseCandidates map[string][]auditedPromiseSignal
-	requiredPromises  map[string][]auditedPromiseSignal
-	inputIndex        auditedSignalIndex
-	queueIndex        auditedSignalIndex
+	cursor              auditedGraphCursor
+	key                 string
+	journal             journalAudit
+	inputSeen           bool
+	checkpoint          *auditedCheckpointPointer
+	checkpointRequest   journal.Record
+	checkpointSeen      bool
+	sdkPosition         uint64
+	lastStepRequest     uint64
+	signalCount         uint64
+	children            map[string]auditedCheckpointChild
+	childSignals        map[uint64]auditedCheckpointSignal
+	signalInputs        []journal.GraphSignalInput
+	signalBindings      []journal.GraphSignalBinding
+	signalEvents        []auditedCheckpointSignal
+	boundInputs         map[uint64]bool
+	signalKeys          map[journal.GraphSignalRequest]bool
+	signalTokens        map[string]bool
+	sdkState            map[string]json.RawMessage
+	sdkSignals          map[uint64]auditedPromiseSignal
+	sdkUsedSignals      map[uint64]bool
+	sdkArrivalQueue     map[string][]uint64
+	sdkArrivalPositions map[string]int
+	promiseCandidates   map[string][]auditedPromiseSignal
+	requiredPromises    map[string][]auditedPromiseSignal
+	inputIndex          auditedSignalIndex
+	queueIndex          auditedSignalIndex
 }
 
 func graphDestinationForKey(key string) string { return "journal/" + digest([]byte("wf.jrn."+key)) }
@@ -291,6 +294,9 @@ func CheckGraphJournals(ctx context.Context, snapshot GraphJournalSnapshot) (rep
 			return err
 		}
 		if err := observeSDKPromiseSelection(state, entry); err != nil {
+			return err
+		}
+		if err := observeSDKSignalSelection(state, entry); err != nil {
 			return err
 		}
 		if entry.Kind == journal.StepRequested || entry.Kind == journal.StepCompleted {

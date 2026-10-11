@@ -1,5 +1,20 @@
 # JetStream Durable Workflow Runtime — Implementation Plan
 
+## SDK checkpoint signal sets reconstructed from history — 2026-10-11
+
+The raw auditor now distinguishes worker delivery from SDK use, verifies oldest
+unused signal selection and checks exact checkpoint consumed/pending sets,
+names/payloads and prefix cursor. Per-name queues avoid scanning prior arrivals.
+Eight component positives and23 controls pass race in1.025s. Eight actual
+R1/R3Domain SDK normal, buffered-user, child and buffered-child cases pass the
+extended audit in120.003s; CI now requires all eight receipts.
+[Evidence and scope](scale/raw-graph-sdk-signal-history-2026-10-11/README.md).
+
+Clock/case readiness ordering, cancelled timer history, ambiguous promise census,
+historical checkpoints and original full acceptance remain open. Both frozen
+qualification services continue under their original invocations.
+
+
 ## Closed original100000 stores offloaded with verified recovery — 2026-10-11
 
 Archived3170 closed native files (3.37GB) to the user's S3 storage. Full remote
