@@ -34,6 +34,57 @@ func rawJournalCheckpointFixture(t *testing.T, encoding journal.Encoding, archiv
 		// Independently encoded frame and pointer; no production writer/reader.
 		frame := map[string]any{"version": 1, "identity": map[string]any{"type": "kind", "id": "id", "inv_seq": 10}, "stage": "next", "data": map[string]int{"x": 1}, "anchor": map[string]uint64{"index": 2, "epoch": 1}, "step_position": 2}
 		switch control {
+		case "materialized-valid":
+			frame["state"] = map[string]any{"value": 42}
+			frame["promise_outcomes"] = map[string]any{"child": map[string]any{"inv_seq": 3, "result": "NDI="}}
+			frame["signal_cursor"] = 3
+			frame["pending_signals"] = []map[string]any{{"sequence": 2, "name": "gate", "payload": "NDI="}}
+			frame["consumed_signals"] = []uint64{1, 3}
+			frame["cancelled_timers"] = []uint64{0}
+		case "state-name":
+			frame["state"] = map[string]any{"bad.name": 42}
+		case "promise-name":
+			frame["promise_outcomes"] = map[string]any{"bad.name": map[string]any{}}
+		case "promise-nonobject":
+			frame["promise_outcomes"] = map[string]any{"child": 42}
+		case "promise-unknown-field":
+			frame["promise_outcomes"] = map[string]any{"child": map[string]any{"unknown": 42}}
+		case "promise-hash-no-ref":
+			frame["promise_outcomes"] = map[string]any{"child": map[string]any{"result_hash": digest([]byte("42"))}}
+		case "promise-ref-bad-hash":
+			frame["promise_outcomes"] = map[string]any{"child": map[string]any{"result_ref": "external", "result_hash": "bad"}}
+		case "promise-inline-and-ref":
+			frame["promise_outcomes"] = map[string]any{"child": map[string]any{"result_ref": "external", "result_hash": digest([]byte("42")), "result": "NDI="}}
+		case "consumed-zero":
+			frame["consumed_signals"] = []uint64{0}
+		case "consumed-duplicate":
+			frame["consumed_signals"] = []uint64{1, 1}
+		case "consumed-unsorted":
+			frame["consumed_signals"] = []uint64{3, 1}
+		case "pending-zero":
+			frame["signal_cursor"] = 3
+			frame["pending_signals"] = []map[string]any{{"sequence": 0, "name": "gate"}}
+		case "pending-beyond-cursor":
+			frame["signal_cursor"] = 1
+			frame["pending_signals"] = []map[string]any{{"sequence": 2, "name": "gate"}}
+		case "pending-consumed":
+			frame["signal_cursor"] = 1
+			frame["consumed_signals"] = []uint64{1}
+			frame["pending_signals"] = []map[string]any{{"sequence": 1, "name": "gate"}}
+		case "pending-name":
+			frame["signal_cursor"] = 1
+			frame["pending_signals"] = []map[string]any{{"sequence": 1, "name": "bad.name"}}
+		case "pending-duplicate":
+			frame["signal_cursor"] = 1
+			frame["pending_signals"] = []map[string]any{{"sequence": 1, "name": "gate"}, {"sequence": 1, "name": "gate"}}
+		case "timer-odd":
+			frame["cancelled_timers"] = []uint64{1}
+		case "timer-beyond-position":
+			frame["cancelled_timers"] = []uint64{2}
+		case "timer-duplicate":
+			frame["cancelled_timers"] = []uint64{0, 0}
+		case "panic-prefix-mismatch":
+			frame["panic_attempts"] = 1
 		case "frame-generation":
 			frame["identity"] = map[string]any{"type": "kind", "id": "id", "inv_seq": 11}
 		case "frame-anchor":
@@ -253,6 +304,28 @@ func TestRawGraphCheckpointPointerAndFrameBindings(t *testing.T) {
 			}
 			if _, err := CheckGraphJournals(context.Background(), s); err == nil {
 				t.Fatal("corrupt checkpoint accepted")
+			}
+		})
+	}
+}
+
+func TestRawGraphCheckpointMaterializedState(t *testing.T) {
+	for _, encoding := range []journal.Encoding{journal.JSON, journal.ProtobufV1} {
+		t.Run(string(encoding)+"/valid", func(t *testing.T) {
+			s, _ := rawJournalCheckpointFixture(t, encoding, true, nil, false, false, "materialized-valid")
+			if _, err := CheckGraphJournals(context.Background(), s); err != nil {
+				t.Fatal(err)
+			}
+		})
+	}
+	for _, control := range []string{"state-name", "promise-name", "promise-nonobject", "promise-unknown-field", "promise-hash-no-ref", "promise-ref-bad-hash", "promise-inline-and-ref", "consumed-zero", "consumed-duplicate", "consumed-unsorted", "pending-zero", "pending-beyond-cursor", "pending-consumed", "pending-name", "pending-duplicate", "timer-odd", "timer-beyond-position", "timer-duplicate", "panic-prefix-mismatch"} {
+		t.Run(control, func(t *testing.T) {
+			s, _ := rawJournalCheckpointFixture(t, journal.JSON, true, nil, false, false, control)
+			if _, err := CheckGraphReferences(context.Background(), s.Graph); err != nil {
+				t.Fatal("fixture reference corruption", err)
+			}
+			if _, err := CheckGraphJournals(context.Background(), s); err == nil {
+				t.Fatal("corrupt materialized state accepted")
 			}
 		})
 	}

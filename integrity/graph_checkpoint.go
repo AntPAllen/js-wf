@@ -1,6 +1,7 @@
 package integrity
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -100,6 +101,61 @@ func auditCheckpointFrame(ctx context.Context, graph GraphReferenceSnapshot, sta
 		frame.Anchor.Index != r.Index || frame.Anchor.Epoch != r.Epoch || frame.Stage != r.Stage || frame.StepPosition != r.StepPosition ||
 		!json.Valid(frame.Data) || digest(frame.Data) != declared.InputHash {
 		return fmt.Errorf("checkpoint frame identity/anchor/stage/locals differs")
+	}
+	if frame.PanicAttempts != uint64(state.journal.lastAttempt) || frame.SignalCursor < state.journal.lastSignal {
+		return fmt.Errorf("checkpoint attempt/signal cursor differs from journal prefix")
+	}
+	return auditMaterializedCheckpoint(frame)
+}
+
+// This validates materialized values and identity sets without calling the
+// production frame validator. Reconstructing their values from SDK history and
+// resolving promise result ownership remain separate audits.
+func auditMaterializedCheckpoint(frame checkpoint.Frame) error {
+	for key, value := range frame.State {
+		if identity.ValidateToken(key) != nil || !json.Valid(value) {
+			return fmt.Errorf("invalid checkpoint state entry")
+		}
+	}
+	for name, raw := range frame.PromiseOutcomes {
+		if identity.ValidateToken(name) != nil || len(bytes.TrimSpace(raw)) == 0 || bytes.TrimSpace(raw)[0] != '{' {
+			return fmt.Errorf("invalid checkpoint promise outcome")
+		}
+		var out struct {
+			InvSeq       uint64          `json:"inv_seq,omitempty"`
+			Result       []byte          `json:"result,omitempty"`
+			ResultRef    string          `json:"result_ref,omitempty"`
+			ResultHash   string          `json:"result_hash,omitempty"`
+			Error        string          `json:"error,omitempty"`
+			LimitRequest json.RawMessage `json:"limit_request,omitempty"`
+			LimitEntry   json.RawMessage `json:"limit_entry,omitempty"`
+		}
+		if checkpoint.DecodeUnambiguous(raw, &out) != nil ||
+			out.ResultRef == "" && out.ResultHash != "" ||
+			out.ResultRef != "" && (len(out.Result) != 0 || !graphAuditHash(out.ResultHash)) {
+			return fmt.Errorf("invalid checkpoint promise result")
+		}
+	}
+	consumed := make(map[uint64]bool, len(frame.ConsumedSignals))
+	for i, sequence := range frame.ConsumedSignals {
+		if sequence == 0 || i > 0 && sequence <= frame.ConsumedSignals[i-1] {
+			return fmt.Errorf("invalid checkpoint consumed signal identities")
+		}
+		consumed[sequence] = true
+	}
+	for i, signal := range frame.PendingSignals {
+		if signal.Sequence == 0 || signal.Sequence > frame.SignalCursor || consumed[signal.Sequence] ||
+			i > 0 && signal.Sequence <= frame.PendingSignals[i-1].Sequence || identity.ValidateToken(signal.Name) != nil {
+			return fmt.Errorf("invalid checkpoint pending signal identities")
+		}
+	}
+	for i, step := range frame.CancelledTimers {
+		if step%2 != 0 || step >= frame.StepPosition || i > 0 && step <= frame.CancelledTimers[i-1] {
+			return fmt.Errorf("invalid checkpoint cancelled timer identities")
+		}
+	}
+	if frame.PanicAttempts > frame.Anchor.Index {
+		return fmt.Errorf("checkpoint attempts exceed anchor")
 	}
 	return nil
 }

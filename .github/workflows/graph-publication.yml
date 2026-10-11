@@ -137,7 +137,7 @@ jobs:
         shell: bash
         run: |
           set -o pipefail
-          go test -race -p=1 ./integrity -run '^(TestRawGraphReferencesAndIndependentCorruptionControls|TestNativeRawGraphReferenceAuditQuiescentReaders|TestRawGraphJournalGenerationsOutcomesAndArchive|TestRawGraphCheckpointPointerAndFrameBindings|TestNativeRawGraphCheckpointAudit)$' -count=1 -v -timeout=5m 2>&1 | tee raw-graph-audit.log
+          go test -race -p=1 ./integrity -run '^(TestRawGraphReferencesAndIndependentCorruptionControls|TestNativeRawGraphReferenceAuditQuiescentReaders|TestRawGraphJournalGenerationsOutcomesAndArchive|TestRawGraphCheckpointPointerAndFrameBindings|TestNativeRawGraphCheckpointAudit|TestRawGraphCheckpointMaterializedState)$' -count=1 -v -timeout=5m 2>&1 | tee raw-graph-audit.log
           python3 - <<'PY'
           import pathlib, re
           log = pathlib.Path('raw-graph-audit.log').read_text()
@@ -148,6 +148,11 @@ jobs:
           assert '--- PASS: TestRawGraphReferencesAndIndependentCorruptionControls ' in log
           assert '--- PASS: TestRawGraphJournalGenerationsOutcomesAndArchive ' in log
           assert '--- PASS: TestRawGraphCheckpointPointerAndFrameBindings ' in log
+          assert '--- PASS: TestRawGraphCheckpointMaterializedState ' in log
+          for encoding in ('json', 'protobuf-v1'):
+              assert f'--- PASS: TestRawGraphCheckpointMaterializedState/{encoding}/valid ' in log
+          for control in ('state-name', 'promise-name', 'promise-nonobject', 'promise-unknown-field', 'promise-hash-no-ref', 'promise-ref-bad-hash', 'promise-inline-and-ref', 'consumed-zero', 'consumed-duplicate', 'consumed-unsorted', 'pending-zero', 'pending-beyond-cursor', 'pending-consumed', 'pending-name', 'pending-duplicate', 'timer-odd', 'timer-beyond-position', 'timer-duplicate', 'panic-prefix-mismatch'):
+              assert f'--- PASS: TestRawGraphCheckpointMaterializedState/{control} ' in log
           for control in ('pointer-generation', 'pointer-sequence', 'pointer-request', 'pointer-position', 'pointer-object', 'completion-result', 'request-kind', 'frame-unowned', 'frame-generation', 'frame-anchor', 'frame-stage', 'frame-position', 'frame-version', 'frame-locals'):
               assert f'--- PASS: TestRawGraphCheckpointPointerAndFrameBindings/{control} ' in log
           for replicas in (1, 3):

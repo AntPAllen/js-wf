@@ -90,7 +90,7 @@ func TestNativeRawGraphCheckpointAudit(t *testing.T) {
 				sum := sha256.Sum256([]byte(`42`))
 				appendEntry(journal.Started, []byte(`{"input_sha256":"`+hex.EncodeToString(sum[:])+`"}`), []byte(`42`))
 				locals := json.RawMessage(`{"x":1}`)
-				frame, hash, err := checkpoint.Encode(checkpoint.Frame{Version: checkpoint.Version, Identity: checkpoint.Identity{Type: h.Type, ID: h.ID, InvSeq: h.InvSeq}, Stage: "next", Data: locals, Anchor: checkpoint.Anchor{Index: 2, Epoch: 1}, StepPosition: 2})
+				frame, hash, err := checkpoint.Encode(checkpoint.Frame{Version: checkpoint.Version, Identity: checkpoint.Identity{Type: h.Type, ID: h.ID, InvSeq: h.InvSeq}, Stage: "next", Data: locals, Anchor: checkpoint.Anchor{Index: 2, Epoch: 1}, StepPosition: 2, State: map[string]json.RawMessage{"value": json.RawMessage(`42`)}, PromiseOutcomes: map[string]json.RawMessage{"child": json.RawMessage(`{"inv_seq":3,"result":"NDI="}`)}, CancelledTimers: []uint64{0}})
 				if err != nil {
 					t.Fatal(err)
 				}

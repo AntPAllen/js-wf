@@ -1,5 +1,20 @@
 # JetStream Durable Workflow Runtime — Implementation Plan
 
+## Independent materialized checkpoint consistency verified — 2026-10-11
+
+The raw audit now checks saved state/promise shapes, signal set ordering and
+disjointness, timer identities and panic bounds. At checkpoint completion it
+also compares panic count and signal high-water with the actual journal prefix.
+A retained race binary exits0 in21.5s, with two rich JSON/protobuf positives,
+nineteen semantic corruptions and all sixteen native checkpoint-stage receipts.
+CI requires these controls; its guard passes against the actual log.
+[Evidence and remaining scope](scale/raw-graph-materialized-audit-2026-10-11/README.md).
+
+Full SDK-history reconstruction and transitive promise ownership remain open;
+this is structural consistency, not complete deterministic-resume acceptance.
+The frozen complete159 and original actual100000-entry runs remain live under
+unchanged invocations. Hosted graph-publication at27fdb33 remains queued.
+
 ## Independent checkpoint pointer/frame binding audit verified — 2026-10-11
 
 Raw journal auditing now binds published checkpoint descriptors to their request,

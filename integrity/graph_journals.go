@@ -72,7 +72,8 @@ func graphDestinationForKey(key string) string { return "journal/" + digest([]by
 // Checkpoint pointer, owned frame identity/anchor/stage/locals and SDK position
 // are independently bound to the declared request and completion. Protected
 // reader snapshots receive reference auditing, not application replay.
-// Materialized frame state semantics, signal binding/index semantics, orphan projections,
+// Materialized value/set consistency is checked; reconstructing values from SDK
+// history, signal binding/index semantics, orphan projections,
 // lease history, client linearizability and I4/I5 remain separate audits.
 func CheckGraphJournals(ctx context.Context, snapshot GraphJournalSnapshot) (report GraphJournalReport, err error) {
 	if snapshot.Invocations == nil || snapshot.ReadProjection == nil {
