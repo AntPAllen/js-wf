@@ -1,7 +1,6 @@
 package wf
 
 import (
-	"bytes"
 	"context"
 	"crypto/sha256"
 	"encoding/hex"
@@ -38,30 +37,8 @@ const MaxInlineTerminal = 600 * 1024
 // results or rejected request/payload contents. Generation and terminal-kind
 // semantics remain the caller's responsibility; legacy absent identity is valid.
 func DecodeOutcome(raw []byte, target *Outcome) error {
-	if checkpoint.DecodeUnambiguous(raw, target) != nil {
+	if checkpoint.DecodeOutcomeEnvelope(raw, target) != nil {
 		return ErrCorruptJournal
-	}
-	var fields map[string]json.RawMessage
-	if json.Unmarshal(raw, &fields) != nil || fields == nil {
-		return ErrCorruptJournal
-	}
-	check := func(fields map[string]json.RawMessage) error {
-		for _, value := range fields {
-			if bytes.Equal(bytes.TrimSpace(value), []byte("null")) {
-				return ErrCorruptJournal
-			}
-		}
-		return nil
-	}
-	if err := check(fields); err != nil {
-		return err
-	}
-	if rawEntry, ok := fields["limit_entry"]; ok {
-		var entry map[string]json.RawMessage
-		if json.Unmarshal(rawEntry, &entry) != nil || entry == nil {
-			return ErrCorruptJournal
-		}
-		return check(entry)
 	}
 	return nil
 }

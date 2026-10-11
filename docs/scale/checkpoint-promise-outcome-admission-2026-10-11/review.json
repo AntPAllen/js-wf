@@ -1,0 +1,53 @@
+{
+  "accepted": true,
+  "source_inputs_unchanged": 1157,
+  "checkpoint_promise_controls": 27,
+  "positive_controls": 9,
+  "negative_controls": 18,
+  "baseline_bad_frame_decode_encode_sdk_restore": 17,
+  "prior_metadata_result_export_controls": 114,
+  "total_metadata_result_export_checkpoint_controls": 141,
+  "exact_current_terminal_ci_guards": true,
+  "full_sdk_and_checkpoint_race_suite": true,
+  "actual_final_executables_captured": 8,
+  "captured_executables": {
+    "normal": [
+      "wf",
+      "worker"
+    ],
+    "race": [
+      "checkpoint",
+      "wf",
+      "worker"
+    ],
+    "sdk": [
+      "checkpoint",
+      "wf"
+    ],
+    "native": [
+      "worker"
+    ]
+  },
+  "normal_checkpoint_executable_missed": true,
+  "native_child_flows": 4,
+  "native_checkpoint_frames": 8,
+  "test_seconds": {
+    "normal": {
+      "js-wf/wf": 0.768,
+      "js-wf/worker": 0.774,
+      "js-wf/internal/checkpoint": 0.043
+    },
+    "race": {
+      "js-wf/wf": 6.462,
+      "js-wf/worker": 5.776,
+      "js-wf/internal/checkpoint": 1.223
+    },
+    "sdk": {
+      "js-wf/wf": 163.933,
+      "js-wf/internal/checkpoint": 4.536
+    },
+    "native": {
+      "js-wf/worker": 150.486
+    }
+  }
+}

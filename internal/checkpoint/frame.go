@@ -100,9 +100,12 @@ func (f Frame) validate() error {
 			ResultHash   string          `json:"result_hash,omitempty"`
 			Error        string          `json:"error,omitempty"`
 			LimitRequest json.RawMessage `json:"limit_request,omitempty"`
-			LimitEntry   json.RawMessage `json:"limit_entry,omitempty"`
+			LimitEntry   *struct {
+				Kind    string          `json:"kind"`
+				Payload json.RawMessage `json:"payload"`
+			} `json:"limit_entry,omitempty"`
 		}
-		if !json.Valid(raw) || bytes.TrimSpace(raw)[0] != '{' || decodeStrict(raw, &out) != nil {
+		if DecodeOutcomeEnvelope(raw, &out) != nil {
 			return invalid("promise outcome")
 		}
 		if out.ResultRef == "" && out.ResultHash != "" || out.ResultRef != "" && (len(out.Result) != 0 || !validHash(out.ResultHash)) {

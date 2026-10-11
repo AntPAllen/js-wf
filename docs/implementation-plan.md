@@ -1,5 +1,24 @@
 # JetStream Durable Workflow Runtime — Implementation Plan
 
+## Checkpoint promise outcomes share strict runtime admission — 2026-10-11
+
+Checkpoint validation now uses the same strict outcome envelope rules as runtime
+readers, with typed limit-entry metadata. Matching frame checksums no longer allow
+nested duplicate, alias or null metadata to restore SDK state. The actual baseline
+admitted 17 malformed cases through decode, encode and public SDK restoration.
+All 27 controls now pass: nine positive and 18 negative, preserving opaque user
+contents and legacy omitted identity. Normal/race CI selections pass all 141 named
+metadata/result/export/checkpoint controls. Full SDK/checkpoint race suites and
+four native child flows also pass, including eight checkpoint frames and verified
+child-link pairs. The reviewer binds 1157 unchanged inputs and eight executables;
+the missed short normal checkpoint executable is recorded explicitly.
+
+See [checkpoint promise admission evidence](scale/checkpoint-promise-outcome-admission-2026-10-11/README.md).
+Promise/child identity equivalence, native negative fault histories, causal replay,
+physical adoption/maintenance paths, full current qualification and original
+release gates remain open. Frozen full162 normal predates this change; public
+continuation remains off.
+
 ## Canonical replay export terminal admission confirmed — 2026-10-11
 
 A suspected export decoder gap was disproved by the actual baseline: the final

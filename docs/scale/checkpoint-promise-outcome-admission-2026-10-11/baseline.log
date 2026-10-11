@@ -1,0 +1,110 @@
+=== RUN   TestCheckpointPromiseOutcomeMetadataAdmission
+=== RUN   TestCheckpointPromiseOutcomeMetadataAdmission/opaque_limit_request
+=== RUN   TestCheckpointPromiseOutcomeMetadataAdmission/duplicate_error
+    outcome_admission_test.go:71: malformed promise frame admitted {1 {parent materialized 17} collect_v1 {"user":null,"user":2} {2 51} 2 map[counter:23] 0 [] [] map[child_4:{"inv_seq":22,"error":"bad","error":"","result":"NDI="}] [] 0} <nil>
+    outcome_admission_test.go:79: malformed promise frame encoded <nil>
+    outcome_admission_test.go:96: malformed promise restored SDK state {collect_v1 {"user":null,"user":2} 2 0 0 []} <nil>
+=== RUN   TestCheckpointPromiseOutcomeMetadataAdmission/unknown_field
+=== RUN   TestCheckpointPromiseOutcomeMetadataAdmission/null_result_hash
+    outcome_admission_test.go:71: malformed promise frame admitted {1 {parent materialized 17} collect_v1 {"user":null,"user":2} {2 51} 2 map[counter:23] 0 [] [] map[child_4:{"inv_seq":22,"result_hash":null}] [] 0} <nil>
+    outcome_admission_test.go:79: malformed promise frame encoded <nil>
+    outcome_admission_test.go:96: malformed promise restored SDK state {collect_v1 {"user":null,"user":2} 2 0 0 []} <nil>
+=== RUN   TestCheckpointPromiseOutcomeMetadataAdmission/null_limit_entry
+    outcome_admission_test.go:71: malformed promise frame admitted {1 {parent materialized 17} collect_v1 {"user":null,"user":2} {2 51} 2 map[counter:23] 0 [] [] map[child_4:{"inv_seq":22,"limit_entry":null}] [] 0} <nil>
+    outcome_admission_test.go:79: malformed promise frame encoded <nil>
+    outcome_admission_test.go:96: malformed promise restored SDK state {collect_v1 {"user":null,"user":2} 2 0 0 []} <nil>
+=== RUN   TestCheckpointPromiseOutcomeMetadataAdmission/inline
+=== RUN   TestCheckpointPromiseOutcomeMetadataAdmission/legacy_identity_omitted
+=== RUN   TestCheckpointPromiseOutcomeMetadataAdmission/opaque_limit_payload
+=== RUN   TestCheckpointPromiseOutcomeMetadataAdmission/duplicate_invocation
+    outcome_admission_test.go:71: malformed promise frame admitted {1 {parent materialized 17} collect_v1 {"user":null,"user":2} {2 51} 2 map[counter:23] 0 [] [] map[child_4:{"inv_seq":9,"inv_seq":22,"result":"NDI="}] [] 0} <nil>
+    outcome_admission_test.go:79: malformed promise frame encoded <nil>
+    outcome_admission_test.go:96: malformed promise restored SDK state {collect_v1 {"user":null,"user":2} 2 0 0 []} <nil>
+=== RUN   TestCheckpointPromiseOutcomeMetadataAdmission/duplicate_result
+    outcome_admission_test.go:71: malformed promise frame admitted {1 {parent materialized 17} collect_v1 {"user":null,"user":2} {2 51} 2 map[counter:23] 0 [] [] map[child_4:{"inv_seq":22,"result":"Nw==","result":"NDI="}] [] 0} <nil>
+    outcome_admission_test.go:79: malformed promise frame encoded <nil>
+    outcome_admission_test.go:96: malformed promise restored SDK state {collect_v1 {"user":null,"user":2} 2 0 0 []} <nil>
+=== RUN   TestCheckpointPromiseOutcomeMetadataAdmission/external
+=== RUN   TestCheckpointPromiseOutcomeMetadataAdmission/null_inv_seq
+    outcome_admission_test.go:71: malformed promise frame admitted {1 {parent materialized 17} collect_v1 {"user":null,"user":2} {2 51} 2 map[counter:23] 0 [] [] map[child_4:{"inv_seq":null,"result":"NDI="}] [] 0} <nil>
+    outcome_admission_test.go:79: malformed promise frame encoded <nil>
+    outcome_admission_test.go:96: malformed promise restored SDK state {collect_v1 {"user":null,"user":2} 2 0 0 []} <nil>
+=== RUN   TestCheckpointPromiseOutcomeMetadataAdmission/null_result
+    outcome_admission_test.go:71: malformed promise frame admitted {1 {parent materialized 17} collect_v1 {"user":null,"user":2} {2 51} 2 map[counter:23] 0 [] [] map[child_4:{"inv_seq":22,"result":null}] [] 0} <nil>
+    outcome_admission_test.go:79: malformed promise frame encoded <nil>
+    outcome_admission_test.go:96: malformed promise restored SDK state {collect_v1 {"user":null,"user":2} 2 0 0 []} <nil>
+=== RUN   TestCheckpointPromiseOutcomeMetadataAdmission/escaped_duplicate_invocation
+    outcome_admission_test.go:71: malformed promise frame admitted {1 {parent materialized 17} collect_v1 {"user":null,"user":2} {2 51} 2 map[counter:23] 0 [] [] map[child_4:{"\u0069nv_seq":9,"inv_seq":22,"result":"NDI="}] [] 0} <nil>
+    outcome_admission_test.go:79: malformed promise frame encoded <nil>
+    outcome_admission_test.go:96: malformed promise restored SDK state {collect_v1 {"user":null,"user":2} 2 0 0 []} <nil>
+=== RUN   TestCheckpointPromiseOutcomeMetadataAdmission/alias_error
+    outcome_admission_test.go:71: malformed promise frame admitted {1 {parent materialized 17} collect_v1 {"user":null,"user":2} {2 51} 2 map[counter:23] 0 [] [] map[child_4:{"inv_seq":22,"Error":"bad","error":"","result":"NDI="}] [] 0} <nil>
+    outcome_admission_test.go:79: malformed promise frame encoded <nil>
+    outcome_admission_test.go:96: malformed promise restored SDK state {collect_v1 {"user":null,"user":2} 2 0 0 []} <nil>
+=== RUN   TestCheckpointPromiseOutcomeMetadataAdmission/null_limit_payload
+    outcome_admission_test.go:71: malformed promise frame admitted {1 {parent materialized 17} collect_v1 {"user":null,"user":2} {2 51} 2 map[counter:23] 0 [] [] map[child_4:{"inv_seq":22,"result":"NDI=","limit_entry":{"kind":"Suspended","payload":null}}] [] 0} <nil>
+    outcome_admission_test.go:79: malformed promise frame encoded <nil>
+    outcome_admission_test.go:96: malformed promise restored SDK state {collect_v1 {"user":null,"user":2} 2 0 0 []} <nil>
+=== RUN   TestCheckpointPromiseOutcomeMetadataAdmission/null_error
+    outcome_admission_test.go:71: malformed promise frame admitted {1 {parent materialized 17} collect_v1 {"user":null,"user":2} {2 51} 2 map[counter:23] 0 [] [] map[child_4:{"inv_seq":22,"error":null}] [] 0} <nil>
+    outcome_admission_test.go:79: malformed promise frame encoded <nil>
+    outcome_admission_test.go:96: malformed promise restored SDK state {collect_v1 {"user":null,"user":2} 2 0 0 []} <nil>
+=== RUN   TestCheckpointPromiseOutcomeMetadataAdmission/null_limit_request
+    outcome_admission_test.go:71: malformed promise frame admitted {1 {parent materialized 17} collect_v1 {"user":null,"user":2} {2 51} 2 map[counter:23] 0 [] [] map[child_4:{"inv_seq":22,"limit_request":null}] [] 0} <nil>
+    outcome_admission_test.go:79: malformed promise frame encoded <nil>
+    outcome_admission_test.go:96: malformed promise restored SDK state {collect_v1 {"user":null,"user":2} 2 0 0 []} <nil>
+=== RUN   TestCheckpointPromiseOutcomeMetadataAdmission/opaque_user_duplicates
+=== RUN   TestCheckpointPromiseOutcomeMetadataAdmission/explicit_empty_error
+=== RUN   TestCheckpointPromiseOutcomeMetadataAdmission/valid_failed
+=== RUN   TestCheckpointPromiseOutcomeMetadataAdmission/alias_invocation
+    outcome_admission_test.go:71: malformed promise frame admitted {1 {parent materialized 17} collect_v1 {"user":null,"user":2} {2 51} 2 map[counter:23] 0 [] [] map[child_4:{"Inv_seq":9,"inv_seq":22,"result":"NDI="}] [] 0} <nil>
+    outcome_admission_test.go:79: malformed promise frame encoded <nil>
+    outcome_admission_test.go:96: malformed promise restored SDK state {collect_v1 {"user":null,"user":2} 2 0 0 []} <nil>
+=== RUN   TestCheckpointPromiseOutcomeMetadataAdmission/alias_result
+    outcome_admission_test.go:71: malformed promise frame admitted {1 {parent materialized 17} collect_v1 {"user":null,"user":2} {2 51} 2 map[counter:23] 0 [] [] map[child_4:{"inv_seq":22,"Result":"Nw==","result":"NDI="}] [] 0} <nil>
+    outcome_admission_test.go:79: malformed promise frame encoded <nil>
+    outcome_admission_test.go:96: malformed promise restored SDK state {collect_v1 {"user":null,"user":2} 2 0 0 []} <nil>
+=== RUN   TestCheckpointPromiseOutcomeMetadataAdmission/null_limit_kind
+    outcome_admission_test.go:71: malformed promise frame admitted {1 {parent materialized 17} collect_v1 {"user":null,"user":2} {2 51} 2 map[counter:23] 0 [] [] map[child_4:{"inv_seq":22,"result":"NDI=","limit_entry":{"kind":null,"payload":{}}}] [] 0} <nil>
+    outcome_admission_test.go:79: malformed promise frame encoded <nil>
+    outcome_admission_test.go:96: malformed promise restored SDK state {collect_v1 {"user":null,"user":2} 2 0 0 []} <nil>
+=== RUN   TestCheckpointPromiseOutcomeMetadataAdmission/duplicate_limit_kind
+    outcome_admission_test.go:71: malformed promise frame admitted {1 {parent materialized 17} collect_v1 {"user":null,"user":2} {2 51} 2 map[counter:23] 0 [] [] map[child_4:{"inv_seq":22,"result":"NDI=","limit_entry":{"kind":"Failed","kind":"Suspended","payload":{}}}] [] 0} <nil>
+    outcome_admission_test.go:79: malformed promise frame encoded <nil>
+    outcome_admission_test.go:96: malformed promise restored SDK state {collect_v1 {"user":null,"user":2} 2 0 0 []} <nil>
+=== RUN   TestCheckpointPromiseOutcomeMetadataAdmission/null_result_ref
+    outcome_admission_test.go:71: malformed promise frame admitted {1 {parent materialized 17} collect_v1 {"user":null,"user":2} {2 51} 2 map[counter:23] 0 [] [] map[child_4:{"inv_seq":22,"result_ref":null}] [] 0} <nil>
+    outcome_admission_test.go:79: malformed promise frame encoded <nil>
+    outcome_admission_test.go:96: malformed promise restored SDK state {collect_v1 {"user":null,"user":2} 2 0 0 []} <nil>
+=== RUN   TestCheckpointPromiseOutcomeMetadataAdmission/user_null
+--- FAIL: TestCheckpointPromiseOutcomeMetadataAdmission (0.01s)
+    --- PASS: TestCheckpointPromiseOutcomeMetadataAdmission/opaque_limit_request (0.00s)
+    --- FAIL: TestCheckpointPromiseOutcomeMetadataAdmission/duplicate_error (0.00s)
+    --- PASS: TestCheckpointPromiseOutcomeMetadataAdmission/unknown_field (0.00s)
+    --- FAIL: TestCheckpointPromiseOutcomeMetadataAdmission/null_result_hash (0.00s)
+    --- FAIL: TestCheckpointPromiseOutcomeMetadataAdmission/null_limit_entry (0.00s)
+    --- PASS: TestCheckpointPromiseOutcomeMetadataAdmission/inline (0.00s)
+    --- PASS: TestCheckpointPromiseOutcomeMetadataAdmission/legacy_identity_omitted (0.00s)
+    --- PASS: TestCheckpointPromiseOutcomeMetadataAdmission/opaque_limit_payload (0.00s)
+    --- FAIL: TestCheckpointPromiseOutcomeMetadataAdmission/duplicate_invocation (0.00s)
+    --- FAIL: TestCheckpointPromiseOutcomeMetadataAdmission/duplicate_result (0.00s)
+    --- PASS: TestCheckpointPromiseOutcomeMetadataAdmission/external (0.00s)
+    --- FAIL: TestCheckpointPromiseOutcomeMetadataAdmission/null_inv_seq (0.00s)
+    --- FAIL: TestCheckpointPromiseOutcomeMetadataAdmission/null_result (0.00s)
+    --- FAIL: TestCheckpointPromiseOutcomeMetadataAdmission/escaped_duplicate_invocation (0.00s)
+    --- FAIL: TestCheckpointPromiseOutcomeMetadataAdmission/alias_error (0.00s)
+    --- FAIL: TestCheckpointPromiseOutcomeMetadataAdmission/null_limit_payload (0.00s)
+    --- FAIL: TestCheckpointPromiseOutcomeMetadataAdmission/null_error (0.00s)
+    --- FAIL: TestCheckpointPromiseOutcomeMetadataAdmission/null_limit_request (0.00s)
+    --- PASS: TestCheckpointPromiseOutcomeMetadataAdmission/opaque_user_duplicates (0.00s)
+    --- PASS: TestCheckpointPromiseOutcomeMetadataAdmission/explicit_empty_error (0.00s)
+    --- PASS: TestCheckpointPromiseOutcomeMetadataAdmission/valid_failed (0.00s)
+    --- FAIL: TestCheckpointPromiseOutcomeMetadataAdmission/alias_invocation (0.00s)
+    --- FAIL: TestCheckpointPromiseOutcomeMetadataAdmission/alias_result (0.00s)
+    --- FAIL: TestCheckpointPromiseOutcomeMetadataAdmission/null_limit_kind (0.00s)
+    --- FAIL: TestCheckpointPromiseOutcomeMetadataAdmission/duplicate_limit_kind (0.00s)
+    --- FAIL: TestCheckpointPromiseOutcomeMetadataAdmission/null_result_ref (0.00s)
+    --- PASS: TestCheckpointPromiseOutcomeMetadataAdmission/user_null (0.00s)
+FAIL
+FAIL	js-wf/internal/checkpoint	0.015s
+FAIL
